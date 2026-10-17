@@ -9,70 +9,104 @@
 //
 #include
 "share/atspre_staload.hats"
-#include
-"share/atspre_staload_libats_ML.hats"
 //
 #staload UN = $UNSAFE // aliasing
 //
 (* ****** ****** *)
-
-extern
-fun{
-a:t@ype
-} listpermute{n:int} (list (a, n)): List0 (list(a, n))
-
+//
+// HX-2026-10: no GC
+// the permutations are linear lists
+//
+vtypedef intlst = List0_vt(int)
+vtypedef intlstlst = List0_vt(intlst)
+//
 (* ****** ****** *)
-
-extern
-fun{a:t@ype}
-list_mcons{n:nat}
-  (x0: a, xss: List (list(a, n))): List0_vt(list(a, n+1))
-
-(* ****** ****** *)
-
-implement
-{a}(*tmp*)
-list_mcons (x0, xss) =
+//
+fun
+nth (xs: !intlst, i: int): int =
+(
+case+ xs of
+| list_vt_nil () => 0 // HX: deadcode
+| list_vt_cons (x, xs1) => if i > 0 then nth (xs1, i-1) else x
+) (* end of [nth] *)
+//
+// HX: a copy of [xs] without its i-th element
+//
+fun
+copy_without (xs: !intlst, i: int): intlst =
+(
+case+ xs of
+| list_vt_nil () => list_vt_nil ()
+| list_vt_cons (x, xs1) =>
+    if i > 0
+      then list_vt_cons (x, copy_without (xs1, i-1))
+      else list_vt_copy<int> (xs1)
+    // end of [if]
+) (* end of [copy_without] *)
+//
+fun
+list_mcons (x0: int, xss: intlstlst): intlstlst =
 (
 case+ xss of
-| list_nil () => nil_vt ()
-| list_cons (xs, xss) => cons_vt (cons (x0, xs), list_mcons<a> (x0, xss))
-)
-
-(* ****** ****** *)
-
-implement
-{a}(*tmp*)
-listpermute
-  {n}(xs) = let
+| ~list_vt_nil () => list_vt_nil ()
+| ~list_vt_cons (xs, xss) =>
+    list_vt_cons (list_vt_cons (x0, xs), list_mcons (x0, xss))
+  // end of [list_vt_cons]
+) (* end of [list_mcons] *)
 //
-val n = length (xs)
-prval () = lemma_list_param (xs)
-vtypedef res = List0_vt (list(a, n))
+fun
+listpermute (xs: !intlst): intlstlst = let
 //
-fn fopr (i: natLt(n)): res = let
-  var x: a
-  val xs1 = list_takeout_at<a> (xs, i, x)
+val n = list_vt_length (xs)
+//
+fun
+loop (xs: !intlst, i: int): intlstlst =
+(
+if
+(i < n)
+then let
+  val x = nth (xs, i)
+  val xs1 = copy_without (xs, i)
+  val xss1 = list_mcons (x, listpermute (xs1))
+  val () = list_vt_free<int> (xs1)
 in
-  list_mcons<a> (x, listpermute<a> (xs1))
-end // end of [fopr]
-//
-implement(res)
-list_tabulate$fopr<res>
-  (i) = let
-  val () = ignoret (xs) // HX: bug?
-in
-  $UN.castvwtp0{res}(fopr($UN.cast{natLt(n)}(i)))
-end // end of [list_tabulate$fopr]
+  list_vt_append<intlst> (xss1, loop (xs, i+1))
+end // end of [then]
+else list_vt_nil ()
+) (* end of [loop] *)
 //
 in
 //
 if n = 0
-  then cons (nil, nil)
-  else list_vt2t(list_vt_concat<list(a,n)>(list_tabulate<res>(n)))
+  then list_vt_cons (list_vt_nil (), list_vt_nil ())
+  else loop (xs, 0)
 //
 end // end of [listpermute]
-
+//
+fun
+intlstlst_print (xss: !intlstlst): void =
+(
+case+ xss of
+| list_vt_nil () => ()
+| @list_vt_cons (xs, xss1) => let
+    val () = fprint_list_vt<int> (stdout_ref, xs)
+    val () = print_newline ()
+    val () = intlstlst_print (xss1)
+  in
+    fold@ (xss)
+  end // end of [list_vt_cons]
+) (* end of [intlstlst_print] *)
+//
+fun
+intlstlst_free (xss: intlstlst): void =
+(
+case+ xss of
+| ~list_vt_nil () => ()
+| ~list_vt_cons (xs, xss) =>
+    (list_vt_free<int> (xs); intlstlst_free (xss))
+  // end of [list_vt_cons]
+) (* end of [intlstlst_free] *)
+//
 (* ****** ****** *)
 
 implement
@@ -81,13 +115,17 @@ main0 () =
 //
 val xs =
   list_make_intrange (0, 4)
+val xs = $UN.castvwtp0{intlst}(xs)
 //
-val xs = list_vt2t{int} (xs)
+val xss = listpermute (xs)
 //
-val xss = listpermute<int> (xs)
+val () = print! ("permute(")
+val () = fprint_list_vt<int> (stdout_ref, xs)
+val () = print! (") =\n")
+val () = intlstlst_print (xss)
 //
-val () = print! ("permute(", xs, ") =\n")
-val () = list_foreach_cloref<List(int)> (xss, lam xs =<1> fprintln!(stdout_ref, xs))
+val () = list_vt_free<int> (xs)
+val () = intlstlst_free (xss)
 //
 } (* end of [main0] *)
 

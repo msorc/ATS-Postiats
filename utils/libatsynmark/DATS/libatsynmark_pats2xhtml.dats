@@ -11,15 +11,28 @@
 
 (* ****** ****** *)
 //
-staload
-UN = "prelude/SATS/unsafe.sats"
-staload
-_(*UN*) = "prelude/DATS/unsafe.dats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+#define ATS_DYNLOADFLAG 0 // no initialization
+
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of the ATS1 version of this file)
 //
 (* ****** ****** *)
 
-staload _(*anon*) = "prelude/DATS/list.dats"
-staload _(*anon*) = "prelude/DATS/list_vt.dats"
+staload
+UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+//
+(* ****** ****** *)
+
 
 (* ****** ****** *)
 
@@ -63,8 +76,7 @@ implement
 psynmark_process_xhtml_bground
   (psm, putc) = let
 //
-val PSM
-  (p, sm, knd) = psm
+val @(p, sm, knd) = psm
 val isbeg = knd <= 0
 //
 macdef
@@ -82,22 +94,22 @@ in
 //
 case+ sm of
 //
-| SMkeyword () =>
+| SMkeyword() =>
     fpr_psynmark (SMkeyword_beg, SMkeyword_end)
-| SMcomment () =>
+| SMcomment() =>
     fpr_psynmark (SMcomment_beg, SMcomment_end)
-| SMextcode () =>
+| SMextcode() =>
     fpr_psynmark (SMextcode_beg, SMextcode_end)
 //
-| SMneuexp () => fpr_psynmark (SMneuexp_beg, SMneuexp_end)
-| SMstaexp () => fpr_psynmark (SMstaexp_beg, SMstaexp_end)
-| SMprfexp () => fpr_psynmark (SMprfexp_beg, SMprfexp_end)
-| SMdynexp () => fpr_psynmark (SMdynexp_beg, SMdynexp_end)
+| SMneuexp() => fpr_psynmark (SMneuexp_beg, SMneuexp_end)
+| SMstaexp() => fpr_psynmark (SMstaexp_beg, SMstaexp_end)
+| SMprfexp() => fpr_psynmark (SMprfexp_beg, SMprfexp_end)
+| SMdynexp() => fpr_psynmark (SMdynexp_beg, SMdynexp_end)
 //
-| SMstalab () => fpr_psynmark (SMstalab_beg, SMstalab_end)
-| SMdynlab () => fpr_psynmark (SMdynlab_beg, SMdynlab_end)
+| SMstalab() => fpr_psynmark (SMstalab_beg, SMstalab_end)
+| SMdynlab() => fpr_psynmark (SMdynlab_beg, SMdynlab_end)
 //
-| SMdynstr () => fpr_psynmark (SMdynstr_beg, SMdynstr_end)
+| SMdynstr() => fpr_psynmark (SMdynstr_beg, SMdynstr_end)
 //
 | _ => ()
 //
@@ -143,8 +155,7 @@ implement
 psynmark_process_xhtml_embedded
   (psm, putc) = let
 //
-val PSM
-  (p, sm, knd) = psm
+val @(p, sm, knd) = psm
 val isbeg = knd <= 0
 //
 macdef
@@ -162,22 +173,22 @@ in
 //
 case+ sm of
 //
-| SMkeyword () =>
+| SMkeyword() =>
     fpr_psynmark (SMkeyword_beg, SMkeyword_end)
-| SMcomment () =>
+| SMcomment() =>
     fpr_psynmark (SMcomment_beg, SMcomment_end)
-| SMextcode () =>
+| SMextcode() =>
     fpr_psynmark (SMextcode_beg, SMextcode_end)
 //
-| SMneuexp () => fpr_psynmark (SMneuexp_beg, SMneuexp_end)
-| SMstaexp () => fpr_psynmark (SMstaexp_beg, SMstaexp_end)
-| SMprfexp () => fpr_psynmark (SMprfexp_beg, SMprfexp_end)
-| SMdynexp () => fpr_psynmark (SMdynexp_beg, SMdynexp_end)
+| SMneuexp() => fpr_psynmark (SMneuexp_beg, SMneuexp_end)
+| SMstaexp() => fpr_psynmark (SMstaexp_beg, SMstaexp_end)
+| SMprfexp() => fpr_psynmark (SMprfexp_beg, SMprfexp_end)
+| SMdynexp() => fpr_psynmark (SMdynexp_beg, SMdynexp_end)
 //
-| SMstalab () => fpr_psynmark (SMstalab_beg, SMstalab_end)
-| SMdynlab () => fpr_psynmark (SMdynlab_beg, SMdynlab_end)
+| SMstalab() => fpr_psynmark (SMstalab_beg, SMstalab_end)
+| SMdynlab() => fpr_psynmark (SMdynlab_beg, SMdynlab_end)
 //
-| SMdynstr () => fpr_psynmark (SMdynstr_beg, SMdynstr_end)
+| SMdynstr() => fpr_psynmark (SMdynstr_beg, SMdynstr_end)
 //
 | _ => ()
 //
@@ -191,40 +202,18 @@ implement{}
 string_pats2xhtmlize
   (stadyn, code) = let
 //
-typedef charlst = List (char)
-viewtypedef charlst_vt = List_vt (char)
-//
 val lbf = lexbufobj_make_string (code)
 //
 val psmss =
   lexbufobj_level1_psynmarkize (stadyn, lbf)
 //
-var res
-  : charlst_vt = list_vt_nil ()
-val p_res = &res
-val putc = lam
-  (c: char): int =<cloref1> let
-  val cs = $UN.ptrget<charlst_vt> (p_res)
-  val () =
-    $UN.ptrset<charlst_vt> (p_res, list_vt_cons (c, cs))
-  // end of [val]
-in
-  0
-end // end of [val]
+val env = libatsynmark_sbuf_make ()
+val putc = putc_make (env, libatsynmark_sbuf_putc)
 val () = 
   string_psynmarklstlst_process<> (code, psmss, putc)
-val sbf = let
-  val res1 =
-    $UN.castvwtp1 {charlst} (res)
-  val n = list_length<char> (res1)
-in
-  string_make_list_rev_int (res1, n)
-end // end of [val[
-//
-val () = list_vt_free<char> (res)
 //
 in
-  strptr_of_strbuf (sbf)
+  libatsynmark_sbuf_takeout (env)
 end // end of [string_pats2xhtmlize]
 
 (* ****** ****** *)
@@ -232,11 +221,10 @@ end // end of [string_pats2xhtmlize]
 implement{}
 charlst_pats2xhtmlize
   (stadyn, code) = let
-  val n = list_length (code)
-  val sbp = string_make_list_int (code, n)
+  val sbp = libatsynmark_strptr_make_charlst (code)
   val str = $UN.castvwtp1 {string} (sbp) 
   val res = string_pats2xhtmlize<> (stadyn, str)
-  val () = strbufptr_free (sbp)
+  val () = strptr_free (sbp)
 in
   res
 end // end of [charlst_pats2xhtmlize]

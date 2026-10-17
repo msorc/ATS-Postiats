@@ -6,7 +6,7 @@
 
 (*
 ** ATS/Postiats - Unleashing the Potential of Types!
-** Copyright (C) 2011-2014 Hongwei Xi, ATS Trustful Software, Inc.
+** Copyright (C) 2011-2013 Hongwei Xi, ATS Trustful Software, Inc.
 ** All rights reserved
 **
 ** ATS is free software;  you can  redistribute it and/or modify it under
@@ -33,10 +33,12 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-  "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_constraint3_mapgen.dats, see PORTING.md, "Constraint solving (constraint3)")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 //
 staload
@@ -45,14 +47,26 @@ UN =
 //
 (* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
 staload "./pats_jsonize.sats"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
+staload _(*anon*) = "./pats_staexp2.dats" // [synentlst_app]
 
 (* ****** ****** *)
 
+staload "./pats_trans3_env.sats"
 staload "./pats_constraint3.sats"
 
 (* ****** ****** *)
@@ -60,10 +74,10 @@ staload "./pats_constraint3.sats"
 local
 //
 extern
-fun s2cst_app : synent_app (s2cst)
-and s2var_app : synent_app (s2var)
-and s2Var_app : synent_app (s2Var)
-and d2con_app : synent_app (d2con)
+fun s2cst_app (x: s2cst, env: !appenv): void
+and s2var_app (x: s2var, env: !appenv): void
+and s2Var_app (x: s2Var, env: !appenv): void
+and d2con_app (x: d2con, env: !appenv): void
 //
 #include "./pats_staexp2_appenv.hats"
 #include "./pats_constraint3_appenv.hats"
@@ -79,28 +93,29 @@ s2cst_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV (!p_s2cs, _, _) = env2
+val+@MYENV (s2cs, _, _) = env2
 //
 val ismem =
-  s2cstset_vt_ismem (!p_s2cs, s2c)
+  s2cstset_vt_ismem (s2cs, s2c)
 //
 val () = (
 if
 (ismem)
-then ((*void*))
+then fold@ (env2)
 else let
 //
 val () =
-  !p_s2cs :=
-  s2cstset_vt_add(!p_s2cs, s2c)
+  s2cs :=
+  s2cstset_vt_add(s2cs, s2c)
+//
+prval () = fold@ (env2)
 //
 in
   s2expopt_app (s2cst_get_def(s2c), env)
 end // end of [else]
 ) (* end of [val] *)
 //
-prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -112,11 +127,11 @@ s2var_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV (_, !p_s2vs, _) = env2
+val+@MYENV (_, s2vs, _) = env2
 val ((*void*)) =
-  !p_s2vs := s2varset_vt_add(!p_s2vs, s2v)
+  s2vs := s2varset_vt_add(s2vs, s2v)
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -128,20 +143,22 @@ s2Var_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV (_, _, !p_s2Vs) = env2
+val+@MYENV (_, _, s2Vs) = env2
 //
 val ismem =
-  s2Varset_vt_ismem (!p_s2Vs, s2V)
+  s2Varset_vt_ismem (s2Vs, s2V)
 //
 val () =
 if
 (ismem)
-then ((*void*))
+then fold@ (env2)
 else let
 //
 val () =
-  !p_s2Vs :=
-  s2Varset_vt_add(!p_s2Vs, s2V)
+  s2Vs :=
+  s2Varset_vt_add(s2Vs, s2V)
+//
+prval () = fold@ (env2)
 //
 val opt = s2Var_get_link (s2V)
 val void = s2expopt_app (opt, env)
@@ -153,8 +170,7 @@ in
   // nothing
 end // end of [else]
 //
-prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -182,7 +198,7 @@ val+~MYENV(s2cs, s2vs, s2Vs) = $UN.castvwtp0{myenv}(appenv)
 val ((*void*)) = s2Varset_vt_free (s2Vs)
 //
 in
-  (s2cs, s2vs)
+  @(s2cs, s2vs)
 end // end of [c3nstr_mapgen_scst_svar]
 
 end // end of [local]

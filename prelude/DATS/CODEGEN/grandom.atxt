@@ -63,10 +63,6 @@ grandom_ref(x) = (x := grandom_val<a> ())
 
 #atscode_separator()
 //
-implement
-{a}(*tmp*)
-grandom_list
-  (n) = list_vt2t(grandom_list_vt<a>(n))
 //
 implement
 {a}(*tmp*)
@@ -120,25 +116,12 @@ prval () = arrayptr_addback (pf | A)
 //
 } (* end of [grandom_arrayptr] *)
 
-implement
-{a}(*tmp*)
-grandom_arrayref (n) =
-  arrayptr_refize(grandom_arrayptr<a> (n))
-// end of [grandom_arrayref]
-
-implement
-{a}(*tmp*)
-grandom_arrszref (n) = let
-  val n = g1ofg0_uint (n) in
-  arrszref_make_arrayref (grandom_arrayref<a> (n), n)
-end // end of [grandom_arrszref]
-
 #atscode_separator()
 
 #atscode_eof_strsub("\#thisfilename$")\
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "grandom_atxt.txt")
 %}\

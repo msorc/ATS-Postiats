@@ -38,32 +38,36 @@
 //
 (* ****** ****** *)
 
-staload UN = "prelude/SATS/unsafe.sats"
-
 (* ****** ****** *)
-
-staload
-STMP = "./pats_stamp.sats"
-typedef stamp = $STMP.stamp
-
-(* ****** ****** *)
-
-staload "./pats_dynexp2.sats"
-
-(* ****** ****** *)
-
-staload CCOMP = "./pats_ccomp.sats"
-
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_histaexp_funlab.dats)
+//
+#include "share/atspre_staload.hats"
+//
 (* ****** ****** *)
 
 staload "./pats_histaexp.sats"
+
+(* ****** ****** *)
+//
+// HX-2026-10: [pats_ccomp.sats] is not ported yet: the name of a funlab
+// is obtained through a C function that [pats_ccomp.dats] will implement
+// (it is [funlab_get_name] there); the tests give it in C.
+//
+%{^
+extern atstype_ptr patsopt_funlab_get_name (atstype_ptr) ;
+%}
+extern
+fun funlab_get_name
+  (fl: funlab): string = "ext#patsopt_funlab_get_name"
+// end of [funlab_get_name]
 
 (* ****** ****** *)
 
 implement
 fprint_funlab
   (out, fl) = let
-  val name = $CCOMP.funlab_get_name ($UN.cast(fl))
+  val name = funlab_get_name (fl)
 in
   fprint_string (out, name)
 end // end of [fprint_funlab]

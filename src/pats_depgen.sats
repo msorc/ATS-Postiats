@@ -32,13 +32,17 @@
 // Start Time: August, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_depgen.sats)
+//
+(* ****** ****** *)
 
 staload SYN = "./pats_syntax.sats"
 
 (* ****** ****** *)
 
 fun depgen_eval
-  (d0cs: $SYN.d0eclist): List_vt (string)
+  (d0cs: $SYN.d0eclist): List0_vt (string)
 // end of [depgen_eval]
 
 (* ****** ****** *)
@@ -48,7 +52,7 @@ fun fprint_target (out: FILEref, given: string): void
 (* ****** ****** *)
 
 fun fprint_entlst
-  (out: FILEref, given: string, xs: List_vt (string)): void
+  (out: FILEref, given: string, xs: List0_vt (string)): void
 // end of [fprint_entlst]
 
 (* ****** ****** *)

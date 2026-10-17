@@ -114,7 +114,7 @@ sllist_unsnoc{n:int | n > 0}
 
 fun{a:t0p}
 sllist_make_list
-  {n:int} (xs: list (INV(a), n)):<!wrt> sllist (a, n)
+  {n:int} (xs: !list_vt (INV(a), n)):<!wrt> sllist (a, n)
 // end of [sllist_make_list]
 
 (* ****** ****** *)
@@ -151,7 +151,7 @@ sllist_get_elt (xs: !Sllist1 (INV(a))): (a)
 fun{a:t0p}
 sllist_set_elt (xs: !Sllist1 (INV(a)), x0: a): void
 fun{a:vt0p}
-sllist_getref_elt (xs: !Sllist1 (INV(a))):<> cPtr1 (a)
+sllist_getref_elt (xs: !Sllist1 (INV(a))):<> P2tr1 (a)
 
 (* ****** ****** *)
 
@@ -162,7 +162,7 @@ sllist_getref_next (xs: !Sllist1 (INV(a))):<> Ptr1
 
 fun{a:vt0p}
 sllist_getref_elt_at {n:int}
-  (xs: !sllist (INV(a), n), i: natLt(n)):<> cPtr1 (a)
+  (xs: !sllist (INV(a), n), i: natLt(n)):<> P2tr1 (a)
 // end of [sllist_getref_elt_at]
 
 (* ****** ****** *)

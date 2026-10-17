@@ -1,0 +1,23 @@
+implement $FIL.pkgsrcname_relocatize (given, ngurl) = given
+
+staload "../pats_syntax_boundary.sats"
+implement parerr_p0at_as (loc) = ()
+implement parerr_add_ifunclosed (loc, name) = ()
+implement filenv_get_name (x) = $FIL.filename_dummy
+implement filenv_getref_d3eclistopt (fenv) = hd_fenv_cell (fenv, 0)
+implement filenv_getref_tmpcstimpmap (fenv) = hd_fenv_cell (fenv, 1)
+implement filenv_getref_tmpvardecmap (fenv) = hd_fenv_cell (fenv, 2)
+implement filenv_get_d3eclistopt (fenv) = $UN.ptr0_get<d3eclistopt> (filenv_getref_d3eclistopt (fenv))
+#include "s2env2.hats"
+implement the_d2varlev_get () = ccb_d2varlev_get ()
+implement the_d2varlev_inc () = ccb_d2varlev_set (ccb_d2varlev_get () + 1)
+implement the_d2varlev_dec () = ccb_d2varlev_set (ccb_d2varlev_get () - 1)
+implement the_d2varlev_save () = ccb_d2varlev_get ()
+implement the_d2varlev_restore (n) = ccb_d2varlev_set (n)
+#include "ccb_mock.hats"
+#include "ccb_stubs2.hats"
+#include "ccb_chunks.hats"
+implement main0 () = {
+  val () = tc_all ()
+  val () = dd_flush ()
+}

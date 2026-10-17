@@ -115,6 +115,6 @@ end // end of [fprint_option_vt]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "option_vt_atxt.txt")
 %}\

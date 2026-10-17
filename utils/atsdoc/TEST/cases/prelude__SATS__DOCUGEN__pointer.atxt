@@ -1,0 +1,188 @@
+(* ****** ****** *)
+
+%{
+implement srcfilename_get () = "../pointer.sats"
+%}
+
+(* ****** ****** *)
+
+%{
+val () = patscode_count_reset()
+val () = patscode_prefix_set("HTML/TRYIT/pointer")
+%}
+
+(* ****** ****** *)
+
+#decltitle("\
+ATSLIB/prelude/pointer\
+")
+
+(* ****** ****** *)
+
+#declpreamble('\
+
+#para("\
+
+This package contains various functions on pointers such as those
+for supporting direct memory access and those for performing pointer
+arithmetic.  ")
+
+')#comment("declpreamble")
+
+(* ****** ****** *)
+
+#declnamesynop("g0ofg1_ptr")
+#declnamesynop("g1ofg0_ptr")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr_get_index")
+#decldescrpt('\
+The purpose of calling this proof function is to introduce a static
+variable that binds to the index of the type assigned to the argument of
+the function.
+')
+#declexample('\
+Let p be a value of the type #stacode("ptr(L)") for some L. Then the
+following line of code initiates a binding between l and L:
+#pats2xhtmld('\
+prval [l:addr] EQADDR () = ptr_get_index (p)\
+')\
+')
+
+(* ****** ****** *)
+
+#declnamesynop("ptr0_is_null")
+#decldescrpt('\
+This function returns true if and only if its argument is the null pointer.
+')
+#declnamesynop("ptr1_is_null")
+#decldescrpt('\
+
+This function does the same as #dyncode("ptr0_is_null") but is given a more
+informative type.  ')
+
+(* ****** ****** *)
+
+#declnamesynop("ptr0_isnot_null")
+#decldescrpt('\
+This function returns true if and only if its argument is not the null pointer.
+')
+#declnamesynop("ptr1_isnot_null")
+#decldescrpt('\
+
+This function does the same as #dyncode("ptr0_isnot_null") but is given a more
+informative type.  ')
+
+(* ****** ****** *)
+
+#declnamesynop("add_ptr0_bsz")
+#declnamesynop("add_ptr1_bsz")
+
+(* ****** ****** *)
+
+#declnamesynop("sub_ptr0_bsz")
+#declnamesynop("sub_ptr1_bsz")
+
+(* ****** ****** *)
+
+#declnamesynop("sub_ptr0_ptr0")
+#declnamesynop("sub_ptr1_ptr1")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr0_succ")
+#declnamesynop("ptr1_succ")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr0_pred")
+#declnamesynop("ptr1_pred")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr0_add_gint")
+#declnamesynop("ptr0_add_guint")
+#declnamesynop("ptr1_add_gint")
+#declnamesynop("ptr1_add_guint")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr0_sub_gint")
+#declnamesynop("ptr0_sub_guint")
+#declnamesynop("ptr1_sub_gint")
+#declnamesynop("ptr1_sub_guint")
+
+(* ****** ****** *)
+
+#declnamesynop("lt_ptr0_ptr0")
+#declnamesynop("lt_ptr1_ptr1")
+#declnamesynop("lte_ptr0_ptr0")
+#declnamesynop("lte_ptr1_ptr1")
+#declnamesynop("gt_ptr0_ptr0")
+#declnamesynop("gt_ptr1_ptr1")
+#declnamesynop("gte_ptr0_ptr0")
+#declnamesynop("gte_ptr1_ptr1")
+#declnamesynop("eq_ptr0_ptr0")
+#declnamesynop("eq_ptr1_ptr1")
+#declnamesynop("neq_ptr0_ptr0")
+#declnamesynop("neq_ptr1_ptr1")
+
+#declnamesynop("compare_ptr0_ptr0")
+#declnamesynop("compare_ptr1_ptr1")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr_get")
+#declnamesynop("ptr_set")
+#declnamesynop("ptr_exch")
+
+(* ****** ****** *)
+//
+// HX: various overloaded symbols
+//
+(* ****** ****** *)
+
+#declname("Overloaded Symbols")
+
+(* ****** ****** *)
+
+#declnamesynop("g0ofg1")
+#declnamesynop("g1ofg0")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr_is_null")
+#declnamesynop("ptr_isnot_null")
+
+(* ****** ****** *)
+
+#declnamesynop("add_ptr_bsz")
+#declnamesynop("sub_ptr_bsz")
+
+(* ****** ****** *)
+
+#declnamesynop("ptr_succ")
+#declnamesynop("ptr_pred")
+#declnamesynop("ptr_add")
+#declnamesynop("ptr_sub")
+
+(* ****** ****** *)
+
+#declnamesynop("<")
+#declnamesynop("<=")
+#declnamesynop(">")
+#declnamesynop(">=")
+#declnamesynop("=")
+#declnamesynop("!=")
+#declnamesynop("compare")
+
+(* ****** ****** *)
+
+#declnamesynop("print")
+#declnamesynop("prerr")
+#declnamesynop("fprint")
+
+(* ****** ****** *)
+
+(* end of [pointer.atxt] *)

@@ -96,10 +96,6 @@ console_log{a:t@ype}(obj: a): void = "mac#%"
 
 (* ****** ****** *)
 //
-fun
-lazy2cloref
-  {a:t@ype}
-  (lazy(a)): ((*void*)) -<cloref1> (a) = "mac#%"
 //
 (* ****** ****** *)
 //

@@ -31,44 +31,63 @@ tcc -run -DATS_MEMALLOC_LIBC -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -
 //
 (* ****** ****** *)
 
-#define :: stream_cons
-#define cons stream_cons
-#define nil stream_nil
-
+(* ****** ****** *)
+//
+// HX-2026-10: no GC
+// The streams are linear: each suspension owns the
+// stream it is built on and frees it if it is freed.
+//
 (* ****** ****** *)
 //
 fun
-from{n:int} (n: int n)
-  :<!laz> stream (intGte(n)) = $delay (cons{intGte(n)}(n, from (n+1)))
+from{n:int}
+(
+  n: int n
+) : stream_vt (intGte(n)) =
+  $ldelay (stream_vt_cons{intGte(n)}(n, from (n+1)))
 //
-(* ****** ****** *)
-
 typedef N2 = intGte(2)
-
-(* ****** ****** *)
-
+//
 fun sieve
 (
-  ns: stream N2
-) :<!laz>
-  stream (N2) = $delay
+  ns: stream_vt N2
+) : stream_vt (N2) = $ldelay
 (
-let
-  val-cons(n, ns) = !ns
-in
-  cons{N2}(n, sieve (stream_filter_cloref<N2> (ns, lam x => g1int_nmod(x, n) > 0)))
-end : stream_con (N2)
-) // end of [sieve]
-
+(
+case+ !ns of
+| ~stream_vt_nil() => stream_vt_nil()
+| ~stream_vt_cons(n, ns) =>
+  stream_vt_cons{N2}
+  (
+    n
+  , sieve
+    (
+      stream_vt_filter_cloptr<N2>
+        (ns, lam (x) =<cloptr1> g1int_nmod(x, n) > 0)
+    )
+  ) (* stream_vt_cons *)
+)
+,
+~ns // HX: called if the stream is freed
+) (* end of [sieve] *)
 //
-
-val primes: stream (N2) = sieve (from(2))
-
+fun
+stream_vt_nth
+(
+  xs: stream_vt(N2), n: int
+) : int =
+(
+case+ !xs of
+| ~stream_vt_nil() => ~1 // HX: deadcode
+| ~stream_vt_cons(x, xs) =>
+    if n > 0 then stream_vt_nth(xs, n-1) else (~xs; x)
+  // end of [stream_vt_cons]
+) (* end of [stream_vt_nth] *)
 //
-
-macdef prime_get (n) = stream_nth_exn (primes, ,(n))
-
+macdef
+prime_get (n) = stream_vt_nth (sieve (from(2)), ,(n))
 //
+(* ****** ****** *)
 
 implement
 main0 () = begin

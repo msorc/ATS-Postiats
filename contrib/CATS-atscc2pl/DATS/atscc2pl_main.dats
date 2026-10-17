@@ -39,6 +39,8 @@ CATSPARSEMIT_targetloc
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 #staload
 "{$CATSPARSEMIT}/SATS/catsparse.sats"
 #staload
@@ -63,11 +65,13 @@ catsparse_all_dynload(): void = "ext#"
 
 (* ****** ****** *)
 //
-datatype
-comarg =
-COMARGkey of (int, string)
 //
-typedef comarglst = List0 (comarg)
+// HX-2026-10: no GC (flat)
+//
+typedef
+comarg = @(int, string)
+//
+typedef comarglst = glist(comarg)
 //
 (* ****** ****** *)
 
@@ -80,8 +84,12 @@ waitkind =
 
 (* ****** ****** *)
 
-datatype OUTCHAN =
-  | OUTCHANref of (FILEref) | OUTCHANptr of (FILEref)
+//
+// HX-2026-10: no GC (flat)
+// 0: OUTCHANref; 1: OUTCHANptr
+//
+typedef
+OUTCHAN = @(int, FILEref)
 // end of [OUTCHAN]
 
 fun
@@ -90,7 +98,7 @@ outchan_get_fileref
 (
 //
 case+ x of
-| OUTCHANref (filr) => filr | OUTCHANptr (filp) => filp
+| @(0, filr) => filr | @(_, filp) => filp
 //
 ) (* end of [outchan_get_fileref] *)
 
@@ -122,8 +130,8 @@ in
 //
 case+
 chan_old of
-| OUTCHANref (filr) => ()
-| OUTCHANptr (filp) => let
+| @(0, filr) => ()
+| @(_, filp) => let
     val err = $STDIO.fclose0 (filp) in (*nothing*)
   end // end of [OUTCHANptr]
 //
@@ -232,7 +240,7 @@ p0 > 0
 then let
   val filp = $UNSAFE.castvwtp0{FILEref}(filp)
 in
-  cmdstate_set_outchan (state, OUTCHANptr (filp))
+  cmdstate_set_outchan (state, @(1, filp))
 end // end of [then]
 else let
   prval
@@ -240,7 +248,7 @@ else let
   ) = $STDIO.FILEptr_free_null (filp)
   val ((*void*)) = state.nerror := state.nerror + 1
 in
-  cmdstate_set_outchan (state, OUTCHANref (stderr_ref))
+  cmdstate_set_outchan (state, @(0, stderr_ref))
 end // end of [else]
 //
 end // end of [cmdstate_set_outchan_basename]
@@ -317,9 +325,9 @@ process_cmdline
 ) : void = let
 in
 //
-case+ arglst of
+case+ glist_view(arglst) of
 //
-| list_nil () => let
+| ~GLnil () => let
     val nif = state.ninputfile
     val wait0 =
     (
@@ -337,7 +345,7 @@ case+ arglst of
     ) (* end of [if] *)
   end // end of [list_nil]
 //
-| list_cons
+| ~GLcons
     (arg, arglst) => let
     val () =
       state.ncomarg := state.ncomarg + 1
@@ -362,11 +370,11 @@ case+ arg of
     val nif = state.ninputfile
   in
     case+ arg of
-    | COMARGkey (1, key) when nif > 0 =>
+    | @(1, key) when nif > 0 =>
         process_cmdline2_COMARGkey1 (state, arglst, key)
-    | COMARGkey (2, key) when nif > 0 =>
+    | @(2, key) when nif > 0 =>
         process_cmdline2_COMARGkey2 (state, arglst, key)
-    | COMARGkey (_, fname) => let
+    | @(_, fname) => let
         val () = state.ninputfile := nif + 1
         val () = atscc2pl_basename (state, fname(*input*))
       in
@@ -377,7 +385,7 @@ case+ arg of
 | _ when
     isoutwait(state) => let
 //
-    val COMARGkey (_, fname) = arg
+    val @(_, fname) = arg
 //
     val () = cmdstate_set_outchan_basename (state, fname)
 //
@@ -387,12 +395,12 @@ case+ arg of
     process_cmdline (state, arglst)
   end // end of [_ when isoutwait]
 //
-| COMARGkey (1, key) =>
+| @(1, key) =>
     process_cmdline2_COMARGkey1 (state, arglst, key)
-| COMARGkey (2, key) =>
+| @(2, key) =>
     process_cmdline2_COMARGkey2 (state, arglst, key)
 //
-| COMARGkey (_, key) => let
+| @(_, key) => let
     val () = comarg_warning (key)
     val () = state.waitkind := WTKnone ()
   in
@@ -478,7 +486,7 @@ comarg_parse (string):<> comarg
 extern
 fun
 comarglst_parse{n:nat}
-  (argc: int n, argv: !argv(n)): list (comarg, n)
+  (argc: int(n), argv: !argv(n)): glist(comarg)
 // end of [comarglst_parse]
 //
 (* ****** ****** *)
@@ -497,8 +505,8 @@ loop
   if i < n
     then (
     if (str[i] != '-')
-      then COMARGkey (i, str) else loop (str, n, i+1)
-    ) else COMARGkey (n, str)
+      then @(i, str) else loop (str, n, i+1)
+    ) else @(n, str)
 ) (* end of [if] *)  
 // end of [loop]
 //
@@ -536,7 +544,7 @@ val res =
   loop (argv, 0, list_vt_nil())
 //
 in
-  list_vt2t (list_vt_reverse (res))
+  glist_make_list_vt (list_vt_reverse (res))
 end // end of [comarglst_parse]
 
 (* ****** ****** *)
@@ -555,7 +563,7 @@ prerrln!
 val arglst =
   comarglst_parse (argc, argv)
 //
-val+list_cons (arg0, arglst) = arglst
+val-~GLcons(arg0, arglst) = glist_view(arglst)
 //
 var
 state = @{
@@ -564,7 +572,7 @@ state = @{
 , waitkind= WTKnone ()
 // number of prcessed
 , ninputfile= ~1 // input files
-, outchan= OUTCHANref (stdout_ref)
+, outchan= @(0, stdout_ref)
 , nerror= 0 // number of accumulated errors
 } : cmdstate // end of [var]
 //

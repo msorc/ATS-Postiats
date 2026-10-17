@@ -39,14 +39,10 @@ sortdef vt0p = vt@ype
 #atscode_separator()
 
 fun{}
-tostring_int(int):<> string
-fun{}
 tostrptr_int(int):<!wrt> Strptr1
 
 #atscode_separator()
 
-fun{}
-tostring_uint(uint):<> string
 fun{}
 tostrptr_uint(uint):<!wrt> Strptr1
 
@@ -60,14 +56,10 @@ tostrptr_bool(bool):<!wrt> Strptr1
 #atscode_separator()
 
 fun{}
-tostring_char(char):<> string
-fun{}
 tostrptr_char(char):<!wrt> Strptr1
 
 #atscode_separator()
 
-fun{}
-tostring_double(double):<> string
 fun{}
 tostrptr_double(double):<!wrt> Strptr1
 
@@ -76,7 +68,7 @@ tostrptr_double(double):<!wrt> Strptr1
 fun
 {a:t0p}
 tostrptr_list
-  (xs0: List(INV(a))): Strptr1
+  (xs0: !List_vt(INV(a))): Strptr1
 //
 fun{}
 tostrptr_list$beg((*void*)): String
@@ -104,22 +96,12 @@ tostrptr_array$sep((*void*)): String
 //
 #atscode_separator()
 //
-fun
-{a:vt0p}
-tostrptr_arrayref
-  {n:int}
-  (arrayref(a,n), size_t(n)): Strptr1
-//
-fun
-{a:vt0p}
-tostrptr_arrszref(arrszref(a)): Strptr1
-//
 #atscode_separator()
 
 #atscode_eof_strsub("\#thisfilename$")\
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "tostring_atxt.txt")
 %}\

@@ -49,6 +49,9 @@ staload UN = $UNSAFE
 staload
 "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 staload
@@ -207,7 +210,7 @@ tokbuf_getinc_token
 
 implement
 tokbuf_get_location(buf) =
-  let val tok = tokbuf_get_token(buf) in tok.token_loc end
+  let val tok = tokbuf_get_token(buf) in tok.token_loc() end
 // end of [tokbuf_get_location]
 
 (* ****** ****** *)

@@ -64,9 +64,9 @@ prval () = lemma_g1uint_param(ln)
 val extra =
   $UN.castvwtp0{pcreptr_extra(null)}(0)
 val subject2 =
-  $UN.cast{arrayref(char, st+ln)}(subject)
+  $UN.cast{ptr}(subject)
 val length = sz2i(st+ln) and startoffset = sz2i(st) and options = 0u
-val ovector = $UN.cast{arrayref(int,0)}(0)
+val ovector = the_null_ptr
 val ret =
   pcre_exec (code, extra, subject2, length, startoffset, options, ovector, 0)
 prval ((*void*)) = pcre_free_study_null (extra)
@@ -90,12 +90,12 @@ prval () = lemma_g1uint_param (ln)
 val extra =
   $UN.castvwtp0{pcreptr_extra(null)}(0)
 val subject2 =
-  $UN.cast{arrayref(char, st+ln)}(subject)
+  $UN.cast{ptr}(subject)
 val length = sz2i(st+ln)
 val startoffset = sz2i(st)
 val options = 0u
 var int3 = @[int][48]() // HX: is [16] adequate?
-val ovector = $UN.cast{arrayref(int,48)}(addr@int3)
+val ovector = addr@int3
 val ret = pcre_exec
 (
   code, extra, subject2, length, startoffset, options, ovector, 48
@@ -219,13 +219,13 @@ extra =
 $UN.castvwtp0{pcreptr_extra(null)}(0)
 val
 subject2 =
-$UN.cast{arrayref(char, st+ln)}(subject)
+$UN.cast{ptr}(subject)
 //
 val length = sz2i(st+ln)
 val startoffset = sz2i(st)
 val options = 0u
 var int3 = @[int][BSZ3]() // HX: is [16] adequate?
-val ovector = $UN.cast{arrayref(int,BSZ3)}(addr@int3)
+val ovector = addr@int3
 val ret = pcre_exec
 (
   code, extra, subject2, length, startoffset, options, ovector, BSZ3

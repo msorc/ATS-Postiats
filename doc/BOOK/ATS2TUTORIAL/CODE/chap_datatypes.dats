@@ -43,15 +43,22 @@ val () = assertloc (isFriday(Friday()))
 
 (* ****** ****** *)
 
-datatype abc =
-  | A of () | B of (bool) | C of (int, double)
-
 (* ****** ****** *)
+//
+// HX-2026-10: no GC
+// a datatype may only have nullary constructors (such
+// as [weekday] above); a datavtype is used otherwise,
+// and its values are freed explicitly
+//
+(* ****** ****** *)
+
+datavtype abc =
+  | A of () | B of (bool) | C of (int, double)
 
 fun
 abc2tag
-(x: abc): int = let
-  val p = $UN.cast{intptr}(x)
+(x: !abc): int = let
+  val p = $UN.castvwtp1{intptr}(x)
 in
 //
 case+ 0 of
@@ -60,25 +67,49 @@ case+ 0 of
 //
 end // end of [abc2tag]
 
-(* ****** ****** *)
+fun
+abc_free(x: abc): void =
+  case+ x of ~A() => () | ~B(_) => () | ~C(_, _) => ()
 
-val () = println! ("tag(A) = ", abc2tag(A()))
-val () = println! ("tag(B) = ", abc2tag(B(true)))
-val () = println! ("tag(C) = ", abc2tag(C(0, 1.0)))
-
-(* ****** ****** *)
-
-datatype ab = A of () | B of (bool)
-
-(* ****** ****** *)
-
-val () = assertloc (iseqz($UN.cast{ptr}(A())))
-val () = assertloc (true = $UN.ptr0_get<bool>($UN.cast{ptr}(B(true))))
-val () = assertloc (false = $UN.ptr0_get<bool>($UN.cast{ptr}(B(false))))
+val () = let
+  val x = A() in println! ("tag(A) = ", abc2tag(x)); abc_free(x)
+end
+val () = let
+  val x = B(true) in println! ("tag(B) = ", abc2tag(x)); abc_free(x)
+end
+val () = let
+  val x = C(0, 1.0) in println! ("tag(C) = ", abc2tag(x)); abc_free(x)
+end
 
 (* ****** ****** *)
 
-datatype exp =
+datavtype ab = AA of () | BB of (bool)
+
+fun
+ab_free(x: ab): void = case+ x of ~AA() => () | ~BB(_) => ()
+
+val () = let
+  val x = AA()
+  val () = assertloc (iseqz($UN.castvwtp1{ptr}(x)))
+in
+  ab_free(x)
+end
+val () = let
+  val x = BB(true)
+  val () = assertloc (true = $UN.ptr0_get<bool>($UN.castvwtp1{ptr}(x)))
+in
+  ab_free(x)
+end
+val () = let
+  val x = BB(false)
+  val () = assertloc (false = $UN.ptr0_get<bool>($UN.castvwtp1{ptr}(x)))
+in
+  ab_free(x)
+end
+
+(* ****** ****** *)
+
+datavtype exp =
 | Int of int
 | Neg of (exp)
 | Add of (exp, exp)
@@ -86,14 +117,13 @@ datatype exp =
 
 (* ****** ****** *)
 
-datatype
+datavtype
 intexp =
-| Int of int
-| Neg of (intexp)
-| Add of (intexp, intexp)
-| Sub of (intexp, intexp)
+| IInt of int
+| INeg of (intexp)
+| IAdd of (intexp, intexp)
+| ISub of (intexp, intexp)
 | IfThenElse of (boolexp, intexp, intexp)
-
 and
 boolexp =
 | Bool of bool
@@ -102,18 +132,21 @@ boolexp =
 | Conj of (boolexp, boolexp)
 | Less of (intexp, intexp)
 | LessEq of (intexp, intexp)
-
-(* ****** ****** *)
 //
 symintr eval
 //
 extern
-fun eval_intexp : intexp -> int
+fun eval_intexp : (!intexp) -> int
 extern
-fun eval_boolexp : boolexp -> bool
+fun eval_boolexp : (!boolexp) -> bool
 //
 overload eval with eval_intexp
 overload eval with eval_boolexp
+//
+extern
+fun free_intexp : (intexp) -> void
+extern
+fun free_boolexp : (boolexp) -> void
 //
 (* ****** ****** *)
 //
@@ -122,10 +155,10 @@ eval_intexp
   (e0) = (
 //
 case+ e0 of
-| Int (i) => i
-| Neg (e) => ~eval(e)
-| Add (e1, e2) => eval(e1) + eval(e2)
-| Sub (e1, e2) => eval(e1) - eval(e2)
+| IInt (i) => i
+| INeg (e) => ~eval(e)
+| IAdd (e1, e2) => eval(e1) + eval(e2)
+| ISub (e1, e2) => eval(e1) - eval(e2)
 | IfThenElse
     (e_test, e_then, e_else) =>
     if eval(e_test) then eval(e_then) else eval(e_else)
@@ -146,16 +179,44 @@ case+ e0 of
 //
 ) (* end of [eval_boolexp] *)
 //
+implement
+free_intexp
+  (e0) = (
+//
+case+ e0 of
+| ~IInt (_) => ()
+| ~INeg (e) => free_intexp(e)
+| ~IAdd (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~ISub (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~IfThenElse
+    (e_test, e_then, e_else) =>
+    (free_boolexp(e_test); free_intexp(e_then); free_intexp(e_else))
+//
+) (* end of [free_intexp] *)
+//
+implement
+free_boolexp
+  (e0) = (
+//
+case+ e0 of
+| ~Bool (_) => ()
+| ~Not (e) => free_boolexp(e)
+| ~Less (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~LessEq (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~Conj (e1, e2) => (free_boolexp(e1); free_boolexp(e2))
+| ~Disj (e1, e2) => (free_boolexp(e1); free_boolexp(e2))
+//
+) (* end of [free_boolexp] *)
+//
 (* ****** ****** *)
 
 val E0 =
 IfThenElse (
-  Less(Int(1), Int(2)), Sub(Int(11), Int(1)), Add(Int(12), Int(13))
+  Less(IInt(1), IInt(2)), ISub(IInt(11), IInt(1)), IAdd(IInt(12), IInt(13))
 ) (* end of [val] *)
 
-(* ****** ****** *)
-
 val () = assertlocmsg (eval(E0) = 10, "\n")
+val () = free_intexp (E0)
 
 (* ****** ****** *)
 

@@ -33,19 +33,24 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-"./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_emit3.dats, see PORTING.md, "ccomp group A (emit)")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 //
 staload
 UN =
 "prelude/SATS/unsafe.sats"
 //
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
-staload "pats_basics.sats"
+staload "./pats_basics.sats"
 
 (* ****** ****** *)
 //
@@ -74,20 +79,14 @@ staload SYN = "./pats_syntax.sats"
 
 (* ****** ****** *)
 
-staload
-S2E = "./pats_staexp2.sats"
-typedef d2con = $S2E.d2con
-typedef d2conlst = $S2E.d2conlst
+staload "./pats_avlmap.sats"
+staload "./pats_staexp2.sats"
 
 (* ****** ****** *)
 
-staload
-D2E = "./pats_dynexp2.sats"
-typedef d2cst = $D2E.d2cst
-typedef d2ecl = $D2E.d2ecl
-typedef d2eclist = $D2E.d2eclist
-overload = with $D2E.eq_d2cst_d2cst
-overload != with $D2E.neq_d2cst_d2cst
+staload "./pats_dynexp2.sats"
+overload = with eq_d2cst_d2cst
+overload != with neq_d2cst_d2cst
 
 (* ****** ****** *)
 
@@ -110,9 +109,9 @@ emit_exndec
   (out, hid) = let
 //
 val
-loc0 = hid.hidecl_loc
-val-
-HIDexndecs(d2cs) = hid.hidecl_node
+loc0 = hid.hidecl_loc ()
+val-~
+HIDexndecs(d2cs) = hidecl_node_view (hid.hidecl_node ())
 //
 val () = emit_text(out, "/*\n")
 val () = emit_location(out, loc0)
@@ -125,13 +124,10 @@ auxlst
 ) : void = let
 in
 //
-case+ d2cs of
+if glist_is_cons (d2cs) then let
 //
-| list_nil
-    ((*void*)) => ()
-//
-| list_cons
-    (d2c, d2cs) => let
+    val d2c = glist_head<d2con> (d2cs)
+    val d2cs = glist_tail<d2con> (d2cs)
 //
     val () =
     emit_text
@@ -142,6 +138,7 @@ case+ d2cs of
   in
     auxlst(out, d2cs)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end (* end of [auxlst] *)
 //
@@ -155,15 +152,15 @@ implement
 emit_saspdec
   (out, hid) = let
 //
-val loc0 = hid.hidecl_loc
-val-HIDsaspdec (d2c) = hid.hidecl_node
+val loc0 = hid.hidecl_loc ()
+val-~HIDsaspdec (d2c) = hidecl_node_view (hid.hidecl_node ())
 //
 val () = emit_text (out, "/*\n")
 val () = emit_location (out, loc0)
 val () = emit_text (out, "\n*/\n")
 //
 val () = emit_text (out, "ATSassume(")
-val () = emit_s2cst (out, d2c.s2aspdec_cst)
+val () = emit_s2cst (out, d2c.s2aspdec_cst ())
 val () = emit_text (out, ") ;\n")
 //
 in
@@ -176,10 +173,10 @@ implement
 emit_extype
   (out, hid) = let
 //
-val loc0 = hid.hidecl_loc
+val loc0 = hid.hidecl_loc ()
 //
-val-HIDextype
-  (name, hse_def) = hid.hidecl_node
+val-~HIDextype
+  (name, hse_def) = hidecl_node_view (hid.hidecl_node ())
 //
 val () = emit_text (out, "/*\n")
 val () = emit_location (out, loc0)
@@ -187,10 +184,9 @@ val () = emit_text (out, "\n*/\n")
 //
 in
 //
-case+
-hse_def.hisexp_node of
-//
-| HSEtysum _ => {
+if
+hisexp_node_is_HSEtysum (hse_def.hisexp_node ())
+then {
 //
     val () =
     emit_text (out, "typedef\n")
@@ -210,7 +206,7 @@ hse_def.hisexp_node of
 //
   } (* end of [HSEtysum] *)
 //
-| _ (*non-tysum*) => {
+else {
     val () =
     emit_text (out, "typedef\n")
     val () = emit_hisexp (out, hse_def)
@@ -227,8 +223,8 @@ implement
 emit_extcode
   (out, hid) = let
 //
-val loc0 = hid.hidecl_loc
-val-HIDextcode (knd, pos, code) = hid.hidecl_node
+val loc0 = hid.hidecl_loc ()
+val-~HIDextcode (knd, pos, code) = hidecl_node_view (hid.hidecl_node ())
 //
 val () = emit_text (out, "/*\n")
 val () = emit_location (out, loc0)
@@ -248,7 +244,7 @@ local
 fun
 auxloc
 (
-  out: FILEref, loc: location
+  out: FILEref, loc: $LOC.location
 ) : void = let
   val () = emit_text (out, "/*\n")
   val () = emit_location (out, loc)
@@ -263,57 +259,36 @@ auxsta
   out: FILEref, d2cs: d2eclist
 ) : void = let
 //
-(*
-val () = println! ("auxsta")
-*)
-//
 in
 //
-case+ d2cs of
-| list_nil
-    ((*void*)) => ()
-  // end of [list_nil]
-| list_cons
-  (
-    d2c, d2cs
-  ) => auxsta(out, d2cs) where
-  {
+if glist_is_cons (d2cs) then let
+    val d2c = glist_head<d2ecl> (d2cs)
+    val d2cs = glist_tail<d2ecl> (d2cs)
     val () =
     (
     case+
-    d2c.d2ecl_node
+    d2ecl_node_view (d2c.d2ecl_node ())
     of // case+
 //
-    | $D2E.D2Cextcode
+    | ~D2Cextcode
         (knd, pos, code) =>
       (
-(*
-      println! ("auxsta: pos = ", pod);
-*)
 //
       if
       (pos = 0) // %{#
       then let
-        val loc = d2c.d2ecl_loc
+        val loc = d2c.d2ecl_loc ()
       in
         auxloc(out, loc); emit_text(out, code)
       end // end of [then] // end of [if]
 //
       ) (* end of [D2Cextcode] *)
 //
-    | $D2E.D2Cstaload
+    | ~D2Cstaload
       (
         idopt
       , fil, flag, fenv, _(*loaded*)
       ) => let
-(*
-//
-// AS-2019-06-07:
-// The information is of no use
-//
-        val () =
-          auxloc(out, d2c.d2ecl_loc)
-*)
         val d2cs =
           $TR2ENV.filenv_get_d2eclist(fenv)
         val issta =
@@ -322,10 +297,13 @@ case+ d2cs of
         if issta then auxsta(out, d2cs) else ((*void*))
       end // end of [D2Cstaload]
 //
-    | _ (* rest-of-d2ecl *) => ((*skipped*))
+    | v (* rest-of-d2ecl *) => d2ecl_node_view_free (v) // skipped
 //
     ) : void // end of [val]
-  } (* end of [where] *) // end of [list_cons]
+  in
+    auxsta(out, d2cs)
+  end // end of [list_cons]
+else () // end of [list_nil]
 //
 end // end of [auxsta]
 
@@ -336,53 +314,34 @@ auxdyn
 ) : void = let
 in
 //
-case+ d2cs of
-//
-| list_nil
-    ((*void*)) => ()
-  // end of [list_nil]
-//
-| list_cons
-  (
-    d2c, d2cs
-  ) => auxdyn(out, d2cs) where
-  {
+if glist_is_cons (d2cs) then let
+    val d2c = glist_head<d2ecl> (d2cs)
+    val d2cs = glist_tail<d2ecl> (d2cs)
     val () =
     (
     case+
-    d2c.d2ecl_node
+    d2ecl_node_view (d2c.d2ecl_node ())
     of // case+
 //
-    | $D2E.D2Cextcode
+    | ~D2Cextcode
         (knd, pos, code) =>
       (
-(*
-      println! ("auxdyn: knd = ", knd);
-*)
 //
       if
       (pos = 0) // %{#
       then let
-        val loc = d2c.d2ecl_loc
+        val loc = d2c.d2ecl_loc ()
       in
         auxloc(out, loc); emit_text(out, code)
       end // end of [then] // end of [if]
 //
       ) (* end of [D2Cextcode] *)
 //
-    | $D2E.D2Cstaload
+    | ~D2Cstaload
       (
         idopt
       , fil, flag, fenv, loaded
       ) => let
-(*
-//
-// AS-2019-06-07:
-// The information is of no use
-//
-        val () =
-          auxloc(out, d2c.d2ecl_loc)
-*)
         val d2cs =
           $TR2ENV.filenv_get_d2eclist(fenv)
         val issta =
@@ -393,7 +352,7 @@ case+ d2cs of
         // end of [if]
       end // end of [D2Cstaload]
 //
-    | $D2E.D2Clocal
+    | ~D2Clocal
       (
         d2cs_head, d2cs_body
       ) =>
@@ -401,18 +360,21 @@ case+ d2cs of
         auxdyn(out, d2cs_head); auxdyn(out, d2cs_body)
       ) // end of [D2Clocal]
 //
-    | $D2E.D2Cinclude
+    | ~D2Cinclude
         (knd, d2cs) =>
       (
         if knd = 0
           then auxsta(out, d2cs) else auxdyn(out, d2cs)
         // end of [if]
       ) (* end of [D2Cinclude] *)
-    | _ (* rest-of-d2ecl *) => ((*skipped*))
+    | v (* rest-of-d2ecl *) => d2ecl_node_view_free (v) // skipped
 //
     ) : void // end of [val]
 //
-  } (* end of [where] *) // end of [list_cons]
+  in
+    auxdyn(out, d2cs)
+  end // end of [list_cons]
+else () // end of [list_nil]
 //
 end // end of [auxdyn]
 
@@ -422,14 +384,10 @@ implement
 emit_staload
   (out, hid) = let
 //
-val-HIDstaload
+val-~HIDstaload
 (
   idopt, fil, flag, fenv, loaded
-) = hid.hidecl_node // end-of-val
-(*
-val () = 
-  println! ("emit_staload: flag = ", flag)
-*)
+) = hidecl_node_view (hid.hidecl_node ()) // end-of-val
 val d2cs =
   $TR2ENV.filenv_get_d2eclist(fenv)
 //
@@ -455,9 +413,9 @@ emit_tmpmovlst(out: FILEref, tmvlst: tmpmovlst): void
 implement
 emit_tmprimval (out, tpmv) =
 (
-case+ tpmv of
-| TPMVnone (pmv) => emit_primval (out, pmv)
-| TPMVsome (tmp, _) => emit_tmpvar (out, tmp)
+case+ tmprimval_view (tpmv) of
+| ~TPMVnone (pmv) => emit_primval (out, pmv)
+| ~TPMVsome (tmp, _) => emit_tmpvar (out, tmp)
 ) (* end of [emit_tmprimval] *)
 
 (* ****** ****** *)
@@ -471,19 +429,19 @@ fun auxlst
 ) : void = let
 in
 //
-case+ xs of
-| list_cons
-    (x, xs) => let
+if glist_is_cons (xs) then let
+    val x = glist_head<tmpmov> (xs)
+    val xs = glist_tail<tmpmov> (xs)
     val () =
     emit_text (out, "ATSINSmove(")
-    val () = emit_tmpvar (out, x.1)
+    val () = emit_tmpvar (out, x.tmpmov_dst ())
     val () = emit_text (out, ", ")
-    val () = emit_tmprimval (out, x.0)
+    val () = emit_tmprimval (out, x.tmpmov_src ())
     val () = emit_text (out, ") ; ")
   in
     auxlst (out, i+1, xs)
   end // end of [list_cons]
-| list_nil((*void*)) => ((*void*))
+else ((*void*)) // end of [list_nil]
 //
 end // end of [auxlst]
 //
@@ -503,9 +461,9 @@ emit_patckont
   (out, fail) = let
 in
 //
-case+ fail of
+case+ patckont_view (fail) of
 //
-| PTCKNTtmplab (tlab) =>
+| ~PTCKNTtmplab (tlab) =>
   {
     val () =
     emit_text (out, "ATSINSgoto(")
@@ -513,7 +471,7 @@ case+ fail of
     val ((*closing*)) = emit_text (out, ")")
   }
 //
-| PTCKNTtmplabint (tlab, int) =>
+| ~PTCKNTtmplabint (tlab, int) =>
   {
     val () =
     emit_text (out, "ATSINSgoto(")
@@ -521,7 +479,7 @@ case+ fail of
     val ((*closing*)) = emit_text (out, ")")
   }
 //
-| PTCKNTtmplabmov (tlab, tmvlst) =>
+| ~PTCKNTtmplabmov (tlab, tmvlst) =>
   {
     val () =
     emit_tmpmovlst (out, tmvlst)
@@ -531,7 +489,7 @@ case+ fail of
     val ((*closing*)) = emit_text (out, ")")
   }
 //
-| PTCKNTraise (tmp, pmv_exn) =>
+| ~PTCKNTraise (tmp, pmv_exn) =>
   {
     val () =
     emit_text (out, "ATSINSraise_exn(")
@@ -541,7 +499,7 @@ case+ fail of
     val ((*closing*)) = emit_text (out, ")")
   }
 //
-| PTCKNTcaseof_fail (loc) =>
+| ~PTCKNTcaseof_fail (loc) =>
   {
     val () =
     emit_text (out, "ATSINScaseof_fail(\"")
@@ -549,7 +507,7 @@ case+ fail of
     val ((*closing*)) = emit_text (out, "\")")
   }
 //
-| PTCKNTfunarg_fail (loc, flab) =>
+| ~PTCKNTfunarg_fail (loc, flab) =>
   {
     val () =
     emit_text (out, "ATSINSfunarg_fail(\"")
@@ -557,7 +515,7 @@ case+ fail of
     val ((*closing*)) = emit_text (out, "\")")
   }
 //
-| PTCKNTnone ((*void*)) =>
+| ~PTCKNTnone ((*void*)) =>
   {
     val () = emit_text (out, "ATSINSdeadcode_fail()")
   }
@@ -582,21 +540,20 @@ fun auxcon
 , d2c: d2con, fail: patckont
 ) : void =let
 //
-val s2c = $S2E.d2con_get_scst (d2c)
+val s2c = d2con_get_scst (d2c)
 //
 in
 //
-case+ 0 of
-| _ when
-    $S2E.s2cst_is_singular (s2c) => ()
-| _ when
-    $S2E.s2cst_is_listlike (s2c) => let
-    val islst = $S2E.s2cst_get_islst (s2c) 
+if
+  s2cst_is_singular (s2c) then ()
+else if
+  s2cst_is_listlike (s2c) then let
+    val islst = s2cst_get_islst (s2c) 
     val isnil = (
-      case+ islst of
-      | Some xx =>
-          $S2E.eq_d2con_d2con (d2c, xx.0)
-      | None () => false (* deadcode *)
+      case+ gopt_view (islst) of
+      | ~GOsome xx =>
+          eq_d2con_d2con (d2c, d2conpair_0 (xx))
+      | ~GOnone () => false (* deadcode *)
     ) : bool // end of [val]
     val () = emit_text (out, "ATSifthen(")
     val () = (
@@ -612,9 +569,9 @@ case+ 0 of
   in
     // nothing
   end // end of [islistlike]
-| _ => let
+else let
     val isnul =
-      $S2E.d2con_is_nullary (d2c)
+      d2con_is_nullary (d2c)
     // end of [val]
     val () =
       emit_text (out, "ATSifnthen(")
@@ -627,7 +584,7 @@ case+ 0 of
     ) : void // end of [val]
     val () = emit_primval (out, pmv)
     val () = emit_text (out, ", ")
-    val () = emit_int (out, $S2E.d2con_get_tag (d2c))
+    val () = emit_int (out, d2con_get_tag (d2c))
     val () = emit_text (out, ")) { ")
     val () = emit_patckont (out, fail)
     val () = emit_text (out, " ; } ;")
@@ -645,7 +602,7 @@ fun auxexn
 ) : void = let
 //
 val narg =
-  $S2E.d2con_get_arity_real (d2c)
+  d2con_get_arity_real (d2c)
 //
 val () =
   emit_text (out, "ATSifnthen(")
@@ -673,17 +630,17 @@ fun auxmain (
 ) : void = let
 in
 //
-case+ patck of
+case+ patck_view (patck) of
 //
-| PATCKcon (d2c) => let
-    val iscon = $S2E.d2con_is_con (d2c)
+| ~PATCKcon (d2c) => let
+    val iscon = d2con_is_con (d2c)
   in
     if iscon then
       auxcon (out, pmv, d2c, fail) else auxexn (out, pmv, d2c, fail)
     // end of [if]
   end // end of [PATCKcon]
 //
-| PATCKint (i) => {
+| ~PATCKint (i) => {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_int(")
     val () = emit_primval (out, pmv)
@@ -694,7 +651,7 @@ case+ patck of
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKint] *)
 //
-| PATCKbool (b) => {
+| ~PATCKbool (b) => {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_bool(")
     val () = emit_primval (out, pmv)
@@ -705,7 +662,7 @@ case+ patck of
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKbool] *)
 //
-| PATCKchar (c) => {
+| ~PATCKchar (c) => {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_char(")
     val () = emit_primval (out, pmv)
@@ -716,7 +673,7 @@ case+ patck of
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKchar] *)
 //
-| PATCKfloat (float) =>
+| ~PATCKfloat (float) =>
   {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_float(")
@@ -728,19 +685,19 @@ case+ patck of
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKfloat] *)
 //
-| PATCKstring (string) =>
+| ~PATCKstring (str) =>
   {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_string(")
     val () = emit_primval (out, pmv)
     val () = emit_text (out, ", ")
-    val () = emit_ATSPMVstring (out, string)
+    val () = emit_ATSPMVstring (out, str)
     val () = emit_text (out, ")) { ")
     val () = emit_patckont (out, fail)
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKstring] *)
 //
-| PATCKi0nt (tok) => {
+| ~PATCKi0nt (tok) => {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_int(")
     val () = emit_primval (out, pmv)
@@ -751,7 +708,7 @@ case+ patck of
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKi0nt] *)
 //
-| PATCKf0loat (tok) => {
+| ~PATCKf0loat (tok) => {
     val () = emit_text (out, "ATSifnthen(")
     val () = emit_text (out, "ATSCKpat_float(")
     val () = emit_primval (out, pmv)
@@ -762,16 +719,6 @@ case+ patck of
     val () = emit_text (out, " ; } ;")
   } (* end of [PATCKf0loat] *)
 //
-(*
-| _ (*unrecognized*) => let
-    val () = prerr_interror ()
-    val () = prerrln! (": emit_instr_patck: patck = ", patck)
-    val () = assertloc (false)
-  in
-    $ERR.abort ((*void*))
-  end // end of [let] // end of [_]
-*)
-//
 end (* end of [auxmain] *)
 
 in (* in of [local] *)
@@ -780,8 +727,8 @@ implement
 emit_instr_patck
   (out, ins) = let
 //
-val-INSpatck
-  (pmv, patck, fail) = ins.instr_node
+val-~INSpatck
+  (pmv, patck, fail) = instr_node_view (ins.instr_node ())
 val isnone = patckont_is_none (fail)
 val () =
   if isnone then emit_text (out, "#if(0)\n")
@@ -804,7 +751,7 @@ fun aux
   out: FILEref, ibr: ibranch
 ) : void =  let
 //
-val inss = ibr.ibranch_inslst
+val inss = ibr.ibranch_inslst ()
 //
 val () = emit_text (out, "ATSbranch_beg()\n")
 val () = emit_instrlst_ln (out, inss)
@@ -827,15 +774,16 @@ fun auxlst
 ) : void = let
 in
 //
-case+ ibrs of
-| list_cons
-    (ibr, ibrs) =>
-  {
+if glist_is_cons (ibrs) then let
+    val ibr = glist_head<ibranch> (ibrs)
+    val ibrs = glist_tail<ibranch> (ibrs)
     val () = aux (out, ibr)
     val () = emit_newline (out)
     val () = auxlst (out, i+1, ibrs)
-  } // end of [list_cons]
-| list_nil () => ()
+  in
+    // nothing
+  end // end of [list_cons]
+else () // end of [list_nil]
 //
 end // end of [auxlst]
 //
@@ -868,26 +816,22 @@ val flab = funent_get_lab(fent)
 val istmp = (funlab_get_tmpknd(flab) > 0)
 //
 val qopt = funlab_get_d2copt(flab)
-val isqua =
-(
-  case+ qopt of Some(d2c) => true | None() => false
-) : bool // end of [val]
+val isqua = gopt_is_some (qopt)
 val isext =
 (
-case+ qopt of
-| Some (d2c) =>
-    if $D2E.d2cst_is_static(d2c) then false else true
-| None _ => false
+if gopt_is_some (qopt) then
+    (if d2cst_is_static(gopt_unsome<d2cst>(qopt)) then false else true)
+else false
 ) : bool // end of [val]
 //
 val flopt = funlab_get_origin(flab)
 val isqua =
 (
-  case+ flopt of Some _ => false | None () => isqua
+  if gopt_is_some (flopt) then false else isqua
 ) : bool // end of [val]
 val isext =
 (
-  case+ flopt of Some _ => false | None () => isext
+  if gopt_is_some (flopt) then false else isext
 ) : bool // end of [val]
 val issta = not (isext)
 //
@@ -947,12 +891,9 @@ aux0_arglst
 ) : void = let
 in
 //
-case+ hses of
-//
-| list_nil () => ()
-//
-| list_cons
-    (hse, hses) => let
+if glist_is_cons (hses) then let
+    val hse = glist_head<hisexp> (hses)
+    val hses = glist_tail<hisexp> (hses)
     val () =
     if i > 0
       then emit_text (out, ", ")
@@ -961,6 +902,7 @@ case+ hses of
   in
     aux0_arglst (out, hses, i+1)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end (* end of [aux0_arglst] *)
 
@@ -972,12 +914,9 @@ aux1_arglst
 ) : void = let
 in
 //
-case+ hses of
-//
-| list_nil () => ()
-//
-| list_cons
-    (hse, hses) => let
+if glist_is_cons (hses) then let
+    val hse = glist_head<hisexp> (hses)
+    val hses = glist_tail<hisexp> (hses)
     val () =
     if n0+i > 0 then emit_text (out, ", ")
     val () =
@@ -987,6 +926,7 @@ case+ hses of
   in
     aux1_arglst (out, hses, n0, i+1)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end (* end of [aux1_arglst] *)
 
@@ -998,12 +938,9 @@ aux2_arglst
 ) : void = let
 in
 //
-case+ hses of
-//
-| list_nil () => ()  
-//
-| list_cons
-    (hse, hses) => let
+if glist_is_cons (hses) then let
+    val hse = glist_head<hisexp> (hses)
+    val hses = glist_tail<hisexp> (hses)
     val () =
     if n0+i > 0 then emit_text (out, ", ")
     val () =
@@ -1013,6 +950,7 @@ case+ hses of
   in
     aux2_arglst (out, hses, n0, i+1)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end (* end of [aux2_arglst] *)
 
@@ -1023,12 +961,9 @@ aux0_envlst
 ) : void = let
 in
 //
-case+ d2es of
-//
-| list_nil () => ()
-//
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val hse = d2env_get_type (d2e)
     val () =
     if i > 0
@@ -1038,6 +973,7 @@ case+ d2es of
   in
     aux0_envlst (out, d2es, i+1)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end (* end of [aux0_envlst] *)
 
@@ -1048,12 +984,9 @@ aux1_envlst
 ) : void = let
 in
 //
-case+ d2es of
-//
-| list_nil () => ()
-//
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val hse = d2env_get_type (d2e)
     val () =
     (
@@ -1063,6 +996,7 @@ case+ d2es of
   in
     aux1_envlst (out, d2es, i+1)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end (* end of [aux1_envlst] *)
 
@@ -1074,12 +1008,9 @@ aux2_envlst
 ) : int = let
 in
 //
-case+ d2es of
-//
-| list_nil () => (n0+i)
-//
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val hse = d2env_get_type (d2e)
     val () =
     if n0+i > 0 then emit_text (out, ", ")
@@ -1090,6 +1021,7 @@ case+ d2es of
   in
     aux2_envlst (out, d2es, n0, i+1)
   end // end of [list_cons]
+else (n0+i) // end of [list_nil]
 //
 end (* end of [aux2_envlst] *)
 
@@ -1101,12 +1033,9 @@ aux3_envlst
 ) : int = let
 in
 //
-case+ d2es of
-//
-| list_nil () => (n0+i)
-//
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val () =
     if n0+i > 0 then emit_text (out, ", ")
     val () =
@@ -1116,6 +1045,7 @@ case+ d2es of
   in
     aux3_envlst (out, d2es, n0, i+1)
   end // end of [list_cons]
+else (n0+i) // end of [list_nil]
 //
 end (* end of [aux3_envlst] *)
 
@@ -1127,12 +1057,9 @@ aux4_envlst
 ) : int = let
 in
 //
-case+ d2es of
-//
-| list_nil () => (i)
-//
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val () =
     if n0+i > 0 then emit_text (out, ", ")
     val () =
@@ -1142,6 +1069,7 @@ case+ d2es of
   in
     aux4_envlst (out, d2es, n0, i+1)
   end // end of [list_cons]
+else (i) // end of [list_nil]
 //
 end (* end of [aux4_envlst] *)
 
@@ -1152,9 +1080,9 @@ aux5_envlst
 ) : void = let
 in
 //
-case+ d2es of
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val hse = d2env_get_type (d2e)
     val () =
     (
@@ -1168,7 +1096,7 @@ case+ d2es of
   in
     aux5_envlst (out, d2es, i+1)
   end // end of [list_cons]
-| list_nil () => ()
+else () // end of [list_nil]
 //
 end (* end of [aux5_envlst] *)
 
@@ -1391,18 +1319,12 @@ fun auxlst
 ) : void = let
 in
 //
-case+ hses of
-| list_cons
-    (hse, hses) => let
+if glist_is_cons (hses) then let
+    val hse = glist_head<hisexp> (hses)
+    val hses = glist_tail<hisexp> (hses)
     val () =
       emit_text (out, "ATStmpdec(")
     // end of [val]
-(*
-    val isvoid = hisexp_is_void (hse)
-    val ((*void*)) =
-      if isvoid then emit_text (out, "_void")
-    // end of [val]
-*)
     val () = (
       emit_funarg (out, i); emit_text (out, ", "); emit_hisexp (out, hse)
     ) (* end of [val] *)
@@ -1410,7 +1332,7 @@ case+ hses of
   in
     auxlst (out, hses, i+1)
   end // end of [list_cons]
-| list_nil ((*void*)) => ()
+else () // end of [list_nil]
 //
 end // end of [auxlst]
 //
@@ -1438,18 +1360,12 @@ auxlst
 ) : void = let
 in
 //
-case+ hses of
-| list_cons
-    (hse, hses) => let
+if glist_is_cons (hses) then let
+    val hse = glist_head<hisexp> (hses)
+    val hses = glist_tail<hisexp> (hses)
     val () =
       emit_text(out, "ATStmpdec(")
     // end of [val]
-(*
-    val isvoid = hisexp_is_void (hse)
-    val ((*void*)) =
-      if isvoid then emit_text (out, "_void")
-    // end of [val]
-*)
     val () =
     (
       emit_funapy(out, i); emit_text(out, ", "); emit_hisexp(out, hse)
@@ -1458,7 +1374,7 @@ case+ hses of
   in
     auxlst(out, hses, i+1)
   end // end of [list_cons]
-| list_nil((*void*)) => ()
+else () // end of [list_nil]
 //
 end // end of [auxlst]
 //
@@ -1552,27 +1468,27 @@ val opt = funlab_get_funent (fl)
 //
 in
 //
-case+ opt of
-| Some (fent) => let
+case+ gopt_view (opt) of
+| ~GOsome (fent) => let
     val () = emit_funlab_funarg (out, fl)
     val () = emit_funent_fundec (out, fent)
   in
     // nothing
   end // end of [Some]
-| None ((*void*)) => ()
+| ~GOnone ((*void*)) => ()
 //
 end // end of [auxfl]
 
-and auxflist
+fun auxflist
 (
   out: FILEref
 , fent0: funent, fls: funlablst, i: int
 ) : void = let
 in
 //
-case+ fls of
-| list_cons
-    (fl, fls) => let
+if glist_is_cons (fls) then let
+    val fl = glist_head<funlab> (fls)
+    val fls = glist_tail<funlab> (fls)
     val () = emit_set_nfnx (i)
     val () = auxfl (out, fent0, fl)
     val () = emit_set_nfnx (0)
@@ -1580,7 +1496,7 @@ case+ fls of
   in
     // nothing
   end // end of [list_cons]
-| list_nil ((*void*)) => ()
+else () // end of [list_nil]
 //
 end // end of [auxflist]
 
@@ -1593,19 +1509,17 @@ emit_funent_fnxdeclst
 val fls = funent_get_fnxlablst(fent0)
 //
 val () = (
-case+ fls of
-| list_cons _ =>
+if glist_is_cons (fls) then
   emit_text(out, "/*\nemit_funent_fnxdeclst:\n*/\n")
-| list_nil((*void*)) => ((*void*))
+else ((*void*))
 ) : void // end of [val]
 //
 in
 //
-case+ fls of
-| list_cons
-    (fl0, fls) => auxflist (out, fent0, fls, 2(*i*))
+if glist_is_cons (fls) then
+  auxflist (out, fent0, glist_tail<funlab> (fls), 2(*i*))
   // end of [list_cons]
-| list_nil((*void*)) => ((*void*))
+else ((*void*))
 //
 end // end of [emit_funent_fnxdeclst]
 
@@ -1625,23 +1539,23 @@ val opt = funlab_get_funent(fl)
 //
 in
 //
-case+ opt of
-| Some (fent) =>
+case+ gopt_view (opt) of
+| ~GOsome (fent) =>
     emit_funent_funbody(out, fent)
-| None ((*void*)) => ((*void*))
+| ~GOnone ((*void*)) => ((*void*))
 //
 end // end of [auxfl]
 
-and auxflist
+fun auxflist
 (
   out: FILEref
 , fent0: funent, fls: funlablst, i: int
 ) : void = let
 in
 //
-case+ fls of
-| list_cons
-    (fl, fls) => let
+if glist_is_cons (fls) then let
+    val fl = glist_head<funlab> (fls)
+    val fls = glist_tail<funlab> (fls)
     val () = emit_set_nfnx (i)
     val () = auxfl (out, fent0, fl)
     val () = emit_set_nfnx (0)
@@ -1649,7 +1563,7 @@ case+ fls of
   in
     // nothing
   end // end of [list_cons]
-| list_nil ((*void*)) => ()
+else () // end of [list_nil]
 //
 end // end of [auxflist]
 
@@ -1662,19 +1576,17 @@ emit_funent_fnxbodylst
 val fls = funent_get_fnxlablst (fent0)
 //
 val () = (
-case+ fls of
-| list_cons _ =>
+if glist_is_cons (fls) then
   emit_text (out, "/*\nemit_funent_fnxbodylst:\n*/\n")
-| _ => ((*void*))
+else ((*void*))
 ) : void // end of [val]
 //
 in
 //
-case+ fls of
-| list_cons
-    (fl0, fls) => auxflist (out, fent0, fls, 2(*i*))
+if glist_is_cons (fls) then
+  auxflist (out, fent0, glist_tail<funlab> (fls), 2(*i*))
   // end of [list_cons]
-| list_nil ((*void*)) => ()
+else ((*void*))
 //
 end // end of [emit_funent_fnxbodylst]
 
@@ -1695,10 +1607,10 @@ val tsubopt = funent_get_tmpsub (fent)
 //
 val () = emit_text (out, "/*\n")
 val () = emit_text (out, "imparg = ")
-val () = $S2E.fprint_s2varlst (out, imparg)
+val () = fprint_s2varlst (out, imparg)
 val () = emit_text (out, "\n")
 val () = emit_text (out, "tmparg = ")
-val () = $S2E.fprint_s2explstlst (out, tmparg)
+val () = fprint_s2explstlst (out, tmparg)
 val () = emit_text (out, "\n")
 val () = emit_text (out, "tmpsub = ")
 val () = fprint_tmpsubopt (out, tsubopt)
@@ -1714,23 +1626,11 @@ in (* in of [local] *)
 implement
 emit_funent_implmnt
   (out, fent) = let
-(*
-val () =
-fprintln!
-( stdout_ref
-, "emit_funent_implmnt: fent = ", fent
-)
-*)
+//
 val loc0 = funent_get_loc (fent)
 val flab = funent_get_lab (fent)
 val d2es = funent_eval_d2envlst (fent)
-(*
-val () =
-fprintln!
-( stdout_ref
-, "emit_funent_implmnt: d2es = ", d2es
-)
-*)
+//
 val () = emit_text (out, "/*\n")
 val () = $LOC.fprint_location (out, loc0)
 val () = emit_text (out, "\n*/\n")
@@ -1764,15 +1664,14 @@ val hses_arg = funlab_get_type_arg (flab)
 val qopt = funlab_get_d2copt (flab)
 val isext =
 (
-case+ qopt of
-| Some (d2c) =>
-    if $D2E.d2cst_is_static (d2c) then false else true
-| None _ => false
+if gopt_is_some (qopt) then
+    (if d2cst_is_static (gopt_unsome<d2cst>(qopt)) then false else true)
+else false
 ) : bool // end of [val]
 val flopt = funlab_get_origin (flab)
 val isext =
 (
-  case+ flopt of Some (d2c) => false | None () => isext
+  if gopt_is_some (flopt) then false else isext
 ) : bool // end of [val]
 val issta = not (isext)
 //
@@ -1823,7 +1722,7 @@ implement
 emit_dynload
   (out, hid) = let
 //
-val-HIDdynload (fil) = hid.hidecl_node
+val-~HIDdynload (fil) = hidecl_node_view (hid.hidecl_node ())
 //
 val () = emit_text (out, "ATSdynloadfcall(")
 val () =
@@ -1840,59 +1739,56 @@ end (* end of [emit_dynload] *)
 
 local
 //
-staload
-UN = "prelude/SATS/unsafe.sats"
-//
 fun emit_primdec
   (out: FILEref, pmd: primdec) : void = let
 in
 //
-case+ pmd.primdec_node of
+case+ primdec_node_view (pmd.primdec_node ()) of
 //
-| PMDnone () => ()
+| ~PMDnone () => ()
 //
-| PMDlist (pmds) => emit_primdeclst (out, pmds)
+| ~PMDlist (pmds) => emit_primdeclst (out, pmds)
 //
-| PMDsaspdec _ => ()
+| ~PMDsaspdec _ => ()
 //
-| PMDextvar
+| ~PMDextvar
     (name, inss) =>
-    emit_instrlst_ln (out, $UN.cast{instrlst}(inss))
+    emit_instrlst_ln (out, inss)
 //
-| PMDdatdecs _ => ()
-| PMDexndecs _ => ()
+| ~PMDdatdecs _ => ()
+| ~PMDexndecs _ => ()
 //
-| PMDimpdec (imp) => let
+| ~PMDimpdec (imp) => let
     val opt = hiimpdec_get_instrlstopt (imp)
   in
-    case+ opt of
-    | Some (inss) => emit_instrlst_ln (out, inss)
-    | None () => ()
+    case+ gopt_view (opt) of
+    | ~GOsome (inss) => emit_instrlst_ln (out, inss)
+    | ~GOnone () => ()
   end // end of [PMDimpdec]
 //
-| PMDfundecs _ => ()
+| ~PMDfundecs _ => ()
 //
-| PMDvaldecs
+| ~PMDvaldecs
     (knd, hvds, inss) =>
-    emit_instrlst_ln (out, $UN.cast{instrlst}(inss))
-| PMDvaldecs_rec
+    emit_instrlst_ln (out, inss)
+| ~PMDvaldecs_rec
     (knd, hvds, inss) =>
-    emit_instrlst_ln (out, $UN.cast{instrlst}(inss))
+    emit_instrlst_ln (out, inss)
 //
-| PMDvardecs(hvds, inss) =>
-    emit_instrlst_ln (out, $UN.cast{instrlst}(inss))
+| ~PMDvardecs(hvds, inss) =>
+    emit_instrlst_ln (out, inss)
 //
-| PMDinclude
+| ~PMDinclude
     (pfil, pmds) => emit_primdeclst (out, pmds)
 //
-| PMDstaload _ => ()
+| ~PMDstaload _ => ()
 //
-| PMDstaloadloc
+| ~PMDstaloadloc
     (pfil, nspace, pmds) => emit_primdeclst (out, pmds)
 //
-| PMDdynload (cfil) => emit_dynload (out, cfil)
+| ~PMDdynload (cfil) => emit_dynload (out, cfil)
 //
-| PMDlocal
+| ~PMDlocal
   (
     pmds_head, pmds_body
   ) => {
@@ -1916,14 +1812,14 @@ emit_primdeclst
   (out, pmds) = let
 in
 //
-case+ pmds of
-| list_cons
-    (pmd, pmds) => let
+if glist_is_cons (pmds) then let
+    val pmd = glist_head<primdec> (pmds)
+    val pmds = glist_tail<primdec> (pmds)
     val () =
       emit_primdec (out, pmd) in emit_primdeclst (out, pmds)
     // end of [val]
   end // end of [list_cons]
-| list_nil () => ()
+else () // end of [list_nil]
 //
 end // end of [emit_primdeclst]
 
@@ -1937,7 +1833,7 @@ emit_d2con_extdec
 //
 val
 isexn =
-$S2E.d2con_is_exn(d2c)
+d2con_is_exn(d2c)
 //
 val () =
 if isexn then {
@@ -1958,10 +1854,18 @@ end // end of [emit_d2con_extdec]
 
 implement
 emit_d2conlst_extdec
-  (out, d2cs) =
-(
-  list_app_cloptr<d2con> (d2cs, lam d2c =<1> emit_d2con_extdec (out, d2c))
-) // end of [emit_d2conlst_extdec]
+  (out, d2cs) = let
+in
+//
+if glist_is_cons (d2cs) then let
+  val d2c = glist_head<d2con> (d2cs)
+  val d2cs = glist_tail<d2con> (d2cs)
+  val () = emit_d2con_extdec (out, d2c)
+in
+  emit_d2conlst_extdec (out, d2cs)
+end else () // end of [list_nil]
+//
+end // end of [emit_d2conlst_extdec]
 
 (* ****** ****** *)
 
@@ -1974,8 +1878,8 @@ fun aux
   out: FILEref, d2c: d2con
 ) : void = let
 //
-val fil = $S2E.d2con_get_fil (d2c)
-val name = $S2E.d2con_get_name (d2c)
+val fil = d2con_get_fil (d2c)
+val name = d2con_get_name (d2c)
 //
 val () = emit_text (out, "ATSdynexn_initize(")
 val () = emit_d2con (out, d2c)
@@ -1993,45 +1897,17 @@ end (* end of [aux] *)
 //
 in
 //
-case+ d2cs of
-| list_cons
-    (d2c, d2cs) => let
-    val isexn = $S2E.d2con_is_exn (d2c)
+if glist_is_cons (d2cs) then let
+    val d2c = glist_head<d2con> (d2cs)
+    val d2cs = glist_tail<d2con> (d2cs)
+    val isexn = d2con_is_exn (d2c)
     val ((*void*)) = if isexn then aux (out, d2c)
   in
     emit_d2conlst_initize (out, d2cs)
   end // end of [list_cons]
-| list_nil () => ()
+else () // end of [list_nil]
 //
 end // end of [emit_d2conlst_initize]
-
-(* ****** ****** *)
-
-(*
-//
-// HX-2014-03-14: should it be tried?
-//
-fun
-d2cst_is_lamless
-  (d2c: d2cst): bool = let
-//
-val opt = $D2E.d2cst_get_funlab (d2c)
-//
-in
-//
-case+ opt of
-| None () => false
-| Some (flab) => let
-    val flab = $UN.cast{funlab}(flab)
-    val opt2 = funlab_get_d2copt (flab)
-  in
-    case+ opt2 of
-    | None () => false
-    | Some (d2c2) => if d2c != d2c2 then true else false
-  end // end of [Some]
-//
-end // end of [d2cst_is_lamless]
-*)
 
 (* ****** ****** *)
 
@@ -2040,28 +1916,27 @@ emit_d2cst_extdec
   (out, d2c) = let
 //
 macdef
-ismac = $D2E.d2cst_is_mac
+ismac = d2cst_is_mac
 //
 macdef
-isfundec = $D2E.d2cst_is_fundec
+isfundec = d2cst_is_fundec
 //
 macdef
-iscastfn = $D2E.d2cst_is_castfn
+iscastfn = d2cst_is_castfn
 //
 in
 //
-case+ 0 of
-| _ when
-    ismac (d2c) => let
+if
+ismac (d2c) then let
     val () = emit_text (out, "ATSdyncst_mac(")
     val () = emit_d2cst (out, d2c)
     val () = emit_text (out, ")\n")
   in
     // nothing
   end // end of [ismac]
-| _ when
-    isfundec(d2c) => let
-    val issta = $D2E.d2cst_is_static (d2c)
+else if
+isfundec(d2c) then let
+    val issta = d2cst_is_static (d2c)
     val () =
     (
       if issta then
@@ -2092,16 +1967,16 @@ case+ 0 of
     // nothing
   end // end of [isfundec]
 //
-| _ when
-    iscastfn(d2c) => let
+else if
+iscastfn(d2c) then let
     val () = emit_text (out, "ATSdyncst_castfn(")
     val () = emit_d2cst (out, d2c)
     val () = emit_text (out, ")\n")
   in
     // nothing
   end // end of [castfn]
-| _ (*non-fun*) => let
-    val-Some(hse) = d2cst_get2_hisexp (d2c)
+else let
+    val-~GOsome(hse) = gopt_view (d2cst_get2_hisexp (d2c))
     val () = emit_text (out, "ATSdyncst_valdec(")
     val () = emit_d2cst (out, d2c)
     val () = emit_text (out, ", ")
@@ -2115,10 +1990,18 @@ end // end of [emit_d2cst_extdec]
 
 implement
 emit_d2cstlst_extdec
-  (out, d2cs) =
-(
-  list_app_cloptr<d2cst> (d2cs, lam d2c =<1> emit_d2cst_extdec (out, d2c))
-) // end of [emit_d2cstlst_extdec]
+  (out, d2cs) = let
+in
+//
+if glist_is_cons (d2cs) then let
+  val d2c = glist_head<d2cst> (d2cs)
+  val d2cs = glist_tail<d2cst> (d2cs)
+  val () = emit_d2cst_extdec (out, d2c)
+in
+  emit_d2cstlst_extdec (out, d2cs)
+end else () // end of [list_nil]
+//
+end // end of [emit_d2cstlst_extdec]
 
 (* ****** ****** *)
 

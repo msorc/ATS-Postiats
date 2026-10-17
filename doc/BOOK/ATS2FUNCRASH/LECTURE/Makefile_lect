@@ -4,11 +4,11 @@
 #
 ######
 #
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSHOMEQ="$(PATSHOME)"
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 #
-#LIBATSDOC=$(ATSHOMEQ)/libatsdoc
+#LIBATSDOC=$(PATSHOMEQ)/ccomp/atslib/lib
 #
 ######
 
@@ -18,7 +18,7 @@ all:: main.db clean
 #
 main.exe: \
 main_atxt.dats ; \
-  $(ATSCC) -D_ATS_NGC -o $@ main_atxt.dats -latsdoc
+  $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ main_atxt.dats -latsdoc
 #
 main_atxt.dats: main.atxt ; \
   $(ATSDOC) --outcode $@ -i main.atxt > main_atxt.txt

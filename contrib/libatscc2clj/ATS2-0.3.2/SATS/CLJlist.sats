@@ -69,21 +69,37 @@ CLJlist_length
 //
 (* ****** ****** *)
 //
+// HX-2026-10: [xs] must be non-empty
 fun
-CLJlist2list
-  {a:t0p}(CLJlist(INV(a))): List0(a) = "mac#%"
+CLJlist_head
+  {a:t0p}(xs: CLJlist(INV(a))): a = "mac#%"
 fun
-CLJlist2list_rev
-  {a:t0p}(CLJlist(INV(a))): List0(a) = "mac#%"
+CLJlist_tail
+  {a:t0p}(xs: CLJlist(INV(a))): CLJlist(a) = "mac#%"
+//
+fun
+CLJlist_reverse
+  {a:t0p}(xs: CLJlist(INV(a))): CLJlist(a) = "mac#%"
 //
 (* ****** ****** *)
 //
 fun
-CLJlist_oflist
-  {a:t0p}(xs: List(INV(a))): CLJlist(a) = "mac#%"
+CLJlist2list_vt
+  {a:t0p}(CLJlist(INV(a))): List0_vt(a) = "mac#%"
 fun
-CLJlist_oflist_rev
-  {a:t0p}(xs: List(INV(a))): CLJlist(a) = "mac#%"
+CLJlist2list_vt_rev
+  {a:t0p}(CLJlist(INV(a))): List0_vt(a) = "mac#%"
+//
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (the list is borrowed)
+//
+fun
+CLJlist_oflist_vt
+  {a:t0p}(xs: !List_vt(INV(a))): CLJlist(a) = "mac#%"
+fun
+CLJlist_oflist_vt_rev
+  {a:t0p}(xs: !List_vt(INV(a))): CLJlist(a) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -93,7 +109,7 @@ CLJlist_sort_1
 fun
 CLJlist_sort_2{a:t0p}
 (
-  xs: CLJlist(INV(a)), cmp: (a, a) -<cloref1> int
+  xs: CLJlist(INV(a)), cmp: (a, a) -<cloptr1> int
 ) : CLJlist(a) = "mac#%" // end-of-function
 //
 (* ****** ****** *)

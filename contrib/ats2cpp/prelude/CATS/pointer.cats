@@ -188,7 +188,7 @@ atstype_bool
 atspre_gt_ptr_intz
   (atstype_ptr p, atstype_int _)
 {
-  return (p > 0 ? atsbool_true : atsbool_false) ;
+  return (p != 0 ? atsbool_true : atsbool_false) ; // HX-2026-10: C++ forbids p > 0
 } // end of [atspre_gt_ptr_intz]
 #define atspre_gt_ptr0_intz atspre_gt_ptr_intz
 #define atspre_gt_ptr1_intz atspre_gt_ptr_intz

@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -62,7 +64,7 @@ packpostamble () = let
 val out = stdout_ref
 val () = fprint_string (out, "\
 #\n\
-echo \"The \${ATSHOME}/doc/EXAMPLE/ATSLIB files have been copied.\"\n\
+echo \"The \\${ATSHOME}/doc/EXAMPLE/ATSLIB files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -115,8 +117,6 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 #packfilename("prelude_float.dats")
 #packfilename("prelude_memory.dats")
 #packfilename("prelude_pointer.dats")
-#packfilename("prelude_string.dats")
-#packfilename("prelude_reference.dats")
 
 (* ****** ****** *)
 
@@ -133,27 +133,21 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("prelude_list.dats")
 #packfilename("prelude_list_vt.dats")
 
 (* ****** ****** *)
 
-#packfilename("prelude_option.dats")
 #packfilename("prelude_option_vt.dats")
 
 (* ****** ****** *)
 
 #packfilename("prelude_array.dats")
-#packfilename("prelude_arrayptr.dats")
-#packfilename("prelude_arrayref.dats")
 #packfilename("prelude_matrix.dats")
 #packfilename("prelude_matrixptr.dats")
 #packfilename("prelude_matrixref.dats")
 
 (* ****** ****** *)
 
-#packfilename("prelude_stream.dats")
-#packfilename("prelude_stream_vt.dats")
 
 (* ****** ****** *)
 
@@ -161,7 +155,6 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("prelude_tostring.dats")
 
 (* ****** ****** *)
 
@@ -171,7 +164,6 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("libats_gflist.dats")
 
 (* ****** ****** *)
 
@@ -192,7 +184,6 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("libats_stringbuf.dats")
 
 (* ****** ****** *)
 
@@ -201,24 +192,13 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("libats_funset_listord.dats")
-#packfilename("libats_funset_avltree.dats")
 
-#packfilename("libats_funmap_list.dats")
-#packfilename("libats_funmap_avltree.dats")
-#packfilename("libats_funmap_rbtree.dats")
 
-#packfilename("libats_funmset_listord.dats")
 
-#packfilename("libats_funarray_braunt.dats")
 
-#packfilename("libats_fundeque_fngtree.dats")
-#packfilename("libats_funralist_nested.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_linset_listord.dats")
-#packfilename("libats_linset_avltree.dats")
 
 (* ****** ****** *)
 
@@ -238,45 +218,27 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_list0.dats")
-#packfilename("libats_ML_array0.dats")
-#packfilename("libats_ML_matrix0.dats")
-#packfilename("libats_ML_string.dats")
-#packfilename("libats_ML_strarr.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_gvalue.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_filebas.dats")
-#packfilename("libats_ML_intrange.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_funset.dats")
-#packfilename("libats_ML_funmap.dats")
-#packfilename("libats_ML_myfunset.dats")
-#packfilename("libats_ML_myfunmap.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_qlistref.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_hashtblref.dats")
-#packfilename("libats_ML_myhashtblref.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_monad_list.dats")
-#packfilename("libats_ML_monad_maybe.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ML_COMPILE_all.dats")
 
 (* ****** ****** *)
 
@@ -296,7 +258,6 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("libats_libc_sys_stat.dats")
 
 (* ****** ****** *)
 
@@ -304,17 +265,12 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 
 (* ****** ****** *)
 
-#packfilename("libats_ATS1_funheap_braun.dats")
-#packfilename("libats_ATS1_funheap_binomial.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ATS1_funset_listord.dats")
-#packfilename("libats_ATS1_funmset_listord.dats")
 
 (* ****** ****** *)
 
-#packfilename("libats_ATS1_linset_listord.dats")
 
 (* ****** ****** *)
 
@@ -323,7 +279,7 @@ The ATSHOME/doc/EXAMPLE/ATSLIB\
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

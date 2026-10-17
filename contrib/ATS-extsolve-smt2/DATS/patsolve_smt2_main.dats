@@ -75,15 +75,24 @@ val () =
 prerrln!
   ("Hello from [patsolve_smt2]!")
 //
-val () = the_s2cinterp_initize()
-//
 val
 arglst =
 patsolve_smt2_cmdline (argc, argv)
 //
 // HX: skipping argv[0]
 //
-val-~list_vt_cons(_, arglst) = arglst
+val-~list_vt_cons(arg0, arglst) = arglst
+val () = commarg_free(arg0) where
+{
+  fun commarg_free(x: commarg): void =
+  (
+    case+ x of
+    | ~CAhelp _ => () | ~CAgitem _ => ()
+    | ~CAinput _ => () | ~CAoutput _ => ()
+    | ~CAprintln _ => () | ~CAprintfile _ => ()
+    | ~CAargend() => ()
+  )
+}
 //
 val () = patsolve_smt2_commarglst(arglst)
 //

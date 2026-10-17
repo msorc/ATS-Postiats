@@ -1,0 +1,1 @@
+stadef x = int ?? bool

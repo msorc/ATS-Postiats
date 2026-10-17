@@ -177,5 +177,5 @@ function #dyncode("draw_triangle") to draw randomly generated triangles.\
 #comment(" end of [chap_drawline.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "chap_drawline_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "chap_drawline_atxt.txt")
 %}

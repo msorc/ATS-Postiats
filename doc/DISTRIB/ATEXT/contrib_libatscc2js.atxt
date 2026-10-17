@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -92,7 +94,7 @@ out
 ,
 "\
 #\n\
-echo \"The \${ATSHOME}/contrib/libatscc2js files have been copied.\"\n\
+echo \"The \\${ATSHOME}/contrib/libatscc2js files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -160,10 +162,8 @@ ATS/contrib/libatscc2js
 #packfilename_r("SATS")
 #packfilename_r("DATS")
 #packfilename_r("HTML")
-#packfilename_r("BUCS320")
 #packfilename_r("Bacon.js")
 #packfilename_r("WorkerSession")
-#packfilename_r("ATS2-0.3.2")
 //
 (* ****** ****** *)
 
@@ -172,7 +172,7 @@ ATS/contrib/libatscc2js
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

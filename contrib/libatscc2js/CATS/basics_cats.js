@@ -224,7 +224,7 @@ ats2jspre_cloref2fun2(cf)
 function
 ats2jspre_cloref2fun3(cf)
 {
-  return function(x1,x2,x3){return ats2jspre_cloref2_app(cf,x1,x2,x3);};
+  return function(x1,x2,x3){return ats2jspre_cloref3_app(cf,x1,x2,x3);};
 }
 //
 /* ****** ****** */

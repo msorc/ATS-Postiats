@@ -85,7 +85,7 @@ ats2jspre_matrixref_uninitized
 %{^
 //
 function
-ats2jspre_matrixref_tabulate_cloref
+ats2jspre_matrixref_tabulate_cloptr
   (m, n, fopr)
 {
   var A, i, j;

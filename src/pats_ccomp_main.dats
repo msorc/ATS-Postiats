@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -33,19 +33,25 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_main.dats, see PORTING.md, "ccomp group B")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 
 staload
 UN = "prelude/SATS/unsafe.sats"
-staload
-_(*anon*) = "prelude/DATS/unsafe.dats"
 
 (* ****** ****** *)
 
-staload "pats_basics.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
 
 (* ****** ****** *)
 //
@@ -153,11 +159,8 @@ val () = emit_text (out, "#include \"prelude/CATS/filebas.cats\"\n")
 // HX: secondary prelude cats files
 //
 val () = emit_text (out, "//\n")
-val () = emit_text (out, "#include \"prelude/CATS/list.cats\"\n")
-val () = emit_text (out, "#include \"prelude/CATS/option.cats\"\n")
 val () = emit_text (out, "#include \"prelude/CATS/array.cats\"\n")
 val () = emit_text (out, "#include \"prelude/CATS/arrayptr.cats\"\n")
-val () = emit_text (out, "#include \"prelude/CATS/arrayref.cats\"\n")
 val () = emit_text (out, "#include \"prelude/CATS/matrix.cats\"\n")
 val () = emit_text (out, "#include \"prelude/CATS/matrixptr.cats\"\n")
 //
@@ -188,6 +191,9 @@ end // end of [emit_ats_ccomp_prelude]
 
 (* ****** ****** *)
 //
+// HX-2026-10: the [ref<Option(..)>] caches of ATS1 are cells of the global
+// arena that hold a [gopt] (a null pointer is [None]); [initset2] resets them
+//
 extern
 fun
 the_dynconlst_get2(): d2conlst
@@ -199,7 +205,7 @@ the_dynconlst_initset2((*void*)): void
 local
 
 val
-the_d2conlst = ref<Option(d2conlst)>(None)
+the_d2conlst = the_garena_alloc (i2sz(8))
 
 in (*in-of-local*)
 
@@ -207,24 +213,25 @@ implement
 the_dynconlst_get2
   ((*void*)) = let
 //
-val opt = !the_d2conlst
+val opt = $UN.ptr0_get<gopt(d2conlst)> (the_d2conlst)
 //
 in
 //
-case+ opt of
-| Some xs => xs
-| None () => xs where
+if gopt_is_some (opt) then gopt_unsome<d2conlst> (opt)
+else xs where
   {
     val xs = the_dynconlst_get()
-    val () = !the_d2conlst := Some(xs)
+    val () = $UN.ptr0_set<gopt(d2conlst)> (the_d2conlst, gopt_some<d2conlst>(xs))
   } (* end of [None] *)
 //
 end // end of [the_dynconlst_get2]
 
 implement
-the_dynconlst_set2(xs) = !the_d2conlst := Some(xs)
+the_dynconlst_set2(xs) =
+  $UN.ptr0_set<gopt(d2conlst)> (the_d2conlst, gopt_some<d2conlst>(xs))
 implement
-the_dynconlst_initset2() = !the_d2conlst := None(*void*)
+the_dynconlst_initset2() =
+  $UN.ptr0_set<gopt(d2conlst)> (the_d2conlst, gopt_none()(*void*))
 
 end // end of [local]
 //
@@ -244,17 +251,17 @@ fun loop
 ) : void = let
 in
 //
-case+ fls of
-| list_cons
-    (fl, fls) => let
-    val-Some (fent) =
-      funlab_get_funent (fl)
+if glist_is_cons (fls) then let
+    val fl = glist_head<funlab> (fls)
+    val fls = glist_tail<funlab> (fls)
+    val fent =
+      gopt_unsome<funent> (funlab_get_funent (fl))
     // end of [val]
     val () = emit_funent_ptype (out, fent)
   in
     loop (out, fls, i+1)
   end // end of [list_cons]
-| list_nil () => ()
+else ()
 //
 end // end of [loop]
 //
@@ -279,9 +286,9 @@ fun loop
 ) : void = let
 in
 //
-case+ fls of
-| list_nil() => ()
-| list_cons(fl, fls) => let
+if glist_is_cons (fls) then let
+    val fl = glist_head<funlab> (fls)
+    val fls = glist_tail<funlab> (fls)
     val tmpknd = funlab_get_tmpknd(fl)
     val istmp =
     (
@@ -293,13 +300,14 @@ case+ fls of
         val fc = funlab_get_funclo(fl) in funclo_is_clo(fc)
       end // end of [let] // end of [if]
     ) : bool // end of [val]
-    val-Some(fent) = funlab_get_funent(fl)
+    val fent = gopt_unsome<funent> (funlab_get_funent(fl))
     val () =
       if isclo then emit_funent_closure(out, fent)
     // end of [val]
   in
     loop(out, fls, i+1)
   end // end of [list_cons]
+else ()
 //
 end // end of [loop]
 //
@@ -324,14 +332,11 @@ fun loop
 ) : void = let
 in
 //
-case+ fls of
-//
-| list_nil() => ()
-//
-| list_cons
-    (fl, fls) => let
+if glist_is_cons (fls) then let
+    val fl = glist_head<funlab> (fls)
+    val fls = glist_tail<funlab> (fls)
     val tmpknd = funlab_get_tmpknd(fl)
-    val-Some(fent) = funlab_get_funent(fl)
+    val fent = gopt_unsome<funent> (funlab_get_funent(fl))
     val () =
       if tmpknd > 0
         then fprint_string(out, "#if(0)\n")
@@ -347,6 +352,7 @@ case+ fls of
   in
     loop(out, fls, i+1)
   end // end of [list_cons]
+else ()
 //
 end // end of [loop]
 //
@@ -358,25 +364,19 @@ end // end of [emit_funlablst_implmnt]
 
 local
 
-extern
-fun
-tmpvar_set_topknd
-(
-  x: tmpvar, knd: int
-) : void = "ext#patsopt_tmpvar_set_topknd"
-
 fun
 auxlst_staticize
   (xs: tmpvarlst): void = let
 in
 //
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) => let
+if glist_is_cons (xs) then let
+    val x = glist_head<tmpvar> (xs)
+    val xs = glist_tail<tmpvar> (xs)
     val () = tmpvar_set_topknd(x, 1(*static*))
   in
     auxlst_staticize(xs)
   end // end of [list_cons]
+else ()
 //
 end // end of [auxlst]
 
@@ -388,7 +388,7 @@ emit_the_tmpdeclst
 //
 val p =
   the_toplevel_getref_tmpvarlst ()
-val tmplst = $UN.ptrget<tmpvarlst> (p)
+val tmplst = $UN.ptr0_get<tmpvarlst> (p)
 val () = auxlst_staticize (tmplst)
 //
 in
@@ -430,7 +430,7 @@ the_dyncstlst_initset2((*void*)): void
 //
 local
 
-val the_d2cstlst = ref<Option(d2cstlst)> (None)
+val the_d2cstlst = the_garena_alloc (i2sz(8))
 
 in (*in-of-local*)
 
@@ -438,15 +438,14 @@ implement
 the_dyncstlst_get2
   ((*void*)) = let
 //
-val opt = !the_d2cstlst
+val opt = $UN.ptr0_get<gopt(d2cstlst)> (the_d2cstlst)
 //
 in
 //
-case+ opt of
-| Some (xs) => xs
-| None (  ) => let
+if gopt_is_some (opt) then gopt_unsome<d2cstlst> (opt)
+else let
     val xs = the_dyncstlst_get()
-    val () = !the_d2cstlst := Some(xs)
+    val () = $UN.ptr0_set<gopt(d2cstlst)> (the_d2cstlst, gopt_some<d2cstlst>(xs))
   in
     xs
   end // end of [None]
@@ -454,9 +453,11 @@ case+ opt of
 end // end of [the_dyncstlst_get2]
 
 implement
-the_dyncstlst_set2(xs) = !the_d2cstlst := Some(xs)
+the_dyncstlst_set2(xs) =
+  $UN.ptr0_set<gopt(d2cstlst)> (the_d2cstlst, gopt_some<d2cstlst>(xs))
 implement
-the_dyncstlst_initset2() = !the_d2cstlst := None(*void*)
+the_dyncstlst_initset2() =
+  $UN.ptr0_set<gopt(d2cstlst)> (the_d2cstlst, gopt_none()(*void*))
 
 end // end of [local]
 //
@@ -494,7 +495,7 @@ the_extcodelst_initset2( (*void*) ): void
 local
 
 val
-the_extlst = ref<Option(hideclist)>(None)
+the_extlst = the_garena_alloc (i2sz(8))
 
 in (*in-of-local*)
 
@@ -502,15 +503,14 @@ implement
 the_extcodelst_get2
   ((*void*)) = let
 //
-val opt = !the_extlst
+val opt = $UN.ptr0_get<gopt(hideclist)> (the_extlst)
 //
 in
 //
-case+ opt of
-| Some xs => xs
-| None () => let
+if gopt_is_some (opt) then gopt_unsome<hideclist> (opt)
+else let
     val xs = the_extcodelst_get()
-    val () = !the_extlst := Some(xs)
+    val () = $UN.ptr0_set<gopt(hideclist)> (the_extlst, gopt_some<hideclist>(xs))
   in
     xs
   end // end of [None]
@@ -518,9 +518,11 @@ case+ opt of
 end // end of [the_extcodelst_get2]
 
 implement
-the_extcodelst_set2(xs) = !the_extlst := Some(xs)
+the_extcodelst_set2(xs) =
+  $UN.ptr0_set<gopt(hideclist)> (the_extlst, gopt_some<hideclist>(xs))
 implement
-the_extcodelst_initset2() = !the_extlst := None(*void*)
+the_extcodelst_initset2() =
+  $UN.ptr0_set<gopt(hideclist)> (the_extlst, gopt_none()(*void*))
 
 end // end of [local]
 //
@@ -539,8 +541,7 @@ the_funlablst_initset2(): void
 local
 //
 val
-the_flablst =
-  ref<Option(funlablst)>(None)
+the_flablst = the_garena_alloc (i2sz(8))
 //
 in (* in of [local] *)
 
@@ -548,24 +549,25 @@ implement
 the_funlablst_get2
   ((*void*)) = let
 //
-val opt = !the_flablst
+val opt = $UN.ptr0_get<gopt(funlablst)> (the_flablst)
 //
 in
 //
-case+ opt of
-| Some xs => xs
-| None () => xs where
+if gopt_is_some (opt) then gopt_unsome<funlablst> (opt)
+else xs where
   {
     val xs = the_funlablst_get()
-    val () = !the_flablst := Some(xs)
+    val () = $UN.ptr0_set<gopt(funlablst)> (the_flablst, gopt_some<funlablst>(xs))
   } (* end of [None] *)
 //
 end // end of [the_fublablst_get2]
 
 implement
-the_funlablst_set2(fls) = !the_flablst := Some(fls)
+the_funlablst_set2(fls) =
+  $UN.ptr0_set<gopt(funlablst)> (the_flablst, gopt_some<funlablst>(fls))
 implement
-the_funlablst_initset2() = !the_flablst := None(*void*)
+the_funlablst_initset2() =
+  $UN.ptr0_set<gopt(funlablst)> (the_flablst, gopt_none()(*void*))
 
 end // end of [local]
 //
@@ -595,7 +597,7 @@ emit_the_primdeclst
 val p0 =
   the_toplevel_getref_primdeclst()
 //
-val pmdlst = $UN.ptrget<primdeclst>(p0)
+val pmdlst = $UN.ptr0_get<primdeclst>(p0)
 //
 in
   emit_primdeclst (out, pmdlst)
@@ -613,22 +615,21 @@ aux
 in
 //
 case+
-x.primdec_node
+primdec_node_view (x.primdec_node ())
 of // case+
 //
-| PMDimpdec(imp) => let
+| ~PMDimpdec(imp) => let
     val opt =
       hiimpdec_get_instrlstopt(imp)
     // end of [val]
   in
-    case+ opt of
-    | None _ => ()
-    | Some _ => let
+    if gopt_is_none (opt) then ()
+    else let
 //
         val d2c =
-          imp.hiimpdec_cst
-        val-Some(hse) =
-          d2cst_get2_hisexp (d2c)
+          imp.hiimpdec_cst ()
+        val hse =
+          gopt_unsome<hisexp> (d2cst_get2_hisexp (d2c))
 //
         val () = emit_text(out, "ATSdyncst_valimp(")
         val () = emit_d2cst (out, d2c)
@@ -641,18 +642,18 @@ of // case+
       end // end of [Some]
   end // end of [PMDimpdec]
 //
-| PMDlocal
+| ~PMDlocal
     (xs_head, xs_body) =>
   {
     val ((*void*)) = auxlst (out, xs_head)
     val ((*void*)) = auxlst (out, xs_body)
   } (* end of [PMDlocal] *)
 //
-| PMDinclude
+| ~PMDinclude
     (knd, xs_incl) => if knd > 0 then auxlst(out, xs_incl)
   // end of [PMDinclude]
 //
-| _ (*rest-of-PMD*) => ()
+| v (*rest-of-PMD*) => primdec_node_view_free (v)
 //
 end // end of [aux]
 
@@ -663,11 +664,12 @@ auxlst
 ) : void = let
 in
 //
-case+ xs of
-| list_nil () => ()
-| list_cons(x, xs) => let
+if glist_is_cons (xs) then let
+    val x = glist_head<primdec> (xs)
+    val xs = glist_tail<primdec> (xs)
     val () = aux (out, x) in auxlst (out, xs)
   end // end of [list_cons]
+else ()
 //
 end // end of [auxlst]
 
@@ -680,7 +682,7 @@ emit_the_primdeclst_valimp
 val p =
   the_toplevel_getref_primdeclst ()
 // end of [val]
-val pmdlst = $UN.ptrget<primdeclst> (p)
+val pmdlst = $UN.ptr0_get<primdeclst> (p)
 //
 val () = emit_text (out, "/*\n")
 val () = emit_text (out, "dynvalist-implementation(beg)\n")
@@ -721,8 +723,7 @@ the_mainats_d2copt_get(): d2cstopt
 local
 //
 val
-the_mainats_d2copt =
-  ref<d2cstopt>(None(*void*))
+the_mainats_d2copt = the_garena_alloc (i2sz(8))
 //
 in (* in of [local] *)
 
@@ -730,56 +731,42 @@ implement
 the_mainats_initize
   ((*void*)) = let
 //
-(*
-val () =
-println!
-  ("the_mainats_initize")
-*)
-//
 fun
 loop(fls: funlablst): void = let
 //
 in
 //
-case+ fls of
-//
-| list_nil() => ()
-//
-| list_cons
-    (fl, fls) => let
-(*
-    val () =
-    println!
-    (
-    "the_mainats_initize: loop: fl = ", fl
-    ) (* println! *)
-*)
+if glist_is_cons (fls) then let
+    val fl = glist_head<funlab> (fls)
+    val fls = glist_tail<funlab> (fls)
     val opt =
       funlab_get_d2copt(fl)
     // end of [val]
     val () = (
-      case+ opt of
-      | None() => ()
-      | Some(d2c) =>
+      if gopt_is_some (opt) then let
+        val d2c = gopt_unsome<d2cst> (opt)
+      in
         if $D2E.d2cst_is_mainats(d2c)
-          then !the_mainats_d2copt := opt
+          then $UN.ptr0_set<d2cstopt> (the_mainats_d2copt, opt)
         // end of [if]
+      end else ()
     ) : void // end of [val]
   in
     loop(fls)        
   end // end of [list_cons]
+else ()
 //
 end // end of [loop]
 //
 val () =
-  !the_mainats_d2copt := None
+  $UN.ptr0_set<d2cstopt> (the_mainats_d2copt, gopt_none())
 //
 in
   loop(the_funlablst_get2((*void*)))
 end // end of [the_mainats_initize]
 
 implement
-the_mainats_d2copt_get() = !the_mainats_d2copt
+the_mainats_d2copt_get() = $UN.ptr0_get<d2cstopt> (the_mainats_d2copt)
 
 end // end of [local]
 
@@ -804,9 +791,8 @@ then let
   val opt = the_mainats_d2copt_get()
 in
 //
-case+ opt of
-| Some _ => (~1)
-| None () => $GLOB.the_DYNLOADFLAG_get()
+if gopt_is_some (opt) then (~1)
+else $GLOB.the_DYNLOADFLAG_get()
 //
 end // end of [then]
 else (~1) // HX: mainatsflag overrules dynloadflag
@@ -840,7 +826,10 @@ in
 end // end of [emit_main_arglst_err]
 
 (* ****** ****** *)
-
+//
+// HX-2026-10: this [emit_dynload] (out, infil) shadows the one of
+// pats_ccomp.sats (out, hid) in this file only, as in ATS1
+//
 extern
 fun
 emit_dynload
@@ -871,17 +860,25 @@ local
 
 (* ****** ****** *)
 //
-staload _ = "libc/SATS/fcntl.sats"
-staload _ = "libc/SATS/stdio.sats"
-staload _ = "libc/SATS/stdlib.sats"
-staload _ = "libc/SATS/unistd.sats"
-//
-(* ****** ****** *)
-//
 staload "./pats_utils.sats"
 staload _(*anon*) = "./pats_utils.dats"
 //
 (* ****** ****** *)
+
+fn
+the_tmpdeclst_emit
+  (out: FILEref, _: int): void = emit_the_tmpdeclst(out)
+// end of [the_tmpdeclst_emit]
+
+fn
+the_primdeclst_emit
+  (out: FILEref, _: int): void = emit_the_primdeclst(out)
+// end of [the_primdeclst_emit]
+
+fn
+the_funlablst_emit
+  (out: FILEref, _: int): void = emit_the_funlablst(out)
+// end of [the_funlablst_emit]
 
 fun
 the_tmpdeclst_stringize
@@ -889,7 +886,7 @@ the_tmpdeclst_stringize
 ) = tostring_fprint<int>
 (
   "postiats_tmpdeclst_"
-, lam (out, _) => emit_the_tmpdeclst(out), 0
+, the_tmpdeclst_emit, 0
 ) // end of [the_tmpdeclst_stringize]
 
 fun
@@ -898,7 +895,7 @@ the_primdeclst_stringize
 ) = tostring_fprint<int>
 (
   "postiats_primdeclst_"
-, lam (out, _) => emit_the_primdeclst(out), 0
+, the_primdeclst_emit, 0
 ) // end of [the_funlablst_stringize]
 
 fun
@@ -906,7 +903,7 @@ the_funlablst_stringize
 (
 ) = tostring_fprint<int>
 (
-  "postiats_funlablst_", lam (out, _) => emit_the_funlablst(out), 0
+  "postiats_funlablst_", the_funlablst_emit, 0
 ) // end of [the_funlablst_stringize]
 
 fun
@@ -919,13 +916,14 @@ fun loop
 ) : void = let
 in
 //
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) => let
+if glist_is_cons (xs) then let
+    val x = glist_head<hidecl> (xs)
+    val xs = glist_tail<hidecl> (xs)
     val () =
       emit_staload(out, x) in loop(out, xs)
     // end of [val]
   end // end of [list_cons]
+else ()
 //
 end // end of [loop]
 //
@@ -953,13 +951,10 @@ fun loop
 ) : void = let
 in
 //
-case+ xs of
-//
-| list_nil () => ()
-//
-| list_cons
-    (x, xs) => let
-    val-HIDdynload (fil) = x.hidecl_node
+if glist_is_cons (xs) then let
+    val x = glist_head<hidecl> (xs)
+    val xs = glist_tail<hidecl> (xs)
+    val-~HIDdynload (fil) = hidecl_node_view (x.hidecl_node ())
     val () = (
       emit_text
       (out, "ATSdynloadflag_init(");
@@ -977,6 +972,7 @@ case+ xs of
   in
     loop (out, xs)
   end (* end of [list_cons] *)
+else ()
 //
 end // end of [loop]
 //
@@ -1042,14 +1038,6 @@ aux_dynload_def
 //
 val
 flag = the_dynloadflag_get()
-//
-(*
-val () =
-println!
-(
-"aux_dynload_def: flag = ", flag
-) (* println! *)
-*)
 //
 val () =
 if
@@ -1185,8 +1173,7 @@ val ns =
   $D2E.d2cst_get_artylst(d2cmain)
 //
 in
-  case+ ns of
-  | list_nil() => 0 | list_cons(n, _) => n
+  if glist_is_cons (ns) then glist_head<int> (ns) else 0
 end : int // end of [val]
 //
 val () = emit_text (out, "ATS")
@@ -1214,9 +1201,8 @@ val opt = the_mainats_d2copt_get()
 //
 in
 //
-case+ opt of
-| None() => ()
-| Some(d2c) => aux_main(out, infil, d2c)
+if gopt_is_some (opt)
+  then aux_main(out, infil, gopt_unsome<d2cst> (opt)) else ()
 //
 end // end of [aux_main_ifopt]
 
@@ -1237,27 +1223,30 @@ loop
 ) : hideclist = let
 in
 //
-case+ xs of
-| list_nil() => list_nil()
-| list_cons(x, xs1) => let
-    val-HIDextcode(knd, pos, _) = x.hidecl_node
+if glist_is_cons (xs) then let
+    val x = glist_head<hidecl> (xs)
+    val xs1 = glist_tail<hidecl> (xs)
+    val-~HIDextcode(knd, pos, _) = hidecl_node_view (x.hidecl_node ())
   in
     if test(pos) then let
       val () = emit_extcode(out, x) in loop(out, test, xs1)
     end else xs // end of [if]
   end // end of [if]
+else glist_nil()
 //
 end // end of [loop]
 //
-val ((*set*)) =
-the_extcodelst_set2(xs2) where
-{
-  val xs2 = loop(out, test, the_extcodelst_get2())
-}
+val xs2 = loop(out, test, the_extcodelst_get2())
+val ((*set*)) = the_extcodelst_set2(xs2)
 //
 in
   // nothing
 end // end of [aux_extcodelst_if]
+
+fn pos_eq_DYNBEG (pos: int): bool = (pos = DYNBEG)
+fn pos_lt_DYNMID (pos: int): bool = (pos < DYNMID)
+fn pos_lte_DYNMID (pos: int): bool = (pos <= DYNMID)
+fn pos_lte_DYNEND (pos: int): bool = (pos <= DYNEND)
 
 fun
 aux_exndeclst
@@ -1270,12 +1259,12 @@ loop
 ) : void = let
 in
 //
-case+ xs of
-| list_cons
-    (x, xs) => let
+if glist_is_cons (xs) then let
+    val x = glist_head<hidecl> (xs)
+    val xs = glist_tail<hidecl> (xs)
     val () = emit_exndec(out, x) in loop(out, xs)
   end // end of [list_cons]
-| list_nil () => ()
+else ()
 //
 end // end of [loop]
 //
@@ -1296,14 +1285,8 @@ val () =
 emit_text
 (
   out
-, "\
-ATSextern()\n\
-atsvoid_t0ype\n\
-the_atsexncon_initize\n\
-(\n\
-  atstype_exnconptr d2c, atstype_string exnmsg\n\
-) ;\n\
-") // end of [val]
+, "ATSextern()\natsvoid_t0ype\nthe_atsexncon_initize\n(\n  atstype_exnconptr d2c, atstype_string exnmsg\n) ;\n"
+) // end of [val]
 val () =
 emit_text (out, "#endif // end of [_ATS_CCOMP_EXCEPTION_NONE_]\n")
 //
@@ -1335,17 +1318,14 @@ loop
 ) : void = let
 in
 //
-case+ xs of
-| list_nil
-    () => ((*void*))
-  // list_nil
-| list_cons
-  (
-    x, xs
-  ) => loop(out, xs) where
-  {
+if glist_is_cons (xs) then let
+    val x = glist_head<hidecl> (xs)
+    val xs = glist_tail<hidecl> (xs)
     val () = emit_saspdec(out, x)
-  } (* end of [list_cons] *)
+  in
+    loop(out, xs)
+  end (* end of [list_cons] *)
+else ((*void*))
 //
 end // end of [loop]
 //
@@ -1391,12 +1371,12 @@ fun loop
 ) : void = let
 in
 //
-case+ xs of
-| list_cons
-    (x, xs) => let
+if glist_is_cons (xs) then let
+    val x = glist_head<hidecl> (xs)
+    val xs = glist_tail<hidecl> (xs)
     val () = emit_extype (out, x) in loop (out, xs)
   end // end of [list_cons]
-| list_nil ((*void*)) => ()
+else ((*void*))
 //
 end // end of [loop]
 //
@@ -1423,14 +1403,6 @@ ccomp_main
   out, flag, infil, hids
 ) = let
 //
-(*
-val () =
-  print ("ccomp_main: infil = ")
-val () =
-  $FIL.print_filename_full (infil)
-val () = print_newline ((*void*))
-*)
-//
 val () =
 {
 //
@@ -1449,23 +1421,17 @@ val () = emit_ats_ccomp_prelude(out)
 val () = let
   val pmds = hideclist_ccomp0(hids)
   val p_pmds = the_toplevel_getref_primdeclst()
-  val () = $UN.ptrset<primdeclst>(p_pmds, pmds)
+  val () = $UN.ptr0_set<primdeclst>(p_pmds, pmds)
   val tmps =
     primdeclst_get_tmpvarset(pmds)
   val tmps =
     tmpvarset_vt_listize_free(tmps)
-  val tmps = list_of_list_vt(tmps)
+  val tmps = glist_make_list_vt<tmpvar>(tmps)
   val p_tmps = the_toplevel_getref_tmpvarlst()
-  val () = $UN.ptrset<tmpvarlst>(p_tmps, tmps)
+  val () = $UN.ptr0_set<tmpvarlst>(p_tmps, tmps)
 in
   // nothing
 end // end of [val]
-//
-#if(0)
-val () = emit_the_tmpdeclst(out)
-val () = emit_the_primdeclst(out)
-val () = emit_the_funlablst(out)
-#endif // end of [#if(0)]
 //
 val
 the_tmpdeclst_rep = the_tmpdeclst_stringize()
@@ -1478,7 +1444,7 @@ val () = aux_staload(out)
 //
 val () =
 aux_extcodelst_if
-  (out, lam (pos) => pos = DYNBEG)
+  (out, pos_eq_DYNBEG)
 //
 val () = emit_the_typedeflst(out)
 //
@@ -1499,7 +1465,7 @@ val () =
 //
 val () =
 aux_extcodelst_if
-  (out, lam (pos) => pos < DYNMID)
+  (out, pos_lt_DYNMID)
 //
 val () =
   fprint_strptr(out, the_tmpdeclst_rep)
@@ -1507,7 +1473,7 @@ val () = strptr_free(the_tmpdeclst_rep)
 //
 val () =
 aux_extcodelst_if
-  (out, lam (pos) => pos <= DYNMID)
+  (out, pos_lte_DYNMID)
 //
 val () =
   fprint_strptr(out, the_funlablst_rep)
@@ -1529,18 +1495,12 @@ val () =
 aux_main_ifopt(out, infil)
 //
 val () =
-aux_extcodelst_if(out, lam (pos) => pos <= DYNEND)
+aux_extcodelst_if(out, pos_lte_DYNEND)
 //
 val () =
 emit_text(out, "\n/* ****** ****** */\n")
 val () =
 emit_text(out, "\n/* end-of-compilation-unit */\n")
-//
-(*
-val () =
-println!
-  ("ccomp_main: leave")
-*)
 //
 in
   // nothing

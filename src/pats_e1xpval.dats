@@ -25,6 +25,7 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -33,13 +34,20 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_e1xpval.dats, see PORTING.md)
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 //
@@ -51,12 +59,12 @@ macdef isdebug () = (debug_flag_get () > 0)
 
 staload UT = "./pats_utils.sats"
 staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
 staload LOC = "./pats_location.sats"
 macdef prerr_location = $LOC.prerr_location
-
 staload SYM = "./pats_symbol.sats"
 //
 macdef NEG = $SYM.symbol_NEG
@@ -85,13 +93,17 @@ macdef DEFINED = $SYM.symbol_DEFINED
 macdef UNDEFINED = $SYM.symbol_UNDEFINED
 //
 overload = with $SYM.eq_symbol_symbol
-//
+
 (* ****** ****** *)
 
 staload "./pats_syntax.sats"
 staload "./pats_staexp1.sats"
 staload "./pats_trans1_env.sats"
 staload "./pats_e1xpval.sats"
+
+(* ****** ****** *)
+
+#include "./pats_e1xpval_gen_dats.hats"
 
 (* ****** ****** *)
 
@@ -107,23 +119,35 @@ prerr_error1_loc
 ) // end of [prerr_error1_loc]
 
 (* ****** ****** *)
+//
+// HX: a [v1al] is read through its tag (no linear view is made)
+//
+fn v1al_int_get (v: v1al): int =
+  case+ v1al_view(v) of ~V1ALint(i) => i | v => (v1al_view_free(v); 0)
+fn v1al_float_get (v: v1al): double =
+  case+ v1al_view(v) of ~V1ALfloat(f) => f | v => (v1al_view_free(v); 0.0)
+fn v1al_string_get (v: v1al): string =
+  case+ v1al_view(v) of ~V1ALstring(s) => s | v => (v1al_view_free(v); "")
+fn v1al_char_get (v: v1al): char =
+  case+ v1al_view(v) of ~V1ALchar(c) => c | v => (v1al_view_free(v); '\000')
+
+fn mkint (i: int): v1al = v1al_V1ALint (i)
+fn mkerr (): v1al = v1al_V1ALerr ()
+
+(* ****** ****** *)
 
 implement
-v1al_is_err (v) =
-(
-  case+ v of | V1ALerr () => true | _ => false
-) (* end of [v1al_is_err] *)
+v1al_is_err (v) = v1al_is_V1ALerr (v)
 
 implement
 v1al_is_true (v) = let
 in
 //
-case+ v of
-| V1ALint i => i <> 0 // most common
-| V1ALchar c => c <> '\000'
-| V1ALstring s => string_isnot_empty s // 2nd most common
-| V1ALfloat f => f <> 0.0
-| V1ALerr ((*void*)) => false
+if v1al_is_V1ALint (v) then (v1al_int_get (v) <> 0) // most common
+else if v1al_is_V1ALchar (v) then (v1al_char_get (v) <> '\000')
+else if v1al_is_V1ALstring (v) then string_isnot_empty (g1ofg0 (v1al_string_get (v))) // 2nd most common
+else if v1al_is_V1ALfloat (v) then (v1al_float_get (v) <> 0.0)
+else false // V1ALerr
 //
 end // end of [v1al_is_true]
 
@@ -145,12 +169,10 @@ e1xp_valize
   val res = e1xplev_valize (0(*lev*), e)
   val ((*void*)) =
   (
-    case+ res of
-    | V1ALerr () => {
-        val () = fprint_the_valerrlst (stderr_ref)
-        val () = $ERR.abort ()
-      } (* end of [V1ALerr] *)
-    | _ (*non-err*) => ((*void*))
+    if v1al_is_V1ALerr (res) then {
+      val () = fprint_the_valerrlst (stderr_ref)
+      val () = $ERR.abort<void> ()
+    } (* end of [V1ALerr] *)
   ) : void // end of [val]
 } (* end of [e1xp_valize] *)
 
@@ -166,125 +188,124 @@ e1xp_valize_if (knd, e) =
 
 implement
 e1xp_valize_defined
-  (e) = case+ e.e1xp_node of
-  | E1XPide id => V1ALint (i) where {
+  (e) = let
+  val node = e.e1xp_node ()
+in
+  case+ e1xp_node_view (node) of
+  | ~E1XPide id => mkint (i) where {
       val i = (case+ the_e1xpenv_find id of
         | ~Some_vt e => (
-            case+ e.e1xp_node of E1XPundef () => 0 | _ => 1
+            if e1xp_node_is_E1XPundef (e.e1xp_node ()) then 0 else 1
           ) // end of [Some_vt]
         | ~None_vt () => 0
       ) : int // end of [val]
     } // end of [E1XPide]
-  | _ => V1ALerr () where {
-      val () = the_valerrlst_add (VE_valize_defined (e))
+  | v => mkerr () where {
+      val () = e1xp_node_view_free (v)
+      val () = the_valerrlst_add (valerr_VE_valize_defined (e))
     } // end of [_]
-// end of [e1xp_valize_defined]
+end // end of [e1xp_valize_defined]
 
 implement
 e1xp_valize_undefined
-  (e) = case+ e.e1xp_node of
-  | E1XPide id => V1ALint (i) where {
+  (e) = let
+  val node = e.e1xp_node ()
+in
+  case+ e1xp_node_view (node) of
+  | ~E1XPide id => mkint (i) where {
       val i = (case+ the_e1xpenv_find id of
         | ~Some_vt e => (
-            case+ e.e1xp_node of E1XPundef () => 1 | _ => 0
+            if e1xp_node_is_E1XPundef (e.e1xp_node ()) then 1 else 0
           ) // end of [Some_vt]
         | ~None_vt () => 1
       ) : int // end of [val]
     } // end of [E1XPide]
-  | _ => V1ALerr () where {
-      val () = the_valerrlst_add (VE_valize_undefined (e))
+  | v => mkerr () where {
+      val () = e1xp_node_view_free (v)
+      val () = the_valerrlst_add (valerr_VE_valize_undefined (e))
     } // end of [_]
-// end of [e1xp_valize_undefined]
+end // end of [e1xp_valize_undefined]
 
 (* ****** ****** *)
-
-absviewtype
-lenv_vtype (a:type) // local environment
-viewtypedef lenv (a:type) = lenv_vtype (a)
-extern fun lenvmake_nil {a:type} (): lenv (a)
-extern fun lenvfree {a:type} (env: lenv (a)): void
-extern fun
-lenvfind {a:type} (env: !lenv (a), x: symbol): Option_vt (a)
-
+//
+// HX-2026-10: the local environments [lenv] (an abstract linear list in
+// ATS1) are plain linear lists of pairs; the comparison closure of
+// [list_assoc_fun] is the function [eq_symbol_symbol]
+//
+vtypedef lenv (a:type) = List0_vt (@(symbol, a))
+//
+fn{a:type}
+lenvmake_nil (): lenv (a) = list_vt_nil ()
+fn{a:type}
+lenvfree (env: lenv (a)): void = list_vt_free<@(symbol, a)> (env)
+//
+fun{a:type}
+lenvfind (env: !lenv (a), x: symbol): Option_vt (a) =
+  case+ env of
+  | @list_vt_cons (kv, env1) => let
+      val k = kv.0 and v = kv.1
+    in
+      if $SYM.eq_symbol_symbol (k, x)
+        then (fold@ env; Some_vt (v))
+        else let
+          val ans = lenvfind<a> (env1, x) in fold@ env; ans
+        end // end of [else]
+    end // end of [list_vt_cons]
+  | list_vt_nil () => None_vt ()
+// end of [lenvfind]
+//
 (* ****** ****** *)
 
-viewtypedef vlenv = lenv (v1al)
-extern fun
-lenvmake_v1alist (xs: symbolist, vs: v1alist): vlenv
-viewtypedef elenv = lenv (e1xp)
-extern fun
-lenvmake_e1xplst (lorg: location, xs: symbolist, es: e1xplst): elenv
+vtypedef vlenv = lenv (v1al)
 
-(* ****** ****** *)
-
-local
-
-assume lenv_vtype (a:type) = List_vt @(symbol, a)
-
-in // in of [local]
-
-implement
-lenvmake_nil () = list_vt_nil ()
-
-implement lenvfree (env) = list_vt_free (env)
-
-implement
-lenvfind {a} (env, x) = let
-  typedef keyitm = (symbol, a)
-  val env = $UN.castvwtp1 {List(keyitm)} (env)
-in
-  list_assoc_fun<symbol,a> (env, lam (x1, x2) =<fun> x1 = x2, x)
-end // end of [envfind]
-
-implement
+fun
 lenvmake_v1alist
-  (xs, vs) = let
-  fun aux (
-    xs: symbolist, vs: v1alist
-  ) : lenv (v1al) =
-    case+ xs of
-    | list_cons (x, xs) => (
-      case+ vs of
-      | list_cons (v, vs) =>
-          list_vt_cons ((x, v), aux (xs, vs))
-      | list_nil () => let
-          val v = V1ALint(0) in list_vt_cons ((x, v), aux (xs, vs))
-        end // end of [list_nil]
-      ) (* end of [list_cons] *)
-    | list_nil () => list_vt_nil ()
-in
-  aux (xs, vs)
-end // end of [envmake_bindlst]
+  (xs: symbolist, vs: !List0_vt (v1al)): vlenv =
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs1) => (
+    case+ vs of
+    | @list_vt_cons (v, vs1) => let
+        val v0 = v
+        val res = lenvmake_v1alist (xs1, vs1)
+        prval () = fold@ (vs)
+      in
+        list_vt_cons ((x, v0), res)
+      end // end of [list_vt_cons]
+    | list_vt_nil () => let
+        val v = mkint (0)
+      in
+        list_vt_cons ((x, v), lenvmake_v1alist (xs1, vs))
+      end // end of [list_nil]
+    ) (* end of [GLcons] *)
+  | ~GLnil () => list_vt_nil ()
+// end of [lenvmake_v1alist]
 
-implement
+(* ****** ****** *)
+
+vtypedef elenv = lenv (e1xp)
+
+fun
 lenvmake_e1xplst
-  (lorg, xs, es) = let
-  fun aux (
-    lorg: location, xs: symbolist, es: e1xplst
-  ) : elenv =
-    case+ xs of
-    | list_cons (x, xs) => (
-      case+ es of
-      | list_cons (e, es) =>
-          list_vt_cons ((x, e), aux (lorg, xs, es))
-      | list_nil () => let
-          val e = e1xp_none (lorg)
-        in
-          list_vt_cons ((x, e), aux (lorg, xs, es))
-        end // end of [list_nil]
-      ) (* end of [list_cons] *)
-    | list_nil () => list_vt_nil ()
-in
-  aux (lorg, xs, es)
-end // end of [lenvmake_e1xplst]
-
-end // end of [local]
+  (lorg: location, xs: symbolist, es: e1xplst): elenv =
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs1) => (
+    case+ glist_view (es) of
+    | ~GLcons (e, es1) =>
+        list_vt_cons ((x, e), lenvmake_e1xplst (lorg, xs1, es1))
+    | ~GLnil () => let
+        val e = e1xp_none (lorg)
+      in
+        list_vt_cons ((x, e), lenvmake_e1xplst (lorg, xs1, es))
+      end // end of [list_nil]
+    ) (* end of [GLcons] *)
+  | ~GLnil () => list_vt_nil ()
+// end of [lenvmake_e1xplst]
 
 (* ****** ****** *)
 
 fn e1xp_valize_int
   (rep: string): int = let
-  val x = $UT.llint_make_string (rep) in int_of_llint (x)
+  val x = $UT.llint_make_string (rep) in $UN.cast{int} (x)
 end // end of [e1xp_valize_int]
 
 (* ****** ****** *)
@@ -292,7 +313,7 @@ end // end of [e1xp_valize_int]
 fn e1xplevenv_valize_ide (
   lev: int, env: !vlenv, e0: e1xp, x: symbol
 ) : v1al = let
-  val ans = lenvfind (env, x)
+  val ans = lenvfind<v1al> (env, x)
 in
 //
 case+ ans of
@@ -300,8 +321,8 @@ case+ ans of
 | ~None_vt _ => (
   case+ the_e1xpenv_find (x) of
   | ~Some_vt e => e1xplev_valize (lev+1, e)
-  | ~None_vt _ => V1ALerr () where {
-      val () = the_valerrlst_add (VE_E1XPide_unbound (e0))
+  | ~None_vt _ => mkerr () where {
+      val () = the_valerrlst_add (valerr_VE_E1XPide_unbound (e0))
     } // end of [None_vt]
   ) (* end of [None_vt] *)
 end // end of [e1xplevenv_valize_ide]
@@ -319,15 +340,15 @@ fun
 e1xplstlevenv_valize
 (
   lev: int, env: !vlenv, es: e1xplst
-) : List_vt (v1al) =
-  case+ es of
-  | list_cons (e, es) => let
+) : List0_vt (v1al) =
+  case+ glist_view (es) of
+  | ~GLcons (e, es) => let
       val v = e1xplevenv_valize (lev, env, e)
       val vs = e1xplstlevenv_valize (lev, env, es)
     in
       list_vt_cons (v, vs)
     end
-  | list_nil () => list_vt_nil ()
+  | ~GLnil () => list_vt_nil ()
 // end of [e1xplstlevenv_valist]
 
 (* ****** ****** *)
@@ -336,15 +357,15 @@ fun
 e1xplevenv_valize_list
 (
   lev: int, env: !vlenv, e0: e1xp, es: e1xplst
-) : v1al = case+ es of
-  | list_cons (e, es) => (
-    case+ es of
-    | list_nil () => e1xplevenv_valize (lev, env, e)
-    | list_cons _ => V1ALerr () where {
-        val () = the_valerrlst_add (VE_E1XPlist (e0))
+) : v1al = case+ glist_view (es) of
+  | ~GLcons (e, es) => (
+    if glist_is_nil (es)
+      then e1xplevenv_valize (lev, env, e)
+      else mkerr () where {
+        val () = the_valerrlst_add (valerr_VE_E1XPlist (e0))
       } // end of [list_cons]
     ) (* end of [list_cons] *)
-  | list_nil () => V1ALint (0)
+  | ~GLnil () => mkint (0)
 // end of [e1xplevenv_valist_list]
 
 (* ****** ****** *)
@@ -358,6 +379,21 @@ e1xplevenv_valize_delta
 
 (* ****** ****** *)
 
+fn
+v1alist_exists_err (vs: !List0_vt (v1al)): bool = let
+  fun loop (vs: !List0_vt (v1al)): bool =
+    case+ vs of
+    | @list_vt_cons (v, vs1) => let
+        val iserr = v1al_is_err (v)
+      in
+        if iserr then (fold@ (vs); true)
+        else let val res = loop (vs1) in fold@ (vs); res end
+      end
+    | list_vt_nil () => false
+in
+  loop (vs)
+end // end of [v1alist_exists_err]
+
 fun
 e1xplevenv_valize_appid
 (
@@ -367,34 +403,34 @@ e1xplevenv_valize_appid
 in
 //
 case+ opt of
-| ~Some_vt e => (case e.e1xp_node of
+| ~Some_vt e => (
+  case+ e1xp_node_view (e.e1xp_node ()) of
 //
-  | E1XPide (id) => 
+  | ~E1XPide (id) => 
       e1xplevenv_valize_appid (lev+1, env, e, id, es)
     // end of [E1XPide]
 //
-  | E1XPfun (xs, body) => res where {
+  | ~E1XPfun (xs, body) => res where {
       val vs = e1xplstlevenv_valize (lev, env, es)
 //
-      val env1 =
-        lenvmake_v1alist (xs, $UN.castvwtp1 {v1alist} (vs))
-      // end of [env1]
+      val env1 = lenvmake_v1alist (xs, vs)
       val iserr = // HX: it is only need if err = 0 holds
-        list_exists_fun ($UN.castvwtp1 {v1alist} (vs), v1al_is_err)
+        v1alist_exists_err (vs)
       // end of [val]
       val () = list_vt_free (vs)
 //
       val res = (
         if iserr then
-          V1ALerr () else e1xplevenv_valize (lev+1, env1, body)
+          mkerr () else e1xplevenv_valize (lev+1, env1, body)
         // end of [if]
       ) : v1al // end of [if]
 //
-      val () = lenvfree (env1)
+      val () = lenvfree<v1al> (env1)
 //
     } // end of [E1XPfun]
-  | _ => V1ALerr () where {
-      val () = the_valerrlst_add (VE_E1XPappid_fun (e0, id))
+  | v => mkerr () where {
+      val () = e1xp_node_view_free (v)
+      val () = the_valerrlst_add (valerr_VE_E1XPappid_fun (e0, id))
     } // end of [_]
   ) (* end of [Some_vt] *)
 | ~None_vt () => e1xplevenv_valize_delta (lev, env, e0, id, es)
@@ -406,9 +442,9 @@ end // end of [e1xplevenv_valize_appid]
 implement
 e1xplev_valize
   (lev, e0) = res where {
-  val env = lenvmake_nil ()
+  val env = lenvmake_nil<v1al> ()
   val res = e1xplevenv_valize (lev, env, e0)
-  val () = lenvfree (env)
+  val () = lenvfree<v1al> (env)
 } // end of [e1xplev_valize]
 
 (* ****** ****** *)
@@ -419,26 +455,19 @@ e1xplevenv_valize
 //
 #define MAXLEV MAX_VALIZE_LEVEL
 //
-(*
-  val () = begin
-    print "e1xplevenv_valize: e0 = "; print e0; print_newline ()
-  end // end of [val]
-*)
-//
 in
 //
 if lev <= MAXLEV then let
   val res = e1xplevenv_valize_main (lev, env, e0)
-  val () = (case+ res of
-    | V1ALerr () => the_valerrlst_add (VE_valize (e0))
-    | _ => ()
+  val () = (
+    if v1al_is_V1ALerr (res) then the_valerrlst_add (valerr_VE_valize (e0))
   ) : void // end of [val]
 in
   res
 end else let
-  val () = the_valerrlst_add (VE_maxlevel (lev, e0))
+  val () = the_valerrlst_add (valerr_VE_maxlevel (lev, e0))
 in
-  V1ALerr ()
+  mkerr ()
 end // end of [if]
 //
 end // end of [e1xplevenv_valize]
@@ -446,55 +475,55 @@ end // end of [e1xplevenv_valize]
 implement
 e1xplevenv_valize_main
   (lev, env, e0) = let
-  val loc0 = e0.e1xp_loc
+  val loc0 = e0.e1xp_loc ()
 in
 //
-case+ e0.e1xp_node of
-| E1XPide (sym) =>
+case+ e1xp_node_view (e0.e1xp_node ()) of
+| ~E1XPide (sym) =>
     e1xplevenv_valize_ide (lev, env, e0, sym)
 //
-| E1XPint (i) => V1ALint (i)
-| E1XPintrep (rep) => let
-    val v = e1xp_valize_int (rep) in V1ALint (v)
+| ~E1XPint (i) => mkint (i)
+| ~E1XPintrep (rep) => let
+    val v = e1xp_valize_int (rep) in mkint (v)
   end // end of [E1XPi0nt]
-| E1XPchar (x) => V1ALchar (x)
-| E1XPstring (x) => V1ALstring (x)
-| E1XPfloat (x) => V1ALfloat (double_of_string x)
+| ~E1XPchar (x) => v1al_V1ALchar (x)
+| ~E1XPstring (x) => v1al_V1ALstring (x)
+| ~E1XPfloat (x) => v1al_V1ALfloat (g0string2float_double (x))
 //
-| E1XPv1al (v) => v
+| ~E1XPv1al (v) => v
 //
-| E1XPnone () => V1ALint (0)
+| ~E1XPnone () => mkint (0)
 //
-| E1XPundef () => let
+| ~E1XPundef () => let
     val () =
-      the_valerrlst_add (VE_E1XPundef (e0)) in V1ALerr()
+      the_valerrlst_add (valerr_VE_E1XPundef (e0)) in mkerr ()
     // end of [val]
   end // end of [E1XPundef]
 //
-| E1XPapp
+| ~E1XPapp
   (
     e_fun, _(*loc_arg*), es_arg
   ) => (
     case+
-    e_fun.e1xp_node of
-    | E1XPide id => (
+    e1xp_node_view (e_fun.e1xp_node ()) of
+    | ~E1XPide id => (
         e1xplevenv_valize_appid (lev, env, e0, id, es_arg)
      ) // end of [E1XPide]
-    | _ (*non-ide*) => let
+    | v (*non-ide*) => let
+        val () = e1xp_node_view_free (v)
         val () =
-          the_valerrlst_add (VE_E1XPapp_fun(e0)) in V1ALerr()
+          the_valerrlst_add (valerr_VE_E1XPapp_fun (e0)) in mkerr ()
         // end of [val]
       end (* end of [_] *)
   ) (* end of [E1XPapp] *)
 //
-| E1XPif (_cond, _then, _else) => let
+| ~E1XPif (_cond, _then, _else) => let
     val _cond =
       e1xplevenv_valize (lev, env, _cond)
     // end of [val]
   in
-    case+ _cond of
-    | V1ALerr() => V1ALerr()
-    | _ (*non-V1ALerr*) => let
+    if v1al_is_V1ALerr (_cond) then mkerr ()
+    else let
         val _taken = (
           if v1al_is_true (_cond) then _then else _else
         ) : e1xp // end of [val]
@@ -503,23 +532,29 @@ case+ e0.e1xp_node of
       end (* end of [non-V1ALerr] *)
   end
 //
-| E1XPlist (es) =>
+| ~E1XPlist (es) =>
     e1xplevenv_valize_list (lev, env, e0, es)
   // end of [E1XPlist]
 //
-| E1XPeval (e1) => e1xplevenv_valize (lev, env, e1) // HX: right?
+| ~E1XPeval (e1) => e1xplevenv_valize (lev, env, e1) // HX: right?
 //
-| E1XPfun _ => V1ALerr () where {
-    val () = the_valerrlst_add (VE_E1XPfun (e0))
+| ~E1XPfun _ => mkerr () where {
+    val () = the_valerrlst_add (valerr_VE_E1XPfun (e0))
   }
 //
-| E1XPerr () => V1ALerr () where {
-    val () = the_valerrlst_add (VE_E1XPerr (e0))
+| ~E1XPerr () => mkerr () where {
+    val () = the_valerrlst_add (valerr_VE_E1XPerr (e0))
   }
 //
 end // end of [e1xplevenv_valize_main]
 
 (* ****** ****** *)
+//
+// HX: the binary operators evaluate both arguments first
+//
+macdef oprerr (e0, id) = mkerr () where {
+  val () = the_valerrlst_add (valerr_VE_opr_arglst (,(e0), ,(id)))
+} // end of [oprerr]
 
 fn
 e1xplevenv_valize_neg
@@ -529,12 +564,9 @@ e1xplevenv_valize_neg
 ) : v1al = let
   val v1 = e1xplevenv_valize (lev, env, e1)
 in
-  case+ (v1) of
-  | (V1ALint i1) => V1ALint (~i1)
-  | (V1ALfloat f1) => V1ALfloat(~f1)
-  | _(*non-number*) => V1ALerr () where {
-      val () = the_valerrlst_add(VE_opr_arglst(e0, id))
-    }
+  if v1al_is_V1ALint (v1) then mkint (~(v1al_int_get (v1)))
+  else if v1al_is_V1ALfloat (v1) then v1al_V1ALfloat (~(v1al_float_get (v1)))
+  else oprerr (e0, id) // non-number
 end // end of [e1xplevenv_valize_neg]
 
 (* ****** ****** *)
@@ -548,13 +580,19 @@ e1xplevenv_valize_add
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => V1ALint (i1 + i2)
-  | (V1ALfloat f1, V1ALfloat f2) => V1ALfloat (f1 + f2)
-  | (V1ALstring s1, V1ALstring s2) => V1ALstring (s1 + s2)
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then mkint (v1al_int_get (v1) + v1al_int_get (v2))
+  else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then v1al_V1ALfloat (v1al_float_get (v1) + v1al_float_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then let
+      val s12 = string0_append (v1al_string_get (v1), v1al_string_get (v2))
+      val s12_ = the_garena_strdup ($UN.strptr2string (s12))
+      val () = strptr_free (s12)
+    in
+      v1al_V1ALstring (s12_)
+    end
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_add]
 
 fn
@@ -566,12 +604,11 @@ e1xplevenv_valize_sub
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => V1ALint (i1 - i2)
-  | (V1ALfloat f1, V1ALfloat f2) => V1ALfloat (f1 - f2)
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then mkint (v1al_int_get (v1) - v1al_int_get (v2))
+  else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then v1al_V1ALfloat (v1al_float_get (v1) - v1al_float_get (v2))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_sub]
 
 fn
@@ -583,12 +620,11 @@ e1xplevenv_valize_mul
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => V1ALint (i1 * i2)
-  | (V1ALfloat f1, V1ALfloat f2) => V1ALfloat (f1 * f2)
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then mkint (v1al_int_get (v1) * v1al_int_get (v2))
+  else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then v1al_V1ALfloat (v1al_float_get (v1) * v1al_float_get (v2))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_mul]
 
 fn
@@ -600,15 +636,16 @@ e1xplevenv_valize_div
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => V1ALint (i1 / i2)
-  | (V1ALfloat f1, V1ALfloat f2) => V1ALfloat (f1 / f2)
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then mkint (g0int_div (v1al_int_get (v1), v1al_int_get (v2)))
+  else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then v1al_V1ALfloat (v1al_float_get (v1) / v1al_float_get (v2))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_div]
 
 (* ****** ****** *)
+
+fn b2v (b: bool): v1al = if b then mkint (1) else mkint (0)
 
 fn e1xplevenv_valize_lt (
   lev: int, env: !vlenv
@@ -617,16 +654,13 @@ fn e1xplevenv_valize_lt (
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALfloat f1, V1ALfloat f2) =>
-      if f1 < f2 then V1ALint 1 else V1ALint 0
-  | (V1ALint i1, V1ALint i2) =>
-      if i1 < i2 then V1ALint 1 else V1ALint 0
-  | (V1ALstring s1, V1ALstring s2) =>
-      if s1 < s2 then V1ALint 1 else V1ALint 0
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then b2v (v1al_float_get (v1) < v1al_float_get (v2))
+  else if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then b2v (v1al_int_get (v1) < v1al_int_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then b2v (lt_string_string (v1al_string_get (v1), v1al_string_get (v2)))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_lt]
 
 fn e1xplevenv_valize_lteq (
@@ -636,16 +670,13 @@ fn e1xplevenv_valize_lteq (
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALfloat f1, V1ALfloat f2) =>
-      if f1 <= f2 then V1ALint 1 else V1ALint 0
-  | (V1ALint i1, V1ALint i2) =>
-      if i1 <= i2 then V1ALint 1 else V1ALint 0
-  | (V1ALstring s1, V1ALstring s2) =>
-      if s1 <= s2 then V1ALint 1 else V1ALint 0
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then b2v (v1al_float_get (v1) <= v1al_float_get (v2))
+  else if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then b2v (v1al_int_get (v1) <= v1al_int_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then b2v (lte_string_string (v1al_string_get (v1), v1al_string_get (v2)))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_lteq]
 
 fn e1xplevenv_valize_gt (
@@ -655,16 +686,13 @@ fn e1xplevenv_valize_gt (
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALfloat f1, V1ALfloat f2) =>
-      if f1 > f2 then V1ALint 1 else V1ALint 0
-  | (V1ALint i1, V1ALint i2) =>
-      if i1 > i2 then V1ALint 1 else V1ALint 0
-  | (V1ALstring s1, V1ALstring s2) =>
-      if s1 > s2 then V1ALint 1 else V1ALint 0
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then b2v (v1al_float_get (v1) > v1al_float_get (v2))
+  else if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then b2v (v1al_int_get (v1) > v1al_int_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then b2v (gt_string_string (v1al_string_get (v1), v1al_string_get (v2)))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_gt]
 
 fn e1xplevenv_valize_gteq (
@@ -674,104 +702,89 @@ fn e1xplevenv_valize_gteq (
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALfloat f1, V1ALfloat f2) =>
-      if f1 >= f2 then V1ALint 1 else V1ALint 0
-  | (V1ALint i1, V1ALint i2) =>
-      if i1 >= i2 then V1ALint 1 else V1ALint 0
-  | (V1ALstring s1, V1ALstring s2) =>
-      if s1 >= s2 then V1ALint 1 else V1ALint 0
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
+    then b2v (v1al_float_get (v1) >= v1al_float_get (v2))
+  else if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then b2v (v1al_int_get (v1) >= v1al_int_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then b2v (gte_string_string (v1al_string_get (v1), v1al_string_get (v2)))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_gteq]
 
 (* ****** ****** *)
 
-fun e1xplevenv_valize_eq (
+fn e1xplevenv_valize_eq (
   lev: int, env: !vlenv
 , e0: e1xp, id: symbol, e1: e1xp, e2: e1xp
 ) : v1al = let
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) =>
-      if i1 = i2 then V1ALint 1 else V1ALint 0
-  | (V1ALstring s1, V1ALstring s2) =>
-      if s1 = s2 then V1ALint 1 else V1ALint 0
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then b2v (v1al_int_get (v1) = v1al_int_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then b2v (eq_string_string (v1al_string_get (v1), v1al_string_get (v2)))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_eq]
 
-fun e1xplevenv_valize_neq (
+fn e1xplevenv_valize_neq (
   lev: int, env: !vlenv
 , e0: e1xp, id: symbol, e1: e1xp, e2: e1xp
 ) : v1al = let
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) =>
-      if i1 <> i2 then V1ALint 1 else V1ALint 0
-  | (V1ALstring s1, V1ALstring s2) =>
-      if s1 <> s2 then V1ALint 1 else V1ALint 0
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
+    then b2v (v1al_int_get (v1) <> v1al_int_get (v2))
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
+    then b2v (neq_string_string (v1al_string_get (v1), v1al_string_get (v2)))
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_neq]
 
 (* ****** ****** *)
 
-fun e1xplevenv_valize_land (
+fn e1xplevenv_valize_land (
   lev: int, env: !vlenv
 , e0: e1xp, id: symbol, e1: e1xp, e2: e1xp
 ) : v1al = let
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => begin
-      if i1 = 0 then V1ALint 0
-      else if i2 = 0 then V1ALint 0
-      else V1ALint 1
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2) then begin
+      if v1al_int_get (v1) = 0 then mkint 0
+      else if v1al_int_get (v2) = 0 then mkint 0
+      else mkint 1
     end // end of [V1ALint, V1ALint]
-  | (V1ALstring s1, V1ALstring s2) => let
-      val s1 = string1_of_string s1 and s2 = string1_of_string s2
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2) then let
+      val s1 = v1al_string_get (v1) and s2 = v1al_string_get (v2)
     in
-      if string_is_empty s1 then V1ALint (0)
-      else if string_is_empty s1 then V1ALint (0)
-      else V1ALint 1
+      if string_is_empty (g1ofg0 s1) then mkint (0)
+      else if string_is_empty (g1ofg0 s1) then mkint (0) // HX: sic (see ATS1)
+      else mkint 1
     end // end of [V1ALstring, V1ALstring]
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_land]
 
-fun e1xplevenv_valize_lor (
+fn e1xplevenv_valize_lor (
   lev: int, env: !vlenv
 , e0: e1xp, id: symbol, e1: e1xp, e2: e1xp
 ) : v1al = let
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => begin
-      if i1 <> 0 then V1ALint 1
-      else if i2 <> 0 then V1ALint 1
-      else V1ALint 0
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2) then begin
+      if v1al_int_get (v1) <> 0 then mkint 1
+      else if v1al_int_get (v2) <> 0 then mkint 1
+      else mkint 0
     end // end of [V1ALint, V1ALint]
-  | (V1ALstring s1, V1ALstring s2) => let
-      val s1 = string1_of_string s1 and s2 = string1_of_string s2
+  else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2) then let
+      val s1 = v1al_string_get (v1) and s2 = v1al_string_get (v2)
     in
-      if string_isnot_empty s1 then V1ALint (1)
-      else if string_isnot_empty s2 then V1ALint (1)
-      else V1ALint 0
+      if string_isnot_empty (g1ofg0 s1) then mkint (1)
+      else if string_isnot_empty (g1ofg0 s2) then mkint (1)
+      else mkint 0
     end // end of [V1ALstring, V1ALstring]
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_lor]
 
 (* ****** ****** *)
@@ -783,25 +796,21 @@ fn e1xplevenv_valize_asl (
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => let
-      val i2 = int1_of_int i2
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2) then let
+      val i1 = v1al_int_get (v1) and i2 = v1al_int_get (v2)
       val () = if (i2 < 0) then {
-        val () = prerr_location (e0.e1xp_loc)
+        val () = prerr_location (e0.e1xp_loc ())
 //
         val () = if isdebug () then prerr ": e1xplevenv_valize_asl"
 //
         val () = prerr ": the second argument of [<<] is required to be a natural number."
         val () = prerr_newline ()
-        val () = $ERR.abort {void} ()
+        val () = $ERR.abort<void> ()
       } // end of [val]
-      val () = assert (i2 >= 0) // redundant at run-time
     in
-       V1ALint (i1 << i2)
+       mkint (g0int_asl (i1, $UN.cast{intGte(0)} (i2)))
     end // end of [(V1ALint _, V1ALint _)]
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_asl]
 
 fn e1xplevenv_valize_asr (
@@ -811,25 +820,21 @@ fn e1xplevenv_valize_asr (
   val v1 = e1xplevenv_valize (lev, env, e1)
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
-  case+ (v1, v2) of
-  | (V1ALint i1, V1ALint i2) => let
-      val i2 = int1_of_int i2
+  if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2) then let
+      val i1 = v1al_int_get (v1) and i2 = v1al_int_get (v2)
       val () = if (i2 < 0) then {
-        val () = prerr_location (e0.e1xp_loc)
+        val () = prerr_location (e0.e1xp_loc ())
 //
         val () = if isdebug () then prerr ": e1xplevenv_valize_asl"
 //
         val () = prerr ": the second argument of [>>] is required to be a natural number."
         val () = prerr_newline ()
-        val () = $ERR.abort {void} ()
+        val () = $ERR.abort<void> ()
       } // end of [val]
-      val () = assert (i2 >= 0) // redundant at run-time
     in
-       V1ALint (i1 >> i2)
+       mkint (g0int_asr (i1, $UN.cast{intGte(0)} (i2)))
     end // end of [(V1ALint _, V1ALint _)]
-  | (_, _) => V1ALerr () where {
-      val () = the_valerrlst_add (VE_opr_arglst (e0, id))
-    }
+  else oprerr (e0, id)
 end // end of [e1xplevenv_valize_asr]
 
 (* ****** ****** *)
@@ -837,107 +842,67 @@ end // end of [e1xplevenv_valize_asr]
 implement
 e1xplevenv_valize_delta
   (lev, env, e0, id, es) = let
-(*
-  val () = begin
-    print "e1xplevenv_valize_delta: id = "; $SYM.print_symbol id; print_newline ()
-  end // end of [val]
-*)
-//
-#define nil list_nil
-#define :: list_cons
-#define cons list_cons
 //
 macdef
-oprarity_err () = V1ALerr () where {
-  val () = the_valerrlst_add (VE_E1XPappid_arity (e0, id))
+oprarity_err () = mkerr () where {
+  val () = the_valerrlst_add (valerr_VE_E1XPappid_arity (e0, id))
 } // end of [oprarity_err]
+//
+val n = glist_length (es)
 //
 in
 //
-case+ 0 of
-| _ when id = DEFINED => (
-  case+ es of
-  | e :: nil () => e1xp_valize_defined(e)
-  | _ => oprarity_err ()
-  )
-| _ when id = UNDEFINED => (
-  case+ es of
-  | e :: nil () => e1xp_valize_undefined(e)
-  | _ => oprarity_err ()
-  )
+if id = DEFINED then (
+  if n = 1 then e1xp_valize_defined(glist_head (es)) else oprarity_err ()
+) else if id = UNDEFINED then (
+  if n = 1 then e1xp_valize_undefined(glist_head (es)) else oprarity_err ()
 //
-| _ when id = NEG => (
-  case+ es of
-  | e1 :: nil () => e1xplevenv_valize_neg(lev, env, e0, id, e1)
-  | _ => oprarity_err ()
-  )
+) else if id = NEG then (
+  if n = 1 then e1xplevenv_valize_neg(lev, env, e0, id, glist_head (es))
+  else oprarity_err ()
 //
-| _ when id = ADD => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_add(lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = SUB => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_sub(lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = MUL => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_mul(lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = DIV => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_div(lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
+) else if id = ADD then (
+  if n = 2 then e1xplevenv_valize_add(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = SUB then (
+  if n = 2 then e1xplevenv_valize_sub(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = MUL then (
+  if n = 2 then e1xplevenv_valize_mul(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = DIV then (
+  if n = 2 then e1xplevenv_valize_div(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
 //
-| _ when id = LT => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_lt (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = LTEQ => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_lteq (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = GT => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_gt (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = GTEQ => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_gteq (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
+) else if id = LT then (
+  if n = 2 then e1xplevenv_valize_lt(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = LTEQ then (
+  if n = 2 then e1xplevenv_valize_lteq(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = GT then (
+  if n = 2 then e1xplevenv_valize_gt(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = GTEQ then (
+  if n = 2 then e1xplevenv_valize_gteq(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
 //
-| _ when (id = EQ orelse id = EQEQ) => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_eq (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when (id = LTGT orelse id = BANGEQ) => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_neq (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
+) else if (id = EQ orelse id = EQEQ) then (
+  if n = 2 then e1xplevenv_valize_eq(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if (id = LTGT orelse id = BANGEQ) then (
+  if n = 2 then e1xplevenv_valize_neq(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
 //
-| _ when id = LAND => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_land (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
-| _ when id = LOR => (
-  case+ es of
-  | e1 :: e2 :: nil () => e1xplevenv_valize_lor (lev, env, e0, id, e1, e2)
-  | _ => oprarity_err ()
-  )
+) else if id = LAND then (
+  if n = 2 then e1xplevenv_valize_land(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
+) else if id = LOR then (
+  if n = 2 then e1xplevenv_valize_lor(lev, env, e0, id, glist_head (es), glist_head (glist_tail (es)))
+  else oprarity_err ()
 //
-| _ => V1ALerr () where {
-    val () = the_valerrlst_add (VE_E1XPappid_opr (e0, id))
+) else mkerr () where {
+    val () = the_valerrlst_add (valerr_VE_E1XPappid_opr (e0, id))
   } // end of [_]
 //
 end // end of [e1xplevenv_valize_delta]
@@ -948,12 +913,10 @@ extern
 fun e1xplev_normalize
   (lorg: location, lev: int, e0: e1xp): e1xp
 // end of [e1xplev_normalize]
-
 extern
 fun e1xplevenv_normalize
   (lorg: location, lev: int, env: !elenv, e0: e1xp): e1xp
 // end of [e1xplevenv_normalize]
-
 extern
 fun e1xplevenv_normalize_main
   (lorg: location, lev: int, env: !elenv, e0: e1xp): e1xp
@@ -963,15 +926,15 @@ fun e1xplevenv_normalize_main
 
 implement
 e1xp_normalize (e0) =
-  e1xplev_normalize (e0.e1xp_loc, 0(*lev*), e0)
+  e1xplev_normalize (e0.e1xp_loc (), 0(*lev*), e0)
 // end of [e1xp_normalize]
 
 implement
 e1xplev_normalize
   (lorg, lev, e0) = res where {
-  val env = lenvmake_nil ()
+  val env = lenvmake_nil<e1xp> ()
   val res = e1xplevenv_normalize (lorg, lev, env, e0)
-  val () = lenvfree (env)
+  val () = lenvfree<e1xp> (env)
 } // end of [e1xplev_normalize]
 
 (* ****** ****** *)
@@ -980,7 +943,7 @@ fn e1xplevenv_normalize_ide (
   lorg: location
 , lev: int, env: !elenv, e0: e1xp, x: symbol
 ) : e1xp = let
-  val ans = lenvfind (env, x)
+  val ans = lenvfind<e1xp> (env, x)
 in
 //
 case+ ans of
@@ -990,7 +953,7 @@ case+ ans of
   | ~Some_vt e =>
       e1xplev_normalize (lorg, lev+1, e)
     // end of [Some_vt]
-  | ~None_vt _ => e1xp_make (lorg, e0.e1xp_node)
+  | ~None_vt _ => e1xp_make (lorg, e0.e1xp_node ())
   ) // end of [None_vt]
 end // end of [e1xplevenv_normalize_ide]
 
@@ -998,17 +961,18 @@ end // end of [e1xplevenv_normalize_ide]
 
 fun e1xplstlevenv_normalize (
   lorg: location, lev: int, env: !elenv, es: e1xplst
-) : e1xplst = case+ es of
-  | list_cons (e, es) => let
+) : e1xplst = case+ glist_view (es) of
+  | ~GLcons (e, es) => let
       val e = e1xplevenv_normalize (lorg, lev, env, e)
       val es = e1xplstlevenv_normalize (lorg, lev, env, es)
     in
-      list_cons (e, es)
+      glist_cons (e, es)
     end
-  | list_nil () => list_nil ()
+  | ~GLnil () => glist_nil ()
 // end of [e1xplstlevenv_normalize]
 
 (* ****** ****** *)
+
 (*
 //
 // HX-2011-04-29: this example works now:
@@ -1026,7 +990,9 @@ in
     e1xplevenv_normalize_main (lorg, lev, env, e0)
   else let
     val () = prerr_error1_loc (lorg)
-    val () = prerrf (": the maximal normlization depth (%i) has been reached.", @(lev))
+    val () = prerr ": the maximal normlization depth ("
+    val () = prerr lev
+    val () = prerr ") has been reached."
     val () = prerr_newline ()
   in
     e1xp_err (lorg)
@@ -1036,26 +1002,26 @@ end // end of [e1xplevenv_normalize]
 implement
 e1xplevenv_normalize_main
   (lorg, lev, env, e0) = let
-  val node = e0.e1xp_node in case+ node of
-  | E1XPide id => e1xplevenv_normalize_ide (lorg, lev, env, e0, id)
+  val node = e0.e1xp_node () in case+ e1xp_node_view (node) of
+  | ~E1XPide id => e1xplevenv_normalize_ide (lorg, lev, env, e0, id)
 //
-  | E1XPint _ => e1xp_make (lorg, node)
-  | E1XPintrep _ => e1xp_make (lorg, node)
-  | E1XPchar _ => e1xp_make (lorg, node)
-  | E1XPstring _ => e1xp_make (lorg, node)
-  | E1XPfloat _ => e1xp_make (lorg, node)
+  | ~E1XPint _ => e1xp_make (lorg, node)
+  | ~E1XPintrep _ => e1xp_make (lorg, node)
+  | ~E1XPchar _ => e1xp_make (lorg, node)
+  | ~E1XPstring _ => e1xp_make (lorg, node)
+  | ~E1XPfloat _ => e1xp_make (lorg, node)
 //
-  | E1XPv1al _ => e1xp_make (lorg, node)
+  | ~E1XPv1al _ => e1xp_make (lorg, node)
 //
-  | E1XPnone () => e1xp_make (lorg, node)
-  | E1XPundef () => e1xp_make (lorg, node)
+  | ~E1XPnone () => e1xp_make (lorg, node)
+  | ~E1XPundef () => e1xp_make (lorg, node)
 //
-  | E1XPlist es => let
+  | ~E1XPlist es => let
       val es = e1xplstlevenv_normalize (lorg, lev, env, es)
     in
       e1xp_list (lorg, es)
     end
-  | E1XPeval (e) => let
+  | ~E1XPeval (e) => let
       val v =
       e1xp_valize (
         e1xplevenv_normalize (lorg, lev, env, e)
@@ -1064,23 +1030,23 @@ e1xplevenv_normalize_main
       e1xp_v1al (lorg, v)
     end (* end of [E1XPeval] *)
 //
-  | E1XPapp (
+  | ~E1XPapp (
       e_fun, _(*loc_arg*), es_arg
     ) => let
       val e_fun = e1xplevenv_normalize (lorg, lev, env, e_fun)
       val es_arg = e1xplstlevenv_normalize (lorg, lev, env, es_arg)
     in
-      case+ e_fun.e1xp_node of
-      | E1XPfun (xs, body) => res where {
+      case+ e1xp_node_view (e_fun.e1xp_node ()) of
+      | ~E1XPfun (xs, body) => res where {
           val env1 = lenvmake_e1xplst (lorg, xs, es_arg)
           val res = e1xplevenv_normalize (lorg, lev+1, env1, body)
-          val ((*void*)) = lenvfree (env1)
+          val ((*void*)) = lenvfree<e1xp> (env1)
         } (* end of [E1XPfun] *)
-      | _ => e1xp_app (lorg, e_fun, lorg, es_arg)
+      | v => (e1xp_node_view_free (v); e1xp_app (lorg, e_fun, lorg, es_arg))
     end // end of [E1XPapp]
-  | E1XPfun _ => e1xp_make (lorg, node)
+  | ~E1XPfun _ => e1xp_make (lorg, node)
 //
-  | E1XPif (
+  | ~E1XPif (
       _cond, _then, _else // HX: specially treated
     ) => let
       val v =
@@ -1096,7 +1062,7 @@ e1xplevenv_normalize_main
       // end of [if]
     end (* end of [E1XPif] *)
 //
-  | E1XPerr _ => e1xp_make (lorg, node)
+  | ~E1XPerr _ => e1xp_make (lorg, node)
 //
 end // end of [e1xplevenv_normalize_main]
 

@@ -1,0 +1,119 @@
+(* ****** ****** *)
+
+%{
+implement srcfilename_get () = "../intrange.sats"
+%}
+
+(* ****** ****** *)
+
+%{
+val () = patscode_count_reset()
+val () = patscode_prefix_set("TRYIT/prelude_intrange")
+%}
+
+(* ****** ****** *)
+
+#decltitle("\
+ATSLIB/prelude/intrange\
+")
+
+(* ****** ****** *)
+
+#declpreamble('\
+
+#para("\
+")
+
+')#comment("declpreamble")
+
+(* ****** ****** *)
+
+#declnamesynop("intrange_foreach")
+#decldescrpt('\
+
+Given two integers l and r, this function enumerates the integers between l
+and r-1, inclusive, and then applies to each enumerated integer the
+function implemented by #dyncode("intrange_foreach$fwork"). The enumeration
+process stops if the function implemented by #dyncode("intrange_foreach$cont")
+returns false, and the integer value returned by #dyncode("intrange_foreach")
+indicates the point of the stoppage. ')
+
+#declnamesynop("intrange_foreach_env")
+#decldescrpt('\
+
+This function does essentially the same as #dyncode("intrange_foreach")
+except for taking an additional argument that serves as an environment.  ')
+
+#declexample('\
+
+The following code implements a function for constructing a list
+of randomly generated values:
+
+#pats2xhtmld_tryit('\
+//
+staload R = "contrib/libats-hwxi/testing/SATS/randgen.sats"
+//
+fun{a:t@ype}
+list_randgen
+  (n: int): List0_vt (a) = let
+//
+viewtypedef env = List0_vt (a)
+//
+implement
+intrange_foreach$fwork<env>
+  (_, env) = env := list_vt_cons ($R.randgen_val<a> (), env)
+// end of [intrange_foreach$fwork]
+//
+var res: env = list_vt_nil ()
+val _(*n*) = intrange_foreach_env<env> (0, n, res)
+//
+in
+  res
+end // end of [list_randgen]
+')
+')
+
+#declnamesynop("intrange_foreach$cont")
+#decldescrpt('\
+
+The default implementation of this function always returns true.\
+
+')
+
+#declnamesynop("intrange_foreach$fwork")
+#decldescrpt('By default, this function is unimplemented.')
+
+(* ****** ****** *)
+
+#declnamesynop("intrange_rforeach")
+#decldescrpt('\
+
+Given two integers l and r, this function enumerates in the reverse order
+the integers between l and r-1, inclusive, and then applies to each
+enumerated integer the function implemented by
+#dyncode("intrange_rforeach$fwork"). The enumeration process stops if the
+function implemented by #dyncode("intrange_rforeach$cont") returns false,
+and the integer value returned by #dyncode("intrange_rforeach") indicates
+the point of stoppage.\
+
+')
+
+#declnamesynop("intrange_rforeach_env")
+#decldescrpt('\
+
+This function does essentially the same as #dyncode("intrange_rforeach")
+except for taking an additional argument that serves as an environment.\
+
+')
+
+#declnamesynop("intrange_rforeach$cont")
+#decldescrpt('\
+The default implementation of this function always returns true.\
+')
+
+#declnamesynop("intrange_rforeach$fwork")
+#decldescrpt('By default, this function is unimplemented.')
+
+(* ****** ****** *)
+
+(* end of [bool.atxt] *)

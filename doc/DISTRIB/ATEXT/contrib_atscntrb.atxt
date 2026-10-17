@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -235,21 +237,6 @@ packfilesynop(x) = atext_nil()
 (* ****** ****** *)
 
 #packfilename(
-"atscntrb-hx-getargs/README.md"
-)
-#packfilename(
-"atscntrb-hx-getargs/mylibies.hats"
-)
-#packfilename(
-"atscntrb-hx-getargs/mylibies_link.hats"
-)
-#packfilename_r("atscntrb-hx-getargs/SATS")
-#packfilename_r("atscntrb-hx-getargs/DATS")
-#packfilename_r("atscntrb-hx-getargs/TEST")
-
-(* ****** ****** *)
-
-#packfilename(
 "atscntrb-hx-mytesting/README"
 )
 #packfilename_r("atscntrb-hx-mytesting/SATS")
@@ -275,7 +262,7 @@ packfilesynop(x) = atext_nil()
 
 %{
 //
-implement main() = () where { }
+implement main0() = () where { }
 //
 %} // end of [%{]
 

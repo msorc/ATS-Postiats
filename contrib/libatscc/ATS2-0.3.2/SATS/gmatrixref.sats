@@ -61,25 +61,25 @@ overload [] with gmatrixref_set_at of 100
 (* ****** ****** *)
 //
 fun
-gmatrixref_exists_cloref
+gmatrixref_exists_cloptr
   {a:t@ype}{m,n:int}
 (
-  gmatrixref(a, m, n), ftest: (natLt(m), natLt(n)) -<cloref1> bool
+  gmatrixref(a, m, n), ftest: (natLt(m), natLt(n)) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-fun
 fun
-gmatrixref_forall_cloref
+gmatrixref_forall_cloptr
   {a:t@ype}{m,n:int}
 (
-  gmatrixref(a, m, n), ftest: (natLt(m), natLt(n)) -<cloref1> bool
+  gmatrixref(a, m, n), ftest: (natLt(m), natLt(n)) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
 //
 fun
-gmatrixref_foreach_cloref
+gmatrixref_foreach_cloptr
   {a:t@ype}{m,n:int}
 (
-  gmatrixref(a, m, n), fwork: (natLt(m), natLt(n)) -<cloref1> void
+  gmatrixref(a, m, n), fwork: (natLt(m), natLt(n)) -<cloptr1> void
 ) : void = "mac#%" // end-of-fun
 //
 (* ****** ****** *)

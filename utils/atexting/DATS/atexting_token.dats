@@ -46,20 +46,21 @@ staload UN = $UNSAFE
 staload
 "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 implement
 token_get_loc
-  (tok) = tok.token_loc
+  (tok) = tok.token_loc()
 //
 (* ****** ****** *)
 //
 implement
 token_make
   (loc, node) =
-$rec{
-  token_loc= loc, token_node= node
-} (* token_make *)
+token_TOKEN(loc, node) (* token_make *)
 //
 (* ****** ****** *)
 
@@ -68,9 +69,9 @@ token_is_eof(tok) =
 (
 //
 case+
-tok.token_node of
-| TOKeof() => true
-| _(*non-eof*) => false
+token_node_view(tok.token_node()) of
+| ~TOKeof() => true
+| v0(*non-eof*) => (token_node_view_free(v0); false)
 //
 ) (* end of [token_is_eof] *)
 
@@ -81,10 +82,10 @@ token_is_nsharp
   (tok) = (
 //
 case+
-tok.token_node of
-| TOKsharp(ns) =>
+token_node_view(tok.token_node()) of
+| ~TOKsharp(ns) =>
   length(ns) >= the_nsharp_get((*void*))
-| _ (*non-code-beg*) => false
+| v0 (*non-code-beg*) => (token_node_view_free(v0); false)
 //
 ) (* end of [token_is_nsharp] *)
 
@@ -95,10 +96,10 @@ token_is_code_beg
   (tok) = (
 //
 case+
-tok.token_node of
-| TOKcode_beg _ =>
-  location_is_atlnbeg(tok.token_loc)
-| _ (*non-code-beg*) => false
+token_node_view(tok.token_node()) of
+| ~TOKcode_beg _ =>
+  location_is_atlnbeg(tok.token_loc())
+| v0 (*non-code-beg*) => (token_node_view_free(v0); false)
 //
 ) (* end of [token_is_code_beg] *)
 
@@ -107,10 +108,10 @@ token_is_code_end(tok) =
 (
 //
 case+
-tok.token_node of
-| TOKcode_end _ =>
-  location_is_atlnbeg(tok.token_loc)
-| _ (*non-code-end*) => false
+token_node_view(tok.token_node()) of
+| ~TOKcode_end _ =>
+  location_is_atlnbeg(tok.token_loc())
+| v0 (*non-code-end*) => (token_node_view_free(v0); false)
 //
 ) (* end of [token_is_code_end] *)
 
@@ -118,7 +119,7 @@ tok.token_node of
 //
 implement
 token_is_atlnbeg(tok) =
-  location_is_atlnbeg(tok.token_loc)
+  location_is_atlnbeg(tok.token_loc())
 //
 (* ****** ****** *)
 //
@@ -146,14 +147,14 @@ fprint_val<token> = fprint_token
 //
 implement{}
 fprint_token_node_$TOKspchr$arg1(out, arg0) =
-  let val-TOKspchr(arg1) = arg0 in fprint(out, int2char0(arg1)) end
+  let val-~TOKspchr(arg1) = token_node_view(arg0) in fprint(out, int2char0(arg1)) end
 implement{}
 fprint_token_node_$TOKbslash$arg1(out, arg0) =
-  let val-TOKbslash(arg1) = arg0 in fprint(out, int2char0(arg1)) end
+  let val-~TOKbslash(arg1) = token_node_view(arg0) in fprint(out, int2char0(arg1)) end
 //
 implement
 fprint_token(out, x0) =
-  fprint_token_node_<>(out, x0.token_node)
+  fprint_token_node_<>(out, x0.token_node())
 //
 implement
 fprint_tnode
@@ -162,7 +163,7 @@ fprint_tnode
 implement
 fprint_tokenlst
   (out, xs) =
-  fprint_list_sep<token>(out, $UN.cast{List0(token)}(xs), ", ")
+  fprint_glist_sep<token>(out, xs, ", ")
 //
 #endif // #ifdef
 

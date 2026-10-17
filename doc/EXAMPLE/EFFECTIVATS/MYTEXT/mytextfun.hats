@@ -14,15 +14,19 @@ Author: Sami Zeinelabdin (https://github.com/sazl)
   
 (* ****** ****** *)
 //
-dynload
-"libatsdoc/dynloadall.dats"
-dynload
-"utils/libatsynmark/dynloadall.dats"
+//
+// HX: libatsynmark is initialized by a call (the ATS1 [dynload])
+//
+staload
+"utils/libatsynmark/SATS/libatsynmark.sats"
+val () = libatsynmark_dynloadall ()
 //
 (* ****** ****** *)
 //
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 //
 (* ****** ****** *)
 
@@ -173,7 +177,7 @@ patspage_script
         var header = headers[i];
         var subHeadings = header.getElementsByTagName('h4');
         var title = header.innerHTML;
-        var link = title.trim().split(/\s/).map(function(x) { return x.toLowerCase(); }).join('-');
+        var link = title.trim().split(/\\s/).map(function(x) { return x.toLowerCase(); }).join('-');
         var html = '<h2 id=\"' + link + '\">' + title + '</h2>';
         var linkHtml = '<a href=\"#' + link + '\">' + html + '</a>';
         header.outerHTML = linkHtml;
@@ -236,6 +240,40 @@ filename
 *)
 //
 (* ****** ****** *)
+//
+// [stacode], [dyncode] and [keycode] mark the static code, the dynamic
+// code and the keywords inside the text: the markup is the one that the
+// generated main.html of stack-array, prop-logic, ... (and of the atexting
+// driver mytexting.dats) show, there was never a definition of them in a helper
+// of atsdoc.
+//
+local
+//
+fun
+spantagging
+(
+  style: string, x: string
+) : atext = let
+  val _opn = atext_appstr3 ("<span style=\"", style, "\">")
+in
+  atext_apptxt3 (_opn, atext_strsub(x), atext_strcst("</span>"))
+end // end of [spantagging]
+//
+in (* in of [local] *)
+
+fun
+stacode
+  (x: string): atext = spantagging ("color: #0000F0;", x)
+fun
+dyncode
+  (x: string): atext = spantagging ("color: #F00000;", x)
+fun
+keycode
+  (x: string): atext = spantagging ("color:#000000;font-weight:bold;", x)
+
+end // end of [local]
+
+(* ****** ****** *)
 
 local
 //
@@ -247,25 +285,17 @@ in (* in of [local] *)
 fun
 pats2xhtml_sats
   (x: string): atext = let
-  val [l:addr]
-  str = string_pats2xhtmlize_bground (0, x)
-  prval () = addr_is_gtez {l} ()
+  val str = string_pats2xhtmlize_bground (0, x)
 in
-  if strptr_is_null (str) then let
-    prval () = strptr_free_null (str) in atext_nil ()
-  end else atext_strptr (str) // end of [if]
+  atext_strptr (str)
 end // end of [pats2xhtml_sats]
 
 fun
 pats2xhtml_dats
   (x: string): atext = let
-  val [l:addr]
-  str = string_pats2xhtmlize_bground (1, x)
-  prval () = addr_is_gtez {l} ()
+  val str = string_pats2xhtmlize_bground (1, x)
 in
-  if strptr_is_null (str) then let
-    prval () = strptr_free_null (str) in atext_nil ()
-  end else atext_strptr (str) // end of [if]
+  atext_strptr (str)
 end // end of [pats2xhtml_dats]
 
 end // end of [local]

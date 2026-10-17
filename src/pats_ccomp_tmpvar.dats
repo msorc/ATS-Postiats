@@ -32,9 +32,21 @@
 // Start Time: October, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_tmpvar.dats, see PORTING.md, "ccomp core modules")
+//
+(* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -51,13 +63,13 @@ staload
 STMP = "./pats_stamp.sats"
 typedef stamp = $STMP.stamp
 
-staload
-LOC = "./pats_location.sats"
-typedef location = $LOC.location
-
 (* ****** ****** *)
 
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
+staload HSE = "./pats_histaexp.sats"
 staload "./pats_histaexp.sats"
+staload "./pats_hidynexp.sats"
 
 (* ****** ****** *)
 
@@ -65,83 +77,67 @@ staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
 
-local
-
-typedef tmpvar = '{
-  tmpvar_loc= location
-, tmpvar_type= hisexp
-, tmpvar_ref= int (* 0/1 : val/ref *)
-, tmpvar_ret= int (* return status *)
-, tmpvar_topknd= int (* 0/1 : local/top(static) *)
-, tmpvar_origin= Option (ptr), tmpvar_suffix= int // copy indication
-, tmpvar_stamp= stamp (* unicity *)
-} // end of [tmpvar]
-
-assume tmpvar_type = tmpvar
-extern typedef "tmpvar_t" = tmpvar
-
-in (* in of [local] *)
-
 implement
 tmpvar_make
   (loc, hse) = let
-  val stamp = $STMP.tmpvar_stamp_make () in '{
-  tmpvar_loc= loc
-, tmpvar_type= hse
-, tmpvar_ref= 0 (*value*)
-, tmpvar_ret= 0 (*noret*)
-, tmpvar_topknd= 0 (*local*)
-, tmpvar_origin= None (), tmpvar_suffix= 0 // HX: copy indication
-, tmpvar_stamp= stamp
-} end // end of [tmpvar_make]
+  val stamp = $STMP.tmpvar_stamp_make ()
+in
+  tmpvar_new
+  (
+    loc, hse
+  , 0 (*value*), 0 (*noret*), 0 (*local*)
+  , gopt_none((*void*)), 0 // HX: copy indication
+  , stamp
+  ) (* tmpvar_new *)
+end // end of [tmpvar_make]
 
 (* ****** ****** *)
 //
 implement
-tmpvar_get_loc(tmp) = tmp.tmpvar_loc
+tmpvar_get_loc(tmp) = tmpvar_loc(tmp)
 //
 implement
-tmpvar_get_type(tmp) = tmp.tmpvar_type
+tmpvar_get_type(tmp) = tmpvar_type(tmp)
 //
 implement
-tmpvar_isref(tmp) = tmp.tmpvar_ref > 0
+tmpvar_isref(tmp) = tmpvar_ref(tmp) > 0
 implement
-tmpvar_isret(tmp) = tmp.tmpvar_ret > 0
+tmpvar_isret(tmp) = tmpvar_ret(tmp) > 0
 //
 implement
-tmpvar_get_topknd(tmp) = tmp.tmpvar_topknd
+tmpvar_get_topknd(tmp) = tmpvar_topknd(tmp)
 //
 implement
-tmpvar_get_origin(tmp) =
-  $UN.cast{tmpvaropt}(tmp.tmpvar_origin)
+tmpvar_get_origin(tmp) = tmpvar_origin(tmp)
 // end of [tmpvar_get_origin]
 //
 implement
-tmpvar_get_stamp (tmp) = tmp.tmpvar_stamp
+tmpvar_get_stamp (tmp) = tmpvar_stamp(tmp)
 implement
-tmpvar_get_suffix(tmp) = tmp.tmpvar_suffix
+tmpvar_get_suffix(tmp) = tmpvar_suffix(tmp)
 //
 (* ****** ****** *)
 //
 implement
-tmpvar_get_tailcal (tmp) = tmp.tmpvar_ret
+tmpvar_get_tailcal (tmp) = tmpvar_ret(tmp)
 //
 (* ****** ****** *)
 //
 implement
-eq_tmpvar_tmpvar (tmp1, tmp2) =
-  $STMP.eq_stamp_stamp (tmp1.tmpvar_stamp, tmp2.tmpvar_stamp)
+eq_tmpvar_tmpvar (tmp1, tmp2) = $effmask_all
+  ($STMP.eq_stamp_stamp (tmpvar_stamp(tmp1), tmpvar_stamp(tmp2)))
 // end of [eq_tmpvar_tmpvar]
 //
 implement
-compare_tmpvar_tmpvar (tmp1, tmp2) =
-  $STMP.compare_stamp_stamp (tmp1.tmpvar_stamp, tmp2.tmpvar_stamp)
-// end of [compare_tmpvar_tmpvar]
+compare_tmpvar_tmpvar (tmp1, tmp2) = $effmask_all
+(
+let
+  val sgn = $STMP.compare_stamp_stamp (tmpvar_stamp(tmp1), tmpvar_stamp(tmp2))
+in
+  $UN.cast{int}(sgn)
+end
+) // end of [compare_tmpvar_tmpvar]
 //
-(* ****** ****** *)
-
-end // end of [local]
-
 (* ****** ****** *)
 //
 implement
@@ -169,24 +165,20 @@ end // end of [fprint_tmpvar]
 //
 implement
 fprint_tmpvaropt
-  (out, opt) = $UT.fprintopt (out, opt, fprint_tmpvar)
+  (out, opt) = $UT.fprintopt<tmpvar> (out, opt, fprint_tmpvar)
 //
 (* ****** ****** *)
-
-local
-
-extern
-fun
-tmpvar_set_ref
-  (tmp: tmpvar, knd: int): void = "patsopt_tmpvar_set_ref"
-// end of [tmpvar_set_ref]
-extern
-fun
-tmpvar_set_ret
-  (tmp: tmpvar, ret: int): void = "patsopt_tmpvar_set_ret"
-// end of [tmpvar_set_ret]
-
-in (* in of [local] *)
+//
+// HX-2026-10: the C functions patsopt_tmpvar_set_* of src/ (declared in the sats)
+//
+implement tmpvar_set_type (tmp, hse) = set_tmpvar_type (tmp, hse)
+implement tmpvar_set_ref (tmp, knd) = set_tmpvar_ref (tmp, knd)
+implement tmpvar_set_ret (tmp, ret) = set_tmpvar_ret (tmp, ret)
+implement tmpvar_set_topknd (tmp, knd) = set_tmpvar_topknd (tmp, knd)
+implement tmpvar_set_origin (tmp, opt) = set_tmpvar_origin (tmp, opt)
+implement tmpvar_set_suffix (tmp, sfx) = set_tmpvar_suffix (tmp, sfx)
+//
+(* ****** ****** *)
 
 implement
 tmpvar_make_ref
@@ -209,8 +201,6 @@ tmpvar_inc_tailcal
   val () = tmpvar_set_ret (tmp, n+1(*ret*))
 } // end of [tmpvar_inc_tailcal]
 
-end // end of [local]
-
 (* ****** ****** *)
 
 implement
@@ -228,66 +218,61 @@ assume tmpvarset_vtype = $LS.set (tmpvar)
 
 staload LM = "libats/SATS/linmap_avltree.sats"
 staload _(*anon*) = "libats/DATS/linmap_avltree.dats"
-assume tmpvarmap_vtype (a:vt@ype) = $LM.map (tmpvar, a)
+assume tmpvarmap_vtype (a:type) = $LM.map (tmpvar, a)
 
 (* ****** ****** *)
 
-val cmp = lam
-(
-  tmp1: tmpvar, tmp2: tmpvar
-) : int =<cloref>
-  compare_tmpvar_tmpvar (tmp1, tmp2)
-// end of [val]
+implement
+$LS.compare_elt_elt<tmpvar> (tmp1, tmp2) = compare_tmpvar_tmpvar (tmp1, tmp2)
+implement
+$LM.compare_key_key<tmpvar> (tmp1, tmp2) = compare_tmpvar_tmpvar (tmp1, tmp2)
 
 in (* in of [local] *)
 
 implement
-tmpvarset_vt_nil () = $LS.linset_make_nil ()
+tmpvarset_vt_nil () = $effmask_all ($LS.linset_make_nil ())
 
 implement
-tmpvarset_vt_free (xs) = $LS.linset_free (xs)
+tmpvarset_vt_free (xs) = $effmask_all ($LS.linset_free (xs))
 
 implement
 tmpvarset_vt_add
   (xs, x) = xs where {
   var xs = xs
-  val _(*replaced*) = $LS.linset_insert (xs, x, cmp)
+  val _(*replaced*) = $effmask_wrt ($LS.linset_insert (xs, x))
 } // end of [tmpvarset_vt_add]
 
 implement
-tmpvarset_vt_listize (xs) = $LS.linset_listize (xs)
+tmpvarset_vt_listize (xs) = $effmask_all ($LS.linset_listize ($LS.linset_copy (xs)))
 implement
-tmpvarset_vt_listize_free (xs) = $LS.linset_listize_free (xs)
+tmpvarset_vt_listize_free (xs) = $effmask_all ($LS.linset_listize (xs))
 
 (* ****** ****** *)
 
-implement
-tmpvarmap_vt_nil () = $LM.linmap_make_nil ()
+implement{a}
+tmpvarmap_vt_nil () = $effmask_all ($LM.linmap_make_nil ())
 
-implement
-tmpvarmap_vt_free (map) = $LM.linmap_free (map)
+implement{a}
+tmpvarmap_vt_free (map) = $effmask_all ($LM.linmap_free (map))
 
-implement
+implement{a}
 tmpvarmap_vt_search
-  {a} (map, tmp) =
-  $LM.linmap_search_opt (map, tmp, cmp)
+  (map, tmp) = $LM.linmap_search_opt (map, tmp)
 // end of [tmpvarmap_vt_search]
 
-implement
+implement{a}
 tmpvarmap_vt_insert
-  {a} (map, tmp, x) = let
+  (map, tmp, x) = let
   var res: a? // uninitialized
-  val ans = $LM.linmap_insert (map, tmp, x, cmp, res)
+  val ans = $LM.linmap_insert (map, tmp, x, res)
   prval () = opt_clear (res)
 in
   ans
 end // end of [tmpvarmap_vt_insert]
 
-implement
+implement{a}
 tmpvarmap_vt_remove
-  {a} (map, tmp) =
-  $LM.linmap_remove (map, tmp, cmp)
-// end of [tmpvarmap_vt_remove]
+  (map, tmp) = $LM.linmap_remove (map, tmp)
 
 end // end of [local]
 
@@ -297,70 +282,9 @@ implement
 tmpvar_set_tyclo
   (tmp, flab) = () where
 {
-val hse = hisexp_tyclo (flab)
-val () = let
-  extern
-  fun tmpvar_set_type
-    (tmp: tmpvar, hse: hisexp): void = "patsopt_tmpvar_set_type"
-  // end of [tmpvar_set_type]
-in
-  tmpvar_set_type (tmp, hse)
-end // end of [val]
+val hse = hisexp_tyclo ($UN.cast{$HSE.funlab}(flab))
+val () = tmpvar_set_type (tmp, hse)
 } (* end of [tmpvar_set_tyclo] *)
-
-(* ****** ****** *)
-
-%{$
-
-ats_void_type
-patsopt_tmpvar_set_type
-(
-  ats_ptr_type tmp, ats_ptr_type hse
-) {
-  ((tmpvar_t)tmp)->atslab_tmpvar_type = hse ; return ;
-} // end of [patsopt_tmpvar_set_type]
-
-ats_void_type
-patsopt_tmpvar_set_ref
-(
-  ats_ptr_type tmp, ats_int_type ref
-) {
-  ((tmpvar_t)tmp)->atslab_tmpvar_ref = ref ; return ;
-} // end of [patsopt_tmpvar_set_ref]
-
-ats_void_type
-patsopt_tmpvar_set_ret
-(
-  ats_ptr_type tmp, ats_int_type ret
-) {
-  ((tmpvar_t)tmp)->atslab_tmpvar_ret = ret ; return ;
-} // end of [patsopt_tmpvar_set_ret]
-
-ats_void_type
-patsopt_tmpvar_set_topknd
-(
-  ats_ptr_type tmp, ats_int_type knd
-) {
-  ((tmpvar_t)tmp)->atslab_tmpvar_topknd = knd ; return ;
-} // end of [patsopt_tmpvar_set_topknd]
-
-ats_void_type
-patsopt_tmpvar_set_origin
-(
-  ats_ptr_type tmp, ats_ptr_type opt
-) {
-  ((tmpvar_t)tmp)->atslab_tmpvar_origin = opt ; return ;
-} // end of [patsopt_tmpvar_set_origin]
-
-ats_void_type
-patsopt_tmpvar_set_suffix
-(
-  ats_ptr_type tmp, ats_int_type sfx
-) {
-  ((tmpvar_t)tmp)->atslab_tmpvar_suffix = sfx ; return ;
-} // end of [patsopt_tmpvar_set_suffix]
-
-%} // end of [%{$]
 
 (* ****** ****** *)
 

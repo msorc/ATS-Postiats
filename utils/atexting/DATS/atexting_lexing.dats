@@ -49,6 +49,9 @@ staload UN = $UNSAFE
 staload
 "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
 macdef EOL = char2int0('\n')
@@ -367,12 +370,12 @@ val () = lexbuf_set_nspace(buf, nchr1)
 //
 val space =
   lexbuf_takeout(buf, nchr1)
-val space = strptr2string(space)
+val space = strptr2gstring(space)
 //
 val loc = lexbuf_getincby_location(buf, nchr1)
 //
 in
-  token_make(loc, TOKspace(space))
+  token_make(loc, token_node_TOKspace(space))
 end // end of [lexing_SPACE]
 //
 (* ****** ****** *)
@@ -393,12 +396,12 @@ val nchr1 = nchr + 1
 //
 val sharp =
   lexbuf_takeout(buf, nchr1)
-val sharp = strptr2string(sharp)
+val sharp = strptr2gstring(sharp)
 //
 val loc = lexbuf_getincby_location(buf, nchr1)
 //
 in
-  token_make(loc, TOKsharp(sharp))
+  token_make(loc, token_node_TOKsharp(sharp))
 end // end of [lexing_SHARP]
 //
 (* ****** ****** *)
@@ -434,7 +437,7 @@ lexbufpos_get_location (buf, pos)
 val () = lexbuf_set_position(buf, pos)
 //
 in
-  token_make(loc, TOKbslash(i))
+  token_make(loc, token_node_TOKbslash(i))
 end // end of [lexing_BSLASH]
 //
 (* ****** ****** *)
@@ -452,7 +455,7 @@ val _ = lexbuf_remove(buf, 1)
 val loc = lexbuf_getincby_location(buf, 1)
 //
 in
-  token_make(loc, TOKsquote())
+  token_make(loc, token_node_TOKsquote())
 end // end of [lexing_SQUOTE]
 //
 (* ****** ****** *)
@@ -473,12 +476,12 @@ val nchr1 = nchr + 1
 //
 val dquote =
   lexbuf_takeout(buf, nchr1)
-val dquote = strptr2string(dquote)
+val dquote = strptr2gstring(dquote)
 //
 val loc = lexbuf_getincby_location(buf, nchr1)
 //
 in
-  token_make(loc, TOKdquote(dquote))
+  token_make(loc, token_node_TOKdquote(dquote))
 end // end of [lexing_DQUOTE]
 //
 (* ****** ****** *)
@@ -504,23 +507,23 @@ case+ c of
 | '}' => let
     val cend =
       lexbuf_takeout(buf, 2)
-    val cend = strptr2string(cend)
+    val cend = strptr2gstring(cend)
     val loc0 =
       lexbuf_getincby_location(buf, 2)
     // end of [val]
   in
-    token_make(loc0, TOKcode_end(cend))
+    token_make(loc0, token_node_TOKcode_end(cend))
   end // end of [%{]
 //
 | '\{' => let
     val cbeg =
       lexbuf_takeout(buf, 2)
-    val cbeg = strptr2string(cbeg)
+    val cbeg = strptr2gstring(cbeg)
     val loc0 =
       lexbuf_getincby_location(buf, 2)
     // end of [val]
   in
-    token_make(loc0, TOKcode_beg(cbeg))
+    token_make(loc0, token_node_TOKcode_beg(cbeg))
   end // end of [%{]
 //
 | _(*rest*) => let
@@ -529,7 +532,7 @@ case+ c of
       lexbuf_getincby_location(buf, 1)
     // end of [val]
   in
-    token_make(loc0, TOKspchr(char2int0('%')))
+    token_make(loc0, token_node_TOKspchr(char2int0('%')))
   end // end of [make]
 //
 end // end of [lexing_PERCENT]
@@ -547,12 +550,12 @@ val nchr1 = succ(nchr)
 //
 val int =
   lexbuf_takeout(buf, nchr1)
-val int = strptr2string(int)
+val int = strptr2gstring(int)
 //
 val loc = lexbuf_getincby_location(buf, nchr1)
 //
 in
-  token_make(loc, TOKint(int))
+  token_make(loc, token_node_TOKint(int))
 end // end of [lexing_INTEGER]
 //
 (* ****** ****** *)
@@ -569,12 +572,12 @@ val nchr1 = succ(nchr)
 val ide =
   lexbuf_takeout(buf, nchr1)
 //
-val ide = strptr2string(ide)
+val ide = strptr2gstring(ide)
 //
 val loc = lexbuf_getincby_location(buf, nchr1)
 //
 in
-  token_make(loc, TOKide(ide))
+  token_make(loc, token_node_TOKide(ide))
 end // end of [lexing_IDENT_alp]
 //
 (* ****** ****** *)
@@ -619,17 +622,17 @@ case+ 0 of
 | _ when
     EOL_test(i0) => let
     val _ = lexbuf_remove(buf, 1)
-    val loc = lexbuf_getbyrow_location(buf) in token_make(loc, TOKeol())
+    val loc = lexbuf_getbyrow_location(buf) in token_make(loc, token_node_TOKeol())
   end // end of [EOF]
 | _ when
     EOF_test(i0) => let
     val _ = lexbuf_remove(buf, 1)
-    val loc = lexbuf_getincby_location(buf, 1) in token_make(loc, TOKeof())
+    val loc = lexbuf_getincby_location(buf, 1) in token_make(loc, token_node_TOKeof())
   end // end of [EOF]
 //
 | _ (*rest*) => let
     val _ = lexbuf_remove(buf, 1)
-    val loc = lexbuf_getincby_location(buf, 1) in token_make(loc, TOKspchr(i0))
+    val loc = lexbuf_getincby_location(buf, 1) in token_make(loc, token_node_TOKspchr(i0))
   end // end of [rest]
 //
 end // end of [get_token_any]
@@ -645,12 +648,12 @@ val tok = get_token (buf)
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| TOKspace _ => tok
-| _ (*non-SPACE*) => let
+| ~TOKspace _ => tok
+| v0 (*non-SPACE*) => (token_node_view_free(v0); let
     val () = lexbuf_set_nspace (buf, 0) in tok
-  end // end of [non-SPACE]
+  end) // end of [non-SPACE]
 //
 end // end of [lexbuf_get_token_any]
 

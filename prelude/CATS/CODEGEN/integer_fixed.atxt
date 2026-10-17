@@ -120,5 +120,5 @@ atspre_g0uint2uint_uint64_uint(x) ((atstype_uint)(x))
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "integer_fixed_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "integer_fixed_atxt.txt")
 %}\

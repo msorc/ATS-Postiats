@@ -33,8 +33,12 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+#include "share/atspre_staload.hats"
+//
+staload UN = "prelude/SATS/unsafe.sats"
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -72,13 +76,15 @@ val ntot = pos.ntot
 val nrow = pos.nrow
 val ncol = pos.ncol
 //
+val () = fprint_lint (out, ntot+1L)
+val () = fprint_string (out, "(line=")
+val () = fprint_int (out, nrow+1)
+val () = fprint_string (out, ", offs=")
+val () = fprint_int (out, ncol+1)
+val () = fprint_string (out, ")")
+//
 in
-//
-fprintf
-(
-  out, "%li(line=%i, offs=%i)", @(ntot+1L, nrow+1, ncol+1)
-) (* end of [val] *)
-//
+  // nothing
 end // end of [fprint_position]
 
 (* ****** ****** *)
@@ -116,7 +122,7 @@ position_incby_char
   (pos, i) =
 if i >= 0 then let
 //
-  #define c2i int_of_char
+  #define c2i char2int0
 //
   val () =
     pos.ntot := pos.ntot + 1L
@@ -141,8 +147,8 @@ implement
 position_decby_count
   (pos, n) = () where {
 //
-  #define u2i int_of_uint
-  #define u2l lint_of_uint
+  #define u2i g0uint2int_uint_int
+  #define u2l g0uint2int_uint_lint
 //
   val () = pos.ntot := pos.ntot - (u2l)n
   val () = pos.ncol := pos.ncol - (u2i)n
@@ -152,54 +158,35 @@ implement
 position_incby_count
   (pos, n) = () where {
 //
-  #define u2i int_of_uint
-  #define u2l lint_of_uint
+  #define u2i g0uint2int_uint_int
+  #define u2l g0uint2int_uint_lint
 //
   val () = pos.ntot := pos.ntot + (u2l)n
   val () = pos.ncol := pos.ncol + (u2i)n
 } // end of [position_incby_count]
 
 (* ****** ****** *)
+//
+// HX-2026-10: the arena encoding of location/locpragma
+//
+#include "./pats_location_gen_dats.hats"
+//
+(* ****** ****** *)
 
-assume
-location_type =
-'{
-//
-  filename=
-  filename // file name
-//
-, beg_ntot= lint // beginning char position
-, beg_nrow= int
-, beg_ncol= int
-, end_ntot= lint // finishing char position
-, end_nrow= int
-, end_ncol= int
-//
-, locpragma= locpragma
-//
-} (* end of [location_type] *)
+implement
+location_get_bchar (loc) = loc.beg_ntot()
 
 (* ****** ****** *)
 
 implement
-location_get_bchar (loc) = loc.beg_ntot
+location_beg_nrow (loc) = loc.beg_nrow()
 
 (* ****** ****** *)
 
 implement
-location_beg_nrow (loc) = loc.beg_nrow
-
-(* ****** ****** *)
-
+location_beg_ntot (loc) = loc.beg_ntot()
 implement
-location_beg_ntot (loc) = loc.beg_ntot
-implement
-location_end_ntot (loc) = loc.end_ntot
-
-(* ****** ****** *)
-
-implement
-location_get_filename(loc) = loc.filename
+location_end_ntot (loc) = loc.end_ntot()
 
 (* ****** ****** *)
 //
@@ -218,21 +205,21 @@ fprint_locrange
   (out, loc) = () where {
 //
 val () =
-  fprint_lint (out, loc.beg_ntot+1L)
+  fprint_lint (out, loc.beg_ntot()+1L)
 val () = fprint_string (out, "(line=")
-val () = fprint_int (out, loc.beg_nrow+1)
+val () = fprint_int (out, loc.beg_nrow()+1)
 val () = fprint_string (out, ", offs=")
-val () = fprint_int (out, loc.beg_ncol+1)
+val () = fprint_int (out, loc.beg_ncol()+1)
 val () = fprint_string (out, ")")
 //
 val () = fprint_string (out, " -- ")
 //
 val () =
-  fprint_lint (out, loc.end_ntot+1L)
+  fprint_lint (out, loc.end_ntot()+1L)
 val () = fprint_string (out, "(line=")
-val () = fprint_int (out, loc.end_nrow+1)
+val () = fprint_int (out, loc.end_nrow()+1)
 val () = fprint_string (out, ", offs=")
-val () = fprint_int (out, loc.end_ncol+1)
+val () = fprint_int (out, loc.end_ncol()+1)
 val () = fprint_string (out, ")")
 //
 } (* end of [fprint_locrange] *)
@@ -242,13 +229,10 @@ val () = fprint_string (out, ")")
 implement
 fprint_location
   (out, loc) = let
-(*
-val () = println! ("fprint_location")
-*)
 in
 //
-fprint_locpragma(out, loc.locpragma);
-$FIL.fprint_filename_full (out, loc.filename);
+fprint_locpragma(out, loc.locpragma());
+$FIL.fprint_filename_full (out, loc.filename());
 fprint_string (out, ": "); fprint_locrange (out, loc)
 //
 end (* end of [fprint_location] *)
@@ -258,13 +242,10 @@ end (* end of [fprint_location] *)
 implement
 fprint2_location
   (out, loc) = let
-(*
-val () = println! ("fprint2_location")
-*)
 in
 //
-fprint_locpragma(out, loc.locpragma);
-$FIL.fprint2_filename_full (out, loc.filename); 
+fprint_locpragma(out, loc.locpragma());
+$FIL.fprint2_filename_full (out, loc.filename()); 
 fprint_string (out, ": "); fprint_locrange (out, loc)
 //
 end (* end of [fprint2_location] *)
@@ -273,28 +254,21 @@ end (* end of [fprint2_location] *)
 
 implement
 location_dummy =
-'{
-  filename= $FIL.filename_dummy
-, beg_ntot= ~1L
-, beg_nrow= ~1
-, beg_ncol= ~1
-, end_ntot= ~1L
-, end_nrow= ~1
-, end_ncol= ~1
-, locpragma= locpragma0_make()
-} (* end of [location_dummy] *)
+location_LOCATION
+(
+  $FIL.filename_dummy
+, ~1L, ~1, ~1, ~1L, ~1, ~1, locpragma0_make()
+) (* end of [location_dummy] *)
 
 (* ****** ****** *)
 
 implement
 location_filename_origin
   (fil) =
-'{
-  filename= fil
-, beg_ntot= 0L, beg_nrow= 0, beg_ncol= 0
-, end_ntot= 0L, end_nrow= 0, end_ncol= 0
-, locpragma= locpragma0_make()
-} (* end of [location_filename_origin] *)
+location_LOCATION
+(
+  fil, 0L, 0, 0, 0L, 0, 0, locpragma0_make()
+) (* end of [location_filename_origin] *)
 
 (* ****** ****** *)
 
@@ -310,44 +284,38 @@ end // end of [location_make_pos_pos]
 
 implement
 location_make_fil_pos_pos
-  (fil, pos1, pos2) = '{
-  filename= fil
-, beg_ntot= pos1.ntot
-, beg_nrow= pos1.nrow
-, beg_ncol= pos1.ncol
-, end_ntot= pos2.ntot
-, end_nrow= pos2.nrow
-, end_ncol= pos2.ncol
-, locpragma= the_location_pragma_get()
-} // end of [location_make_pos_pos]
+  (fil, pos1, pos2) =
+location_LOCATION
+(
+  fil
+, pos1.ntot, pos1.nrow, pos1.ncol
+, pos2.ntot, pos2.nrow, pos2.ncol
+, the_location_pragma_get()
+) // end of [location_make_pos_pos]
 
 (* ****** ****** *)
 
 implement
 location_leftmost
-  (loc) = '{
-  filename= loc.filename
-, beg_ntot= loc.beg_ntot
-, beg_nrow= loc.beg_nrow
-, beg_ncol= loc.beg_ncol
-, end_ntot= loc.beg_ntot
-, end_nrow= loc.beg_nrow
-, end_ncol= loc.beg_ncol
-, locpragma= loc.locpragma
-} // end of [location_leftmost]
+  (loc) =
+location_LOCATION
+(
+  loc.filename()
+, loc.beg_ntot(), loc.beg_nrow(), loc.beg_ncol()
+, loc.beg_ntot(), loc.beg_nrow(), loc.beg_ncol()
+, loc.locpragma()
+) // end of [location_leftmost]
 
 implement
 location_rightmost
-  (loc) = '{
-  filename= loc.filename
-, beg_ntot= loc.end_ntot
-, beg_nrow= loc.end_nrow
-, beg_ncol= loc.end_ncol
-, end_ntot= loc.end_ntot
-, end_nrow= loc.end_nrow
-, end_ncol= loc.end_ncol
-, locpragma= loc.locpragma
-} // end of [location_rightmost]
+  (loc) =
+location_LOCATION
+(
+  loc.filename()
+, loc.end_ntot(), loc.end_nrow(), loc.end_ncol()
+, loc.end_ntot(), loc.end_nrow(), loc.end_ncol()
+, loc.locpragma()
+) // end of [location_rightmost]
 
 (* ****** ****** *)
 
@@ -357,13 +325,13 @@ fn
 location_is_none
 (
   loc: location
-) :<> bool = (loc.beg_ntot < 0L)
+) : bool = (loc.beg_ntot() < 0L)
 
 fn
 location_combine_main
 (
   loc1: location, loc2: location
-) :<> location = let
+) : location = let
 //
   var beg_ntot: lint
   var beg_nrow: int and beg_ncol: int
@@ -371,39 +339,42 @@ location_combine_main
   var end_nrow: int and end_ncol: int
 //
   val () =
-  if loc1.beg_ntot <= loc2.beg_ntot
+  if loc1.beg_ntot() <= loc2.beg_ntot()
     then begin
-      beg_nrow := loc1.beg_nrow;
-      beg_ncol := loc1.beg_ncol;
-      beg_ntot := loc1.beg_ntot;
+      beg_nrow := loc1.beg_nrow();
+      beg_ncol := loc1.beg_ncol();
+      beg_ntot := loc1.beg_ntot();
     end // end of [then]
     else begin
-      beg_nrow := loc2.beg_nrow;
-      beg_ncol := loc2.beg_ncol;
-      beg_ntot := loc2.beg_ntot;
+      beg_nrow := loc2.beg_nrow();
+      beg_ncol := loc2.beg_ncol();
+      beg_ntot := loc2.beg_ntot();
     end // end of [else]
   // end of [if] // end of [val]
 //
   val () =
-  if loc1.end_ntot >= loc2.end_ntot
+  if loc1.end_ntot() >= loc2.end_ntot()
     then begin
-      end_nrow := loc1.end_nrow;
-      end_ncol := loc1.end_ncol;
-      end_ntot := loc1.end_ntot; 
+      end_nrow := loc1.end_nrow();
+      end_ncol := loc1.end_ncol();
+      end_ntot := loc1.end_ntot(); 
     end // end of [then]
     else begin
-      end_nrow := loc2.end_nrow;
-      end_ncol := loc2.end_ncol;
-      end_ntot := loc2.end_ntot; 
+      end_nrow := loc2.end_nrow();
+      end_ncol := loc2.end_ncol();
+      end_ntot := loc2.end_ntot(); 
     end // end of [else]
   // end of [if] // end of [val]
 //
-in '{
-  filename= loc1.filename
-, beg_ntot= beg_ntot, beg_nrow= beg_nrow, beg_ncol= beg_ncol
-, end_ntot= end_ntot, end_nrow= end_nrow, end_ncol= end_ncol
-, locpragma= loc1.locpragma
-} end // end of [location_combine_main]
+in
+  location_LOCATION
+  (
+    loc1.filename()
+  , beg_ntot, beg_nrow, beg_ncol
+  , end_ntot, end_nrow, end_ncol
+  , loc1.locpragma()
+  ) (* end of [location_LOCATION] *)
+end // end of [location_combine_main]
 
 in // in of [local]
 
@@ -424,7 +395,7 @@ fprint_line_pragma
   (out, loc) = let
 //
 val
-line = loc.beg_nrow
+line = loc.beg_nrow()
 //
 val () =
 if
@@ -433,18 +404,12 @@ then let
   val () = fprint_string (out, "#line ")
   val () = fprint_int (out, line+1) // counting from 1
   val () = fprint_string (out, " \"")
-  val () = $FIL.fprint_filename_full (out, loc.filename)
+  val () = $FIL.fprint_filename_full (out, loc.filename())
   val () = fprint_string (out, "\"\n")
 in
   // nothing
 end // end of [then]
 else let
-(*
-//
-// HX-2010-11-02: this is another possibility:
-//
-  val () = fprint1_string (out, "#line 1 \"<built-in>\"\n")
-*)
 in
   // nothing
 end // end of [else]
@@ -457,47 +422,38 @@ end // end of [fprint_line_pragma]
 
 local
 //
-datatype
-locpragma =
-  | LOCPRAGMA0 of ()
-  | LOCPRAGMA1 of (string(*...*))
-  | LOCPRAGMA2 of (string(*file*), string(*...*))
+// HX: the global state is kept in cells of the global arena
 //
-assume locpragma_type = locpragma
-//
-typedef locpragmalst = List0(locpragma)
-//
-val
-the_locpragma = ref<locpragma>(LOCPRAGMA0())
-val
-the_locpragmalst = ref<locpragmalst>(list_nil())
+val the_locpragma = the_garena_alloc (sizeof<locpragma>)
+val () = $UN.ptr0_set<locpragma> (the_locpragma, locpragma0_make())
+val the_locpragmalst = the_garena_alloc (sizeof<glist(locpragma)>)
+val () = $UN.ptr0_set<glist(locpragma)> (the_locpragmalst, glist_nil())
 //
 in (* in-of-local *)
 //
 implement
-locpragma0_make()= LOCPRAGMA0()
+locpragma0_make()= locpragma_LOCPRAGMA0()
 implement
-locpragma1_make(x)= LOCPRAGMA1(x)
+locpragma1_make(x)= locpragma_LOCPRAGMA1(x)
 implement
-locpragma2_make(x1, x2)= LOCPRAGMA2(x1, x2)
+locpragma2_make(x1, x2)= locpragma_LOCPRAGMA2(x1, x2)
 //
 implement
 the_location_pragma_get
-  ((*void*)) = !the_locpragma
+  ((*void*)) = $UN.ptr0_get<locpragma> (the_locpragma)
 implement
 the_location_pragma_set
-  (x0) = !the_locpragma := x0
+  (x0) = $UN.ptr0_set<locpragma> (the_locpragma, x0)
 //
 implement
 the_location_pragma_pop
   ((*void*)) = () where
 {
 //
-  val x0 = !the_locpragma
-  val xs = !the_locpragmalst
-  val-list_cons(x, xs) = xs
-  val () = !the_locpragma := x
-  val () = !the_locpragmalst := xs
+  val xs = $UN.ptr0_get<glist(locpragma)> (the_locpragmalst)
+  val-~GLcons(x, xs) = glist_view (xs)
+  val () = $UN.ptr0_set<locpragma> (the_locpragma, x)
+  val () = $UN.ptr0_set<glist(locpragma)> (the_locpragmalst, xs)
 //
 } (* end of [the_location_pragma_pop] *)
 //
@@ -506,10 +462,10 @@ the_location_pragma_push
   ((*void*)) = () where
 {
 //
-  val x0 = !the_locpragma
-  val xs = !the_locpragmalst
-  val () = !the_locpragma := LOCPRAGMA0()
-  val () = !the_locpragmalst := list_cons(x0, xs)
+  val x0 = $UN.ptr0_get<locpragma> (the_locpragma)
+  val xs = $UN.ptr0_get<glist(locpragma)> (the_locpragmalst)
+  val () = $UN.ptr0_set<locpragma> (the_locpragma, locpragma0_make())
+  val () = $UN.ptr0_set<glist(locpragma)> (the_locpragmalst, glist_cons(x0, xs))
 //
 } (* end of [the_location_pragma_push] *)
 
@@ -519,11 +475,11 @@ implement
 fprint_locpragma(out, x) =
 (
 //
-case+ x of
-| LOCPRAGMA0() => ()
-| LOCPRAGMA1(loc) =>
+case+ locpragma_view(x) of
+| ~LOCPRAGMA0() => ()
+| ~LOCPRAGMA1(loc) =>
   fprint! (out, "#locpragma(", loc, "): ")
-| LOCPRAGMA2(fil, loc) =>
+| ~LOCPRAGMA2(fil, loc) =>
   fprint! (out, "#locpragma(", fil, ": ", loc, "): ")
 //
 ) (* end of [fprint_locpragma] *)

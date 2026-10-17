@@ -39,8 +39,6 @@
 //
 (* ****** ****** *)
 //
-staload
-"libats/ML/SATS/basis.sats"
 //
 (* ****** ****** *)
 
@@ -50,6 +48,9 @@ staload UN = $UNSAFE
 //
 staload
 "./../SATS/atexting.sats"
+//
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -83,22 +84,22 @@ token_topeval
 in
 //
 case+
-x0.token_node
+token_node_view(x0.token_node())
 of // case+
 //
-| TOKide(ide) => fprint(out, ide)
-| TOKint(rep) => fprint(out, rep)
+| ~TOKide(ide) => fprint(out, ide)
+| ~TOKint(rep) => fprint(out, rep)
 //
-| TOKspace(cs) => fprint(out, cs)
-| TOKsharp(cs) => fprint(out, cs)
+| ~TOKspace(cs) => fprint(out, cs)
+| ~TOKsharp(cs) => fprint(out, cs)
 //
-| TOKsquote() => fprint(out, "'")
-| TOKdquote(cs) => fprint(out, cs)
+| ~TOKsquote() => fprint(out, "'")
+| ~TOKdquote(cs) => fprint(out, cs)
 //
-| TOKspchr(c) =>
+| ~TOKspchr(c) =>
     fprint_char(out, int2char0(c))
   // TOKspchr
-| TOKbslash(c) => let
+| ~TOKbslash(c) => let
 (*
     val isesp =
       is_escaped(c)
@@ -113,12 +114,12 @@ of // case+
     if (c != '\n') then fprint_char(out, c)
   end // TOKbslash
 //
-| TOKcode_beg _ => fprint(out, "%{")
-| TOKcode_end _ => fprint(out, "%}")
+| ~TOKcode_beg _ => fprint(out, "%{")
+| ~TOKcode_end _ => fprint(out, "%}")
 //
-| TOKeol((*void*)) => fprint_newline(out)
+| ~TOKeol((*void*)) => fprint_newline(out)
 //
-| TOKeof((*void*)) => ((*end-of-file*))
+| ~TOKeof((*void*)) => ((*end-of-file*))
 //
 end // end of [token_topeval]
 
@@ -133,46 +134,46 @@ atext_topeval
 in
 //
 case+
-x0.atext_node
+atext_node_view(x0.atext_node())
 of // case+
 //
-| TEXTnil() => ()
+| ~TEXTnil() => ()
 //
-| TEXTtoken(tok) =>
+| ~TEXTtoken(tok) =>
   {
     val () = token_topeval(out, tok)
   } (* end of [TEXTtoken] *)
 //
-| TEXTstring(str) =>
+| ~TEXTstring(str) =>
   {
     val () = fprint_string(out, str)
   } (* end of [TEXTstring] *)
 //
-| TEXTerrmsg(msg) =>
+| ~TEXTerrmsg(msg) =>
   {
     val () = fprint_string(out, msg)
   } (* end of [TEXTerrmsg] *)
 //
-| TEXTlist(xs) =>
+| ~TEXTlist(xs) =>
   {
     val () = atextlst_topeval(out, xs)
   }
 //
-| TEXTsquote(xs) =>
+| ~TEXTsquote(xs) =>
   {
     val () = fprint(out, "'")
     val () = atextlst_topeval(out, xs)
     val () = fprint(out, "'")
   }
 //
-| TEXTdquote(tok, xs) =>
+| ~TEXTdquote(tok, xs) =>
   {
     val () = token_topeval(out, tok)
     val () = atextlst_topeval(out, xs)
     val () = token_topeval(out, tok)
   }
 //
-| TEXTextcode
+| ~TEXTextcode
     (tok_beg, txtlst, tok_end) =>
   {
     val () = token_topeval(out, tok_beg)
@@ -181,13 +182,13 @@ of // case+
   }
 //
 (*
-| TEXTdefname(tok, name) =>
+| ~TEXTdefname(tok, name) =>
   {
     val () = token_topeval(out, tok)
     val () = token_topeval(out, name)
   }
 *)
-| TEXTdefname _ =>
+| ~TEXTdefname _ =>
   {
     val x1 =
       atext_defname_eval(x0)
@@ -196,7 +197,7 @@ of // case+
   } (* end of [TEXTfuncall] *)
 //
 (*
-| TEXTfuncall
+| ~TEXTfuncall
     (tok0, tok1, arglst) =>
   {
     val () = token_topeval(out, tok0)
@@ -206,7 +207,7 @@ of // case+
     val () = fprint(out, ")")
   } (* end of [TEXTfuncall] *)
 *)
-| TEXTfuncall _ =>
+| ~TEXTfuncall _ =>
   {
     val x1 =
       atext_funcall_eval(x0)
@@ -222,12 +223,12 @@ implement
 atextlst_topeval
   (out, xs) =
 (
-case+ xs of
-| list0_nil() => ()
-| list0_cons(x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) =>
   (
     atext_topeval(out, x); atextlst_topeval(out, xs)
-  ) (* end of [list0_cons] *)
+  ) (* end of [list_cons] *)
 )
 //
 (* ****** ****** *)

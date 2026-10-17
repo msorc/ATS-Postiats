@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -92,7 +94,7 @@ out
 ,
 "\
 #\n\
-echo \"The \${ATSHOME}/contrib/libatscc2r34 files have been copied.\"\n\
+echo \"The \\${ATSHOME}/contrib/libatscc2r34 files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -169,7 +171,7 @@ ATS/contrib/libatscc2r34
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

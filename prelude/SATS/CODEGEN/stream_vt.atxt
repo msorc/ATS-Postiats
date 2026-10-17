@@ -59,6 +59,13 @@ stream_vt
 //
 \#endif // [\#if(0)]
 //
+#atscode_separator()
+//
+// HX-2026-10:
+// moved here from the (removed) [stream.sats]
+//
+exception StreamSubscriptExn of ((*void*))
+//
 vtypedef
 streamopt_vt(a:vt0p) = Option_vt(stream_vt(a))
 //
@@ -101,15 +108,11 @@ stream_vt_make_con
 // this is a regular function
 // instead of a cast function
 //
-fun{a:t0p}
-stream_t2vt(stream(INV(a))): stream_vt(a)
 //
 // HX-2014-04-07:
 // this is a regular function
 // instead of a cast function
 //
-fun{a:t0p}
-stream_vt2t(stream_vt(INV(a))): stream(a)
 //
 #atscode_separator()
 
@@ -434,26 +437,7 @@ xs: stream_vt(INV(a)), init: res, fopr: (Nat, res, &a >> a?!) -<cloptr1> res
 //
 #atscode_separator()
 
-fun
-{env:t0p}{a:t0p}
-stream_vt_unfold
-(
-  st0: env, fopr: (&env >> _) -<cloref1> a
-) : stream_vt(a) // end of [stream_vt_unfold]
-
-fun
-{env:t0p}{a:t0p}
-stream_vt_unfold_opt
-(
-  st0: env, fopr: (&env >> _) -<cloref1> Option_vt(a)
-) : stream_vt(a) // end of [stream_vt_unfold_opt]
-
-#atscode_separator()
 //
-fun
-{x,y:t0p}
-cross_stream_vt_list
-(xs: stream_vt(INV(x)), ys: List(INV(y))): stream_vt(@(x, y))
 fun
 {x,y:t0p}
 cross_stream_vt_list_vt
@@ -545,6 +529,6 @@ overload .eval_opt with streamer_vt_eval_opt
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "stream_vt_atxt.txt")
 %}\

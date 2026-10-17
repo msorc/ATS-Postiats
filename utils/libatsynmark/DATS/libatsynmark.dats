@@ -11,23 +11,42 @@
 
 (* ****** ****** *)
 //
-staload
-UN = "prelude/SATS/unsafe.sats"
+// HX-2026-10: no GC (ATS2 port of the ATS1 version of this file)
 //
 (* ****** ****** *)
 
-staload _(*anon*) = "prelude/DATS/list.dats"
-staload _(*anon*) = "prelude/DATS/list_vt.dats"
-staload _(*anon*) = "prelude/DATS/pointer.dats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
+#define ATS_DYNLOADFLAG 0 // no initialization
+
+(* ****** ****** *)
+//
 staload
-STDIO = "libc/SATS/stdio.sats"
+UN = "prelude/SATS/unsafe.sats"
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+//
+(* ****** ****** *)
+
+staload
+STDIO = "libats/libc/SATS/stdio.sats"
+
+(* ****** ****** *)
+
+staload "src/pats_lexing.sats"
+staload "src/pats_syntax.sats"
+staload _(*templates*) = "src/pats_error.dats"
 
 (* ****** ****** *)
 
 staload "./../SATS/libatsynmark.sats"
+
+(* ****** ****** *)
+
+#include "./libatsynmark_gen_dats.hats"
 
 (* ****** ****** *)
 
@@ -45,13 +64,43 @@ case+ opt of
     (fil) => $FIL.the_filenamelst_ppush (fil)
   // end of [Some_vt]
 | ~None_vt () => let
-    val () = prerr ": warning(libatsynmark)"
+    val () = prerr_string ": warning(libatsynmark)"
     val () = prerrln! (": the file [", name, "] is not available.")
   in
-    $ERR.abort ()
+    $ERR.abort<void> ()
   end // end of [None_vt]
 //
 end // end of [libatsynmark_filename_set_current]
+
+(* ****** ****** *)
+
+implement
+libatsynmark_char_list_vt_make_file
+  (inp) = let
+//
+fun loop
+(
+  inp: FILEref, res: charlst_vt
+) : charlst_vt = let
+  val i = $STDIO.fgetc0 (inp)
+in
+  if i >= 0
+    then loop (inp, list_vt_cons ($UN.cast{char} (i), res))
+    else list_vt_reverse (res)
+  // end of [if]
+end // end of [loop]
+//
+in
+  loop (inp, list_vt_nil ())
+end // end of [libatsynmark_char_list_vt_make_file]
+
+(* ****** ****** *)
+
+implement
+putc_make (env, f) = @(env, f)
+
+implement
+putc_call (putc, c) = putc.1 (putc.0, c)
 
 (* ****** ****** *)
 
@@ -64,7 +113,7 @@ in
   | '<' => fpr ("&lt;")
   | '>' => fpr ("&gt;")
   | '&' => fpr ("&amp;")
-  | _ => putc (c)
+  | _ => putc_call (putc, c)
 end // end of [fhtml_putc]
 
 (* ****** ****** *)
@@ -73,34 +122,32 @@ implement
 fstring_putc
   (x, putc) = let
 //
-fun loop{n:int}
-  {i:nat | i <= n} .<n-i>.
+fun loop
 (
-  x: string n
-, i: size_t i
-, putc: putc_type
-, nerr: &int
+  p: ptr, putc: putc_type, nerr: int
 ) : int(*nerr*) = let
-  val isnot = string_isnot_atend (x, i)
+  val c = $UN.ptr0_get<char> (p)
 in
 //
-if isnot then let
-  val err = putc (x[i])
-  val () = if err != 0 then nerr := nerr + 1
+if c != '\000' then let
+  val err = putc_call (putc, c)
+  val nerr = (if err != 0 then nerr + 1 else nerr): int
 in
-  loop (x, i+1, putc, nerr)
+  loop (ptr0_succ<char> (p), putc, nerr)
 end else nerr // end of [if]
 //
 end // end of [loop]
 //
-var nerr: int = 0
-val x = string1_of_string (x)
-//
 in
-  loop (x, 0, putc, nerr)
+  loop ($UN.cast{ptr} (x), putc, 0)
 end // end of [fstring_putc]
 
 (* ****** ****** *)
+
+implement
+fprint_position
+  (out, x) = $LOC.fprint_position (out, x)
+// end of [fprint_position]
 
 implement
 fprint_location
@@ -110,37 +157,27 @@ fprint_location
 (* ****** ****** *)
 
 implement
-token_get_loc (x) = x.token_loc
-
-(* ****** ****** *)
-
-local
-
-staload "src/pats_lexing.sats"
-
-in (* in of [local] *)
-
-implement
-token_is_eof (x) =
-  case+ x.token_node of
-  | T_EOF () => true | _ => false
-// end of [token_is_eof]
+token_get_loc (x) = x.token_loc ()
 
 (* ****** ****** *)
 
 implement
-token_is_comment (x) =
-  case+ x.token_node of
-  | T_COMMENT_line () => true
-  | T_COMMENT_block () => true
-  | T_COMMENT_rest () => true
-  | _ => false
-// end of [token_is_comment]
+token_is_eof (x) = token_node_is_T_EOF (x.token_node ())
+
+(* ****** ****** *)
+
+implement
+token_is_comment (x) = let
+  val tnd = x.token_node ()
+in
+  token_node_is_T_COMMENT_line (tnd)
+  || token_node_is_T_COMMENT_block (tnd)
+  || token_node_is_T_COMMENT_rest (tnd)
+end // end of [token_is_comment]
 
 implement
 token_is_extcode (x) =
-  case+ x.token_node of
-  | T_EXTCODE _ => true | _ => false
+  token_node_is_T_EXTCODE (x.token_node ())
 // end of [token_is_extcode]
 
 (* ****** ****** *)
@@ -154,226 +191,51 @@ token_is_keyword
 ** token_is_keyword
 *)
 //
+val tnd = x.token_node ()
+//
+macdef is (c) = ,(c) (tnd)
+//
 in
 //
-case+
-  x.token_node of
+if token_node_is_T_NONE (tnd) then false
 //
-(*
-| T_AT () => true
+else if token_node_is_T_IDENT_alp (tnd) then false
+else if token_node_is_T_IDENT_sym (tnd) then false
+else if token_node_is_T_IDENT_arr (tnd) then false
+else if token_node_is_T_IDENT_tmp (tnd) then false
+else if token_node_is_T_IDENT_dlr (tnd) then false
+else if token_node_is_T_IDENT_srp (tnd) then false
+else if token_node_is_T_IDENT_ext (tnd) then false
 //
-| T_BACKSLASH () => true
-| T_BANG () => true
-| T_BAR () => true
-| T_BQUOTE () => true
+else if token_node_is_T_CHAR (tnd) then false
+else if token_node_is_T_INT (tnd) then false
+else if token_node_is_T_FLOAT (tnd) then false
+else if token_node_is_T_STRING (tnd) then false
 //
-| T_COLON () => true
-| T_COLONLT () => true
+else if token_node_is_T_EXTCODE (tnd) then false
 //
-| T_DOLLAR () => true
+else if token_node_is_T_COMMENT_line (tnd) then false
+else if token_node_is_T_COMMENT_block (tnd) then false
+else if token_node_is_T_COMMENT_rest (tnd) then false
 //
-| T_DOT () => true
-| T_DOTDOT () => true
-| T_DOTDOTDOT () => true
+else if token_node_is_T_ERR (tnd) then false
 //
-| T_DOTINT (_) => true
+else if token_node_is_T_EOF (tnd) then false
 //
-| T_EQ () => true
-| T_EQGT () => true
-| T_EQLT () => true
-| T_EQLTGT () => true
-| T_EQSLASHEQGT () => true
-| T_EQGTGT () => true
-| T_EQSLASHEQGTGT () => true
-//
-| T_HASH () => true
-//
-| T_LT () => true
-| T_GT () => true
-//
-| T_GTLT () => true
-| T_DOTLT () => true
-| T_GTDOT () => true
-| T_DOTLTGTDOT () => true
-//
-| T_MINUSGT () => true
-| T_MINUSLT () => true
-| T_MINUSLTGT () => true
-//
-| T_TILDE () => true
-//
-| T_ABSTYPE _ => true
-| T_AND () => true
-| T_AS () => true
-| T_ASSUME () => true
-| T_BEGIN () => true
-| T_BRKCONT (_) => true
-| T_CASE _ => true
-| T_CLASSDEC () => true
-| T_DATASORT () => true
-| T_DATATYPE (_) => true
-| T_DO () => true
-| T_DYNLOAD () => true
-| T_ELSE () => true
-| T_END () => true
-| T_EXCEPTION () => true
-| T_EXTERN () => true
-| T_EXTYPE () => true
-| T_EXTVAL () => true
-| T_FIX (_) => true
-| T_FIXITY (_) => true
-| T_FOR (_) => true
-| T_FUN (_) => true
-| T_IF () => true
-| T_IMPLEMENT () => true
-| T_IN () => true
-| T_LAM (_) => true
-| T_LET () => true
-| T_LOCAL () => true
-| T_MACDEF (_) => true
-| T_NONFIX () => true
-| T_OVERLOAD () => true
-| T_OF () => true
-| T_OP () => true
-| T_REC () => true
-| T_REFAT () => true
-| T_SCASE () => true
-| T_SIF () => true
-| T_SORTDEF () => true
-| T_STACST () => true
-| T_STADEF () => true
-| T_STALOAD () => true
-| T_SYMELIM () => true
-| T_SYMINTR () => true
-| T_THEN () => true
-| T_TKINDEF () => true
-| T_TRY () => true
-| T_TYPE (_) => true
-| T_TYPEDEF (_) => true
-| T_VAL (_) => true
-| T_VAR () => true
-| T_WHEN () => true
-| T_WHERE () => true
-| T_WHILE (_) => true
-| T_WITH () => true
-| T_WITHTYPE (_) => true
-//
-| T_ADDRAT () => true
-| T_FOLDAT () => true
-| T_FREEAT () => true
-| T_VIEWAT () => true
-//
-| T_DLRARRSZ () => true
-| T_DLRDYNLOAD () => true
-| T_DLRDELAY (_) => true
-| T_DLREFFMASK () => true
-| T_DLREFFMASK_ARG (_) => true
-| T_DLREXTERN () => true
-| T_DLREXTKIND () => true
-| T_DLREXTYPE () => true
-| T_DLREXTYPE_STRUCT () => true
-| T_DLREXTVAL () => true
-| T_DLRRAISE () => true
-| T_DLRLST (_) => true
-| T_DLRREC (_) => true
-| T_DLRTUP (_) => true
-//
-| T_SRPASSERT () => true
-| T_SRPDEFINE () => true
-| T_SRPELIF () => true
-| T_SRPELIFDEF () => true
-| T_SRPELIFNDEF () => true
-| T_SRPELSE () => true
-| T_SRPENDIF () => true
-| T_SRPERROR () => true
-| T_SRPIF () => true
-| T_SRPIFDEF () => true
-| T_SRPIFNDEF () => true
-| T_SRPINCLUDE () => true
-| T_SRPPRINT () => true
-| T_SRPTHEN () => true
-| T_SRPUNDEF () => true
-//
-| T_SRPFILENAME () => true
-| T_SRPLOCATION () => true
-//
-| T_LPAREN () => true
-| T_RPAREN () => true
-| T_LBRACKET () => true
-| T_RBRACKET () => true
-| T_LBRACE () => true
-| T_RBRACE () => true
-//
-| T_COMMA () => true
-| T_SEMICOLON () => true
-//
-| T_ATLPAREN () => true
-| T_QUOTELPAREN () => true
-| T_ATLBRACKET () => true
-| T_QUOTELBRACKET () => true
-| T_HASHLBRACKET () => true
-| T_ATLBRACE () => true
-| T_QUOTELBRACE () => true
-//
-| T_BQUOTELPAREN () => true
-| T_COMMALPAREN () => true
-| T_PERCENTLPAREN () => true
-//
-*)
-//
-| T_NONE () => false
-//
-| T_IDENT_alp (_) => false
-| T_IDENT_sym (_) => false
-| T_IDENT_arr (_) => false
-| T_IDENT_tmp (_) => false
-| T_IDENT_dlr (_) => false
-| T_IDENT_srp (_) => false
-| T_IDENT_ext (_) => false
-//
-| T_CHAR (_) => false
-| T_INT _ => false
-| T_FLOAT _ => false
-| T_STRING (_) => false
-//
-| T_EXTCODE (_, _) => false
-//
-| T_COMMENT_line () => false
-| T_COMMENT_block () => false
-| T_COMMENT_rest () => false
-//
-| T_ERR () => false
-//
-| T_EOF () => false
-//
-| _ (*rest-of-token*) => true
+else true (* rest-of-token *)
 //
 end // end of [token_is_keyword]
 
 (* ****** ****** *)
 
 implement
-token_is_int (x) =
-  case+ x.token_node of
-  | T_INT _ => true | _ => false
-// end of [token_is_int]
+token_is_int (x) = token_node_is_T_INT (x.token_node ())
 implement
-token_is_char (x) =
-  case+ x.token_node of
-  | T_CHAR (_) => true | _ => false
-// end of [token_is_char]
+token_is_char (x) = token_node_is_T_CHAR (x.token_node ())
 implement
-token_is_float (x) =
-  case+ x.token_node of
-  | T_FLOAT _ => true | _ => false
-// end of [token_is_float]
+token_is_float (x) = token_node_is_T_FLOAT (x.token_node ())
 implement
-token_is_string (x) =
-  case+ x.token_node of
-  | T_STRING (_) => true | _ => false
-// end of [token_is_string]
-
-end // end of [local]
+token_is_string (x) = token_node_is_T_STRING (x.token_node ())
 
 (* ****** ****** *)
 
@@ -389,18 +251,40 @@ LBF = "src/pats_lexbuf.sats"
 stadef lexbuf = $LBF.lexbuf
 
 (* ****** ****** *)
+//
+// HX-2026-10:
+// a lexbufobj is a lexbuf in the C heap: it is
+// allocated by [ptr_alloc] and freed by [lexbufobj_free]
+//
+extern
+castfn
+lexbufobj_of_ptr
+  {l:addr}
+(
+  pf1: mfree_gc_v (l), pf2: lexbuf @ l | p: ptr l
+) : lexbufobj
+extern
+castfn
+lexbufobj_to_ptr
+  (lbf: lexbufobj)
+  : [l:addr] (mfree_gc_v (l), lexbuf @ l | ptr l)
+//
+extern
+castfn
+lexbufobj_takeout
+  (lbf: !lexbufobj)
+  : [l:addr] (lexbuf @ l, lexbuf @ l -<lin,prf> void | ptr l)
+//
+(* ****** ****** *)
 
 implement
 lexbufobj_make_string
   (inp) = let
   val [l:addr]
-    (pfgc, pfat | p) = ptr_alloc<lexbuf> ()
+    (pfat, pfgc | p) = ptr_alloc<lexbuf> ()
   val () = $LBF.lexbuf_initize_string (!p, inp)
-  extern castfn __cast
-    (pf1: free_gc_v (lexbuf?, l), pf2: lexbuf @ l | p: ptr l): lexbufobj
-  // end of [extern]
 in
-  __cast (pfgc, pfat | p)
+  lexbufobj_of_ptr (pfgc, pfat | p)
 end // end of [lexbufobj_make_string]
 
 (* ****** ****** *)
@@ -411,17 +295,12 @@ lexbufobj_make_charlst_vt
 //
 val
 [l:addr]
-  (pfgc, pfat | p) = ptr_alloc<lexbuf> ()
+  (pfat, pfgc | p) = ptr_alloc<lexbuf> ()
 //
 val () = $LBF.lexbuf_initize_charlst_vt (!p, inp)
 //
-extern
-castfn __cast
-  (pf1: free_gc_v (lexbuf?, l), pf2: lexbuf @ l | p: ptr l): lexbufobj
-// end of [extern]
-//
 in
-  __cast (pfgc, pfat | p)
+  lexbufobj_of_ptr (pfgc, pfat | p)
 end // end of [lexbufobj_make_charlst_vt]
 
 (* ****** ****** *)
@@ -432,21 +311,13 @@ lexbufobj_make_fileref
 //
 val
 [l:addr]
-  (pfgc, pfat | p) = ptr_alloc<lexbuf> ()
+  (pfat, pfgc | p) = ptr_alloc<lexbuf> ()
 //
-val
-getc =
-  lam () =<cloptr1> $STDIO.fgetc0_err (inp)
-//
-val () = $LBF.lexbuf_initize_getc (!p, getc)
-//
-extern
-castfn __cast
-  (pf1: free_gc_v (lexbuf?, l), pf2: lexbuf @ l | p: ptr l): lexbufobj
-// end of [extern]
+val () =
+  $LBF.lexbuf_initize_getc (!p, llam () => $STDIO.fgetc0 (inp))
 //
 in
-  __cast (pfgc, pfat | p)
+  lexbufobj_of_ptr (pfgc, pfat | p)
 end // end of [lexbufobj_make_fileref]
 
 (* ****** ****** *)
@@ -454,12 +325,7 @@ end // end of [lexbufobj_make_fileref]
 implement
 lexbufobj_free (lbf) = let
 //
-extern
-castfn
-__cast (lbf: lexbufobj)
-  : [l:addr] (free_gc_v (lexbuf?, l), lexbuf @ l | ptr l)
-//
-val (pfgc, pfat | p) = __cast (lbf)
+val (pfgc, pfat | p) = lexbufobj_to_ptr (lbf)
 //
 val ((*cleared*)) = $LBF.lexbuf_uninitize (!p)
 //
@@ -478,37 +344,22 @@ vtypedef lexbuf = $LEX.lexbuf
 //
 fun loop
 (
-  buf: &lexbuf, res: &res? >> res
-) : void = let
+  buf: &lexbuf, res: res
+) : res = let
   val tok =
-    $LEX.lexing_next_token (buf)
+    lexing_next_token (buf)
   val iseof = token_is_eof (tok)
 in
 //
-if iseof then
-  res := list_vt_nil ()
-else let
-  val () = res :=
-    list_vt_cons{token}{0}(tok, ?)
-  val+ list_vt_cons (_, !p_res1) = res
-  val () = loop (buf, !p_res1)
-  prval ((*void*)) = fold@ (res)
-in
-  // nothing
-end // end of [if]
+if iseof
+  then list_vt_reverse (res)
+  else loop (buf, list_vt_cons (tok, res))
 //
 end (* end of [loop] *)
 //
-var res: res
-val (pf, fpf | p) =
-  __cast (lbf) where {
-  extern
-  castfn
-  __cast (lbf: !lexbufobj)
-    : [l:addr] (lexbuf @ l, lexbuf @ l -<lin,prf> void | ptr l)
-} (* end of [val] *)
+val (pf, fpf | p) = lexbufobj_takeout (lbf)
 //
-val () = loop (!p, res)
+val res = loop (!p, list_vt_nil ())
 //
 prval ((*rtrned*)) = fpf (pf)
 //
@@ -524,35 +375,42 @@ stadef tokbuf = $TBF.tokbuf
 
 (* ****** ****** *)
 
+extern
+castfn
+tokbufobj_of_ptr
+  {l:addr}
+(
+  pf1: mfree_gc_v (l), pf2: tokbuf @ l | p: ptr l
+) : tokbufobj
+extern
+castfn
+tokbufobj_to_ptr
+  (tbf: tokbufobj)
+  : [l:addr] (mfree_gc_v (l), tokbuf @ l | ptr l)
+extern
+castfn
+tokbufobj_takeout
+  (tbf: !tokbufobj)
+  : [l:addr] (tokbuf @ l, tokbuf @ l -<lin,prf> void | ptr l)
+
+(* ****** ****** *)
+
 implement
 tokbufobj_make_lexbufobj
   (lbf) = let
 //
-val (pfgc1, pfat1 | p1) = let
-  extern castfn __cast
-    (lbf: lexbufobj): [l:addr] (free_gc_v(lexbuf?, l), lexbuf@l | ptr l)
-  // end of [castfn] // end of [extern]
-in
-  __cast (lbf)
-end // end of [val]
+val (pfgc1, pfat1 | p1) = lexbufobj_to_ptr (lbf)
 //
 val
 [l2:addr]
-  (pfgc2, pfat2 | p2) = ptr_alloc<tokbuf> ()
+  (pfat2, pfgc2 | p2) = ptr_alloc<tokbuf> ()
 //
 val () = $TBF.tokbuf_initize_lexbuf (!p2, !p1)
 //
 val ((*void*)) = ptr_free (pfgc1, pfat1 | p1)
 //
-extern
-castfn
-__cast
-(
-  pf1: free_gc_v (tokbuf?, l2), pf2: tokbuf @ l2 | p: ptr l2
-) : tokbufobj // end of [castfn] // end of [extern]
-//
 in
-  __cast (pfgc2, pfat2 | p2)
+  tokbufobj_of_ptr (pfgc2, pfat2 | p2)
 end // end of [tokbufobj_make_lexbufobj]
 
 (* ****** ****** *)
@@ -560,14 +418,7 @@ end // end of [tokbufobj_make_lexbufobj]
 implement
 tokbufobj_free (tbf) = let
 //
-extern
-castfn
-__cast
-(
-  tbf: tokbufobj
-) : [l:addr] (free_gc_v (tokbuf?, l), tokbuf @ l | ptr l)
-//
-val (pfgc, pfat | p) = __cast (tbf)
+val (pfgc, pfat | p) = tokbufobj_to_ptr (tbf)
 //
 val () = $TBF.tokbuf_uninitize (!p)
 //
@@ -581,11 +432,7 @@ implement
 tokbufobj_unget_token
   (tbf, tok) = let
 //
-val (pf, fpf | p) = __cast (tbf) where
-{
-  extern castfn __cast (tbf: !tokbufobj)
-    : [l:addr] (tokbuf @ l, tokbuf @ l -<lin,prf> void | ptr l)
-} (* end of [val] *)
+val (pf, fpf | p) = tokbufobj_takeout (tbf)
 //
 val () = $TBF.tokbuf_unget_token (!p, tok)
 //
@@ -599,12 +446,14 @@ end // end of [tokbufobj_unget_token]
 //
 staload SYM = "src/pats_symbol.sats"
 //
-overload = with $SYM.eq_symbol_symbol
-overload print with $SYM.print_symbol
-//
 (* ****** ****** *)
 
 staload SYN = "src/pats_syntax.sats"
+
+(* ****** ****** *)
+
+fn
+eq_symbol (x: symbol, y: symbol): bool = $SYM.eq_symbol_symbol (x, y)
 
 (* ****** ****** *)
 
@@ -613,8 +462,9 @@ test_symbol_p0at
   (sym, p0t) = let
 in
 //
-case+ p0t.p0at_node of
-| $SYN.P0Tide (sym1) => sym = sym1 | _ => false
+case+ p0at_node_view (p0t.p0at_node ()) of
+| ~P0Tide (sym1) => eq_symbol (sym, sym1)
+| v (* rest-of-p0at *) => (p0at_node_view_free (v); false)
 //
 end // end of [test_symbol_p0at]
 
@@ -626,19 +476,19 @@ fun
 s0taconlst_test
 (
   sym: symbol
-, xs0: $SYN.s0taconlst
+, xs0: s0taconlst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) => let
-    val sym1 = x.s0tacon_sym
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) => let
+    val sym1 = x.s0tacon_sym ()
   in
-    if sym = sym1
-      then true else s0taconlst_test(sym, xs)
+    if eq_symbol (sym, sym1)
+      then true else s0taconlst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [s0taconlst_test]
 
@@ -646,38 +496,38 @@ fun
 s0expdeflst_test
 (
   sym: symbol
-, xs0: $SYN.s0expdeflst
+, xs0: s0expdeflst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) => let
-    val sym1 = x.s0expdef_sym
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) => let
+    val sym1 = x.s0expdef_sym ()
   in
-    if sym = sym1
+    if eq_symbol (sym, sym1)
       then true else s0expdeflst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [s0expdeflst_test]
 
 fun
 e0xndeclst_test
 (
-  sym: symbol, xs0: $SYN.e0xndeclst
+  sym: symbol, xs0: e0xndeclst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) => let
-    val sym1 = x.e0xndec_sym
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) => let
+    val sym1 = x.e0xndec_sym ()
   in
-    if sym = sym1
-      then true else e0xndeclst_test(sym, xs)
+    if eq_symbol (sym, sym1)
+      then true else e0xndeclst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [e0xndeclst_test]
 
@@ -685,22 +535,22 @@ fun
 d0atdeclst_test
 (
   sym: symbol
-, xs1: $SYN.d0atdeclst, xs2: $SYN.s0expdeflst
+, xs1: d0atdeclst, xs2: s0expdeflst
 ) : bool = let
 //
 fun loop1
 (
-  sym: symbol, xs0: $SYN.d0atdeclst
+  sym: symbol, xs0: d0atdeclst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) =>
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) =>
   (
-    if sym = x.d0atdec_sym
-      then true else loop1(sym, xs)
-  ) (* end of [list_cons] *)
+    if eq_symbol (sym, x.d0atdec_sym ())
+      then true else loop1 (sym, xs)
+  ) (* end of [GLcons] *)
 //
 end // end of [loop1]
 //
@@ -711,79 +561,78 @@ end // end of [d0atdeclst_test]
 fun
 d0cstdeclst_test
 (
-  sym: symbol, xs0: $SYN.d0cstdeclst
+  sym: symbol, xs0: d0cstdeclst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_cons
-    (x, xs) => let
-    val sym1 = x.d0cstdec_sym
+case+ glist_view (xs0) of
+| ~GLcons (x, xs) => let
+    val sym1 = x.d0cstdec_sym ()
   in
-    if sym = sym1
-      then true else d0cstdeclst_test(sym, xs)
+    if eq_symbol (sym, sym1)
+      then true else d0cstdeclst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
-| list_nil () => false
+  end // end of [GLcons]
+| ~GLnil () => false
 //
 end // end of [d0cstdeclst_test]
 
 fun
 m0acdeflst_test
 (
-  sym: symbol, xs0: $SYN.m0acdeflst
+  sym: symbol, xs0: m0acdeflst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) => let
-    val sym1 = x.m0acdef_sym
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) => let
+    val sym1 = x.m0acdef_sym ()
   in
-    if sym = sym1
+    if eq_symbol (sym, sym1)
       then true else m0acdeflst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [m0acdeflst_test]
 
 fun
 f0undeclst_test
 (
-  sym: symbol, xs0: $SYN.f0undeclst
+  sym: symbol, xs0: f0undeclst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) => let
-    val sym1 = x.f0undec_sym
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) => let
+    val sym1 = x.f0undec_sym ()
   in
-    if sym = sym1
+    if eq_symbol (sym, sym1)
       then true else f0undeclst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [f0undeclst_test]
 
 fun
 v0aldeclst_test
 (
-  sym: symbol, xs0: $SYN.v0aldeclst
+  sym: symbol, xs0: v0aldeclst
 ) : bool = let
 in
 //
-case+ xs0 of
-| list_nil() => false
-| list_cons(x, xs) => let
-    val p0t = x.v0aldec_pat
+case+ glist_view (xs0) of
+| ~GLnil () => false
+| ~GLcons (x, xs) => let
+    val p0t = x.v0aldec_pat ()
   in
     if test_symbol_p0at (sym, p0t)
       then true else v0aldeclst_test (sym, xs)
     // end of [if]
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
-end // end of [f0undeclst_test]
+end // end of [v0aldeclst_test]
 
 in (* in of [local] *)
 
@@ -792,33 +641,33 @@ test_symbol_d0ecl
   (sym, d0c) = let
 in
 //
-case+ d0c.d0ecl_node of
+case+ d0ecl_node_view (d0c.d0ecl_node ()) of
 //
-| $SYN.D0Coverload
+| ~D0Coverload
     (id, dqid, pval) =>
   (
-    if id.i0de_sym = sym then true else false
+    if eq_symbol (id.i0de_sym (), sym) then true else false
   )
 //
-| $SYN.D0Cstacons
+| ~D0Cstacons
     (_, xs) => s0taconlst_test (sym, xs)
-| $SYN.D0Csexpdefs
+| ~D0Csexpdefs
     (_, xs) => s0expdeflst_test (sym, xs)
 //
-| $SYN.D0Cexndecs
+| ~D0Cexndecs
     (xs0) => e0xndeclst_test (sym, xs0)
 //
-| $SYN.D0Cdatdecs
+| ~D0Cdatdecs
     (knd, xs1, xs2) => d0atdeclst_test (sym, xs1, xs2)
 //
-| $SYN.D0Cdcstdecs
+| ~D0Cdcstdecs
     (_, _, _, xs) => d0cstdeclst_test (sym, xs)
 //
-| $SYN.D0Cmacdefs(_, _, xs) => m0acdeflst_test (sym, xs)
-| $SYN.D0Cfundecs(_, _, xs) => f0undeclst_test (sym, xs)
-| $SYN.D0Cvaldecs(_, _, xs) => v0aldeclst_test (sym, xs)
+| ~D0Cmacdefs(_, _, xs) => m0acdeflst_test (sym, xs)
+| ~D0Cfundecs(_, _, xs) => f0undeclst_test (sym, xs)
+| ~D0Cvaldecs(_, _, xs) => v0aldeclst_test (sym, xs)
 //
-| _ (* rest-of-d0ecl *) => false
+| v (* rest-of-d0ecl *) => (d0ecl_node_view_free (v); false)
 //
 end // end of [test_symbol_d0ecl]
 
@@ -832,10 +681,7 @@ staload PAR = "src/pats_parsing.sats"
 
 local
 
-typedef charlst = List (char)
-vtypedef charlst_vt = List_vt (char)
-
-typedef d0eclist = $SYN.d0eclist
+typedef d0eclist = d0eclist
 
 (* ****** ****** *)
 //
@@ -843,19 +689,23 @@ typedef d0eclist = $SYN.d0eclist
 // for getting the last
 // position of the current line
 //
-fn* EOLgetpos
+fun EOLgetpos
 (
   inp: !charlst_vt, pos1: lint, pos2: lint
 ) : lint = let
 in
 //
-if pos1 < pos2 then let
-  val-list_vt_cons (_, !p_cs) = inp
-  val pos2 = EOLgetpos (!p_cs, pos1+1L, pos2)
-  prval () = fold@ (inp)
-in
-  pos2
-end else
+if pos1 < pos2 then
+(
+  case+ inp of
+  | @list_vt_cons (_, cs) => let
+      val pos2 = EOLgetpos (cs, pos1+1L, pos2)
+      prval () = fold@ (inp)
+    in
+      pos2
+    end // end of [list_vt_cons]
+  | list_vt_nil () => pos2
+) else
   EOLgetpos2 (inp, pos2)
 // end of [if]
 //
@@ -868,11 +718,10 @@ and EOLgetpos2
 in
 //
 case+ inp of
-| list_vt_cons
-    (c, !p_cs) =>
+| @list_vt_cons (c, cs) =>
   (
     if c != '\n' then let
-      val pos2 = EOLgetpos2 (!p_cs, pos2+1L)
+      val pos2 = EOLgetpos2 (cs, pos2+1L)
       prval () = fold@ (inp)
     in
       pos2
@@ -880,7 +729,7 @@ case+ inp of
       prval () = fold@ (inp) in pos2
     end // end of [if]
   )
-| list_vt_nil () => (fold@ inp; pos2)
+| list_vt_nil () => pos2
 //
 end // end of [EOLgetpos2]
 
@@ -888,7 +737,7 @@ end // end of [EOLgetpos2]
 
 fun drop
 (
-  inp: &charlst_vt, pos1: lint, pos2: lint
+  inp: &charlst_vt >> charlst_vt, pos1: lint, pos2: lint
 ) : void = let
 in
 //
@@ -898,7 +747,7 @@ if pos1 < pos2 then
   | ~list_vt_cons (_, cs) => let
       val () = inp := cs in drop (inp, pos1+1L, pos2)
     end // end of [list_vt_cons]
-  | list_vt_nil () => fold@ (inp)
+  | list_vt_nil () => ()
 ) else ((*void*)) // end of [if]
 //
 end // end of [drop]
@@ -907,42 +756,23 @@ end // end of [drop]
 
 fun take
 (
-  inp: &charlst_vt, pos1: lint, pos2: lint
+  inp: &charlst_vt >> charlst_vt, pos1: lint, pos2: lint, res: charlst_vt
 ) : charlst_vt = let
-  var res: charlst_vt
-  val () = take_main (inp, pos1, pos2, res)
-in
-  res
-end // end of [take]
-
-and take_main
-(
-  inp: &charlst_vt
-, pos1: lint, pos2: lint
-, res: &charlst_vt? >> charlst_vt
-) : void = let
 in
 //
 if pos1 < pos2 then
 (
   case+ inp of
-  | list_vt_cons _ => let
-      prval () = fold@ (inp)
-      val () = res := inp
-      val+ list_vt_cons (_, !p_cs) = res
-      val () = inp := !p_cs
-      val () = take_main (inp, pos1+1L, pos2, !p_cs)
+  | ~list_vt_cons (c, cs) => let
+      val () = inp := cs
     in
-      fold@ (res)
+      take (inp, pos1+1L, pos2, list_vt_cons (c, res))
     end // end of [list_vt_cons]
-  | list_vt_nil () => let
-      prval () = fold@ (inp) in res := list_vt_nil ()
-    end // end of [list_vt_nil]
-) else (
-  res := list_vt_nil ()
-) (* end of [if] *)
+  | list_vt_nil () =>
+      list_vt_reverse (res)
+) else list_vt_reverse (res)
 //
-end // end of [take_main]
+end // end of [take]
 
 (* ****** ****** *)
 
@@ -963,12 +793,9 @@ val fil = (
   | ~Some_vt filename => filename
   | ~None_vt () => let
       val () = $LOC.prerr_location (loc0)
-      val () = prerr ": error(libatsynmark)"
-(*
-      val () = prerrln! (": the file [", path, "] is not available for inclusion.")
-*)
+      val () = prerr_string ": error(libatsynmark)"
       val () = prerrln! (": the file [", path2, "] is not available for inclusion.")
-      val () = $ERR.abort ()
+      val () = $ERR.abort<void> ()
     in
       $FIL.filename_dummy
     end // end of [None_vt]
@@ -977,14 +804,12 @@ val fil = (
 val fsym =
   $FIL.filename_get_fullname (fil)
 val fname = $SYM.symbol_get_name (fsym)
-val (
-  pffil | filp
-) = $STDIO.fopen_exn (fname, file_mode_r)
-val inp = char_list_vt_make_file ($UN.cast{FILEref}(filp))
-val () = $STDIO.fclose_exn (pffil | filp)
+val inp = libatsynmark_fopen_exn (fname, "r")
+val cs = libatsynmark_char_list_vt_make_file (inp)
+val ((*closed*)) = fileref_close (inp)
 //
 val (pfpush | ()) = $FIL.the_filenamelst_push (fil)
-val res(*d0eclreplst*) = charlst_declitemize (stadyn, inp)
+val res(*d0eclreplst*) = charlst_declitemize (stadyn, cs)
 val () = $FIL.the_filenamelst_pop (pfpush | (*none*))
 //
 in
@@ -1002,15 +827,10 @@ val lbf =
   lexbufobj_make_charlst_vt (inp1)
 val tbf = tokbufobj_make_lexbufobj (lbf)
 //
-extern
-castfn __cast (tbf: tokbufobj)
-  : [l:addr] (free_gc_v (tokbuf?, l), tokbuf @ l | ptr l)
-//
-val (pfgc, pfat | p) = __cast (tbf)
+val (pf, fpf | p) = tokbufobj_takeout (tbf)
 val d0cs = $PAR.parse_from_tokbuf_toplevel (stadyn, !p)
-//
-val ((*void*)) = $TBF.tokbuf_uninitize(!p)
-val ((*void*)) = ptr_free (pfgc, pfat | p)  
+prval () = fpf (pf)
+val ((*void*)) = tokbufobj_free (tbf)
 //
 fun d0eclrep_make
 (
@@ -1019,76 +839,66 @@ fun d0eclrep_make
 in
 //
 case+
-  d0c.d0ecl_node of
-| $SYN.D0Cinclude
+  d0ecl_node_view (d0c.d0ecl_node ()) of
+| ~D0Cinclude
     (pfil, stadyn, path) => let
     val (
       pfpush | ()
     ) = $FIL.the_filenamelst_push (pfil)
-    val replst = i0nclude_declitemize (d0c.d0ecl_loc, stadyn, path)
+    val replst = i0nclude_declitemize (d0c.d0ecl_loc (), stadyn, path)
     val () = $FIL.the_filenamelst_pop (pfpush | (*none*))
-    val cs = list_of_list_vt (inp)
+    val cs = glist_make_list_vt (inp)
   in
-    D0ECLREPinclude (d0c, cs, replst)
+    d0eclrep_D0ECLREPinclude (d0c, cs, replst)
   end // end of [D0Cinclude]
-| $SYN.D0Cguadecl (knd, gd0c) => let
-    val gd0c = guad0eclrep_make (gd0c.guad0ecl_node, inp, pos)
+| ~D0Cguadecl (knd, gd0c) => let
+    val gd0c =
+      guad0eclrep_make (gd0c.guad0ecl_node (), inp, pos)
   in
-    D0ECLREPguadecl (gd0c)
+    d0eclrep_D0ECLREPguadecl (gd0c)
   end // end of [D0Cguadecl]
-| _ => let
-    val cs = list_of_list_vt (inp) in D0ECLREPsing (d0c, cs)
+| v (* rest-of-d0ecl *) => let
+    val () = d0ecl_node_view_free (v)
+    val cs = glist_make_list_vt (inp) in d0eclrep_D0ECLREPsing (d0c, cs)
   end // end of [_]
 //
 end (* end of [d0eclrep_make] *)
 //
 and guad0eclrep_make
 (
-  gnode: $SYN.guad0ecl_node, inp: charlst_vt, pos: lint
+  gnode: guad0ecl_node, inp: charlst_vt, pos: lint
 ) : guad0eclrep = let
 in
 //
-case+ gnode of
-| $SYN.GD0Cone
+case+ guad0ecl_node_view (gnode) of
+| ~GD0Cone
     (e0xp, d0cs) => let
     var inp = inp
     var pos = pos
-    var res: d0eclreplst
-    val () =
-      traverse(d0cs, inp, pos, res)
-    // end of [val]
-    val d0cs = res
-    val ((*freed*)) = list_vt_free(inp)
+    val d0cs = traverse (d0cs, inp, pos, list_vt_nil ())
+    val ((*freed*)) = list_vt_free (inp)
   in
-    GUAD0ECLREPone (d0cs)
+    guad0eclrep_GUAD0ECLREPone (d0cs)
   end // end of [GD0Cone]
-| $SYN.GD0Ctwo
+| ~GD0Ctwo
     (e0xp, d0cs1, d0cs2) => let
     var inp = inp
     var pos = pos
-    var res: d0eclreplst
-    val () =
-      traverse(d0cs1, inp, pos, res)
-    val d0cs1 = res
-    val () =
-      traverse(d0cs2, inp, pos, res)
-    val d0cs2 = res
+    val d0cs1 = traverse (d0cs1, inp, pos, list_vt_nil ())
+    val d0cs2 = traverse (d0cs2, inp, pos, list_vt_nil ())
     val ((*freed*)) = list_vt_free (inp)
   in
-    GUAD0ECLREPtwo (d0cs1, d0cs2)
+    guad0eclrep_GUAD0ECLREPtwo (d0cs1, d0cs2)
   end // end of [GD0Ctwo]
-| $SYN.GD0Ccons
+| ~GD0Ccons
     (e0xp, d0cs1, knd, gnode2) => let
     var inp = inp
     var pos = pos
-    var res: d0eclreplst
-    val () =
-      traverse (d0cs1, inp, pos, res)
-    val d0cs1 = res
+    val d0cs1 = traverse (d0cs1, inp, pos, list_vt_nil ())
     val gd0c2 =
       guad0eclrep_make (gnode2, inp, pos)
   in
-    GUAD0ECLREPcons (d0cs1, gd0c2)
+    guad0eclrep_GUAD0ECLREPcons (d0cs1, gd0c2)
   end // end of [GD0Ccons]
 //
 end // end of [guad0eclrep_make]
@@ -1096,20 +906,20 @@ end // end of [guad0eclrep_make]
 and traverse
 (
   d0cs: d0eclist
-, inp: &charlst_vt, pos: &lint
-, res: &d0eclreplst? >> d0eclreplst
-) : void = let
+, inp: &charlst_vt >> charlst_vt, pos: &lint
+, res: List0_vt (d0eclrep)
+) : d0eclreplst = let
 in
 //
-case+ d0cs of
-| list_nil
+case+ glist_view (d0cs) of
+| ~GLnil
     ((*void*)) =>
-    (res := list_nil ())
-  // list_nil
-| list_cons
+    glist_make_list_vt (list_vt_reverse (res))
+  // GLnil
+| ~GLcons
     (d0c, d0cs) => let
 //
-    val loc = d0c.d0ecl_loc
+    val loc = d0c.d0ecl_loc ()
 //
     val pos0 = pos
     val pos1 = $LOC.location_beg_ntot (loc)
@@ -1119,29 +929,23 @@ case+ d0cs of
 //
     val pos2 = EOLgetpos (inp, pos1, pos2)
 //
-    val inp_cs = take (inp, pos1, pos2)
+    val inp_cs = take (inp, pos1, pos2, list_vt_nil ())
 //
-    val () = res :=
-      list_cons{d0eclrep}{0} (?, ?)
-    val+ list_cons (!p1, !p2) = res
-    val () = !p1 := d0eclrep_make (d0c, inp_cs, pos1)
+    val x = d0eclrep_make (d0c, inp_cs, pos1)
 //
     val () = pos := pos2
-    val () = traverse (d0cs, inp, pos, !p2)
 //
-    prval () = fold@ (res)
   in
-    // nothing
-  end // end of [list_cons]
+    traverse (d0cs, inp, pos, list_vt_cons (x, res))
+  end // end of [GLcons]
 //
 end (* end of [traverse] *)
 //
 var inp = inp
 var pos: lint = 0L
 //
-var res: d0eclreplst
-val () =
-  traverse (d0cs, inp, pos, res)
+val res =
+  traverse (d0cs, inp, pos, list_vt_nil ())
 //
 val ((*freed*)) = list_vt_free (inp)
 //
@@ -1157,7 +961,7 @@ implement
 d0eclreplst_find_synop
   (d0cs, sym) = let
 //
-vtypedef res_vt = List_vt (charlst)
+vtypedef res_vt = List0_vt (charlst)
 //
 fun aux
 (
@@ -1165,14 +969,14 @@ fun aux
 ) : res_vt = let
 in
 //
-case+ d0c of
-| D0ECLREPsing (d0c, cs) => let
+case+ d0eclrep_view (d0c) of
+| ~D0ECLREPsing (d0c, cs) => let
     val found = test_symbol_d0ecl (sym, d0c)
   in
     if found then list_vt_cons (cs, res) else res
   end // end of [D0ECLREPsing]
-| D0ECLREPinclude (d0c, cs, d0cs2) => auxlst (d0cs2, sym, res)
-| D0ECLREPguadecl (gd0c) => auxgua (gd0c, sym, res)
+| ~D0ECLREPinclude (d0c, cs, d0cs2) => auxlst (d0cs2, sym, res)
+| ~D0ECLREPguadecl (gd0c) => auxgua (gd0c, sym, res)
 //
 end // end of [aux]
 
@@ -1182,12 +986,12 @@ and auxlst
 ) : res_vt = let
 in
 //
-case+ d0cs of
-| list_cons
+case+ glist_view (d0cs) of
+| ~GLcons
     (d0c, d0cs) => let
     val res = aux (d0c, sym, res) in auxlst (d0cs, sym, res)
-  end // end of [list_cons]
-| list_nil () => res
+  end // end of [GLcons]
+| ~GLnil () => res
 //
 end // end of [auxlst]
 //
@@ -1197,15 +1001,15 @@ and auxgua
 ) : res_vt = let
 in
 //
-case+ gd0c of
-| GUAD0ECLREPone
+case+ guad0eclrep_view (gd0c) of
+| ~GUAD0ECLREPone
     (d0cs) => auxlst (d0cs, sym, res)
-| GUAD0ECLREPtwo
+| ~GUAD0ECLREPtwo
     (d0cs1, d0cs2) =>
   (
     auxlst (d0cs2, sym, auxlst(d0cs1, sym, res))
   ) // end of [GUAD0ECLREPtwo]
-| GUAD0ECLREPcons
+| ~GUAD0ECLREPcons
     (d0cs1, gd0c2) =>
   (
     auxgua (gd0c2, sym, auxlst(d0cs1, sym, res))
@@ -1217,6 +1021,81 @@ end // end of [auxgua]
 in
   list_vt_reverse(auxlst(d0cs, sym, list_vt_nil(*void*)))
 end // end of [d0eclreplst_find_synop]
+
+(* ****** ****** *)
+
+implement
+libatsynmark_strptr_make_charlst
+  (cs) = let
+//
+fun loop
+(
+  env: ptr, cs: charlst
+) : void =
+(
+  case+ glist_view (cs) of
+  | ~GLnil () => ()
+  | ~GLcons (c, cs) => let
+      val _(*err*) = libatsynmark_sbuf_putc (env, c) in loop (env, cs)
+    end // end of [GLcons]
+) (* end of [loop] *)
+//
+val env = libatsynmark_sbuf_make ()
+val ((*void*)) = loop (env, cs)
+//
+in
+  libatsynmark_sbuf_takeout (env)
+end // end of [libatsynmark_strptr_make_charlst]
+
+(* ****** ****** *)
+
+%{$
+#include <stdio.h>
+#include <stdlib.h>
+void*
+libatsynmark_fopen_exn (void *name0, void *mode0)
+{
+  const char *name = (const char*)name0 ; const char *mode = (const char*)mode0 ;
+  FILE *fil = fopen(name, mode) ;
+  if (!fil) {
+    perror ("fopen") ;
+    fprintf (stderr, "exit(ATS): [fopen(\"%s\", \"%s\")] failed\n", name, mode) ;
+    exit (1) ;
+  } // end of [if]
+  return fil ;
+}
+typedef struct {
+  char *buf ; size_t len ; size_t cap ;
+} libatsynmark_sbuf_struct ;
+void*
+libatsynmark_sbuf_make (void)
+{
+  libatsynmark_sbuf_struct *p =
+    (libatsynmark_sbuf_struct*)malloc(sizeof(libatsynmark_sbuf_struct)) ;
+  p->cap = 256 ; p->len = 0 ;
+  p->buf = (char*)malloc(p->cap) ;
+  return p ;
+}
+int
+libatsynmark_sbuf_putc (void *env, char c)
+{
+  libatsynmark_sbuf_struct *p = (libatsynmark_sbuf_struct*)env ;
+  if (p->len + 1 >= p->cap) {
+    p->cap = 2 * p->cap ; p->buf = (char*)realloc(p->buf, p->cap) ;
+  }
+  p->buf[p->len++] = c ;
+  return 0 ;
+}
+void*
+libatsynmark_sbuf_takeout (void *env)
+{
+  libatsynmark_sbuf_struct *p = (libatsynmark_sbuf_struct*)env ;
+  char *res = p->buf ;
+  res[p->len] = '\000' ;
+  free(p) ;
+  return res ;
+}
+%}
 
 (* ****** ****** *)
 

@@ -63,7 +63,11 @@ in
     then let
       val str =
         fileref_get_line_string (filr)
-      val str = strptr2string (str)
+      //
+      // HX-2026-10: the key is owned by the (global)
+      // hashtable for good as the table is never freed
+      //
+      val str = $UNSAFE.castvwtp0{string}(str)
       val-~None_vt() = $HT.insert_opt (str, 1)
     in
       loop (filr)

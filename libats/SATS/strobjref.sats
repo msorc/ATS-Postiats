@@ -81,7 +81,7 @@ strobjref_get0_strptr
   x: !strobjref l
 ) :<> #[l1:agz]
 (
-  minus (strobjref l, strptr l1) | strptr (l1)
+  minus_v (strobjref l, strptr l1) | strptr (l1)
 ) // end of [strobjref_get0_strptr]
 
 fun strobjref_get1_strptr (x: !Strobjref1): Strptr1

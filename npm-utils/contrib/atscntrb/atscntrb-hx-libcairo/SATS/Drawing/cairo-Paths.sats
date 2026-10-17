@@ -174,7 +174,7 @@ int num_glyphs
 */
 fun cairo_glyph_path {n:int}
 (
-  ctx: !xr1, glyphs: arrayref (cairo_glyph_t, n), n: int n
+  ctx: !xr1, glyphs: &(@[cairo_glyph_t][n]), n: int n
 ) : void = "mac#%" // endfun
 
 (* ****** ****** *)

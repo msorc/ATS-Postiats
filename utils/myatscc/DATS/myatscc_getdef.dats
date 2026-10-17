@@ -9,24 +9,6 @@
 "share/atspre_staload.hats"
 //
 #staload
-"libats/ML/SATS/basis.sats"
-#staload
-"libats/ML/SATS/list0.sats"
-#staload _ =
-"libats/ML/DATS/list0.dats"
-//
-(*
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
-*)
-//
-(* ****** ****** *)
-//
-(*
-#staload UN = $UNSAFE
-*)
-#staload
 UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
@@ -34,194 +16,218 @@ UN = "prelude/SATS/unsafe.sats"
 #staload "./../SATS/myatscc.sats"
 
 (* ****** ****** *)
-//
-extern
-fun
-myatscc_getdef_file
-  ((*void*)): Option_vt(string)
-//
-(* ****** ****** *)
-
-implement
-myatscc_getdef
-  ((*void*)) = let
-//
-val opt =
-  myatscc_getdef_file()
-//
-in
-//
-case+ opt of
-| ~Some_vt(def) => def
-| ~None_vt((*void*)) => MYATSCCDEF_def_get()
-//
-end // end of [myatscc_getdef]
-
-(* ****** ****** *)
 
 local
 
 (* ****** ****** *)
 //
+// HX-2026-10:
+// [pfx] is a prefix of [str]
+//
 fun
-auxprfx
+string_is_prefix
 (
-xs: List(char)
-,
-ys: List(char)
-) : Option_vt(List0(char)) = let
+  pfx: string, str: string
+) : bool = let
 //
-prval () = lemma_list_param(ys)
-//
+fun
+loop
+(
+  p1: ptr, p2: ptr
+) : bool = let
+  val c1 = $UN.ptr0_get<char>(p1)
 in
-//
-case+ xs of
-| list_nil
-    () => Some_vt(ys)
-  // list_nil
-| list_cons
-    (x, xs) =>
+  if
+  isneqz(c1)
+  then
   (
-    case+ ys of
-    | list_nil
-        () => None_vt()
-      // list_nil
-    | list_cons(y, ys) =>
-      if (x = y)
-        then auxprfx(xs, ys) else None_vt()
-      // end of [list_cons]
-  ) (* end of [list_cons] *)
-//
-end // end of [auxprfx]
-//
-fun
-auxprfx2
-(
-xs: List(char)
-,
-ys: List(char)
-) :
-Option_vt
-(
-  List0(char)
-) = let
-//
-val
-opt = auxprfx(xs, ys)
+    if c1 = $UN.ptr0_get<char>(p2)
+      then loop(ptr0_succ<char>(p1), ptr0_succ<char>(p2)) else false
+    // end of [if]
+  )
+  else true
+end // end of [loop]
 //
 in
-  case+ opt of
-  |  Some_vt _ => opt
-  | ~None_vt((*void*)) =>
-    (
-      case+ ys of
-      | list_nil() => None_vt()
-      | list_cons(_, ys) => auxprfx2(xs, ys)
-    )
-end // end of [auxprfx2]
+  loop(string2ptr(pfx), string2ptr(str))
+end // end of [string_is_prefix]
+//
+fun
+substr
+(p0: ptr, i: int, j: int): Strptr1 = let
+//
+val ln = $UN.cast{size_t}(j - i)
+val ln = g1ofg0(ln)
+val (pf, pfgc | p1) = malloc_gc(succ(ln))
+val _(*p1*) =
+  $extfcall(ptr, "memcpy", p1, ptr_add<char>(p0, i), ln)
+val () = $UN.ptr0_set<char>(ptr_add<char>(p1, j-i), '\000')
+//
+in
+  $UN.castvwtp0{Strptr1}((pf, pfgc | p1))
+end // end of [substr]
 //
 (* ****** ****** *)
 //
+// HX: the position right after the first
+// occurrence of [key] in [line] (or -1)
+//
 fun
-auxfind
+auxfind_key
 (
-  filr: FILEref
-) : Option_vt(string) =
-  res where
-{
+  line: string, key: string
+) : int = let
 //
-  val cs1 =
-  string_explode(MYATSCCDEF_key)
-  val res =
-  auxfind2($UN.list_vt2t(cs1), filr)
+val n = g0u2i(string_length(line))
+val k = g0u2i(string_length(key))
+val p0 = string2ptr(line)
 //
-  val ((*void*)) = list_vt_free(cs1)
-  val ((*void*)) = fileref_close(filr)
-//
-} (* end of [auxfind] *)
-//
-and
-auxfind2
-(
-  cs1: List(char), filr: FILEref
-) : Option_vt(string) =
+fun
+loop(i: int): int =
 (
 if
-fileref_isnot_eof(filr)
-then let
-  val cs2 =
-  fileref_get_line_charlst(filr)
-  val opt =
-  auxprfx2(cs1, $UN.list_vt2t(cs2))
-in
-  case+ opt of
-  | ~None_vt() => let
-      val () =
-      list_vt_free(cs2)
-    in
-      auxfind2(cs1, filr)
-    end // end of [None_vt]
-  | ~Some_vt(cs2_) => let
-      val cs2_ = list_reverse(cs2_)
-      val ((*void*)) = list_vt_free(cs2)
-    in
-      Some_vt(auxfind2_cont(filr, cs2_))
-    end // end of [Some_vt]
-end // end of [then]
-else None_vt(*void*) // end of [else]
+(i + k <= n)
+then
+(
+  if
+  string_is_prefix
+  (key, $UN.cast{string}(ptr_add<char>(p0, i)))
+  then (i + k) else loop(i+1)
 )
+else ~1
+) (* end of [loop] *)
 //
-and
-auxfind2_cont
-(
-  inp: FILEref
-, res: List0_vt(char)
-) : string = let
+in
+  loop(0)
+end // end of [auxfind_key]
 //
-val
-iscont =
+fun
+auxsuffix
 (
-case+ res of
-| list_vt_nil() => true
-| list_vt_cons(c, _) => (c = '\\')
+  line: string, i: int
+) : Strptr1 =
+  string0_copy($UN.cast{string}(ptr_add<char>(string2ptr(line), i)))
+//
+(* ****** ****** *)
+//
+(*
+HX:
+A definition is continued onto the next line
+if it is empty or it ends with a backslash
+(which is then removed)
+*)
+fun
+auxcont
+(
+  inp: FILEref, def: Strptr1
+) : Strptr1 = let
+//
+val def0 = $UN.strptr2string(def)
+val n = g0u2i(string_length(def0))
+//
+val iscont =
+(
+  if n = 0
+    then true
+    else ($UN.ptr0_get<char>(ptr_add<char>(string2ptr(def0), n-1)) = '\\')
+  // end of [if]
 ) : bool // end of [val]
-//
-val res =
-(
-case+ res of
-| list_vt_nil() => res
-| @list_vt_cons(c, cs) =>
-  (
-    if iscont
-      then cs where
-      {
-        val cs = cs
-        val () = free@{char}{0}(res)
-      } else (fold@(res); res)
-    // end of [if]
-  )
-) : List0_vt(char)
 //
 in
 //
 if
 iscont
 then let
-  val cs =
-  fileref_get_line_charlst(inp)
-  val res =
-  list_vt_reverse_append(cs, res)
+//
+val def2 =
+(
+if n > 0
+  then
+  substr(string2ptr(def0), 0, n-1)
+  else string0_copy("")
+) : Strptr1 // end of [val]
+val () = strptr_free(def)
+//
 in
-  auxfind2_cont(inp, res)
-end // end of [then]
+//
+if
+fileref_is_eof(inp)
+then def2
 else let
-  val res =
-  $UN.castvwtp0{List0_vt(charNZ)}(res)
+  val line =
+    fileref_get_line_string(inp)
+  val def3 =
+    string0_append
+    ($UN.strptr2string(def2), $UN.strptr2string(line))
+  // end of [val]
+  val () = strptr_free(def2)
+  val () = strptr_free(line)
 in
-  strnptr2string(string_make_rlist_vt(res))
+  auxcont(inp, $UN.castvwtp0{Strptr1}(def3))
 end // end of [else]
 //
-end // end of [auxfind2_cont]
+end // end of [then]
+else def // end of [else]
+//
+end // end of [auxcont]
+//
+(* ****** ****** *)
+//
+fun
+auxfind
+(
+  inp: FILEref
+) : Option_vt(Strptr1) =
+(
+if
+fileref_isnot_eof(inp)
+then let
+  val line =
+    fileref_get_line_string(inp)
+  val line0 = $UN.strptr2string(line)
+  val i = auxfind_key(line0, MYATSCCDEF_key)
+in
+  if
+  (i >= 0)
+  then let
+    val def = auxsuffix(line0, i)
+    val () = strptr_free(line)
+  in
+    Some_vt(auxcont(inp, def))
+  end // end of [then]
+  else let
+    val () = strptr_free(line) in auxfind(inp)
+  end // end of [else]
+end // end of [then]
+else None_vt(*void*) // end of [else]
+) (* end of [auxfind] *)
+//
+(* ****** ****** *)
+//
+fun
+arglst_get1
+{n:int}
+(
+  args: !list_vt(Strptr1, n)
+) : Option_vt(Strptr1) =
+(
+case+ args of
+| list_vt_nil() => None_vt()
+| @list_vt_cons(_, args1) => let
+    val res =
+    (
+    case+ args1 of
+    | list_vt_nil() => None_vt()
+    | @list_vt_cons(x, _) => let
+        val res = Some_vt(strptr1_copy(x))
+      in
+        fold@(args1); res
+      end // end of [list_vt_cons]
+    ) : Option_vt(Strptr1)
+  in
+    fold@(args); res
+  end // end of [list_vt_cons]
+) (* end of [arglst_get1] *)
 //
 (* ****** ****** *)
 
@@ -230,31 +236,41 @@ in (* in-of-local *)
 (* ****** ****** *)
 
 implement
-myatscc_getdef_file
-  ((*void*)) = let
+myatscc_getdef
+  (args) = let
 //
-val gvs =
-  the_name_i_env_get()
-//
-val opt = list0_nth_opt(gvs, 1)
+val opt = arglst_get1(args)
 //
 in
 //
 case+ opt of
-| ~Some_vt(gv) => let
-    val-
-    GVstring(name) = gv
+| ~None_vt() =>
+    string0_copy(MYATSCCDEF_def)
+  // end of [None_vt]
+| ~Some_vt(name) => let
     val opt =
     fileref_open_opt
-      (name, file_mode_r)
+      ($UN.strptr2string(name), file_mode_r)
+    // end of [val]
+    val () = strptr_free(name)
   in
     case+ opt of
-    | ~None_vt() => None_vt()
-    | ~Some_vt(filr) => auxfind(filr)
+    | ~None_vt() =>
+        string0_copy(MYATSCCDEF_def)
+      // end of [None_vt]
+    | ~Some_vt(inp) => let
+        val res = auxfind(inp)
+        val () = fileref_close(inp)
+      in
+        case+ res of
+        | ~Some_vt(def) => def
+        | ~None_vt() => string0_copy(MYATSCCDEF_def)
+      end // end of [Some_vt]
   end // end of [Some_vt]
-| ~None_vt((*void*)) => None_vt()
 //
-end // end of [myatscc_getdef_file]
+end // end of [myatscc_getdef]
+
+(* ****** ****** *)
 
 end // end of [local]
 

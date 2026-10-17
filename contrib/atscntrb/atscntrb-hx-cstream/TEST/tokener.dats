@@ -40,8 +40,12 @@ UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-datatype token =
-  | TOKide of string
+//
+// HX-2026-10: no GC
+// tokens are linear
+//
+datavtype token =
+  | TOKide of Strptr1
   | TOKint of int
   | TOKlparen of ()
   | TOKrparen of ()
@@ -53,7 +57,9 @@ datatype token =
 
 extern
 fun fprint_token
-  (out: FILEref, x: token): void
+  (out: FILEref, x: !token): void
+extern
+fun token_free (x: token): void
 overload fprint with fprint_token
 
 (* ****** ****** *)
@@ -64,7 +70,7 @@ fprint_token (out, x) =
 case+ x of
 //
 | TOKide(ide) =>
-    fprint! (out, "TOKide(", ide, ")")
+    fprint! (out, "TOKide(", $UN.strptr2string(ide), ")")
 | TOKint(int) =>
     fprint! (out, "TOKint(", int, ")")
 //
@@ -74,6 +80,23 @@ case+ x of
 | TOKerr(int) => fprint! (out, "TOKerr(", int, ")")
 | TOKeof((*void*)) => fprint! (out, "TOKeof(", ")")
 ) (* end of [fprint_token] *)
+
+(* ****** ****** *)
+
+implement
+token_free (x) =
+(
+case+ x of
+| ~TOKide(ide) => strptr_free(ide)
+| ~TOKint _ => ()
+| ~TOKlparen() => ()
+| ~TOKrparen() => ()
+| ~TOKerr _ => ()
+| ~TOKeof() => ()
+) (* end of [token_free] *)
+
+implement
+tokener$token_free<token> (x) = token_free (x)
 
 (* ****** ****** *)
 //
@@ -233,7 +256,7 @@ case+ 0 of
     isalpha (i0) => let
     val ide = tokener_get_ide (cs0, i0, sbf)
   in
-    TOKide (strptr2string (ide))
+    TOKide (ide)
   end
 | _ when
     isdigit (i0) => let
@@ -273,21 +296,20 @@ val cs0 = cstream_make_fileref (inp)
 val tknr =
   tokener_make_cstream (cs0)
 //
-var tok: token =
-  tokener_get_token<token> (tknr)
-//
-val () =
-while (true)
-{
-val () =
-  fprintln! (stdout_ref, "tok = ", tok)
-val () =
+fun
+loop
 (
-  case+ tok of
-  | TOKeof () => $break
-  | _ => (tok := tokener_get_token<token> (tknr))
-) : void // end of [val]
-} (* end of [where] *) // end of [val]
+  tknr: !tokener(token)
+) : void = let
+  val tok = tokener_get_token<token> (tknr)
+  val () = (print! ("tok = "); fprint_token (stdout_ref, tok); print_newline ())
+  val iseof = (case+ tok of TOKeof () => true | _ => false): bool
+  val () = token_free (tok)
+in
+  if iseof then () else loop (tknr)
+end // end of [loop]
+//
+val () = loop (tknr)
 //
 val ((*void*)) = tokener_free (tknr)
 //

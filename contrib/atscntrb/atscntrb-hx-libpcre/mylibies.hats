@@ -6,12 +6,10 @@
 (* ****** ****** *)
 //
 #staload PCRE = "./SATS/pcre.sats"
-#staload PCRE_ML = "./SATS/pcre_ML.sats"
 //
 (* ****** ****** *)
 //
 #staload _(*PCRE*) = "./DATS/pcre.dats"
-#staload _(*PCRE_ML*) = "./DATS/pcre_ML.dats"
 //
 (* ****** ****** *)
 

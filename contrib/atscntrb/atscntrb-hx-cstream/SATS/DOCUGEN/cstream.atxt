@@ -78,7 +78,7 @@ with its first argument if its second argument is a negative integer.
 (* ****** ****** *)
 
 #declnamesynop("cstream_make_fun")
-#declnamesynop("cstream_make_cloref")
+#declnamesynop("cstream_make_cloptr")
 
 (* ****** ****** *)
 

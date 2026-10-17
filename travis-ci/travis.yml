@@ -7,7 +7,6 @@ sudo: false
 addons:
   apt:
     packages:
-    - libgc-dev
     - libgmp-dev
     - libgtk-3-dev
     - libev-dev
@@ -20,8 +19,9 @@ before_install:
   - date
   - cd ${HOME}
   # Setting-up
-  - export ATSHOME=${HOME}/ats-lang-anairiats-0.2.12
-  - export ATSHOMERELOC=ATS-0.2.12
+  # the stage-0 compiler (ATS2 0.4.2, see travis-ci/install-ats2.sh); ATS1 is not needed
+  - export STAGE0HOME=${HOME}/ats2-stage0/lib/ats2-postiats-0.4.2
+  - export STAGE0PATSOPT=${HOME}/ats2-stage0/bin/patsopt
   - export PATSHOME=${TRAVIS_BUILD_DIR}
   - export PATH=${PATH}:${PATSHOME}/bin
   # Download ATS2-contrib
@@ -33,52 +33,51 @@ before_install:
 install:
   # Install pkgs
   - ${TRAVIS_BUILD_DIR}/travis-ci/install-pkgs.sh
-  # Install ATS1
-  - ${TRAVIS_BUILD_DIR}/travis-ci/install-ats1.sh 0.2.12
+  # Install ATS2 (stage 0 of the build)
+  - ${TRAVIS_BUILD_DIR}/travis-ci/install-ats2.sh 0.4.2
 
 script:
   - ${GCC} --version
   - ${CLANG} --version
-  # Building ATS1
-  - cd ${ATSHOME}
-  # ./configure&&make CC=${GCC} all
-  - ./configure&&make CC=${GCC} all_ngc
-  # Building ATS2
+  # Building ATS2: stage 1 is built by the stage-0 compiler, stage 2 by stage 1
   - cd ${TRAVIS_BUILD_DIR}
-  - make -f Makefile_devl CC=${GCC} all
-  # make GCFLAG=-D_ATS_GCATS -f Makefile_devl CC=${GCC} all
-  # make C3NSTRINTKND=intknd -f Makefile_devl CC=${CLANG} all
-  # make C3NSTRINTKND=intknd GCFLAG=-D_ATS_GCATS -f Makefile_devl CC=${CLANG} all
-  # Trying-out release process
-  - cd ${TRAVIS_BUILD_DIR}
-  - make -C ${PATSHOME}/src CBOOTgmp
-  # make -C ${PATSHOME}/src CBOOTint
-  - make -C ${PATSHOME}/src/CBOOT/prelude
-  - make -C ${PATSHOME}/src/CBOOT/libc
-  - make -C ${PATSHOME}/src/CBOOT/libats
-  - make -C ${PATSHOME}/doc/DISTRIB -f Makefile atspackaging
-  - make -C ${PATSHOME}/doc/DISTRIB -f Makefile atspacktarzvcf_gmp
-  # make -C ${PATSHOME}/doc/DISTRIB -f Makefile atscontribing
-  # make -C ${PATSHOME}/doc/DISTRIB -f Makefile atscntrbtarzvcf
-  # make -C ${PATSHOME}/doc/DISTRIB -f Makefile_include tarzvcf
-  # make -C ${PATSHOME}/doc/DISTRIB cleanall
+  - make -f Makefile_devl CC=${GCC} PATSOPT=${STAGE0PATSOPT} STAGE0HOME=${STAGE0HOME} all
+  # make -f Makefile_devl C3NSTRINTKND=intknd CC=${CLANG} PATSOPT=... STAGE0HOME=... all
+  - make -C src cleanall
+  - make -C src CC=${GCC} PATSOPT=${PATSHOME}/bin/patsopt
+  # The bootstrap C bundle (src/CBOOT), built with a C compiler and gmp only
+  - make -C src CBOOT
+  - make -C src/CBOOT -j2 CC=${GCC}
+  - src/CBOOT/patsopt --version
+  # Typecheck and test the compiler
+  - make -C src check
+  - make -C src test
+
   # Running regress test
   - cd ${TRAVIS_BUILD_DIR}
   - make -C ${PATSHOME}/doc -f Makefile_test testall > testall_doc.log 2>&1
   - tail -100 testall_doc.log
   # Building some utilities
-  - cp ${ATSHOME}/config.h .
-  - make -C src cleanall
-  - make -C src/CBOOT/libc
-  - make -C src/CBOOT/libats
-  - make -C src/CBOOT/prelude
-  - make -C utils/libatsopt copy build
-  - cp -f utils/libatsopt/BUILD/libatsopt.a ${ATSHOME}/ccomp/lib
-  - make -C utils/libatsynmark copy build
-  - cp -f utils/libatsynmark/BUILD/libatsynmark.a ${ATSHOME}/ccomp/lib
+  - make -C utils/libatsopt build
+  - cp -f utils/libatsopt/BUILD/libatsopt.a ccomp/atslib/lib/
+  # pats2xhtml and libatsynmark: ATS2 (no GC) on libatsopt.a, no ATS1; a smoke test and
+  # the md5 suite (utils/libatsynmark/TEST: the md5 sums are those of the ATS1 build)
+  - make -C utils/libatsynmark install
   - make -C utils/atsynmark
-  # make -C utils/atstagging
-  # make -C utils/packeditall
+  - echo 'val x = 1' | ${PATSHOME}/bin/pats2xhtml --embedded -d | grep -q '<span class="keyword">val</span>'
+  - make -C utils/libatsynmark test
+  # atsdoc and libatsdoc (ATS2, no GC): the generator of the prelude sources, of the
+  # documents and of the packaging scripts. No ATS1: the prelude sources are regenerated
+  # with it and compared with the tracked ones, and all the templates of the repository are
+  # regenerated and compared with utils/atsdoc/TEST/genall.md5
+  - cp -f src/libatsopt.a ccomp/atslib/lib/
+  - make -f Makefile_devl bin_atsdoc
+  - make -C utils/atsdoc test
+  - make -C utils/atsdoc genprelude
+  - make -C utils/atsdoc genall
+  # Trying-out release process (src/CBOOT was generated above)
+  - make -C ${PATSHOME}/doc/DISTRIB -f Makefile atspackaging
+  - make -C ${PATSHOME}/doc/DISTRIB -f Makefile atspacktarzvcf_gmp
   # Building books
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make -C doc/BOOK/ATS2TUTORIAL; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make -C doc/BOOK/INT2PROGINATS; fi

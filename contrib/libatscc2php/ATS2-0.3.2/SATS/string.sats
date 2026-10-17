@@ -139,7 +139,7 @@ string_concat with string_concat_4 of 100
 (* ****** ****** *)
 //
 fun
-string_explode(cs: string): List0(strchr) = "mac#%"
+string_explode(cs: string): List0_vt(strchr) = "mac#%"
 //
 (* ****** ****** *)
 

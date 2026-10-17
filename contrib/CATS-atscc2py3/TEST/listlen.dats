@@ -21,25 +21,25 @@ staload
 extern
 fun
 listlen{a:t0p}
-  : List0 (a) -> int = "mac#listlen"
+  : (!List0_vt(a)) -> int = "mac#listlen"
 //
 implement
 listlen{a}
   (xs) = let
 //
-prval () = lemma_list_param (xs)
-//
 fun
 loop{i,j:nat} .<i>.
 (
-  xs: list (a, i), res: int(j)
+  xs: !list_vt(a, i), res: int(j)
 ) : int(i+j) = let
 in
 //
 case+ xs of
-| list_nil () => res | list_cons (_, xs) => loop (xs, res+1)
+| list_vt_nil () => res | list_vt_cons (_, xs) => loop (xs, res+1)
 //
 end // end of [loop]
+//
+prval () = lemma_list_vt_param (xs)
 //
 in
   loop (xs, 0)
@@ -50,12 +50,12 @@ end // end of [listlen]
 extern
 fun
 fromto
-  : (int, int) -> List0 (int) = "mac#fromto"
+  : (int, int) -> List0_vt (int) = "mac#fromto"
 //
 implement
 fromto (m, n) =
 if m < n
-  then list_cons (m, fromto (m+1, n)) else list_nil ()
+  then list_vt_cons (m, fromto (m+1, n)) else list_vt_nil ()
 // end of [if]
 //
 (* ****** ****** *)

@@ -123,10 +123,6 @@ overload int2double with R34matrix_int2double
 //
 (* ****** ****** *)
 //
-fun
-lazy2cloref
-  {a:t@ype}
-  (lazy(a)): ((*void*)) -<cloref1> (a) = "mac#%"
 //
 (* ****** ****** *)
 //

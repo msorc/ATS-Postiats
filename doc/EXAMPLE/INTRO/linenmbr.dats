@@ -14,42 +14,33 @@ staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload "libats/ML/SATS/basis.sats"
-staload "libats/ML/SATS/list0.sats"
-staload "libats/ML/SATS/filebas.sats"
-
 (* ****** ****** *)
-
-staload _ = "libats/ML/DATS/list0.dats"
-staload _ = "libats/ML/DATS/filebas.dats"
-
-(* ****** ****** *)
-
-(*
-dynload "prelude/DATS/filebas.dats"
-dynload "libats/ML/DATS/filebas.dats"
-*)
-
-(* ****** ****** *)
-
+//
+// HX-2026-10: no GC
+// the lines are kept in a linear list
+//
 implement
 main () = let
 //
 fun loop
 (
-  xs: list0 (string), n: int
+  xs: List0_vt (Strptr1), n: int
 ) : void = let
 in
 //
 case+ xs of
-| list0_cons
+| ~list_vt_cons
     (x, xs) => let
-    val x = g1ofg0 (x)
-    val islast = list0_is_nil (xs)
+    val x0 = g1ofg0 ($UN.strptr2string (x))
+    val islast =
+    (
+      case+ xs of
+      | list_vt_nil () => true | list_vt_cons _ => false
+    ) : bool // end of [val]
     val hasmore =
     (
       if islast
-        then string_isnot_empty (x) else true
+        then string_isnot_empty (x0) else true
       // end of [if]
     ) : bool // end of [val]
     val () =
@@ -58,12 +49,13 @@ case+ xs of
       val () = if n > 0 then print_char ('\n')
       val () = print_int (n+1)
       val () = print_string (":\t")
-      val () = print_string (x)
+      val () = print_string (x0)
     } // end of [if] // end of [val]
+    val () = strptr_free (x)
   in
     loop (xs, n+1)
-  end // end of [list0_cons]
-| list0_nil () => ()
+  end // end of [list_vt_cons]
+| ~list_vt_nil () => ()
 //
 end // end of [loop]
 //

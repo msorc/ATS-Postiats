@@ -3,8 +3,7 @@
 #
 ######
 #
-ATSCC=$(ATSHOME)/bin/atscc
-ATSDOC=$(ATSHOME)/bin/atsdoc
+ATSDOC=$(PATSHOME)/bin/atsdoc
 #
 PATSCC=$(PATSHOME)/bin/patscc
 PATSOPT=$(PATSHOME)/bin/patsopt
@@ -23,20 +22,20 @@ all:: main.html
 
 INPATH :=
 INPATH += -I$(PATSHOME)/src
-INPATH += -IATS $(PATSHOME) -IATS $(ATSHOME)
+INPATH += -IATS $(PATSHOME)
 
 LDPATH :=
 LDPATH += -L$(PATSLIB)
 
 LIBRARY :=
-LIBRARY := -latsynmark -latsdoc -latsopt -lats -lgmp
+LIBRARY := -latsynmark -latsdoc -latslib -latsopt -lgmp
 
 ######
 #
 main.exe: \
 main_atxt.dats ; \
-$(ATSCC) \
-  -D_ATS_GCATS \
+$(PATSCC) \
+  -DATS_MEMALLOC_LIBC \
   $(INPATH) -o $@ $< $(LDPATH) $(LIBRARY)
 #
 main_atxt.dats: main.atxt; \

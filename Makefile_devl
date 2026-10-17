@@ -15,17 +15,28 @@
 #
 # Note:
 #
-# You may need to execute the command-line:
+# ATS1 is no longer needed: the compiler in src/ is written in ATS2 (no GC).
+# The first patsopt (stage 0) is any ATS2 compiler or the C bundle of
+# src/CBOOT; see src/README. Examples (PATSHOME is the root of this repo):
 #
-# make -f codegen/Makefile_atslib
+# make -f Makefile_devl PATSOPT=/usr/bin/patsopt \
+#   STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all   # an installed ATS2
+# make -C src/CBOOT && \
+#   make -f Makefile_devl PATSOPT=$PWD/src/CBOOT/patsopt all
+# make -f Makefile_devl all                   # bin/patsopt exists already
 #
-# if you have never done it explicitly before:
+# (the generated prelude sources, prelude/*/CODEGEN/*.?ats, are in git;
+# `make -f codegen/Makefile_atslib` regenerates them with bin/atsdoc (ATS2: `make -f Makefile_devl bin_atsdoc`))
 #
 ######
 
 CPF=cp -f
 MVF=mv -f
 MAKE=make
+#
+# the number of parallel jobs of the build of src/ (do not use make -j on this
+# Makefile: the steps of utils/atscc must not run in parallel)
+JOBS=4
 
 ######
 #
@@ -38,7 +49,6 @@ all:: atslib_update
 #
 ######
 #
-src_depend: ; touch src/.depend
 src_cleanall: ; make -C src cleanall
 #
 ######
@@ -47,8 +57,6 @@ bin_patscc: \
 src_patscc; \
 $(MVF) utils/atscc/BUILD/patscc bin/patscc
 #
-src_patscc:: ; \
-make -f codegen/Makefile_atslib
 src_patscc:: bin_patsopt ; \
 make -C utils/atscc -f Makefile copy build clean
 #
@@ -64,9 +72,8 @@ bin_patsopt: \
 src_patsopt; \
 $(CPF) src/patsopt bin/patsopt
 src_patsopt: \
-src_depend \
 src_cleanall ; \
-make -C src -f Makefile \
+make -C src -f Makefile -j$(JOBS) \
 C3NSTRINTKND=$(C3NSTRINTKND) all
 #
 ######
@@ -79,10 +86,28 @@ make -C utils/myatscc -f Makefile copy build clean
 #
 ######
 #
-lib_patsopt:: ; \
-make -C src -f Makefile \
-C3NSTRINTKND=$(C3NSTRINTKND) libatsopt
+lib_patsopt:: bin_patsopt ; \
+make -C src -f Makefile -j$(JOBS) \
+C3NSTRINTKND=$(C3NSTRINTKND) libatsopt.a
 lib_patsopt:: ; $(CPF) src/libatsopt.a ccomp/atslib/lib/.
+#
+######
+#
+# pats2xhtml (utils/atsynmark) and libatsynmark (utils/libatsynmark), written in
+# ATS2 and built on src/libatsopt.a: not part of [all]; use `make -f Makefile_devl
+# bin_pats2xhtml` after [all] (it builds bin/pats2xhtml and utils/libatsynmark/BUILD/libatsynmark.a)
+#
+bin_pats2xhtml: ; \
+make -C utils/libatsynmark -f Makefile install && make -C utils/atsynmark -f Makefile build
+#
+######
+#
+# atsdoc (utils/atsdoc) and libatsdoc (libatsdoc), written in ATS2 and built on
+# src/libatsopt.a: not part of [all]; use `make -f Makefile_devl bin_atsdoc` after [all]
+# (it builds bin/atsdoc and ccomp/atslib/lib/libatsdoc.a)
+#
+bin_atsdoc: ; \
+make -C utils/atsdoc -f Makefile build libs
 #
 ######
 #

@@ -276,12 +276,12 @@ R34matrix_tabulate_fun
 , n: int(n)
 , fopr: (natLt(m), natLt(n)) -<fun1> a): R34matrix(a, m, n) = "mac#%"
 fun
-R34matrix_tabulate_cloref
+R34matrix_tabulate_cloptr
 {a:t0p}
 {m,n:pos}
 ( m: int(m)
 , n: int(n)
-, fopr: (natLt(m), natLt(n)) -<cloref1> a): R34matrix(a, m, n) = "mac#%"
+, fopr: (natLt(m), natLt(n)) -<cloptr1> a): R34matrix(a, m, n) = "mac#%"
 //
 (* ****** ****** *)
 

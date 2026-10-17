@@ -24,7 +24,6 @@
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
 ** 02110-1301, USA.
 *)
-
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -33,13 +32,27 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_hidynexp_util.dats, see PORTING.md, "Erased trees (hidynexp)")
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
 staload
-UN = "./prelude/SATS/unsafe.sats"
+UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 //
@@ -66,6 +79,7 @@ overload print with $LOC.print_location
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload S2E = "./pats_staexp2.sats"
 staload D2E = "./pats_dynexp2.sats"
 overload = with $S2E.eq_d2con_d2con
@@ -73,6 +87,8 @@ overload = with $D2E.eq_d2var_d2var
 
 (* ****** ****** *)
 
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
 staload "./pats_histaexp.sats"
 staload "./pats_hidynexp.sats"
 
@@ -91,17 +107,19 @@ implement
 $D2E.d2cst_is_fun
   (d2c) = let
 //
-val-Some (hse) = d2cst_get2_hisexp (d2c)
+val opt = d2cst_get2_hisexp (d2c)
+val () = assertloc (gopt_is_some (opt)) // HX: [val-Some (hse)]
+val hse = gopt_unsome (opt)
 //
 in
 //
 case+
-  hse.hisexp_node of
-| HSEfun (fc, _arg, _res) =>
+  hisexp_node_view (hse.hisexp_node()) of
+| ~HSEfun (fc, _arg, _res) =>
   (
     case+ fc of FUNCLOfun () => true | _ => false
   ) // end of [HSEfun]
-| _ => false // end of [_]
+| v => (hisexp_node_view_free (v); false) // end of [_]
 //
 end // end of [$D2E.d2cst_is_fun]
 
@@ -111,23 +129,25 @@ implement
 d2cst_get2_type_arg
   (d2c) = let
 //
-val-Some(hse) = d2cst_get2_hisexp (d2c)
+val opt = d2cst_get2_hisexp (d2c)
+val () = assertloc (gopt_is_some (opt)) // HX: [val-Some (hse)]
+val hse = gopt_unsome (opt)
 //
 in
 //
-case+ hse.hisexp_node of
-| HSEfun (
+case+ hisexp_node_view (hse.hisexp_node()) of
+| ~HSEfun (
     _(*fc*), _arg, _(*res*)
   ) => _arg
-| _ => let
+| v => let
+    val () = hisexp_node_view_free (v)
     val () = prerr_interror ()
-    val (
-    ) = (
-      prerrln! (": d2cst_get_type_arg: hse = ", hse)
-    ) // end of [val]
+    val () = prerr_string (": d2cst_get_type_arg: hse = ")
+    val () = prerr_hisexp (hse)
+    val () = prerr_newline ()
     val () = assertloc (false)
   in
-    exit (1) // HX: this is deadcode
+    $ERR.abort_interr<hisexplst> () // HX: this is deadcode
   end (* end of [_] *)
 //
 end // end of [d2cst_get2_type_arg]
@@ -136,24 +156,26 @@ implement
 d2cst_get2_type_res
   (d2c) = let
 //
-val-Some(hse) = d2cst_get2_hisexp (d2c)
+val opt = d2cst_get2_hisexp (d2c)
+val () = assertloc (gopt_is_some (opt)) // HX: [val-Some (hse)]
+val hse = gopt_unsome (opt)
 //
 in
 //
 case+
-  hse.hisexp_node of
-| HSEfun (
+  hisexp_node_view (hse.hisexp_node()) of
+| ~HSEfun (
     _(*fc*), _(*arg*), _res
   ) => _res
-| _ => let
+| v => let
+    val () = hisexp_node_view_free (v)
     val () = prerr_interror ()
-    val (
-    ) = (
-      prerrln! (": d2cst_get_type_arg: hse = ", hse)
-    ) // end of [val]
+    val () = prerr_string (": d2cst_get_type_arg: hse = ")
+    val () = prerr_hisexp (hse)
+    val () = prerr_newline ()
     val () = assertloc (false)
   in
-    exit (1) // HX: this is deadcode
+    $ERR.abort_interr<hisexp> () // HX: this is deadcode
   end (* end of [_] *)
 //
 end // end of [d2cst_get_type_res]
@@ -174,13 +196,13 @@ d2cst_get2_funclo (d2c) = let
   val opt = d2cst_get2_hisexp (d2c)
 in
 //
-case+ opt of
-| Some (hse) =>
-  (
-    case+ hse.hisexp_node of
-    | HSEfun (fc, _, _) => Some_vt (fc) | _ => None_vt ()
-  )
-| None () => None_vt ()
+if gopt_is_some (opt) then let
+  val hse = gopt_unsome (opt)
+in
+  case+ hisexp_node_view (hse.hisexp_node()) of
+  | ~HSEfun (fc, _, _) => Some_vt (fc)
+  | v => (hisexp_node_view_free (v); None_vt ())
+end else None_vt ()
 //
 end // end of [d2cst_get2_funclo]
 
@@ -191,36 +213,49 @@ d2var_get2_funclo (d2v) = let
   val opt = d2var_get2_hisexp (d2v)
 in
 //
-case+ opt of
-| Some (hse) =>
-  (
-    case+ hse.hisexp_node of
-    | HSEfun (fc, _, _) => Some_vt (fc) | _ => None_vt ()
-  )
-| None () => None_vt ()
+if gopt_is_some (opt) then let
+  val hse = gopt_unsome (opt)
+in
+  case+ hisexp_node_view (hse.hisexp_node()) of
+  | ~HSEfun (fc, _, _) => Some_vt (fc)
+  | v => (hisexp_node_view_free (v); None_vt ())
+end else None_vt ()
 //
 end // end of [d2var_get2_funclo]
 
 (* ****** ****** *)
 
+fun
+hipatlst_forall_wild
+  (hips: hipatlst): bool =
+  if glist_is_cons (hips)
+    then (
+      if hipat_is_wild (glist_head<hipat> (hips))
+        then hipatlst_forall_wild (glist_tail<hipat> (hips)) else false
+    ) else true
+// end of [hipatlst_forall_wild]
+
 implement
 hipat_is_wild
   (hip) = let
+//
+val nd = hip.hipat_node()
+//
 in
 //
-case+
-  hip.hipat_node of
-| HIPany _ => true
-| HIPvar _ => true
-| HIPann (hip, _) => hipat_is_wild (hip)
-| HIPrefas (_, hip) => hipat_is_wild (hip)
-| _ => false
+if hipat_node_is_HIPany (nd) then true
+else if hipat_node_is_HIPvar (nd) then true
+else if hipat_node_is_HIPann (nd) then let
+  val-~HIPann (hip, _) = hipat_node_view (nd) in hipat_is_wild (hip)
+end else if hipat_node_is_HIPrefas (nd) then let
+  val-~HIPrefas (_, hip) = hipat_node_view (nd) in hipat_is_wild (hip)
+end else false
 //
 end // end of [hipat_is_wild]
 
 implement
 hipatlst_is_wild
-  (hips) = list_forall_fun (hips, hipat_is_wild)
+  (hips) = hipatlst_forall_wild (hips)
 // end of [hipatlst_is_wild]
 
 implement
@@ -228,12 +263,19 @@ labhipatlst_is_wild
   (lhips) = let
 //
 fun labhipat_is_wild
-  (lhip: labhipat): bool = let
-  val LABHIPAT (_, hip) = lhip in hipat_is_wild (hip)
-end // end of [labhipat_is_wild]
+  (lhip: labhipat): bool = hipat_is_wild (lhip.labhipat_elt())
+// end of [labhipat_is_wild]
+//
+fun loop
+  (lhips: labhipatlst): bool =
+  if glist_is_cons (lhips)
+    then (
+      if labhipat_is_wild (glist_head<labhipat> (lhips))
+        then loop (glist_tail<labhipat> (lhips)) else false
+    ) else true
 //
 in
-  list_forall_fun (lhips, labhipat_is_wild)
+  loop (lhips)
 end // end of [labhipatlst_is_wild]
 
 (* ****** ****** *)
@@ -242,92 +284,84 @@ implement
 hipat_subtest
   (hip1, hip2) = let
 //
-(*
-val () =
-(
-  println! ("hipat_subtest: hip1 = ", hip1);
-  println! ("hipat_subtest: hip2 = ", hip2);
-) // end of [val]
-*)
-//
-val hipn1 = hip1.hipat_node
-val hipn2 = hip2.hipat_node
+val hipn1 = hip1.hipat_node()
+val hipn2 = hip2.hipat_node()
 //
 in
 //
-case+
-  (hipn1, hipn2) of
-//
-| (_, HIPany _) => true
-| (_, HIPvar _) => true
-| (_, HIPann (hip2, _)) => hipat_subtest (hip1, hip2)
-| (_, HIPrefas (_, hip2)) => hipat_subtest (hip1, hip2)
-//
-| (HIPann (hip1, _), _) => hipat_subtest (hip1, hip2)
-| (HIPrefas (_, hip1), _) => hipat_subtest (hip1, hip2)
-//
-| (HIPcon
-    (_, d2c1, _, lxs1), _) =>
-  (
-  case+ hipn2 of
-  | HIPcon(_, d2c2, _, lxs2) =>
-    (
-      if d2c1 = d2c2
-        then labhipatlst_subtest (lxs1, lxs2) else false
-      // end of [if]
-    )
-  | HIPcon_any(_, d2c2) => d2c1 = d2c2
-  | _ (*non-HIPcon*) => false
-  )
-| (HIPcon_any(_, d2c1), _) =>
-  (
-  case+ hipn2 of
-  | HIPcon(_, d2c2, _, lxs2) =>
-      if d2c1 = d2c2 then labhipatlst_is_wild (lxs2) else false
-  | HIPcon_any(_, d2c2) => d2c1 = d2c2
-  | _ (*non-HIPcon*) => false
-  )
-//
-| (HIPint i1, _) => (
-  case+ hipn2 of HIPint i2 => i1 = i2 | _ => false
-  )
-| (HIPbool b1, _) => (
-  case+ hipn2 of HIPbool b2 => b1 = b2 | _ => false
-  )
-| (HIPchar c1, _) => (
-  case+ hipn2 of HIPchar c2 => c1 = c2 | _ => false
-  )
-| (HIPstring str1, _) =>
-  (
-  case+ hipn2 of
-  | HIPstring str2 => str1 = str2 | _ => false
-  )
-| (HIPfloat f1, _) => (
-  case+ hipn2 of HIPfloat f2 => f1 = f2 | _ => false
-  )
-//
-| (HIPempty((*void*)), _) => (
-  case+ hipn2 of HIPempty((*void*)) => true | _ => false
-  )
-//
-(*
-//
-// HX-2014-07: [HIPlst] is no longer in use
-//
-| (HIPlst (_, xs1), _) => (
-  case+ hipn2 of
-  | HIPlst (_, xs2) => hipatlst_subtest (xs1, xs2) | _ => false
-  )
-*)
-//
-| (HIPrec(_, _, lxs1, _), _) =>
-  (
-  case+ hipn2 of
-  | HIPrec(_, _, lxs2, _) =>
-    labhipatlst_subtest(lxs1, lxs2) | _ => false
-  )
-//
-| (_, _) (*rest-of-hipat-hipat*) => false
+if hipat_node_is_HIPany (hipn2) then true
+else if hipat_node_is_HIPvar (hipn2) then true
+else if hipat_node_is_HIPann (hipn2) then let
+  val-~HIPann (hip2, _) = hipat_node_view (hipn2) in hipat_subtest (hip1, hip2)
+end else if hipat_node_is_HIPrefas (hipn2) then let
+  val-~HIPrefas (_, hip2) = hipat_node_view (hipn2) in hipat_subtest (hip1, hip2)
+end else if hipat_node_is_HIPann (hipn1) then let
+  val-~HIPann (hip1, _) = hipat_node_view (hipn1) in hipat_subtest (hip1, hip2)
+end else if hipat_node_is_HIPrefas (hipn1) then let
+  val-~HIPrefas (_, hip1) = hipat_node_view (hipn1) in hipat_subtest (hip1, hip2)
+end else if hipat_node_is_HIPcon (hipn1) then let
+  val-~HIPcon (_, d2c1, _, lxs1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPcon (hipn2) then let
+    val-~HIPcon (_, d2c2, _, lxs2) = hipat_node_view (hipn2)
+  in
+    if d2c1 = d2c2
+      then labhipatlst_subtest (lxs1, lxs2) else false
+    // end of [if]
+  end else if hipat_node_is_HIPcon_any (hipn2) then let
+    val-~HIPcon_any (_, d2c2) = hipat_node_view (hipn2) in d2c1 = d2c2
+  end else false (* non-HIPcon *)
+end else if hipat_node_is_HIPcon_any (hipn1) then let
+  val-~HIPcon_any (_, d2c1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPcon (hipn2) then let
+    val-~HIPcon (_, d2c2, _, lxs2) = hipat_node_view (hipn2)
+  in
+    if d2c1 = d2c2 then labhipatlst_is_wild (lxs2) else false
+  end else if hipat_node_is_HIPcon_any (hipn2) then let
+    val-~HIPcon_any (_, d2c2) = hipat_node_view (hipn2) in d2c1 = d2c2
+  end else false (* non-HIPcon *)
+end else if hipat_node_is_HIPint (hipn1) then let
+  val-~HIPint (i1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPint (hipn2) then let
+    val-~HIPint (i2) = hipat_node_view (hipn2) in i1 = i2
+  end else false
+end else if hipat_node_is_HIPbool (hipn1) then let
+  val-~HIPbool (b1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPbool (hipn2) then let
+    val-~HIPbool (b2) = hipat_node_view (hipn2) in b1 = b2
+  end else false
+end else if hipat_node_is_HIPchar (hipn1) then let
+  val-~HIPchar (c1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPchar (hipn2) then let
+    val-~HIPchar (c2) = hipat_node_view (hipn2) in c1 = c2
+  end else false
+end else if hipat_node_is_HIPstring (hipn1) then let
+  val-~HIPstring (str1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPstring (hipn2) then let
+    val-~HIPstring (str2) = hipat_node_view (hipn2) in str1 = str2
+  end else false
+end else if hipat_node_is_HIPfloat (hipn1) then let
+  val-~HIPfloat (f1) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPfloat (hipn2) then let
+    val-~HIPfloat (f2) = hipat_node_view (hipn2) in f1 = f2
+  end else false
+end else if hipat_node_is_HIPempty (hipn1) then
+  hipat_node_is_HIPempty (hipn2)
+else if hipat_node_is_HIPrec (hipn1) then let
+  val-~HIPrec (_, _, lxs1, _) = hipat_node_view (hipn1)
+in
+  if hipat_node_is_HIPrec (hipn2) then let
+    val-~HIPrec (_, _, lxs2, _) = hipat_node_view (hipn2)
+  in
+    labhipatlst_subtest (lxs1, lxs2)
+  end else false
+end else false (* rest-of-hipat-hipat *)
 //
 end // end of [hipat_subtest]
 
@@ -338,275 +372,249 @@ hipatlst_subtest
   (xs1, xs2) = let
 in
 //
-case+ xs1 of
-| list_cons
-    (x1, xs1) => (
-  case+ xs2 of
-  | list_cons (x2, xs2) =>
-    (
-      if hipat_subtest (x1, x2)
-        then hipatlst_subtest (xs1, xs2) else false
-      // end of [if]
-    )
-  | list_nil () => false
-  )
-| list_nil () => (
-  case+ xs2 of list_cons _ => false | list_nil () => true
-  )
+if glist_is_cons (xs1) then (
+  if glist_is_cons (xs2) then (
+    if hipat_subtest (glist_head<hipat> (xs1), glist_head<hipat> (xs2))
+      then hipatlst_subtest (glist_tail<hipat> (xs1), glist_tail<hipat> (xs2)) else false
+    // end of [if]
+  ) else false
+) else (
+  if glist_is_cons (xs2) then false else true
+)
 //
 end // end of [hipatlst_subtest]
 
 (* ****** ****** *)
-
-local
 
 fun labhipat_subtest
 (
   lx1: labhipat, lx2: labhipat
 ) : bool = let
 //
-val+LABHIPAT (l1, x1) = lx1
-val+LABHIPAT (l2, x2) = lx2
+val l1 = lx1.labhipat_lab() and x1 = lx1.labhipat_elt()
+val l2 = lx2.labhipat_lab() and x2 = lx2.labhipat_elt()
 //
 in
   if l1 = l2 then hipat_subtest (x1, x2) else false
 end // end of [labhipat_subtest]
-
-in (* in of [local] *)
 
 implement
 labhipatlst_subtest
   (lxs1, lxs2) = let
 in
 //
-case+ lxs1 of
-| list_cons
-    (lx1, lxs1) => (
-  case+ lxs2 of
-  | list_cons (lx2, lxs2) =>
-    (
-      if labhipat_subtest (lx1, lx2)
-        then labhipatlst_subtest (lxs1, lxs2) else false
-      // end of [if]
-    )
-  | list_nil () => false
-  )
-| list_nil () => (
-  case+ lxs2 of list_cons _ => false | list_nil () => true
-  )
+if glist_is_cons (lxs1) then (
+  if glist_is_cons (lxs2) then (
+    if labhipat_subtest (glist_head<labhipat> (lxs1), glist_head<labhipat> (lxs2))
+      then labhipatlst_subtest (glist_tail<labhipat> (lxs1), glist_tail<labhipat> (lxs2)) else false
+    // end of [if]
+  ) else false
+) else (
+  if glist_is_cons (lxs2) then false else true
+)
 //
 end // end of [labhipatlst_subtest]
-
-end // end of [local]
 
 (* ****** ****** *)
 //
 implement
 hidexp_is_empty
   (x0) = let
-(*
-val () =
-println!
-(
-"hidexp_is_empty: x0 = ", x0
-) (* println! *)
-*)
+//
+val nd = x0.hidexp_node()
+//
 in
 //
-case+
-x0.hidexp_node
-of (* case+ *)
-| HDEempty() => true
-| HDEfoldat() => true
-| HDEseq(hdes) => hidexplst_isall_empty(hdes)
-| _ (*rest-of-hidexp*) => false
+if hidexp_node_is_HDEempty (nd) then true
+else if hidexp_node_is_HDEfoldat (nd) then true
+else if hidexp_node_is_HDEseq (nd) then let
+  val-~HDEseq (hdes) = hidexp_node_view (nd) in hidexplst_isall_empty (hdes)
+end else false (* rest-of-hidexp *)
 //
 end // end of [hidexp_is_empty]
 //
 implement
 hidexplst_isall_empty
-  (xs) = list_forall_fun(xs, hidexp_is_empty)
+  (xs) =
+  if glist_is_cons (xs)
+    then (
+      if hidexp_is_empty (glist_head<hidexp> (xs))
+        then hidexplst_isall_empty (glist_tail<hidexp> (xs)) else false
+    ) else true
 implement
 hidexplst_isexi_empty
-  (xs) = list_exists_fun(xs, hidexp_is_empty)
+  (xs) =
+  if glist_is_cons (xs)
+    then (
+      if hidexp_is_empty (glist_head<hidexp> (xs))
+        then true else hidexplst_isexi_empty (glist_tail<hidexp> (xs))
+    ) else false
 //
 (* ****** ****** *)
-
-local
 
 fun
 hidexplst_is_value
   (xs: hidexplst): bool =
-  list_forall_fun (xs, hidexp_is_value)
+  if glist_is_cons (xs)
+    then (
+      if hidexp_is_value (glist_head<hidexp> (xs))
+        then hidexplst_is_value (glist_tail<hidexp> (xs)) else false
+    ) else true
 // end of [hidexplst_is_value]
 
 fun
 labhidexplst_is_value
-  (lxs: labhidexplst): bool = let
-//
-fun ftest (lx: labhidexp) = let
-  val LABHIDEXP (l, x) = lx in hidexp_is_value (x)
-end // end of [fun]
-//
-in
-  list_forall_fun (lxs, ftest)
-end // end of [labhidexplst_is_value]
+  (lxs: labhidexplst): bool =
+  if glist_is_cons (lxs)
+    then let
+      val lx = glist_head<labhidexp> (lxs)
+    in
+      if hidexp_is_value (lx.labhidexp_elt())
+        then labhidexplst_is_value (glist_tail<labhidexp> (lxs)) else false
+    end else true
+// end of [labhidexplst_is_value]
 
 fun
 hidecl_is_value
   (hid0: hidecl): bool = let
+//
+val nd = hid0.hidecl_node()
+//
 in
 //
-case+
-hid0.hidecl_node
-of // case+
-| HIDnone() => true
-//
-| HIDlist(hids) =>
-    hideclist_is_value(hids)
-//
-| HIDfundecs _ => true
-| HIDvaldecs
-    (_, hvds) => hivaldecs_is_value(hvds)
-  // end of [HIDvaldecs]
-//
-| _(*rest-of-hidecl*) => false
+if hidecl_node_is_HIDnone (nd) then true
+else if hidecl_node_is_HIDlist (nd) then let
+  val-~HIDlist (hids) = hidecl_node_view (nd) in hideclist_is_value (hids)
+end else if hidecl_node_is_HIDfundecs (nd) then true
+else if hidecl_node_is_HIDvaldecs (nd) then let
+  val-~HIDvaldecs (_, hvds) = hidecl_node_view (nd) in hivaldecs_is_value (hvds)
+end else false (* rest-of-hidecl *)
 //
 end // end of [hidecl_is_value]
 
 and
 hideclist_is_value
   (hids: hideclist): bool =
-  list_forall_fun(hids, hidecl_is_value)
+  if glist_is_cons (hids)
+    then (
+      if hidecl_is_value (glist_head<hidecl> (hids))
+        then hideclist_is_value (glist_tail<hidecl> (hids)) else false
+    ) else true
 // end of [hideclist_is_value]
 
 and
 hivaldec_is_value
   (hvd: hivaldec): bool =
-  hidexp_is_value(hvd.hivaldec_def)
+  hidexp_is_value(hvd.hivaldec_def())
 //
 and
 hivaldecs_is_value
   (hvds: hivaldeclst): bool =
-  list_forall_fun(hvds, hivaldec_is_value)
-
-in (* in of [local] *)
+  if glist_is_cons (hvds)
+    then (
+      if hivaldec_is_value (glist_head<hivaldec> (hvds))
+        then hivaldecs_is_value (glist_tail<hivaldec> (hvds)) else false
+    ) else true
 
 implement
 hidexp_is_value
   (hde0) = let
+//
+val nd = hde0.hidexp_node()
+//
 in
 //
-case+
-hde0.hidexp_node
-of // case+
-//
-  | HDEvar _ => true
-  | HDEcst _ => true
-//
-  | HDEbool _ => true
-  | HDEchar _ => true
-  | HDEstring _ => true
-//
-  | HDEi0nt _ => true
-  | HDEf0loat _ => true
-//
-  | HDEextval _ => true
-//
-  | HDElam _ => true
-  | HDErec (_, lhdes, _) => labhidexplst_is_value (lhdes)
-//
-  | HDEtmpcst _ => true
-  | HDEtmpvar _ => true
-//
-  | HDElet(hids, hde) =>
-    if hideclist_is_value(hids) then hidexp_is_value(hde) else false
-//
-  | _ (*rest-of-hidexp*) => false
+if hidexp_node_is_HDEvar (nd) then true
+else if hidexp_node_is_HDEcst (nd) then true
+else if hidexp_node_is_HDEbool (nd) then true
+else if hidexp_node_is_HDEchar (nd) then true
+else if hidexp_node_is_HDEstring (nd) then true
+else if hidexp_node_is_HDEi0nt (nd) then true
+else if hidexp_node_is_HDEf0loat (nd) then true
+else if hidexp_node_is_HDEextval (nd) then true
+else if hidexp_node_is_HDElam (nd) then true
+else if hidexp_node_is_HDErec (nd) then let
+  val-~HDErec (_, lhdes, _) = hidexp_node_view (nd) in labhidexplst_is_value (lhdes)
+end else if hidexp_node_is_HDEtmpcst (nd) then true
+else if hidexp_node_is_HDEtmpvar (nd) then true
+else if hidexp_node_is_HDElet (nd) then let
+  val-~HDElet (hids, hde) = hidexp_node_view (nd)
+in
+  if hideclist_is_value(hids) then hidexp_is_value(hde) else false
+end else false (* rest-of-hidexp *)
 //
 end // end of [hidexp_is_value]
 
-end // end of [local]
-
 (* ****** ****** *)
-
-local
 
 fun
 auxseq
 (
-  hde, hdes: hidexplst
+  hde: hidexp, hdes: hidexplst
 ) : bool =
 (
-  case+ hdes of
-  | list_nil () => hidexp_is_lvalue (hde)
-  | list_cons (hde, hdes) => auxseq (hde, hdes)
+  if glist_is_cons (hdes)
+    then auxseq (glist_head<hidexp> (hdes), glist_tail<hidexp> (hdes))
+    else hidexp_is_lvalue (hde)
 ) (* end of [auxseq] *)
-
-in (*in-of-local*)
 
 implement
 hidexp_is_lvalue
   (hde0) = let
+//
+val nd = hde0.hidexp_node()
+//
 in
 //
-case+ hde0.hidexp_node of
-| HDEvar (d2v) =>
-    $D2E.d2var_is_mutabl (d2v)
-| HDEselvar (d2v, _, _) =>
-    $D2E.d2var_is_mutabl (d2v)
-| HDEselptr (hde, _, _) => true
-//
-| HDEseq (hdes) =>
-  (
-    case+ hdes of
-    | list_cons (hde, hdes) => auxseq (hde, hdes) | list_nil () => false
-  ) (* end of [HDEseq] *)
-//
-| _ (* non-lvalue *) => false
+if hidexp_node_is_HDEvar (nd) then let
+  val-~HDEvar (d2v) = hidexp_node_view (nd) in $D2E.d2var_is_mutabl (d2v)
+end else if hidexp_node_is_HDEselvar (nd) then let
+  val-~HDEselvar (d2v, _, _) = hidexp_node_view (nd) in $D2E.d2var_is_mutabl (d2v)
+end else if hidexp_node_is_HDEselptr (nd) then true
+else if hidexp_node_is_HDEseq (nd) then let
+  val-~HDEseq (hdes) = hidexp_node_view (nd)
+in
+  if glist_is_cons (hdes)
+    then auxseq (glist_head<hidexp> (hdes), glist_tail<hidexp> (hdes)) else false
+end else false (* non-lvalue *)
 //
 end // end of [hidexp_is_lvalue]
-
-end // end of [local]
-
-(* ****** ****** *)
-
-(*
-implement
-un_hidexp_int (hde) =
-(
-case+ hde.hidexp_node of
-| HDEint (int) => Some_vt (int)
-| HDEi0nt (tok) =>
-| _(*noninteger*) => None_vt((*void*))
-) (* end of [un_hidexp_int] *)
-*)
 
 (* ****** ****** *)
 
 implement
 hidecl_is_empty (hid) = let
+//
+val nd = hid.hidecl_node()
+//
 in
 //
-case+
-  hid.hidecl_node of
-//
-| HIDnone () => true
-//
-| HIDlist (xs) => list_is_nil (xs)
-//
-| HIDfundecs (_, _, xs) => list_is_nil (xs)
-//
-| HIDvaldecs (_, xs) => list_is_nil (xs)
-| HIDvaldecs_rec (_, xs) => list_is_nil (xs)
-(*
-| HIDvardecs (xs) => list_is_nil (xs)
-*)
-| _ (* rest-of-hidecl *) => false
+if hidecl_node_is_HIDnone (nd) then true
+else if hidecl_node_is_HIDlist (nd) then let
+  val-~HIDlist (xs) = hidecl_node_view (nd) in glist_is_nil (xs)
+end else if hidecl_node_is_HIDfundecs (nd) then let
+  val-~HIDfundecs (_, _, xs) = hidecl_node_view (nd) in glist_is_nil (xs)
+end else if hidecl_node_is_HIDvaldecs (nd) then let
+  val-~HIDvaldecs (_, xs) = hidecl_node_view (nd) in glist_is_nil (xs)
+end else if hidecl_node_is_HIDvaldecs_rec (nd) then let
+  val-~HIDvaldecs_rec (_, xs) = hidecl_node_view (nd) in glist_is_nil (xs)
+end else false (* rest-of-hidecl *)
 //
 end // end of [hidecl_is_empty]
 
 (* ****** ****** *)
+
+fun
+hidexplst_filter_nonempty
+  (xs: hidexplst): hidexplst =
+  if glist_is_cons (xs) then let
+    val x = glist_head<hidexp> (xs)
+    val isemp = hidexp_is_empty (x)
+    val xs1 = hidexplst_filter_nonempty (glist_tail<hidexp> (xs))
+  in
+    if isemp then xs1 else glist_cons (x, xs1)
+  end else glist_nil ((*void*))
+// end of [hidexplst_filter_nonempty]
 
 implement
 hidexp_seq_simplify
@@ -619,34 +627,18 @@ val hdes = (
 //
 if
 isexi
-then let
-//
-val
-hdes =
-list_filter_fun
-( hdes
-, lam(x) =<1>
-  not(hidexp_is_empty(x))
-) (* list_filter_fun *)
-//
-in
-  list_of_list_vt{hidexp}(hdes)
-end // end of [then]
+then hidexplst_filter_nonempty (hdes)
 else hdes // end of [else]
 //
 ) : hidexplst // end of [val]
 //
 in
-  case+ hdes of
-  | list_cons
-      (hde, list_nil()) => hde
-    // list_sing
-  | _(* non-singleton *) => hidexp_seq(loc, hse0, hdes)
+  if glist_is_cons (hdes) andalso glist_is_nil (glist_tail<hidexp> (hdes))
+    then glist_head<hidexp> (hdes) // list_sing
+    else hidexp_seq(loc, hse0, hdes) (* non-singleton *)
 end // end of [hidexp_seq_simplify]
 
 (* ****** ****** *)
-
-local
 
 typedef d2var = $D2E.d2var
 
@@ -659,23 +651,29 @@ hdevaremp =
 
 fun hidexp_is_varemp
   (hde0: hidexp): hdevaremp = let
+//
+val nd = hde0.hidexp_node()
+//
 in
 //
-case+ hde0.hidexp_node of
-| HDEvar d2v => HDEVEsome_var (d2v)
-| HDEempty () => HDEVEsome_emp ((*void*))
-| HDEfoldat () => HDEVEsome_emp ((*void*))
-| HDErec (knd, lhdes, _) =>
-  (
-    if knd = 0 then (
-      case+ lhdes of
-      | list_cons (lhde, list_nil ()) => let
-          val+LABHIDEXP (lab, hde) = lhde in hidexp_is_varemp (hde)
-        end  // end of [list_cons (_, list_nil)]
-      | _ => HDEVEnone ()
-    ) else HDEVEnone () // end of [if]
-  ) (* end of [HIErec] *)
-| _ => HDEVEnone ((*void*))
+if hidexp_node_is_HDEvar (nd) then let
+  val-~HDEvar (d2v) = hidexp_node_view (nd) in HDEVEsome_var (d2v)
+end else if hidexp_node_is_HDEempty (nd) then HDEVEsome_emp ((*void*))
+else if hidexp_node_is_HDEfoldat (nd) then HDEVEsome_emp ((*void*))
+else if hidexp_node_is_HDErec (nd) then let
+  val-~HDErec (knd, lhdes, _) = hidexp_node_view (nd)
+in
+  if knd = 0 then (
+    if glist_is_cons (lhdes) andalso glist_is_nil (glist_tail<labhidexp> (lhdes))
+      then let
+        val lhde = glist_head<labhidexp> (lhdes)
+      in
+        hidexp_is_varemp (lhde.labhidexp_elt())
+      end  // end of [list_cons (_, list_nil)]
+      else HDEVEnone ()
+  ) else HDEVEnone () // end of [if]
+end (* end of [HIErec] *)
+else HDEVEnone ((*void*))
 //
 end // end of [hidexp_is_varemp]
 
@@ -686,96 +684,93 @@ hianybind =
   | HABNDsome_var of (d2var, hidexp)
   | HABNDsome_emp of hidexp
 
-fun hidecl_is_anybind
-  (hid0: hidecl): hianybind = let
-//
-fun aux
+fun hidecl_is_anybind_aux
 (
   hip0: hipat, hde: hidexp
 ) : hianybind = let
-in
 //
-case+
-hip0.hipat_node
-of (* case+ *)
-//
-| HIPany _ => HABNDsome_any (hde)
-//
-| HIPvar(d2v) => HABNDsome_var(d2v, hde)
-//
-| HIPempty((*void*)) => HABNDsome_emp(hde)
-//
-| HIPrec
-  (
-    knd, pck, lhips, hse_rec
-  ) => (
-    if knd = 0 then
-    (
-    case+ lhips of
-    | list_cons(lhip, list_nil()) =>
-        let val+LABHIPAT(lab, hip) = lhip in aux(hip, hde) end
-    | _ (*non-list_sing*) => HABNDnone ()
-    ) else HABNDnone () // end of [if]
-  ) (* end of [HIPrec] *)
-| _ (* rest-of-hipat *) => HABNDnone ((*void*))
-//
-end // end of [aux]
+val nd = hip0.hipat_node()
 //
 in
 //
-case+
-hid0.hidecl_node
-of (* case+ *)
-| HIDvaldecs
-    (_, hvds) =>
+if hipat_node_is_HIPany (nd) then HABNDsome_any (hde)
+else if hipat_node_is_HIPvar (nd) then let
+  val-~HIPvar (d2v) = hipat_node_view (nd) in HABNDsome_var(d2v, hde)
+end else if hipat_node_is_HIPempty (nd) then HABNDsome_emp(hde)
+else if hipat_node_is_HIPrec (nd) then let
+  val-~HIPrec (knd, pck, lhips, hse_rec) = hipat_node_view (nd)
+in
+  if knd = 0 then
   (
-  case+ hvds of
-  | list_cons (
-      hvd, list_nil()
-    ) => aux(hvd.hivaldec_pat, hvd.hivaldec_def)
-  | _ (* non-list_sing*) => HABNDnone ((*void*))
-  ) (* end of [HIDvaldecs] *)
-| _ (*non-HIDvaldecs*) => HABNDnone((*void*))
+  if glist_is_cons (lhips) andalso glist_is_nil (glist_tail<labhipat> (lhips))
+    then let
+      val lhip = glist_head<labhipat> (lhips)
+    in
+      hidecl_is_anybind_aux (lhip.labhipat_elt(), hde)
+    end
+    else HABNDnone () (* non-list_sing *)
+  ) else HABNDnone () // end of [if]
+end (* end of [HIPrec] *)
+else HABNDnone ((*void*)) (* rest-of-hipat *)
+//
+end // end of [hidecl_is_anybind_aux]
+
+fun hidecl_is_anybind
+  (hid0: hidecl): hianybind = let
+//
+val nd = hid0.hidecl_node()
+//
+in
+//
+if hidecl_node_is_HIDvaldecs (nd) then let
+  val-~HIDvaldecs (_, hvds) = hidecl_node_view (nd)
+in
+  if glist_is_cons (hvds) andalso glist_is_nil (glist_tail<hivaldec> (hvds))
+    then let
+      val hvd = glist_head<hivaldec> (hvds)
+    in
+      hidecl_is_anybind_aux (hvd.hivaldec_pat(), hvd.hivaldec_def())
+    end
+    else HABNDnone ((*void*)) (* non-list_sing*)
+end else HABNDnone((*void*)) (* non-HIDvaldecs*)
 //
 end // end of [hidecl_is_anybind]
 
-fun dropz{n:pos}
+fun hideclist_last
+  (xs: hideclist): hidecl = let
+  val x = glist_head<hidecl> (xs)
+  val xs1 = glist_tail<hidecl> (xs)
+in
+  if glist_is_cons (xs1) then hideclist_last (xs1) else x
+end // end of [hideclist_last]
+
+fun dropz
 (
-  xs: list (hidecl, n)
-) : list (hidecl, n-1) = let
+  xs: hideclist
+) : hideclist = let
 //
-val+list_cons (x, xs1) = xs
+val x = glist_head<hidecl> (xs)
+val xs1 = glist_tail<hidecl> (xs)
 //
 in
 //
-case+ xs1 of
-| list_cons _ =>
-    list_cons (x, dropz (xs1))
-| list_nil () => list_nil ()
+if glist_is_cons (xs1)
+  then glist_cons (x, dropz (xs1)) else glist_nil ()
 //
 end // end of [dropz]
-
-in (* in of [local] *)
 
 implement
 hidexp_let_simplify
   (loc, hse, hids, hde) = let
 //
-(*
-val () =
-println! ("hidexp_let_simplify")
-*)
-//
 in
 //
-case+ hids of
-//
-| list_cons _ => let
+if glist_is_cons (hids) then let
     val opt = hidexp_is_varemp (hde)
   in
     case+ opt of
     | ~HDEVEsome_var (d2v) => let
-        val hid = list_last (hids)
+        val hid = hideclist_last (hids)
         val opt2 = hidecl_is_anybind (hid)
       in
         case+ opt2 of
@@ -791,7 +786,7 @@ case+ hids of
         | ~HABNDsome_emp _ => hidexp_let (loc, hse, hids, hde)
       end // end of [HDEVEsome_var]        
     | ~HDEVEsome_emp ((*void*)) => let
-        val hid = list_last (hids)
+        val hid = hideclist_last (hids)
         val opt2 = hidecl_is_anybind (hid)
       in
         case+ opt2 of
@@ -806,11 +801,9 @@ case+ hids of
     | ~HDEVEnone () => hidexp_let (loc, hse, hids, hde)
   end // end of [list_cons]
 //
-| list_nil ((*void*)) => hde
+else hde (* list_nil *)
 //
 end // end of [hidexp_let_simplify]
-
-end // end of [local]
 
 (* ****** ****** *)
 

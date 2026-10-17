@@ -1,0 +1,17 @@
+# covexcl.txt: lines of the trans3 modules that no ATS source can reach, left out of the "reachable" coverage of covunion.py
+# MODULE FIRST LAST REASON  (line numbers of the .dats)
+pats_trans3_env_lstate 113 133 fprint_lstbefitm (debug printer, no caller)
+pats_trans3_env_lstate 136 141 fprint_lstbefitmlst (debug printer, no caller)
+pats_trans3_env_lstate 155 170 lstbefitmlst_restore_linval_type (no caller)
+pats_trans3_env_lstate 172 192 fprint_saityp(lst) (debug printers)
+pats_trans3_env_lstate 227 260 fprint_lstaftitm(lst) (debug printers)
+pats_trans3_env_lstate 307 322 lstaftitmlst_reverse (no caller)
+pats_trans3_env_lstate 331 341 fprint_lstaftc3nstr (debug printer)
+pats_trans3_env_svar 130 155 fprint_the_s2varbindmap (debug printer, no caller)
+pats_trans3_env_pfman 126 160 fprint_the_pfmanenv (debug printer, no caller)
+pats_trans3_env_pfman 168 172 pop_loop on an empty stack (the stack always has the mark of its push)
+pats_trans3_env_pfman 216 237 the_pfmanenv_add_dvarlst / add_dvaropt (no caller)
+pats_trans3_util 383 397 d3lablst_is_overld (no caller)
+pats_trans3_util 488 499 d3explst_get_ind (no caller)
+pats_patcst2 296 322 p2atcstlstlst_of_vt on the unused path / assertloc of i0nt2intinf
+pats_patcst2 322 526 fprint_p2atcst and co (debug printers; the one call is in an error message of the solver)

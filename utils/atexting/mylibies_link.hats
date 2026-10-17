@@ -25,6 +25,21 @@ in (*nothing*) end
 //
 (* ****** ****** *)
 //
+// HX-2026-10: the arena encoding of the syntax
+//
+local
+#include "share/atspre_staload.hats"
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
+staload "./SATS/atexting.sats"
+in
+#include "./DATS/atexting_gen.hats"
+#include "./DATS/atexting_def_gen.hats"
+end // end of [local]
+//
+(* ****** ****** *)
+//
 local
 #include "./DATS/atexting_fname.dats"
 in (*nothing*) end
@@ -83,22 +98,21 @@ staload
 "prelude/DATS/integer.dats"
 staload
 "prelude/DATS/filebas.dats"
+// HX-2026-10: (for the arena templates)
+#include "share/atspre_staload.hats"
 //
 (* ****** ****** *)
-//
-staload
-"libats/ML/SATS/basis.sats"  
 //
 staload
 "libats/libc/SATS/stdio.sats"  
 //
 (* ****** ****** *)
 //
-datatype
-outchan =
-| OUTCHANptr of FILEref
-| OUTCHANref of FILEref
-// end of [OUTCHAN]
+// HX-2026-10: no GC (flat)
+// 0: OUTCHANref; 1: OUTCHANptr
+//
+typedef
+outchan = @(int, FILEref)
 //
 (* ****** ****** *)
 
@@ -107,9 +121,7 @@ outchan_get_fileref
   (x0: outchan): FILEref =
 (
 //
-case+ x0 of
-| OUTCHANref(filr) => filr
-| OUTCHANptr(filp) => filp
+x0.1
 //
 ) // outchan_get_fileref
 
@@ -119,9 +131,7 @@ fun
 outchan_close(x0: outchan): void =
 (
 //
-case+ x0 of
-| OUTCHANref(filr) => ()
-| OUTCHANptr(filp) => fclose0_exn(filp)
+if x0.0 > 0 then fclose0_exn(x0.1)
 //
 ) (* end of [outchan_close] *)
 
@@ -145,6 +155,8 @@ MAIN_NONE
 local
 //
 staload "./SATS/atexting.sats"
+staload "libats/SATS/arena.sats" // HX-2026-10
+staload _ = "libats/DATS/arena.dats"
 //
 typedef
 cmdstate = @{
@@ -168,7 +180,7 @@ atexting_usage
   out: FILEref, arg0: commarg
 ) : void = let
 //
-val-CAgitem(cmd) = arg0
+val-~CAgitem(cmd) = commarg_view(arg0)
 //
 in
 //
@@ -187,15 +199,15 @@ process_commarg
 ) : void = let
 in
 //
-case+ x0 of
+case+ commarg_view(x0) of
 //
-| CAhelp _ =>
+| ~CAhelp _ =>
   atexting_usage
   (
     stderr_ref, state.cmdname
   ) (* CAhelp *)
 //
-| CAgitem(arg) =>
+| ~CAgitem(arg) =>
   {
     val () =
     fprintln!
@@ -205,21 +217,21 @@ case+ x0 of
     ) (* end of [val] *)
   }
 //
-| CAnsharp(_, opt) => let
+| ~CAnsharp(_, opt) => let
     val ns =
     (
-      case+ opt of
-      | None0() => 0
-      | Some0(ns) => g0string2int(ns)
+      case+ gopt_view(opt) of
+      | ~GOnone() => 0
+      | ~GOsome(ns) => g0string2int(ns)
     ) : int // end of [val]
   in
     the_nsharp_set(ns)
   end // end of [CSnsharp]
 //
-| CAinpfil(_, opt) =>
+| ~CAinpfil(_, opt) =>
   (
-    case+ opt of
-    | None0() => let
+    case+ gopt_view(opt) of
+    | ~GOnone() => let
         val txts =
           parsing_from_stdin()
         // end of [val]
@@ -228,8 +240,8 @@ case+ x0 of
         // end of [val]
       in
         atextlst_topeval(out, txts)
-      end // end of [None0]
-    | Some0(path) => let
+      end // end of [None]
+    | ~GOsome(path) => let
         val txts =
           parsing_from_filename(path)
         // end of [val]
@@ -238,10 +250,10 @@ case+ x0 of
         // end of [val]
       in
         atextlst_topeval(out, txts)
-      end // end of [Some0]
+      end // end of [Some]
   ) (* end of [CAinpfil] *)
 //
-| CAoutfil(_, opt) =>
+| ~CAoutfil(_, opt) =>
     process_commarg_outfil(x0, opt, state)
   // end of [CAoutfil]
 //
@@ -251,7 +263,7 @@ and
 process_commarg_outfil
 (
   x0: commarg
-, opt: option0(string)
+, opt: gopt(string)
 , state: &cmdstate >> _
 ) : void = let
 //
@@ -261,12 +273,12 @@ val () =
 //
 in
 //
-case+ opt of
-| None0() =>
+case+ gopt_view(opt) of
+| ~GOnone() =>
   (
-    state.outchan := OUTCHANref(stdout_ref)
-  ) (* None0 *)
-| Some0(path) => let
+    state.outchan := @(0, stdout_ref)
+  ) (* None *)
+| ~GOsome(path) => let
     val opt =
       fileref_open_opt(path, state.outmode)
     // end of [val]
@@ -274,9 +286,9 @@ case+ opt of
     case+ opt of
     | ~None_vt() =>
       (
-        state.outchan := OUTCHANref(stderr_ref)
+        state.outchan := @(0, stderr_ref)
       )
-    | ~Some_vt(filr) => state.outchan := OUTCHANref(filr)
+    | ~Some_vt(filr) => state.outchan := @(0, filr)
   end // end of [val]
 //
 end // end of [process_commarg_outfil]
@@ -289,17 +301,17 @@ process_commarglst
 ) : void = let
 in
 //
-case+ xs of
+case+ glist_view(xs) of
 //
-| list0_nil() =>
+| ~GLnil() =>
   process_commarglst_final(state)
 //
-| list0_cons(x, xs) => let
+| ~GLcons(x, xs) => let
     val () =
     process_commarg(x, state)
   in
     process_commarglst(xs, state)
-  end // end of [list0_cons]
+  end // end of [list_cons]
 //
 end // end of [process_commarglst]
 //
@@ -341,8 +353,8 @@ val _(*void*) = fprintln! (out, "args = ", args)
 *)
 //
 val-
-list0_cons
-  (arg0, args) = args
+~GLcons
+  (arg0, args) = glist_view(args)
 //
 var
 state: cmdstate
@@ -351,7 +363,7 @@ state.cmdname := arg0
 val () =
 state.outmode := file_mode_w
 val () =
-state.outchan := OUTCHANref(stdout_ref)
+state.outchan := @(0, stdout_ref)
 //
 val () = process_commarglst(args, state)
 //

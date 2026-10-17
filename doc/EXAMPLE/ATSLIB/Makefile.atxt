@@ -1,12 +1,14 @@
 %{
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
-staload TIME = "libc/SATS/time.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 //
 dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 //
 %}\
 %{
@@ -123,7 +125,6 @@ RMF=rm -f
 
 ######
 
-#make2_entry("prelude_string", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
@@ -132,7 +133,6 @@ RMF=rm -f
 
 ######
 
-#make2_entry("prelude_reference", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
@@ -148,22 +148,16 @@ RMF=rm -f
 
 ######
 
-#make2_entry("prelude_list", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("prelude_list_vt", "-DATS_MEMALLOC_LIBC", "")
 
-#make2_entry("prelude_option", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("prelude_option_vt", "-DATS_MEMALLOC_LIBC", "")
 
 #make2_entry("prelude_array", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("prelude_arrayptr", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("prelude_arrayref", "-DATS_MEMALLOC_LIBC", "")
 
 #make2_entry("prelude_matrix", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("prelude_matrixptr", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("prelude_matrixref", "-DATS_MEMALLOC_LIBC", "")
 
-#make2_entry("prelude_stream", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("prelude_stream_vt", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
@@ -172,7 +166,6 @@ RMF=rm -f
 ######
 
 #make2_entry("prelude_gprint", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("prelude_tostring", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
@@ -182,7 +175,6 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_gflist", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
@@ -203,7 +195,6 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_stringbuf", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 %{
 (*
 #make2_entry("libats_strobjref", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
@@ -226,27 +217,18 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_funmap_list", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("libats_funmap_avltree", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("libats_funmap_rbtree", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
-#make2_entry("libats_funset_listord", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("libats_funset_avltree", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
-#make2_entry("libats_funmset_listord", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
-#make2_entry("libats_funarray_braunt", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
-#make2_entry("libats_fundeque_fngtree", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_funralist_nested", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
@@ -257,8 +239,6 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_linset_listord", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("libats_linset_avltree", "-DATS_MEMALLOC_LIBC", "")
 
 ######
 
@@ -271,45 +251,27 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_ML_list0", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_array0", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_matrix0", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_string", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_strarr", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_gvalue", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_filebas", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_intrange", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_funset", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_funmap", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_myfunset", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_myfunmap", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_qlistref", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_hashtblref", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_myhashtblref", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_monad_list", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ML_monad_maybe", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ML_COMPILE_all", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
@@ -329,7 +291,6 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_libc_sys_stat", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
@@ -337,16 +298,11 @@ RMF=rm -f
 
 ######
 
-#make2_entry("libats_ATS1_funset_listord", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
-#make2_entry("libats_ATS1_funheap_braun", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("libats_ATS1_funheap_binomial", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
-#make2_entry("libats_ATS1_funmset_listord", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
-#make2_entry("libats_ATS1_linset_listord", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 
 ######
 
@@ -363,5 +319,5 @@ cleanall:: clean
 \
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
 %}\

@@ -33,10 +33,18 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-"./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_dmacro2_eval1.dats, see PORTING.md, "Macros (dmacro2)")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 //
 staload "./pats_errmsg.sats"
@@ -52,6 +60,12 @@ overload print with $LOC.print_location
 
 (* ****** ****** *)
 
+staload SYN = "./pats_syntax.sats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_dynexp2.sats"
@@ -77,83 +91,83 @@ d2var_rename(loc0, d2v) = d2v // HX: is this okay?
 //
 (* ****** ****** *)
 //
-extern fun eval1_s2exp : eval1_type(s2exp)
-extern fun eval1_s2explst : eval1_type(s2explst)
-extern fun eval1_s2expopt : eval1_type(s2expopt)
+extern fun eval1_s2exp (loc0: location, ctx: !evalctx, env: &alphenv, x: s2exp): s2exp
+extern fun eval1_s2explst (loc0: location, ctx: !evalctx, env: &alphenv, x: s2explst): s2explst
+extern fun eval1_s2expopt (loc0: location, ctx: !evalctx, env: &alphenv, x: s2expopt): s2expopt
 //
-extern fun eval1_s2exparg : eval1_type(s2exparg)
-extern fun eval1_s2exparglst : eval1_type(s2exparglst)
+extern fun eval1_s2exparg (loc0: location, ctx: !evalctx, env: &alphenv, x: s2exparg): s2exparg
+extern fun eval1_s2exparglst (loc0: location, ctx: !evalctx, env: &alphenv, x: s2exparglst): s2exparglst
 //
-extern fun eval1_t2mpmarg : eval1_type(t2mpmarg)
-extern fun eval1_t2mpmarglst : eval1_type(t2mpmarglst)
-//
-(* ****** ****** *)
-
-extern fun eval1_d2var : eval1_type(d2var)
-
-(* ****** ****** *)
-
-extern fun eval1_i2nvarg : eval1_type(i2nvarg)
-extern fun eval1_i2nvarglst : eval1_type(i2nvarglst)
-extern fun eval1_i2nvresstate : eval1_type(i2nvresstate)
-
-(* ****** ****** *)
-//
-extern fun eval1_p2at : eval1_type(p2at)
-extern fun eval1_p2atlst : eval1_type(p2atlst)
-extern fun eval1_p2atopt : eval1_type(p2atopt)
-//
-extern fun eval1_labp2at : eval1_type(labp2at)
-extern fun eval1_labp2atlst : eval1_type(labp2atlst)
-//
-(* ****** ****** *)
-//
-extern fun eval1_d2explst : eval1_type(d2explst)
-extern fun eval1_d2expopt : eval1_type(d2expopt)
-//
-extern fun eval1_labd2exp : eval1_type(labd2exp)
-extern fun eval1_labd2explst : eval1_type(labd2explst)
-//
-extern fun eval1_d2lablst : eval1_type(d2lablst)
-//
-extern fun eval1_d2exparg : eval1_type(d2exparg)
-extern fun eval1_d2exparglst : eval1_type(d2exparglst)
-//
-(* ****** ****** *)
-//
-extern fun eval1_d2exp_applst : eval1_type(d2exp)
-extern fun eval1_d2exp_macsyn : eval1_type(d2exp)
+extern fun eval1_t2mpmarg (loc0: location, ctx: !evalctx, env: &alphenv, x: t2mpmarg): t2mpmarg
+extern fun eval1_t2mpmarglst (loc0: location, ctx: !evalctx, env: &alphenv, x: t2mpmarglst): t2mpmarglst
 //
 (* ****** ****** *)
 
-extern fun eval1_gm2at : eval1_type(gm2at)
-extern fun eval1_gm2atlst : eval1_type(gm2atlst)
+extern fun eval1_d2var (loc0: location, ctx: !evalctx, env: &alphenv, x: d2var): d2var
 
-extern fun eval1_c2lau : eval1_type(c2lau)
-extern fun eval1_c2laulst : eval1_type(c2laulst)
+(* ****** ****** *)
+
+extern fun eval1_i2nvarg (loc0: location, ctx: !evalctx, env: &alphenv, x: i2nvarg): i2nvarg
+extern fun eval1_i2nvarglst (loc0: location, ctx: !evalctx, env: &alphenv, x: i2nvarglst): i2nvarglst
+extern fun eval1_i2nvresstate (loc0: location, ctx: !evalctx, env: &alphenv, x: i2nvresstate): i2nvresstate
 
 (* ****** ****** *)
 //
-extern fun eval1_d2ecl : eval1_type(d2ecl)
-extern fun eval1_d2eclist : eval1_type(d2eclist)
+extern fun eval1_p2at (loc0: location, ctx: !evalctx, env: &alphenv, x: p2at): p2at
+extern fun eval1_p2atlst (loc0: location, ctx: !evalctx, env: &alphenv, x: p2atlst): p2atlst
+extern fun eval1_p2atopt (loc0: location, ctx: !evalctx, env: &alphenv, x: p2atopt): p2atopt
+//
+extern fun eval1_labp2at (loc0: location, ctx: !evalctx, env: &alphenv, x: labp2at): labp2at
+extern fun eval1_labp2atlst (loc0: location, ctx: !evalctx, env: &alphenv, x: labp2atlst): labp2atlst
+//
+(* ****** ****** *)
+//
+extern fun eval1_d2explst (loc0: location, ctx: !evalctx, env: &alphenv, x: d2explst): d2explst
+extern fun eval1_d2expopt (loc0: location, ctx: !evalctx, env: &alphenv, x: d2expopt): d2expopt
+//
+extern fun eval1_labd2exp (loc0: location, ctx: !evalctx, env: &alphenv, x: labd2exp): labd2exp
+extern fun eval1_labd2explst (loc0: location, ctx: !evalctx, env: &alphenv, x: labd2explst): labd2explst
+//
+extern fun eval1_d2lablst (loc0: location, ctx: !evalctx, env: &alphenv, x: d2lablst): d2lablst
+//
+extern fun eval1_d2exparg (loc0: location, ctx: !evalctx, env: &alphenv, x: d2exparg): d2exparg
+extern fun eval1_d2exparglst (loc0: location, ctx: !evalctx, env: &alphenv, x: d2exparglst): d2exparglst
+//
+(* ****** ****** *)
+//
+extern fun eval1_d2exp_applst (loc0: location, ctx: !evalctx, env: &alphenv, x: d2exp): d2exp
+extern fun eval1_d2exp_macsyn (loc0: location, ctx: !evalctx, env: &alphenv, x: d2exp): d2exp
 //
 (* ****** ****** *)
 
-implement
+extern fun eval1_gm2at (loc0: location, ctx: !evalctx, env: &alphenv, x: gm2at): gm2at
+extern fun eval1_gm2atlst (loc0: location, ctx: !evalctx, env: &alphenv, x: gm2atlst): gm2atlst
+
+extern fun eval1_c2lau (loc0: location, ctx: !evalctx, env: &alphenv, x: c2lau): c2lau
+extern fun eval1_c2laulst (loc0: location, ctx: !evalctx, env: &alphenv, x: c2laulst): c2laulst
+
+(* ****** ****** *)
+//
+extern fun eval1_d2ecl (loc0: location, ctx: !evalctx, env: &alphenv, x: d2ecl): d2ecl
+extern fun eval1_d2eclist (loc0: location, ctx: !evalctx, env: &alphenv, x: d2eclist): d2eclist
+//
+(* ****** ****** *)
+
+implement{a}
 eval1_listmap
 (
 loc0, ctx, env, xs, fopr
 ) = (
 //
-case+ xs of
+case+ glist_view (xs) of
 //
-| list_nil() => list_nil()
+| ~GLnil() => glist_nil()
 //
-| list_cons(x, xs) => let
+| ~GLcons(x, xs) => let
     val x = fopr(loc0, ctx, env, x)
-    val xs = eval1_listmap(loc0, ctx, env, xs, fopr)
+    val xs = eval1_listmap<a>(loc0, ctx, env, xs, fopr)
   in
-    list_cons(x, xs)
+    glist_cons<a>(x, xs)
   end // end of [list_cons]
 ) (* end of [eval1_listmap] *)
 
@@ -165,11 +179,6 @@ eval1_s2exp
   loc0, ctx, env, s2e
 ) = s2e where
 {
-(*
-val () =
-println!
-("eval1_s2exp: s2e(bef) = ", s2e)
-*)
 val
 sub =
 stasub_make_evalctx(ctx)
@@ -177,11 +186,6 @@ val
 s2e = s2exp_subst(sub, s2e)
 //
 val () = stasub_free(sub)
-(*
-val () =
-println!
-("eval1_s2exp: s2e(aft) = ", s2e)
-*)
 } (* end of [eval1_s2exp] *)
 
 (* ****** ****** *)
@@ -189,7 +193,7 @@ println!
 implement
 eval1_s2explst
   (loc0, ctx, env, s2es) =
-  eval1_listmap (loc0, ctx, env, s2es, eval1_s2exp)
+  eval1_listmap<s2exp> (loc0, ctx, env, s2es, eval1_s2exp)
 // end of [eval1_s2explst]
 
 implement
@@ -197,9 +201,9 @@ eval1_s2expopt
 (
 loc0, ctx, env, opt
 ) = (
-  case+ opt of
-  | None() => None()
-  | Some(s2e) => Some(eval1_s2exp(loc0, ctx, env, s2e))
+  case+ gopt_view (opt) of
+  | ~GOnone() => gopt_none()
+  | ~GOsome(s2e) => gopt_some<s2exp>(eval1_s2exp(loc0, ctx, env, s2e))
 ) // end of [eval1_s2expopt]
 
 (* ****** ****** *)
@@ -210,14 +214,14 @@ eval1_s2exparg
 loc0, ctx, env, s2a
 ) = let
 //
-val s2an = s2a.s2exparg_node
+val s2an = s2a.s2exparg_node ()
 //
 in
 //
-case+ s2an of
-| S2EXPARGone() => s2exparg_one(loc0)
-| S2EXPARGall() => s2exparg_all(loc0)
-| S2EXPARGseq(s2es) =>
+case+ s2exparg_node_view (s2an) of
+| ~S2EXPARGone() => s2exparg_one(loc0)
+| ~S2EXPARGall() => s2exparg_all(loc0)
+| ~S2EXPARGseq(s2es) =>
   s2exparg_seq
     (loc0, eval1_s2explst(loc0, ctx, env, s2es))
   // end of [S2EXPARGseq]
@@ -227,7 +231,7 @@ end // end of [eval1_s2exparg]
 implement
 eval1_s2exparglst
   (loc0, ctx, env, s2as) =
-  eval1_listmap(loc0, ctx, env, s2as, eval1_s2exparg)
+  eval1_listmap<s2exparg>(loc0, ctx, env, s2as, eval1_s2exparg)
 // end of [eval1_s2exparglst]
 
 (* ****** ****** *)
@@ -239,7 +243,7 @@ loc0, ctx, env, t2ma
 ) = let
 //
 val s2es = 
-  eval1_s2explst(loc0, ctx, env, t2ma.t2mpmarg_arg)
+  eval1_s2explst(loc0, ctx, env, t2ma.t2mpmarg_arg ())
 //
 in
   t2mpmarg_make (loc0, s2es)
@@ -248,7 +252,7 @@ end // end of [eval1_t2mpmarg]
 implement
 eval1_t2mpmarglst
   (loc0, ctx, env, t2mas) =
-  eval1_listmap(loc0, ctx, env, t2mas, eval1_t2mpmarg)
+  eval1_listmap<t2mpmarg>(loc0, ctx, env, t2mas, eval1_t2mpmarg)
 // end of [eval1_t2mpmarglst]
 
 (* ****** ****** *)
@@ -271,9 +275,9 @@ loc0, ctx, env, arg
 ) = let
 //
 val d2v =
-  eval1_d2var(loc0, ctx, env, arg.i2nvarg_var)
+  eval1_d2var(loc0, ctx, env, arg.i2nvarg_var ())
 val opt =
-  eval1_s2expopt(loc0, ctx, env, arg.i2nvarg_type)
+  eval1_s2expopt(loc0, ctx, env, arg.i2nvarg_type ())
 //
 in
   i2nvarg_make(d2v, opt)
@@ -282,16 +286,16 @@ end // end of [eval1_i2nvarg]
 implement
 eval1_i2nvarglst
   (loc0, ctx, env, args) =
-  eval1_listmap(loc0, ctx, env, args, eval1_i2nvarg)
+  eval1_listmap<i2nvarg>(loc0, ctx, env, args, eval1_i2nvarg)
 // end of [eval1_i2nvarglst]
 
 implement
 eval1_i2nvresstate
   (loc0, ctx, env, inv) = let
-  val svs = inv.i2nvresstate_svs
-  val gua = inv.i2nvresstate_gua
-  val arg = eval1_i2nvarglst(loc0, ctx, env, inv.i2nvresstate_arg)
-  val met = inv.i2nvresstate_met
+  val svs = inv.i2nvresstate_svs ()
+  val gua = inv.i2nvresstate_gua ()
+  val arg = eval1_i2nvarglst(loc0, ctx, env, inv.i2nvresstate_arg ())
+  val met = inv.i2nvresstate_met ()
 in
   i2nvresstate_make_met (svs, gua, arg, met)
 end // end of [eval1_i2nvresstate]
@@ -303,21 +307,16 @@ eval1_p2at
 (
 loc0, ctx, env, p2t0
 ) = let
-(*
-val () =
-println!
-("eval1_p2at: p2t0 = ", p2t0)
-*)
 in
 //
 case+
-p2t0.p2at_node
+p2at_node_view (p2t0.p2at_node ())
 of (* case+ *)
 //
-| P2Tany _ =>
+| ~P2Tany () =>
   p2at_any(loc0)
 //
-| P2Tvar(d2v) => let
+| ~P2Tvar(d2v) => let
     val d2v_new =
       d2var_rename(loc0, d2v)
     val () =
@@ -327,7 +326,7 @@ of (* case+ *)
     p2at_var(loc0, d2v_new)
   end // end of [P2Tvar]
 //
-| P2Tcon
+| ~P2Tcon
   (
     knd, d2c
   , s2qs, s2e_con, npf, p2ts_arg
@@ -339,29 +338,29 @@ of (* case+ *)
     p2at_con(loc0, knd, d2c, s2qs, s2e_con, npf, p2ts_arg)
   end // end of [P2Tcon]
 //
-| P2Tint(i) =>
+| ~P2Tint(i) =>
   p2at_int(loc0, i)
-| P2Tintrep(rep) =>
+| ~P2Tintrep(rep) =>
   p2at_intrep(loc0, rep)
 //
-| P2Tbool(b) =>
+| ~P2Tbool(b) =>
   p2at_bool(loc0, b)
-| P2Tchar(c) =>
+| ~P2Tchar(c) =>
   p2at_char(loc0, c)
-| P2Tfloat(rep) =>
+| ~P2Tfloat(rep) =>
   p2at_float(loc0, rep)
-| P2Tstring(str) =>
+| ~P2Tstring(str) =>
   p2at_string(loc0, str)
 //
-| P2Ti0nt(tok) =>
+| ~P2Ti0nt(tok) =>
   p2at_i0nt(loc0, tok)
-| P2Tf0loat(tok) =>
+| ~P2Tf0loat(tok) =>
   p2at_f0loat(loc0, tok)
 //
-| P2Tempty() =>
+| ~P2Tempty() =>
   p2at_empty(loc0)
 //
-| P2Tlst(lin, p2ts) => let
+| ~P2Tlst(lin, p2ts) => let
     val
     p2ts =
     eval1_p2atlst(loc0, ctx, env, p2ts)
@@ -369,7 +368,7 @@ of (* case+ *)
     p2at_lst(loc0, lin, p2ts)
   end // end of [P2Tlst]
 //
-| P2Trec(knd, npf, lp2ts) => let
+| ~P2Trec(knd, npf, lp2ts) => let
     val
     lp2ts =
     eval1_labp2atlst(loc0, ctx, env, lp2ts)
@@ -377,16 +376,17 @@ of (* case+ *)
     p2at_rec(loc0, knd, npf, lp2ts)
   end // end of [P2Trec]
 //
-| P2Tann(p2t, s2e) =>
+| ~P2Tann(p2t, s2e) =>
   p2at_ann(loc0, p2t, s2e) where
   {
     val p2t = eval1_p2at(loc0, ctx, env, p2t)
     val s2e = eval1_s2exp(loc0, ctx, env, s2e)
   } (* end of [P2Tann] *)
 //
-| _ (*P2T-rest*) =>
+| v (*P2T-rest*) =>
     exitloc(1) where // HX: exit with loc-info
   {
+    val () = p2at_node_view_free (v)
     val () =
     println! (
       "eval1_p2at: not implemented yet: p2t0 = ", p2t0
@@ -400,16 +400,16 @@ end // end of [eval1_p2at]
 implement
 eval1_p2atlst
   (loc0, ctx, env, p2ts) =
-  eval1_listmap(loc0, ctx, env, p2ts, eval1_p2at)
+  eval1_listmap<p2at>(loc0, ctx, env, p2ts, eval1_p2at)
 // end of [eval1_p2atlst]
 
 implement
 eval1_p2atopt
   (loc0, ctx, env, opt) = let
 in
-  case+ opt of
-  | Some (p2t) => Some (eval1_p2at (loc0, ctx, env, p2t))
-  | None ((*void*)) => None ()
+  case+ gopt_view (opt) of
+  | ~GOsome (p2t) => gopt_some<p2at> (eval1_p2at (loc0, ctx, env, p2t))
+  | ~GOnone ((*void*)) => gopt_none ()
 end // end of [eval1_p2atopt]
 
 (* ****** ****** *)
@@ -419,20 +419,20 @@ eval1_labp2at
   (loc0, ctx, env, lp2t) = let
 in
 //
-case+ lp2t of
-| LABP2ATnorm (l, p2t) => let
+case+ labp2at_view (lp2t) of
+| ~LABP2ATnorm (l, p2t) => let
     val p2t = eval1_p2at (loc0, ctx, env, p2t)
   in
-    LABP2ATnorm (l, p2t)
+    labp2at_LABP2ATnorm (l, p2t)
   end // end of [LABP2ATnor]
-| LABP2ATomit _ => LABP2ATomit (loc0)
+| ~LABP2ATomit (_) => labp2at_LABP2ATomit (loc0)
 //
 end // end of [eval1_labp2at]
 
 implement
 eval1_labp2atlst
   (loc0, ctx, env, lp2ts) =
-  eval1_listmap (loc0, ctx, env, lp2ts, eval1_labp2at)
+  eval1_listmap<labp2at> (loc0, ctx, env, lp2ts, eval1_labp2at)
 // end of [eval1_labp2atlst]
 
 (* ****** ****** *)
@@ -440,15 +440,15 @@ eval1_labp2atlst
 implement
 eval1_d2explst
   (loc0, ctx, env, d2es) =
-  eval1_listmap (loc0, ctx, env, d2es, eval1_d2exp)
+  eval1_listmap<d2exp> (loc0, ctx, env, d2es, eval1_d2exp)
 // end of [eval1_d2explst]
 
 implement
 eval1_d2expopt
   (loc0, ctx, env, opt) = (
-  case+ opt of
-  | Some (d2e) => Some (eval1_d2exp (loc0, ctx, env, d2e))
-  | None () => None ()
+  case+ gopt_view (opt) of
+  | ~GOsome (d2e) => gopt_some<d2exp> (eval1_d2exp (loc0, ctx, env, d2e))
+  | ~GOnone () => gopt_none ()
 ) // end of [eval1_d2expopt]
 
 (* ****** ****** *)
@@ -457,15 +457,16 @@ implement
 eval1_labd2exp (
   loc0, ctx, env, ld2e
 ) = let
-  val $SYN.DL0ABELED (l, d2e) = ld2e
+  val l = ld2e.labd2exp_lab ()
+  val d2e = ld2e.labd2exp_elt ()
 in
-  $SYN.DL0ABELED (l, eval1_d2exp (loc0, ctx, env, d2e))
+  labd2exp_make (l, eval1_d2exp (loc0, ctx, env, d2e))
 end // end of [eval1_labd2exp]
 
 implement
 eval1_labd2explst
   (loc0, ctx, env, ld2es) =
-  eval1_listmap (loc0, ctx, env, ld2es, eval1_labd2exp)
+  eval1_listmap<labd2exp> (loc0, ctx, env, ld2es, eval1_labd2exp)
 // end of [eval1_labd2explst]
 
 (* ****** ****** *)
@@ -475,20 +476,20 @@ eval1_d2lablst
   (loc0, ctx, env, d2ls) = let
 in
 //
-case+ d2ls of
-| list_cons
+case+ glist_view (d2ls) of
+| ~GLcons
     (d2l, d2ls) => let
     val d2l = (
-      case+ d2l.d2lab_node of
-      | D2LABlab _ => d2l
-      | D2LABind (ind) =>
+      case+ d2lab_node_view (d2l.d2lab_node ()) of
+      | ~D2LABlab (_) => d2l
+      | ~D2LABind (ind) =>
           d2lab_ind (loc0, eval1_d2explst (loc0, ctx, env, ind))
     ) : d2lab // end of [val]
     val d2ls = eval1_d2lablst (loc0, ctx, env, d2ls)
   in
-    list_cons (d2l, d2ls)
+    glist_cons<d2lab> (d2l, d2ls)
   end // end of [list_cons]
-| list_nil () => list_nil ()
+| ~GLnil () => glist_nil ()
 //
 end // end of [eval1_d2lablst]
 
@@ -499,14 +500,14 @@ eval1_d2exparg
   (loc0, ctx, env, d2a) = let
 in
 //
-case+ d2a of
-| D2EXPARGsta
-    (locarg, s2as) => D2EXPARGsta (loc0, s2as)
-| D2EXPARGdyn
+case+ d2exparg_view (d2a) of
+| ~D2EXPARGsta
+    (locarg, s2as) => d2exparg_D2EXPARGsta (loc0, s2as)
+| ~D2EXPARGdyn
     (npf, locarg, d2es) => let
     val d2es = eval1_d2explst (loc0, ctx, env, d2es)
   in
-    D2EXPARGdyn (npf, loc0, d2es)
+    d2exparg_D2EXPARGdyn (npf, loc0, d2es)
   end // end of [D2EXPARGdyn]
 //
 end // end of [eval1_d2exparg]
@@ -514,7 +515,7 @@ end // end of [eval1_d2exparg]
 implement
 eval1_d2exparglst
   (loc0, ctx, env, d2as) =
-  eval1_listmap (loc0, ctx, env, d2as, eval1_d2exparg)
+  eval1_listmap<d2exparg> (loc0, ctx, env, d2as, eval1_d2exparg)
 // end of [eval1_d2exparglst]
 
 (* ****** ****** *)
@@ -524,22 +525,31 @@ eval1_d2exp_applst (
   loc0, ctx, env, d2e0
 ) = let
 //
-val-D2Eapplst
-  (d2e, d2as) = d2e0.d2exp_node
-val loc = d2e.d2exp_loc
+// HX: [val-D2Eapplst (d2e, d2as) = d2e0.d2exp_node] (MatchError)
+val d2e = (
+  case+ d2exp_node_view (d2e0.d2exp_node ()) of
+  | ~D2Eapplst (d2e, _) => d2e
+  | v => (d2exp_node_view_free (v); (assertloc (false); d2e0))
+) : d2exp
+val d2as = (
+  case+ d2exp_node_view (d2e0.d2exp_node ()) of
+  | ~D2Eapplst (_, d2as) => d2as
+  | v => (d2exp_node_view_free (v); (assertloc (false); glist_nil ()))
+) : d2exparglst
+val loc = d2e.d2exp_loc ()
 //
-fun auxerr (
+fn auxerr (
   loc0: location, d2e0: d2exp, d2m: d2mac
 ) : void = let
   val () = prerr_errmac_loc (loc0)
   val () = prerr ": the dynamic symbol ["
   val () = prerr_d2mac (d2m)
   val () = prerr "] at (";
-  val () = $LOC.prerr_location (d2e0.d2exp_loc)
+  val () = $LOC.prerr_location (d2e0.d2exp_loc ())
   val () = prerr ") refers to a macrodef (to be called inside ,(...))."
   val () = prerr_newline ();
 in
-  the_trans3errlst_add (T3E_dmacro_eval1_d2exp (loc0, d2e0))
+  the_trans3errlst_add (trans3err_T3E_dmacro_eval1_d2exp (loc0, d2e0))
 end // end of [auxerr]
 //
 val d2e = eval1_d2exp (loc0, ctx, env, d2e)
@@ -548,9 +558,9 @@ val d2as = eval1_d2exparglst (loc0, ctx, env, d2as)
 in
 //
 case+
-d2e.d2exp_node
+d2exp_node_view (d2e.d2exp_node ())
 of // case+
-| D2Emac (d2m) => let
+| ~D2Emac (d2m) => let
     val knd = d2mac_get_kind (d2m)
   in
     if knd = 0 then ( // [d2m] is of short form
@@ -561,12 +571,12 @@ of // case+
       // end of [val]
     end // end of [if]
   end // end of [D2Emac]
-| D2Eapplst
+| ~D2Eapplst
     (d2e1, d2as1) => (
-    d2exp_applst (loc0, d2e1, list_append (d2as1, d2as))
+    d2exp_applst (loc0, d2e1, glist_append<d2exparg> (d2as1, d2as))
   ) // end of [D2Eapplst]
 //
-| _ => d2exp_applst (loc0, d2e, d2as)
+| v => (d2exp_node_view_free (v); d2exp_applst (loc0, d2e, d2as))
 //
 end // end of [eval1_d2exp_applst]
 
@@ -576,24 +586,31 @@ implement
 eval1_d2exp_macsyn (
   loc0, ctx, env, d2e0
 ) = let
-  val-D2Emacsyn (knd, d2e) = d2e0.d2exp_node
+  // HX: [val-D2Emacsyn (knd, d2e) = d2e0.d2exp_node] (MatchError)
+  val knd = (
+    case+ d2exp_node_view (d2e0.d2exp_node ()) of
+    | ~D2Emacsyn (knd, _) => knd
+    | v => (d2exp_node_view_free (v); (assertloc (false); $SYN.MSKencode))
+  ) : $SYN.macsynkind
+  val d2e = (
+    case+ d2exp_node_view (d2e0.d2exp_node ()) of
+    | ~D2Emacsyn (_, d2e) => d2e
+    | v => (d2exp_node_view_free (v); (assertloc (false); d2e0))
+  ) : d2exp
 in
 //
 case+ knd of
 | $SYN.MSKdecode () => let
     val m2v = eval0_d2exp (loc0, ctx, env, d2e)
   in
-    case+ m2v of
-    | M2Vdcode (d2e_new) => d2e_new
-    | _ => let
+    case+ m2val_view (m2v) of
+    | ~M2Vdcode (d2e_new) => d2e_new
+    | v => let
+        val () = m2val_view_free (v)
         val () = prerr_errmac_loc (loc0)
         val () = prerr ": the expansion of the dynamic expression at (";
-        val () = $LOC.prerr_location (d2e.d2exp_loc)
+        val () = $LOC.prerr_location (d2e.d2exp_loc ())
         val ()= prerr ") is expected to return code (AST) but it does not.";
-(*
-        val () = prerr "expanded exp: d2e = "; prerr_d2exp (d2e); prerr_newline ();
-        val () = prerr "returned val: m2v = "; prerr_m2val (m2v); prerr_newline ();
-*)
         val () = prerr_newline ()
       in
         d2exp_errexp (loc0)
@@ -621,13 +638,7 @@ end // end of [eval1_d2exp_macsyn]
 implement
 eval1_d2exp
   (loc0, ctx, env, d2e0) = let
-(*
-val () = (
-  println! ("eval1_d2exp: loc0 = ", loc0);
-  println! ("eval1_d2exp: d2e0 = ", d2e0);
-) (* end of [val] *)
-*)
-val d2en0 = d2e0.d2exp_node
+val d2en0 = d2e0.d2exp_node ()
 //
 macdef reloc () = d2exp_make_node (loc0, d2en0)
 //
@@ -658,42 +669,42 @@ macdef eval1claulst (c2ls) = eval1_c2laulst (loc0, ctx, env, ,(c2ls))
 //
 in
 //
-case+ d2en0 of
+case+ d2exp_node_view (d2en0) of
 //
-| D2Evar (d2v) =>
+| ~D2Evar (d2v) =>
     d2exp_var (loc0, eval1dvar (d2v))
   // end of [D2Evar]
 //
-| D2Ecst _ => reloc ()
+| ~D2Ecst _ => reloc ()
 //
-| D2Eint _ => reloc ()
-| D2Eintrep _ => reloc ()
-| D2Echar _ => reloc ()
-| D2Estring _ => reloc ()
-| D2Efloat _ => reloc ()
+| ~D2Eint _ => reloc ()
+| ~D2Eintrep _ => reloc ()
+| ~D2Echar _ => reloc ()
+| ~D2Estring _ => reloc ()
+| ~D2Efloat _ => reloc ()
 //
-| D2Ei0nt _ => reloc ()
-| D2Ec0har _ => reloc ()
-| D2Es0tring _ => reloc ()
-| D2Ef0loat _ => reloc ()
+| ~D2Ei0nt _ => reloc ()
+| ~D2Ec0har _ => reloc ()
+| ~D2Es0tring _ => reloc ()
+| ~D2Ef0loat _ => reloc ()
 //
-| D2Ecstsp _ => reloc ()
+| ~D2Ecstsp _ => reloc ()
 //
-| D2Etop _ => reloc ()
-| D2Eempty _ => reloc ()
+| ~D2Etop _ => reloc ()
+| ~D2Eempty _ => reloc ()
 //
-| D2Eextval (s2e, rep) =>
+| ~D2Eextval (s2e, rep) =>
     d2exp_extval (loc0, eval1sexp (s2e), rep)
   (* end of [D2Eextval] *)
 //
-| D2Eextfcall
+| ~D2Eextfcall
     (res, _fun, _arg) => let
     val res = eval1sexp (res)
     val _arg = eval1dexplst (_arg)
   in
     d2exp_extfcall (loc0, res, _fun, _arg)
   end // end of [D2Eextfcall]
-| D2Eextmcall
+| ~D2Eextmcall
     (res, _obj, _mtd, _arg) => let
     val res = eval1sexp (res)
     val _obj = eval1dexp(_obj)
@@ -702,7 +713,7 @@ case+ d2en0 of
     d2exp_extmcall (loc0, res, _obj, _mtd, _arg)
   end // end of [D2Eextmcall]
 //
-| D2Econ
+| ~D2Econ
   (
     d2c, locfun, s2as, npf, locarg, d2es
   ) => let
@@ -714,19 +725,19 @@ case+ d2en0 of
     d2exp_con (loc0, d2c, locfun, s2as, npf, locarg, d2es)
   end // end of [D2Econ]
 //
-| D2Esym _ => reloc ()
+| ~D2Esym _ => reloc ()
 //
-| D2Etmpid (
+| ~D2Etmpid (
     d2e_id, t2mas
   ) => let
-    val d2en = d2e_id.d2exp_node
+    val d2en = d2e_id.d2exp_node ()
     val d2e_id = d2exp_make_node (loc0, d2en)
     val t2mas = eval1tmpmarglst (t2mas)
   in
     d2exp_tmpid (loc0, d2e_id, t2mas)
   end // end of [D2Etmpid]
 //
-| D2Elet (d2cs, d2e) => let
+| ~D2Elet (d2cs, d2e) => let
     val () = alphenv_push (env)
     val d2cs = eval1_d2eclist (loc0, ctx, env, d2cs)
     val d2e = eval1dexp (d2e)
@@ -734,7 +745,7 @@ case+ d2en0 of
   in
     d2exp_let (loc0, d2cs, d2e)
   end // end of [D2Elet]
-| D2Ewhere (d2e, d2cs) => let
+| ~D2Ewhere (d2e, d2cs) => let
     val () = alphenv_push (env)
     val d2cs = eval1_d2eclist (loc0, ctx, env, d2cs)
     val d2e = eval1dexp (d2e)
@@ -743,11 +754,11 @@ case+ d2en0 of
     d2exp_where (loc0, d2e, d2cs)
   end // end of [D2Ewhere]
 //
-| D2Eapplst _ =>
+| ~D2Eapplst _ =>
     eval1_d2exp_applst (loc0, ctx, env, d2e0)
   // end of [D2Eapplst]
 //
-| D2Eifhead
+| ~D2Eifhead
   (
     inv, _test, _then, _else
   ) => let
@@ -758,7 +769,7 @@ case+ d2en0 of
   in
     d2exp_ifhead (loc0, inv, _test, _then, _else)
   end // end of [D2Eifhead]
-| D2Esifhead
+| ~D2Esifhead
   (
     inv, _test, _then, _else
   ) => let
@@ -770,7 +781,7 @@ case+ d2en0 of
     d2exp_sifhead (loc0, inv, _test, _then, _else)
   end // end of [D2Esifhead]
 //
-| D2Ecasehead
+| ~D2Ecasehead
   (
     knd, inv, d2es, c2ls
   ) => let
@@ -781,100 +792,100 @@ case+ d2en0 of
     d2exp_casehead (loc0, knd, inv, d2es, c2ls)
   end // end of [D2Ecasehead]
 //
-| D2Esing (d2e) =>
+| ~D2Esing (d2e) =>
     d2exp_sing(loc0, eval1dexp (d2e))
-| D2Elist (npf, d2es) =>
+| ~D2Elist (npf, d2es) =>
     d2exp_list(loc0, npf, eval1dexplst (d2es))
 //
-| D2Elst
+| ~D2Elst
     (lin, opt, d2es) => d2exp_lst
   (
     loc0, lin, eval1sexpopt (opt), eval1dexplst (d2es)
   ) (* end of [D2Elst] *)
 //
-| D2Etup (knd, npf, d2es) =>
+| ~D2Etup (knd, npf, d2es) =>
     d2exp_tup (loc0, knd, npf, eval1dexplst (d2es))
-| D2Erec (knd, npf, ld2es) =>
+| ~D2Erec (knd, npf, ld2es) =>
     d2exp_rec (loc0, knd, npf, eval1labdexplst (ld2es))
 //
-| D2Eseq (d2es) => d2exp_seq (loc0, eval1dexplst (d2es))
+| ~D2Eseq (d2es) => d2exp_seq (loc0, eval1dexplst (d2es))
 //
-| D2Eselab (d2e, d2ls) =>
+| ~D2Eselab (d2e, d2ls) =>
     d2exp_selab (loc0, eval1dexp (d2e), eval1dlablst (d2ls))
 //
-| D2Eptrof (d2e) =>
+| ~D2Eptrof (d2e) =>
     d2exp_ptrof (loc0, eval1dexp (d2e))
-| D2Eviewat (d2e) =>
+| ~D2Eviewat (d2e) =>
     d2exp_viewat (loc0, eval1dexp (d2e))
 //
-| D2Ederef(d2s, d2e) =>
+| ~D2Ederef(d2s, d2e) =>
     d2exp_deref(loc0, d2s, eval1dexp(d2e))
 //
-| D2Eassgn(d2e_l, d2e_r) =>
+| ~D2Eassgn(d2e_l, d2e_r) =>
     d2exp_assgn(loc0, eval1dexp(d2e_l), eval1dexp(d2e_r))
-| D2Exchng(d2e_l, d2e_r) =>
+| ~D2Exchng(d2e_l, d2e_r) =>
     d2exp_xchng(loc0, eval1dexp(d2e_l), eval1dexp(d2e_r))
 //
-| D2Earrsub
+| ~D2Earrsub
   (
     d2s, d2e, locind, ind
   ) => d2exp_arrsub
   (
     loc0, d2s, eval1dexp(d2e), loc0, eval1dexplst(ind)
   ) // end of [D2Earrsub]
-| D2Earrinit
+| ~D2Earrinit
     (elt, asz, ini) => d2exp_arrinit
   (
     loc0
   , eval1sexp(elt), eval1dexpopt (asz), eval1dexplst(ini)
   ) // end of [D2Earrinit]
 //
-| D2Earrpsz (opt, d2es) =>
+| ~D2Earrpsz (opt, d2es) =>
     d2exp_arrpsz(loc0, eval1sexpopt(opt), eval1dexplst(d2es))
   // end of [D2Earrpsz]
 //
-| D2Eraise(d2e) => d2exp_raise(loc0, eval1dexp(d2e))
+| ~D2Eraise(d2e) => d2exp_raise(loc0, eval1dexp(d2e))
 //
-| D2Evararg
+| ~D2Evararg
     (d2es) => d2exp_vararg(loc0, eval1dexplst(d2es))
   // end of [D2Evararg]
 //
-| D2Evcopyenv
+| ~D2Evcopyenv
     (knd, d2e) => d2exp_vcopyenv(loc0, knd, eval1dexp(d2e))
   // end of [D2Evcopyenv]
 //
-| D2Eshowtype(d2e) => d2exp_showtype(loc0, eval1dexp(d2e))
+| ~D2Eshowtype(d2e) => d2exp_showtype(loc0, eval1dexp(d2e))
 //
-| D2Eexist(s2a, d2e) =>
+| ~D2Eexist(s2a, d2e) =>
     d2exp_exist (loc0, eval1sexparg (s2a), eval1dexp (d2e))
   // end of [D2Eexist]
 //
-| D2Elam_dyn
+| ~D2Elam_dyn
     (lin, npf, p2ts, d2e) => let
     val p2ts = eval1_p2atlst (loc0, ctx, env, p2ts)
   in
     d2exp_lam_dyn (loc0, lin, npf, p2ts, eval1dexp (d2e))
   end // end of [D2Elam_dyn]
 //
-| D2Edelay (d2e) => d2exp_delay (loc0, eval1dexp (d2e))
-| D2Eldelay (d2e, opt) => // (eval, free)
+| ~D2Edelay (d2e) => d2exp_delay (loc0, eval1dexp (d2e))
+| ~D2Eldelay (d2e, opt) => // (eval, free)
     d2exp_ldelay (loc0, eval1dexp (d2e), eval1dexpopt (opt))
   // end of [D2Eldelay]
 //
-| D2Emac _ => reloc () // HX-2012-12: right?
-| D2Emacsyn _ => eval1_d2exp_macsyn (loc0, ctx, env, d2e0)
+| ~D2Emac _ => reloc () // HX-2012-12: right?
+| ~D2Emacsyn _ => eval1_d2exp_macsyn (loc0, ctx, env, d2e0)
 //
-| D2Eann_type (d2e, s2e) =>
+| ~D2Eann_type (d2e, s2e) =>
     d2exp_ann_type (loc0, eval1dexp (d2e), eval1sexp (s2e))
   // end of [D2Eann_type]
-| D2Eann_seff (d2e, s2fe) =>
+| ~D2Eann_seff (d2e, s2fe) =>
     d2exp_ann_seff (loc0, eval1dexp (d2e), s2fe)
   // end of [D2Eann_seff]
-| D2Eann_funclo (d2e, funclo) =>
+| ~D2Eann_funclo (d2e, funclo) =>
     d2exp_ann_funclo (loc0, eval1dexp (d2e), funclo)
   // end of [D2Eann_funclo]
 //
-| _ (*rest-of-d2exp*) => d2exp_errexp (loc0)
+| v (*rest-of-d2exp*) => (d2exp_node_view_free (v); d2exp_errexp (loc0))
 //
 end // end of [eval1_d2exp]
 
@@ -884,8 +895,8 @@ implement
 eval1_gm2at
   (loc0, ctx, env, gm2t) = let
 //
-val d2e = eval1_d2exp (loc0, ctx, env, gm2t.gm2at_exp)
-val opt = eval1_p2atopt (loc0, ctx, env, gm2t.gm2at_pat)
+val d2e = eval1_d2exp (loc0, ctx, env, gm2t.gm2at_exp ())
+val opt = eval1_p2atopt (loc0, ctx, env, gm2t.gm2at_pat ())
 //
 in
   gm2at_make (loc0, d2e, opt)
@@ -894,7 +905,7 @@ end // end of [eval1_gm2at]
 implement
 eval1_gm2atlst
   (loc0, ctx, env, gm2ts) =
-  eval1_listmap (loc0, ctx, env, gm2ts, eval1_gm2at)
+  eval1_listmap<gm2at> (loc0, ctx, env, gm2ts, eval1_gm2at)
 // end of [eval1_gm2atlst]
 
 (* ****** ****** *)
@@ -903,24 +914,24 @@ implement
 eval1_c2lau
   (loc0, ctx, env, c2l) = let
 //
-val p2ts = eval1_p2atlst (loc0, ctx, env, c2l.c2lau_pat)
-val gm2ts = eval1_gm2atlst (loc0, ctx, env, c2l.c2lau_gua)
-val d2e_body = eval1_d2exp (loc0, ctx, env, c2l.c2lau_body)
+val p2ts = eval1_p2atlst (loc0, ctx, env, c2l.c2lau_pat ())
+val gm2ts = eval1_gm2atlst (loc0, ctx, env, c2l.c2lau_gua ())
+val d2e_body = eval1_d2exp (loc0, ctx, env, c2l.c2lau_body ())
 //
 in
-  c2lau_make (loc0, p2ts, gm2ts, c2l.c2lau_seq, c2l.c2lau_neg, d2e_body)
+  c2lau_make (loc0, p2ts, gm2ts, c2l.c2lau_seq (), c2l.c2lau_neg (), d2e_body)
 end // end of [eval1_c2lau]
 
 implement
 eval1_c2laulst
   (loc0, ctx, env, c2ls) =
-  eval1_listmap (loc0, ctx, env, c2ls, eval1_c2lau)
+  eval1_listmap<c2lau> (loc0, ctx, env, c2ls, eval1_c2lau)
 // end of [eval1_c2laulst]
 
 (* ****** ****** *)
 
-extern fun eval1_v2aldeclst : eval1_type (v2aldeclst)
-extern fun eval1_v2aldeclst_rec : eval1_type (v2aldeclst)
+extern fun eval1_v2aldeclst (loc0: location, ctx: !evalctx, env: &alphenv, x: v2aldeclst): v2aldeclst
+extern fun eval1_v2aldeclst_rec (loc0: location, ctx: !evalctx, env: &alphenv, x: v2aldeclst): v2aldeclst
 
 (* ****** ****** *)
 
@@ -931,29 +942,29 @@ eval1_d2ecl (
 in
 //
 case+
-d2c0.d2ecl_node of
+d2ecl_node_view (d2c0.d2ecl_node ()) of
 //
-| D2Cnone (
+| ~D2Cnone (
   ) => d2ecl_none (loc0)
 //
-| D2Clist (d2cs) => let
+| ~D2Clist (d2cs) => let
     val d2cs = eval1_d2eclist (loc0, ctx, env, d2cs)
   in
     d2ecl_list (loc0, d2cs)
   end // end of [D2Clist]
 //
-| D2Cvaldecs (knd, d2cs) => let
+| ~D2Cvaldecs (knd, d2cs) => let
     val d2cs = eval1_v2aldeclst (loc0, ctx, env, d2cs)
   in
     d2ecl_valdecs (loc0, knd, d2cs)
   end // end of [D2Cvaldecs]
-| D2Cvaldecs_rec (knd, d2cs) => let
+| ~D2Cvaldecs_rec (knd, d2cs) => let
     val d2cs = eval1_v2aldeclst_rec (loc0, ctx, env, d2cs)
   in
     d2ecl_valdecs_rec (loc0, knd, d2cs)
   end // end of [D2Cvaldecs_rec]
 //
-| _(*not-handled*) => d2ecl_errdec (loc0)
+| v (*not-handled*) => (d2ecl_node_view_free (v); d2ecl_errdec (loc0))
 //
 end // end of [eval1_d2ecl]
 
@@ -962,7 +973,7 @@ end // end of [eval1_d2ecl]
 implement
 eval1_d2eclist
   (loc0, ctx, env, d2cs) =
-  eval1_listmap (loc0, ctx, env, d2cs, eval1_d2ecl)
+  eval1_listmap<d2ecl> (loc0, ctx, env, d2cs, eval1_d2ecl)
 // end of [eval1_d2eclist]
 
 (* ****** ****** *)
@@ -979,16 +990,16 @@ fun auxlst1
 , ctx: !evalctx, env: &alphenv
 , d2cs: v2aldeclst
 ) : d2explst = (
-  case+ d2cs of
-  | list_cons
+  case+ glist_view (d2cs) of
+  | ~GLcons
       (d2c, d2cs) => let
       val d2e =
-        eval1_d2exp (loc0, ctx, env, d2c.v2aldec_def)
+        eval1_d2exp (loc0, ctx, env, d2c.v2aldec_def ())
       val d2es = auxlst1 (loc0, ctx, env, d2cs)
     in
-      list_cons (d2e, d2es)
+      glist_cons<d2exp> (d2e, d2es)
     end // end of [list_cons]
-  | list_nil () => list_nil ()
+  | ~GLnil () => glist_nil ()
 ) // end of [auxlst1]
 val d2es = auxlst1 (loc0, ctx, env, d2cs)
 //
@@ -999,20 +1010,23 @@ fun auxlst2 (
 ) : v2aldeclst = let
 in
 //
-case+ d2cs of
-| list_cons 
+case+ glist_view (d2cs) of
+| ~GLcons 
     (d2c, d2cs) => let
     val p2t =
-      eval1_p2at (loc0, ctx, env, d2c.v2aldec_pat)
-    val-list_cons (d2e, d2es) = d2es
+      eval1_p2at (loc0, ctx, env, d2c.v2aldec_pat ())
+    // HX: [val-list_cons (d2e, d2es) = d2es] (MatchError)
+    val () = assertloc (glist_is_cons (d2es))
+    val d2e = glist_head<d2exp> (d2es)
+    val d2es = glist_tail<d2exp> (d2es)
     val ann =
-      eval1_s2expopt (loc0, ctx, env, d2c.v2aldec_ann)
+      eval1_s2expopt (loc0, ctx, env, d2c.v2aldec_ann ())
     val d2c = v2aldec_make (loc0, p2t, d2e, ann)
     val d2cs = auxlst2 (loc0, ctx, env, d2cs, d2es)
   in
-    list_cons (d2c, d2cs)
+    glist_cons<v2aldec> (d2c, d2cs)
   end // end of [list_cons]
-| list_nil () => list_nil ()
+| ~GLnil () => glist_nil ()
 end // end of [auxlst2]
 //
 in
@@ -1030,15 +1044,15 @@ fun auxlst1 (
   loc0: location
 , ctx: !evalctx, env: &alphenv, d2cs: v2aldeclst
 ) : p2atlst = (
-  case+ d2cs of
-  | list_cons
+  case+ glist_view (d2cs) of
+  | ~GLcons
       (d2c, d2cs) => let
-      val p2t = eval1_p2at (loc0, ctx, env, d2c.v2aldec_pat)
+      val p2t = eval1_p2at (loc0, ctx, env, d2c.v2aldec_pat ())
       val p2ts = auxlst1 (loc0, ctx, env, d2cs)
     in
-      list_cons (p2t, p2ts)
+      glist_cons<p2at> (p2t, p2ts)
     end // end of [list_cons]
-  | list_nil () => list_nil ()
+  | ~GLnil () => glist_nil ()
 ) // end of [auxlst1]
 val p2ts = auxlst1 (loc0, ctx, env, d2cs)
 //
@@ -1047,17 +1061,20 @@ fun auxlst2 (
 , ctx: !evalctx, env: &alphenv
 , d2cs: v2aldeclst, p2ts: p2atlst
 ) : v2aldeclst = (
-  case+ d2cs of
-  | list_cons (d2c, d2cs) => let
-      val d2e = eval1_d2exp (loc0, ctx, env, d2c.v2aldec_def)
-      val-list_cons (p2t, p2ts) = p2ts
-      val ann = eval1_s2expopt (loc0, ctx, env, d2c.v2aldec_ann)
+  case+ glist_view (d2cs) of
+  | ~GLcons (d2c, d2cs) => let
+      val d2e = eval1_d2exp (loc0, ctx, env, d2c.v2aldec_def ())
+      // HX: [val-list_cons (p2t, p2ts) = p2ts] (MatchError)
+      val () = assertloc (glist_is_cons (p2ts))
+      val p2t = glist_head<p2at> (p2ts)
+      val p2ts = glist_tail<p2at> (p2ts)
+      val ann = eval1_s2expopt (loc0, ctx, env, d2c.v2aldec_ann ())
       val d2c = v2aldec_make (loc0, p2t, d2e, ann)
       val d2cs = auxlst2 (loc0, ctx, env, d2cs, p2ts)
     in
-      list_cons (d2c, d2cs)
+      glist_cons<v2aldec> (d2c, d2cs)
     end
-  | list_nil () => list_nil ()
+  | ~GLnil () => glist_nil ()
 ) // end of [auxlst2]
 //
 in

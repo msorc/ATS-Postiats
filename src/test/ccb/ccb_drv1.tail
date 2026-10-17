@@ -1,0 +1,24 @@
+implement $FIL.pkgsrcname_relocatize (given, ngurl) = given
+
+implement filenv_get_name (x) = $FIL.filename_dummy
+implement $TRENV2.filenv_getref_d3eclistopt (fenv) = hd_fenv_cell (fenv, 0)
+implement $TRENV2.filenv_getref_tmpcstimpmap (fenv) = hd_fenv_cell (fenv, 1)
+implement $TRENV2.filenv_getref_tmpvardecmap (fenv) = hd_fenv_cell (fenv, 2)
+implement filenv_get_d3eclistopt (fenv) = $UN.ptrget<d3eclistopt> ($TRENV2.filenv_getref_d3eclistopt (fenv))
+staload "pats_trans2_env.sats"
+#include "s2env1.hats"
+extern praxi ccb_pf_make (): the_d2varlev_inc_v
+extern praxi ccb_pf_free (pf: the_d2varlev_inc_v): void
+implement the_d2varlev_get () = ccb_d2varlev_get ()
+implement the_d2varlev_inc () = let val () = ccb_d2varlev_set (ccb_d2varlev_get () + 1) in (ccb_pf_make () | ()) end
+implement the_d2varlev_dec (pf | (*none*)) = let prval () = ccb_pf_free (pf) in ccb_d2varlev_set (ccb_d2varlev_get () - 1) end
+implement the_d2varlev_save () = ccb_d2varlev_get ()
+implement the_d2varlev_restore (n) = ccb_d2varlev_set (n)
+#include "ccb_mock.hats"
+#include "ccb_stubs1.hats"
+#include "ccb_chunks1.hats"
+
+implement main () = {
+  val () = tc_all ()
+  val () = dd_flush ()
+}

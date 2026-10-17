@@ -31,7 +31,8 @@ LIBATSCC_targetloc
 #staload
   "./../SATS/integer.sats"
 //
-#staload "./../SATS/list.sats"
+#staload "./../SATS/list_vt.sats"
+#staload "./../SATS/stream_vt.sats"
 //
 (* ****** ****** *)
 //
@@ -39,7 +40,7 @@ LIBATSCC_targetloc
 //
 (* ****** ****** *)
 //
-#define ATSCC_STREAM 1
+
 #define ATSCC_STREAM_VT 1
 //
 (* ****** ****** *)

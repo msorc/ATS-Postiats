@@ -35,6 +35,7 @@
 //
 #staload _ =
 "./../DATS/basis_intset.dats"
+#staload _ = "libats/DATS/arena.dats" // HX-2026-10
 //
 (* ****** ****** *)
 

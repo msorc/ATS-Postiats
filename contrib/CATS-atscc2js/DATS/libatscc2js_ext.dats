@@ -18,6 +18,9 @@
 staload
 UN = "prelude/SATS/unsafe.sats"
 //
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
 staload
@@ -56,18 +59,15 @@ atscc2js_main0_opt
 //
 (* ****** ****** *)
 //
-datatype
-comarg =
 //
-| COMARGstrlit of string
+// HX-2026-10: no GC (flat)
+// 0: strlit; 1: strinp; 2: prefil; 3: postfil
 //
-| COMARGstrinp of string
+typedef
+comarg = @(int, string)
 //
-| COMARGprefil of string
-| COMARGpostfil of string
-//
-typedef comarglst0 = List0(comarg)
-typedef comarglst1 = List1(comarg)
+typedef comarglst0 = glist(comarg)
+typedef comarglst1 = glist(comarg)
 //
 (* ****** ****** *)
 //
@@ -115,13 +115,7 @@ libatscc2js_dynload
 //
 (* ****** ****** *)
 
-datatype
-atscc2jsres =
-ATSCC2JSRES of
-(
-  int(*nerr*)
-, string(*stdout*), string(*stderr*)
-)
+
 
 (* ****** ****** *)
 //
@@ -130,27 +124,27 @@ fun
 atscc2js_main0_arglst
   {n:pos}
 (
-  args: list(comarg, n)
+  args: glist(comarg)
 ) : int(*nerr*) = "ext#libatscc2js_atscc2js_main0_arglst"
 //
 (* ****** ****** *)
 //
 implement
-comarg_strlit(x) = COMARGstrlit(x)
+comarg_strlit(x) = @(0, x)
 implement
-comarg_strinp(x) = COMARGstrinp(x)
+comarg_strinp(x) = @(1, x)
 //
 implement
-comarg_prefil(x) = COMARGprefil(x)
+comarg_prefil(x) = @(2, x)
 implement
-comarg_postfil(x) = COMARGpostfil(x)
+comarg_postfil(x) = @(3, x)
 //
 (* ****** ****** *)
 //
 implement
-comarglst_nil() = list_nil((*void*))
+comarglst_nil() = glist_nil((*void*))
 implement
-comarglst_cons(x, xs) = list_cons(x, xs)
+comarglst_cons(x, xs) = glist_cons<comarg>(x, xs)
 //
 (* ****** ****** *)
 
@@ -197,7 +191,7 @@ end // end of [local]
 (* ****** ****** *)
 //
 typedef
-stringlst = List0(string)
+stringlst = glist(string)
 //
 extern
 fun
@@ -207,7 +201,7 @@ string2file
 , prefils: stringlst
 , postfils: stringlst
 , number_of_errors: &int >> int
-) : string // end-of-string2file
+) : Strptr1 // end-of-string2file
 //
 (* ****** ****** *)
 
@@ -216,12 +210,12 @@ local
 fun
 aux_prefils
 (
-  out: FILEref, xs: List(string), nerr: &int >> int
+  out: FILEref, xs: glist(string), nerr: &int >> int
 ) : void =
 (
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) =>
   {
     val () =
       aux_prefils (out, xs, nerr)
@@ -234,12 +228,12 @@ case+ xs of
 fun
 aux_postfils
 (
-  out: FILEref, xs: List(string), nerr: &int >> int
+  out: FILEref, xs: glist(string), nerr: &int >> int
 ) : void =
 (
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) =>
   {
     val () =
       aux_postfils (out, xs, nerr)
@@ -308,10 +302,10 @@ then let
   val () = if ec != 0 then nerr := nerr + 1
 //
 in
-  strnptr2string(tmp0)
+  $UN.castvwtp0{Strptr1}(tmp0)
 end // end of [then]
 else let
-  val () = nerr := nerr + 1 in strnptr2string(tmp0)
+  val () = nerr := nerr + 1 in $UN.castvwtp0{Strptr1}(tmp0)
 end // end of [else]
 //
 end // end of [string2file]
@@ -325,14 +319,14 @@ atscc2js_main0_arglst
   (args) = let
 //
 vtypedef
-res = List0_vt(string)
+res = List0_vt(Strptr1)
 //
 fun
 auxarglst
 {n:nat}
 {l:addr}
 (
-  xs: List(comarg)
+  xs: glist(comarg)
 , n0: int(n)
 , p0: ptr(l)
 , prefils: stringlst
@@ -340,19 +334,19 @@ auxarglst
 , res: &res >> res, nerr: &int >> int
 ) : intGte(0) = (
 //
-case+ xs of
-| list_nil() => n0
-| list_cons(x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil() => n0
+| ~GLcons(x, xs) =>
   (
     case+ x of
-    | COMARGstrlit(x) => let
+    | @(0, x) => let
         val n1 = n0+1
         val p1 = ptr_succ<string>(p0)
         val () = $UN.ptr0_set<string>(p0, x)
       in
         auxarglst(xs, n1, p1, prefils, postfils, res, nerr)
       end // end of [COMARGstrlit]
-    | COMARGstrinp(x) => let
+    | @(1, x) => let
         val n1 = n0+1
         val p1 = ptr_succ<string>(p0)
         val f0 =
@@ -360,23 +354,23 @@ case+ xs of
           (x, prefils, postfils, nerr)
         // end of [val]
         val () =
-          res := list_vt_cons(f0, res)
+          $UN.ptr0_set<string>(p0, $UN.strptr2string(f0))
         // end of [val]
-        val () = $UN.ptr0_set<string>(p0, f0)
+        val () = res := list_vt_cons(f0, res)
       in
         auxarglst(xs, n1, p1, prefils, postfils, res, nerr)
       end // end of [COMARGstrinp]
-    | COMARGprefil(x) => let
+    | @(2, x) => let
         val n1 = n0
         val p1 = p0
-        val prefils = list_cons(x, prefils)
+        val prefils = glist_cons<string>(x, prefils)
       in
         auxarglst(xs, n1, p1, prefils, postfils, res, nerr)
       end // end of [COMARGprefil]
-    | COMARGpostfil(x) => let
+    | @(_, x) => let
         val n1 = n0
         val p1 = p0
-        val postfils = list_cons(x, postfils)
+        val postfils = glist_cons<string>(x, postfils)
       in
         auxarglst(xs, n1, p1, prefils, postfils, res, nerr)
       end // end of [COMARGpostfil]
@@ -400,13 +394,14 @@ case+ xs of
     ((*void*)) => ()
 | ~list_vt_cons
     (x, xs) => let
-    val ec = unlink(x) in unlinklst(xs)
+    val ec = unlink($UN.strptr2string(x))
+    val () = strptr_free(x) in unlinklst(xs)
   end (* end of [list_cons] *)
 //
 end // end of [unlinklst]
 //
 val
-argc = list_length(args)
+argc = glist_length<comarg>(args)
 val
 asz0 = g1int2uint_int_size(argc+1)
 //
@@ -415,9 +410,9 @@ val
 array_ptr_alloc<string> (asz0)
 //
 val
-prefils = list_nil()
+prefils = glist_nil()
 val
-postfils = list_nil()
+postfils = glist_nil()
 //
 var
 res: res = list_vt_nil

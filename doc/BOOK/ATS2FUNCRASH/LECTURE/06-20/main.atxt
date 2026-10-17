@@ -125,12 +125,12 @@ extern
 fun
 funarg1_get(): int = "mac\\\\#"
 //
-\%{^
+\\\%{^
 function funarg1_get()
 {
   return parseInt(document.getElementById("funarg1").value);
 }
-\%} (* end of external code *)
+\\\%} (* end of external code *)
 //
 ')
 
@@ -148,10 +148,10 @@ prefix (for carrying some namespace information) if the string
 #dyncode('"mac\\\\#"') is not present. In case a different name is
 needed for #dyncode("funarg1_get") in C, the name should be explicitly
 mentioned after the symbol #dyncode('\\\\#'). For instance, if the
-string #dyncode('"mac\\\\#\JS_funarg1_get"') is used, then the name
+string #dyncode('"mac\\\\#\\\JS_funarg1_get"') is used, then the name
 #dyncode("JS_funarg1_get") is chosen (by #command("patsopt")) for
 #dyncode("funarg1_get").  In ATS source, the code written between
-#dyncode("\%{^") and #dyncode("\%}") is considered external and is
+#dyncode("\\\%{^") and #dyncode("\\\%}") is considered external and is
 directly pasted by #command("patsopt") into the generated C code.  The
 symbol #dyncode("^") means that the pasted code is to appear near the
 beginning of the generated code. If the symbol #dyncode("^") is
@@ -248,6 +248,6 @@ url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/QueenP
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
 

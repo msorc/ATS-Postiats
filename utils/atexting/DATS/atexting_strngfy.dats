@@ -39,13 +39,7 @@
 //
 (* ****** ****** *)
 //
-staload
-"libats/ML/SATS/basis.sats"
 //
-staload
-"libats/ML/SATS/string.sats"
-staload _ =
-"libats/ML/DATS/string.dats"
 //
 (* ****** ****** *)
 //
@@ -62,6 +56,9 @@ staload UN = $UNSAFE
 //
 staload
 "./../SATS/atexting.sats"
+//
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 //
@@ -81,39 +78,39 @@ token_strngfy
 in
 //
 case+
-x0.token_node
+token_node_view(x0.token_node())
 of // case+
 //
-| TOKeol() => "\n"
-| TOKeof() => ("")
+| ~TOKeol() => "\n"
+| ~TOKeof() => ("")
 //
-| TOKint(rep) => rep
+| ~TOKint(rep) => rep
 //
-| TOKide(rep) => rep
+| ~TOKide(rep) => rep
 //
-| TOKspchr(c0) =>
+| ~TOKspchr(c0) =>
   if c0 > 0
     then (
-      string_sing($UN.cast{charNZ}(c0))
+      strptr2gstring($UN.castvwtp0{Strptr1}(string_sing($UN.cast{charNZ}(c0))))
     ) else ""
   // end of [if]
 //
-| TOKbslash(c0) =>
+| ~TOKbslash(c0) =>
   if (c0 > 0 && c0 != '\n')
     then (
-      string_sing($UN.cast{charNZ}(c0))
+      strptr2gstring($UN.castvwtp0{Strptr1}(string_sing($UN.cast{charNZ}(c0))))
     ) else ("")
   // end of [if]
 //
-| TOKspace(bs) => bs
+| ~TOKspace(bs) => bs
 //
-| TOKsharp(nx) => nx
+| ~TOKsharp(nx) => nx
 //
-| TOKsquote() => "'"
-| TOKdquote(nx) => nx
+| ~TOKsquote() => "'"
+| ~TOKdquote(nx) => nx
 //
-| TOKcode_beg(cbeg) => cbeg
-| TOKcode_end(cend) => cend
+| ~TOKcode_beg(cbeg) => cbeg
+| ~TOKcode_end(cend) => cend
 //
 end // end of [token_strngfy]
 
@@ -128,28 +125,28 @@ atext_strngfy
 in
 //
 case+
-x0.atext_node
+atext_node_view(x0.atext_node())
 of // case+
 //
-| TEXTnil() => ""
+| ~TEXTnil() => ""
 //
-| TEXTtoken(tok) =>
+| ~TEXTtoken(tok) =>
     token_strngfy(tok)
   // end-of-TEXTtoken
 //
 //
-| TEXTstring(str) => str
-| TEXTerrmsg(msg) => msg
+| ~TEXTstring(str) => str
+| ~TEXTerrmsg(msg) => msg
 //
-| TEXTlist(txts) => atextlst_strngfy(txts)
+| ~TEXTlist(txts) => atextlst_strngfy(txts)
 //
-| TEXTsquote(txts) => atextlst_strngfy(txts)
-| TEXTdquote(_, txts) => atextlst_strngfy(txts)
+| ~TEXTsquote(txts) => atextlst_strngfy(txts)
+| ~TEXTdquote(_, txts) => atextlst_strngfy(txts)
 //
-| TEXTextcode _ => "#extcode"
+| ~TEXTextcode _ => "#extcode"
 //
-| TEXTdefname _ => "#defname"
-| TEXTfuncall _ => "#funcall"
+| ~TEXTdefname _ => "#defname"
+| ~TEXTfuncall _ => "#funcall"
 //
 end // end of [atext_strngfy]
 
@@ -164,33 +161,33 @@ aux
 ) : void =
 (
 case+
-x0.atext_node
+atext_node_view(x0.atext_node())
 of // case+
 //
-| TEXTnil() => ()
+| ~TEXTnil() => ()
 //
-| TEXTtoken(tok) =>
+| ~TEXTtoken(tok) =>
   ignoret(
     stringbuf_insert_token(sbf, tok)
   ) (* TEXTtoken *)
 //
 //
-| TEXTstring(str) =>
+| ~TEXTstring(str) =>
   ignoret(
     stringbuf_insert_string(sbf, str)
   ) (* TEXTstring *)
 //
-| TEXTerrmsg(msg) =>
+| ~TEXTerrmsg(msg) =>
   ignoret(
     stringbuf_insert_string(sbf, msg)
   ) (* TEXTerrmsg *)
 //
-| TEXTlist(txts) =>
+| ~TEXTlist(txts) =>
   {
     val ((*void*)) = auxlst(txts, sbf)
   }
 //
-| TEXTsquote(txts) =>
+| ~TEXTsquote(txts) =>
   {
     val _(*1*) =
       stringbuf_insert_char(sbf, '\'')
@@ -198,7 +195,7 @@ of // case+
     val _(*1*) =
       stringbuf_insert_char(sbf, '\'')
   } (* TEXTsquote *)
-| TEXTdquote(tok, txts) =>
+| ~TEXTdquote(tok, txts) =>
   {
     val _(*n*) =
       stringbuf_insert_token(sbf, tok)
@@ -207,14 +204,14 @@ of // case+
       stringbuf_insert_token(sbf, tok)
   } (* TEXTdquote *)
 //
-| TEXTextcode _ => ()
+| ~TEXTextcode _ => ()
 //
-| TEXTdefname _ =>
+| ~TEXTdefname _ =>
   {
     val () =
       aux(atext_defname_eval(x0), sbf)
   } (* TEXTdefname *)
-| TEXTfuncall _ =>
+| ~TEXTfuncall _ =>
   {
     val () = aux(atext_funcall_eval(x0), sbf)
   } (* TEXTfuncall *)
@@ -227,11 +224,11 @@ auxlst
   xs: atextlst, sbf: !stringbuf
 ) : void =
 (
-case+ xs of
-| list0_nil() => ()
-| list0_cons(x, xs) => let
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) => let
     val () = aux(x, sbf) in auxlst(xs, sbf)
-  end // end of [list0_cons]
+  end // end of [list_cons]
 ) (* end of [auxlst(xs, sbf)] *)
 
 in (* in-of-local *)
@@ -252,7 +249,7 @@ val () = auxlst(xs, sbf)
 val res = stringbuf_getfree_strptr(sbf)
 //
 in
-  strptr2string(res)
+  strptr2gstring(res)
 end // end of [atextlst_strngfy]
 
 end // end of [local]
@@ -268,20 +265,20 @@ stringbuf_insert_token
 in
 //
 case+
-x0.token_node
+token_node_view(x0.token_node())
 of // case+
 //
-| TOKeol() =>
+| ~TOKeol() =>
   stringbuf_insert_char(sbf, '\n')
-| TOKeof() => 0
+| ~TOKeof() => 0
 //
-| TOKint(rep) =>
+| ~TOKint(rep) =>
   stringbuf_insert_string(sbf, rep)
 //
-| TOKide(rep) =>
+| ~TOKide(rep) =>
   stringbuf_insert_string(sbf, rep)
 //
-| TOKspchr(c0) =>
+| ~TOKspchr(c0) =>
   if c0 > 0
     then let
       val c0 = $UN.cast{charNZ}(c0)
@@ -290,7 +287,7 @@ of // case+
     end else 0
   // end of [if]
 //
-| TOKbslash(c0) =>
+| ~TOKbslash(c0) =>
   if (c0 > 0 && c0 != '\n')
     then let
       val c0 = $UN.cast{charNZ}(c0)
@@ -299,15 +296,15 @@ of // case+
     end else (0)
   // end of [if]
 //
-| TOKspace(bs) => stringbuf_insert_string(sbf, bs)
+| ~TOKspace(bs) => stringbuf_insert_string(sbf, bs)
 //
-| TOKsharp(nx) => stringbuf_insert_string(sbf, nx)
+| ~TOKsharp(nx) => stringbuf_insert_string(sbf, nx)
 //
-| TOKsquote() => stringbuf_insert_string(sbf, "'")
-| TOKdquote(nx) => stringbuf_insert_string(sbf, nx)
+| ~TOKsquote() => stringbuf_insert_string(sbf, "'")
+| ~TOKdquote(nx) => stringbuf_insert_string(sbf, nx)
 //
-| TOKcode_beg(cbeg) => stringbuf_insert_string(sbf, cbeg)
-| TOKcode_end(cend) => stringbuf_insert_string(sbf, cend)
+| ~TOKcode_beg(cbeg) => stringbuf_insert_string(sbf, cbeg)
+| ~TOKcode_end(cend) => stringbuf_insert_string(sbf, cend)
 //
 end // end of [stringbuf_insert_token]
 

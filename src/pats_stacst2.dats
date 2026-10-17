@@ -33,9 +33,25 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_stacst2.dats, see PORTING.md, "Level 2, slice 2")
+// A [s2cstref] is a cell of the global arena: the symbol and the constant found so far (null: none).
+// The order of the implementations (the initialisation order when the module is dynloaded) is the
+// one of src/pats_stacst2.dats. [the_s2expenv_pervasive_find] is declared in the (partial)
+// pats_trans2_env.sats: the trans2 slice implements it.
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload
@@ -44,6 +60,7 @@ INTINF = "./pats_intinf.sats"
 (* ****** ****** *)
 
 staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
@@ -57,6 +74,7 @@ implement prerr_FILENAME<> () = prerr "pats_stacst2"
 
 (* ****** ****** *)
 
+staload "./pats_basics.sats"
 staload "./pats_effect.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
@@ -68,72 +86,52 @@ staload "./pats_trans2_env.sats"
 
 (* ****** ****** *)
 
-abstype s2cstnul (l:addr)
-typedef s2cstnul = [l:agez] s2cstnul (l)
-
-extern
-castfn s2cstnul_none (x: ptr null):<> s2cstnul (null)
-
-extern
-castfn s2cstnul_some (x: s2cst):<> [l:agz] s2cstnul (l)
-extern
-castfn s2cstnul_unsome {l:agz} (x: s2cstnul l):<> s2cst
+#include "./pats_staexp2.hats"
 
 (* ****** ****** *)
 
-extern
-fun
-s2cstnul_is_null{l:addr}
-  (x: s2cstnul(l)): bool(l==null) = "atspre_ptr_is_null"
-// end of [s2cstnul_is_null]
-extern
-fun
-s2cstnul_isnot_null{l:addr}
-  (x: s2cstnul(l)): bool(l > null) = "atspre_ptr_isnot_null"
-// end of [s2cstnul_isnot_null]
+assume s2cstref_type = ptr
 
 (* ****** ****** *)
-
-local
-
-typedef
-syms2cst_struct = @{
-  sym= symbol, cst= s2cstnul
-} // end of [syms2cst_struct]
-
-assume
-s2cstref_type = ref(syms2cst_struct)
-
-in (* in of [local] *)
-
-fun
+//
+// the cell: the symbol (word 0) and the constant, null if not found yet (word 1)
+//
+fn
 s2cstref_get_sym
-  (r: s2cstref): symbol = let
-  val (vbox pf | p) = ref_get_view_ptr(r) in p->sym
-end // end of [s2cstref_get_sym]
+  (r: s2cstref): symbol =
+  $UN.cast{symbol}($UN.ptr0_get<ptr>(r))
+// end of [s2cstref_get_sym]
 
-fun
+fn
 s2cstref_get_cstnul
-  (r: s2cstref): s2cstnul = let
-  val (vbox pf | p) = ref_get_view_ptr(r) in p->cst
-end // end of [s2cstref_get_cstnul]
-fun
+  (r: s2cstref): ptr =
+  $UN.ptr0_get<ptr>(ptr0_add_guint<byte>(r, i2sz(8)))
+fn
 s2cstref_set_cstnul
-  (r: s2cstref, s2c: s2cstnul): void = let
-  val (vbox pf | p) = ref_get_view_ptr(r) in p->cst := s2c
-end // end of [s2cstref_set_cstnul]
+  (r: s2cstref, s2c: ptr): void =
+  $UN.ptr0_set<ptr>(ptr0_add_guint<byte>(r, i2sz(8)), s2c)
 
 implement
 s2cstref_make(name) = let
   val id = $SYM.symbol_make_string(name)
-  val (pfgc, pfat | p) = ptr_alloc<syms2cst_struct>()
-prval () = free_gc_elim (pfgc)
-  val () = (p->sym := id; p->cst := s2cstnul_none(null))
+  val p = the_garena_alloc(i2sz(16))
+  val () = $UN.ptr0_set<ptr>(p, $UN.cast{ptr}(id))
+  val () = $UN.ptr0_set<ptr>(ptr0_add_guint<byte>(p, i2sz(8)), the_null_ptr)
 in
-  ref_make_view_ptr(pfat | p)
+  p
 end  // end of [s2cstref_make]
 
-end // end of [local]
+(* ****** ****** *)
+//
+// HX: [val-list_cons (x, _) = xs] of ATS1
+//
+fn s2explst_head1 (xs: s2explst): s2exp =
+  if glist_is_cons (xs) then glist_head<s2exp> (xs) else $ERR.abort<s2exp> ()
+fn s2explst_head2 (xs: s2explst): s2exp = let
+  val xs = (if glist_is_cons (xs) then glist_tail<s2exp> (xs) else $ERR.abort<s2explst> ()): s2explst
+in
+  s2explst_head1 (xs)
+end // end of [s2explst_head2]
 
 (* ****** ****** *)
 
@@ -149,11 +147,11 @@ fn auxerr
   val () = prerr "] is not available."
   val () = prerr_newline ();
 in
-  $ERR.abort {s2cst} ()
+  $ERR.abort<s2cst> ()
 end (* end of [auxerr] *)
 //
   val s2c = s2cstref_get_cstnul (r)
-  val isnul = s2cstnul_is_null (s2c)
+  val isnul = ptr_is_null (s2c)
 //
 in
 //
@@ -164,19 +162,21 @@ in
 //
 case+ ans of
 | ~Some_vt (s2i) => (
-  case+ s2i of
-  | S2ITMcst s2cs => let
-      val-list_cons (s2c, _) = s2cs
-      val () = s2cstref_set_cstnul (r, s2cstnul_some (s2c))
+  case+ s2itm_view (s2i) of
+  | ~S2ITMcst (s2cs) => let
+      val s2c = (
+        if glist_is_cons (s2cs) then glist_head<s2cst> (s2cs) else $ERR.abort<s2cst> ()
+      ) : s2cst // HX: val-list_cons (s2c, _) = s2cs
+      val () = s2cstref_set_cstnul (r, $UN.cast{ptr}(s2c))
     in
       s2c
     end // end of [S2ITMcst]
-  | _ => auxerr (id)
+  | v => (s2itm_view_free (v); auxerr (id))
   ) // end of [Some_vt]
 | ~None_vt () => auxerr (id)
 //
 end else
-  s2cstnul_unsome (s2c)
+  $UN.cast{s2cst}(s2c)
 // end of [if]
 end // end of [s2cstref_get_cst]
 
@@ -184,24 +184,44 @@ end // end of [s2cstref_get_cst]
 
 implement
 s2cstref_equ_cst
-  (r, s2c) =
-(
+  (r, s2c) = let
 //
-eq_s2cst_s2cst
-  (s2cstref_get_cst(r), s2c)
+// HX-2026-10:
+// some pervasive constants (e.g., [list],
+// [lazy] and [ref]) are no longer declared by
+// the prelude (no GC); testing against such a
+// constant should simply fail instead of aborting
 //
-) (* end of [s2cstref_equ_cst] *)
+val s2c0 = s2cstref_get_cstnul (r)
+//
+in
+//
+if
+ptr_is_null (s2c0)
+then let
+  val id = s2cstref_get_sym (r)
+  val ans = the_s2expenv_pervasive_find (id)
+in
+  case+ ans of
+  | ~Some_vt (s2i) => (
+    if s2itm_is_S2ITMcst (s2i)
+      then eq_s2cst_s2cst (s2cstref_get_cst(r), s2c)
+      else false // non-S2ITMcst
+    ) // end of [Some_vt]
+  | ~None_vt ((*void*)) => false
+end // end of [then]
+else eq_s2cst_s2cst ($UN.cast{s2cst}(s2c0), s2c)
+//
+end (* end of [s2cstref_equ_cst] *)
 
 implement
 s2cstref_equ_exp
   (r, s2e) =
 (
-case+
-s2e.s2exp_node
-of (* case+ *)
-| S2Ecst s2c => s2cstref_equ_cst(r, s2c)
-| S2Eapp(s2e, _) => s2cstref_equ_exp(r, s2e)
-| _ (*non-S2Ecst-S2Eapp*) => false
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Ecst s2c => s2cstref_equ_cst(r, s2c)
+| ~S2Eapp(s2e, _) => s2cstref_equ_exp(r, s2e)
+| v (*non-S2Ecst-S2Eapp*) => (s2exp_node_view_free (v); false)
 ) (* end of [s2cstref_equ_exp] *)
 
 (* ****** ****** *)
@@ -348,7 +368,7 @@ s2exp_agtz(s2l) = let
     s2cstref_get_cst(the_gt_addr_addr)
   val _0_ = s2exp_int(0) // HX: 0 for null
 in
-  s2exp_cstapp(s2c, list_pair(s2l, _0_))
+  s2exp_cstapp(s2c, glist_pair(s2l, _0_))
 end // end of [s2exp_agtz]
 
 (* ****** ****** *)
@@ -359,7 +379,7 @@ s2exp_bneg(s2p) = let
     s2cstref_get_cst(the_neg_bool)
   // end of [val]
 in
-  s2exp_cstapp(s2c, list_sing(s2p))
+  s2exp_cstapp(s2c, glist_sing(s2p))
 end // end of [s2exp_bneg]
 
 implement
@@ -368,7 +388,7 @@ s2exp_badd(s2p1, s2p2) = let
     s2cstref_get_cst(the_add_bool_bool)
   // end of [val]
 in
-  s2exp_cstapp(s2c, list_pair(s2p1, s2p2))
+  s2exp_cstapp(s2c, glist_pair(s2p1, s2p2))
 end // end of [s2exp_badd]
 
 implement
@@ -377,7 +397,7 @@ s2exp_bmul (s2p1, s2p2) = let
     s2cstref_get_cst(the_mul_bool_bool)
   // end of [val]
 in
-  s2exp_cstapp(s2c, list_pair(s2p1, s2p2))
+  s2exp_cstapp(s2c, glist_pair(s2p1, s2p2))
 end // end of [s2exp_bmul]
 
 (* ****** ****** *)
@@ -390,18 +410,19 @@ aux (
   s2p0: s2exp, s2ps: s2explst
 ) : s2exp =
 (
-case+ s2ps of
-| list_nil() => s2p0
-| list_cons(s2p, s2ps) =>
+case+ glist_view (s2ps) of
+| ~GLnil() => s2p0
+| ~GLcons(s2p, s2ps) =>
     s2exp_badd(s2p0, aux(s2p, s2ps))
   // end of [list_cons]
 )
 //
 in
-  case+ s2ps of
-  | list_nil() => s2exp_bool(false)
-  | list_cons(s2p, s2ps) => aux(s2p, s2ps)
+  case+ glist_view (s2ps) of
+  | ~GLnil() => s2exp_bool(false)
+  | ~GLcons(s2p, s2ps) => aux(s2p, s2ps)
 end // end of [s2explst_badd]
+
 
 implement
 s2explst_bmul(s2ps) = let
@@ -411,18 +432,19 @@ aux (
   s2p0: s2exp, s2ps: s2explst
 ) : s2exp =
 (
-case+ s2ps of
-| list_nil() => s2p0
-| list_cons(s2p, s2ps) =>
+case+ glist_view (s2ps) of
+| ~GLnil() => s2p0
+| ~GLcons(s2p, s2ps) =>
     s2exp_bmul(s2p0, aux(s2p, s2ps))
   // end of [list_cons]
 )
 //
 in
-  case+ s2ps of
-  | list_nil() => s2exp_bool(true)
-  | list_cons(s2p, s2ps) => aux(s2p, s2ps)
+  case+ glist_view (s2ps) of
+  | ~GLnil() => s2exp_bool(true)
+  | ~GLcons(s2p, s2ps) => aux(s2p, s2ps)
 end // end of [s2explst_bmul]
+
 
 (* ****** ****** *)
 
@@ -432,7 +454,7 @@ s2exp_ineg(s2e) = let
   s2c =
   s2cstref_get_cst(the_neg_int)
 in
-  s2exp_cstapp(s2c, list_sing(s2e))
+  s2exp_cstapp(s2c, glist_sing(s2e))
 end // end of [s2exp_ineg]
 
 (* ****** ****** *)
@@ -442,7 +464,7 @@ s2exp_intlt(s2i1, s2i2) = let
   val
   s2c = s2cstref_get_cst(the_lt_int_int)
 in
-  s2exp_cstapp(s2c, list_pair(s2i1, s2i2))
+  s2exp_cstapp(s2c, glist_pair(s2i1, s2i2))
 end // end of [s2exp_intlt]
 
 implement
@@ -450,7 +472,7 @@ s2exp_intlte(s2i1, s2i2) = let
   val
   s2c = s2cstref_get_cst(the_lte_int_int)
 in
-  s2exp_cstapp(s2c, list_pair(s2i1, s2i2))
+  s2exp_cstapp(s2c, glist_pair(s2i1, s2i2))
 end // end of [s2exp_intlte]
 
 implement
@@ -458,7 +480,7 @@ s2exp_intgt(s2i1, s2i2) = let
   val
   s2c = s2cstref_get_cst(the_gt_int_int)
 in
-  s2exp_cstapp(s2c, list_pair(s2i1, s2i2))
+  s2exp_cstapp(s2c, glist_pair(s2i1, s2i2))
 end // end of [s2exp_intgt]
 
 implement
@@ -466,7 +488,7 @@ s2exp_intgte(s2i1, s2i2) = let
   val
   s2c = s2cstref_get_cst(the_gte_int_int)
 in
-  s2exp_cstapp(s2c, list_pair(s2i1, s2i2))
+  s2exp_cstapp(s2c, glist_pair(s2i1, s2i2))
 end // end of [s2exp_intgte]
 
 implement
@@ -474,7 +496,7 @@ s2exp_intneq(s2i1, s2i2) = let
   val
   s2c = s2cstref_get_cst(the_neq_int_int)
 in
-  s2exp_cstapp(s2c, list_pair(s2i1, s2i2))
+  s2exp_cstapp(s2c, glist_pair(s2i1, s2i2))
 end // end of [s2exp_intneq]
 
 (* ****** ****** *)
@@ -488,23 +510,19 @@ s2exp_igtez
 implement
 un_s2exp_intconst
   (s2i) = let
-(*
-val () =
-println!
-("un_s2exp_intconst")
-*)
 in
 //
-case+ s2i.s2exp_node of
+case+ s2exp_node_view (s2exp_node (s2i)) of
 //
-| S2Eint(x) => Some_vt(x)
+| ~S2Eint(x) => Some_vt(x)
 //
-| S2Eintinf(x) =>
+| ~S2Eintinf(x) =>
   Some_vt($INTINF.intinf_get_int(x))
 //
-| _(*noninteger*) => None_vt((*void*))
+| v (*noninteger*) => (s2exp_node_view_free (v); None_vt((*void*)))
 //
 end // end of [un_s2exp_intconst]
+
 
 (* ****** ****** *)
 
@@ -552,7 +570,7 @@ s2exp_bool_bool_t0ype
   s2cstref_get_cst(the_bool_bool_t0ype)
 //
 in
-  s2exp_cstapp(s2c, list_sing(ind))
+  s2exp_cstapp(s2c, glist_sing(ind))
 end // end of [s2exp_bool_bool_t0ype]
 
 (* ****** ****** *)
@@ -566,7 +584,7 @@ s2c =
 s2cstref_get_cst(the_bool_bool_t0ype)
 //
 in
-  s2exp_cstapp(s2c, list_sing(ind))
+  s2exp_cstapp(s2c, glist_sing(ind))
 end // end of [s2exp_bool_index_t0ype]
 
 implement
@@ -575,20 +593,15 @@ un_s2exp_bool_index_t0ype
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+
-s2e.s2exp_node
-of (* case+ *)
-| S2Eapp (
-  s2e_fun, s2es_arg
-  ) when s2cstref_equ_exp
-  (
-    the_bool_bool_t0ype, s2e_fun
-  ) => let
-    val-list_cons(s2b, _) = s2es_arg in Some_vt(s2b)
-  end // end of [S2Eapp when ...]
-| _ (* non-S2Eapp *) => None_vt((*void*))
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_bool_bool_t0ype, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_bool_index_t0ype]
+
 
 (* ****** ****** *)
 
@@ -628,7 +641,7 @@ fun auxg0i
   val knd = s2exp_cst (knd)
   val g0i = s2cstref_get_cst (the_g0int_t0ype)
 in
-  s2exp_cstapp (g0i, list_sing (knd))
+  s2exp_cstapp (g0i, glist_sing (knd))
 end // end of [auxg0i]
 
 fun auxg0u
@@ -636,7 +649,7 @@ fun auxg0u
   val knd = s2exp_cst (knd)
   val g0u = s2cstref_get_cst (the_g0uint_t0ype)
 in
-  s2exp_cstapp (g0u, list_sing (knd))
+  s2exp_cstapp (g0u, glist_sing (knd))
 end // end of [auxg0u]
 
 fun auxg1i (
@@ -645,7 +658,7 @@ fun auxg1i (
   val knd = s2exp_cst (knd)
   val g1i = s2cstref_get_cst (the_g1int_int_t0ype)
 in
-  s2exp_cstapp (g1i, list_pair (knd, ind))
+  s2exp_cstapp (g1i, glist_pair (knd, ind))
 end // end of [auxg1i]
 
 fun auxg1u (
@@ -654,7 +667,7 @@ fun auxg1u (
   val knd = s2exp_cst (knd)
   val g1u = s2cstref_get_cst (the_g1uint_int_t0ype)
 in
-  s2exp_cstapp (g1u, list_pair (knd, ind))
+  s2exp_cstapp (g1u, glist_pair (knd, ind))
 end // end of [auxg1u]
 
 in // in of [local]
@@ -767,7 +780,7 @@ implement
 s2exp_g0int_kind_t0ype (knd) = let
   val g0i = s2cstref_get_cst (the_g0int_t0ype)
 in
-  s2exp_cstapp (g0i, list_sing (knd))
+  s2exp_cstapp (g0i, glist_sing (knd))
 end // end of [s2exp_g0int_kind_t0ype]
 
 implement
@@ -775,7 +788,7 @@ s2exp_g1int_kind_index_t0ype
   (knd, ind) = let
   val g1i = s2cstref_get_cst (the_g1int_int_t0ype)
 in
-  s2exp_cstapp (g1i, list_pair (knd, ind))
+  s2exp_cstapp (g1i, glist_pair (knd, ind))
 end // end of [s2exp_g1int_kind_index_t0ype]
 
 (* ****** ****** *)
@@ -786,19 +799,15 @@ un_s2exp_g1int_index_t0ype
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+ s2e.s2exp_node of
-| S2Eapp (s2e_fun, s2es_arg) 
-    when s2cstref_equ_exp (
-    the_g1int_int_t0ype, s2e_fun
-  ) => let
-    val-list_cons (s2e1_knd, s2es_arg) = s2es_arg
-    val-list_cons (s2e2_ind, s2es_arg) = s2es_arg
-  in
-    Some_vt (s2e2_ind)
-  end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_g1int_int_t0ype, s2e_fun)
+      then Some_vt (s2explst_head2 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_g1int_index_t0ype]
+
 
 (* ****** ****** *)
 
@@ -806,7 +815,7 @@ implement
 s2exp_g0uint_kind_t0ype (knd) = let
   val g0u = s2cstref_get_cst (the_g0uint_t0ype)
 in
-  s2exp_cstapp (g0u, list_sing (knd))
+  s2exp_cstapp (g0u, glist_sing (knd))
 end // end of [s2exp_g0uint_kind_t0ype]
 
 implement
@@ -814,7 +823,7 @@ s2exp_g1uint_kind_index_t0ype
   (knd, ind) = let
   val g1u = s2cstref_get_cst (the_g1uint_int_t0ype)
 in
-  s2exp_cstapp (g1u, list_pair (knd, ind))
+  s2exp_cstapp (g1u, glist_pair (knd, ind))
 end // end of [s2exp_g1uint_kind_index_t0ype]
 
 (* ****** ****** *)
@@ -825,19 +834,15 @@ un_s2exp_g1uint_index_t0ype
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+ s2e.s2exp_node of
-| S2Eapp (s2e_fun, s2es_arg) 
-    when s2cstref_equ_exp (
-    the_g1uint_int_t0ype, s2e_fun
-  ) => let
-    val-list_cons (s2e1_knd, s2es_arg) = s2es_arg
-    val-list_cons (s2e2_ind, s2es_arg) = s2es_arg
-  in
-    Some_vt (s2e2_ind)
-  end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_g1uint_int_t0ype, s2e_fun)
+      then Some_vt (s2explst_head2 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_g1uint_index_t0ype]
+
 
 (* ****** ****** *)
 
@@ -848,14 +853,13 @@ un_s2exp_g1size_index_t0ype
 in
 //
 case+ opt of
-| Some_vt _ => let
-    prval () = fold@ (opt) in opt
-  end // end of [Some_vt]
+| ~Some_vt (x) => Some_vt (x)
 | ~None_vt () =>
     un_s2exp_g1uint_index_t0ype (s2f)
   // end of [None_vt]
 //
 end // end of [un_s2exp_g1size_index_t0ype]
+
 
 (* ****** ****** *)
 
@@ -888,7 +892,7 @@ s2exp_char_int_t0ype (c) = let
   val s2c = s2cstref_get_cst (the_char_int_t0ype)
   val ind = s2exp_int (c)
 in
-  s2exp_cstapp (s2c, list_sing (ind))
+  s2exp_cstapp (s2c, glist_sing (ind))
 end // end of [s2exp_char_int_t0ype]
 
 (* ****** ****** *)
@@ -897,24 +901,24 @@ implement
 s2exp_char_index_t0ype (ind) = let
   val s2c = s2cstref_get_cst (the_char_int_t0ype)
 in
-  s2exp_cstapp (s2c, list_sing (ind))
+  s2exp_cstapp (s2c, glist_sing (ind))
 end // end of [s2exp_char_index_t0ype]
 
 implement
-un_s2exp_char_index_t0ype (s2f) = let
+un_s2exp_char_index_t0ype
+  (s2f) = let
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+ s2e.s2exp_node of
-| S2Eapp (s2e_fun, s2es_arg) 
-    when s2cstref_equ_exp (
-    the_char_int_t0ype, s2e_fun
-  ) => let
-    val-list_cons (s2e, _) = s2es_arg in Some_vt (s2e)
-  end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_char_int_t0ype, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_char_index_t0ype]
+
 
 (* ****** ****** *)
 
@@ -933,7 +937,7 @@ s2exp_schar_int_t0ype (c) = let
   val s2c = s2cstref_get_cst (the_schar_int_t0ype)
   val ind = s2exp_int (c)
 in
-  s2exp_cstapp (s2c, list_sing (ind))
+  s2exp_cstapp (s2c, glist_sing (ind))
 end // end of [s2exp_schar_int_t0ype]
 
 implement
@@ -951,7 +955,7 @@ s2exp_uchar_int_t0ype (c) = let
   val s2c = s2cstref_get_cst (the_uchar_int_t0ype)
   val ind = s2exp_int (c)
 in
-  s2exp_cstapp (s2c, list_sing (ind))
+  s2exp_cstapp (s2c, glist_sing (ind))
 end // end of [s2exp_uchar_int_t0ype]
 
 (* ****** ****** *)
@@ -973,7 +977,7 @@ fun auxmain
   val knd = s2exp_cst (knd)
   val g0f = s2cstref_get_cst (the_g0float_t0ype)
 in
-  s2exp_cstapp (g0f, list_sing (knd))
+  s2exp_cstapp (g0f, glist_sing (knd))
 end // end of [auxmain]
 
 in // in of [local]
@@ -1015,17 +1019,17 @@ s2exp_string_int_type (n) = let
 // HX: the cast is okay as we do not attempt
 // to handle string of extremely long length
 //
-  val ind = s2exp_int ((int_of_size)n)
+  val ind = s2exp_int ($UN.cast{int}(n))
   val s2c = s2cstref_get_cst (the_string_int_type)
 in
-  s2exp_cstapp (s2c, list_sing(ind))
+  s2exp_cstapp (s2c, glist_sing(ind))
 end // end of [s2exp_string_type]
 
 implement
 s2exp_string_index_type (ind) = let
   val s2c = s2cstref_get_cst (the_string_int_type)
 in
-  s2exp_cstapp (s2c, list_sing(ind))
+  s2exp_cstapp (s2c, glist_sing(ind))
 end // end of [s2exp_string_index_type]
 
 (* ****** ****** *)
@@ -1043,7 +1047,7 @@ s2exp_literal_float
   val ind = s2exp_float (rep)
   val s2c = s2cstref_get_cst (the_literal_float)
 in
-  s2exp_cstapp (s2c, list_sing(ind))
+  s2exp_cstapp (s2c, glist_sing(ind))
 end // end of [s2exp_literal_float]
 
 implement
@@ -1052,7 +1056,7 @@ s2exp_literal_string
   val ind = s2exp_string (str)
   val s2c = s2cstref_get_cst (the_literal_string)
 in
-  s2exp_cstapp (s2c, list_sing(ind))
+  s2exp_cstapp (s2c, glist_sing(ind))
 end // end of [s2exp_literal_string]
 //
 (* ****** ****** *)
@@ -1083,7 +1087,7 @@ s2c =
 s2cstref_get_cst(the_ptr_addr_type)
 //
 in
-  s2exp_cstapp(s2c, list_sing(s2l))
+  s2exp_cstapp(s2c, glist_sing(s2l))
 end // end of [s2exp_ptr_addr_type]
 //
 (* ****** ****** *)
@@ -1091,27 +1095,18 @@ end // end of [s2exp_ptr_addr_type]
 implement
 un_s2exp_ptr_addr_type
   (s2f) = let
-val
-s2e =
-s2hnf2exp (s2f)
+  val s2e = s2hnf2exp (s2f)
 in
 //
-case+
-s2e.s2exp_node of
-|
-S2Eapp
-(s2e_fun, s2es_arg) 
-when s2cstref_equ_exp
-(
-the_ptr_addr_type, s2e_fun
-) =>
-let
-  val-
-  list_cons (s2l, _) = s2es_arg in Some_vt(s2l)
-end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_ptr_addr_type, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_ptr_addr_type]
+
 //
 (* ****** ****** *)
 //
@@ -1135,7 +1130,7 @@ val s2c =
 //
 in
   s2exp_cstapp
-  (s2c, list_pair(s2e1, s2l2))
+  (s2c, glist_pair(s2e1, s2l2))
 end // end of [s2exp_ptr_addr_type]
 *)
 //
@@ -1223,7 +1218,7 @@ s2exp_arrpsz_vt0ype_int_vt0ype
   val ind = s2exp_int(s2i)
   val s2c = s2cstref_get_cst(the_arrpsz_vt0ype_int_vt0ype)
 in
-  s2exp_cstapp(s2c, list_pair(s2e, ind))
+  s2exp_cstapp(s2c, glist_pair(s2e, ind))
 end // end of [s2exp_list_vt0ype_int_vtype]
 
 (* ****** ****** *)
@@ -1236,7 +1231,7 @@ implement
 s2exp_list0_t0ype_type (s2e) = let
   val s2c = s2cstref_get_cst (the_list0_t0ype_type)
 in
-  s2exp_cstapp (s2c, list_sing (s2e))
+  s2exp_cstapp (s2c, glist_sing (s2e))
 end // end of [s2exp_list0_t0ype_type]
 *)
 
@@ -1245,14 +1240,6 @@ end // end of [s2exp_list0_t0ype_type]
 implement
 the_list_t0ype_int_type =
   s2cstref_make "list_t0ype_int_type"
-implement
-s2exp_list_t0ype_int_type
-  (s2e, s2i) = let
-  val ind = s2exp_int (s2i)
-  val s2c = s2cstref_get_cst (the_list_t0ype_int_type)
-in
-  s2exp_cstapp(s2c, list_pair(s2e,  ind))
-end // end of [s2exp_list_t0ype_int_type]
 
 implement
 the_list_vt0ype_int_vtype =
@@ -1263,7 +1250,7 @@ s2exp_list_vt0ype_int_vtype
   val ind = s2exp_int (s2i)
   val s2c = s2cstref_get_cst (the_list_vt0ype_int_vtype)
 in
-  s2exp_cstapp(s2c, list_pair(s2e, ind))
+  s2exp_cstapp(s2c, glist_pair(s2e, ind))
 end // end of [s2exp_list_vt0ype_int_vtype]
 
 (* ****** ****** *)
@@ -1284,27 +1271,24 @@ s2cstref_get_cst
 ) (* end of [val] *)
 //
 in
-  s2exp_cstapp(s2c, list_sing(s2e))
+  s2exp_cstapp(s2c, glist_sing(s2e))
 end // end of [s2exp_vbox_view_prop]
 //
 implement
 un_s2exp_vbox_view_prop
   (s2f) = let
-//
-val s2e = s2hnf2exp (s2f)
-//
+  val s2e = s2hnf2exp (s2f)
 in
 //
-case+ s2e.s2exp_node of
-| S2Eapp (s2e_fun, s2es_arg) 
-    when s2cstref_equ_exp (
-    the_vbox_view_prop, s2e_fun
-  ) => let
-    val-list_cons (s2e, _) = s2es_arg in Some_vt (s2e)
-  end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_vbox_view_prop, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_vbox_view_prop]
+
 //
 (* ****** ****** *)
 
@@ -1323,7 +1307,7 @@ s2cstref_get_cst
 ) (* end of [val] *)
 //
 in
-  s2exp_cstapp(s2c, list_sing (s2e))
+  s2exp_cstapp(s2c, glist_sing (s2e))
 end // end of [s2exp_ref_vt0ype_type]
 
 implement
@@ -1332,16 +1316,15 @@ un_s2exp_ref_vt0ype_type
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+ s2e.s2exp_node of
-| S2Eapp (s2e_fun, s2es_arg) 
-    when s2cstref_equ_exp (
-    the_ref_vt0ype_type, s2e_fun
-  ) => let
-    val-list_cons (s2e, _) = s2es_arg in Some_vt (s2e)
-  end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_ref_vt0ype_type, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_ref_vt0ype_type]
+
 
 (* ****** ****** *)
 //
@@ -1349,36 +1332,20 @@ implement
 the_lazy_t0ype_type =
   s2cstref_make "lazy_t0ype_type"
 implement
-s2exp_lazy_t0ype_type
-  (s2e) = let
-//
-val
-s2c =
-s2cstref_get_cst
-(
-  the_lazy_t0ype_type
-) (* end of [val] *)
-//
-in
-  s2exp_cstapp(s2c, list_sing(s2e))
-end // end of [s2exp_lazy_t0ype_type]
-//
-implement
 un_s2exp_lazy_t0ype_type
   (s2f) = let
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+ s2e.s2exp_node of
-| S2Eapp (s2e_fun, s2es_arg) 
-    when s2cstref_equ_exp (
-    the_lazy_t0ype_type, s2e_fun
-  ) => let
-    val-list_cons (s2e, _) = s2es_arg in Some_vt (s2e)
-  end // end of [S2Eapp when ...]
-| _ => None_vt ()
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_lazy_t0ype_type, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_lazy_t0ype_type]
+
 //
 (* ****** ****** *)
 //
@@ -1396,7 +1363,7 @@ s2cstref_get_cst
   (the_lazy_vt0ype_vtype)
 //
 in
-  s2exp_cstapp(s2c, list_sing(s2e))
+  s2exp_cstapp(s2c, glist_sing(s2e))
 end // end of [s2exp_lazy_vt0ype_vtype]
 //
 implement
@@ -1405,24 +1372,15 @@ un_s2exp_lazy_vt0ype_vtype
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+
-s2e.s2exp_node
-of // case+
-| S2Eapp
-  (
-    s2e_fun, s2es_arg
-  ) when
-    s2cstref_equ_exp
-  (
-    the_lazy_vt0ype_vtype, s2e_fun
-  ) => let
-    val-
-    list_cons
-      (s2e, _) = s2es_arg in Some_vt (s2e)
-  end // end of [S2Eapp when ...]
-| _ (* non-S2Eapp *) => None_vt((*void*))
+case+ s2exp_node_view (s2exp_node (s2e)) of
+| ~S2Eapp (s2e_fun, s2es_arg) =>
+    if s2cstref_equ_exp (the_lazy_vt0ype_vtype, s2e_fun)
+      then Some_vt (s2explst_head1 (s2es_arg)) else None_vt ()
+  // end of [S2Eapp]
+| v (*non-S2Eapp*) => (s2exp_node_view_free (v); None_vt ())
 //
 end // end of [un_s2exp_lazy_vt0ype_vtype]
+
 //
 (* ****** ****** *)
 //
@@ -1491,7 +1449,7 @@ s2c =
 s2cstref_get_cst(the_types_cons)
 //
 in
-  s2exp_cstapp(s2c, list_pair(s2e1, s2e2))
+  s2exp_cstapp(s2c, glist_pair(s2e1, s2e2))
 end // end of [s2exp_types_cons]
 
 (* ****** ****** *)
@@ -1502,15 +1460,16 @@ s2exp_types_list
 //
 fun
 auxlst(s2es: s2explst): s2exp =
-case+ s2es of
-| list_nil() =>
+case+ glist_view (s2es) of
+| ~GLnil() =>
   s2exp_types_nil()
-| list_cons(s2e, s2es) =>
+| ~GLcons(s2e, s2es) =>
   s2exp_types_cons(s2e, auxlst(s2es))
 //
 in
   s2exp_vararg(auxlst(s2es))
 end (* end of [s2exp_types_list] *)
+
 //
 (* ****** ****** *)
 //
@@ -1526,7 +1485,7 @@ s2c =
 s2cstref_get_cst(the_vcopyenv_view_view)
 //
 in
-  s2exp_cstapp(s2c, list_sing(s2e))
+  s2exp_cstapp(s2c, glist_sing(s2e))
 end // end of [s2exp_vcopyenv_v]
 //
 (* ****** ****** *)
@@ -1538,7 +1497,7 @@ implement
 s2exp_vcopyenv_vt (s2e) = let
   val s2c = s2cstref_get_cst (the_vcopyenv_vt0ype_vt0ype)
 in
-  s2exp_cstapp (s2c, list_sing (s2e))
+  s2exp_cstapp (s2c, glist_sing (s2e))
 end // end of [s2exp_vcopyenv_vt]
 
 (* ****** ****** *)
@@ -1561,7 +1520,7 @@ the_effwrt = s2cstref_make "effwrt"
 implement
 s2eff_hnfize (s2fe) = let
 //
-fun aux .<>.
+fun aux
 (
   s2fe: s2eff, s2e: s2exp
 ) : s2eff = let
@@ -1569,23 +1528,22 @@ fun aux .<>.
   val s2e = s2hnf2exp (s2f)
 in
 //
-case+
-s2e.s2exp_node of
+case+ s2exp_node_view (s2exp_node (s2e)) of
 //
-| S2Ecst (s2c) => (
-    case+ 0 of
-    | _ when s2cstref_equ_cst(the_effnil, s2c) => s2eff_effset(effset_nil)
-    | _ when s2cstref_equ_cst(the_effall, s2c) => s2eff_effset(effset_all)
-    | _ when s2cstref_equ_cst(the_effntm, s2c) => s2eff_effset(effset_ntm)
-    | _ when s2cstref_equ_cst(the_effexn, s2c) => s2eff_effset(effset_exn)
-    | _ when s2cstref_equ_cst(the_effref, s2c) => s2eff_effset(effset_ref)
-    | _ when s2cstref_equ_cst(the_effwrt, s2c) => s2eff_effset(effset_wrt)
-    | _ => s2fe
+| ~S2Ecst (s2c) => (
+    if s2cstref_equ_cst(the_effnil, s2c) then s2eff_effset(effset_nil)
+    else if s2cstref_equ_cst(the_effall, s2c) then s2eff_effset(effset_all)
+    else if s2cstref_equ_cst(the_effntm, s2c) then s2eff_effset(effset_ntm)
+    else if s2cstref_equ_cst(the_effexn, s2c) then s2eff_effset(effset_exn)
+    else if s2cstref_equ_cst(the_effref, s2c) then s2eff_effset(effset_ref)
+    else if s2cstref_equ_cst(the_effwrt, s2c) then s2eff_effset(effset_wrt)
+    else s2fe
   ) // end of [S2Ecst]
-| S2Evar (s2v) => s2fe
-| S2EVar (s2v) => s2fe
-| S2Eeff (s2fe) => s2fe
-| _ => let
+| ~S2Evar (s2v) => s2fe
+| ~S2EVar (s2v) => s2fe
+| ~S2Eeff (s2fe) => s2fe
+| v => let
+    val () = s2exp_node_view_free (v)
     val s2e = s2exp_errexp(s2rt_eff) in s2eff_exp(s2e)
   end // end of [_]
 //
@@ -1593,12 +1551,13 @@ end (* end of [aux] *)
 //
 in
 //
-case+ s2fe of
-| S2EFFset _ => s2fe
-| S2EFFexp(s2e) => aux (s2fe, s2e)
-| S2EFFadd _ => s2fe
+case+ s2eff_view (s2fe) of
+| ~S2EFFset _ => s2fe
+| ~S2EFFexp(s2e) => aux (s2fe, s2e)
+| ~S2EFFadd _ => s2fe
 //
 end // end of [s2eff_make_s2exp]
+
 
 (* ****** ****** *)
 
@@ -1656,10 +1615,10 @@ at_vt0ype_addr_view_assume
     s2exp_at(arg1, arg2)
   val s2e_def =
     s2exp_lam_srt
-    (s2t_def, '[s2v1, s2v2], s2f_at)
+    (s2t_def, glist_cons(s2v1, glist_sing(s2v2)), s2f_at)
   // end of [val]
 in
-  s2cst_set_def(s2c, Some(s2e_def))
+  s2cst_set_def(s2c, gopt_some<s2exp>(s2e_def))
 end // end of [at_vt0ype_addr_view_assume]
 
 (* ****** ****** *)
@@ -1697,9 +1656,9 @@ sizeof_t0ype_int_assume
   s2t_def = s2cst_get_srt(s2c)
   val
   s2e_def =
-  s2exp_lam_srt(s2t_def, '[s2v], s2size)
+  s2exp_lam_srt(s2t_def, glist_sing(s2v), s2size)
 in
-  s2cst_set_def(s2c, Some s2e_def)
+  s2cst_set_def(s2c, gopt_some<s2exp>(s2e_def))
 end // end of [sizeof_t0ype_int_assume]
 
 (* ****** ****** *)
@@ -1732,10 +1691,10 @@ val s2t_def = s2cst_get_srt (s2c)
 val s2v = s2var_make_srt (s2t)
 val arg = s2exp_var (s2v)
 val s2e_body = s2exp_invar (arg)
-val s2e_def = s2exp_lam_srt (s2t_def, '[s2v], s2e_body)
+val s2e_def = s2exp_lam_srt (s2t_def, glist_sing(s2v), s2e_body)
 //
 in
-  s2cst_set_def (s2c, Some s2e_def)
+  s2cst_set_def (s2c, gopt_some<s2exp>(s2e_def))
 end // end of [invar_assume]
 
 (* ****** ****** *)

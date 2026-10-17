@@ -33,62 +33,64 @@
 //
 (* ****** ****** *)
 
-abstype symbol_type // boxed
+staload "libats/SATS/arena.sats"
+
+abstype symbol_type = ptr // boxed
 typedef symbol = symbol_type
-typedef symbolist = List (symbol)
-typedef symbolopt = Option (symbol)
+typedef symbolist = glist(symbol)
+typedef symbolopt = gopt(symbol)
 
 (* ****** ****** *)
 
-val symbol_empty : symbol
+val symbol_empty : symbol = "ext#patsopt_symbol_empty"
 
 (* ****** ****** *)
 //
-val symbol_NEG : symbol // ~
+val symbol_NEG : symbol = "ext#patsopt_symbol_NEG" // ~
 //
-val symbol_ADD : symbol // +
-val symbol_SUB : symbol // -
-val symbol_MUL : symbol // *
-val symbol_DIV : symbol // /
+val symbol_ADD : symbol = "ext#patsopt_symbol_ADD" // +
+val symbol_SUB : symbol = "ext#patsopt_symbol_SUB" // -
+val symbol_MUL : symbol = "ext#patsopt_symbol_MUL" // *
+val symbol_DIV : symbol = "ext#patsopt_symbol_DIV" // /
 //
-val symbol_AMPERSAND : symbol // & // read-only
-val symbol_AMPERBANG : symbol // &! // read-write
-val symbol_AMPERQMARK : symbol // &? // write-only
+val symbol_AMPERSAND : symbol = "ext#patsopt_symbol_AMPERSAND" // & // read-only
+val symbol_AMPERBANG : symbol = "ext#patsopt_symbol_AMPERBANG" // &! // read-write
+val symbol_AMPERQMARK : symbol = "ext#patsopt_symbol_AMPERQMARK" // &? // write-only
 //
-val symbol_AT : symbol // @
-val symbol_BACKSLASH : symbol // \
-val symbol_BANG : symbol // !
-val symbol_COLONEQ : symbol // := // assign
-val symbol_COLONEQCOLON : symbol // :=: // exhange
+val symbol_AT : symbol = "ext#patsopt_symbol_AT" // @
+val symbol_BACKSLASH : symbol = "ext#patsopt_symbol_BACKSLASH" // \
+val symbol_BANG : symbol = "ext#patsopt_symbol_BANG" // !
+val symbol_COLONEQ : symbol = "ext#patsopt_symbol_COLONEQ" // := // assign
+val symbol_COLONEQCOLON : symbol = "ext#patsopt_symbol_COLONEQCOLON" // :=: // exhange
 //
-val symbol_GT : symbol // >
-val symbol_GTEQ : symbol // >=
-val symbol_LT : symbol // <
-val symbol_LTEQ : symbol // <=
+val symbol_GT : symbol = "ext#patsopt_symbol_GT" // >
+val symbol_GTEQ : symbol = "ext#patsopt_symbol_GTEQ" // >=
+val symbol_LT : symbol = "ext#patsopt_symbol_LT" // <
+val symbol_LTEQ : symbol = "ext#patsopt_symbol_LTEQ" // <=
 //
-val symbol_EQ : symbol // =
-val symbol_EQEQ : symbol // ==
-val symbol_LTGT : symbol // <>
-val symbol_BANGEQ : symbol // !=
+val symbol_EQ : symbol = "ext#patsopt_symbol_EQ" // =
+val symbol_EQEQ : symbol = "ext#patsopt_symbol_EQEQ" // ==
+val symbol_LTGT : symbol = "ext#patsopt_symbol_LTGT" // <>
+val symbol_BANGEQ : symbol = "ext#patsopt_symbol_BANGEQ" // !=
 //
-val symbol_GTLT : symbol // ><
+val symbol_GTLT : symbol = "ext#patsopt_symbol_GTLT" // ><
 //
-val symbol_GTGT : symbol // >>
-val symbol_LTLT : symbol // <<
+val symbol_GTGT : symbol = "ext#patsopt_symbol_GTGT" // >>
+val symbol_LTLT : symbol = "ext#patsopt_symbol_LTLT" // <<
 //
-val symbol_LAND : symbol // &&
-val symbol_LOR : symbol // ||
-val symbol_LRBRACKETS : symbol // []
-val symbol_MINUSGT : symbol // ->
-val symbol_QMARK : symbol // ?
-val symbol_QMARKBANG : symbol // ?!
-val symbol_TILDE : symbol // ~
-val symbol_UNDERSCORE : symbol // _
+val symbol_LAND : symbol = "ext#patsopt_symbol_LAND" // &&
+val symbol_LOR : symbol = "ext#patsopt_symbol_LOR" // ||
+val symbol_LRBRACKETS : symbol = "ext#patsopt_symbol_LRBRACKETS" // []
+val symbol_MINUSGT : symbol = "ext#patsopt_symbol_MINUSGT" // ->
+val symbol_QMARK : symbol = "ext#patsopt_symbol_QMARK" // ?
+val symbol_QMARKBANG : symbol = "ext#patsopt_symbol_QMARKBANG" // ?!
+val symbol_TILDE : symbol = "ext#patsopt_symbol_TILDE" // ~
+val symbol_UNDERSCORE : symbol = "ext#patsopt_symbol_UNDERSCORE" // _
 //
-val symbol_VBOX : symbol // for vbox pattern
+val symbol_VBOX : symbol = "ext#patsopt_symbol_VBOX" // for vbox pattern
 //
-val symbol_LAMAT : symbol // lam@
-val symbol_LLAMAT : symbol // llam@
+val symbol_LAMAT : symbol = "ext#patsopt_symbol_LAMAT" // lam@
+val symbol_LLAMAT : symbol = "ext#patsopt_symbol_LLAMAT" // llam@
 (*
 //
 // YD-2018-07-07:
@@ -101,78 +103,78 @@ val symbol_REFAT : symbol // ref@
 //
 // HX: for pre-defined predicative sorts
 //
-val symbol_INT : symbol
-val symbol_BOOL : symbol
-val symbol_ADDR : symbol
+val symbol_INT : symbol = "ext#patsopt_symbol_INT"
+val symbol_BOOL : symbol = "ext#patsopt_symbol_BOOL"
+val symbol_ADDR : symbol = "ext#patsopt_symbol_ADDR"
 //
 (*
 val symbol_CHAR : symbol
 *)
 //
-val symbol_REAL : symbol
+val symbol_REAL : symbol = "ext#patsopt_symbol_REAL"
 //
-val symbol_FLOAT : symbol
-val symbol_STRING : symbol
+val symbol_FLOAT : symbol = "ext#patsopt_symbol_FLOAT"
+val symbol_STRING : symbol = "ext#patsopt_symbol_STRING"
 //
-val symbol_CLS : symbol // for nominal classes
+val symbol_CLS : symbol = "ext#patsopt_symbol_CLS" // for nominal classes
 //
-val symbol_EFF : symbol // for sets of effects
+val symbol_EFF : symbol = "ext#patsopt_symbol_EFF" // for sets of effects
 //
-val symbol_TKIND : symbol // HX-2012-05-23: for template args
+val symbol_TKIND : symbol = "ext#patsopt_symbol_TKIND" // HX-2012-05-23: for template args
 //
 // HX: for pre-defined impredicative sorts
 //
-val symbol_PROP : symbol
-val symbol_TYPE : symbol
-val symbol_T0YPE : symbol
-val symbol_VIEW : symbol
-val symbol_VTYPE : symbol
-val symbol_VT0YPE : symbol
-val symbol_VIEWTYPE : symbol
-val symbol_VIEWT0YPE : symbol
+val symbol_PROP : symbol = "ext#patsopt_symbol_PROP"
+val symbol_TYPE : symbol = "ext#patsopt_symbol_TYPE"
+val symbol_T0YPE : symbol = "ext#patsopt_symbol_T0YPE"
+val symbol_VIEW : symbol = "ext#patsopt_symbol_VIEW"
+val symbol_VTYPE : symbol = "ext#patsopt_symbol_VTYPE"
+val symbol_VT0YPE : symbol = "ext#patsopt_symbol_VT0YPE"
+val symbol_VIEWTYPE : symbol = "ext#patsopt_symbol_VIEWTYPE"
+val symbol_VIEWT0YPE : symbol = "ext#patsopt_symbol_VIEWT0YPE"
 //
-val symbol_TYPES : symbol
+val symbol_TYPES : symbol = "ext#patsopt_symbol_TYPES"
 //
 (* ****** ****** *)
 
-val symbol_TRUE_BOOL : symbol
-and symbol_FALSE_BOOL : symbol
-
-(* ****** ****** *)
-
-val symbol_DEFINED : symbol // defined
-val symbol_UNDEFINED : symbol // undefined
+val symbol_TRUE_BOOL : symbol = "ext#patsopt_symbol_TRUE_BOOL"
+val symbol_FALSE_BOOL : symbol = "ext#patsopt_symbol_FALSE_BOOL"
 
 (* ****** ****** *)
 
-val symbol_TUPZ : symbol // TUPSIZE // for syndef
+val symbol_DEFINED : symbol = "ext#patsopt_symbol_DEFINED" // defined
+val symbol_UNDEFINED : symbol = "ext#patsopt_symbol_UNDEFINED" // undefined
 
 (* ****** ****** *)
 
-val symbol_CAR : symbol // car
-val symbol_CDR : symbol // mfcdr
-val symbol_ISLIST : symbol // islist
-val symbol_ISCONS : symbol // iscons
-val symbol_ISNIL : symbol  // islist
+val symbol_TUPZ : symbol = "ext#patsopt_symbol_TUPZ" // TUPSIZE // for syndef
+
+(* ****** ****** *)
+
+val symbol_CAR : symbol = "ext#patsopt_symbol_CAR" // car
+val symbol_CDR : symbol = "ext#patsopt_symbol_CDR" // mfcdr
+val symbol_ISLIST : symbol = "ext#patsopt_symbol_ISLIST" // islist
+val symbol_ISCONS : symbol = "ext#patsopt_symbol_ISCONS" // iscons
+val symbol_ISNIL : symbol = "ext#patsopt_symbol_ISNIL"  // islist
 
 (* ****** ****** *)
 //
-val symbol__STDIN__ : symbol
-val symbol__STRING__ : symbol
+val symbol__STDIN__ : symbol = "ext#patsopt_symbol__STDIN__"
+val symbol__STRING__ : symbol = "ext#patsopt_symbol__STRING__"
 //
 (* ****** ****** *)
 //
-val symbol_PATSHOME : symbol
+val symbol_PATSHOME : symbol = "ext#patsopt_symbol_PATSHOME"
 //
-val symbol_PATSCONTRIB : symbol
+val symbol_PATSCONTRIB : symbol = "ext#patsopt_symbol_PATSCONTRIB"
 //
-val symbol_PATSHOMELOCS : symbol
+val symbol_PATSHOMELOCS : symbol = "ext#patsopt_symbol_PATSHOMELOCS"
 //
-val symbol_PATSRELOCROOT : symbol
+val symbol_PATSRELOCROOT : symbol = "ext#patsopt_symbol_PATSRELOCROOT"
 //
 (* ****** ****** *)
 //
-val symbol_ATS_PACKNAME : symbol
+val symbol_ATS_PACKNAME : symbol = "ext#patsopt_symbol_ATS_PACKNAME"
 //
 (*
 //
@@ -181,14 +183,14 @@ val symbol_ATS_PACKNAME : symbol
 //
 val symbol_ATS_STALOADFLAG : symbol
 *)
-val symbol_ATS_DYNLOADFLAG : symbol
+val symbol_ATS_DYNLOADFLAG : symbol = "ext#patsopt_symbol_ATS_DYNLOADFLAG"
 //
-val symbol_ATS_DYNLOADNAME : symbol
+val symbol_ATS_DYNLOADNAME : symbol = "ext#patsopt_symbol_ATS_DYNLOADNAME"
 //
-val symbol_ATS_MAINATSFLAG : symbol
+val symbol_ATS_MAINATSFLAG : symbol = "ext#patsopt_symbol_ATS_MAINATSFLAG"
 //
-val symbol_ATS_EXTERN_PREFIX : symbol
-val symbol_ATS_STATIC_PREFIX : symbol
+val symbol_ATS_EXTERN_PREFIX : symbol = "ext#patsopt_symbol_ATS_EXTERN_PREFIX"
+val symbol_ATS_STATIC_PREFIX : symbol = "ext#patsopt_symbol_ATS_STATIC_PREFIX"
 //
 (* ****** ****** *)
 //

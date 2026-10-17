@@ -346,5 +346,5 @@ This article is written by <a href="http://www.cs.bu.edu/~hwxi/">Hongwei Xi</a>.
 </html>
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

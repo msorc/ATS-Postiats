@@ -15,6 +15,9 @@
 #staload _ =
 "./../DATS/basis_intset.dats"
 //
+// HX-2026-10: intsets are in the global arena
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
 overload + with intset_add_elt
@@ -59,13 +62,18 @@ val () = println! ("ys = (", ys, ")")
 val () = println! ("xs * ys = (", xs * ys, ")")
 val () = println! ("xs + ys = (", xs + ys, ")")
 //
-val () = intset_foreach_cloref(xs, lam(x) => println! ("x = ", x))
-val () = intset_foreach_cloref(ys, lam(y) => println! ("y = ", y))
+var fx = lam@(x: natLt(N)): void => println! ("x = ", x)
+var fy = lam@(y: natLt(N)): void => println! ("y = ", y)
+var fxy =
+lam@(x: natLt(N), y: natLt(N)): void => println! ("(x, y) = (", x, ", ", y, ")")
 //
-val () = cintset_foreach_cloref(N, xs, lam(x) => println! ("x = ", x))
-val () = cintset_foreach_cloref(N, ys, lam(y) => println! ("y = ", y))
+val () = intset_foreach_clo(xs, fx)
+val () = intset_foreach_clo(ys, fy)
 //
-val () = intset2_foreach_cloref(xs, ys, lam(x, y) => println! ("(x, y) = (", x, ", ", y, ")"))
+val () = cintset_foreach_clo(N, xs, fx)
+val () = cintset_foreach_clo(N, ys, fy)
+//
+val () = intset2_foreach_clo(xs, ys, fxy)
 //
 } (* end of [main0] *)
 

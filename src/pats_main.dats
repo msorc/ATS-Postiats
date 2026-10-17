@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -33,31 +33,34 @@
 //
 (* ****** ****** *)
 //
-staload
-STDIO =
-"libc/SATS/stdio.sats"
-//
-(* ****** ****** *)
-//
-staload
-ATSPRE =
-  "./pats_atspre.dats"
-//
-(* ****** ****** *)
-//
-staload
-UN =
-"prelude/SATS/unsafe.sats"
+// HX-2026-10: no GC (ATS2 port of src/pats_main.dats, the driver of patsopt;
+// see PORTING.md, "Driver and ccomp integration")
 //
 (* ****** ****** *)
 
-staload
-ERR = "./pats_error.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
-staload
-GLOB = "./pats_global.sats"
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+#include "./mylibies.hats"
+
+(* ****** ****** *)
+
+staload ERR = "./pats_error.sats"
+staload _(*ERR*) = "./pats_error.dats"
+
+(* ****** ****** *)
+
+staload GLOB = "./pats_global.sats"
+
+(* ****** ****** *)
+
+staload FIL = "./pats_filename.sats"
 
 (* ****** ****** *)
 //
@@ -70,13 +73,9 @@ isdebug() =
   (debug_flag_get() > 0)
 //
 (* ****** ****** *)
-//
+
 staload "./pats_comarg.sats"
-//
-(*
-overload print with print_comarg
-*)
-//
+
 (* ****** ****** *)
 
 staload "./pats_lexing.sats"
@@ -90,10 +89,8 @@ staload "./pats_jsonize.sats"
 
 (* ****** ****** *)
 
-staload
-DEPGEN = "./pats_depgen.sats"
-staload
-TAGGEN = "./pats_taggen.sats"
+staload DEPGEN = "./pats_depgen.sats"
+staload TAGGEN = "./pats_taggen.sats"
 
 (* ****** ****** *)
 
@@ -102,10 +99,8 @@ staload "./pats_dynexp1.sats"
 
 (* ****** ****** *)
 //
-staload
-TRANS1 = "./pats_trans1.sats"
-staload
-TRENV1 = "./pats_trans1_env.sats"
+staload TRANS1 = "./pats_trans1.sats"
+staload TRENV1 = "./pats_trans1_env.sats"
 //
 (* ****** ****** *)
 
@@ -115,17 +110,13 @@ staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
 
-staload
-TRANS2 = "./pats_trans2.sats"
-staload
-TRENV2 = "./pats_trans2_env.sats"
+staload TRANS2 = "./pats_trans2.sats"
+staload TRENV2 = "./pats_trans2_env.sats"
 
 (* ****** ****** *)
 
-staload
-CODEGEN2 = "./pats_codegen2.sats"
-staload
-JSONIZE2 = "./pats_jsonize_synent2.sats"
+staload CODEGEN2 = "./pats_codegen2.sats"
+staload JSONIZE2 = "./pats_jsonize_synent2.sats"
 
 (* ****** ****** *)
 
@@ -133,15 +124,12 @@ staload "./pats_dynexp3.sats"
 
 (* ****** ****** *)
 
-staload
-TRANS3 = "./pats_trans3.sats"
-staload
-TRENV3 = "./pats_trans3_env.sats"
+staload TRANS3 = "./pats_trans3.sats"
+staload TRENV3 = "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
-staload
-CNSTR3 = "./pats_constraint3.sats"
+staload CNSTR3 = "./pats_constraint3.sats"
 
 (* ****** ****** *)
 //
@@ -157,276 +145,230 @@ staload TYER = "./pats_typerase.sats"
 staload CCOMP = "./pats_ccomp.sats"
 
 (* ****** ****** *)
+#ifdef PATSOPT_MAIN_NONE
 //
-// HX-2015-10-02:
+// HX-2026-10: the library flavour (ATS_DYNLOADNAME; ATS_DYNLOADFUN_NAME in ATS1): the
+// initialization of every module is the C function [libatsopt_dynloadall].
+// The flag of this module is defined by the [dynload] of libatsopt_ext.dats.
 //
-#define
-ATS_DYNLOADFLAG 0 // manual dynloading
-#define
-ATS_DYNLOADFUN_NAME "libatsopt_dynloadall"
+#define ATS_DYNLOADNAME "libatsopt_dynloadall"
 //
-(* ****** ****** *)
+#endif // ifdef(PATSOPT_MAIN_NONE)
 //
-dynload "pats_error.dats"
-//
-dynload "pats_intinf.dats"
-//
-dynload "pats_counter.dats"
-//
-dynload "pats_utils.dats"
-dynload "pats_global.dats"
-//
-dynload "pats_basics.dats"
-//
-dynload "pats_comarg.dats"
-//
-dynload "pats_stamp.dats"
-//
-dynload "pats_symbol.dats"
-//
-dynload "pats_filename.dats"
-//
-dynload "pats_location.dats"
-//
-dynload "pats_jsonize.dats"
-//
-dynload "pats_errmsg.dats"
+// HX-2026-10:
+// The modules are initialized by the dynload of this file (rule 17 of
+// PORTING.md: no [#define ATS_DYNLOADFLAG 0] here); the order is the
+// one of PORTING.md ("Driver and ccomp integration"). The files that
+// are only included by another one ([pats_lintprgm_solve],
+// [pats_lintprgm_myint_{gmp,int}]) have no initialization of their own.
 //
 (* ****** ****** *)
-
-dynload "pats_reader.dats"
-dynload "pats_lexbuf.dats"
-dynload "pats_lexing.dats"
-dynload "pats_lexing_error.dats"
-dynload "pats_lexing_print.dats"
-dynload "pats_lexing_token.dats"
-
-dynload "pats_label.dats"
-dynload "pats_effect.dats"
-dynload "pats_fixity_prec.dats"
-dynload "pats_fixity_fxty.dats"
-dynload "pats_syntax.dats"
-dynload "pats_syntax_print.dats"
-dynload "pats_depgen.dats"
-dynload "pats_taggen.dats"
-
-dynload "pats_tokbuf.dats"
-dynload "pats_parsing.dats"
-dynload "pats_parsing_util.dats"
-dynload "pats_parsing_error.dats"
-dynload "pats_parsing_kwds.dats"
-dynload "pats_parsing_base.dats"
-dynload "pats_parsing_e0xp.dats"
-dynload "pats_parsing_sort.dats"
-dynload "pats_parsing_staexp.dats"
-dynload "pats_parsing_p0at.dats"
-dynload "pats_parsing_dynexp.dats"
-dynload "pats_parsing_decl.dats"
-dynload "pats_parsing_toplevel.dats"
 //
-dynload "pats_symmap.dats"
-dynload "pats_symenv.dats"
+dynload "./pats_error.dats"
+dynload "./pats_basics.dats"
+dynload "./pats_utils.dats"
+dynload "./pats_global.dats"
+dynload "./pats_intinf.dats"
+dynload "./pats_counter.dats"
+dynload "./pats_stamp.dats"
+dynload "./pats_errmsg.dats"
+dynload "./pats_symbol.dats"
+dynload "./pats_label.dats"
+dynload "./pats_filename.dats"
+dynload "./pats_location.dats"
 //
-dynload "pats_staexp1.dats"
-dynload "pats_staexp1_print.dats"
-dynload "pats_dynexp1.dats"
-dynload "pats_dynexp1_print.dats"
+dynload "./pats_effect.dats"
+dynload "./pats_fixity_prec.dats"
+dynload "./pats_fixity_fxty.dats"
 //
-dynload "pats_trans1_env.dats"
+dynload "./pats_reader.dats"
+dynload "./pats_lexbuf.dats"
+dynload "./pats_lexing_token.dats"
+dynload "./pats_lexing.dats"
+dynload "./pats_lexing_error.dats"
+dynload "./pats_lexing_print.dats"
+dynload "./pats_tokbuf.dats"
 //
-dynload "pats_e1xpval.dats"
-dynload "pats_e1xpval_error.dats"
+dynload "./pats_syntax.dats"
+dynload "./pats_syntax_print.dats"
 //
-dynload "pats_filename_reloc.dats"
+dynload "./pats_staexp1.dats"
+dynload "./pats_staexp1_print.dats"
+dynload "./pats_dynexp1.dats"
+dynload "./pats_dynexp1_print.dats"
 //
-dynload "pats_trans1_e0xp.dats"
-dynload "pats_trans1_error.dats"
-dynload "pats_trans1_effect.dats"
-dynload "pats_trans1_sort.dats"
-dynload "pats_trans1_staexp.dats"
-dynload "pats_trans1_p0at.dats"
-dynload "pats_trans1_syndef.dats"
-dynload "pats_trans1_dynexp.dats"
-dynload "pats_trans1_decl.dats"
+dynload "./pats_symmap.dats"
+dynload "./pats_symenv.dats"
 //
-dynload "pats_staexp2.dats"
-dynload "pats_stacst2.dats"
+dynload "./pats_parsing.dats"
+dynload "./pats_parsing_util.dats"
+dynload "./pats_parsing_error.dats"
+dynload "./pats_parsing_kwds.dats"
+dynload "./pats_parsing_base.dats"
+dynload "./pats_parsing_e0xp.dats"
+dynload "./pats_parsing_sort.dats"
+dynload "./pats_parsing_staexp.dats"
+dynload "./pats_parsing_p0at.dats"
+dynload "./pats_parsing_dynexp.dats"
+dynload "./pats_parsing_decl.dats"
+dynload "./pats_parsing_toplevel.dats"
 //
-dynload "pats_staexp2_print.dats"
-dynload "pats_staexp2_pprint.dats"
+dynload "./pats_trans1_env.dats"
+dynload "./pats_e1xpval.dats"
+dynload "./pats_e1xpval_error.dats"
+dynload "./pats_trans1_e0xp.dats"
+dynload "./pats_trans1_error.dats"
+dynload "./pats_trans1_effect.dats"
+dynload "./pats_trans1_sort.dats"
+dynload "./pats_trans1_staexp.dats"
+dynload "./pats_trans1_p0at.dats"
+dynload "./pats_trans1_syndef.dats"
+dynload "./pats_trans1_dynexp.dats"
+dynload "./pats_trans1_decl.dats"
+dynload "./pats_filename_reloc.dats"
 //
-dynload "pats_staexp2_sort.dats"
+dynload "./pats_jsonize.dats"
+dynload "./pats_depgen.dats"
+dynload "./pats_taggen.dats"
+dynload "./pats_comarg.dats"
 //
-dynload "pats_staexp2_scst.dats"
-dynload "pats_staexp2_svar.dats"
-dynload "pats_staexp2_svvar.dats"
+dynload "./pats_avlmap.dats"
+dynload "./pats_staexp2_sort.dats"
+dynload "./pats_staexp2.dats"
+dynload "./pats_staexp2_scst.dats"
+dynload "./pats_staexp2_svar.dats"
+dynload "./pats_staexp2_svvar.dats"
+dynload "./pats_staexp2_dcon.dats"
+dynload "./pats_staexp2_hole.dats"
+dynload "./pats_staexp2_ctxt.dats"
+dynload "./pats_staexp2_error.dats"
+dynload "./pats_staexp2_print.dats"
+dynload "./pats_staexp2_pprint.dats"
+dynload "./pats_staexp2_szexp.dats"
+dynload "./pats_staexp2_skexp.dats"
+dynload "./pats_staexp2_util1.dats"
+dynload "./pats_staexp2_util2.dats"
+dynload "./pats_staexp2_util3.dats"
+dynload "./pats_stacst2.dats"
+dynload "./pats_namespace.dats"
 //
-dynload "pats_staexp2_hole.dats"
-dynload "pats_staexp2_ctxt.dats"
+dynload "./pats_dynexp2.dats"
+dynload "./pats_dyncst2.dats"
+dynload "./pats_dynexp2_dcst.dats"
+dynload "./pats_dynexp2_dmac.dats"
+dynload "./pats_dynexp2_dvar.dats"
+dynload "./pats_dynexp2_print.dats"
+dynload "./pats_dynexp2_util.dats"
 //
-dynload "pats_staexp2_dcon.dats"
+dynload "./pats_trans2_env.dats"
+dynload "./pats_trans2_error.dats"
+dynload "./pats_trans2_sort.dats"
+dynload "./pats_trans2_staexp.dats"
+dynload "./pats_trans2_p1at.dats"
+dynload "./pats_trans2_dynexp.dats"
+dynload "./pats_trans2_impdec.dats"
+dynload "./pats_trans2_decl.dats"
 //
-dynload "pats_staexp2_skexp.dats"
-dynload "pats_staexp2_szexp.dats"
+dynload "./pats_staexp2_solve.dats"
+dynload "./pats_dynexp2_mapgen.dats"
+dynload "./pats_patcst2.dats"
 //
-dynload "pats_staexp2_util1.dats"
-dynload "pats_staexp2_util2.dats"
-dynload "pats_staexp2_util3.dats"
+dynload "./pats_codegen2.dats"
+dynload "./pats_codegen2_util.dats"
+dynload "./pats_codegen2_absrec.dats"
+dynload "./pats_codegen2_datype.dats"
+dynload "./pats_codegen2_fprint.dats"
 //
-dynload "pats_staexp2_error.dats"
-dynload "pats_staexp2_solve.dats"
+dynload "./pats_dmacro2.dats"
+dynload "./pats_dmacro2_eval0.dats"
+dynload "./pats_dmacro2_eval1.dats"
+dynload "./pats_dmacro2_print.dats"
 //
-dynload "pats_patcst2.dats"
+dynload "./pats_trans3_error.dats"
+dynload "./pats_dynexp3.dats"
+dynload "./pats_dynexp3_print.dats"
+dynload "./pats_trans3_env.dats"
+dynload "./pats_trans3_env_svar.dats"
+dynload "./pats_trans3_env_scst.dats"
+dynload "./pats_trans3_env_termet.dats"
+dynload "./pats_trans3_env_effect.dats"
+dynload "./pats_trans3_env_lamlp.dats"
+dynload "./pats_trans3_env_print.dats"
+dynload "./pats_trans3_env_pfman.dats"
+dynload "./pats_trans3_env_dvar.dats"
+dynload "./pats_trans3_env_lstate.dats"
+dynload "./pats_trans3_syncst.dats"
+dynload "./pats_trans3_util.dats"
+dynload "./pats_trans3_dynexp_up.dats"
+dynload "./pats_trans3_dynexp_dn.dats"
+dynload "./pats_trans3_appsym.dats"
+dynload "./pats_trans3_caseof.dats"
+dynload "./pats_trans3_patcon.dats"
+dynload "./pats_trans3_p2at.dats"
+dynload "./pats_trans3_selab.dats"
+dynload "./pats_trans3_fldfrat.dats"
+dynload "./pats_trans3_lvalres.dats"
+dynload "./pats_trans3_ptrof.dats"
+dynload "./pats_trans3_viewat.dats"
+dynload "./pats_trans3_deref.dats"
+dynload "./pats_trans3_assgn.dats"
+dynload "./pats_trans3_xchng.dats"
+dynload "./pats_trans3_looping.dats"
+dynload "./pats_trans3_decl.dats"
 //
-dynload "pats_dynexp2.dats"
-dynload "pats_dyncst2.dats"
+dynload "./pats_lintprgm.dats"
+dynload "./pats_lintprgm_print.dats"
+dynload "./pats_lintprgm_myint.dats"
 //
-dynload "pats_dynexp2_print.dats"
+dynload "./pats_constraint3.dats"
+dynload "./pats_constraint3_print.dats"
+dynload "./pats_constraint3_icnstr.dats"
+dynload "./pats_constraint3_simplify.dats"
+dynload "./pats_constraint3_solve.dats"
+dynload "./pats_constraint3_init.dats"
+dynload "./pats_constraint3_mapgen.dats"
+dynload "./pats_constraint3_jsonize.dats"
+dynload "./pats_jsonize_synent2.dats"
 //
-dynload "pats_dynexp2_dcst.dats"
-dynload "pats_dynexp2_dvar.dats"
-dynload "pats_dynexp2_dmac.dats"
+dynload "./pats_histaexp.dats"
+dynload "./pats_histaexp_print.dats"
+dynload "./pats_histaexp_funlab.dats"
 //
-dynload "pats_dynexp2_util.dats"
+dynload "./pats_hidynexp.dats"
+dynload "./pats_hidynexp_print.dats"
+dynload "./pats_hidynexp_util.dats"
 //
-dynload "pats_dynexp2_mapgen.dats"
+dynload "./pats_typerase_error.dats"
+dynload "./pats_typerase_staexp.dats"
+dynload "./pats_typerase_dynexp.dats"
+dynload "./pats_typerase_decl.dats"
 //
-dynload "pats_namespace.dats"
-//
-dynload "pats_trans2_env.dats"
-dynload "pats_trans2_error.dats"
-dynload "pats_trans2_sort.dats"
-dynload "pats_trans2_staexp.dats"
-dynload "pats_trans2_p1at.dats"
-dynload "pats_trans2_dynexp.dats"
-dynload "pats_trans2_impdec.dats"
-dynload "pats_trans2_decl.dats"
-//
-dynload "pats_codegen2.dats"
-dynload "pats_codegen2_util.dats"
-dynload "pats_codegen2_absrec.dats"
-dynload "pats_codegen2_datype.dats"
-dynload "pats_codegen2_fprint.dats"
-//
-dynload "pats_jsonize_synent2.dats"
-//
-dynload "pats_dynexp3.dats"
-dynload "pats_dynexp3_print.dats"
-//
-dynload "pats_trans3_util.dats"
-dynload "pats_trans3_error.dats"
-//
-dynload "pats_trans3_env.dats"
-dynload "pats_trans3_env_print.dats"
-dynload "pats_trans3_env_scst.dats"
-dynload "pats_trans3_env_svar.dats"
-dynload "pats_trans3_env_termet.dats"
-dynload "pats_trans3_env_effect.dats"
-dynload "pats_trans3_env_dvar.dats"
-dynload "pats_trans3_env_lamlp.dats"
-dynload "pats_trans3_env_pfman.dats"
-dynload "pats_trans3_env_lstate.dats"
-//
-dynload "pats_dmacro2.dats"
-dynload "pats_dmacro2_print.dats"
-dynload "pats_dmacro2_eval0.dats"
-dynload "pats_dmacro2_eval1.dats"
-//
-dynload "pats_trans3_p2at.dats"
-dynload "pats_trans3_patcon.dats"
-dynload "pats_trans3_syncst.dats"
-dynload "pats_trans3_dynexp_up.dats"
-dynload "pats_trans3_dynexp_dn.dats"
-dynload "pats_trans3_appsym.dats"
-dynload "pats_trans3_caseof.dats"
-dynload "pats_trans3_selab.dats"
-dynload "pats_trans3_ptrof.dats"
-dynload "pats_trans3_viewat.dats"
-dynload "pats_trans3_deref.dats"
-dynload "pats_trans3_assgn.dats"
-dynload "pats_trans3_xchng.dats"
-dynload "pats_trans3_lvalres.dats"
-dynload "pats_trans3_fldfrat.dats"
-dynload "pats_trans3_looping.dats"
-dynload "pats_trans3_decl.dats"
-//
-dynload "pats_lintprgm.dats"
-dynload "pats_lintprgm_print.dats"
-(*
-//
-// HX: ATS_DYNLOADFLAG set to 0
-//
-dynload pats_lintprgm_myint_int.dats
-dynload pats_lintprgm_myint_gmp.dats
-*)
-dynload "pats_lintprgm_solve.dats"
-//
-dynload "pats_constraint3.dats"
-//
-dynload "pats_constraint3_print.dats"
-//
-dynload "pats_constraint3_mapgen.dats"
-dynload "pats_constraint3_jsonize.dats"
-//
-dynload "pats_constraint3_init.dats"
-dynload "pats_constraint3_simplify.dats"
-dynload "pats_constraint3_icnstr.dats"
-dynload "pats_constraint3_solve.dats"
-//
-dynload "pats_histaexp.dats"
-dynload "pats_histaexp_print.dats"
-dynload "pats_histaexp_funlab.dats"
-//
-dynload "pats_hidynexp.dats"
-dynload "pats_hidynexp_print.dats"
-dynload "pats_hidynexp_util.dats"
-//
-dynload "pats_typerase_error.dats"
-dynload "pats_typerase_staexp.dats"
-dynload "pats_typerase_dynexp.dats"
-dynload "pats_typerase_decl.dats"
-//
-dynload "pats_ccomp.dats"
-dynload "pats_ccomp_print.dats"
-//
-dynload "pats_ccomp_hitype.dats"
-//
-dynload "pats_ccomp_tmplab.dats"
-dynload "pats_ccomp_tmpvar.dats"
-//
-dynload "pats_ccomp_d2env.dats"
-//
-dynload "pats_ccomp_funlab.dats"
-dynload "pats_ccomp_funent.dats"
-//
-dynload "pats_ccomp_util.dats"
-//
-dynload "pats_ccomp_ccompenv.dats"
-dynload "pats_ccomp_instrseq.dats"
-//
-dynload "pats_ccomp_hipat.dats"
-//
-dynload "pats_ccomp_dynexp.dats"
-//
-dynload "pats_ccomp_caseof.dats"
-dynload "pats_ccomp_claulst.dats"
-//
-dynload "pats_ccomp_lazyeval.dats"
-//
-dynload "pats_ccomp_trywith.dats"
-//
-dynload "pats_ccomp_looping.dats"
-//
-dynload "pats_ccomp_decl.dats"
-//
-dynload "pats_ccomp_subst.dats"
-dynload "pats_ccomp_environ.dats"
-dynload "pats_ccomp_template.dats"
-//
-dynload "pats_ccomp_emit.dats"
-dynload "pats_ccomp_emit2.dats"
-dynload "pats_ccomp_emit3.dats"
-dynload "pats_ccomp_main.dats"
+dynload "./pats_ccomp.dats"
+dynload "./pats_ccomp_print.dats"
+dynload "./pats_ccomp_hitype.dats"
+dynload "./pats_ccomp_tmplab.dats"
+dynload "./pats_ccomp_tmpvar.dats"
+dynload "./pats_ccomp_d2env.dats"
+dynload "./pats_ccomp_funlab.dats"
+dynload "./pats_ccomp_funent.dats"
+dynload "./pats_ccomp_util.dats"
+dynload "./pats_ccomp_ccompenv.dats"
+dynload "./pats_ccomp_instrseq.dats"
+dynload "./pats_ccomp_hipat.dats"
+dynload "./pats_ccomp_dynexp.dats"
+dynload "./pats_ccomp_caseof.dats"
+dynload "./pats_ccomp_claulst.dats"
+dynload "./pats_ccomp_lazyeval.dats"
+dynload "./pats_ccomp_trywith.dats"
+dynload "./pats_ccomp_looping.dats"
+dynload "./pats_ccomp_decl.dats"
+dynload "./pats_ccomp_subst.dats"
+dynload "./pats_ccomp_environ.dats"
+dynload "./pats_ccomp_template.dats"
+dynload "./pats_ccomp_emit.dats"
+dynload "./pats_ccomp_emit2.dats"
+dynload "./pats_ccomp_emit3.dats"
+dynload "./pats_ccomp_main.dats"
 //
 (* ****** ****** *)
 
@@ -441,6 +383,25 @@ extern void patsopt_PATSHOMELOCS_set() ;
 //
 extern void patsopt_PATSRELOCROOT_set() ;
 //
+#include <stdio.h>
+//
+// HX-2026-10: [fopen_err] of ATS1; [append] is 0 for "w", 1 for "a"
+//
+static
+void*
+patsopt_main_fopen
+  (char *name, int append)
+{
+  return (void*)fopen(name, (append ? "a" : "w")) ;
+}
+static
+int
+patsopt_main_fclose
+  (void *filp)
+{
+  return fclose((FILE*)filp) ;
+}
+//
 %} // end of [%{^]
 
 (* ****** ****** *)
@@ -451,7 +412,7 @@ patsopt_usage
   out: FILEref, arg0: comarg
 ) : void = let
 //
-val COMARG(_, cmdname) = arg0
+val @(_, cmdname) = arg0
 //
 in
 //
@@ -483,13 +444,7 @@ fprintln! (out, "  -tc (for typechecking only)");
 fprintln! (out, "  --compile (for compiling into C)");
 fprintln! (out, "  --typecheck (for typechecking only)");
 //
-(*
-fprintln! (out, "  -dep (for generating information on file dependencices)");
-*)
 fprintln! (out, "  --depgen (for generating information on file dependencices)");
-(*
-fprintln! (out, "  -tag (for generating tagging information on syntactic entities)");
-*)
 fprintln! (out, "  --taggen (for generating tagging information on syntactic entities)");
 //
 fprintln! (out, "  --gline (for generating line pragma information in target code)");
@@ -513,46 +468,6 @@ end // end of [patsopt_usage]
 
 (* ****** ****** *)
 //
-(*
-//
-HX: VERSION-0.0.1 released on September 2, 2013
-HX: VERSION-0.0.2 released on September 19, 2013
-HX: VERSION-0.0.3 released in the October of 2013
-HX: VERSION-0.0.4 released in the November of 2013
-HX: VERSION-0.0.5 released on January 15, 2014
-HX: VERSION-0.0.6 released on February 16, 2014
-HX: VERSION-0.0.7 released on March 30, 2014
-HX: VERSION-0.0.8 released on Sunday, May 4, 2014
-//
-HX: VERSION-0.1.0 released on Monday, June 9, 2014
-HX: VERSION-0.1.1 released on Wednesday, July 30, 2014
-HX: VERSION-0.1.2 released on Friday, August 29, 2014
-HX: VERSION-0.1.3 released on Monday, September 29, 2014
-HX: VERSION-0.1.4 released on Thursday, October 23, 2014
-HX: VERSION-0.1.5 released on Thursday, November 20, 2014
-HX: VERSION-0.1.6 released on Tuesday, January 6, 2015
-HX: VERSION-0.1.7 released on Tuesday, January 20, 2015
-HX: VERSION-0.1.8 released on Saturday, January 24, 2015
-HX: VERSION-0.1.9 released on Friday, February 27, 2015
-HX: VERSION-0.1.10 released on Sunday, March 22, 2015
-HX: VERSION-0.1.11 released on Thursday, April 23, 2015
-HX: VERSION-0.1.12 released on Saturday, May 16, 2015
-HX: VERSION-0.1.13 released on Friday, May 22, 2015
-//
-HX: VERSION-0.2.0 released on Tuesday, June 9, 2015
-HX: VERSION-0.2.1 released on Sunday, July 12, 2015
-HX: VERSION-0.2.2 released on Saturday, August 29, 2015
-HX: VERSION-0.2.3 released on Tuesday, September 22, 2015
-HX: VERSION-0.2.3 released on Wednesday, October 28, 2015
-HX: VERSION-0.2.3 released on Tuesday, Decemember 22, 2015
-HX: VERSION-0.2.6 released on Saturday, February 6, 2016)
-HX: VERSION-0.2.7 released on Saturday, May 14, 2016)
-HX: VERSION-0.2.8 released on Wednesday, June 29, 2016)
-//
-*)
-//
-(* ****** ****** *)
-//
 #define
 PATS_COPYRIGHT
 "Copyright (c) 2011-2021 Hongwei Xi"
@@ -570,12 +485,15 @@ implement
 patsopt_version(out) =
 {
 //
-val () =
-fprintf
-( out
-, "ATS/Postiats version %i.%i.%i with %s\n"
-, @(PATS_MAJOR_VERSION, PATS_MINOR_VERSION, PATS_MICRO_VERSION, PATS_COPYRIGHT)
-) (* end of [fprintf] *)
+val () = fprint_string(out, "ATS/Postiats version ")
+val () = fprint_int(out, PATS_MAJOR_VERSION)
+val () = fprint_string(out, ".")
+val () = fprint_int(out, PATS_MINOR_VERSION)
+val () = fprint_string(out, ".")
+val () = fprint_int(out, PATS_MICRO_VERSION)
+val () = fprint_string(out, " with ")
+val () = fprint_string(out, PATS_COPYRIGHT)
+val () = fprint_string(out, "\n")
 //
 } (* end of [patsopt_version] *)
 //
@@ -606,27 +524,12 @@ case+ knd of
 ) // end of [waitknd_get_stadyn]
 
 (* ****** ****** *)
-
-datatype
-outchan =
-| OUTCHANref of (FILEref)
-| OUTCHANptr of (FILEref)
-// end of [outchan]
-
-fun
-outchan_get_filr
-  (oc: outchan): FILEref =
-(
-case+ oc of
-| OUTCHANref(filr) => filr
-| OUTCHANptr(filr) => filr
-) (* end of [outchan_get_filr] *)
-
+//
+// HX-2026-10: [outchan] of ATS1 is [OUTCHANref(filr) | OUTCHANptr(filr)]:
+// a datatype with arguments is not allowed (no GC), so it is the flat pair
+// [outchan_isptr] (0 for OUTCHANref, 1 for OUTCHANptr) and [outchan].
+//
 (* ****** ****** *)
-
-typedef
-fmode =
-[m:file_mode] file_mode(m)
 
 typedef
 cmdstate = @{
@@ -645,10 +548,11 @@ cmdstate = @{
 //
 , preludeflag= int
 //
-, infil=filename
+, infil= $FIL.filename
 //
-, outmode= fmode
-, outchan= outchan
+, outmode= int // 0: write, 1: append
+, outchan= FILEref
+, outchan_isptr= int
 //
 , depgen= int // dep info generation
 , taggen= int // tagging info generation
@@ -668,80 +572,75 @@ cmdstate = @{
 } // end of [cmdstate]
 
 (* ****** ****** *)
-
-local
+//
+extern
+fun
+main_fopen
+  (name: string, append: int): ptr = "mac#patsopt_main_fopen"
+extern
+fun
+main_fclose
+  (filp: ptr): int = "mac#patsopt_main_fclose"
+//
+(* ****** ****** *)
 
 fun
-auxmain
+cmdstate_set_outchan_path
 (
   state: &cmdstate, name: string
-) : outchan = let
+) : void = let
 //
-val (pfopt | filp) =
-  $STDIO.fopen_err(name, state.outmode)
+val
+filr_old = state.outchan
+val
+isptr_old = state.outchan_isptr
+//
+val () =
+(
+//
+if
+(name = "-")
+then let
+  val () = state.outchan := stdout_ref
+  val () = state.outchan_isptr := 0
+in
+  // nothing
+end // end of [then]
+else let
+  val filp = main_fopen(name, state.outmode)
+in
+//
+if
+ptr_isnot_null(filp)
+then let
+  val () = state.outchan := $UN.cast{FILEref}(filp)
+  val () = state.outchan_isptr := 1
+in
+  // nothing
+end // end of [then]
+else let
+  val () = state.outchan := stderr_ref
+  val () = state.outchan_isptr := 0
+in
+  // nothing
+end // end of [else]
+//
+end // end of [else]
+//
+) : void // end of [val]
 //
 in
 //
 if
-filp > null
+(isptr_old > 0)
 then let
-//
-  prval
-  Some_v(pf) = pfopt
-//
-  val filr =
-  $UN.castvwtp_trans{FILEref}(@(pf | filp))
-//
+  val err = main_fclose($UN.cast{ptr}(filr_old))
 in
-  OUTCHANptr(filr)
+  // nothing
 end // end of [then]
-else let
-  prval
-  None_v() = pfopt
-in
-  OUTCHANref(stderr_ref)
-end // end of [else]
+else () // end of [else]
 //
-end // end of [auxmain]
-
-in (* in-of-local *)
-
-fun
-outchan_make_path
-(
-  state: &cmdstate, name: string
-) : outchan =
-(
-case+ name of
-| "-" => OUTCHANref(stdout_ref)
-//
-| _(*~special*) => auxmain(state, name)
-//
-) (* outchan_make_path *)
-
-end // end of [local]
-
-(* ****** ****** *)
-
-fun
-cmdstate_set_outchan
-(
-  state: &cmdstate, out_new: outchan
-) : void = let
-  val out_old = state.outchan
-  val ((*void*)) = state.outchan := out_new
-in
-//
-case+
-out_old of
-//
-| OUTCHANref _ => ()
-//
-| OUTCHANptr(filp) => let
-    val err = $STDIO.fclose0_err(filp) in (*nothing*)
-  end // end of [OUTCHANptr]
-//
-end // end of [cmdstate_set_outchan]
+end // end of [cmdstate_set_outchan_path]
 
 (* ****** ****** *)
 
@@ -785,44 +684,12 @@ case+ state.waitknd of
 ) (* end of [isiatswait] *)
 
 (* ****** ****** *)
-
-local
-
-var
-theOutFilename
-  : Stropt = stropt_none
 //
-val (pf0 | ()) =
-  vbox_make_view_ptr{Stropt}(view@(theOutFilename) | &theOutFilename)
-// end of [val]
-
-in (* in-of-local *)
-
-fun
-theOutFilename_get
-(
-// argless
-) : Stropt = out where
-{
+// HX-2026-10:
+// [theOutFilename_get/set] of ATS1 (a [vbox] on a toplevel [var]) are
+// dropped: nothing reads the name of the output file (it is not exported
+// by pats_main.sats).
 //
-prval vbox pf = pf0
-//
-  val out = theOutFilename
-  val () = theOutFilename := stropt_none
-} // end of [theOutFilename_get]
-
-fun
-theOutFilename_set
- (name: Stropt) = () where
-{
-//
-prval vbox pf = pf0
-//
-  val () = theOutFilename := name
-} // end of [theOutFilename_set]
-
-end // end of [local]
-
 (* ****** ****** *)
 //
 extern
@@ -838,9 +705,11 @@ the_fixity_load
   val given = "prelude/fixity.ats"
   val fullname =
     $FIL.filename_dirbase(PATSHOME, given)
-  val fullname = string_of_strptr(fullname)
+  val fullname_s =
+    the_garena_strdup($UN.castvwtp1{string}(fullname))
+  val ((*freed*)) = strptr_free(fullname)
   val filename =
-    $FIL.filename_make(given, given, fullname)
+    $FIL.filename_make(given, given, fullname_s)
 //
   val (
     pffil | ()
@@ -850,18 +719,13 @@ the_fixity_load
   val ((*popped*)) =
     $FIL.the_filenamelst_pop(pffil | (*none*))
 //
-  val (
-    pfenv | ()
-  ) = $TRENV1.the_fxtyenv_push_nil((*void*))
+  val () =
+    $TRENV1.the_fxtyenv_push_nil((*void*))
   val d1cs = $TRANS1.d0eclist_tr_errck(d0cs)
   val fxtymap =
-    $TRENV1.the_fxtyenv_pop (pfenv | (*none*))
+    $TRENV1.the_fxtyenv_pop ((*none*))
   val ((*joined*)) =
     $TRENV1.the_fxtyenv_pervasive_joinwth(fxtymap)
-//
-(*
-  val () = println! "[the_fixity_load] is finished."
-*)
 //
 in
   // empty
@@ -880,20 +744,16 @@ implement
 pervasive_load
   (PATSHOME, given) = {
 //
-(*
-val () = (
-  println! ("pervasive_load: given = ", given)
-) (* end of [val] *)
-*)
-//
 val fullname =
   $FIL.filename_dirbase(PATSHOME, given)
-val fullname = string_of_strptr(fullname)
+val fullname_s =
+  the_garena_strdup($UN.castvwtp1{string}(fullname))
+val ((*freed*)) = strptr_free(fullname)
 //
 val filename =
-  $FIL.filename_make(given, given, fullname)
+  $FIL.filename_make(given, given, fullname_s)
 //
-val (pfpush|()) = 
+val (pfpush|()) =
   $FIL.the_filenamelst_push(filename)
 val d0cs =
   parse_from_filename_toplevel(0(*sta*), filename)
@@ -906,17 +766,17 @@ val ((*default*)) =
 val ((*default*)) =
   $TRENV1.the_EXTERN_PREFIX_set("atspre_")
 //
-val (pfenv | ()) =
+val () =
   $TRENV1.the_trans1_env_push((*void*))
 val d1cs = $TRANS1.d0eclist_tr_errck(d0cs)
 val ((*popped*)) =
-  $TRENV1.the_trans1_env_pop(pfenv | (*none*))
+  $TRENV1.the_trans1_env_pop((*none*))
 //
-val (pfenv | ()) =
+val () =
   $TRENV2.the_trans2_env_push((*void*))
 val d2cs = $TRANS2.d1eclist_tr_errck(d1cs)
 val ((*joined*)) =
-  $TRENV2.the_trans2_env_pervasive_joinwth1(pfenv | filename, d2cs)
+  $TRENV2.the_trans2_env_pervasive_joinwth1(filename, d2cs)
 //
 val ((*reset*)) = $GLOB.the_PACKNAME_set_none()
 val ((*reset*)) = $TRENV1.the_EXTERN_PREFIX_set_none()
@@ -924,9 +784,6 @@ val ((*reset*)) = $TRENV1.the_EXTERN_PREFIX_set_none()
 } (* end of [pervasive_load] *)
 
 (* ****** ****** *)
-//
-// HX-2015-10-05:
-// For use in libatsopt
 //
 extern
 fun
@@ -988,6 +845,7 @@ val () = pervasive_load(PATSHOME, "prelude/SATS/memory.sats")
 //
 val () = pervasive_load(PATSHOME, "prelude/SATS/reference.sats")
 //
+//
 val () = pervasive_load(PATSHOME, "prelude/SATS/filebas.sats")
 val () = pervasive_load(PATSHOME, "prelude/SATS/intrange.sats")
 //
@@ -1011,10 +869,8 @@ val () = pervasive_load(PATSHOME, "prelude/SATS/checkast.sats")
 //
 *)
 //
-val () = pervasive_load(PATSHOME, "prelude/SATS/list.sats")
 val () = pervasive_load(PATSHOME, "prelude/SATS/list_vt.sats")
 //
-val () = pervasive_load(PATSHOME, "prelude/SATS/option.sats")
 val () = pervasive_load(PATSHOME, "prelude/SATS/option_vt.sats")
 //
 val () = pervasive_load(PATSHOME, "prelude/SATS/array.sats")
@@ -1022,13 +878,10 @@ val () = pervasive_load(PATSHOME, "prelude/SATS/array.sats")
 val () = pervasive_load(PATSHOME, "prelude/SATS/array_prf.sats")
 //
 val () = pervasive_load(PATSHOME, "prelude/SATS/arrayptr.sats")
-val () = pervasive_load(PATSHOME, "prelude/SATS/arrayref.sats")
 //
 val () = pervasive_load(PATSHOME, "prelude/SATS/matrix.sats")
 val () = pervasive_load(PATSHOME, "prelude/SATS/matrixptr.sats")
-val () = pervasive_load(PATSHOME, "prelude/SATS/matrixref.sats")
 //
-val () = pervasive_load(PATSHOME, "prelude/SATS/stream.sats")
 val () = pervasive_load(PATSHOME, "prelude/SATS/stream_vt.sats")
 //
 val () = pervasive_load(PATSHOME, "prelude/SATS/gprint.sats")
@@ -1038,17 +891,9 @@ val () = pervasive_load(PATSHOME, "prelude/SATS/parray.sats") // null-terminated
 //
 val () = pervasive_load(PATSHOME, "prelude/SATS/extern.sats") // interfacing externs
 //
-(*
-val () = pervasive_load(PATSHOME, "prelude/SATS/giterator.sats")
-val () = pervasive_load(PATSHOME, "prelude/SATS/fcontainer.sats")
-*)
-//
 } (* end of [the_prelude_load] *)
 
 (* ****** ****** *)
-//
-// HX-2015-10-05:
-// For use in libatsopt
 //
 extern
 fun
@@ -1098,7 +943,7 @@ val ents = $DEPGEN.depgen_eval(d0cs)
 val
 ((*popped*)) = $FIL.the_filenamelst_ppop()
 //
-val filr = outchan_get_filr(state.outchan)
+val filr = state.outchan
 //
 in
   $DEPGEN.fprint_entlst(filr, given, ents)
@@ -1116,7 +961,7 @@ val ents = $TAGGEN.taggen_proc(d0cs)
 val
 ((*popped*)) = $FIL.the_filenamelst_ppop()
 //
-val filr = outchan_get_filr(state.outchan)
+val filr = state.outchan
 //
 in
   $TAGGEN.fprint_entlst(filr, given, ents)
@@ -1139,8 +984,7 @@ do_atsreloc
 val itms =
   $TRENV1.the_atsrelocitmlst_get()
 //
-val filr =
-  outchan_get_filr(state.outchan)
+val filr = state.outchan
 //
 in
 //
@@ -1165,7 +1009,6 @@ do_codegen_2
   (state, given, d2cs) = let
 //
 val out = state.outchan
-val out = outchan_get_filr(out)
 //
 in
   $CODEGEN2.d2eclist_codegen_out(out, d2cs)
@@ -1183,45 +1026,6 @@ do_jsonize_2
 //
 (* ****** ****** *)
 
-local
-
-(*
-fun
-fprint_jsonlst
-(
-  out: FILEref, jsvs: jsonvalist
-) : void = let
-//
-fun loop
-(
-  out: FILEref, jsvs: jsonvalist, i: int
-) : void = let
-in
-//
-case+ jsvs of
-| list_nil
-    ((*void*)) => ()
-  // list_nil
-| list_cons
-    (jsv, jsvs) => let
-    val () =
-    if i > 0
-      then fprint_string (out, ",\n")
-    // end of [if]
-    val ((*void*)) = fprintln! (out, jsv)
-  in
-    loop (out, jsvs, i+1)
-  end // end of [list_cons]
-//
-end // end of [loop]
-//
-in
-  loop (out, jsvs, 0)
-end // end of [fprint_jsonlst]
-*)
-
-in (* in of [local] *)
-
 implement
 do_jsonize_2
 (
@@ -1229,13 +1033,10 @@ do_jsonize_2
 ) = let
 //
 val out = state.outchan
-val out = outchan_get_filr(out)
 //
 in
   $JSONIZE2.d2eclist_jsonize_out(out, d2cs)
 end (* end of [do_jsonize_2] *)
-
-end // end of [local]
 
 (* ****** ****** *)
 //
@@ -1293,10 +1094,10 @@ val () = $TRANS1.trans1_finalize()
 val () =
 if isdebug() then
 {
-  val () =
-  prerrln! (
-    "The 1st translation (fixity) of [", given, "] is successfully completed!"
-  ) (* end of [val] *)
+  val () = prerr_string("The 1st translation (fixity) of [")
+  val () = prerr_string(given)
+  val () = prerr_string("] is successfully completed!")
+  val () = prerr_newline()
 } // end of [if] // end of [val]
 //
 in
@@ -1326,9 +1127,10 @@ val d2cs = $TRANS2.d1eclist_tr_errck(d1cs)
 val () =
 if isdebug() then
 {
-  val () = prerrln! (
-    "The 2nd translation (binding) of [", given, "] is successfully completed!"
-  ) (* end of [val] *)
+  val () = prerr_string("The 2nd translation (binding) of [")
+  val () = prerr_string(given)
+  val () = prerr_string("] is successfully completed!")
+  val () = prerr_newline()
 } // end of [if] // end of [val]
 //
 } (* end of [do_trans12] *)
@@ -1349,20 +1151,7 @@ val () =
 //
 val d3cs = $TRANS3.d2eclist_tr_errck(d2cs)
 //
-(*
 val () =
-{
-//
-val () =
-print "do_trans123: the_s3itmlst =\n"
-val () =
-$TRENV3.fprint_the_s3itmlst(stdout_ref)
-val ((*void*)) = print_newline((*void*))
-//
-} (* end of [val] *)
-*)
-//
-val () = 
 {
 //
 val flag =
@@ -1385,8 +1174,7 @@ val () =
 if
 flag > 0
 then {
-  val filr =
-    outchan_get_filr(state.outchan)
+  val filr = state.outchan
   val () = $CNSTR3.c3nstr_export(filr, c3t0)
 } (* end of [then] *)
 //
@@ -1396,9 +1184,10 @@ val () =
 if
 isdebug()
 then {
-  val () = prerrln! (
-    "The 3rd translation (type-checking) of [", given, "] is successfully completed!"
-  ) (* end of [val] *)
+  val () = prerr_string("The 3rd translation (type-checking) of [")
+  val () = prerr_string(given)
+  val () = prerr_string("] is successfully completed!")
+  val () = prerr_newline()
 } // end of [then] // end of [if] // end of [val]
 //
 } (* end of [do_trans123] *)
@@ -1417,16 +1206,13 @@ val d3cs =
 //
 val hids = $TYER.d3eclist_tyer_errck(d3cs)
 //
-(*
-val () = fprint_hideclist(stdout_ref, hids)
-*)
-//
 val () =
 if isdebug() then
 {
-  val () = prerrln! (
-    "The 4th translation (type/proof-erasing) of [", given, "] is successfully completed!"
-  ) (* end of [val] *)
+  val () = prerr_string("The 4th translation (type/proof-erasing) of [")
+  val () = prerr_string(given)
+  val () = prerr_string("] is successfully completed!")
+  val () = prerr_newline()
 } // end of [if] // end of [val]
 //
 } (* end of [do_trans1234] *)
@@ -1436,17 +1222,6 @@ if isdebug() then
 implement
 do_transfinal
   (state, given, d0cs) = let
-//
-(*
-val () = 
-println!
-("PACKNAME=",
- $GLOB.the_PACKNAME_get())
-val () = 
-println!
-("STATIC_PREFIX=",
- $GLOB.the_STATIC_PREFIX_get())
-*)
 //
 in
 //
@@ -1483,7 +1258,7 @@ case+ 0 of
 | _ (*compilation*) => let
     val () = state.olevel := 1 // for output
     val hids = do_trans1234(state, given, d0cs)
-    val filr = outchan_get_filr(state.outchan)
+    val filr = state.outchan
     val flag = waitknd_get_stadyn(state.waitknd)
     val ((*void*)) =
       $CCOMP.ccomp_main(filr, flag, state.infil, hids)
@@ -1499,17 +1274,11 @@ end (* end of [do_transfinal] *)
 local
 
 fun
-auxexn
-(
-  p0: ptr
-, given: string, d0cs: d0eclist, exn: exn
-) : void = let
-//
-fun
 auxerr
 (
   n: int, outfil: FILEref, given: string, msg: string
 ) : void = let
+//
 val
 cmtl =
 "/* ****** ****** */\n"
@@ -1518,22 +1287,34 @@ in
 //
 if
 (n > 0)
-then
-fprintf
-(
-  outfil
-, "%s//\n#error(PATSOPT_ERROR_(patsopt(%s): %s))\n//\n%s", @(cmtl, given, msg, cmtl)
-) // end of [fprintf]
+then let
+  val () = fprint_string(outfil, cmtl)
+  val () = fprint_string(outfil, "//\n#error(PATSOPT_ERROR_(patsopt(")
+  val () = fprint_string(outfil, given)
+  val () = fprint_string(outfil, "): ")
+  val () = fprint_string(outfil, msg)
+  val () = fprint_string(outfil, "))\n//\n")
+  val () = fprint_string(outfil, cmtl)
+in
+  // nothing
+end // end of [then]
+else () // end of [else]
 //
 end (* end of [auxerr] *)
+
+fun
+auxexn
+(
+  p0: ptr
+, given: string, d0cs: d0eclist, exn: exn
+) : void = let
 //
 val
 (pf, fpf | p) =
 $UN.ptr0_vtake{cmdstate}(p0)
 //
 val olevel = p->olevel
-val outfil =
-  outchan_get_filr(p->outchan)
+val outfil = p->outchan
 //
 val nerror = p->nerror
 val ((*void*)) = p->nerror := nerror + 1
@@ -1569,17 +1350,6 @@ case+ exn of
     auxerr(olevel, outfil, given, "trans4-errors")
   )
 //
-(*
-| $ERR.PATSOPT_FILENONE_EXN(fname) =>
-  (
-    fold@(exn);  
-    fprintf (outfil, "/* ****** ****** */\n//\n", @());
-    fprintf (outfil, "#error(patsopt(%s): [%s] cannot be accessed)\n", @(given, fname));
-    fprintf (outfil, "//\n/* ****** ****** */\n", @());
-    $raise(exn);
-  )
-*)
-//
 | exn => $raise(exn)
 //
 end // end of [auxexn]
@@ -1592,7 +1362,7 @@ do_transfinal2
 state, given, d0cs
 ) = let
 //
-val p0 = &state
+val p0 = $UN.cast{ptr}(addr@state)
 //
 in
 //
@@ -1630,11 +1400,31 @@ parse_from_given_arglst_toplevel
 ) = let
 //
 fun
+loop2
+{i:nat | i <= n}
+( state: &cmdstate
+, arglst: comarglst(i)
+, fnames: glist(string)
+) :
+(
+  comarglst(i), d0eclist
+) = let
+  val
+  givens = glist_reverse(fnames)
+  var fil: $FIL.filename
+  val d0cs =
+  parse_from_givenames_toplocal2(1(*dyn*), givens, fil)
+  val () = state.infil := fil
+in
+  (arglst, d0cs)
+end // end of [loop2]
+//
+fun
 loop
 {i:nat | i <= n}
 ( state: &cmdstate
 , arglst: comarglst(i)
-, fnames: list_vt(string, n-i+1)
+, fnames: glist(string)
 ) :
 [i:nat | i <= n]
 (
@@ -1642,49 +1432,22 @@ loop
 ) = (
 //
 case+ arglst of
-| list_vt_nil() =>
+| ~list_vt_nil() =>
   (
-    fold@(arglst);
-    loop2(state, arglst, fnames)
+    loop2(state, list_vt_nil(), fnames)
   )
-| list_vt_cons(!p_arg1, !p_arglst2) =>
+| ~list_vt_cons(arg1, arglst2) =>
   (
-    case+ !p_arg1 of
-    | COMARG(1, _) =>
-       (fold@(arglst); loop2(state, arglst, fnames))
-    | COMARG(2, _) =>
-       (fold@(arglst); loop2(state, arglst, fnames))
-    | COMARG(_, fname) => let
-        val arglst2 = !p_arglst2
-      in
-        free@{comarg}{0}(arglst);
-        loop(state, arglst2, list_vt_cons(fname, fnames))
-      end // end of [COMARG]
+    case+ arg1 of
+    | @(1, _) =>
+       loop2(state, list_vt_cons(arg1, arglst2), fnames)
+    | @(2, _) =>
+       loop2(state, list_vt_cons(arg1, arglst2), fnames)
+    | @(_, fname) =>
+        loop(state, arglst2, glist_cons(fname, fnames))
   )
 //
 ) (* end of [loop] *)
-//
-and
-loop2
-{i:nat | i <= n}
-( state: &cmdstate
-, arglst: comarglst(i)
-, fnames: list_vt(string, n-i+1)
-) :
-(
-  comarglst(i), d0eclist
-) = let
-  val
-  fnames =
-  list_vt_reverse(fnames)
-  val
-  givens = $UN.list_vt2t(fnames)
-  val d0cs =
-  parse_from_givenames_toplocal2(1(*dyn*), givens, state.infil)
-  val ((*freed*)) = list_vt_free(fnames)
-in
-  (arglst, d0cs)
-end // end of [loop2]
 //
 val
 stadyn =
@@ -1696,17 +1459,19 @@ if
 (stadyn <= 1)
 then let // -s / -d
 //
+var fil: $FIL.filename
 val
 d0cs =
 parse_from_givename_toplevel
-  (stadyn, given, state.infil)
+  (stadyn, given, fil)
+val () = state.infil := fil
 //
 in
   (arglst, d0cs)
 end // end of [then]
 else // stadyn >= 2 // -dd
 (
-  loop(state, arglst, list_vt_sing(given))
+  loop(state, arglst, glist_sing(given))
 )  (* end of [else] *)
 //
 end // end of [parse_from_given_arglst_toplevel]
@@ -1776,13 +1541,13 @@ end // end of [process_nil]
 
 (* ****** ****** *)
 
-fn*
+fun
 process_cmdline
   {i:nat} .<i,0>.
 (
   state: &cmdstate
 , arglst: comarglst(i)
-) :<fun1> void = let
+) : void = let
 in
 //
 case+ arglst of
@@ -1810,13 +1575,7 @@ process_cmdline2
 (
   state: &cmdstate
 , arg: comarg, arglst: comarglst(i)
-) :<fun1> void = let
-//
-(*
-val () =
-println!
-  ("process_cmdline2: arg = ", arg)
-*)
+) : void = let
 //
 in
 //
@@ -1834,15 +1593,15 @@ case+ arg of
   in
     case+ arg of
 //
-    | COMARG(1, key)
+    | @(1, key)
       when nif > 0 =>
       process_cmdline2_comarg1(state, arglst, key)
 //
-    | COMARG(2, key)
+    | @(2, key)
       when nif > 0 =>
       process_cmdline2_comarg2(state, arglst, key)
 //
-    | COMARG(_, "-") => let
+    | @(_, "-") => let
 //
         val () =
         state.ninpfile := nif + 1
@@ -1850,7 +1609,7 @@ case+ arg of
         process_nil(state); process_cmdline(state, arglst)
       end (* end of [COMARG] *)
 //
-    | COMARG(_, given) => let
+    | @(_, given) => let
 //
         val () =
         state.ninpfile := nif + 1
@@ -1871,12 +1630,6 @@ case+ arg of
         val istaggen = state.taggen > 0
         val () = if istaggen then istrans := false
 //
-(*
-        val
-        d0cs = // for -s / -d
-        parse_from_givename_toplevel
-          (stadyn, given, state.infil)
-*)
         val
         (arglst, d0cs) =
         parse_from_given_arglst_toplevel(state, given, arglst)
@@ -1901,13 +1654,9 @@ case+ arg of
     val () =
     state.waitknd := WTKnone()
 //
-    val COMARG(_, given) = arg
+    val @(_, given) = arg
 //
-    val opt = stropt_some(given)
-    val ((*void*)) = theOutFilename_set(opt)
-//
-    val _new = outchan_make_path(state, given)
-    val ((*void*)) = cmdstate_set_outchan(state, _new)
+    val ((*void*)) = cmdstate_set_outchan_path(state, given)
 //
   in
     process_cmdline(state, arglst)
@@ -1917,7 +1666,7 @@ case+ arg of
     isdatswait(state) => let
     val () =
     state.waitknd := WTKnone()
-    val COMARG(_, def) = arg
+    val @(_, def) = arg
     val () = process_DATS_def(def)
   in
     process_cmdline(state, arglst)
@@ -1927,17 +1676,17 @@ case+ arg of
     isiatswait(state) => let
     val () =
     state.waitknd := WTKnone()
-    val COMARG(_, dir) = arg
+    val @(_, dir) = arg
     val () = process_IATS_dir(dir)
   in
     process_cmdline(state, arglst)
   end
 //
-| COMARG(1, key) =>
+| @(1, key) =>
     process_cmdline2_comarg1(state, arglst, key)
-| COMARG(2, key) =>
+| @(2, key) =>
     process_cmdline2_comarg2(state, arglst, key)
-| COMARG(_, key) => let
+| @(_, key) => let
     val () =
     comarg_warning(key)
     val () =
@@ -1954,7 +1703,7 @@ process_cmdline2_comarg1
 (
   state: &cmdstate
 , arglst: comarglst(i), key: string
-) :<fun1> void = let
+) : void = let
 //
 val () = state.waitknd := WTKnone()
 //
@@ -2042,7 +1791,7 @@ process_cmdline2_comarg2
 (
   state: &cmdstate
 , arglst: comarglst(i), key: string
-) :<fun1> void = let
+) : void = let
 //
 val () =
   state.waitknd := WTKnone(*void*)
@@ -2059,11 +1808,11 @@ case+ key of
 | "--output" =>
     state.waitknd := WTKoutput()
 | "--output-w" => {
-    val () = state.outmode := file_mode_w
+    val () = state.outmode := 0
     val () = state.waitknd := WTKoutput()
   } // end of [--output-w]
 | "--output-a" => {
-    val () = state.outmode := file_mode_a
+    val () = state.outmode := 1
     val () = state.waitknd := WTKoutput()
   } // end of [--output-a]
 //
@@ -2134,7 +1883,7 @@ fun
 patsopt_main
   {n:pos}
 (
-  argc: int(n), argc: &(@[string][n])
+  argc: int(n), argv: &(@[string][n])
 ) : void = "ext#libatsopt_patsopt_main"
 //
 (* ****** ****** *)
@@ -2146,7 +1895,7 @@ patsopt_main
 //
 val () =
 set () where
-{ 
+{
   extern
   fun set(): void
     = "mac#patsopt_PATSHOME_set"
@@ -2163,7 +1912,7 @@ set () where
 //
 val () =
 set () where
-{ 
+{
   extern
   fun set(): void
     = "mac#patsopt_PATSRELOCROOT_set"
@@ -2172,7 +1921,7 @@ set () where
 //
 val () =
 set () where
-{ 
+{
   extern
   fun set(): void
     = "mac#patsopt_PATSHOMELOCS_set"
@@ -2200,12 +1949,13 @@ issome
 then stropt_unsome(opt)
 else let
   val () =
-  prerrln!
+  prerr_string
   (
     "The environment variable PATSHOME is undefined!"
   ) (* end of [val] *)
+  val () = prerr_newline()
 in
-  $ERR.abort((*exit*))
+  $ERR.abort<string>((*exit*))
 end (* end of [else] *)
 //
 end : string // end of [val]
@@ -2224,7 +1974,7 @@ val+
 ~list_vt_cons
   (arg0, arglst) = arglst where
 {
-  val arglst = comarglst_parse(argc, argv)
+  val arglst = $effmask_all(comarglst_parse(argc, argv))
 } (* end of [val] *)
 //
 var
@@ -2243,8 +1993,9 @@ state = @{
 //
 , infil= $FIL.filename_dummy
 //
-, outmode= file_mode_w
-, outchan= OUTCHANref(stdout_ref)
+, outmode= 0
+, outchan= stdout_ref
+, outchan_isptr= 0
 //
 , depgen= 0 // file dependency generation
 , taggen= 0 // syntax tagging info generation
@@ -2252,7 +2003,7 @@ state = @{
 , atsreloc= 0 // for package relocation
 //
 , codegenflag= 0 // syntax level for CODEgen
-, jsonizeflag= 0 // syntax level for JSONize 
+, jsonizeflag= 0 // syntax level for JSONize
 //
 , typecheckflag= 0 // compiling by default
 //
@@ -2272,28 +2023,47 @@ val () = process_cmdline(state, arglst)
 // should be able to receive an error:
 //
 val () =
-if state.nerror > 0 then $ERR.abort{void}()
+if state.nerror > 0 then $ERR.abort<void>()
 //
 } (* end of [where] *) // end of [patsopt_main]
 //
 (* ****** ****** *)
+
 //
-#ifndef
-PATSOPT_MAIN_NONE
+// HX-2026-10: -DATS PATSOPT_MAIN_NONE (libatsopt, [make libatsopt.a]):
+// no [main0]; the host program calls [libatsopt_dynloadall] (defined in
+// libatsopt_ext.c: it runs the initialization of every module, which is
+// the [dynload]s above) and then [libatsopt_patsopt_main(_opt)].
+//
+#ifndef PATSOPT_MAIN_NONE
 //
 implement
-main(argc, argv) =
+main0(argc, argv) =
 (
 //
 if
 (argc >= 2)
-then patsopt_main(argc, argv)
-else prerrln! ("Hello from ATS2(ATS/Postiats)!")
+then let
+  val
+  (pf, fpf | p) = argv_takeout_strarr(argv)
+  val () =
+  patsopt_main(argc, !p)
+  prval () = minus_addback(fpf, pf | argv)
+in
+  // nothing
+end // end of [then]
+else let
+  val () = prerr_string("Hello from ATS2(ATS/Postiats)!")
+  val () = prerr_newline()
+in
+  // nothing
+end // end of [else]
 // end of [if]
-) (* end of [main] *)
+) (* end of [main0] *)
 //
 #endif // ifndef(PATSOPT_MAIN_NONE)
-//
+
+
 (* ****** ****** *)
 
 (* end of [pats_main.dats] *)

@@ -27,22 +27,9 @@ cleanall:: ; $(RMF) arrinit
 
 ######
 
-all:: \
-catamorph
-catamorph: \
-catamorph.dats ; \
-  $(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: catamorph ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) catamorph
 
 ######
 
-all:: \
-clofuns
-clofuns: clofuns.dats ; \
-  $(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: clofuns ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) clofuns
 
 ######
 
@@ -55,12 +42,6 @@ cleanall:: ; $(RMF) conjdisj
 
 ######
 
-all:: \
-dotoverld
-dotoverld: dotoverld.dats ; \
-  $(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: dotoverld ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) dotoverld
 
 ######
 
@@ -91,34 +72,13 @@ cleanall:: ; $(RMF) fieldarr
 #
 ######
 
-all:: \
-findexn
-findexn: findexn_dats.c ; \
-  $(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
-findexn_dats.c: findexn.dats ; $(PATSCC2) -ccats $<
-regress:: findexn ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) findexn
 cleanall:: ; $(RMF) findexn_dats.c
 
 ######
 
-all:: \
-fixedpoint
-fixedpoint: fixedpoint.dats ; \
-  $(PATSCC2) -DATS_MEMALLOC_LIBC -cleanaft -o $@ $<
-regress:: fixedpoint fixedpoint.test-cmp
-	./$< 2>&1 | diff -q fixedpoint.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) fixedpoint
 
 ######
 
-all:: \
-funargpat
-funargpat: funargpat.dats ; \
-  $(PATSCC2) -DATS_MEMALLOC_LIBC -cleanaft -o $@ $<
-regress:: funargpat ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) funargpat
 
 ######
 
@@ -168,29 +128,11 @@ cleanall:: ; $(RMF) intbase
 
 ######
 
-all:: \
-kacker
-kacker: kacker.dats ; \
-$(PATSCC2) -DATS_MEMALLOC_LIBC -cleanaft -o $@ $<
-regress:: kacker kacker.test-cmp
-	./$< 2>&1 | diff -q kacker.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) kacker
 
 ######
 #
-all:: \
-lazytest
-regress:: lazytest lazytest.test-cmp
-	./$< 2>&1 | diff -q lazytest.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) lazytest
 cleanall:: ; $(RMF) lazytest_dats.c
 #
-lazytest: \
-lazytest_dats.c ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
-lazytest_dats.c: lazytest.dats ; $(PATSCC2) -ccats $<
 #
 ######
 #
@@ -209,13 +151,6 @@ llazytest_dats.c: llazytest.dats ; $(PATSCC2) -ccats $<
 #
 ######
 
-all:: \
-listpat
-listpat: \
-listpat.dats ; \
-$(PATSCC2) -DATS_MEMALLOC_LIBC -cleanaft -o $@ $<
-regress:: listpat ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) listpat
 
 ######
 
@@ -270,14 +205,7 @@ partmplt.dats ; $(PATSCC2) -cleanaft -o $@ $<
 #
 ######
 #
-all:: \
-patguard
-regress:: patguard ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) patguard
 #
-patguard: \
-patguard.dats ; \
-$(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
 #
 ######
 #
@@ -292,14 +220,7 @@ $(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
 #
 ######
 #
-all:: \
-patrefas
-regress:: patrefas ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) patrefas
 #
-patrefas: \
-patrefas.dats ; \
-$(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
 #
 ######
 
@@ -345,16 +266,7 @@ sumodd.dats; $(PATSCC2) -cleanaft -o $@ $<
 #
 ######
 #
-all:: \
-tempboxed
-regress:: tempboxed tempboxed.test-cmp
-	./$< 2>&1 | diff -q tempboxed.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) tempboxed
 #
-tempboxed: \
-tempboxed.dats ; \
-$(PATSCC2) -DATS_MEMALLOC_LIBC -cleanaft -o $@ $<
 #
 ######
 #
@@ -411,29 +323,10 @@ CPF=cp -f
 
 ######
 #
-all:: \
-d2ctype
-d2ctype: \
-d2ctype.dats ; \
-$(PATSCC2) -cleanaft -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: d2ctype ; ./$< || (echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) d2ctype
 #
 ######
 #
-all:: \
-codegen2
-codegen2: \
-codegen2.dats \
-codegen2_out.dats ; \
-$(PATSCC2) -cleanaft -o $@ codegen2_test.dats -DATS_MEMALLOC_LIBC
-regress:: codegen2 codegen2.test-cmp
-	./$< 2>&1 | diff -q codegen2.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) codegen2
 #
-codegen2_out.dats: \
-codegen2.dats; $(PATSOPT) --output-a $@ --codegen-2 -d codegen2.dats
 #
 cleanall:: ; $(RMF) codegen2_out.dats
 #

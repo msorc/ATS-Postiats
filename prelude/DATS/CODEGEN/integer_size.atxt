@@ -131,6 +131,6 @@ g1int2uint<ssizeknd,sizeknd> = g1int2uint_ssize_size
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_size_atxt.txt")
 %}\

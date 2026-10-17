@@ -33,7 +33,7 @@
 //
 (* ****** ****** *)
 
-abstype intinf_type
+abstype intinf_type = ptr
 typedef intinf = intinf_type
 
 (* ****** ****** *)
@@ -126,10 +126,12 @@ overload * with mul_intinf_intinf
 //
 (* ****** ****** *)
 //
-abstype intinfset_type
+abstype intinfset_type = ptr
 typedef intinfset = intinfset_type
 //
-typedef intinflst = List (intinf)
+staload "libats/SATS/arena.sats"
+
+typedef intinflst = glist(intinf)
 vtypedef intinflst_vt = List_vt (intinf)
 //
 fun intinfset_sing (x: intinf): intinfset

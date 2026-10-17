@@ -43,7 +43,7 @@ in (* nothing *) end // end of [local]
 
 local
 #include
-"{$HX_CSTREAM}/DATS/cstream_cloref.dats"
+"{$HX_CSTREAM}/DATS/cstream_cloptr.dats"
 in (* nothing *) end // end of [local]
 
 (* ****** ****** *)

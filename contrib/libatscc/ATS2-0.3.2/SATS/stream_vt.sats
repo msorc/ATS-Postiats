@@ -43,13 +43,6 @@ stream_vt_free
 //
 (* ****** ****** *)
 //
-fun
-stream_vt2t
-  {a:t0p}
-(
-xs: stream_vt(INV(a))
-) :<!wrt> stream(a) = "mac#%" // endfun
-//
 (* ****** ****** *)
 //
 fun
@@ -97,153 +90,77 @@ stream_vt_concat
 //
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC
+// The closures are linear (cloptr): each of the following
+// functions consumes the closure given to it (a lazy stream
+// keeps it until the stream is evaluated or freed).
+//
 fun
-stream_vt_map_cloref
+stream_vt_map_cloptr
   {a:vt0p}{b:vt0p}
 (
-xs: stream_vt(INV(a)), fopr: (a) -<cloref1> b
+  xs: stream_vt(INV(a)), fopr: (a) -<cloptr1> b
 ) : stream_vt(b) = "mac#%" // end-of-function
 //
 fun
-stream_vt_mapopt_cloref
-  {a:vt0p}{b:vt0p}
-(
-xs: stream_vt(INV(a)), fopr: (a) -<cloref1> Option_vt(b)
-) : stream_vt(b) = "mac#%" // end-of-function
-//
-fun
-stream_vt_map_method
-  {a:vt0p}{b:vt0p}
-(
-xs: stream_vt(INV(a)), TYPE(b)
-) :
-(
- (a) -<cloref1> b
-) -<lincloptr1> stream_vt(b) = "mac#%" // endfun
-fun
-stream_vt_mapopt_method
-  {a:vt0p}{b:vt0p}
-(
-xs: stream_vt(INV(a)), TYPE(b)
-) :
-(
- (a) -<cloref1> Option_vt(b)
-) -<lincloptr1> stream_vt(b) = "mac#%" // endfun
-//
-(* ****** ****** *)
-//
-fun
-stream_vt_filter_cloref
+stream_vt_filter_cloptr
   {a:t0ype}
 (
-  xs: stream_vt(INV(a)), pred: (a) -<cloref1> bool
+  xs: stream_vt(INV(a)), pred: (a) -<cloptr1> bool
 ) : stream_vt(a) = "mac#%" // end-of-function
-fun
-stream_vt_filter_method
-  {a:t0ype}
-(
-xs: stream_vt(INV(a))
-) :
-(
-  (a) -<cloref1> bool
-) -<lincloptr1> stream_vt(a) = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
 //
 fun
-stream_vt_exists_cloref
+stream_vt_exists_cloptr
   {a:t0ype}
 (
-stream_vt(INV(a)), pred: (a) -<cloref1> bool
+  stream_vt(INV(a)), pred: (a) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-function
 fun
-stream_vt_exists_method
+stream_vt_forall_cloptr
   {a:t0ype}
 (
-xs: stream_vt(INV(a))
-) : ((a) -<cloref1> bool) -<lincloptr1> bool = "mac#%"
-//
-(* ****** ****** *)
-//
-fun
-stream_vt_forall_cloref
-  {a:t0ype}
-(
-stream_vt(INV(a)), pred: (a) -<cloref1> bool
+  stream_vt(INV(a)), pred: (a) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-function
-fun
-stream_vt_forall_method
-  {a:t0ype}
-(
-xs: stream_vt(INV(a))
-) : ((a) -<cloref1> bool) -<lincloptr1> bool = "mac#%"
 //
 (* ****** ****** *)
 //
 fun
-stream_vt_foreach_cloref
+stream_vt_foreach_cloptr
   {a:vt0ype}
 (
-xs: stream_vt(INV(a)), fwork: (a) -<cloref1> void
+  xs: stream_vt(INV(a)), fwork: (a) -<cloptr1> void
 ) : void = "mac#%" // end-of-function
 fun
-stream_vt_foreach_method
+stream_vt_iforeach_cloptr
   {a:vt0ype}
 (
-xs: stream_vt(INV(a))
-) :<> ((a) -<cloref1> void) -<lincloptr1> void = "mac#%"
-//
-(* ****** ****** *)
-//
-fun
-stream_vt_iforeach_cloref
-  {a:vt0ype}
-(
-xs: stream_vt(INV(a)), fwork: (Nat, a) -<cloref1> void
+  xs: stream_vt(INV(a)), fwork: (Nat, a) -<cloptr1> void
 ) : void = "mac#%" // end-of-function
 fun
-stream_vt_iforeach_method
+stream_vt_rforeach_cloptr
   {a:vt0ype}
 (
-xs: stream_vt(INV(a))
-) :<> ((Nat, a) -<cloref1> void) -<lincloptr1> void = "mac#%"
-//
-(* ****** ****** *)
-//
-fun
-stream_vt_rforeach_cloref
-  {a:vt0ype}
-(
-xs: stream_vt(INV(a)), fwork: (a) -<cloref1> void
+  xs: stream_vt(INV(a)), fwork: (a) -<cloptr1> void
 ) : void = "mac#%" // end-of-function
-fun
-stream_vt_rforeach_method
-  {a:vt0ype}
-(
-xs: stream_vt(INV(a))
-) :<> ((a) -<cloref1> void) -<lincloptr1> void = "mac#%"
 //
 (* ****** ****** *)
 //
 fun
-stream_vt_tabulate_cloref
+stream_vt_tabulate_cloptr
   {a:t0p}
-  (fopr: intGte(0) -<cloref1> a): stream_vt(a) = "mac#%"
+  (fopr: intGte(0) -<cloptr1> a): stream_vt(a) = "mac#%"
 //
 (* ****** ****** *)
 //
 overload length with stream_vt_length of 100
+//
 overload append with stream_vt_append of 100
 overload concat with stream_vt_concat of 100
 //
 overload .takeLte with stream_vt_takeLte of 100
-//
-overload .map with stream_vt_map_method of 100
-overload .mapopt with stream_vt_mapopt_method of 100
-overload .filter with stream_vt_filter_method of 100
-overload .foreach with stream_vt_foreach_method of 100
-overload .iforeach with stream_vt_iforeach_method of 100
-overload .rforeach with stream_vt_rforeach_method of 100
 //
 (* ****** ****** *)
 

@@ -33,9 +33,21 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans1_syndef.dats)
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload
@@ -58,6 +70,7 @@ staload SYN = "./pats_syntax.sats"
 //
 (* ****** ****** *)
 
+staload "./pats_staexp1.sats"
 staload "./pats_dynexp1.sats"
 
 (* ****** ****** *)
@@ -66,17 +79,13 @@ staload "./pats_trans1.sats"
 
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
-macdef list_sing (x) = list_cons (,(x), list_nil)
+macdef list_sing (x) = glist_sing (,(x))
+macdef list_pair (x, y) = glist_cons (,(x), glist_sing (,(y)))
 
 (* ****** ****** *)
 
-typedef
-syndef_search_all_type =
-  (symbol) -<fun1> Option_vt (fsyndef)
 extern
-fun syndef_search_all : syndef_search_all_type
-// end of [extern]
+fun syndef_search_all (id: symbol): Option_vt (fsyndef)
 
 (* ****** ****** *)
 
@@ -148,11 +157,14 @@ fun aux1lst
   loc0: location, fid: d1exp, d1es: d1explst
 ) : d1explst = let
 //
-val d1es =
-  list_map_cloptr (d1es, lam d1e =<1> aux1 (loc0, fid, d1e))
-//
 in
-  list_of_list_vt (d1es)
+//
+case+ glist_view (d1es) of
+| ~GLnil () => glist_nil ()
+| ~GLcons (d1e, d1es1) => let
+    val d1e = aux1 (loc0, fid, d1e) in glist_cons (d1e, aux1lst (loc0, fid, d1es1))
+  end // end of [GLcons]
+//
 end // end of [aux1lst]
 
 (* ****** ****** *)
@@ -162,20 +174,25 @@ fun aux2
   loc0: location, fid: d1exp, d1e: d1exp
 ) : d1exp = let
 in
-  case+ d1e.d1exp_node of
-  | D1Elist
+  case+ d1exp_node_view (d1e.d1exp_node ()) of
+  | ~D1Elist
       (npf, d1es) => d1exp_seq (loc0, aux1lst (loc0, fid, d1es))
     // end of [D1Elist]
-  | _ (*rest-of-d1exp*) => aux1 (loc0, fid, d1e)
+  | v (*rest-of-d1exp*) => (d1exp_node_view_free (v); aux1 (loc0, fid, d1e))
 end // end of [aux2]
 
 fun aux2lst
 (
   loc0: location, fid: d1exp, d1es: d1explst
 ) : d1explst = let
-  val d1es = list_map_cloptr (d1es, lam d1e =<1> aux2 (loc0, fid, d1e))
 in
-  list_of_list_vt (d1es)
+//
+case+ glist_view (d1es) of
+| ~GLnil () => glist_nil ()
+| ~GLcons (d1e, d1es1) => let
+    val d1e = aux2 (loc0, fid, d1e) in glist_cons (d1e, aux2lst (loc0, fid, d1es1))
+  end // end of [GLcons]
+//
 end // end of [aux2lst]
 
 (* ****** ****** *)
@@ -192,9 +209,14 @@ fun aux3lst
 (
   loc0: location, fid: d1exp, d1e1: d1exp, d1es2: d1explst
 ) : d1explst = let
-  val d1es = list_map_cloptr (d1es2, lam d1e2 =<1> aux3 (loc0, fid, d1e1, d1e2))
 in
-  list_of_list_vt (d1es)
+//
+case+ glist_view (d1es2) of
+| ~GLnil () => glist_nil ()
+| ~GLcons (d1e2, d1es21) => let
+    val d1e2 = aux3 (loc0, fid, d1e1, d1e2) in glist_cons (d1e2, aux3lst (loc0, fid, d1e1, d1es21))
+  end // end of [GLcons]
+//
 end // end of [aux3lst]
 
 (* ****** ****** *)
@@ -249,7 +271,7 @@ val d1e1_res = auxpr (loc0, d1es, sym)
 val dq = $SYN.d0ynq_none (loc0)
 val fid2 = d1exp_dqid (loc0, dq, sym2)
 val d1e2_res =
-  d1exp_app_dyn (loc0, fid2, loc0, ~1(*npf*), list_nil)
+  d1exp_app_dyn (loc0, fid2, loc0, ~1(*npf*), glist_nil ())
 //
 in
   d1exp_seq (loc0, list_pair (d1e1_res, d1e2_res))
@@ -271,8 +293,8 @@ println! ("auxfpr: d1es = ", d1es)
 *)
 in
 //
-case+ d1es of
-| list_cons
+case+ glist_view (d1es) of
+| ~GLcons
     (d1e1, d1es2) => let
     val dq = $SYN.d0ynq_none (loc0)
     val fid = d1exp_dqid (loc0, dq, sym)
@@ -280,7 +302,7 @@ case+ d1es of
   in
     d1exp_seq (loc0, d1es_res)
   end (* end of [list_cons] *)
-| list_nil () => d1exp_errexp (loc0)
+| ~GLnil () => d1exp_errexp (loc0)
 //
 end (* end of [auxfpr] *)
 
@@ -300,11 +322,11 @@ fprintln! (out, "auxfprln: d1es = ", d1es)
 *)
 in
 //
-case+ d1es of
-| list_nil
+case+ glist_view (d1es) of
+| ~GLnil
     ((*void*)) => d1exp_errexp(loc0)
   // list_nil
-| list_cons
+| ~GLcons
     (d1e1, d1es2) => let
     val dq = $SYN.d0ynq_none(loc0)
     val fid = d1exp_dqid(loc0, dq, sym)
@@ -376,30 +398,33 @@ val sym = symbol_FPRINT
 //
 in
 //
-case+ d1es of
-| list_nil
+case+ glist_view (d1es) of
+| ~GLnil
   (
     // argless
   ) => d1exp_errexp (loc0)
 //
-| list_cons
+| ~GLcons
   (
-    d1e, list_nil()
+    d1e, d1es_rest
   ) => (
+    if glist_is_nil (d1es_rest) then (
     case+
-      d1e.d1exp_node of
-    | D1Elist
+      d1exp_node_view (d1e.d1exp_node ())
+    of
+    | ~D1Elist
         (npf, d1es) =>
       (
         auxfpr (loc0, d1es, sym)
       ) // end of [D1Elist]
-    | _(*non-D1Elist*) =>
+    | v (*non-D1Elist*) =>
       (
+        d1exp_node_view_free (v);
         auxfpr(loc0, list_sing(d1e), sym)
       ) (* end of [_] *)
+    ) else auxfpr(loc0, d1es, sym)
   ) (* end of [list_cons] *)
 //
-| list_cons(_, _) => auxfpr(loc0, d1es, sym)
 //
 end (* end of [fsyndef_FPRINT] *)
 
@@ -422,30 +447,33 @@ fprintln!(out, "fsyndef_FPRINTLN: d1es = ", d1es)
 //
 in
 //
-case+ d1es of
-| list_nil
+case+ glist_view (d1es) of
+| ~GLnil
   (
     // argless
   ) => d1exp_errexp(loc0)
 //
-| list_cons
+| ~GLcons
   (
-    d1e, list_nil()
+    d1e, d1es_rest
   ) => (
+    if glist_is_nil (d1es_rest) then (
     case+
-      d1e.d1exp_node of
-    | D1Elist
+      d1exp_node_view (d1e.d1exp_node ())
+    of
+    | ~D1Elist
         (npf, d1es) =>
       (
         auxfprln(loc0, d1es, sym, sym2)
       ) // end of [D1Elist]
-    | _ (*non-D1Elist*) =>
+    | v (*non-D1Elist*) =>
       (
+        d1exp_node_view_free (v);
         auxfprln(loc0, list_sing(d1e), sym, sym2)
       ) (* end of [_] *)
+    ) else auxfprln(loc0, d1es, sym, sym2)
   ) (* end of [list_cons] *)
 //
-| list_cons(_, _) => auxfprln(loc0, d1es, sym, sym2)
 //
 end (* end of [fsyndef_FPRINTLN] *)
 
@@ -490,29 +518,27 @@ println! ("syndef_search_all")
 //
 in
 //
-case+ 0 of
+if id = symbol_CAR then Some_vt{fsyndef}(fsyndef_CAR)
+else if id = symbol_CDR then Some_vt{fsyndef}(fsyndef_CDR)
 //
-| _ when id = symbol_CAR => Some_vt(fsyndef_CAR)
-| _ when id = symbol_CDR => Some_vt(fsyndef_CDR)
+else if id = symbol_ISNIL then Some_vt{fsyndef}(fsyndef_ISNIL)
+else if id = symbol_ISCONS then Some_vt{fsyndef}(fsyndef_ISCONS)
+else if id = symbol_ISLIST then Some_vt{fsyndef}(fsyndef_ISLIST)
 //
-| _ when id = symbol_ISNIL => Some_vt(fsyndef_ISNIL)
-| _ when id = symbol_ISCONS => Some_vt(fsyndef_ISCONS)
-| _ when id = symbol_ISLIST => Some_vt(fsyndef_ISLIST)
+else if id = symbol_TUPZ then Some_vt{fsyndef}(fsyndef_TUPZ)
 //
-| _ when id = symbol_TUPZ => Some_vt(fsyndef_TUPZ)
+else if id = symbol_PRINT then Some_vt{fsyndef}(fsyndef_PRINT)
+else if id = symbol_PRINTLN then Some_vt{fsyndef}(fsyndef_PRINTLN)
+else if id = symbol_PRERR then Some_vt{fsyndef}(fsyndef_PRERR)
+else if id = symbol_PRERRLN then Some_vt{fsyndef}(fsyndef_PRERRLN)
 //
-| _ when id = symbol_PRINT => Some_vt(fsyndef_PRINT)
-| _ when id = symbol_PRINTLN => Some_vt(fsyndef_PRINTLN)
-| _ when id = symbol_PRERR => Some_vt(fsyndef_PRERR)
-| _ when id = symbol_PRERRLN => Some_vt(fsyndef_PRERRLN)
+else if id = symbol_FPRINT then Some_vt{fsyndef}(fsyndef_FPRINT)
+else if id = symbol_FPRINTLN then Some_vt{fsyndef}(fsyndef_FPRINTLN)
 //
-| _ when id = symbol_FPRINT => Some_vt(fsyndef_FPRINT)
-| _ when id = symbol_FPRINTLN => Some_vt(fsyndef_FPRINTLN)
+else if id = symbol_GPRINT then Some_vt{fsyndef}(fsyndef_GPRINT)
+else if id = symbol_GPRINTLN then Some_vt{fsyndef}(fsyndef_GPRINTLN)
 //
-| _ when id = symbol_GPRINT => Some_vt(fsyndef_GPRINT)
-| _ when id = symbol_GPRINTLN => Some_vt(fsyndef_GPRINTLN)
-//
-| _ (* unsupported idext *) => None_vt((*void*))
+else None_vt{fsyndef}((*void*)) (* unsupported idext *)
 //
 end // end of [syndef_search_all]
 
@@ -532,21 +558,21 @@ println! ("d1exp_syndef_resolve")
 in
 //
 case+
-d1e.d1exp_node
+d1exp_node_view (d1e.d1exp_node ())
 of // case+
 //
-| D1Eidextapp
+| ~D1Eidextapp
     (id, d1es) => let
     val opt = syndef_search_all (id)
   in
     case+ opt of
     | ~None_vt() => d1e
     | ~Some_vt(f) => let
-        val d1es = list_reverse (d1es) in f (loc0, (l2l)d1es)
+        val d1es = glist_reverse (d1es) in f (loc0, d1es)
       end // end of [Some_vt]
   end // end of [D1Eidextapp]
 //
-| _ (* non-D1Eidextapp *) => d1e
+| v (* non-D1Eidextapp *) => (d1exp_node_view_free (v); d1e)
 //
 end (* end of [d1exp_syndef_resolve] *)
 

@@ -227,6 +227,6 @@ url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FU
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
 

@@ -1,8 +1,5 @@
 %{
 //
-dynload
-"libatsdoc/dynloadall.dats"
-//
 #include "./../proginatsatxt.dats"
 //
 %}\
@@ -1234,5 +1231,5 @@ an operation to delete an element from a given linear red-black tree.
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

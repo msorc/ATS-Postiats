@@ -49,17 +49,13 @@ staload "./../SATS/cstream_tokener.sats"
 (* ****** ****** *)
 
 datavtype
-tokener(a:type) =
+tokener(a:vtype) =
 TOKENER of
 (cstream, int, $SBF.stringbuf)
 // end of [tokener]
-
 (* ****** ****** *)
-
 assume tokener_vtype = tokener
-
 (* ****** ****** *)
-
 implement{a}
 tokener_make_cstream (cs0) = let
 //
@@ -68,9 +64,7 @@ val buf =
   $SBF.stringbuf_make_nil (i2sz(BUFSZ)) in TOKENER{a}(cs0, c0, buf)
 // end of [val]
 end // end of [tokener_make_cstream]
-
 (* ****** ****** *)
-
 implement{a}
 tokener_free
   (buf) = () where
@@ -79,9 +73,7 @@ tokener_free
   val ((*void*)) = cstream_free (cs0)
   val ((*void*)) = $SBF.stringbuf_free (sbf)
 } (* end of [tokener_getfree_cstream] *)
-
 (* ****** ****** *)
-
 implement{token}
 tokener_get_token
   (buf) = tok where
@@ -90,21 +82,20 @@ tokener_get_token
   val tok = tokener_get_token$main<token> (cs0, c0, sbf)
   prval ((*void*)) = fold@ (buf)
 } (* end of [lexinguf_get_token] *)
-
 (* ****** ****** *)
-
+//
+// HX-2026-10:
+// the current token is kept as a pointer; it is
+// moved out by [tokener2_get] (token_v records that)
+//
 datavtype
-tokener2(token:type) =
-  TOKENER2 of (tokener(token), token)
+tokener2(token:vtype) =
+  TOKENER2 of (tokener(token), ptr(*token*))
 // end of [tokener2]
-
 (* ****** ****** *)
-
 assume token_v = unit_v
-assume tokener2_vtype(a:type) = tokener2(a)
-
+assume tokener2_vtype(a:vtype) = tokener2(a)
 (* ****** ****** *)
-
 implement
 {a}(*tmp*)
 tokener2_get (t2knr) = let
@@ -112,17 +103,23 @@ tokener2_get (t2knr) = let
 val+TOKENER2(_, tok) = t2knr
 //
 in
-  (unit_v() | tok)
+  (unit_v() | $UN.castvwtp0{a}(tok))
 end // end of [tokener2_get]
-
 (* ****** ****** *)
-
 implement
 {token}
-tokener2_unget (pf | t2knr) =
-  let prval unit_v () = pf in () end
-// end of [tokener2_unget]
-
+tokener2_unget
+  (pf | t2knr, tok) = let
+//
+prval unit_v () = pf
+//
+val+@TOKENER2(_, tok0) = t2knr
+val () = tok0 := $UN.castvwtp0{ptr}(tok)
+prval ((*void*)) = fold@ (t2knr)
+//
+in
+  // nothing
+end // end of [tokener2_unget]
 implement
 {token}
 tokener2_getaft (pf | t2knr) =
@@ -131,48 +128,43 @@ tokener2_getaft (pf | t2knr) =
 prval unit_v () = pf
 //
 val+@TOKENER2(tknr, tok) = t2knr
-val () = tok := tokener_get_token<token> (tknr)
+val () =
+  tok := $UN.castvwtp0{ptr}(tokener_get_token<token> (tknr))
 prval ((*void*)) = fold@ (t2knr)
 //
 } (* end of [tokener2_getaft] *)
-
 (* ****** ****** *)
-
 implement
 {token}
 tokener2_getout
-  (t2knr) = tok_ where
+  (t2knr) = tok where
 {
 //
-val+@TOKENER2(tknr, tok) = t2knr
-val tok_ = tok
-val ((*void*)) = tok := tokener_get_token<token> (tknr)
-//
-prval ((*void*)) = fold@ (t2knr)
+val (pf | tok) = tokener2_get<token> (t2knr)
+val ((*void*)) = tokener2_getaft<token> (pf | t2knr)
 //
 } (* end of [tokener2_getout] *)
-
 (* ****** ****** *)
-
 implement
 {a}(*tmp*)
 tokener2_free (t2knr) = let
 //
-val+~TOKENER2(tknr, tok) = t2knr in tokener_free (tknr)
+val+~TOKENER2(tknr, tok) = t2knr
+val () = tokener$token_free<a> ($UN.castvwtp0{a}(tok))
 //
+in
+  tokener_free (tknr)
 end // end of [tokener2_free]
-
 (* ****** ****** *)
-
 implement
 {a}(*tmp*)
 tokener2_make_tokener
   (tknr) = let
 //
-val tok = tokener_get_token<a> (tknr) in TOKENER2 (tknr, tok)
+val tok = tokener_get_token<a> (tknr)
 //
+in
+  TOKENER2 (tknr, $UN.castvwtp0{ptr}(tok))
 end // end of [tokener2_make]
-
 (* ****** ****** *)
-
 (* end of [cstream_tokener.dats] *)

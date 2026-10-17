@@ -69,13 +69,13 @@ datatype action = Up | Down | Random | Reset
 (* ****** ****** *)
 //
 val theUps =
-  theUps.map(TYPE{action})(lam(x) => Up())
+  $BACONJS.EStream_map(theUps, lam(x) => Up())
 val theDowns =
-  theDowns.map(TYPE{action})(lam(x) => Down())
+  $BACONJS.EStream_map(theDowns, lam(x) => Down())
 val theRandoms =
-  theRandoms.map(TYPE{action})(lam(x) => Random())
+  $BACONJS.EStream_map(theRandoms, lam(x) => Random())
 val theResets =
-  theResets.map(TYPE{action})(lam(x) => Reset())
+  $BACONJS.EStream_map(theResets, lam(x) => Reset())
 //
 (* ****** ****** *)
 //
@@ -114,7 +114,7 @@ in
   mybus.push(n)
 end // end of [aux]
 //
-val () = theClicks.onValue()(lam(x) => aux(x))
+val () = $BACONJS.EStream_onValue(theClicks, lam(x) =<cloptr1> aux(x))
 //
 in
   mybus
@@ -140,7 +140,7 @@ in
 end // end of [stringize]
 //
 in
-  theCounts.map(TYPE{string})(lam(x) => stringize(x))
+  $BACONJS.EStream_map(theCounts, lam(x) =<cloptr1> stringize(x))
 end // end of [val]
 //
 extvar "theCounts" = theCounts

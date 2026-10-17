@@ -32,12 +32,26 @@
 // Start Time: June, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_dmacro2_print.dats)
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
 staload _(*anon*) = "./pats_utils.dats"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 
@@ -55,52 +69,52 @@ macdef prstr (s) = fprint_string (out, ,(s))
 //
 in
 //
-case+ x of
-| M2Vint (i) => {
+case+ m2val_view (x) of
+| ~M2Vint (i) => {
     val () = prstr "M2Vint("
     val () = fprint_int (out, i)
     val () = prstr ")"
   }
-| M2Vbool (b) => {
+| ~M2Vbool (b) => {
     val () = prstr "M2Vbool("
     val () = fprint_bool (out, b)
     val () = prstr ")"
   }
-| M2Vchar (c) => {
+| ~M2Vchar (c) => {
     val () = prstr "M2Vchar("
     val () = fprint_char (out, c)
     val () = prstr ")"
   }
-| M2Vfloat (rep) => {
+| ~M2Vfloat (rep) => {
     val () = prstr "M2Vfloat("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
-| M2Vstring (str) => {
+| ~M2Vstring (str) => {
     val () = prstr "M2Vstring("
     val () = fprint_string (out, str)
     val () = prstr ")"
   }
-| M2Vunit () => prstr "M2Vunit()"
+| ~M2Vunit () => prstr "M2Vunit()"
 //
-| M2Vscode (s2e) => {
+| ~M2Vscode (s2e) => {
     val () = prstr "M2Vscode("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   }
-| M2Vdcode (d2e) => {
+| ~M2Vdcode (d2e) => {
     val () = prstr "M2Vdcode("
     val () = fprint_d2exp (out, d2e)
     val () = prstr ")"
   }
 //
-| M2Vlist (xs) => {
+| ~M2Vlist (xs) => {
     val () = prstr "M2Vlist("
-    val () = $UT.fprintlst (out, xs, ", ", fprint_m2val)
+    val () = $UT.fprintlst<m2val> (out, xs, ", ", fprint_m2val)
     val () = prstr ")"
   }
 //
-| M2Verr () => prstr "M2Verr()"
+| ~M2Verr () => prstr "M2Verr()"
 //
 end // end of [fprint_m2val]
 
@@ -113,7 +127,7 @@ prerr_m2val (x) = fprint_m2val (stderr_ref, x)
 
 implement
 fprint_m2valist
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_m2val)
+  (out, xs) = $UT.fprintlst<m2val> (out, xs, ", ", fprint_m2val)
 // end of [fprint_m2valist]
 
 (* ****** ****** *)

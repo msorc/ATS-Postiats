@@ -30,9 +30,11 @@ staload "./../basics_erl.sats"
 //
 (* ****** ****** *)
 //
-staload "./../SATS/list.sats"
 //
 staload "./../SATS/integer.sats"
+//
+staload "./../SATS/list_vt.sats"
+staload "./../SATS/stream_vt.sats"
 //
 staload "./../SATS/intrange.sats"
 //

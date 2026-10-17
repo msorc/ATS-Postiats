@@ -177,16 +177,6 @@ cleanall:: ; $(RMF) rtfind2_dats.erl
 
 ######
 
-all:: \
-twice_dats.erl
-twice_dats.erl: twice.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2ERL) -o $@
-twice_dats.beam:: twice_dats.erl ; $(ERLC) $< 
-regress:: twice_dats.beam; $(ERL) -run twice_dats main0_erl -run init stop -noshell
-cleanall:: ; $(RMF) twice_dats.erl
-
-######
-
 testall:: all
 testall:: libatscc2erl
 testall:: regress

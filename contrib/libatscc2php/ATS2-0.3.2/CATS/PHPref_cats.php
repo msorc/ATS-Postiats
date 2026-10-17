@@ -52,6 +52,11 @@ ats2phppre_PHPref_set_elt
   ($A, $x)
   { $A->value = $x; return ; }
 //
+function
+ats2phppre_PHPref_exch_elt
+  ($A, $x)
+  { $x0 = $A->value; $A->value = $x; return $x0; }
+//
 /* ****** ****** */
 
 /* end of [PHPref_cats.php] */

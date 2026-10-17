@@ -115,6 +115,6 @@ end // end of [gpow_int_val]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gnumber_atxt.txt")
 %}\

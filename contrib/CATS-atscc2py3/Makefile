@@ -44,8 +44,8 @@ bin_atscc2py3
 bin_atscc2py3: \
 $(SOURCES_DATS); \
 $(PATSCC) \
-  -DATS_MEMALLOC_GCBDW -O2 -o bin/atscc2py3 \
-  $(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS) -lgc
+  -DATS_MEMALLOC_LIBC -O2 -o bin/atscc2py3 \
+  $(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS)
 #
 ######
 #

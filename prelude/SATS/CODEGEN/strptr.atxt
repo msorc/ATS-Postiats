@@ -119,34 +119,12 @@ strptr2strnptr
 //
 #atscode_separator()
 //
-castfn
-strptr2stropt
-  {l:addr}
-(
-  x: strptr (l)
-) :<>
-[n:int
-|(l==null&&n < 0)||(l>null&&n>=0)
-] stropt(n)
 //
-castfn
-strptr2stropt0(x: Strptr0):<> Stropt0
-castfn
-strptr2stropt1(x: Strptr1):<> Stropt1
-//
-castfn
-strnptr2stropt
-  {l:addr}{n:int}
-  (x: strnptr(l, n)):<> stropt(n)
-//
-#atscode_separator()
-//
-castfn
-strptr2string(x: Strptr1):<> String
-//
-castfn
-strnptr2string
-  {l:addr}{n:nat}(x: strnptr(l, n)):<> string(n)
+// HX-2026-10: no GC
+// The castfns turning a linear string (strptr/strnptr)
+// into a nonlinear one (string/stropt) are removed as the
+// memory would never be freed; [$UNSAFE.strptr2string]
+// can be used for borrowing a linear string.
 //
 #atscode_separator()
 
@@ -464,6 +442,6 @@ overload ptrcast with strnptr2ptr
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "strptr_atxt.txt")
 %}\

@@ -35,13 +35,14 @@
 
 staload "./pats_basics.sats"
 staload "./pats_counter.sats"
+staload "libats/SATS/arena.sats"
 
 (* ****** ****** *)
 //
 abst@ype stamp_t0ype = count
 //
 typedef stamp = stamp_t0ype
-typedef stampopt = Option (stamp)
+typedef stampopt = gopt(stamp)
 //
 (* ****** ****** *)
 
@@ -112,8 +113,8 @@ fun funlab_stamp_make (): stamp
 
 (* ****** ****** *)
 //
-absviewtype stampset_viewtype
-viewtypedef stampset_vt = stampset_viewtype
+absvtype stampset_viewtype = ptr
+vtypedef stampset_vt = stampset_viewtype
 //
 fun stampset_vt_nil ():<> stampset_vt
 fun stampset_vt_is_nil (xs: !stampset_vt):<> bool

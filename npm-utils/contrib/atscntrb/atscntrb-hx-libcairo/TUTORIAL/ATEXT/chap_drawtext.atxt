@@ -175,5 +175,5 @@ fun cairo_show_text {l:agz} (cr: !cairo_ref l, utf8: string): void
 #comment(" end of [chap_drawtext.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "chap_drawtext_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "chap_drawtext_atxt.txt")
 %}

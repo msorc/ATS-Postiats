@@ -1,9 +1,10 @@
 %{
 //
-dynload "libatsdoc/dynloadall.dats"
-//
-dynload "utils/libatsynmark/dynloadall.dats"
 staload "utils/libatsynmark/SATS/libatsynmark.sats"
+//
+// HX-2026-10: the initialization of libatsynmark/libatsopt (ATS1: dynload)
+//
+val () = libatsynmark_dynloadall ()
 //
 #include "utils/atsdoc/HATS/pats2xhtmlatxt.hats"
 //
@@ -12,7 +13,6 @@ staload "declatext.sats"
 dynload "htmlgendecl.dats"
 staload "htmlgendecl.sats"
 //
-staload _(*anon*) = "prelude/DATS/list.dats"
 staload _(*anon*) = "prelude/DATS/list_vt.dats"
 staload _(*anon*) = "prelude/DATS/reference.dats"
 //
@@ -22,7 +22,7 @@ theDeclrepLst_initize (fil: FILEref): void
 implement
 theDeclrepLst_initize
   (filr) = let
-  val cs = char_list_vt_make_file (filr)
+  val cs = libatsynmark_char_list_vt_make_file (filr)
   val replst = charlst_declitemize (0(*sta*), cs)
 in
   theDeclrepLst_set (replst)
@@ -46,10 +46,10 @@ htmlgendecl_initize () = let
 //
 val name = srcfilename_get ()
 val filr =
-  open_file_exn (name, file_mode_r)
+  libatsynmark_fopen_exn (name, "r")
 val () = libatsynmark_filename_set_current (name)
 val () = theDeclrepLst_initize (filr)
-val () = close_file_exn (filr)
+val () = fileref_close (filr)
 //
 in
   // nothing
@@ -99,5 +99,5 @@ val () = theAtextMap_insert_str ("theDeclitemLst_content", theDeclitemLst_conten
 </html>
 
 %{
-implement main () = fprint_filsub (stdout_ref, "htmlgendecl_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "htmlgendecl_atxt.txt")
 %}\

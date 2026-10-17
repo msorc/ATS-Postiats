@@ -57,6 +57,6 @@ end // end of [memory$alloc]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "memory_atxt.txt")
 %}\

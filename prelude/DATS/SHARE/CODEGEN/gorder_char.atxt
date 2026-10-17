@@ -35,6 +35,6 @@ gcompare_val_val<char> = compare_char0_char0
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_char_atxt.txt")
 %}\

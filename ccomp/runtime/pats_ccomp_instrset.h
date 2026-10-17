@@ -47,10 +47,19 @@
 //
 /* ****** ****** */
 
-#define ATStysum() struct{ int contag; }
-#define ATStyexn() struct{ int exntag; char *exnmsg; }
-#define ATStylist(tyelt) struct{ tyelt head; void *tail; }
-#define ATStyclo() struct{ void *cfun; }
+//
+// HX-2026-10:
+// a single (may_alias) type for accessing the tag of
+// a constructor cell (each expansion of an anonymous
+// struct type would be a distinct type)
+//
+typedef ATSstruct { int contag; } atstype_tysum ;
+#define ATStysum() atstype_tysum
+typedef ATSstruct { int exntag; char *exnmsg; } atstype_tyexn ;
+#define ATStyexn() atstype_tyexn
+#define ATStylist(tyelt) ATSstruct{ tyelt head; void *tail; }
+typedef ATSstruct { void *cfun; } atstype_tyclo ;
+#define ATStyclo() atstype_tyclo
 
 /* ****** ****** */
 //

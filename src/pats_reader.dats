@@ -32,311 +32,148 @@
 // Start Time: March, 2011
 //
 (* ****** ****** *)
-//
-staload
-ATSPRE = "./pats_atspre.dats"
-//
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/libc/SATS/stdio.sats"
+
 (* ****** ****** *)
 
 staload "./pats_reader.sats"
 
 (* ****** ****** *)
 
-viewtypedef
-freader (v:view) =
+#define KIND_FILP 0
+#define KIND_GETC 1
+#define KIND_STRING 2
+#define KIND_CHARLST 3
+
+(* ****** ****** *)
+
+vtypedef
+freader =
 $extype_struct
 "pats_reader_struct" of {
-  pfres= v
-, getchar= (!v | (*none*)) -<cloptr1> int
-, freeres= ( v | (*none*)) -<cloptr1> void  
-} // end of [freader]
+  rkind= int, rptr= ptr, ridx= size_t
+} (* end of [freader] *)
+
+assume reader_vt0ype = freader
 
 (* ****** ****** *)
-
-absviewt@ype reader0 = reader? // for initialization
-
-(* ****** ****** *)
-
-local
-//
-staload
-"libc/SATS/stdio.sats"
-//
-assume reader0 = freader (unit_v)?
-assume reader_vt0ype = [v:view] freader (v)
-//
-in (* in of [local] *)
-
-(* ****** ****** *)
-//
-implement
-reader_get_char
-  (r) = r.getchar (r.pfres | (*none*))
-//
-(* ****** ****** *)
-
-fun
-reader0_initize_filp
-  {m:fmode}{l0:addr}
-(
-  pfmod:
-  file_mode_lte(m,r)
-, pffil: FILE(m) @ l0
-| r: &reader0 >> reader, p0: ptr l0
-) : void = () where
-{
-//
-viewdef v = FILE(m) @ l0
-//
-val
-getchar = lam
-  (pffil: !v | (*none*)): int =<cloptr1> fgetc_err (pfmod | !p0)
-// end of [getchar]
-//
-val
-freeres = lam
-  (pffil: v | (*none*)): void =<cloptr1> fclose_exn (pffil | p0)
-//
-prval () = r.pfres := pffil
-//
-val ((*void*)) = r.getchar := getchar
-val ((*void*)) = r.freeres := freeres  
-//
-} (* end of [reader0_initize_filp] *)
-
-(* ****** ****** *)
-
-fun
-reader0_initize_getc
-(
-  r: &reader0 >> reader, getc: () -<cloptr1> int
-) : void = () where {
-  viewdef v = unit_v
-  val getchar = __cast (getc) where {
-    extern castfn __cast
-      (f: () -<cloptr1> int): (!v | (*none*)) -<cloptr1> int
-    // end of [extern]
-  } // end of [val]
-  val freeres = lam (
-    pf: v | (*none*)
-  ) : void =<cloptr1> let prval unit_v () = pf in (*none*) end 
-  val () = r.pfres := unit_v ()
-  val () = r.getchar := getchar
-  val () = r.freeres := freeres
-} // end of [reader0_initize_getc]
-
-(* ****** ****** *)
-
-fun
-reader0_initize_string
-  {n:nat} {l:addr} (
-  pfgc: free_gc_v (size_t?, l)
-, pfat: sizeLte n @ l
-| r: &reader0 >> reader, inp: string n, p: ptr l
-) : void = () where {
-//
-  viewdef v = (
-    free_gc_v (size_t?, l), sizeLte n @ l
-  ) // end of [viewdef]
-//
-  val getchar = lam
-    (pf: !v | (*none*)): int =<cloptr1> let
-    prval pf1 = pf.1
-    val i = !p
-    prval () = pf.1 := pf1
-    val isnotend = string_isnot_atend (inp, i)
-  in
-    if isnotend then let
-      val c = string_get_char_at (inp, i)
-      prval pf1 = pf.1      
-      val () = !p := i + 1
-      prval () = pf.1 := pf1
-    in
-      (int_of_char)c
-    end else ~1 (*EOF*) // end of [if]
-  end // end of [val]
-//
-  val freeres = lam
-    (pf: v | (*none*)): void =<cloptr1> ptr_free (pf.0, pf.1 | p)
-  // end of [freeres]
-//
-  val () = r.pfres := (pfgc, pfat)
-  val () = r.getchar := getchar
-  val () = r.freeres := freeres
-} // end of [reader0_initize_string]
-
-(* ****** ****** *)
-
-local
-//
-viewtypedef cs = List_vt (char)
-//
-in (* in of [local] *)
-
-fun
-reader0_initize_charlst_vt
-  {l:addr} (
-  pfgc: free_gc_v (cs?, l)
-, pfat: cs @ l
-| r: &reader0 >> reader, p: ptr l
-) : void = () where {
-//
-  viewdef v = (
-    free_gc_v (cs?, l), cs @ l
-  ) // end of [viewdef]
-//
-  val getchar =
-    lam (
-    pf: !v | (*none*)
-  ) : int =<cloptr1> let
-    prval pf1 = pf.1 // for dereferencing [p]
-  in
-    case+ !p of
-    | ~list_vt_cons
-        (c, cs) => let
-        val () = !p := cs; prval () = pf.1 := pf1
-      in
-        int_of_uchar (uchar_of_char (c))
-      end // end of [list_vt_cons]
-    | list_vt_nil () => let
-        prval () = fold@ (!p); prval () = pf.1 := pf1
-      in
-        ~1 (*EOF*)
-      end // end of [list_vt_nil]
-  end // end of [lam] // end of [val]
-//
-  val freeres =
-    lam (
-    pf: v | (*none*)
-  ) : void =<cloptr1> let
-    prval (pf0, pf1) = pf
-    val () = list_vt_free<char> (!p)
-  in
-    ptr_free (pf0, pf1 | p)
-  end // end of [freeres]
-//
-  val () = r.pfres := (pfgc, pfat)
-  val () = r.getchar := getchar
-  val () = r.freeres := freeres
-} // end of [reader0_initize_charlst_vt]
-
-end // end of [local]
-
-(* ****** ****** *)
-
-fun
-reader0_uninitize
-(
-  r: &reader >> reader0
-) : void = () where {
-  stavar v: view
-  prval pf = r.pfres : v
-  val () = r.freeres (pf | (*none*))
-  val () = cloptr_free (r.getchar)
-  val () = cloptr_free (r.freeres)
-  prval () = __assert (r) where {
-    extern prfun __assert (r: &freader(v)? >> reader0): void
-  } // end of [prval]
-} // end of [reader0_uninitize]
-
-(* ****** ****** *)
-
-end // end of [local]
-
-(* ****** ****** *)
-
-local
 
 extern
-prfun reader0_encode (r: &reader? >> reader0): void
-extern
-prfun reader0_decode (r: &reader0 >> reader?): void
+fun
+reader_set
+(
+  r: &reader? >> reader, knd: int, p: ptr
+) : void = "mac#patsopt_reader_set"
 
-in // in of [local]
+%{^
+#define patsopt_reader_set(r, knd, p) \
+  do { ((pats_reader_struct*)(r))->rkind = (knd) ; \
+       ((pats_reader_struct*)(r))->rptr = (p) ; \
+       ((pats_reader_struct*)(r))->ridx = 0 ; } while (0)
+%} // end of [%{^]
 
 (* ****** ****** *)
 
 implement
 reader_initize_filp
-(
-  pfmod, pffil | r, p
-) = () where
-{
-//
-prval () = reader0_encode (r)
-//
-val ((*void*)) =
-  reader0_initize_filp (pfmod, pffil | r, p)
-//
-} // end of [reader_initize_filp]
-
-(* ****** ****** *)
+  (r, fp) = reader_set (r, KIND_FILP, $UN.cast{ptr}(fp))
+// end of [reader_initize_filp]
 
 implement
 reader_initize_getc
-  (r, getc) = () where
-{
-//
-prval () = reader0_encode (r)
-//
-val ((*void*)) = reader0_initize_getc (r, getc)
-//
-} // end of [reader_initize_getc]
-
-(* ****** ****** *)
+  (r, getc) = reader_set (r, KIND_GETC, $UN.castvwtp0{ptr}(getc))
+// end of [reader_initize_getc]
 
 implement
 reader_initize_string
-  (r, inp) = () where
-{
-//
-val inp = string1_of_string inp
-val (pfgc, pfat | p) = ptr_alloc<size_t> ()
-val () = !p := size1_of_int1 (0)
-//
-prval () = reader0_encode (r)
-//
-val () =
-  reader0_initize_string (pfgc, pfat | r, inp, p)
-//
-} (* end of preader_initize_string] *)
-
-(* ****** ****** *)
+  (r, inp) = reader_set (r, KIND_STRING, $UN.cast{ptr}(inp))
+// end of [reader_initize_string]
 
 implement
 reader_initize_charlst_vt
-  (r, inp) = () where
-{
-val
-(
-  pfgc, pfat | p
-) =
-ptr_alloc<List_vt(char)> ()
-//
-val () = !p := inp
-//
-prval () = reader0_encode (r)
-//
-val ((*void*)) =
-  reader0_initize_charlst_vt (pfgc, pfat | r, p)
-//
-} (* end of preader_initize_charlst_vt] *)
+  (r, inp) = reader_set (r, KIND_CHARLST, $UN.castvwtp0{ptr}(inp))
+// end of [reader_initize_charlst_vt]
 
 (* ****** ****** *)
 
 implement
-reader_uninitize
-  (r) = () where {
+reader_get_char (r) = let
+  val knd = r.rkind
+in
 //
-val () = reader0_uninitize (r)
+case+ 0 of
+| _ when knd = KIND_FILP =>
+    fgetc0 ($UN.cast{FILEref}(r.rptr))
+| _ when knd = KIND_GETC => let
+    val f = $UN.castvwtp0{() -<lincloptr1> int}(r.rptr)
+    val i = f ()
+    val _ = $UN.castvwtp0{ptr}(f)
+  in
+    i
+  end // end of [KIND_GETC]
+| _ when knd = KIND_STRING => let
+    val p = $UN.cast{ptr}(r.rptr)
+    val i = r.ridx
+    val c = $UN.ptr0_get<char> (ptr0_add_guint<char> (p, i))
+  in
+    if (c != '\000')
+      then let
+        val () = r.ridx := succ(i)
+      in
+        char2int0 (c)
+      end // end of [then]
+      else ~1 (*EOF*) // end of [else]
+  end // end of [KIND_STRING]
+| _ (* KIND_CHARLST *) => let
+    val cs = $UN.castvwtp0{List0_vt(char)}(r.rptr)
+  in
+    case+ cs of
+    | ~list_vt_cons (c, cs) => let
+        val () = r.rptr := $UN.castvwtp0{ptr}(cs)
+      in
+        uchar2int0 (char2uchar0 (c))
+      end // end of [list_vt_cons]
+    | ~list_vt_nil () => let
+        val () = r.rptr := $UN.castvwtp0{ptr}(list_vt_nil{char}())
+      in
+        ~1 (*EOF*)
+      end // end of [list_vt_nil]
+  end // end of [KIND_CHARLST]
 //
-prval ((*void*)) = reader0_decode (r)
-//
-} (* end of [reader_uninitize] *)
+end // end of [reader_get_char]
 
 (* ****** ****** *)
 
-end // end of [local]
+implement
+reader_uninitize (r) = let
+  val knd = r.rkind
+  val () =
+  (
+  case+ 0 of
+  | _ when knd = KIND_FILP => let
+      val () = fileref_close ($UN.cast{FILEref}(r.rptr)) in (*nothing*)
+    end
+  | _ when knd = KIND_GETC => let
+      val f = $UN.castvwtp0{() -<lincloptr1> int}(r.rptr)
+    in
+      cloptr_free ($UN.castvwtp0{cloptr(void)}(f))
+    end
+  | _ when knd = KIND_CHARLST => let
+      val cs = $UN.castvwtp0{List0_vt(char)}(r.rptr)
+    in
+      list_vt_free (cs)
+    end
+  | _ (* KIND_STRING *) => ()
+  ) : void
+in
+  $UN.castvwtp0{void}(r)
+end // end of [reader_uninitize]
 
 (* ****** ****** *)
 

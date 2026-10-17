@@ -13,18 +13,15 @@
 
 (* ****** ****** *)
 
-assume location_type = string
-
-(* ****** ****** *)
-
 implement
-location_make (rep) = rep
+location_make
+  (ar, rep) = astring_make(ar, rep)
 
 (* ****** ****** *)
 
 implement
 fprint_location
-  (out, loc) = fprint_string (out, loc)
+  (ar, out, loc) = astring_fprint(ar, out, loc)
 // end of [fprint_location]
 
 (* ****** ****** *)

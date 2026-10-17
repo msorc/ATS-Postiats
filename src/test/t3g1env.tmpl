@@ -1,0 +1,61 @@
+(* group 1 of the trans3 port (t3g1_gen.py): the test doubles of t3env.tmpl WITHOUT [d2var_get_type_some] (it is real: pats_trans3_dynexp_up.dats) *)
+(* the test doubles of the driver of the level-3 test (t3_gen.py), generated from t3env.tmpl (see t3hand.tmpl): implemented once, in the driver *)
+(* ****** ****** *)
+//
+// the test double of the pervasive static environment of trans2_env (a table, the last [t_penv_add] first)
+//
+2|var the_penv_ids: glist (symbol) = glist_nil ()
+2|var the_penv_itms: glist (s2itm) = glist_nil ()
+2|val the_penv_ids_r = ref_make_viewptr{glist (symbol)} (view@ the_penv_ids | addr@ the_penv_ids)
+2|val the_penv_itms_r = ref_make_viewptr{glist (s2itm)} (view@ the_penv_itms | addr@ the_penv_itms)
+2|implement t_penv_add (id, itm) = {
+2|  val () = ref_set_elt (the_penv_ids_r, glist_cons<symbol> (id, ref_get_elt (the_penv_ids_r)))
+2|  val () = ref_set_elt (the_penv_itms_r, glist_cons<s2itm> (itm, ref_get_elt (the_penv_itms_r)))
+2|}
+2|fun penv_find (ids: glist (symbol), itms: glist (s2itm), id: symbol): Option_vt (s2itm) =
+2|  case+ glist_view (ids) of
+2|  | ~GLnil () => None_vt ()
+2|  | ~GLcons (id1, ids) => (
+2|    case+ glist_view (itms) of
+2|    | ~GLnil () => None_vt ()
+2|    | ~GLcons (itm1, itms) => if $SYM.eq_symbol_symbol (id, id1) then Some_vt (itm1) else penv_find (ids, itms, id)
+2|    )
+2|implement the_s2expenv_pervasive_find (id) =
+2|  penv_find (ref_get_elt (the_penv_ids_r), ref_get_elt (the_penv_itms_r), id)
+1|val the_penv_ids = ref<List (symbol)> (list_nil ())
+1|val the_penv_itms = ref<List (s2itm)> (list_nil ())
+1|implement t_penv_add (id, itm) = {
+1|  val () = !the_penv_ids := list_cons (id, !the_penv_ids)
+1|  val () = !the_penv_itms := list_cons (itm, !the_penv_itms)
+1|}
+1|fun penv_find (ids: List (symbol), itms: List (s2itm), id: symbol): Option_vt (s2itm) =
+1|  case+ ids of
+1|  | list_nil () => None_vt ()
+1|  | list_cons (id1, ids) => (
+1|    case+ itms of
+1|    | list_nil () => None_vt ()
+1|    | list_cons (itm1, itms) => if $SYM.eq_symbol_symbol (id, id1) then Some_vt (itm1) else penv_find (ids, itms, id)
+1|    )
+1|implement $TRENV2.the_s2expenv_pervasive_find (id) = penv_find (!the_penv_ids, !the_penv_itms, id)
+//
+// the functions that trans3_env needs from the modules that are not ported yet (trans2, trans3 proper)
+//
+// the instantiation of a constructor (test double): the quantifiers of the type of the constructor are taken off
+2|fun t_con_inst (e: s2exp): @(s2qualst, s2exp) = let
+2|  var vs: s2varlst? and ps: s2explst? and sc: s2exp?
+2|in
+2|  if uns2exp_exiuni (1, e, vs, ps, sc) then let
+2|    val @(qs, e1) = t_con_inst (sc)
+2|  in @(glist_cons<s2qua> (s2qua_new (vs, ps), qs), e1) end else @(glist_nil (), e)
+2|end
+2|implement trans3_env_d2con_instantiate (loc, d2c) = t_con_inst (d2con_get_type (d2c))
+1|fun t_con_inst (e: s2exp): @(s2qualst, s2exp) = let
+1|  var vs: s2varlst and ps: s2explst and sc: s2exp
+1|in
+1|  if uns2exp_exiuni (1, e, vs, ps, sc) then let
+1|    val @(qs, e1) = t_con_inst (sc)
+1|  in @(list_cons (@{ s2qua_svs= vs, s2qua_sps= ps }, qs), e1) end else @(list_nil (), e)
+1|end
+1|implement $TR2.d2con_instantiate (loc, d2c) = t_con_inst (d2con_get_type (d2c))
+1|implement $TRENV2.filenv_getref_d3eclistopt (fenv) = $UN.cast{Ptr1} (1)
+1|implement $TRENV2.filenv_get_d2eclist (fenv) = list_nil ()

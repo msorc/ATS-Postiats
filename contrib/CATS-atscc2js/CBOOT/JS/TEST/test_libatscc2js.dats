@@ -15,12 +15,12 @@ ATS_DYNLOADNAME
 #define
 LIBATSCC2JS_targetloc
 "$PATSHOME\
-/contrib/libatscc2js/ATS2-0.3.2"
+/contrib/libatscc2js"
 //
 (* ****** ****** *)
 //
 #include
-"{$LIBATSCC2JS}/staloadall.hats"
+"{$LIBATSCC2JS}/mylibies.hats"
 //
 (* ****** ****** *)
 

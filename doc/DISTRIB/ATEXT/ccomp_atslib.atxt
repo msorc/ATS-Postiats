@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -62,7 +64,7 @@ packpostamble () = let
 val out = stdout_ref
 val () = fprint_string (out, "\
 #\n\
-echo \"The \${ATSHOME}/ccomp/atslib files have been copied.\"\n\
+echo \"The \\${ATSHOME}/ccomp/atslib files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -110,7 +112,7 @@ ATS/ccomp/atslib
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

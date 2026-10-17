@@ -5,22 +5,12 @@
 
 ######
 
-CC=gcc
-CCOMP=$(CC)
-
-######
 #
-ATSCC=$(ATSHOME)/bin/atscc
-ATSOPT=$(ATSHOME)/bin/atsopt
+# libatsopt.a is built by $(PATSHOME)/src (the compiler is written in ATS2 now): it
+# contains the compiler and the C API of utils/libatsopt (src/libatsopt_ext.c,
+# src/libatsopt_ext.dats), so there is nothing to add. The stage-0 compiler is the
+# one of src/Makefile (PATSOPT=, STAGE0HOME=, see src/README).
 #
-######
-
-ATSRUNTIME=$(ATSHOME)/ccomp/runtime
-
-######
-
-DATS=./../DATS
-
 ######
 
 all:: libatsopt
@@ -36,51 +26,35 @@ libatsopt:: libatsopt_gmp
 #
 # For building libatsopt with libgmp dependency
 #
+libatsopt_gmp:: ; $(RMF) libatsopt.a
 libatsopt_gmp:: ; \
 $(MAKE) -C $(PATSHOME)/src cleanall
 libatsopt_gmp:: ; \
-$(MAKE) -C $(PATSHOME)/src C3NSTRINTKND=gmpknd libatsopt
-#
-libatsopt_gmp:: ; $(RMF) libatsopt.a
-libatsopt_gmp:: ; $(MAKE) -C $(PATSHOME)/src CBOOTgmp
-#
-libatsopt_gmp:: ; \
-$(MAKE) -C $(PATSHOME)/src/CBOOT cleanall
-libatsopt_gmp:: ; \
-$(MAKE) -C $(PATSHOME)/src/CBOOT libatsopt && $(MVF) $(PATSHOME)/src/CBOOT/libatsopt.a .
+$(MAKE) -C $(PATSHOME)/src C3NSTRINTKND=gmpknd libatsopt.a && $(CPF) $(PATSHOME)/src/libatsopt.a .
 #
 ######
 #
 # For building libatsopt without libgmp dependency
 #
+libatsopt_int:: ; $(RMF) libatsopt.a
 libatsopt_int:: ; \
 $(MAKE) -C $(PATSHOME)/src cleanall
 libatsopt_int:: ; \
-$(MAKE) -C $(PATSHOME)/src C3NSTRINTKND=intknd libatsopt
-#
-libatsopt_int:: ; $(RMF) libatsopt.a
-libatsopt_int:: ; $(MAKE) -C $(PATSHOME)/src CBOOTint
-#
-libatsopt_int:: ; \
-$(MAKE) -C $(PATSHOME)/src/CBOOT cleanall
-libatsopt_int:: ; \
-$(MAKE) -C $(PATSHOME)/src/CBOOT libatsopt && $(MVF) $(PATSHOME)/src/CBOOT/libatsopt.a .
+$(MAKE) -C $(PATSHOME)/src C3NSTRINTKND=intknd libatsopt.a && $(CPF) $(PATSHOME)/src/libatsopt.a .
 #
 ######
 #
-patsopt_ext_dats.c: \
-$(DATS)/patsopt_ext.dats; \
-  $(ATSCC) -IATS ${PATSHOME} -IATS ${ATSHOME} -cc $<
-patsopt_ext_dats.o: patsopt_ext_dats.c ; \
-$(CCOMP) -O2 $(CFLAGS) \
-  -I $(ATSHOME) -I $(ATSRUNTIME) -I $(PATSHOME)/src -c -o $@ $<
+# the extension (the C API of libatsopt) is part of src/libatsopt.a
 #
-libatsopt_ext:: patsopt_ext_dats.o ; $(AR) -r libatsopt.a $<
+libatsopt_ext:: ; true
 #
+######
+
 ######
 
 AR= ar
 RMF=rm -f
+CPF=cp -f
 MVF=mv -f
 MAKE=make
 

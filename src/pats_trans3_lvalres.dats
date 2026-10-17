@@ -37,13 +37,22 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_lvalres.dats, see PORTING.md,
+// "Level 3 translation, group 3 (p2at/selab/fldfrat/lvalres)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -57,6 +66,12 @@ staload _(*anon*) = "./pats_errmsg.dats"
 implement
 prerr_FILENAME<> () = prerr "pats_trans3_lvalres"
 //
+(* ****** ****** *)
+
+staload
+LOC = "./pats_location.sats"
+typedef loc_t = $LOC.location
+
 (* ****** ****** *)
 
 staload "./pats_syntax.sats"
@@ -102,7 +117,7 @@ auxerr_pfobj
   val () = prerr "] failed to turn up a result."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_pfobj_search_none (loc0, s2l))
+  the_trans3errlst_add (trans3err_T3E_pfobj_search_none (loc0, s2l))
 end // end of [auxerr_pfobj]
 
 fun auxmain
@@ -113,31 +128,27 @@ fun auxmain
 , s2e_new: s2exp
 ) : s2exp = let
 //
-val+~PFOBJ (
+val ~PFOBJ (
   d2v, s2e_ctx, s2e_elt, s2l
 ) = pfobj // end of [val]
-var ctxtopt: s2ctxtopt = None ()
-(*
-val () = println! ("auxmain: s2e_elt = ", s2e_elt)
-*)
-val s2es2ps =
+var ctxtopt: s2ctxtopt = gopt_none ()
+val @(s2e_old, s2ps) =
   s2exp_get_dlablst_context_check (loc0, s2e_elt, d3ls, ctxtopt)
-val s2e_old = s2es2ps.0
-val () = trans3_env_add_proplst_vt (loc0, s2es2ps.1)
+val () = trans3_env_add_proplst_vt (loc0, s2ps)
 //
 in
 //
-case+ ctxtopt of
-| Some (ctxt) => let
+case+ gopt_view(ctxtopt) of
+| ~GOsome (ctxt) => let
     val s2e_elt =
       s2ctxt_hrepl (ctxt, s2e_new)
     // end of [val]
     val s2e = s2exp_hrepl (s2e_ctx, s2e_elt)
-    val () = d2var_set_type (d2v, Some (s2e))
+    val () = d2var_set_type (d2v, gopt_some (s2e))
   in
     s2e_old
-  end // end of [Some]
-| None () => let
+  end // end of [GOsome]
+| ~GOnone () => let
     val err = $SOL.s2exp_tyleq_solve (loc0, s2e_new, s2e_old)
     val () = if err > 0 then let
       val () = prerr_error3_loc (loc0)
@@ -145,11 +156,11 @@ case+ ctxtopt of
       val () = prerr_newline ()
       val () = prerr_the_staerrlst ()
     in
-      the_trans3errlst_add (T3E_s2addr_exch_type_oldnew (loc0, s2e_elt, d3ls, s2e_new))
+      the_trans3errlst_add (trans3err_T3E_s2addr_exch_type_oldnew (loc0, s2e_elt, d3ls, s2e_new))
     end // end of [if] // end of [val]
   in
     s2e_old
-  end // end of [None]
+  end // end of [GOnone]
 //
 end // end of [auxmain]
 
@@ -189,7 +200,7 @@ auxerr_linold
   val () = (prerr "["; prerr_s2exp (s2e_old); prerr "].")
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d3lval_exch_type_linold (loc0, d3e, d3ls))
+  the_trans3errlst_add (trans3err_T3E_d3lval_exch_type_linold (loc0, d3e, d3ls))
 end // end of [auxerr_linold]
 
 fun
@@ -204,7 +215,7 @@ d2var_refval_check
     val () = prerr "] is required to be mutable in order to support call-by-reference."
     val () = prerr_newline ()
   in
-    the_trans3errlst_add (T3E_d3lval_refval (loc0, d2v))
+    the_trans3errlst_add (trans3err_T3E_d3lval_refval (loc0, d2v))
   end // end of [if]
 // end of [d2var_refval_check]
 
@@ -216,108 +227,101 @@ d3lval_set_type_err
   refval, d3e0, s2e_new, err
 ) = let
 //
-val loc0 = d3e0.d3exp_loc
-//
-(*
-val () =
-(
-  println! ("d3lval_set_type_err: d3e0 = ", d3e0);
-  println! ("d3lval_set_type_err: s2e_new = ", s2e_new);
-) // end of [val]
-*)
+val loc0 = d3e0.d3exp_loc()
 //
 in
 //
 case+
-d3e0.d3exp_node of
+d3exp_node_view(d3e0.d3exp_node()) of
 //
-| D3Evar (d2v)
-    when d2var_is_mutabl (d2v) => let
-    val-Some (s2l) = d2var_get_addr (d2v)
-    val d3ls = list_nil // HX: a special case of sel_var
-    val _(*old*) = s2addr_exch_type (loc0, s2l, d3ls, s2e_new)
-  in
-    // nothing
-  end // end of [D2Evar/mutabl]
+| ~D3Evar (d2v) =>
+  (
+    if d2var_is_mutabl (d2v) then let
+      val-~GOsome (s2l) = gopt_view (d2var_get_addr (d2v))
+      val d3ls = glist_nil () // HX: a special case of sel_var
+      val _(*old*) = s2addr_exch_type (loc0, s2l, d3ls, s2e_new)
+    in
+      // nothing
+    end // end of [D2Evar/mutabl]
+    else if d2var_is_linear (d2v) then let
+      val () =
+        d2var_refval_check (loc0, d2v, refval)
+      // end of [val]
+      val opt =
+        d2var_exch_type (d2v, gopt_some (s2e_new))
+      // end of [val]
+      val () = d3exp_set_type (d3e0, s2e_new)
+    in
+      case+ gopt_view(opt) of
+      | ~GOsome (s2e_old) => let
+          val islin = s2exp_is_lin (s2e_old)
+          val () = if islin then
+            auxerr_linold (loc0, d3e0, glist_nil((*d3ls*)), s2e_old)
+          // end of [if] // end of [val]
+        in
+          // nothing
+        end // end of [GOsome]
+      | ~GOnone ((*none*)) => ()
+    end // end of [D2Evar/linear]
+    else (err := err + 1)
+  ) (* end of [D3Evar] *)
 //
-| D3Evar (d2v)
-    when d2var_is_linear (d2v) => let
-    val () =
-      d2var_refval_check (loc0, d2v, refval)
-    // end of [val]
-    val opt =
-      d2var_exch_type (d2v, Some (s2e_new))
-    // end of [val]
-    val () = d3exp_set_type (d3e0, s2e_new)
-  in
-    case+ opt of
-    | Some (s2e_old) => let
-        val islin = s2exp_is_lin (s2e_old)
-        val () = if islin then
-          auxerr_linold (loc0, d3e0, list_nil(*d3ls*), s2e_old)
-        // end of [if] // end of [val]
-      in
-        // nothing
-      end // end of [Some]
-    | None ((*none*)) => ()
-  end // end of [D2Evar/linear]
+| ~D3Esel_var (d2v, s2rt, d3ls) =>
+  (
+    if d2var_is_mutabl (d2v) then let
+      val-~GOsome (s2l) = gopt_view (d2var_get_addr (d2v))
+      val _(*old*) = s2addr_exch_type (loc0, s2l, d3ls, s2e_new)
+    in
+      // nothing
+    end // end of [D2Evar/mutabl]
+    else if d2var_is_linear (d2v) then let
+      val () =
+        d2var_refval_check (loc0, d2v, refval)
+      // end of [val]
+      val s2e = d2var_get_type_some (loc0, d2v)
+      var ctxtopt: s2ctxtopt = gopt_none ()
+      val s2e_old =
+        s2exp_get_dlablst_context (loc0, s2e, d3ls, ctxtopt)
+      val s2e_old = s2exp_hnfize (s2e_old)
+      val islin = s2exp_is_lin (s2e_old)
+      val () = if islin then auxerr_linold (loc0, d3e0, d3ls, s2e_old)
+    in
+      case+ gopt_view(ctxtopt) of
+      | ~GOsome (ctxt) => let
+          val s2e =
+            s2ctxt_hrepl (ctxt, s2e_new)
+          // end of [val]
+        in
+          d2var_set_type (d2v, gopt_some (s2e))
+        end // end of [GOsome]
+      | ~GOnone () => let
+          val () = prerr_interror_loc (loc0)
+          val () = prerr ": type-restoration for the left-value failed."
+          val () = prerr_newline ()
+          val () = assertloc (false)
+        in
+          // this error can occur in theory, but will it do in practice?
+        end // end of [GOnone]
+    end // end of [D3Esel_var/linear]
+    else (err := err + 1)
+  ) (* end of [D3Esel_var] *)
 //
-(*
-| D3Evar (d2v) when d2var_get_isfix (d2v) => ()
-*)
-//
-| D3Esel_var (d2v, s2rt, d3ls)
-    when d2var_is_mutabl (d2v) => let
-    val-Some (s2l) = d2var_get_addr (d2v)
-    val _(*old*) = s2addr_exch_type (loc0, s2l, d3ls, s2e_new)
-  in
-    // nothing
-  end // end of [D2Evar/mutabl]
-| D3Esel_var (d2v, s2rt, d3ls)
-    when d2var_is_linear (d2v) => let
-    val () =
-      d2var_refval_check (loc0, d2v, refval)
-    // end of [val]
-    val s2e = d2var_get_type_some (loc0, d2v)
-    var ctxtopt: s2expopt = None ()
-    val s2e_old =
-      s2exp_get_dlablst_context (loc0, s2e, d3ls, ctxtopt)
-    val s2e_old = s2exp_hnfize (s2e_old)
-    val islin = s2exp_is_lin (s2e_old)
-    val () = if islin then auxerr_linold (loc0, d3e0, d3ls, s2e_old)
-  in
-    case+ ctxtopt of
-    | Some (ctxt) => let
-        val s2e =
-          s2ctxt_hrepl (ctxt, s2e_new)
-        // end of [val]
-      in
-        d2var_set_type (d2v, Some (s2e))
-      end // end of [Some]
-    | None () => let
-        val () = prerr_interror_loc (loc0)
-        val () = prerr ": type-restoration for the left-value failed."
-        val () = prerr_newline ()
-        val () = assertloc (false)
-      in
-        // this error can occur in theory, but will it do in practice?
-      end // end of [None]
-  end // end of [D3Evar/linear]
-//
-| D3Esel_ptr
+| ~D3Esel_ptr
     (d3e_ptr, s2rt, d3ls) => let
     val s2e_ptr = d3exp_get_type (d3e_ptr)
     val s2f_ptr = s2exp2hnf (s2e_ptr)
     val opt = un_s2exp_ptr_addr_type (s2f_ptr)
   in
     case+ opt of
-    | ~Some_vt (s2l) => {
+    | ~Some_vt (s2l) => let
         val _(*old*) = s2addr_exch_type (loc0, s2l, d3ls, s2e_new)
-       } // end of [Some_vt]
+      in
+        // nothing
+      end // end of [Some_vt]
     | ~None_vt () => () // HX: error already registered at this point
   end // end of [D2Esel_ptr]
 //
-| D3Eviewat (d3e_ptr, d3ls) => let
+| ~D3Eviewat (d3e_ptr, d3ls) => let
     val s2e_ptr = d3exp_get_type (d3e_ptr)
     val s2f_ptr = s2exp2hnf (s2e_ptr)
     val opt = un_s2exp_ptr_addr_type (s2f_ptr)
@@ -328,22 +332,8 @@ d3e0.d3exp_node of
     | ~None_vt () => () // HX: error already registered at this point
   end // end of [D2Eviewat]
 //
-(*
-| D3Eapp_sta(d3e) =>
-    d3lval_set_type_err (refval, d3e, s2e_new, err)
-  // end of [D3Eapp_sta]
-*)
-//
-| _ (*D3E...: non-left-values*) => (err := err + 1)
-//
-(*
-| _ (*D3E...: non-left-values*) => let
-    val () = prerr_error3_loc (loc0)
-    val () = prerrln! ": type-restoration cannot be applied to a non-left-value."
-  in
-    the_trans3errlst_add (T3E_d3lval_funarg (d3e0))
-  end // end of [_]
-*)
+| v (*D3E...: non-left-values*) =>
+    (d3exp_node_view_free (v); err := err + 1)
 //
 end // end of [d3lval_set_type_err]
 
@@ -359,21 +349,21 @@ val opt = p3at_get_type_left (p3t)
 //
 in
 //
-case+ opt of
-| Some (s2e) => let
+case+ gopt_view(opt) of
+| ~GOsome (s2e) => let
     var err: int = 0
     val () = d3lval_set_type_err (0(*refval*), d3e0, s2e, err)
   in
     if err > 0 then let
-      val loc0 = d3e0.d3exp_loc
+      val loc0 = d3e0.d3exp_loc()
       val () = prerr_error3_loc (loc0)
       val () = prerr ": the dynamic expression should be a left-value but it is not."
       val () = prerr_newline ()
     in
-      the_trans3errlst_add (T3E_d3lval_linpatcon (d3e0, s2e))
+      the_trans3errlst_add (trans3err_T3E_d3lval_linpatcon (d3e0, s2e))
     end (* end of [if] *)
-  end // end of [Some]
-| None ((*void*)) => ()
+  end // end of [GOsome]
+| ~GOnone ((*void*)) => ()
 //
 end // end of [d3lval_set_pat_type_left]
 
@@ -387,19 +377,19 @@ fun loop
 ) : void = let
 in
 //
-case+ d3es of
-| list_cons
+case+ glist_view(d3es) of
+| ~GLcons
     (d3e, d3es) => (
-  case+ p3ts of
-  | list_cons
+  case+ glist_view(p3ts) of
+  | ~GLcons
       (p3t, p3ts) => let
       val () =
         d3lval_set_pat_type_left (d3e, p3t) in loop (d3es, p3ts)
       // end of [val]
-    end // end of [list_cons]
-  | list_nil () => ()
-  ) // end of [list_cons]
-| list_nil () => ()
+    end // end of [GLcons]
+  | ~GLnil () => ()
+  ) // end of [GLcons]
+| ~GLnil () => ()
 //
 end // end of [loop]
 
@@ -421,19 +411,15 @@ auxerr
 ) : void = let
 //
 val
-loc0 = d3e0.d3exp_loc
-//
-(*
-val () = prerr_error3_loc (loc0)
-val () = prerrln! (": auxerr: d3e0 = ", d3e0)
-*)
+loc0 = d3e0.d3exp_loc()
 //
 val () = prerr_error3_loc (loc0)
 val () =
-  prerrln! (": the function argument needs to be a left-value.")
+  prerr ": the function argument needs to be a left-value."
+val () = prerr_newline ()
 //
 in
-  the_trans3errlst_add (T3E_d3lval_funarg (d3e0))
+  the_trans3errlst_add (trans3err_T3E_d3lval_funarg (d3e0))
 end // end of [_]
 //
 in (* in of [local] *)
@@ -441,13 +427,6 @@ in (* in of [local] *)
 implement
 d3lval_arg_set_type
   (refval, d3e0, s2e_new) = let
-(*
-val () = (
-  println! ("d3lval_arg_set_type: d3e0 = ", d3e0);
-  println! ("d3lval_arg_set_type: refval = ", refval);
-  println! ("d3lval_arg_set_type: s2e_new = ", s2e_new);
-) (* end of [val] *)
-*)
 var err: int = 0
 var freeknd: int = 0 // free [d3e0] if it is set to 1
 val () = d3lval_set_type_err (refval, d3e0, s2e_new, err)
@@ -455,19 +434,11 @@ val () =
 (
 if err > 0 then
 (
-  case+ 0 of
-  | _ when refval > 0 => auxerr (d3e0)
-  | _ when s2exp_is_nonlin (s2e_new) => () // HX-2013-03: safely discarded
-(*
-  | _ when s2exp_fun_is_freeptr (s2e_new) => (freeknd := 1) // auto-freeing
-*)
-  | _ (* refval = 0 *) => auxerr (d3e0)
+  if refval > 0 then auxerr (d3e0)
+  else if s2exp_is_nonlin (s2e_new) then () // HX-2013-03: safely discarded
+  else (* refval = 0 *) auxerr (d3e0)
 ) // end of [if]
 ) : void // end of [val]
-//
-(*
-val () = println! ("d3lval_arg_set_type: freeknd = ", freeknd)
-*)
 //
 in
   freeknd // freeknd=1: a linear value must be freed if it cannot be returned
@@ -482,20 +453,23 @@ s2exp_fun_is_freeptr
   (s2e_fun: s2exp) : bool = let
 in
 //
-case+ s2e_fun.s2exp_node of
-| S2Efun
+case+ s2exp_node_view(s2e_fun.s2exp_node()) of
+| ~S2Efun
   (
     fc, lin, _(*s2fe*), _(*npf*), _(*arg*), _(*res*)
   ) => 
   (
   case+ fc of
-  | FUNCLOclo (knd) =>
+  | FUNCLOfun () => false
+  | _ (*clo*) => let
+      val knd = funclo_get_clokind (fc)
+    in
       if knd > 0
         then (if lin <= 0 then true else false) else false
       // end of [if]
-  | _ (*non-clofun*) => false
+    end // end of [FUNCLOclo]
   ) // end of [S2Efun]
-| _ (*non-fun-type*) => false
+| v (*non-fun-type*) => (s2exp_node_view_free (v); false)
 //
 end // end of [s2exp_fun_is_freeptr]
 
@@ -508,12 +482,12 @@ auxerr
 (
   d3e0: d3exp
 ) : void = let
-  val loc0 = d3e0.d3exp_loc
+  val loc0 = d3e0.d3exp_loc()
   val () = prerr_error3_loc (loc0)
   val () = prerr ": the function itself needs to be a left-value."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d3lval_fun (d3e0))
+  the_trans3errlst_add (trans3err_T3E_d3lval_fun (d3e0))
 end // end of [_]
 
 fun
@@ -522,30 +496,27 @@ auxres
   d3e0: d3exp
 ) : d3exp = let
 //
-val loc0 = d3e0.d3exp_loc
+val loc0 = d3e0.d3exp_loc()
 val s2e0 = d3exp_get_type (d3e0)
 val s2fun = s2exp_hnfize (s2e0)
 //
-val-S2Efun
+val-~S2Efun
 (
   fc0, lin, s2fe, npf, s2es_arg, s2e_res
-) = s2fun.s2exp_node
+) = s2exp_node_view(s2fun.s2exp_node())
 //
 val s2fun_new =
 (
-  case+ lin of
-  | _ when
-      lin = 0 => s2fun
-  | _ when
-      lin = 1 =>
+  if lin = 0 then s2fun
+  else if lin = 1 then
     s2exp_fun_srt (
       s2rt_vtype, fc0, ~1(*topized*), s2fe, npf, s2es_arg, s2e_res
     ) (* end of [lin=1] *)
-  | _ (* lin = ~1 *) => let
+  else (* lin = ~1 *) let
       val () = prerr_error3_loc (loc0)
       val () = prerr ": a linear function cannot be applied repeatedly."
       val () = prerr_newline ()
-      val () = the_trans3errlst_add (T3E_d3exp_funclo_topized (d3e0))
+      val () = the_trans3errlst_add (trans3err_T3E_d3exp_funclo_topized (d3e0))
     in
       s2fun
     end // end of [_]
@@ -554,9 +525,9 @@ val s2fun_new =
 val refval =
 (
   case+ fc0 of
-  | FUNCLOclo knd =>
-     if knd = 0 then 1 else 0
   | FUNCLOfun () => 0
+  | _ (*clo*) =>
+     if funclo_get_clokind (fc0) = 0 then 1 else 0
 ) : int // end of [val]
 //
 var err: int = 0
@@ -566,18 +537,15 @@ val () =
 (
 if err > 0 then
 (
-  case+ 0 of
-  | _ when refval > 0 => auxerr (d3e0)
-  | _ when s2exp_fun_is_freeptr (s2fun_new) => (freeknd := 1) // auto-freeing
-  | _ (* refval = 0 *) => ((* fun or cloref *))
+  if refval > 0 then auxerr (d3e0)
+  else if s2exp_fun_is_freeptr (s2fun_new) then (freeknd := 1) // auto-freeing
+  else (* refval = 0 *) ((* fun or cloref *))
 ) // end of [if]
 ) : void // end of [val]
 //
 in
   d3exp_refarg (loc0, s2fun_new, refval, freeknd, d3e0)
 end // end of [auxres]
-
-#define CLO 0; #define CLOPTR 1; #define CLOREF ~1
 
 in (* in of [local] *)
 
@@ -587,14 +555,14 @@ d3exp_fun_restore
 in
 //
 case+ fc of
-| FUNCLOclo (knd) =>
+| FUNCLOfun () => d3e_fun
+| _ (*clo*) =>
   (
 //
 // knd: 0/1/~1: clo/cloptr/cloref
 //
-    if knd >= CLO then auxres (d3e_fun) else d3e_fun
+    if funclo_get_clokind (fc) >= 0 then auxres (d3e_fun) else d3e_fun
   ) // end of [FUNCLOclo]
-| FUNCLOfun () => d3e_fun
 //
 end // end of [d3exp_fun_restore]
 
@@ -611,9 +579,8 @@ auxlst1
 , s2es_arg: s2explst
 , wths2es: wths2explst
 ) : d3explst =
-  case d3es of
-  | list_nil () => list_nil ()
-  | list_cons _ => auxlst2 (d3es, s2es_arg, wths2es)
+  if glist_is_cons (d3es)
+    then auxlst2 (d3es, s2es_arg, wths2es) else glist_nil ()
 // end of [auxlst1]
 
 and
@@ -625,57 +592,50 @@ auxlst2
 ) : d3explst = let
 in
 //
-case+ wths2es of
+case+ wths2explst_view(wths2es) of
 //
-| WTHS2EXPLSTnil
-    ((*void*)) => list_nil ()
+| ~WTHS2EXPLSTnil
+    ((*void*)) => glist_nil ()
 //
-| WTHS2EXPLSTcons_invar
+| ~WTHS2EXPLSTcons_invar
     (_, _, wths2es) => let
-    val-list_cons (d3e, d3es) = d3es
-    val-list_cons (s2e_arg, s2es_arg) = s2es_arg
-    val loc = d3e.d3exp_loc
-    val-S2Erefarg(refval, s2e_res) = s2e_arg.s2exp_node
+    val-~GLcons (d3e, d3es) = glist_view(d3es)
+    val-~GLcons (s2e_arg, s2es_arg) = glist_view(s2es_arg)
+    val loc = d3e.d3exp_loc()
+    val-~S2Erefarg(refval, s2e_res) = s2exp_node_view(s2e_arg.s2exp_node())
     val freeknd = // HX: freeknd = 0
       d3lval_arg_set_type (refval, d3e, s2e_res)
     val d3e = d3exp_refarg (loc, s2e_res, refval, freeknd, d3e)
     val d3es = auxlst1 (d3es, s2es_arg, wths2es)
   in
-    list_cons (d3e, d3es)
+    glist_cons (d3e, d3es)
   end // end of [WTHS2EXPLSTcons_invar]
 //
-| WTHS2EXPLSTcons_trans
+| ~WTHS2EXPLSTcons_trans
     (refval, s2e_res, wths2es) => let
-    val-list_cons (d3e, d3es) = d3es
-    val-list_cons (s2e_arg, s2es_arg) = s2es_arg
-    val loc = d3e.d3exp_loc
+    val-~GLcons (d3e, d3es) = glist_view(d3es)
+    val-~GLcons (s2e_arg, s2es_arg) = glist_view(s2es_arg)
+    val loc = d3e.d3exp_loc()
     val s2f_res = s2exp2hnf (s2e_res)
     val s2e_res = s2hnf_opnexi_and_add (loc, s2f_res)
-(*
-    val () = (
-      println! ("d3explst_arg_restore: auxlst2: d3e = ", d3e);
-      println! ("d3explst_arg_restore: auxlst2: d3e.type = ", d3e.d3exp_type);
-      println! ("d3explst_arg_restore: auxlst2: s2e_res = ", s2e_res);
-    ) // end of [val]
-*)
     val freeknd = // HX: freeknd = 0
       d3lval_arg_set_type (refval, d3e, s2e_res)
     val d3e = d3exp_refarg (loc, s2e_res, refval, freeknd, d3e)
     val d3es = auxlst1 (d3es, s2es_arg, wths2es)
   in
-    list_cons (d3e, d3es)
+    glist_cons (d3e, d3es)
   end // end of [WTHS2EXPLSTcons_trans]
 //
-| WTHS2EXPLSTcons_none
+| ~WTHS2EXPLSTcons_none
     (wths2es) => let
-    val-list_cons (d3e, d3es) = d3es
-    val-list_cons (s2e_arg, s2es_arg) = s2es_arg
+    val-~GLcons (d3e, d3es) = glist_view(d3es)
+    val-~GLcons (s2e_arg, s2es_arg) = glist_view(s2es_arg)
     val d3es = auxlst1 (d3es, s2es_arg, wths2es)
   in
-    list_cons (d3e, d3es)
+    glist_cons (d3e, d3es)
   end // end of [WTHS2EXPLSTcons_none]
 //
-end // end of [d3explst_arg_restore]
+end // end of [auxlst2]
 
 in (* in of [local] *)
 //

@@ -45,32 +45,6 @@ UN =
 (* ****** ****** *)
 
 implement
-JSarray_make_list
-  {a}(xs) = let
-//
-fun
-loop
-(
-  A: JSarray(a), xs: List(a)
-) : void =
-(
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) =>
-  let
-    val _ = A.push(x) in loop(A, xs)
-  end // [list_cons]
-)
-//
-val A = JSarray_nil{a}()
-//
-in
-  let val () = loop(A, xs) in A end
-end // end of [JSarray_make_list]
-
-(* ****** ****** *)
-
-implement
 JSarray_make_list_vt
   {a}(xs) = let
 //
@@ -97,7 +71,7 @@ end // end of [JSarray_make_list_vt]
 (* ****** ****** *)
 
 implement
-JSarray_tabulate_cloref
+JSarray_tabulate_cloptr
   {a}{n}
 (
   asz, fopr
@@ -107,20 +81,25 @@ val A = JSarray_nil{a}()
 //
 fun
 loop
-{i:nat | i <= n}(i: int(i)): void =
+{i:nat | i <= n}
+(
+  i: int(i), fopr: !cfun(natLt(n), a)
+) : void =
 (
 if i < asz
   then let
     val _ =
-    JSarray_push(A, fopr(i)) in loop(i+1)
+    JSarray_push(A, fopr(i)) in loop(i+1, fopr)
   end // end of [then]
   else () // end of [else]
 // end of [if]
 ) (* end of [loop] *)
 //
+val () = loop(0, fopr)
+//
 in
-  let val () = loop(0) in A end
-end (* end of [JSarray_tabulate_cloref] *)
+  cfun_free(fopr); A
+end (* end of [JSarray_tabulate_cloptr] *)
 
 (* ****** ****** *)
 //
@@ -128,7 +107,7 @@ implement
 {a}(*tmp*)
 JSarray_sort_1(A) = 
 JSarray_sort_2
-  (A, lam(x1, x2) => gcompare_val_val<a>(x1, x2))
+  (A, lam(x1, x2) =<cloptr1> gcompare_val_val<a>(x1, x2))
 //
 (* ****** ****** *)
 

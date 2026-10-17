@@ -1,0 +1,107 @@
+(* the part of the test of the constraint solver (c3_gen.py) that differs in ATS1 and ATS2 (generated from c3hand.tmpl: "2|" lines are ATS2
+   only, "1|" lines ATS1 only, "<<(" is "@(" in ATS2 and "(" in ATS1), after the generated dumpers and the common part c3common.hats *)
+(* ****** ****** *)
+//
+// the lists of s3exp
+//
+2|fun LN_s3explst (): s3explst = glist_nil{s3exp} ()
+2|fun LC_s3explst (x: s3exp, xs: s3explst): s3explst = glist_cons<s3exp> (x, xs)
+1|fun LN_s3explst (): s3explst = list_nil ()
+1|fun LC_s3explst (x: s3exp, xs: s3explst): s3explst = list_cons (x, xs)
+//
+// the environment of the solver: the proofs of the push/pop are axioms on the ATS1 side
+//
+2|fun drv_env_push (env: &s2vbcfenv): void = s2vbcfenv_push (env)
+2|fun drv_env_pop (env: &s2vbcfenv): void = s2vbcfenv_pop (env)
+1|extern praxi pf_dr_s2vbcfenv_push_v (pf: s2vbcfenv_push_v): void
+1|extern praxi pf_mk_s2vbcfenv_push_v (): s2vbcfenv_push_v
+1|fun drv_env_push (env: &s2vbcfenv): void = let val (pf | ()) = s2vbcfenv_push (env) prval () = pf_dr_s2vbcfenv_push_v (pf) in end
+1|fun drv_env_pop (env: &s2vbcfenv): void = let prval pf = pf_mk_s2vbcfenv_push_v () in s2vbcfenv_pop (pf | env) end
+//
+// a multiset of variables
+//
+2|fun mk_vms_aux (vs: s2varlst, r: s2varmset): s2varmset =
+2|  if glist_is_cons (vs) then mk_vms_aux (glist_tail<s2var> (vs), s2varmset_add (r, glist_head<s2var> (vs))) else r
+1|fun mk_vms_aux (vs: s2varlst, r: s2varmset): s2varmset =
+1|  case+ vs of list_cons (v, vs) => mk_vms_aux (vs, s2varmset_add (r, v)) | list_nil () => r
+fun mk_vms (vs: s2varlst): s2varmset = mk_vms_aux (vs, s2varmset_nil ())
+//
+// the contents of the environment: the variables, then the boolean expressions
+//
+fun drv_env_ext (env: !s2vbcfenv): void = let
+  val <<(vs, xs) = s2vbcfenv_extract (env)
+  val () = dd_ps "env: vars="
+  val () = dd_listvt_s2var (vs)
+  val () = dd_ps " exps="
+  val () = dd_listvt_s3exp (xs)
+  val () = dd_nl ()
+in end
+//
+// the tuples of the results
+//
+fun drv_mapgen (k: c3nstr): void = let
+  val <<(cs, vs) = c3nstr_mapgen_scst_svar (k)
+  val cs = s2cstset_vt_listize_free (cs)
+  val vs = s2varset_vt_listize_free (vs)
+  val () = dd_ps "mapgen: csts="
+  val () = dd_listvt_s2cst (cs)
+  val () = dd_ps " vars="
+  val () = dd_listvt_s2var (vs)
+  val () = dd_nl ()
+in end
+//
+// the conversion of an s3exp into a constraint of the solver (the variables of [vs] are numbered from 1)
+//
+2|fun drv_icn_finds {n:nat} (vim: !s2varindmap (n), vs: s2varlst): void =
+2|  if glist_is_cons (vs) then let
+2|    val v = glist_head<s2var> (vs)
+2|    val i = s2varindmap_find (vim, v)
+2|    val () = (dd_s2var v; dd_ps "->"; dd_int (i); dd_ps " ")
+2|  in drv_icn_finds (vim, glist_tail<s2var> (vs)) end else ()
+1|fun drv_icn_finds {n:nat} (vim: !s2varindmap (n), vs: s2varlst): void =
+1|  case+ vs of
+1|  | list_cons (v, vs) => let
+1|    val i = s2varindmap_find (vim, v)
+1|    val () = (dd_s2var v; dd_ps "->"; dd_int (i); dd_ps " ")
+1|  in drv_icn_finds (vim, vs) end
+1|  | list_nil () => ()
+2|fun vt_s2varlst (xs: s2varlst): List0_vt (s2var) = glist_listize<s2var> (xs)
+1|fun vt_s2varlst (xs: s2varlst): List0_vt (s2var) = list_copy (xs)
+fun drv_icn (x: s3exp, vs: s2varlst): void = let
+  val vsvt = vt_s2varlst (vs)
+  val <<(vim, n) = s2varindmap_make (vsvt)
+  val () = (dd_ps "varindmap: n="; dd_int (n); dd_ps " "; drv_icn_finds (vim, vs); dd_nl ())
+  val ic = s3exp2icnstr<knd> (mkloc (0), vim, n, x)
+  val () = (dd_ps "icnstr: "; fprint_icnstr<knd> (dd_out, ic, n+1); dd_nl ())
+  val ic2 = icnstr_copy<knd> (ic, n+1)
+  val () = icnstr_free<knd> (ic, n+1)
+  val ic3 = icnstr_negate<knd> (ic2)
+  val () = (dd_ps "negated: "; fprint_icnstr<knd> (dd_out, ic3, n+1); dd_nl ())
+  val () = icnstr_free<knd> (ic3, n+1)
+  val () = s2varindmap_free (vim)
+  val () = list_vt_free (vsvt)
+in end
+fun drv_icv (x: s3exp, vs: s2varlst): void = let
+  val vsvt = vt_s2varlst (vs)
+  val <<(vim, n) = s2varindmap_make (vsvt)
+  var err: int = 0
+  val iv = s3exp2myintvec<knd> (vim, n, x, err)
+  val () = (dd_ps "myintvec: err="; dd_int (err); dd_ps " ["; fprint_myintvec<knd> (dd_out, iv, n+1); dd_ps "]\n")
+  val () = myintvec_free<knd> (iv, n+1)
+  val () = s2varindmap_free (vim)
+  val () = list_vt_free (vsvt)
+in end
+//
+// the exceptions of the solver (the process would stop): reported, and the line is abandoned
+//
+extern fun run_line (): void
+2|fun drv_safe_line (): void = (
+2|  try run_line () with
+2|  | ~$ERR.FatalErrorExn () => (dd_ps "EXN FatalErrorExn\n")
+2|  | ~$ERR.FatalErrorExn_interr () => (dd_ps "EXN FatalErrorExn_interr\n")
+2|)
+1|fun drv_safe_line (): void = (
+1|  try run_line () with
+1|  | ~($ERR.FatalErrorExn ()) => (dd_ps "EXN FatalErrorExn\n")
+1|  | ~($ERR.FatalErrorExn_interr ()) => (dd_ps "EXN FatalErrorExn_interr\n")
+1|)

@@ -31,6 +31,14 @@
 // Authoremail: gmhwxiATgmailDOTcom
 // Start Time: March, 2011
 //
+%{#
+#include "pats_lexing.cats"
+%} // end of [%{#]
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -39,307 +47,28 @@ staload "./pats_basics.sats"
 
 staload
 LOC = "./pats_location.sats"
-stadef location = $LOC.location
-stadef position = $LOC.position
+typedef location = $LOC.location
+typedef position = $LOC.position
 
 (* ****** ****** *)
 
 staload
 LBF = "./pats_lexbuf.sats"
-stadef lexbuf = $LBF.lexbuf
+vtypedef lexbuf = $LBF.lexbuf
 
 (* ****** ****** *)
-//
-typedef
-arrayref
-  (a:t@ype, n:int) = array(a, n)
-//
-(* ****** ****** *)
 
-datatype
-token_node =
 //
-  | T_NONE of () // dummy
-//
-  | T_AT of () // @
-//
-  | T_BAR of () // |
-  | T_BANG of () // !
-  | T_BQUOTE of () // `
-  | T_BACKSLASH of () // \
-//
-  | T_COLON of () // :
-  | T_COLONLT of () // :<
-(*
-  | T_COLONLTGT of () // :<> // HX: impossible
-*)
-//
-  | T_DOLLAR of () // $
-//
-  | T_DOT of () // .
-  | T_DOTDOT of () // ..
-  | T_DOTDOTDOT of () // ...
-//
-  | T_DOTINT of int // .[0-9]+
-//
-  | T_EQ of () // =
-  | T_EQGT of () // =>
-  | T_EQLT of () // =<
-  | T_EQLTGT of () // =<>
-  | T_EQSLASHEQGT of () // =/=>
-  | T_EQGTGT of () // =>>
-  | T_EQSLASHEQGTGT of () // =/=>>
-//
-  | T_HASH of () // #
-//
-  | T_LT of () // < // for opening a tmparg
-  | T_GT of () // > // for closing a tmparg
-//
-  | T_GTLT of () // ><
-  | T_DOTLT of () // .< // opening termetric
-  | T_GTDOT of () // >. // closing termetric
-  | T_DOTLTGTDOT of () // .<>. // for empty termetric
-//
-  | T_MINUSGT of () // ->
-  | T_MINUSLT of () // -<
-  | T_MINUSLTGT of () // -<>
-//
-  | T_TILDE of () // ~ // often for 'not', 'free', etc.
-//
-// HX: for absprop, abstype, abst@ype;
-  | T_ABSTYPE of
-      (int) // absview, absvtype, absvt@ype
-//
-  | T_ASSUME of () // for implementing abstypes
-  | T_REASSUME of () // for re-assuming abstypes
-//
-  | T_AS of () // as // for refas-pattern
-  | T_AND of () // and
-  | T_BEGIN of () // begin // initiating a sequence
-  | T_CASE of (caskind) // case, case-, case+, prcase
-  | T_CLASSDEC of () // classdec
-  | T_DATASORT of () // datasort
-  | T_DATATYPE of int // datatype, dataprop, dataview, dataviewtype
-  | T_DO of () // [do]
-  | T_ELSE of () // [else]
-  | T_END of () // the [end] keyword
-  | T_EXCEPTION of () // [exception]
-//
-  | T_EXTERN of () // extern
-  | T_EXTYPE of () // externally named type
-  | T_EXTVAR of () // externally named variable
-//
-  | T_FIX of int // fix and fix@
-  | T_FIXITY of
-      (fxtykind) // infix, infixl, infixr, prefix, postfix
-  | T_FOR of () // for
-  | T_FORSTAR of () // for*
-  | T_FUN of (funkind) // fn, fnx, fun, prfn and prfun
-//
-  | T_IF of () // (dynamic) if
-  | T_IFCASE of () // (dynamic) ifcase
-//
-  | T_IMPLEMENT of
-      (int) // 0/1/-1: implmnt/implement/primplmnt
-  | T_IMPORT of () // import (for packages)
-  | T_IN of () // in
-  | T_LAM of int // lam, llam (linear lam) and lam@ (flat lam)
-  | T_LET of () // let
-  | T_LOCAL of () // local
-  | T_MACDEF of (int) // 0/1: macdef/macrodef
-  | T_NONFIX of () // nonfix
-  | T_OF of () // of
-  | T_OP of () // op // HX: taken from ML
-  | T_REC of () // rec
-//
-(*
-  | T_REFAT of () // HX-2015-12-10: 'ref@' removed
-*)
-//
-  | T_SIF of () // static if
-  | T_SCASE of () // static case
-//
-  | T_STACST of () // stacst
-  | T_STADEF of () // stadef
-  | T_STATIC of () // static
-  | T_SORTDEF of () // sortdef
-(*
-  | T_STAVAR of () // stavar // HX: a suspended hack
-*)
-//
-  | T_SYMELIM of () // symelim
-  | T_SYMINTR of () // symintr
-  | T_SYMLOAD of () // symload
-//
-  | T_THEN of () // the [then] keyword
-  | T_TKINDEF of () // tkindef // for introducting tkinds
-  | T_TRY of () // try
-  | T_TYPE of int // type, type+, type-
-  | T_TYPEDEF of (int)
-    // typedef, propdef, viewdef, viewtypedef
-  | T_VAL of (valkind) // val, val+, val-, prval
-  | T_VAR of (int(*knd*)) // knd = 0/1: var/prvar
-  | T_WHEN of () // when
-  | T_WHERE of () // where
-  | T_WHILE of () // while
-  | T_WHILESTAR of () // while*
-  | T_WITH of () // with
-  | T_WITHTYPE of
-      (int) // withtype, withprop, withview, withviewtype
-    // end of [T_WITHTYPE] // HX: it is from DML and now rarely used
-//
-  | T_ADDRAT of () // addr@
-  | T_FOLDAT of () // fold@
-  | T_FREEAT of () // free@
-  | T_VIEWAT of () // view@
-//
-  | T_DLRDELAY of
-      (int(*lin*)) // $delay/$ldelay
-//
-  | T_DLRARRPSZ of () // $arrpsz/$arrptrsize
-//
-  | T_DLRTYREP of () // $tyrep(SomeType)
-  | T_DLRD2CTYPE of () // $d2ctype(foo/foo<...>)
-//
-  | T_DLREFFMASK of () // $effmask
-  | T_DLREFFMASK_ARG of (int) // ntm(0), exn(1), ref(2), wrt(3), all(4)
-//
-  | T_DLREXTERN of () // $extern
-  | T_DLREXTYPE of () // externally named type
-  | T_DLREXTKIND of () // $extkind
-  | T_DLREXTYPE_STRUCT of () // externally named struct
-//
-  | T_DLREXTVAL of () // externally named value
-  | T_DLREXTFCALL of () // externally named fun-call
-  | T_DLREXTMCALL of () // externally named method-call
-//
-  | T_DLRLITERAL of () // $literal
-//
-  | T_DLRMYFILENAME of () // $myfilename
-  | T_DLRMYLOCATION of () // $mylocation
-  | T_DLRMYFUNCTION of () // $myfunction
-//
-  | T_DLRLST of int // $lst and $lst_t and $lst_vt
-  | T_DLRREC of int // $rec and $rec_t and $rec_vt
-  | T_DLRTUP of int // $tup and $tup_t and $tup_vt
-//
-  | T_DLRBREAK of () // $break
-  | T_DLRCONTINUE of () // $continue
-//
-  | T_DLRRAISE of () // $raise // raising exceptions
-//
-  | T_DLRVARARG of () // $vararg // variadicity support
-//
-  | T_DLRVCOPYENV of (int) // $vcopyenv_v(v)/$vcopyenv_vt(vt)
-//
-  | T_DLRSHOWTYPE of () // $showtype // for debugging purpose
-//
-  | T_DLRTEMPENVER of () // $tempenver // for adding environvar
-//
-  | T_DLRSOLASSERT of () // $solver_assert // assert(d2e_prf)
-  | T_DLRSOLVERIFY of () // $solver_verify // verify(s2e_prop)
-//
-  | T_SRPIF of () // #if
-  | T_SRPIFDEF of () // #ifdef
-  | T_SRPIFNDEF of () // #ifndef
-//
-  | T_SRPTHEN of () // #then
-//
-  | T_SRPELIF of () // #elif
-  | T_SRPELIFDEF of () // #elifdef
-  | T_SRPELIFNDEF of () // #elifndef
-  | T_SRPELSE of () // #else
-//
-  | T_SRPENDIF of () // #endif
-//
-  | T_SRPERROR of () // #error
-  | T_SRPPRERR of () // #prerr
-  | T_SRPPRINT of () // #print
-//
-  | T_SRPASSERT of () // #assert
-//
-  | T_SRPUNDEF of () // #undef
-  | T_SRPDEFINE of () // #define
-//
-  | T_SRPINCLUDE of () // #include
-//
-(*
-  | T_STALOAD of () // staload
-  | T_DYNLOAD of () // dynload
-*)
-  | T_SRPSTALOAD of () // #staload
-  | T_SRPDYNLOAD of () // #dynload
-//
-  | T_SRPREQUIRE of () // #require
-//
-  | T_SRPPRAGMA of () // #pragma
-  | T_SRPCODEGEN2 of () // #codegen2
-  | T_SRPCODEGEN3 of () // #codegen3
-//
-  | T_IDENT_alp of string // alnum
-  | T_IDENT_sym of string // symbol
-  | T_IDENT_arr of string // A[...]
-  | T_IDENT_tmp of string // A<...>
-  | T_IDENT_dlr of string // $alnum
-  | T_IDENT_srp of string // #alnum
-  | T_IDENT_ext of string // alnum!
-//
-  | T_INT of (
-      int(*base*), string(*rep*), uint(*suffix*)
-    ) (* end of [T_INT] *)
-//
-  | T_CHAR of char (* character *)
-//
-  | T_FLOAT of (int(*base*), string(*rep*), uint(*suffix*))
-//
-  | {n:int}
-    T_CDATA of (arrayref(char, n), size_t(n)) // for binaries
-  | T_STRING of (string)
-//
-(*
-  | T_LABEL of (int(*knd*), string) // HX-2013-01: should it be supported?
-*)
-//
-  | T_COMMA of () // ,
-  | T_SEMICOLON of () // ;
-//
-  | T_LPAREN of () // (
-  | T_RPAREN of () // )
-  | T_LBRACKET of () // [
-  | T_RBRACKET of () // ]
-  | T_LBRACE of () // {
-  | T_RBRACE of () // }
-//
-  | T_ATLPAREN of ()  // @(
-  | T_QUOTELPAREN of () // '(
-  | T_ATLBRACKET of () // @[
-  | T_QUOTELBRACKET of () // '[
-  | T_HASHLBRACKET of () // #[
-  | T_ATLBRACE of () // @{
-  | T_QUOTELBRACE of () // '{
-//
-  | T_BQUOTELPAREN of () // `( // macro syntax
-  | T_COMMALPAREN of ()  // ,( // macro syntax
-  | T_PERCENTLPAREN of () // %( // macro syntax
-//
-  | T_EXTCODE of (int(*kind*), string) // external code
-//
-  | T_COMMENT_line of () // line comment
-  | T_COMMENT_rest of () // rest-of-file comment
-  | T_COMMENT_block of () // (embeddable) block comment
-//
-  | T_ERR of () // for errors
-//
-  | T_EOF of () // end-of-file
-//
-(* end of [token_node] *)
+// HX-2026-10: no GC
+// token_node, token, lexerr_node and lexerr are generated by arenagen
+// (--global) from [pats_lexing_token.spec]; see PORTING.md. Match on
+// [token_node_view(x)] with the constructors T_AT, T_INT... (linear,
+// hence always with ~); build values with token_node_T_AT() ...;
+// the fields of a token are tok.token_loc() and tok.token_node().
+//
+#include "./pats_lexing_token_gen.hats"
 
-typedef
-token = '{
-  token_loc= location, token_node= token_node
-} (* end of [token] *)
-
-typedef tokenopt = Option (token)
+typedef tokenopt = gopt(token)
 
 (* ****** ****** *)
 //
@@ -348,184 +77,184 @@ tnode = token_node
 //
 (* ****** ****** *)
 
-val ABSTYPE : tnode
-val ABST0YPE : tnode
-val ABSPROP : tnode
-val ABSVIEW : tnode
-val ABSVIEWTYPE : tnode
-val ABSVIEWT0YPE : tnode
+val ABSTYPE : tnode = "ext#patsopt_ABSTYPE"
+val ABST0YPE : tnode = "ext#patsopt_ABST0YPE"
+val ABSPROP : tnode = "ext#patsopt_ABSPROP"
+val ABSVIEW : tnode = "ext#patsopt_ABSVIEW"
+val ABSVIEWTYPE : tnode = "ext#patsopt_ABSVIEWTYPE"
+val ABSVIEWT0YPE : tnode = "ext#patsopt_ABSVIEWT0YPE"
 
-val ADDR : tnode
-val ADDRAT : tnode
+val ADDR : tnode = "ext#patsopt_ADDR"
+val ADDRAT : tnode = "ext#patsopt_ADDRAT"
 
-val CASE : tnode
-val CASE_pos : tnode
-val CASE_neg : tnode
+val CASE : tnode = "ext#patsopt_CASE"
+val CASE_pos : tnode = "ext#patsopt_CASE_pos"
+val CASE_neg : tnode = "ext#patsopt_CASE_neg"
 
-val DATATYPE : tnode
-val DATAPROP : tnode
-val DATAVIEW : tnode
-val DATAVTYPE : tnode
+val DATATYPE : tnode = "ext#patsopt_DATATYPE"
+val DATAPROP : tnode = "ext#patsopt_DATAPROP"
+val DATAVIEW : tnode = "ext#patsopt_DATAVIEW"
+val DATAVTYPE : tnode = "ext#patsopt_DATAVTYPE"
 
-val FN : tnode
-val FNX : tnode
-val FUN : tnode
+val FN : tnode = "ext#patsopt_FN"
+val FNX : tnode = "ext#patsopt_FNX"
+val FUN : tnode = "ext#patsopt_FUN"
 //
-val PRFN : tnode
-val PRFUN : tnode
+val PRFN : tnode = "ext#patsopt_PRFN"
+val PRFUN : tnode = "ext#patsopt_PRFUN"
 //
-val PRAXI : tnode
+val PRAXI : tnode = "ext#patsopt_PRAXI"
 //
-val CASTFN : tnode
+val CASTFN : tnode = "ext#patsopt_CASTFN"
 
-val FOLD : tnode
-val FOLDAT : tnode
+val FOLD : tnode = "ext#patsopt_FOLD"
+val FOLDAT : tnode = "ext#patsopt_FOLDAT"
 
-val FIX : tnode
-val FIXAT : tnode
+val FIX : tnode = "ext#patsopt_FIX"
+val FIXAT : tnode = "ext#patsopt_FIXAT"
 
-val FOR : tnode
-val FORSTAR : tnode
+val FOR : tnode = "ext#patsopt_FOR"
+val FORSTAR : tnode = "ext#patsopt_FORSTAR"
 
-val FREE : tnode
-val FREEAT : tnode
+val FREE : tnode = "ext#patsopt_FREE"
+val FREEAT : tnode = "ext#patsopt_FREEAT"
 
-val IMPLMNT : tnode // implmnt
-val IMPLEMENT : tnode // implement
-val PRIMPLMNT : tnode // primplmnt
+val IMPLMNT : tnode = "ext#patsopt_IMPLMNT" // implmnt
+val IMPLEMENT : tnode = "ext#patsopt_IMPLEMENT" // implement
+val PRIMPLMNT : tnode = "ext#patsopt_PRIMPLMNT" // primplmnt
 
-val INFIX : tnode
-val INFIXL : tnode
-val INFIXR : tnode
-val PREFIX : tnode
-val POSTFIX : tnode
+val INFIX : tnode = "ext#patsopt_INFIX"
+val INFIXL : tnode = "ext#patsopt_INFIXL"
+val INFIXR : tnode = "ext#patsopt_INFIXR"
+val PREFIX : tnode = "ext#patsopt_PREFIX"
+val POSTFIX : tnode = "ext#patsopt_POSTFIX"
 
-val LAM : tnode
-val LAMAT : tnode
-val LLAM : tnode
-val LLAMAT : tnode
+val LAM : tnode = "ext#patsopt_LAM"
+val LAMAT : tnode = "ext#patsopt_LAMAT"
+val LLAM : tnode = "ext#patsopt_LLAM"
+val LLAMAT : tnode = "ext#patsopt_LLAMAT"
 
 val MACDEF  : tnode
-val MACRODEF : tnode
+val MACRODEF : tnode = "ext#patsopt_MACRODEF"
 
 (*
 //
-val REF : tnode
+val REF : tnode = "ext#patsopt_REF"
 //
-val REFAT : tnode
+val REFAT : tnode = "ext#patsopt_REFAT"
 //
 // HX-2015-12-10: 'ref@' removed
 //
 *)
 
-val TKINDEF : tnode
+val TKINDEF : tnode = "ext#patsopt_TKINDEF"
 
 (* ****** ****** *)
 //
-val PROP : tnode // ident
-val VIEW : tnode // ident
-val TYPE : tnode // ident
-val TBOX : tnode // ident
-val TFLT : tnode // ident
-val VTYPE : tnode // ident
-val VTBOX : tnode // ident
-val VTFLT : tnode // ident
-val VIEWTYPE : tnode // ident
+val PROP : tnode = "ext#patsopt_PROP" // ident
+val VIEW : tnode = "ext#patsopt_VIEW" // ident
+val TYPE : tnode = "ext#patsopt_TYPE" // ident
+val TBOX : tnode = "ext#patsopt_TBOX" // ident
+val TFLT : tnode = "ext#patsopt_TFLT" // ident
+val VTYPE : tnode = "ext#patsopt_VTYPE" // ident
+val VTBOX : tnode = "ext#patsopt_VTBOX" // ident
+val VTFLT : tnode = "ext#patsopt_VTFLT" // ident
+val VIEWTYPE : tnode = "ext#patsopt_VIEWTYPE" // ident
 (*
-val VIEWTBOX : tnode // ident
-val VIEWTFLT : tnode // ident
+val VIEWTBOX : tnode = "ext#patsopt_VIEWTBOX" // ident
+val VIEWTFLT : tnode = "ext#patsopt_VIEWTFLT" // ident
 *)
 //
-val T0YPE : tnode // keyword
-val VT0YPE : tnode // keyword
-val VIEWT0YPE : tnode // keyword
+val T0YPE : tnode = "ext#patsopt_T0YPE" // keyword
+val VT0YPE : tnode = "ext#patsopt_VT0YPE" // keyword
+val VIEWT0YPE : tnode = "ext#patsopt_VIEWT0YPE" // keyword
 //
 (* ****** ****** *)
 
-val TYPE_pos : tnode
-val TYPE_neg : tnode
-val T0YPE_pos : tnode
-val T0YPE_neg : tnode
+val TYPE_pos : tnode = "ext#patsopt_TYPE_pos"
+val TYPE_neg : tnode = "ext#patsopt_TYPE_neg"
+val T0YPE_pos : tnode = "ext#patsopt_T0YPE_pos"
+val T0YPE_neg : tnode = "ext#patsopt_T0YPE_neg"
 
 (*
-val TYPES : tnode
-val TYPES_pos : tnode
-val TYPES_neg : tnode
+val TYPES : tnode = "ext#patsopt_TYPES"
+val TYPES_pos : tnode = "ext#patsopt_TYPES_pos"
+val TYPES_neg : tnode = "ext#patsopt_TYPES_neg"
 *)
 
-val PROP_pos : tnode
-val PROP_neg : tnode
+val PROP_pos : tnode = "ext#patsopt_PROP_pos"
+val PROP_neg : tnode = "ext#patsopt_PROP_neg"
 
-val VIEWAT : tnode
-val VIEW_pos : tnode
-val VIEW_neg : tnode
-val VIEWTYPE_pos : tnode
-val VIEWTYPE_neg : tnode
-val VIEWT0YPE_pos : tnode
-val VIEWT0YPE_neg : tnode
+val VIEWAT : tnode = "ext#patsopt_VIEWAT"
+val VIEW_pos : tnode = "ext#patsopt_VIEW_pos"
+val VIEW_neg : tnode = "ext#patsopt_VIEW_neg"
+val VIEWTYPE_pos : tnode = "ext#patsopt_VIEWTYPE_pos"
+val VIEWTYPE_neg : tnode = "ext#patsopt_VIEWTYPE_neg"
+val VIEWT0YPE_pos : tnode = "ext#patsopt_VIEWT0YPE_pos"
+val VIEWT0YPE_neg : tnode = "ext#patsopt_VIEWT0YPE_neg"
 
-val TYPEDEF : tnode
-val PROPDEF : tnode
-val VIEWDEF : tnode
-val VIEWTYPEDEF : tnode
+val TYPEDEF : tnode = "ext#patsopt_TYPEDEF"
+val PROPDEF : tnode = "ext#patsopt_PROPDEF"
+val VIEWDEF : tnode = "ext#patsopt_VIEWDEF"
+val VIEWTYPEDEF : tnode = "ext#patsopt_VIEWTYPEDEF"
 
-val VAL : tnode
-val VAL_pos : tnode
-val VAL_neg : tnode
-val MCVAL : tnode // for model-checking
-val PRVAL : tnode // for theorem-proving
+val VAL : tnode = "ext#patsopt_VAL"
+val VAL_pos : tnode = "ext#patsopt_VAL_pos"
+val VAL_neg : tnode = "ext#patsopt_VAL_neg"
+val MCVAL : tnode = "ext#patsopt_MCVAL" // for model-checking
+val PRVAL : tnode = "ext#patsopt_PRVAL" // for theorem-proving
 
-val VAR : tnode
-val PRVAR : tnode
+val VAR : tnode = "ext#patsopt_VAR"
+val PRVAR : tnode = "ext#patsopt_PRVAR"
 
-val WHILE : tnode
-val WHILESTAR : tnode
+val WHILE : tnode = "ext#patsopt_WHILE"
+val WHILESTAR : tnode = "ext#patsopt_WHILESTAR"
 
-val WITHTYPE : tnode
-val WITHPROP : tnode
-val WITHVIEW : tnode
-val WITHVIEWTYPE : tnode
-
-(* ****** ****** *)
-
-val DLRDELAY : tnode
-val DLRLDELAY : tnode
-
-val DLREFFMASK : tnode
-val DLREFFMASK_NTM : tnode
-val DLREFFMASK_EXN : tnode
-val DLREFFMASK_REF : tnode
-val DLREFFMASK_WRT : tnode
-val DLREFFMASK_ALL : tnode
-
-val DLRLST : tnode
-val DLRLST_T : tnode
-val DLRLST_VT : tnode
-val DLRREC : tnode
-val DLRREC_T : tnode
-val DLRREC_VT : tnode
-val DLRTUP : tnode
-val DLRTUP_T : tnode
-val DLRTUP_VT : tnode
-
-val DLRVCOPYENV_V : tnode
-val DLRVCOPYENV_VT : tnode
+val WITHTYPE : tnode = "ext#patsopt_WITHTYPE"
+val WITHPROP : tnode = "ext#patsopt_WITHPROP"
+val WITHVIEW : tnode = "ext#patsopt_WITHVIEW"
+val WITHVIEWTYPE : tnode = "ext#patsopt_WITHVIEWTYPE"
 
 (* ****** ****** *)
 
-val DOT : tnode // = T_DOT
-val QMARK : tnode // = IDENT_sym ("?")
-val PERCENT : tnode // = IDENT_sym ("%")
+val DLRDELAY : tnode = "ext#patsopt_DLRDELAY"
+val DLRLDELAY : tnode = "ext#patsopt_DLRLDELAY"
+
+val DLREFFMASK : tnode = "ext#patsopt_DLREFFMASK"
+val DLREFFMASK_NTM : tnode = "ext#patsopt_DLREFFMASK_NTM"
+val DLREFFMASK_EXN : tnode = "ext#patsopt_DLREFFMASK_EXN"
+val DLREFFMASK_REF : tnode = "ext#patsopt_DLREFFMASK_REF"
+val DLREFFMASK_WRT : tnode = "ext#patsopt_DLREFFMASK_WRT"
+val DLREFFMASK_ALL : tnode = "ext#patsopt_DLREFFMASK_ALL"
+
+val DLRLST : tnode = "ext#patsopt_DLRLST"
+val DLRLST_T : tnode = "ext#patsopt_DLRLST_T"
+val DLRLST_VT : tnode = "ext#patsopt_DLRLST_VT"
+val DLRREC : tnode = "ext#patsopt_DLRREC"
+val DLRREC_T : tnode = "ext#patsopt_DLRREC_T"
+val DLRREC_VT : tnode = "ext#patsopt_DLRREC_VT"
+val DLRTUP : tnode = "ext#patsopt_DLRTUP"
+val DLRTUP_T : tnode = "ext#patsopt_DLRTUP_T"
+val DLRTUP_VT : tnode = "ext#patsopt_DLRTUP_VT"
+
+val DLRVCOPYENV_V : tnode = "ext#patsopt_DLRVCOPYENV_V"
+val DLRVCOPYENV_VT : tnode = "ext#patsopt_DLRVCOPYENV_VT"
 
 (* ****** ****** *)
 
-val INTZERO : tnode // = T_INT_dec ("0")
+val DOT : tnode = "ext#patsopt_DOT" // = T_DOT
+val QMARK : tnode = "ext#patsopt_QMARK" // = IDENT_sym ("?")
+val PERCENT : tnode = "ext#patsopt_PERCENT" // = IDENT_sym ("%")
+
+(* ****** ****** *)
+
+val INTZERO : tnode = "ext#patsopt_INTZERO" // = T_INT_dec ("0")
 
 (* ****** ****** *)
 //
-fun print_token : token -> void
-fun prerr_token : token -> void
-fun fprint_token : fprint_type (token)
+fun print_token (tok: token): void
+fun prerr_token (tok: token): void
+fun fprint_token (out: FILEref, tok: token): void
 //
 overload print with print_token
 overload prerr with prerr_token
@@ -551,39 +280,6 @@ fun tnode_search (x: string): tnode
 //
 (* ****** ****** *)
 
-datatype
-lexerr_node =
-  | LE_CHAR_oct of ()
-  | LE_CHAR_hex of ()
-  | LE_CHAR_unclose of ()
-  | LE_QUOTE_dangling of ()
-//
-  | LE_STRING_unclose of ()
-  | LE_STRING_char_oct of ()
-  | LE_STRING_char_hex of ()
-//
-  | LE_COMMENT_block_unclose of ()
-//
-  | LE_EXTCODE_unclose of ()
-//
-  | LE_DIGIT_oct_89 of (char)
-//
-  | LE_IDIGITS_empty of () // YD-2018-07-10: fix hex int format.
-//
-  | LE_FEXPONENT_empty of ()
-  | LE_FEXPONENT_missing of () // YD-2018-07-09: fix hex float format.
-  | LE_FINTFRAC_missing of () // YD-2018-07-10: fix hex float format.
-//
-  | LE_UNSUPPORTED_char of (char)
-// end of [lexerr_node]
-//
-typedef
-lexerr = '{
-  lexerr_loc= location, lexerr_node= lexerr_node
-} (* end of [lexerr] *)
-//
-(* ****** ****** *)
-
 fun
 lexerr_make
 (
@@ -596,7 +292,7 @@ fun the_lexerrlst_add (x: lexerr): void
 
 (* ****** ****** *)
 
-fun fprint_lexerr : fprint_type (lexerr)
+fun fprint_lexerr (out: FILEref, x: lexerr): void
 fun fprint_the_lexerrlst (out: FILEref): int(*err*) // 0/1
 
 (* ****** ****** *)

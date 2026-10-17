@@ -181,6 +181,6 @@ nmod_g1int_int1<llintknd>
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_long_atxt.txt")
 %}\

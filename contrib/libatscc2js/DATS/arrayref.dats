@@ -84,7 +84,7 @@ ats2jspre_arrayref_uninitized
 %{^
 //
 function
-ats2jspre_arrayref_tabulate_cloref
+ats2jspre_arrayref_tabulate_cloptr
   (n, fopr)
 {
   var A, i;

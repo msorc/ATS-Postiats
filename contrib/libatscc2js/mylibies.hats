@@ -32,26 +32,17 @@
 //
 (* ****** ****** *)
 //
-#staload "./SATS/list.sats"
 #staload "./SATS/list_vt.sats"
 //
-#staload
-_(*anon*) = "./DATS/list.dats"
 #staload
 _(*anon*) = "./DATS/list_vt.dats"
 //
 (* ****** ****** *)
 //
-#staload "./SATS/option.sats"
-#staload _ = "./DATS/option.dats"
-//
 (* ****** ****** *)
 //
-#staload "./SATS/stream.sats"
 #staload "./SATS/stream_vt.sats"
 //
-#staload
-_(*anon*) = "./DATS/stream.dats"
 #staload
 _(*anon*) = "./DATS/stream_vt.dats"
 //
@@ -93,16 +84,6 @@ _(*anon*) =
 #staload "./SATS/qlistref.sats" // list-based queue
 //
 (* ****** ****** *)
-//
-#staload
-"./SATS/ML/list0.sats" // un-indexed list
-#staload
-_(*anon*) = "./DATS/ML/list0.dats" // un-indexed list
-//
-#staload
-"./SATS/ML/array0.sats" // un-indexed array
-#staload
-_(*anon*) = "./DATS/ML/array0.dats" // un-indexed array
 //
 (* ****** ****** *)
 

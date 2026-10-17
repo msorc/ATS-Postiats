@@ -21,14 +21,8 @@ all_in_one::
 ######
 
 all:: ; \
-$(PATSOPT) -d ./DATS/list.dats | \
-$(ATSCC2R34) -o ./output/DATS/list_dats.R -i
-all:: ; \
-$(PATSOPT) -d ./DATS/option.dats | \
-$(ATSCC2R34) -o ./output/DATS/option_dats.R -i
-all:: ; \
-$(PATSOPT) -d ./DATS/stream.dats | \
-$(ATSCC2R34) -o ./output/DATS/stream_dats.R -i
+$(PATSOPT) -d ./DATS/list_vt.dats | \
+$(ATSCC2R34) -o ./output/DATS/list_vt_dats.R -i
 all:: ; \
 $(PATSOPT) -d ./DATS/stream_vt.dats | \
 $(ATSCC2R34) -o ./output/DATS/stream_vt_dats.R -i
@@ -50,12 +44,6 @@ $(ATSCC2R34) -o ./output/DATS/R34matrix_dats.R -i
 
 ######
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/list0.dats | \
-$(ATSCC2R34) -o ./output/DATS/ML/list0_dats.R -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/option0.dats | \
-$(ATSCC2R34) -o ./output/DATS/ML/option0_dats.R -i
 #
 ######
 #
@@ -117,16 +105,12 @@ CATS/R34matrix_cats.R \
 
 libatscc2r34_all:: ; \
 $(CAT) >>$(LIBATSCC2R34_ALL_R34) \
-output/DATS/list_dats.R \
-output/DATS/option_dats.R \
-output/DATS/stream_dats.R \
+output/DATS/list_vt_dats.R \
 output/DATS/stream_vt_dats.R \
 output/DATS/intrange_dats.R \
 output/DATS/R34vector_dats.R \
 output/DATS/R34dframe_dats.R \
 output/DATS/R34matrix_dats.R \
-output/DATS/ML/list0_dats.R \
-output/DATS/ML/option0_dats.R \
 
 ######
 #
@@ -148,7 +132,6 @@ clean:: ; $(RMF) *~ */*~
 
 cleanall:: clean
 cleanall:: ; $(RMF) output/DATS/*_dats.R
-cleanall:: ; $(RMF) output/DATS/ML/*_dats.R
 cleanall:: ; $(RMF) $(LIBATSCC2R34_ALL_R34)
 
 ######

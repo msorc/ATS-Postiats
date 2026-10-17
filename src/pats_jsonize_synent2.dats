@@ -6,7 +6,7 @@
 
 (*
 ** ATS/Postiats - Unleashing the Potential of Types!
-** Copyright (C) 2011-2014 Hongwei Xi, ATS Trustful Software, Inc.
+** Copyright (C) 2011-2013 Hongwei Xi, ATS Trustful Software, Inc.
 ** All rights reserved
 **
 ** ATS is free software;  you can  redistribute it and/or modify it under
@@ -43,10 +43,12 @@
 //
 (* ****** ****** *)
 //
-staload 
-ATSPRE =
-  "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_jsonize_synent2.dats, see PORTING.md, "Level-2 jsonize")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 //
 staload
@@ -54,14 +56,26 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 
-staload
-LEX = "./pats_lexing.sats"
-typedef token = $LEX.token
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
+(*
+** for T_* constructors
+*)
+staload "./pats_lexing.sats"
 
 (* ****** ****** *)
 
 staload
 SYN = "./pats_syntax.sats"
+macdef l0ab_lab = $SYN.l0ab_lab
+macdef i0de_sym = $SYN.i0de_sym
 
 (* ****** ****** *)
 //
@@ -72,6 +86,7 @@ _(*anon*) = "./pats_jsonize.dats"
 //
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 
@@ -85,14 +100,23 @@ staload "./pats_jsonize_synent2.sats"
 
 (* ****** ****** *)
 
-#define nil list_nil
-#define :: list_cons
-#define cons list_cons
+#include "./pats_syntax_token.hats"
 
 (* ****** ****** *)
 
 macdef
 jsonize_loc (x) = jsonize_location (,(x))
+
+(* ****** ****** *)
+//
+#define l2l glist_make_list_vt
+//
+// HX: the [::] chains of ATS1
+//
+macdef nil = glist_nil{jsonval} ()
+macdef cons (x, xs) = glist_cons<jsonval> (,(x), ,(xs))
+//
+(* ****** ****** *)
 
 (* ****** ****** *)
 //
@@ -111,10 +135,10 @@ jsonize_s2rtbas
   (s2tb) = let
 in
 //
-case+ s2tb of
-| S2RTBASpre (sym) => jsonize_symbol (sym)
-| S2RTBASimp (knd, sym) => jsonize_symbol (sym)
-| S2RTBASdef (s2td) => let
+case+ s2rtbas_view (s2tb) of
+| ~S2RTBASpre (sym) => jsonize_symbol (sym)
+| ~S2RTBASimp (knd, sym) => jsonize_symbol (sym)
+| ~S2RTBASdef (s2td) => let
     val sym = s2rtdat_get_sym (s2td) in jsonize_symbol (sym)
   end // end of [S2RTBASdef]
 //
@@ -127,14 +151,14 @@ jsonize_s2rt
   (s2t0) = let
 in
 //
-case+ s2t0 of
-| S2RTbas(s2tb) => let
+case+ s2rt_viewof (s2t0) of
+| ~S2RTbas(s2tb) => let
     val s2tb = jsonize_s2rtbas (s2tb)
   in
     jsonval_conarg1 ("S2RTbas", s2tb)
   end // end of [S2RTbas]
 //
-| S2RTfun
+| ~S2RTfun
     (s2ts_arg, s2t_res) => let
 //
     val arg =
@@ -146,17 +170,17 @@ case+ s2t0 of
     jsonval_conarg2 ("S2RTfun", arg, res)
   end // end of [S2RTfun]
 //
-| S2RTtup(s2ts) => let
+| ~S2RTtup(s2ts) => let
     val s2ts = jsonize_s2rtlst (s2ts)
   in
     jsonval_conarg1 ("S2RTtup", s2ts)
   end // end of [S2RTtup]
 //
-| S2RTVar(s2tV) =>
+| ~S2RTVar(s2tV) =>
     jsonize_s2rt(s2rtVar_get_s2rt(s2tV))
   // end of [S2RTVar]
 //
-| S2RTerr((*void*)) => jsonval_conarg0 ("S2RTerr")
+| ~S2RTerr((*void*)) => jsonval_conarg0 ("S2RTerr")
 //
 end // end of [jsonize_s2rt]
   
@@ -166,11 +190,8 @@ implement
 jsonize_s2rtlst
   (s2ts) = let
 //
-val jsvs =
-  list_map_fun (s2ts, jsonize_s2rt)
-//
 in
-  JSONlist (list_of_list_vt{jsonval}(jsvs))
+  jsonize_list_fun<s2rt> (s2ts, jsonize_s2rt)
 end // end of [jsonize_s2rtlst]
 
 (* ****** ****** *)
@@ -202,9 +223,9 @@ val extdef = let
   val opt = s2cst_get_extdef(s2c)
 in
 //
-case+ opt of
-| $SYN.SCSTEXTDEFnone() => jsonval_none()
-| $SYN.SCSTEXTDEFsome(name) => jsonval_some(jsonval_string(name))
+case+ $SYN.scstextdef_view (opt) of
+| ~$SYN.SCSTEXTDEFnone() => jsonval_none()
+| ~$SYN.SCSTEXTDEFsome(name) => jsonval_some(jsonval_string(name))
 //
 end // end of [extdef]
 //
@@ -218,9 +239,9 @@ dconlstopt = let
   // end of [val]
 in
 //
-case+ opt of
-| None () => jsonval_none((*void*))
-| Some (d2cs) =>
+case+ gopt_view (opt) of
+| ~GOnone () => jsonval_none((*void*))
+| ~GOsome (d2cs) =>
     jsonval_some(jsonize_d2conlst(d2cs))
   // end of [Some]
 end // end of [val]
@@ -310,11 +331,8 @@ implement
 jsonize_s2varlst
   (s2vs) = let
 //
-val jsvs =
-  list_map_fun (s2vs, jsonize_s2var)
-//
 in
-  JSONlist (list_of_list_vt{jsonval}(jsvs))
+  jsonize_list_fun<s2var> (s2vs, jsonize_s2var)
 end // end of [jsonize_s2varlst]
 
 (* ****** ****** *)
@@ -386,15 +404,15 @@ jsonize_tyreckind
   (knd) = let
 in
 //
-case+ knd of
+case+ tyreckind_view (knd) of
 //
-| TYRECKINDbox () => jsonval_conarg0 ("TYRECKINDbox")
-| TYRECKINDbox_lin () => jsonval_conarg0 ("TYRECKINDbox_lin")
+| ~TYRECKINDbox () => jsonval_conarg0 ("TYRECKINDbox")
+| ~TYRECKINDbox_lin () => jsonval_conarg0 ("TYRECKINDbox_lin")
 //
-| TYRECKINDflt0 () => jsonval_conarg0 ("TYRECKINDflt0")
-| TYRECKINDflt1 (x) => 
+| ~TYRECKINDflt0 () => jsonval_conarg0 ("TYRECKINDflt0")
+| ~TYRECKINDflt1 (x) => 
     jsonval_conarg1 ("TYRECKINDflt1", jsonize_stamp (x))
-| TYRECKINDflt_ext (name) =>
+| ~TYRECKINDflt_ext (name) =>
     jsonval_conarg1 ("TYRECKINDflt_ext", jsonval_string (name))
 //
 end // end of [jsonize_tyreckind]
@@ -445,40 +463,40 @@ val s2e0 =
 in
 //
 case+
-s2e0.s2exp_node
+s2exp_node_view (s2e0.s2exp_node ())
 of // case+
 //
-| S2Eint(i) =>
+| ~S2Eint(i) =>
     jsonval_conarg1("S2Eint", jsonval_int(i))
-| S2Eintinf(i) =>
+| ~S2Eintinf(i) =>
     jsonval_conarg1("S2Eintinf", jsonval_intinf(i))
 //
-| S2Ecst(s2c) =>
+| ~S2Ecst(s2c) =>
     jsonval_conarg1("S2Ecst", jsonize_s2cst(s2c))
 //
-| S2Efloat(rep) =>
+| ~S2Efloat(rep) =>
     jsonval_conarg1("S2Efloat", jsonval_string(rep))
 //
-| S2Eextype(name, arg) =>
+| ~S2Eextype(name, arg) =>
     jsonval_conarg1("S2Eextype", jsonval_string(name))
-| S2Eextkind(name, arg) =>
+| ~S2Eextkind(name, arg) =>
     jsonval_conarg1("S2Eextkind", jsonval_string(name))
 //
-| S2Evar(s2v) =>
+| ~S2Evar(s2v) =>
     jsonval_conarg1("S2Evar", jsonize_s2var(s2v))
-| S2EVar(s2V) =>
+| ~S2EVar(s2V) =>
     jsonval_conarg1("S2EVar", jsonize_s2Var(s2V))
 //
-| S2Eat(s2elt, s2addr) => let
+| ~S2Eat(s2elt, s2addr) => let
     val s2elt = jsonize_s2exp(flag, s2elt)
     val s2addr = jsonize_s2exp(flag, s2addr)
   in
     jsonval_conarg2("S2Eat", s2elt, s2addr)
   end // end of [S2Eat]
-| S2Esizeof(s2e) =>
+| ~S2Esizeof(s2e) =>
     jsonval_conarg1("S2Esizeof", jsonize_s2exp(flag, s2e))
 //
-| S2Eeqeq
+| ~S2Eeqeq
     (s2e1, s2e2) => let
     val s2e1 = jsonize_s2exp(flag, s2e1)
     and s2e2 = jsonize_s2exp(flag, s2e2)
@@ -486,7 +504,7 @@ of // case+
     jsonval_conarg2("S2Eeqeq", s2e1(*left*), s2e2(*right*))
   end // end of [S2Eeqeq]
 //
-| S2Eapp
+| ~S2Eapp
     (s2e1, s2es2) => let
     val s2e1 = jsonize_s2exp(flag, s2e1)
     val s2es2 = jsonize_s2explst(flag, s2es2)
@@ -494,7 +512,7 @@ of // case+
     jsonval_conarg2("S2Eapp", s2e1(*fun*), s2es2(*arglst*))
   end // end of [S2Eapp]
 //
-| S2Efun
+| ~S2Efun
   (
     fc, lin, s2fe, npf, _arg, _res
   ) => let
@@ -505,7 +523,7 @@ of // case+
     jsonval_conarg3("S2Efun", npf, _arg, _res)
   end // end of [S2Efun]
 //
-| S2Emetdec
+| ~S2Emetdec
     (s2es1, s2es2) => let
     val s2es1 = jsonize_s2explst(flag, s2es1)
     and s2es2 = jsonize_s2explst(flag, s2es2)
@@ -515,18 +533,18 @@ of // case+
     // jsonval_conarg2
   end // end of [S2Emetdec]
 //
-| S2Etop(knd, s2e) =>  let
+| ~S2Etop(knd, s2e) =>  let
     val knd = jsonval_int(knd)
     val s2e = jsonize_s2exp(flag, s2e)
   in
     jsonval_conarg2("S2Etop", knd, s2e)
   end // end of [S2Etop]
 //
-| S2Ewithout(s2e) =>
+| ~S2Ewithout(s2e) =>
     jsonval_conarg1("S2Ewithout", jsonize_s2exp(flag, s2e))
   // end of [S2Ewithout]
 //
-| S2Etyarr
+| ~S2Etyarr
     (_elt, _dim) => let
     val _elt = jsonize_s2exp(flag, _elt)
     val _dim = jsonize_s2explst(flag, _dim)
@@ -534,7 +552,7 @@ of // case+
     jsonval_conarg2("S2Etyarr", _elt, _dim)
   end // end of [S2Etyarr]
 //
-| S2Etyrec
+| ~S2Etyrec
     (knd, npf, ls2es) => let
     val knd =
       jsonize_tyreckind(knd)
@@ -545,10 +563,10 @@ of // case+
     jsonval_conarg3("S2Etyrec", knd, npf, ls2es)
   end // end of [S2Etyrec]
 //
-| S2Einvar(s2e) =>
+| ~S2Einvar(s2e) =>
     jsonval_conarg1("S2Einvar", jsonize_s2exp(flag, s2e))
 //
-| S2Eexi
+| ~S2Eexi
   (
     s2vs, s2ps, s2e_body
   ) => let
@@ -558,7 +576,7 @@ of // case+
   in
     jsonval_conarg3("S2Eexi", s2vs, s2ps, s2e_body)
   end // end of [S2Eexi]
-| S2Euni
+| ~S2Euni
   (
     s2vs, s2ps, s2e_body
   ) => let
@@ -569,31 +587,31 @@ of // case+
     jsonval_conarg3("S2Euni", s2vs, s2ps, s2e_body)
   end // end of [S2Euni]
 //
-| S2Erefarg(knd, s2e) => let
+| ~S2Erefarg(knd, s2e) => let
     val knd = jsonval_int(knd)
     val s2e = jsonize_s2exp(flag, s2e)
   in
     jsonval_conarg2("S2Erefarg", knd, s2e)
   end // end of [S2Erefarg]
 //
-| S2Evararg(s2e) =>
+| ~S2Evararg(s2e) =>
     jsonval_conarg1("S2Evararg", jsonize_s2exp(flag, s2e))
   // end of [val]
 //
-| S2Ewthtype(s2e, ws2es) => let
+| ~S2Ewthtype(s2e, ws2es) => let
     val s2e = jsonize_s2exp(flag, s2e)
     val ws2es = jsonize_wths2explst(flag, ws2es)
   in
     jsonval_conarg2("S2Ewthtype", s2e, ws2es)
   end // end of [S2Ewths2explst]
 //
-| S2Eerrexp((*void*)) => jsonval_conarg0("S2Eerrexp")
+| ~S2Eerrexp((*void*)) => jsonval_conarg0("S2Eerrexp")
 //
-| _(* rest-of-s2exp *) => jsonval_conarg0("S2Eignored")
+| v(* rest-of-s2exp *) => (s2exp_node_view_free (v); jsonval_conarg0("S2Eignored"))
 //
 end // end of [auxmain]
 //
-val s2t0 = s2e0.s2exp_srt
+val s2t0 = s2e0.s2exp_srt ()
 val s2t0 = jsonize_s2rt(s2t0)
 //
 val s2e0 = auxmain(flag, s2e0)
@@ -613,20 +631,17 @@ fun auxlst
   flag: int, s2es: s2explst
 ) : jsonvalist =
 //
-case+ s2es of
-| list_cons
-    (s2e, s2es) => let
-    val s2e =
-      jsonize_s2exp (flag, s2e)
-    // end of [val]
-    val s2es = auxlst (flag, s2es)
-  in
-    list_cons (s2e, s2es)
-  end // end of [list_cons]
-| list_nil ((*void*)) => list_nil ()
+if glist_is_cons (s2es) then let
+  val s2e =
+    jsonize_s2exp (flag, glist_head<s2exp> (s2es))
+  // end of [val]
+  val s2es = auxlst (flag, glist_tail<s2exp> (s2es))
+in
+  glist_cons<jsonval> (s2e, s2es)
+end else nil
 //
 in
-  JSONlist (auxlst (flag, s2es))
+  jsonval_JSONlist (auxlst (flag, s2es))
 end // end of [jsonize_s2explst]
 
 (* ****** ****** *)
@@ -636,9 +651,9 @@ jsonize_s2expopt
   (flag, opt) = let
 in
 //
-case+ opt of
-| None () => JSONoption (None ())
-| Some (s2e) => JSONoption (Some (jsonize_s2exp (flag, s2e)))
+case+ gopt_view (opt) of
+| ~GOnone () => jsonval_JSONoption (gopt_none ())
+| ~GOsome (s2e) => jsonval_JSONoption (gopt_some (jsonize_s2exp (flag, s2e)))
 //
 end // end of [jsonize_s2expopt]
 
@@ -653,27 +668,24 @@ fun auxlst
   flag: int, ls2es: labs2explst
 ) : jsonvalist =
 //
-case+ ls2es of
-| list_cons
-    (ls2e, ls2es) => let
-    val+SLABELED
-      (lab, name, s2e) = ls2e
-    val lab = jsonize_label (lab)
-    val name =
-    (
-      case+ name of
-      | None () => jsonval_none ()
-      | Some (x) => jsonval_some (jsonval_string(x))
-    ) : jsonval
-    val s2e = jsonize_s2exp (flag, s2e)
-    val ls2e = jsonval_conarg3 ("SL0ABELED", lab, name, s2e)
-  in
-    list_cons (ls2e, auxlst (flag, ls2es))
-  end // end of [list_cons]
-| list_nil((*void*)) => list_nil ()
+if glist_is_cons (ls2es) then let
+  val ls2e = glist_head<labs2exp> (ls2es)
+  val lab = jsonize_label (ls2e.labs2exp_lab ())
+  val name =
+  (
+    case+ gopt_view (ls2e.labs2exp_nam ()) of
+    | ~GOnone () => jsonval_none ()
+    | ~GOsome (x) => jsonval_some (jsonval_string(x))
+  ) : jsonval
+  val s2e = jsonize_s2exp (flag, ls2e.labs2exp_elt ())
+  val ls2e = jsonval_conarg3 ("SL0ABELED", lab, name, s2e)
+  val rest = auxlst (flag, glist_tail<labs2exp> (ls2es))
+in
+  glist_cons<jsonval> (ls2e, rest)
+end else nil
 //
 in
-  JSONlist (auxlst (flag, ls2es))
+  jsonval_JSONlist (auxlst (flag, ls2es))
 end // end of [jsonize_labs2explst]
 
 (* ****** ****** *)
@@ -691,16 +703,16 @@ auxlst
   flag: int, ws2es: wths2explst
 ) : jsonval =
 //
-case+ ws2es of
-| WTHS2EXPLSTnil() =>
+case+ wths2explst_view (ws2es) of
+| ~WTHS2EXPLSTnil() =>
     jsonval_conarg0("WTHS2EXPLSTnil")
   // WTHS2EXPLSTnil
-| WTHS2EXPLSTcons_none
+| ~WTHS2EXPLSTcons_none
     (ws2es) =>
     jsonval_conarg1
       ("WTHS2EXPLSTcons_none", auxlst(flag, ws2es))
   // WTHS2EXPLSTcons_none
-| WTHS2EXPLSTcons_invar
+| ~WTHS2EXPLSTcons_invar
     (knd, s2e, ws2es) => let
     val knd = jsonval_int(knd)
     val s2e = jsonize_s2exp(flag, s2e)
@@ -708,7 +720,7 @@ case+ ws2es of
     jsonval_conarg3
       ("WTHS2EXPLSTcons_invar", knd, s2e, auxlst(flag, ws2es))
   end // end of [WTHS2EXPLSTcons_invar]
-| WTHS2EXPLSTcons_trans
+| ~WTHS2EXPLSTcons_trans
     (knd, s2e, ws2es) => let
     val knd = jsonval_int(knd)
     val s2e = jsonize_s2exp(flag, s2e)
@@ -731,18 +743,18 @@ jsonize_s2zexp
   (s2ze) =
 (
 //
-case+ s2ze of
+case+ s2zexp_view (s2ze) of
 //
-| S2ZEbot () =>
+| ~S2ZEbot () =>
     jsonval_conarg0 ("S2ZEbot")
 //
-| S2ZEvar (s2v) => let
+| ~S2ZEvar (s2v) => let
     val s2v = jsonize_s2var(s2v)
   in
     jsonval_conarg1 ("S2ZEvar", s2v)
   end // end of [S2ZEvar]
 //
-| _(*ignored*) => jsonval_conarg0 ("S2ZEignored")
+| v(*ignored*) => (s2zexp_view_free (v); jsonval_conarg0 ("S2ZEignored"))
 //
 ) (* end of [jsonize_s2zexp] *)
 
@@ -837,8 +849,7 @@ implement
 jsonize_i0nt
   (tok) = let
 //
-val-$LEX.T_INT
-  (base, rep, sfx) = tok.token_node
+val rep = token_int_rep (tok)
 //
 in
   jsonval_string (rep)
@@ -848,18 +859,17 @@ implement
 jsonize_c0har
   (tok) = let
 //
-val-$LEX.T_CHAR(c) = tok.token_node
+val c = token_char_get (tok)
 //
 in
-  jsonval_int (int_of_char(c))
+  jsonval_int (char2int0(c))
 end (* end of [jsonize_c0har] *)
 
 implement
 jsonize_f0loat
   (tok) = let
 //
-val-$LEX.T_FLOAT
-  (base, rep, sfx) = tok.token_node
+val rep = token_float_rep (tok)
 //
 in
   jsonval_string (rep)
@@ -869,7 +879,7 @@ implement
 jsonize_s0tring
   (tok) = let
 //
-val-$LEX.T_STRING(rep) = tok.token_node
+val rep = token_string_get (tok)
 //
 in
   jsonval_string (rep)
@@ -893,14 +903,14 @@ val () =
 *)
 in
 //
-case+ ext of
-| $SYN.DCSTEXTDEFnone(knd) =>
+case+ $SYN.dcstextdef_view (ext) of
+| ~$SYN.DCSTEXTDEFnone(knd) =>
     jsonval_conarg1("DCSTEXTDEFnone", jsonval_int(knd))
-| $SYN.DCSTEXTDEFsome_ext(name) =>
+| ~$SYN.DCSTEXTDEFsome_ext(name) =>
     jsonval_conarg1("DCSTEXTDEFsome_ext", jsonval_string(name))
-| $SYN.DCSTEXTDEFsome_mac(name) =>
+| ~$SYN.DCSTEXTDEFsome_mac(name) =>
     jsonval_conarg1("DCSTEXTDEFsome_mac", jsonval_string(name))
-| $SYN.DCSTEXTDEFsome_sta(name) =>
+| ~$SYN.DCSTEXTDEFsome_sta(name) =>
     jsonval_conarg1("DCSTEXTDEFsome_sta", jsonval_string(name))
 //
 end // end of [jsonize_dcstextdef]
@@ -1008,25 +1018,25 @@ println!
 //
 in
 //
-case+ d2i of
+case+ d2itm_view (d2i) of
 //
-| D2ITMcst (d2c) => let
+| ~D2ITMcst (d2c) => let
     val d2c = jsonize_d2cst (d2c)
   in
     jsonval_conarg1 ("D2ITMcst", d2c)
   end // end of [D2ITMcst]
-| D2ITMvar (d2v) => let
+| ~D2ITMvar (d2v) => let
     val d2v = jsonize_d2var (d2v)
   in
     jsonval_conarg1 ("D2ITMvar", d2v)
   end // end of [D2ITMvar]
-| D2ITMcon (d2cs) => let
+| ~D2ITMcon (d2cs) => let
     val d2cs = jsonize_d2conlst (d2cs)
   in
     jsonval_conarg1 ("D2ITMcon", d2cs)
   end // end of [D2ITMcon]
 //
-| _ (*rest*) => jsonval_conarg0 ("D2ITMignored")
+| v (*rest*) => (d2itm_view_free (v); jsonval_conarg0 ("D2ITMignored"))
 //
 end // end of [jsonize_d2itm]
 
@@ -1037,7 +1047,7 @@ jsonize_d2sym
   (d2s) = let
 //
 val sym =
-  jsonize_symbol (d2s.d2sym_sym)
+  jsonize_symbol (d2s.d2sym_sym ())
 //
 in
   jsonval_labval1 ("d2sym_sym", sym)
@@ -1085,18 +1095,18 @@ fun auxmain
 in
 //
 case+
-p2t0.p2at_node of
+p2at_node_view (p2t0.p2at_node ()) of
 //
-| P2Tany () =>
+| ~P2Tany () =>
     jsonval_conarg0 ("P2Tany")
 //
-| P2Tvar (d2v) => let
+| ~P2Tvar (d2v) => let
     val d2v = jsonize_d2var (d2v)
   in
     jsonval_conarg1 ("P2Tvar", d2v)
   end // end of [P2Tvar]
 //
-| P2Tcon
+| ~P2Tcon
   (
     pcknd, d2c, s2qs, s2e_con, npf, p2ts
   ) => let
@@ -1110,35 +1120,35 @@ p2t0.p2at_node of
     val jsv6 = jsonize_p2atlst (p2ts)
 //
     val arglst = (
-      jsv1 :: jsv2 :: jsv3 :: jsv4 :: jsv5 :: jsv6 :: list_nil
+      cons (jsv1, cons (jsv2, cons (jsv3, cons (jsv4, cons (jsv5, cons (jsv6, nil))))))
     ) (* end of [val] *)
 //
   in
     jsonval_conarglst ("P2Tcon", arglst)
   end // end of [P2Tcon]
 //
-| P2Tint (i) =>
+| ~P2Tint (i) =>
     jsonval_conarg1 ("P2Tint", jsonval_int (i))
-| P2Tintrep (rep) =>
+| ~P2Tintrep (rep) =>
     jsonval_conarg1 ("P2Tintrep", jsonval_string (rep))
 //
-| P2Tbool (b) => 
+| ~P2Tbool (b) => 
     jsonval_conarg1 ("P2Tbool", jsonval_bool (b))
-| P2Tchar (c) =>
-    jsonval_conarg1 ("P2Tchar", jsonval_int (int_of_char(c)))
-| P2Tfloat (rep) =>
+| ~P2Tchar (c) =>
+    jsonval_conarg1 ("P2Tchar", jsonval_int (char2int0(c)))
+| ~P2Tfloat (rep) =>
     jsonval_conarg1 ("P2Tfloat", jsonval_string (rep))
-| P2Tstring (str) =>
+| ~P2Tstring (str) =>
     jsonval_conarg1 ("P2Tstring", jsonval_string (str))
 //
-| P2Ti0nt (tok) =>
+| ~P2Ti0nt (tok) =>
     jsonval_conarg1 ("P2Ti0nt", jsonize_i0nt (tok))
-| P2Tf0loat (tok) =>
+| ~P2Tf0loat (tok) =>
     jsonval_conarg1 ("P2Tf0loat", jsonize_f0loat (tok))
 //
-| P2Tempty ((*void*)) => jsonval_conarg0 ("P2Tempty")
+| ~P2Tempty ((*void*)) => jsonval_conarg0 ("P2Tempty")
 //
-| P2Trec
+| ~P2Trec
     (knd, npf, lp2ts) => let
     val knd = jsonval_int (knd)
     val npf = jsonval_int (npf)
@@ -1147,29 +1157,29 @@ p2t0.p2at_node of
     jsonval_conarg3 ("P2Trec", knd, npf, lp2ts)
   end (* end of [P2Trec] *)
 //
-| P2Trefas
+| ~P2Trefas
     (d2v, p2t) =>
   (
     jsonval_conarg2
       ("P2Trefas", jsonize_d2var(d2v), jsonize_p2at(p2t))
   ) (* end of [P2Trefas] *)
 //
-| P2Tvbox (d2v) =>
+| ~P2Tvbox (d2v) =>
     jsonval_conarg1 ("P2Tvbox", jsonize_d2var (d2v))
 //
-| P2Tann (p2t, ann) =>
+| ~P2Tann (p2t, ann) =>
   (
     jsonval_conarg2
       ("P2Tann", jsonize_p2at (p2t), jsonize0_s2exp(ann))
   ) (* end of [P2Tann] *)
 //
-| P2Terrpat ((*void*)) => jsonval_conarg0 ("P2Terrpat")
+| ~P2Terrpat ((*void*)) => jsonval_conarg0 ("P2Terrpat")
 //
-| _ (*yet-to-be-processed*) => jsonval_conarg0 ("P2Tignored")
+| v (*yet-to-be-processed*) => (p2at_node_view_free (v); jsonval_conarg0 ("P2Tignored"))
 //
 end // end of [auxmain]
 //
-val loc0 = p2t0.p2at_loc
+val loc0 = p2t0.p2at_loc ()
 val loc0 = jsonize_loc (loc0)
 val p2t0 = auxmain (p2t0)
 //
@@ -1199,17 +1209,17 @@ implement
 jsonize_labp2at (lp2t) = let
 in
 //
-case+ lp2t of
-| LABP2ATnorm
+case+ labp2at_view (lp2t) of
+| ~LABP2ATnorm
     (l0, p2t) => let
     val lab =
-    jsonize_label (l0.l0ab_lab)
+    jsonize_label (l0ab_lab (l0))
     val p2t = jsonize_p2at (p2t)
   in
     jsonval_labval1
       ("LABP2ATnorm", jsonval_pair (lab, p2t))
   end // end of [LABP2ATnorm]
-| LABP2ATomit (loc) => let
+| ~LABP2ATomit (loc) => let
     val loc = jsonize_location (loc)
   in
     jsonval_labval1 ("LABP2ATomit", jsonval_sing (loc))
@@ -1236,45 +1246,45 @@ fun auxmain
 in
 //
 case+
-d2e0.d2exp_node of
+d2exp_node_view (d2e0.d2exp_node ()) of
 //
-| D2Ecst (d2c) => let
+| ~D2Ecst (d2c) => let
     val jsv1 = jsonize_d2cst (d2c)
   in
     jsonval_conarg1 ("D2Ecst", jsv1)
   end // end of [D2Ecst]
-| D2Evar (d2v) => let
+| ~D2Evar (d2v) => let
     val jsv1 = jsonize_d2var (d2v)
   in
     jsonval_conarg1 ("D2Evar", jsv1)
   end // end of [D2Evar]
 //
-| D2Eint (int) =>
+| ~D2Eint (int) =>
     jsonval_conarg1 ("D2Eint", jsonval_int (int))
-| D2Eintrep (rep) =>
+| ~D2Eintrep (rep) =>
     jsonval_conarg1 ("D2Eintrep", jsonval_string (rep))
 //
-| D2Ei0nt (tok) =>
+| ~D2Ei0nt (tok) =>
     jsonval_conarg1 ("D2Ei0nt", jsonize_i0nt (tok))
-| D2Ec0har (tok) =>
+| ~D2Ec0har (tok) =>
     jsonval_conarg1 ("D2Ec0har", jsonize_c0har (tok))
-| D2Ef0loat (tok) =>
+| ~D2Ef0loat (tok) =>
     jsonval_conarg1 ("D2Ef0loat", jsonize_f0loat (tok))
-| D2Es0tring (tok) =>
+| ~D2Es0tring (tok) =>
     jsonval_conarg1 ("D2Es0tring", jsonize_s0tring (tok))
 //
-| D2Esym (d2s) =>
+| ~D2Esym (d2s) =>
     jsonval_conarg1 ("D2Esym", jsonize_d2sym (d2s))
 //
-| D2Eempty ((*void*)) => jsonval_conarg0 ("D2Eempty")
+| ~D2Eempty ((*void*)) => jsonval_conarg0 ("D2Eempty")
 //
-| D2Eextval(s2e, name) => let
+| ~D2Eextval(s2e, name) => let
     val s2e = jsonize0_s2exp(s2e)
     val name = jsonval_string(name)
   in
     jsonval_conarg2("D2Eextval", s2e, name)
   end // end of [D2Eextval]
-| D2Eextfcall
+| ~D2Eextfcall
     (s2e, name, d2es_arg) => let
     val s2e = jsonize0_s2exp(s2e)
     val name = jsonval_string(name)
@@ -1282,7 +1292,7 @@ d2e0.d2exp_node of
   in
     jsonval_conarg3("D2Eextfcall", s2e, name, d2es_arg)
   end // end of [D2Eextfcall]
-| D2Eextmcall
+| ~D2Eextmcall
     (s2e, obj, name, d2es_arg) => let
 //
     val s2e = jsonize0_s2exp(s2e)
@@ -1295,14 +1305,14 @@ d2e0.d2exp_node of
     jsonval_conarg4("D2Eextmcall", s2e, obj, name, d2es_arg)
   end // end of [D2Eextmcall]
 //
-| D2Elet
+| ~D2Elet
     (d2cs, d2e_body) => let
     val d2cs = jsonize_d2eclist (d2cs)
     val d2e_body = jsonize_d2exp (d2e_body)
   in
     jsonval_conarg2 ("D2Elet", d2cs, d2e_body)
   end // end of [D2Elet]
-| D2Ewhere
+| ~D2Ewhere
     (d2e_body, d2cs) => let
     val d2cs = jsonize_d2eclist (d2cs)
     val d2e_body = jsonize_d2exp (d2e_body)
@@ -1310,7 +1320,7 @@ d2e0.d2exp_node of
     jsonval_conarg2 ("D2Ewhere", d2e_body, d2cs)
   end // end of [D2Ewhere]
 //
-| D2Eapplst
+| ~D2Eapplst
     (d2e, d2as) => let
     val jsv1 = jsonize_d2exp (d2e)
     val jsv2 = jsonize_d2exparglst (d2as)
@@ -1318,7 +1328,7 @@ d2e0.d2exp_node of
     jsonval_conarg2 ("D2Eapplst", jsv1, jsv2)
   end // end of [D2Eapplst]
 //
-| D2Eifhead
+| ~D2Eifhead
   (
     inv, _test, _then, _else
   ) => let
@@ -1330,7 +1340,7 @@ d2e0.d2exp_node of
     jsonval_conarg4 ("D2Eifhead", jsv1, jsv2, jsv3, jsv4)
   end // end of [D2Eifhead]
 //
-| D2Ecasehead
+| ~D2Ecasehead
   (
     casknd, inv, d2es, c2ls
   ) => let
@@ -1344,12 +1354,12 @@ d2e0.d2exp_node of
     jsonval_conarg4 ("D2Ecasehead", jsv1, jsv2, jsv3, jsv4)
   end // end of [D2Ecasehead]
 //
-| D2Esing(d2e) => let
+| ~D2Esing(d2e) => let
     val jsv = jsonize_d2exp (d2e)
   in
     jsonval_conarg1 ("D2Esing", jsv)
   end // end of [D2Esing]
-| D2Elist
+| ~D2Elist
     (npf, d2es) => let
     val jsv1 = jsonval_int (npf)
     val jsv2 = jsonize_d2explst (d2es)
@@ -1357,7 +1367,7 @@ d2e0.d2exp_node of
     jsonval_conarg2 ("D2Elist", jsv1, jsv2)
   end // end of [D2Elist]
 //
-| D2Etup
+| ~D2Etup
     (knd, npf, d2es) => let
     val jsv1 = jsonval_int (knd)
     val jsv2 = jsonval_int (npf)
@@ -1366,7 +1376,7 @@ d2e0.d2exp_node of
     jsonval_conarg3 ("D2Etup", jsv1, jsv2, jsv3)
   end // end of [D2Etup]
 //
-| D2Erec
+| ~D2Erec
     (knd, npf, ld2es) => let
     val jsv1 = jsonval_int (knd)
     val jsv2 = jsonval_int (npf)
@@ -1375,10 +1385,10 @@ d2e0.d2exp_node of
     jsonval_conarg3 ("D2Erec", jsv1, jsv2, jsv3)
   end // end of [D2Erec]
 //
-| D2Eseq (d2es) =>
+| ~D2Eseq (d2es) =>
     jsonval_conarg1 ("D2Eseq", jsonize_d2explst (d2es))
 //
-| D2Eselab
+| ~D2Eselab
     (d2e, d2ls) => let
     val d2e = jsonize_d2exp (d2e)
     val d2ls = jsonize_d2lablst (d2ls)
@@ -1386,21 +1396,21 @@ d2e0.d2exp_node of
     jsonval_conarg2("D2Eselab", d2e, d2ls)
   end // end of [D2Eselab]
 //
-| D2Ederef
+| ~D2Ederef
     (d2s, d2e) => let
     val d2s = jsonize_d2sym (d2s)
     val d2e = jsonize_d2exp (d2e)
   in
     jsonval_conarg2("D2Ederef", d2s, d2e)
   end // end of [D2Ederef]
-| D2Eassgn
+| ~D2Eassgn
     (d2e_l, d2e_r) => let
     val d2e_l = jsonize_d2exp (d2e_l)
     val d2e_r = jsonize_d2exp (d2e_r)
   in
     jsonval_conarg2("D2Eassgn", d2e_l, d2e_r)
   end // end of [D2Eassgn]
-| D2Exchng
+| ~D2Exchng
     (d2e_l, d2e_r) => let
     val d2e_l = jsonize_d2exp (d2e_l)
     val d2e_r = jsonize_d2exp (d2e_r)
@@ -1408,7 +1418,7 @@ d2e0.d2exp_node of
     jsonval_conarg2("D2Exchng", d2e_l, d2e_r)
   end // end of [D2Exchng]
 //
-| D2Elam_dyn
+| ~D2Elam_dyn
   (
     lin, npf, p2ts_arg, d2e_body
   ) => let
@@ -1420,7 +1430,7 @@ d2e0.d2exp_node of
     jsonval_conarg4 ("D2Elam_dyn", jsv1, jsv2, jsv3, jsv4)
   end // end of [D2Elam_dyn]
 //
-| D2Elam_met
+| ~D2Elam_met
   (
     ref, s2es_met, d2e_body
   ) => let
@@ -1435,7 +1445,7 @@ d2e0.d2exp_node of
   in
     jsonval_conarg2 ("D2Elam_met", jsv2, jsv3)
   end // end of [D2Elam_met]
-| D2Elam_sta
+| ~D2Elam_sta
     (s2vs, s2ps, d2e) => let
     val jsv1 =
       jsonize_s2varlst (s2vs)
@@ -1446,21 +1456,21 @@ d2e0.d2exp_node of
     jsonval_conarg3 ("D2Elam_sta", jsv1, jsv2, jsv3)
   end // end of [D2Elam_sta]
 //
-| D2Eann_type
+| ~D2Eann_type
     (d2e, s2e) => let
     val jsv1 = jsonize_d2exp (d2e)
     val jsv2 = jsonize0_s2exp (s2e)
   in
     jsonval_conarg2 ("D2Eann_type", jsv1, jsv2)
   end // end of [D2Eann_type]
-| D2Eann_seff
+| ~D2Eann_seff
     (d2e, s2fe) => let
     val jsv1 = jsonize_d2exp (d2e)
     val jsv2 = jsonize_s2eff (s2fe)
   in
     jsonval_conarg2 ("D2Eann_seff", jsv1, jsv2)
   end // end of [D2Eann_seff]
-| D2Eann_funclo
+| ~D2Eann_funclo
     (d2e, funclo) => let
     val jsv1 = jsonize_d2exp (d2e)
     val jsv2 = jsonize_funclo (funclo)
@@ -1468,20 +1478,20 @@ d2e0.d2exp_node of
     jsonval_conarg2 ("D2Eann_funclo", jsv1, jsv2)
   end // end of [D2Eann_funclo]
 //
-| D2Eerrexp ((*void*)) => jsonval_conarg0("D2Eerrexp")
+| ~D2Eerrexp ((*void*)) => jsonval_conarg0("D2Eerrexp")
 //
-| _ (*rest*) => let
-    val () = prerrln!
-    (
-      "warning(ATS): [jsonize_d2exp]: ignored: ", d2e0
-    ) (* end of [val] *)
+| v (*rest*) => let
+    val () = d2exp_node_view_free (v)
+    val () = prerr "warning(ATS): [jsonize_d2exp]: ignored: "
+    val () = prerr_d2exp (d2e0)
+    val () = prerr_newline ()
   in
     jsonval_conarg0 ("D2Eignored")
   end (* end of [_] *)
 //
 end // end of [auxmain]
 //
-val loc0 = d2e0.d2exp_loc
+val loc0 = d2e0.d2exp_loc ()
 val loc0 = jsonize_loc (loc0)
 val d2e0 = auxmain (d2e0)
 //
@@ -1504,9 +1514,9 @@ implement
 jsonize_d2expopt (opt) = let
 in
 //
-case+ opt of
-| None () => jsonval_none ()
-| Some (d2e) => jsonval_some (jsonize_d2exp (d2e))
+case+ gopt_view (opt) of
+| ~GOnone () => jsonval_none ()
+| ~GOsome (d2e) => jsonval_some (jsonize_d2exp (d2e))
 //
 end // end of [jsonize_d2expopt]
 
@@ -1515,8 +1525,9 @@ end // end of [jsonize_d2expopt]
 implement
 jsonize_labd2exp
   (ld2e) = let
-  val+$SYN.DL0ABELED (l0, d2e) = ld2e
-  val lab = jsonize_label (l0.l0ab_lab)
+  val l0 = ld2e.labd2exp_lab ()
+  val d2e = ld2e.labd2exp_elt ()
+  val lab = jsonize_label (l0ab_lab (l0))
   val d2e = jsonize_d2exp (d2e)
 in
   jsonval_conarg2 ("DL0ABELED", lab, d2e)
@@ -1538,20 +1549,20 @@ jsonize_d2exparg
   (d2a) = let
 in
 //
-case+ d2a of
-| D2EXPARGsta
+case+ d2exparg_view (d2a) of
+| ~D2EXPARGsta
     (loc, s2as) => let
-    val arglst = JSONlist (list_nil)
+    val arglst = jsonval_JSONlist (nil)
   in
     jsonval_labval1 ("D2EXPARGsta", arglst)
   end // end of [D2EXPARGsta]
-| D2EXPARGdyn
+| ~D2EXPARGdyn
     (npf, loc, d2es) => let
     val jsv1 = jsonval_int (npf)
     val jsv2 = jsonize_loc (loc)
     val jsv3 = jsonize_d2explst (d2es)
     val arglst =
-      JSONlist (jsv1 :: jsv2 :: jsv3 :: list_nil)
+      jsonval_JSONlist (cons (jsv1, cons (jsv2, cons (jsv3, nil))))
     // end of [val]
   in
     jsonval_labval1 ("D2EXPARGdyn", arglst)
@@ -1580,14 +1591,14 @@ in
 //
 case+
 //
-d2l0.d2lab_node of
+d2lab_node_view (d2l0.d2lab_node ()) of
 //
-| D2LABlab (lab) => let
+| ~D2LABlab (lab) => let
     val lab = jsonize_label (lab)
   in
     jsonval_labval1 ("D2LABlab", jsonval_sing(lab))
   end // end of [D2LABlab]
-| D2LABind (d2es) => let
+| ~D2LABind (d2es) => let
     val d2es = jsonize_d2explst (d2es)
   in
     jsonval_labval1 ("D2LABind", jsonval_sing(d2es))
@@ -1595,7 +1606,7 @@ d2l0.d2lab_node of
 //
 end // end of [auxmain]
 //
-val loc0 = d2l0.d2lab_loc
+val loc0 = d2l0.d2lab_loc ()
 val loc0 = jsonize_loc (loc0)
 val d2l0 = auxmain (d2l0)
 //
@@ -1618,9 +1629,9 @@ implement
 jsonize_gm2at
   (gm2t) = let
 //
-val loc = jsonize_loc (gm2t.gm2at_loc)
-val exp = jsonize_d2exp (gm2t.gm2at_exp)
-val pat = jsonize_p2atopt (gm2t.gm2at_pat)
+val loc = jsonize_loc (gm2t.gm2at_loc ())
+val exp = jsonize_d2exp (gm2t.gm2at_exp ())
+val pat = jsonize_p2atopt (gm2t.gm2at_pat ())
 //
 in
 //
@@ -1644,12 +1655,12 @@ implement
 jsonize_c2lau
   (c2l0) = let
 //
-val loc = jsonize_loc (c2l0.c2lau_loc)
-val pat = jsonize_p2atlst (c2l0.c2lau_pat)
-val gua = jsonize_gm2atlst (c2l0.c2lau_gua)
-val seq = jsonval_int (c2l0.c2lau_seq)
-val neg = jsonval_int (c2l0.c2lau_neg)
-val body = jsonize_d2exp (c2l0.c2lau_body)
+val loc = jsonize_loc (c2l0.c2lau_loc ())
+val pat = jsonize_p2atlst (c2l0.c2lau_pat ())
+val gua = jsonize_gm2atlst (c2l0.c2lau_gua ())
+val seq = jsonval_int (c2l0.c2lau_seq ())
+val neg = jsonval_int (c2l0.c2lau_neg ())
+val body = jsonize_d2exp (c2l0.c2lau_body ())
 //
 in
 //
@@ -1697,20 +1708,20 @@ println!
 in
 //
 case+
-d2c0.d2ecl_node of
+d2ecl_node_view (d2c0.d2ecl_node ()) of
 //
-| D2Cnone() =>
+| ~D2Cnone() =>
     jsonval_conarg0("D2Cnone")
-| D2Clist(xs) => let
+| ~D2Clist(xs) => let
     val xs = jsonize_d2eclist(xs)
   in
     jsonval_conarg1("D2Clist", xs)
   end // end of [D2Clist]
 //
-| D2Coverload
+| ~D2Coverload
     (id, pval, opt) => let
     val sym =
-    jsonize_symbol(id.i0de_sym)
+    jsonize_symbol(i0de_sym (id))
     val pval = jsonval_int (pval)
     val opt =
     jsonize_option_fun<d2itm>(opt, jsonize_d2itm)
@@ -1718,33 +1729,33 @@ d2c0.d2ecl_node of
     jsonval_conarg3("D2Coverload", sym, pval, opt)
   end // end of [D2Coverload]
 //
-| D2Cstacsts(s2cs) => let
+| ~D2Cstacsts(s2cs) => let
     val s2cs = jsonize_s2cstlst(s2cs)
   in
     jsonval_conarg1("D2Cstacsts", s2cs)
   end // end of [D2Cstacsts]
-| D2Cstacons(knd, s2cs) => let
+| ~D2Cstacons(knd, s2cs) => let
     val knd = jsonval_int(knd)
     val s2cs = jsonize_s2cstlst(s2cs)
   in
     jsonval_conarg2("D2Cstacsts", knd, s2cs)
   end // end of [D2Cstacons]
 //
-| D2Cextype
+| ~D2Cextype
     (name, s2e_def) => let
     val name = jsonval_string(name)
     val s2e_def = jsonize0_s2exp(s2e_def)
   in
     jsonval_conarg2("D2Cextype", name, s2e_def)
   end // end of [D2Cextype]
-| D2Cextvar
+| ~D2Cextvar
     (name, d2e_def) => let
     val name = jsonval_string(name)
     val d2e_def = jsonize_d2exp(d2e_def)
   in
     jsonval_conarg2("D2Cextvar", name, d2e_def)
   end // end of [D2Cextvar]
-| D2Cextcode
+| ~D2Cextcode
     (knd, pos, code) => let
     val knd = jsonval_int(knd)
     val pos = jsonval_int(pos)
@@ -1753,7 +1764,7 @@ d2c0.d2ecl_node of
     jsonval_conarg3("D2Cextcode", knd, pos, code)
   end // end of [D2Cextcode]
 //
-| D2Cdatdecs
+| ~D2Cdatdecs
     (knd, s2cs) => let
     val knd = jsonval_int(knd)
     val s2cs = jsonize_s2cstlst(s2cs)
@@ -1761,13 +1772,13 @@ d2c0.d2ecl_node of
     jsonval_conarg2 ("D2Cdatdecs", knd, s2cs)
   end // end of [D2Cdatdecs]
 //
-| D2Cexndecs(d2cs) => let
+| ~D2Cexndecs(d2cs) => let
     val d2cs = jsonize_d2conlst(d2cs)
   in
     jsonval_conarg1("D2Cexndecs", d2cs(*constr*))
   end // end of [D2Cdatdecs]
 //
-| D2Cdcstdecs
+| ~D2Cdcstdecs
     (knd, dck, d2cs) => let
     val knd = jsonval_int(knd)
     val dck = jsonize_dcstkind(dck)
@@ -1776,7 +1787,7 @@ d2c0.d2ecl_node of
     jsonval_conarg3("D2Cdcstdecs", knd, dck, d2cs)
   end // end of [D2Cdcstdecs]
 //
-| D2Cimpdec
+| ~D2Cimpdec
     (knd, i2mp) => let
     val knd = jsonval_int(knd)
     val i2mp = jsonize_i2mpdec(i2mp)
@@ -1784,7 +1795,7 @@ d2c0.d2ecl_node of
     jsonval_conarg2("D2Cimpdec", knd, i2mp)
   end // end of [D2Cimpdec]
 //
-| D2Cfundecs
+| ~D2Cfundecs
   (
     knd, s2qs, f2ds
   ) => let
@@ -1795,7 +1806,7 @@ d2c0.d2ecl_node of
     jsonval_conarg3("D2Cfundecs", knd, s2qs, f2ds)
   end // end of [D2Cfundecs]
 //
-| D2Cvaldecs
+| ~D2Cvaldecs
     (knd, v2ds) => let
     val knd = jsonize_valkind(knd)
     val v2ds = jsonize_v2aldeclst(v2ds)
@@ -1803,13 +1814,13 @@ d2c0.d2ecl_node of
     jsonval_conarg2("D2Cvaldecs", knd, v2ds)
   end // end of [D2Cvaldecs]
 //
-| D2Cvardecs(v2ds) => let
+| ~D2Cvardecs(v2ds) => let
     val v2ds = jsonize_v2ardeclst(v2ds)
   in
     jsonval_conarg1("D2Cvardecs", v2ds)
   end // end of [D2Cvardecs]
 //
-| D2Cinclude
+| ~D2Cinclude
     (knd, d2cs) => let
     val knd = jsonval_int(knd)
     val d2cs = jsonize_d2eclist(d2cs)
@@ -1817,7 +1828,7 @@ d2c0.d2ecl_node of
     jsonval_conarg2("D2Cinclude", knd, d2cs)
   end // end of [D2Cinclude]
 //
-| D2Cstaload
+| ~D2Cstaload
   (
     idopt, fname, loadflag, fenv, loaded
   ) => let
@@ -1829,7 +1840,7 @@ d2c0.d2ecl_node of
     jsonval_conarg2("D2Cstaload", idopt, fname)
   end // end of [D2Cstaload]
 //
-| D2Clocal
+| ~D2Clocal
     (head, body) => let
     val head = jsonize_d2eclist(head)
     val body = jsonize_d2eclist(body)
@@ -1837,11 +1848,11 @@ d2c0.d2ecl_node of
     jsonval_conarg2("D2Clocal", head, body)
   end // end of [D2Clocal]
 //
-| _ (*rest*) => jsonval_conarg0("D2Cignored")
+| v (*rest*) => (d2ecl_node_view_free (v); jsonval_conarg0("D2Cignored"))
 //
 end // end of [auxmain]
 //
-val loc0 = d2c0.d2ecl_loc
+val loc0 = d2c0.d2ecl_loc ()
 val d2c0 = auxmain( d2c0 )
 val loc0 = jsonize_loc(loc0)
 //
@@ -1867,29 +1878,35 @@ implement
 jsonize_i2mpdec
   (i2mp) = let
 //
-val loc = jsonize_loc (i2mp.i2mpdec_loc)
-val locid = jsonize_loc (i2mp.i2mpdec_locid)
+val loc = jsonize_loc (i2mp.i2mpdec_loc ())
+val locid = jsonize_loc (i2mp.i2mpdec_locid ())
 //
-val d2c = jsonize_d2cst (i2mp.i2mpdec_cst)
+val d2c = jsonize_d2cst (i2mp.i2mpdec_cst ())
 //
-val imparg = jsonize_ignored (i2mp.i2mpdec_imparg)
-val tmparg = jsonize_ignored (i2mp.i2mpdec_tmparg)
-val tmpgua = jsonize_ignored (i2mp.i2mpdec_tmpgua)
+val imparg = jsonize_ignored (i2mp.i2mpdec_imparg ())
+val tmparg = jsonize_ignored (i2mp.i2mpdec_tmparg ())
+val tmpgua = jsonize_ignored (i2mp.i2mpdec_tmpgua ())
 //
-val def = jsonize_d2exp (i2mp.i2mpdec_def)
+val def = jsonize_d2exp (i2mp.i2mpdec_def ())
 //
 in
 //
-JSONlablist
+jsonval_JSONlablist
 (
-   (   "i2mpdec_loc" , loc)
-:: ( "i2mpdec_locid" , locid)
-:: (   "i2mpdec_cst" , d2c)
-:: ("i2mpdec_imparg" , imparg)
-:: ("i2mpdec_tmparg" , tmparg)
-:: ("i2mpdec_tmpgua" , tmpgua)
-:: (   "i2mpdec_def" , def)
-:: list_nil () // end-of-list
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_loc", loc),
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_locid", locid),
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_cst", d2c),
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_imparg", imparg),
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_tmparg", tmparg),
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_tmpgua", tmpgua),
+  glist_cons<labjsonval>
+    (labjsonval_new ("i2mpdec_def", def), glist_nil{labjsonval} ()))))))) // end-of-list
 ) (* end of [jsonval_lablist] *)
 //
 end // end of [i2mpdec]
@@ -1900,10 +1917,10 @@ implement
 jsonize_f2undec
   (f2d) = let
 //
-val loc = jsonize_loc (f2d.f2undec_loc)
-val d2v = jsonize_d2var (f2d.f2undec_var)
-val def = jsonize_d2exp (f2d.f2undec_def)
-val ann = jsonize0_s2expopt (f2d.f2undec_ann)
+val loc = jsonize_loc (f2d.f2undec_loc ())
+val d2v = jsonize_d2var (f2d.f2undec_var ())
+val def = jsonize_d2exp (f2d.f2undec_def ())
+val ann = jsonize0_s2expopt (f2d.f2undec_ann ())
 //
 in
 //
@@ -1930,10 +1947,10 @@ implement
 jsonize_v2aldec
   (v2d) = let
 //
-val loc = jsonize_loc (v2d.v2aldec_loc)
-val pat = jsonize_p2at (v2d.v2aldec_pat)
-val def = jsonize_d2exp (v2d.v2aldec_def)
-val ann = jsonize_ignored (v2d.v2aldec_ann)
+val loc = jsonize_loc (v2d.v2aldec_loc ())
+val pat = jsonize_p2at (v2d.v2aldec_pat ())
+val def = jsonize_d2exp (v2d.v2aldec_def ())
+val ann = jsonize_ignored (v2d.v2aldec_ann ())
 //
 in
 //
@@ -1958,15 +1975,15 @@ implement
 jsonize_v2ardec
   (v2d) = let
 //
-val loc = jsonize_loc(v2d.v2ardec_loc)
-val knd = jsonval_int(v2d.v2ardec_knd)
+val loc = jsonize_loc(v2d.v2ardec_loc ())
+val knd = jsonval_int(v2d.v2ardec_knd ())
 //
-val svar = jsonize_s2var(v2d.v2ardec_svar)
-val dvar = jsonize_d2var(v2d.v2ardec_dvar)
+val svar = jsonize_s2var(v2d.v2ardec_svar ())
+val dvar = jsonize_d2var(v2d.v2ardec_dvar ())
 //
-val init = jsonize_d2expopt(v2d.v2ardec_init)
+val init = jsonize_d2expopt(v2d.v2ardec_init ())
 //
-val _type = jsonize0_s2expopt(v2d.v2ardec_type)
+val _type = jsonize0_s2expopt(v2d.v2ardec_type ())
 //
 in
 //
@@ -1993,7 +2010,7 @@ d2eclist_jsonize_out
   (out, d2cls) = let
 //
 val
-( s2cs
+@( s2cs
 , s2vs
 , s2Vs
 , d2cons
@@ -2015,28 +2032,22 @@ val d2vars =
   d2varset_vt_listize_free (d2vars)
 //
 val jsv_s2cs =
-  jsonize_list_fun<s2cst>($UN.linlst2lst(s2cs), jsonize_s2cst_long)
-val () = list_vt_free (s2cs)
+  jsonize_list_fun<s2cst>(l2l (s2cs), jsonize_s2cst_long)
 //
 val jsv_s2vs =
-  jsonize_list_fun<s2var>($UN.linlst2lst(s2vs), jsonize_s2var_long)
-val () = list_vt_free (s2vs)
+  jsonize_list_fun<s2var>(l2l (s2vs), jsonize_s2var_long)
 //
 val jsv_s2Vs =
-  jsonize_list_fun<s2Var>($UN.linlst2lst(s2Vs), jsonize_s2Var_long)
-val () = list_vt_free (s2Vs)
+  jsonize_list_fun<s2Var>(l2l (s2Vs), jsonize_s2Var_long)
 //
 val jsv_d2cons =
-  jsonize_list_fun<d2con>($UN.linlst2lst(d2cons), jsonize_d2con_long)
-val () = list_vt_free (d2cons)
+  jsonize_list_fun<d2con>(l2l (d2cons), jsonize_d2con_long)
 //
 val jsv_d2csts =
-  jsonize_list_fun<d2cst>($UN.linlst2lst(d2csts), jsonize_d2cst_long)
-val () = list_vt_free (d2csts)
+  jsonize_list_fun<d2cst>(l2l (d2csts), jsonize_d2cst_long)
 //
 val jsv_d2vars =
-  jsonize_list_fun<d2var>($UN.linlst2lst(d2vars), jsonize_d2var_long)
-val () = list_vt_free (d2vars)
+  jsonize_list_fun<d2var>(l2l (d2vars), jsonize_d2var_long)
 //
 val jsv_d2cls = jsonize_d2eclist(d2cls)
 //

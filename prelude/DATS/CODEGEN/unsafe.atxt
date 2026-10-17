@@ -256,6 +256,6 @@ ptr0_get_at<char>(string2ptr(src), i)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "unsafe_atxt.txt")
 %}\

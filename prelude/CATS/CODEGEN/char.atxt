@@ -435,5 +435,5 @@ atspre_uint2byte (atstype_uint u) { return ((atstype_byte)u) ; }
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "char_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "char_atxt.txt")
 %}\

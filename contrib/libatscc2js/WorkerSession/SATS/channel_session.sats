@@ -60,13 +60,13 @@ fun{
 a:t@ype
 } chanpos1_session_send
 (
-  cfun0(a) // getting data
+  () -> a // getting data
 ) : chanpos_session(chsnd(a)::chnil)
 fun{
 a:t@ype
 } chanpos1_session_recv
 (
-  cfun1(a, void) // setting data
+  (a) -> void // setting data
 ) : chanpos_session(chrcv(a)::chnil)
 //
 (* ****** ****** *)
@@ -75,13 +75,13 @@ fun{
 a:t@ype
 } channeg1_session_recv
 (
-  cfun0(a) // getting data
+  () -> a // getting data
 ) : channeg_session(chrcv(a)::chnil)
 fun{
 a:t@ype
 } channeg1_session_send
 (
-  cfun1(a, void) // setting data
+  (a) -> void // setting data
 ) : channeg_session(chsnd(a)::chnil)
 //
 (* ****** ****** *)
@@ -90,14 +90,14 @@ fun{}
 chanpos1_session_initize
   {ss:type}
 (
-  fwork: cfun0(void), ssp: chanpos_session(ss)
+  fwork: () -> void, ssp: chanpos_session(ss)
 ) : chanpos_session(ss)
 //
 fun{}
 channeg1_session_initize
   {ss:type}
 (
-  fwork: cfun0(void), ssn: channeg_session(ss)
+  fwork: () -> void, ssn: channeg_session(ss)
 ) : channeg_session(ss)
 //
 (* ****** ****** *)
@@ -106,14 +106,14 @@ fun{}
 chanpos1_session_finalize
   {ss:type}
 (
-  ssp: chanpos_session(ss), fwork: cfun0(void)
+  ssp: chanpos_session(ss), fwork: () -> void
 ) : chanpos_session(ss)
 //
 fun{}
 channeg1_session_finalize
   {ss:type}
 (
-  ssn: channeg_session(ss), fwork: cfun0(void)
+  ssn: channeg_session(ss), fwork: () -> void
 ) : channeg_session(ss)
 //
 (* ****** ****** *)

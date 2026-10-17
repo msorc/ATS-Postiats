@@ -93,6 +93,6 @@ streamize_intrange_lr(m: int, n: int): stream_vt(int)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "intrange_atxt.txt")
 %}\

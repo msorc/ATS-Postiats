@@ -456,6 +456,6 @@ matrix_map2to
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "matrix_atxt.txt")
 %}\

@@ -1,8 +1,5 @@
 %{
 //
-dynload
-"libatsdoc/dynloadall.dats"
-//
 #include "./../proginatsatxt.dats"
 //
 %}\
@@ -606,5 +603,5 @@ functional programming language like the core of ATS can be implemented.
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

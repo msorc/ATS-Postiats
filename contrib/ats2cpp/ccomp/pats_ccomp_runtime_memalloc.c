@@ -69,41 +69,4 @@ void
 
 /* ****** ****** */
 
-#ifdef ATS_MEMALLOC_GCBDW
-
-extern "C"
-{
-//
-void
-atsruntime_mfree_undef (void *ptr)
-{
- atsruntime_mfree_gcbdw (ptr) ; return ;
-}
-extern
-void
-*atsruntime_malloc_undef (size_t bsz)
-{
- return atsruntime_malloc_gcbdw (bsz) ;
-}
-extern
-void
-*atsruntime_calloc_undef
-  (size_t asz, size_t tsz)
-{
- return atsruntime_calloc_gcbdw (asz, tsz) ;
-}
-extern
-void
-*atsruntime_realloc_undef
-   (void *ptr, size_t bsz)
-{
- return atsruntime_realloc_gcbdw (ptr, bsz) ;
-}
-//
-} // end of [extern "C"]
-//
-#endif // ATS_MEMALLOC_GCBDW
-
-/* ****** ****** */
-
 /* end of [pats_ccomp_runtime_memalloc.c] */

@@ -29,8 +29,18 @@
 //
 // Author: Hongwei Xi
 // Authoremail: gmhwxi AT gmail DOT com
-// Start Time: May, 2011
+// Start Time: September, 2011
 //
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_trans2_env.sats, see PORTING.md, "Level 2 translation (trans2)").
+// The proofs of ATS1 ([the_trans2_env_push_v] etc.) are gone (rule T1-5): the push/pop/save/restore
+// functions take and return no proof. The maps are the linear [symmap]s of ATS1.
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -57,15 +67,12 @@ staload "./pats_dynexp2.sats"
 (* ****** ****** *)
 //
 // HX:
-// [filenv] is introduced in [pats_staexp2.sats];
-// using [minus] to indicate the need for the presence
-// of [filenv] (for otherwise GC may reclaim [filenv]
-// while the extracted ptr is still in use!
+// [filenv] is introduced in [pats_staexp2.sats]; it is a cell of the
+// global arena (never freed) that holds three maps
 //
-
-viewtypedef s2temap = symmap (s2rtext)
-viewtypedef s2itmmap = symmap (s2itm)
-viewtypedef d2itmmap = symmap (d2itm)
+vtypedef s2temap = symmap (s2rtext)
+vtypedef s2itmmap = symmap (s2itm)
+vtypedef d2itmmap = symmap (d2itm)
 
 fun
 filenv_make
@@ -79,18 +86,14 @@ fun filenv_get_name
   (fenv: filenv): filename // in [pats_staexp2.sats]
 // end of [filenv_get_name]
 *)
-
-fun filenv_get_s2temap (fenv: filenv):
-  [l:addr] (s2temap @ l, minus (filenv, s2temap @ l) | ptr l)
-// end of [filenv_get_s2temap]
-
-fun filenv_get_s2itmmap (fenv: filenv):
-  [l:addr] (s2itmmap @ l, minus (filenv, s2itmmap @ l) | ptr l)
-// end of [filenv_get_s2itmmap]
-
-fun filenv_get_d2itmmap (fenv: filenv):
-  [l:addr] (d2itmmap @ l, minus (filenv, d2itmmap @ l) | ptr l)
-// end of [filenv_get_d2itmmap]
+//
+// HX-2026-10: the maps stay in the cell of [filenv]; the pointers below
+// are the maps themselves (a [symmap] is a pointer): borrow them with
+// [$UN.castvwtp1{symmap(..)}], they are never freed
+//
+fun filenv_get_s2temap (fenv: filenv): ptr
+fun filenv_get_s2itmmap (fenv: filenv): ptr
+fun filenv_get_d2itmmap (fenv: filenv): ptr
 
 fun filenv_get_d2eclist (fenv: filenv): d2eclist
 
@@ -114,24 +117,17 @@ fun the_s2rtenv_find_qua (q: $SYN.s0rtq, id: symbol): s2rtextopt_vt
 
 (* ****** ****** *)
 
-absview s2rtenv_push_v
-
-(* ****** ****** *)
-
 fun the_s2rtenv_top_clear ((*void*)): void
 
 (* ****** ****** *)
 //
-fun the_s2rtenv_pop (pf: s2rtenv_push_v | (*none*)): s2temap
-fun the_s2rtenv_pop_free (pf: s2rtenv_push_v | (*none*)): void
-fun the_s2rtenv_push_nil (): (s2rtenv_push_v | void)
+fun the_s2rtenv_pop (): s2temap
+fun the_s2rtenv_pop_free (): void
+fun the_s2rtenv_push_nil (): void
 //
 (* ****** ****** *)
 
-fun the_s2rtenv_localjoin
-(
-  pf1: s2rtenv_push_v, pf2: s2rtenv_push_v | (*none*)
-) : void // end of [the_s2rtenv_localjoin]
+fun the_s2rtenv_localjoin ((*void*)): void
 
 fun the_s2rtenv_pervasive_joinwth0 (map: s2temap): void
 fun the_s2rtenv_pervasive_joinwth1 (map: !s2temap): void
@@ -154,25 +150,18 @@ fun the_s2expenv_find_qua (q: $SYN.s0taq, id: symbol): s2itmopt_vt
 fun the_s2expenv_pervasive_find (id: symbol): Option_vt (s2itm)
 
 (* ****** ****** *)
-//
-absview s2expenv_push_v
-//
-(* ****** ****** *)
 
 fun the_s2expenv_top_clear ((*void*)): void
 
 (* ****** ****** *)
 //
-fun the_s2expenv_pop (pf: s2expenv_push_v | (*none*)): s2itmmap
-fun the_s2expenv_pop_free (pf: s2expenv_push_v | (*none*)): void
-fun the_s2expenv_push_nil (): (s2expenv_push_v | void)
+fun the_s2expenv_pop (): s2itmmap
+fun the_s2expenv_pop_free (): void
+fun the_s2expenv_push_nil (): void
 //
 (* ****** ****** *)
 
-fun the_s2expenv_localjoin
-(
-  pf1: s2expenv_push_v, pf2: s2expenv_push_v | (*none*)
-) : void // end of [the_s2expenv_localjoin]
+fun the_s2expenv_localjoin ((*void*)): void
 
 fun the_s2expenv_pervasive_joinwth0 (map: s2itmmap): void
 fun the_s2expenv_pervasive_joinwth1 (map: !s2itmmap): void
@@ -199,12 +188,10 @@ fun s2var_check_tmplev (loc: location, s2v: s2var): void
 fun s2qualstlst_set_tmplev (s2qs: s2qualst, tmplev: int): void
 
 (* ****** ****** *)
-
-absview the_d2varlev_inc_v
 //
 fun the_d2varlev_get (): int
-fun the_d2varlev_inc (): (the_d2varlev_inc_v | void)
-fun the_d2varlev_dec (pf: the_d2varlev_inc_v | (*none*)): void
+fun the_d2varlev_inc (): void
+fun the_d2varlev_dec (): void
 //
 fun the_d2varlev_save (): int
 fun the_d2varlev_restore (lev0: int): void
@@ -233,39 +220,29 @@ fun the_d2expenv_current_find (id: symbol): Option_vt (d2itm)
 fun the_d2expenv_pervasive_find (id: symbol): Option_vt (d2itm)
 
 (* ****** ****** *)
-//
-absview d2expenv_push_v
-//
-(* ****** ****** *)
 
 fun the_d2expenv_top_clear ((*void*)): void
 
 (* ****** ****** *)
 //
-fun the_d2expenv_pop (pf: d2expenv_push_v | (*none*)): d2itmmap
-fun the_d2expenv_pop_free (pf: d2expenv_push_v | (*none*)): void
-fun the_d2expenv_push_nil ((*void*)): (d2expenv_push_v | void)
+fun the_d2expenv_pop (): d2itmmap
+fun the_d2expenv_pop_free (): void
+fun the_d2expenv_push_nil ((*void*)): void
 //
 (* ****** ****** *)
 
-fun the_d2expenv_localjoin
-(
-  pf1: d2expenv_push_v, pf2: d2expenv_push_v | (*none*)
-) : void // end of [the_d2expenv_localjoin]
+fun the_d2expenv_localjoin ((*void*)): void
 
 fun the_d2expenv_pervasive_joinwth0 (map: d2itmmap): void
 fun the_d2expenv_pervasive_joinwth1 (map: !d2itmmap): void
 
 (* ****** ****** *)
 //
-absview staload_level_push_v
-//
 fun the_staload_level_get (): int
 //
-fun the_staload_level_pop
-  (pf: staload_level_push_v | (*none*)): void
+fun the_staload_level_pop ((*void*)): void
 //
-fun the_staload_level_push (): (staload_level_push_v | void)
+fun the_staload_level_push ((*void*)): void
 //
 (* ****** ****** *)
 
@@ -274,33 +251,24 @@ fun the_filenvmap_find (fid: symbol): Option_vt (filenv)
 
 (* ****** ****** *)
 //
-absview trans2_env_push_v
+fun the_trans2_env_pop ((*none*)): void
 //
-fun the_trans2_env_pop
-  (pf: trans2_env_push_v | (*none*)): void
-//
-fun the_trans2_env_push (): (trans2_env_push_v | void)
+fun the_trans2_env_push ((*none*)): void
 //
 fun
-the_trans2_env_localjoin
-(
-  pf1: trans2_env_push_v, pf2: trans2_env_push_v | (*none*)
-) : void // end of [trans2_env_localjoin]
+the_trans2_env_localjoin ((*none*)): void
 //
 (* ****** ****** *)
 //
-absview trans2_env_save_v
-//
-fun the_trans2_env_save
-  ((*none*)): (trans2_env_save_v | void)
+fun the_trans2_env_save ((*none*)): void
 fun the_trans2_env_restore
-  (pf: trans2_env_save_v | (*none*)) : (s2temap, s2itmmap, d2itmmap)
+  ((*none*)): @(s2temap, s2itmmap, d2itmmap)
 //
 (* ****** ****** *)
 
 fun
 the_trans2_env_pervasive_joinwth1
-  (pf: trans2_env_push_v | fil: filename, d2cs: d2eclist): void
+  (fil: filename, d2cs: d2eclist): void
 // end of [the_trans2_env_pervasive_joinwth1]
 
 (* ****** ****** *)

@@ -68,5 +68,5 @@ atspre_arrayptr_make_arrpsz
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "arrayptr_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "arrayptr_atxt.txt")
 %}\

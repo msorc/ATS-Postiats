@@ -51,10 +51,7 @@ channeg_list{a:vt0p}
 //
 (* ****** ****** *)
 //
-fun
-list2sslist{a:t0p}(xs: List(a)): channeg(sslist(a)) = "mac#%"
-fun
-sslist2list{a:t0p}(chn: channeg(sslist(a))): List0(a) = "mac#%"
+// HX-2026-10: no GC (the lists are linear)
 //
 fun
 list2sslist_vt{a:vt0p}(xs: List_vt(a)): channeg(sslist(a)) = "mac#%"

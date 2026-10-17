@@ -43,12 +43,10 @@ staload "./../SATS/print.sats"
 //
 (* ****** ****** *)
 
-staload "./../SATS/list.sats"
 staload "./../SATS/list_vt.sats"
 
 (* ****** ****** *)
 
-staload "./../SATS/stream.sats"
 staload "./../SATS/stream_vt.sats"
 
 (* ****** ****** *)

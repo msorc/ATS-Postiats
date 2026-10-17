@@ -234,7 +234,6 @@ fileref_get_exnloc
 
 #atscode_separator()
 
-typedef charlst = List0(char)
 vtypedef charlst_vt = List0_vt(char)
 
 #atscode_separator()
@@ -268,7 +267,7 @@ fileref_put_string
   (out: FILEref, cs: NSH(string)): void
 fun
 fileref_put_charlst
-  (inp: FILEref, cs: NSH(List(char))): void
+  (inp: FILEref, cs: !List_vt(char)): void
 //
 #atscode_separator()
 //
@@ -322,7 +321,7 @@ env:vt0p
 fun{
 env:vt0p
 } fileref_foreach$fworkv
-  {n:int} (arrayref(char, n), size_t(n), &(env) >> _): void
+  {n:int} (&(@[char][n]), size_t(n), &(env) >> _): void
 //
 #atscode_separator()
 //
@@ -352,6 +351,6 @@ streamize_dirname_fname(dir: NSH(string)): stream_vt(Strptr1)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "filebas_atxt.txt")
 %}\

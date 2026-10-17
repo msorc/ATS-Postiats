@@ -32,12 +32,35 @@
 // Start Time: January, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_print.dats, see PORTING.md, "Type-checking environment (trans3_env)")
+//
+
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
 staload _(*anon*) = "./pats_utils.dats"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 staload "./pats_trans3_env.sats"
@@ -53,28 +76,28 @@ macdef prstr (x) = fprint_string (out, ,(x))
 in
 //
 case+
-c3t.c3nstr_node
+c3nstr_node_view (c3t.c3nstr_node ())
 of // case+
-| C3NSTRprop
+| ~C3NSTRprop
     (s2p) => {
     val () =
       prstr "C3NSTRprop("
-    val () = fprint_c3nstrkind (out, c3t.c3nstr_kind)
+    val () = fprint_c3nstrkind (out, c3t.c3nstr_kind ())
     val () = prstr "; "
     val () = fpprint_s2exp (out, s2p)
     val ((*closing*)) = prstr ")"
   } (* end of [C3NSTRprop] *)
-| C3NSTRitmlst
+| ~C3NSTRitmlst
     (s3is) => {
     val () =
       prstr "C3NSTRitmlst("
-    val () = fprint_c3nstrkind (out, c3t.c3nstr_kind)
+    val () = fprint_c3nstrkind (out, c3t.c3nstr_kind ())
     val () = prstr "; "
     val () = fprint_s3itmlst (out, s3is)
     val ((*closing*)) = prstr ")"
   } (* end of [C3NSTRitmlst] *)
 //
-| C3NSTRsolverify
+| ~C3NSTRsolverify
     (s2e_prop) => {
     val () =
       prstr "C3NSTRsolverify("
@@ -99,37 +122,35 @@ macdef prstr (x) = fprint_string (out, ,(x))
 //
 in
 //
-case+ knd of
-| C3TKmain() =>
+case+ c3nstrkind_view (knd) of
+| ~C3TKmain() =>
     prstr "C3TKmain()"
-| C3TKcase_exhaustiveness _ =>
+| ~C3TKcase_exhaustiveness _ =>
     prstr "C3TKcase_exhaustiveness(...)"
 //
-| C3TKtermet_isnat() =>
+| ~C3TKtermet_isnat() =>
     prstr "C3TKtermet_isnat()"
-| C3TKtermet_isdec() =>
+| ~C3TKtermet_isdec() =>
     prstr "C3TKtermet_isdec()"
 //
-| C3TKsome_fin _ =>
+| ~C3TKsome_fin _ =>
     prstr "C3TKsome_fin()"
-| C3TKsome_lvar _ =>
+| ~C3TKsome_lvar _ =>
     prstr "C3TKsome_lvar()"
-| C3TKsome_vbox _ =>
+| ~C3TKsome_vbox _ =>
     prstr "C3TKsome_vbox()"
 //
-| C3TKlstate() =>
+| ~C3TKlstate() =>
     prstr "C3TKlstate()"
-| C3TKlstate_var(d2v) =>
+| ~C3TKlstate_var(d2v) =>
   (
-    fprint!
-      (out, "C3TKlstate(", d2v, ")")
-    // fprint!
+    prstr "C3TKlstate("; fprint_d2var (out, d2v); prstr ")"
   ) (* C3TKlstate_var *)
 //
-| C3TKloop(knd) =>
-    fprint! (out, "C3TKloop(", knd, ")")
+| ~C3TKloop(knd) =>
+    (prstr "C3TKloop("; fprint_int (out, knd); prstr ")")
 //
-| C3TKsolverify() => prstr "C3TKsolverify()"
+| ~C3TKsolverify() => prstr "C3TKsolverify()"
 //
 end // end of [fprint_c3nstrkind]
 
@@ -145,20 +166,20 @@ prstr (x) =
 //
 in
 //
-case+ h3p.h3ypo_node of
-| H3YPOprop s2p => {
+case+ h3ypo_node_view (h3p.h3ypo_node ()) of
+| ~H3YPOprop s2p => {
     val () = prstr "H2YPOprop("
     val () = fpprint_s2exp (out, s2p)
     val () = prstr ")"
   } // end of [H3YPOprop]
-| H3YPObind (s2v, s2p) => {
+| ~H3YPObind (s2v, s2p) => {
     val () = prstr "H2YPObind("
     val () = fprint_s2var (out, s2v)
     val () = prstr " -> "
     val () = fpprint_s2exp (out, s2p)
     val () = prstr ")"
   } // end of [H3YPObind]
-| H3YPOeqeq (s2e1, s2e2) => {
+| ~H3YPOeqeq (s2e1, s2e2) => {
     val () = prstr "H2YPOeqeq("
     val () = fpprint_s2exp (out, s2e1)
     val () = prstr " == "
@@ -183,54 +204,54 @@ macdef prstr (x) = fprint_string (out, ,(x))
 //
 in
 //
-case+ s3i of
+case+ s3itm_view (s3i) of
 //
-| S3ITMsvar (s2v) => {
+| ~S3ITMsvar (s2v) => {
     val () = prstr "S3ITMsvar("
     val () = fprint_s2var (out, s2v)
     val () = prstr ")"
   } // end of [S3ITMsvar]
-| S3ITMhypo (h3p) => {
+| ~S3ITMhypo (h3p) => {
     val () = prstr "S3ITMhypo("
     val () = fprint_h3ypo (out, h3p)
     val () = prstr ")"
   } // end of [S3ITMhypo]
-| S3ITMsVar (s2V) => {
+| ~S3ITMsVar (s2V) => {
     val () = prstr "S3ITMsVar("
     val () = fprint_s2Var (out, s2V)
     val opt = s2Var_get_link (s2V)
     val () = (
-      case+ opt of
-      | Some s2e => (
+      case+ gopt_view (opt) of
+      | ~GOsome s2e => (
           prstr "->"; fpprint_s2exp (out, s2e)
         ) // end of [Some]
-      | None () => () // end of [None]
+      | ~GOnone () => () // end of [None]
     ) : void // end of [val]
     val () = prstr ")"
   } // end of [S3ITMsVar]
 //
-| S3ITMcnstr (c3t) => {
+| ~S3ITMcnstr (c3t) => {
     val () = prstr "S3ITMcnstr("
     val () = fprint_c3nstr (out, c3t)
     val () = prstr ")"
   } // end of [S3ITMcnstr]
-| S3ITMcnstr_ref (ctr) => {
-    val ref = ctr.c3nstroptref_ref
+| ~S3ITMcnstr_ref (ctr) => {
+    val opt = ctr.c3nstroptref_val ()
     val () = prstr "S3ITMcnstr_ref("
     val () = (
-      case+ !ref of
-      | Some c3t => fprint_c3nstr (out, c3t) | None () => ()
+      case+ gopt_view (opt) of
+      | ~GOsome c3t => fprint_c3nstr (out, c3t) | ~GOnone () => ()
     ) : void // end of [val]
     val () = prstr ")"
   } // end of [S3ITMcnstr_ref]
 //
-| S3ITMdisj (s3iss) => {
+| ~S3ITMdisj (s3iss) => {
     val () = prstr "S3ITMdisj("
     val () = fprint_s3itmlstlst (out, s3iss)
     val () = prstr ")"
   }
 //
-| S3ITMsolassert
+| ~S3ITMsolassert
     (s2e_prop) => {
     val () =
       prstr "S3ITMsolassert("
@@ -244,12 +265,12 @@ end // end of [fprint_s3itm]
 
 implement
 fprint_s3itmlst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_s3itm)
+  (out, xs) = $UT.fprintlst<s3itm> (out, xs, ", ", fprint_s3itm)
 // end of [fprint_s3itmlst]
 
 implement
 fprint_s3itmlstlst
-  (out, xss) = $UT.fprintlst (out, xss, "; ", fprint_s3itmlst)
+  (out, xss) = $UT.fprintlst<s3itmlst> (out, xss, "; ", fprint_s3itmlst)
 // end of [fprint_s3itmlstlst]
 
 (* ****** ****** *)

@@ -26,16 +26,14 @@ all:: ; \
 $(PATSOPT) -d ./DATS/basics.dats | \
 $(ATSCC2SCM) -o ./output/DATS/basics_dats.scm -i
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/list.dats | \
-$(ATSCC2SCM) -o ./output/DATS/list_dats.scm -i
-all:: ; \
-$(PATSOPT) -d ./DATS/option.dats | \
-$(ATSCC2SCM) -o ./output/DATS/option_dats.scm -i
 #
 all:: ; \
-$(PATSOPT) -d ./DATS/stream.dats | \
-$(ATSCC2SCM) -o ./output/DATS/stream_dats.scm -i
+$(PATSOPT) -d ./DATS/list_vt.dats | \
+$(ATSCC2SCM) -o ./output/DATS/list_vt_dats.scm -i
+all:: ; \
+$(PATSOPT) -d ./DATS/SCMlist.dats | \
+$(ATSCC2SCM) -o ./output/DATS/SCMlist_dats.scm -i
+#
 all:: ; \
 $(PATSOPT) -d ./DATS/stream_vt.dats | \
 $(ATSCC2SCM) -o ./output/DATS/stream_vt_dats.scm -i
@@ -52,9 +50,6 @@ $(ATSCC2SCM) -o ./output/DATS/reference_dats.scm -i
 #
 ######
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/funarray.dats | \
-$(ATSCC2SCM) -o ./output/DATS/funarray_dats.scm -i
 #
 all:: ; \
 $(PATSOPT) -d ./DATS/slistref.dats | \
@@ -66,15 +61,6 @@ $(ATSCC2SCM) -o ./output/DATS/qlistref_dats.scm -i
 #
 ######
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/list0.dats | \
-$(ATSCC2SCM) -o ./output/DATS/ML/list0_dats.scm -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/array0.dats | \
-$(ATSCC2SCM) -o ./output/DATS/ML/array0_dats.scm -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/option0.dats | \
-$(ATSCC2SCM) -o ./output/DATS/ML/option0_dats.scm -i
 #
 ######
 
@@ -131,18 +117,13 @@ CATS/SCMlist_cats.scm
 
 libatscc2scm_all:: ; \
 $(CAT) >>$(LIBATSCC2SCM_ALL_SCM) \
-output/DATS/list_dats.scm \
-output/DATS/option_dats.scm \
-output/DATS/stream_dats.scm \
+output/DATS/list_vt_dats.scm \
+output/DATS/SCMlist_dats.scm \
 output/DATS/stream_vt_dats.scm \
 output/DATS/intrange_dats.scm \
 output/DATS/reference_dats.scm \
-output/DATS/funarray_dats.scm \
 output/DATS/slistref_dats.scm \
 output/DATS/qlistref_dats.scm \
-output/DATS/ML/list0_dats.scm \
-output/DATS/ML/array0_dats.scm \
-output/DATS/ML/option0_dats.scm \
 
 ######
 #
@@ -173,7 +154,6 @@ clean:: ; $(RMF) *~ */*~
 
 cleanall:: clean
 cleanall:: ; $(RMF) output/DATS/*_?ats.scm
-cleanall:: ; $(RMF) output/DATS/ML/*_?ats.scm
 cleanall:: ; $(RMF) $(LIBATSCC2SCM_ALL_SCM)
 
 ######

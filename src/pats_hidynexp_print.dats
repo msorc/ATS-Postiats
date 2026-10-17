@@ -24,12 +24,24 @@
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
 ** 02110-1301, USA.
 *)
-
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: September, 2012
+//
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_hidynexp_print.dats, see PORTING.md, "Erased trees (hidynexp)")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 //
@@ -49,6 +61,8 @@ staload
 LAB = "./pats_label.sats"
 staload
 FIL = "./pats_filename.sats"
+staload
+SYM = "./pats_symbol.sats"
 //
 (* ****** ****** *)
 //
@@ -57,6 +71,7 @@ SYN = "./pats_syntax.sats"
 //
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 
@@ -78,20 +93,20 @@ fprint_string (out, ,(str))
 in
 //
 case+
-x.hipat_node of
+hipat_node_view (x.hipat_node()) of
 //
-| HIPany(d2v) => {
+| ~HIPany(d2v) => {
     val () = prstr "HIPany("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   } (* end of [HIPany] *)
-| HIPvar(d2v) => {
+| ~HIPvar(d2v) => {
     val () = prstr "HIPvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   } (* end of [HIPvar] *)
 //
-| HIPcon (
+| ~HIPcon (
     pck, d2c, hse_sum, lhips
   ) => {
     val () = prstr "HIPcon("
@@ -103,59 +118,59 @@ x.hipat_node of
     val () = prstr ")"
     val () = prstr ")"
   }
-| HIPcon_any(pck, d2c) => {
+| ~HIPcon_any(pck, d2c) => {
     val () = prstr "HIPcon_any("
     val () = fprint_d2con (out, d2c)
     val () = prstr ")"
   }
 //
-| HIPint(i) => {
+| ~HIPint(i) => {
     val () = prstr "HIPint("
     val () = fprint_int (out, i)
     val () = prstr ")"
   }
-| HIPintrep
+| ~HIPintrep
     (intrep) => {
     val () = prstr "HIPintrep("
     val () = fprint_string (out, intrep)
     val () = prstr ")"
   }
-| HIPbool(b) => {
+| ~HIPbool(b) => {
     val () = prstr "HIPbool("
     val () = fprint_bool (out, b)
     val () = prstr ")"
   }
-| HIPchar(c) => {
+| ~HIPchar(c) => {
     val () = prstr "HIPchar("
     val () = fprint_char (out, c)
     val () = prstr ")"
   }
-| HIPstring(str) => {
+| ~HIPstring(str) => {
     val () = prstr "HIPstring("
     val () = fprint_string (out, str)
     val () = prstr ")"
   }
-| HIPfloat(rep) => {
+| ~HIPfloat(rep) => {
     val () = prstr "HIPfloat("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
 //
-| HIPi0nt(tok) => {
+| ~HIPi0nt(tok) => {
     val () = prstr "HIPi0nt("
     val () = $SYN.fprint_i0nt (out, tok)
     val () = prstr ")"
   }
-| HIPf0loat(tok) => {
+| ~HIPf0loat(tok) => {
     val () = prstr "HIPf0loat("
     val () = $SYN.fprint_f0loat (out, tok)
     val () = prstr ")"
   } // end of [HIPf0lat]
 //
-| HIPempty((*void*)) => prstr "HIPempty()"
+| ~HIPempty () => prstr "HIPempty()"
 //
 (*
-| HIPlst (
+| ~HIPlst (
     hse_elt, hips_elt
   ) => {
     val () = prstr "HIPlst("
@@ -166,17 +181,17 @@ x.hipat_node of
   } // end of [HIPlst]
 *)
 //
-| HIPrec (
+| ~HIPrec (
     knd, pck, lhips, hse_rec
   ) => {
     val () = prstr "HIPrec("
-    val () = fprintf (out, "knd= %i", @(knd))
+    val () = (fprint_string (out, "knd= "); fprint_int (out, knd))
     val () = prstr "; "
     val () = fprint_labhipatlst (out, lhips)
     val () = prstr ")"
   } // end of [HIPrec]
 //
-| HIPrefas
+| ~HIPrefas
     (d2v, hip) => {
     val () = prstr "HIPrefas("
     val () = fprint_d2var (out, d2v)
@@ -185,7 +200,7 @@ x.hipat_node of
     val () = prstr (")")
   } (* end of [HIPrefas] *)
 //
-| HIPann (hip, ann) => {
+| ~HIPann (hip, ann) => {
     val () = prstr "HIPann("
     val () = fprint_hipat (out, hip)
     val () = prstr " : "
@@ -193,7 +208,7 @@ x.hipat_node of
     val () = prstr ")"
   } (* end of [HIPann] *)
 //
-| HIPerr ((*void*)) => prstr "HIPerr()"
+| ~HIPerr () => prstr "HIPerr()"
 //
 (*
 | _ => {
@@ -210,15 +225,16 @@ prerr_hipat (x) = fprint_hipat (stderr_ref, x)
 
 implement
 fprint_hipatlst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_hipat)
+  (out, xs) = $UT.fprintlst<hipat> (out, xs, ", ", fprint_hipat)
 // end of [fprint_hipatlst]
 
 extern
-fun fprint_labhipat : fprint_type (labhipat)
+fun fprint_labhipat (out: FILEref, x: labhipat): void
 implement
 fprint_labhipat
   (out, lx) = {
-  val LABHIPAT (l, x) = lx
+  val l = lx.labhipat_lab()
+  val x = lx.labhipat_elt()
   val () =
     $LAB.fprint_label (out, l)
   val () = fprint_string (out, "= ")
@@ -227,7 +243,7 @@ fprint_labhipat
 
 implement
 fprint_labhipatlst
-  (out, lxs) = $UT.fprintlst (out, lxs, ", ", fprint_labhipat)
+  (out, lxs) = $UT.fprintlst<labhipat> (out, lxs, ", ", fprint_labhipat)
 // end of [fprint_labhipatlst]
 
 (* ****** ****** *)
@@ -238,15 +254,15 @@ fprint_hilab
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ hil.hilab_node of
-| HILlab (lab) => {
+case+ hilab_node_view (hil.hilab_node()) of
+| ~HILlab (lab) => {
     val () = prstr "HILlab("
     val () = $LAB.fprint_label (out, lab)
     val () = prstr ")"
   } // end of [HILlab]
-| HILind (ind) => {
+| ~HILind (ind) => {
     val () = prstr "HILind("
-    val () = $UT.fprintlst (out, ind, ", ", fprint_hidexp)
+    val () = $UT.fprintlst<hidexp> (out, ind, ", ", fprint_hidexp)
     val () = prstr ")"
   } // end of [HILind]
 //
@@ -254,15 +270,15 @@ end // end of [fprint_hilab]
 
 implement
 fprint_hilablst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_hilab)
+  (out, xs) = $UT.fprintlst<hilab> (out, xs, ", ", fprint_hilab)
 // end of [fprint_hilablst]
 
 (* ****** ****** *)
 
 extern
-fun fprint_higmat : fprint_type (higmat)
+fun fprint_higmat (out: FILEref, x: higmat): void
 extern
-fun fprint_hiclau : fprint_type (hiclau)
+fun fprint_hiclau (out: FILEref, x: hiclau): void
 
 (* ****** ****** *)
 
@@ -273,83 +289,83 @@ fprint_hidexp
 in
 //
 case+
-  x.hidexp_node of
+  hidexp_node_view (x.hidexp_node()) of
 //
-| HDEcst (d2c) => {
+| ~HDEcst (d2c) => {
     val () = prstr "HDEcst("
     val () = fprint_d2cst (out, d2c)
     val () = prstr ")"
   }
-| HDEvar (d2v) => {
+| ~HDEvar (d2v) => {
     val () = prstr "HDEvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   }
 //
-| HDEint (i) => {
+| ~HDEint (i) => {
     val () = prstr "HDEint("
     val () = fprint_int (out, i)
     val () = prstr ")"
   }
-| HDEintrep (rep) => {
+| ~HDEintrep (rep) => {
     val () = prstr "HDEintrep("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
-| HDEbool (b) => {
+| ~HDEbool (b) => {
     val () = prstr "HDEbool("
     val () = fprint_bool (out, b)
     val () = prstr ")"
   }
-| HDEchar (c) => {
+| ~HDEchar (c) => {
     val () = prstr "HDEchar("
     val () = fprint_char (out, c)
     val () = prstr ")"
   }
-| HDEfloat (rep) => {
+| ~HDEfloat (rep) => {
     val () = prstr "HDEfloat("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
-| HDEstring (str) => {
+| ~HDEstring (str) => {
     val () = prstr "HDEstring("
     val () = fprint_string (out, str)
     val () = prstr ")"
   }
 //
-| HDEi0nt (tok) => {
+| ~HDEi0nt (tok) => {
     val () = prstr "HDEi0nt("
     val () = $SYN.fprint_i0nt (out, tok)
     val () = prstr ")"
   }
-| HDEf0loat (tok) => {
+| ~HDEf0loat (tok) => {
     val () = prstr "HDEf0loat("
     val () = $SYN.fprint_f0loat (out, tok)
     val () = prstr ")"
   }
 //
-| HDEcstsp (cst) => {
+| ~HDEcstsp (cst) => {
     val () = prstr "HDEcstsp("
     val () = $SYN.fprint_cstsp (out, cst)
     val () = prstr ")"
   }
 //
-| HDEtyrep (hse) => {
+| ~HDEtyrep (hse) => {
     val () = prstr "HDEtyrep("
     val () = fprint_hisexp (out, hse)
     val () = prstr ")"
   }
 //
-| HDEtop () => prstr "HDEtop()"
-| HDEempty () => prstr "HDEempty()"
-| HDEignore (hde) =>
+| ~HDEtop () => prstr "HDEtop()"
+| ~HDEempty () => prstr "HDEempty()"
+| ~HDEignore (hde) =>
   {
     val () = prstr "HDEignore("
     val () = fprint_hidexp (out, hde)
     val () = prstr ")"
   }
 //
-| HDEcastfn
+| ~HDEcastfn
     (d2c, arg) => {
     val () = prstr "HDEcastfn("
     val () = fprint_d2cst (out, d2c)
@@ -358,7 +374,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEextval (name) =>
+| ~HDEextval (name) =>
   {
     val () = prstr "HDEextval("
     val () = prstr "\""
@@ -367,7 +383,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEextfcall
+| ~HDEextfcall
     (_fun, _arg) =>
   {
     val () = prstr "HDEextfcall("
@@ -378,7 +394,7 @@ case+
     val () = fprint_hidexplst (out, _arg)
     val () = prstr ")"
   }
-| HDEextmcall
+| ~HDEextmcall
     (_obj, _mtd, _arg) =>
   {
     val () = prstr "HDEextmcall("
@@ -392,7 +408,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEcon (
+| ~HDEcon (
     d2c, hse_sum, lhdes
   ) => {
     val () = prstr "HDEcon("
@@ -405,7 +421,7 @@ case+
     val () = prstr ")"
   } // end of [HDEcon]
 //
-| HDEtmpcst (d2c, t2mas) => {
+| ~HDEtmpcst (d2c, t2mas) => {
     val () = prstr "HDEtmpcst("
     val () = fprint_d2cst (out, d2c)
     val () = prstr "<"
@@ -413,7 +429,7 @@ case+
     val () = prstr ">"
     val () = prstr ")"
   }
-| HDEtmpvar (d2v, t2mas) => {
+| ~HDEtmpvar (d2v, t2mas) => {
     val () = prstr "HDEtmpvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr "<"
@@ -422,14 +438,14 @@ case+
     val () = prstr ")"
   }
 //
-| HDEfoldat () => prstr "HDEfoldat()"
-| HDEfreeat (hde) => {
+| ~HDEfoldat () => prstr "HDEfoldat()"
+| ~HDEfreeat (hde) => {
     val () = prstr "HDEfreeat("
     val () = fprint_hidexp (out, hde)
     val () = prstr ")"
   }
 //
-| HDElet (hids, hde) => {
+| ~HDElet (hids, hde) => {
     val () = prstr "HDElet(\n"
     val () = fprint_hideclist (out, hids)
     val () = prstr "**in**\n"
@@ -437,7 +453,7 @@ case+
     val () = prstr "\n)"
   }
 //
-| HDEapp (
+| ~HDEapp (
     _fun, hse_fun, _arg
   ) => {
     val () = prstr "HDEapp("
@@ -450,7 +466,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEif (
+| ~HDEif (
     _cond, _then, _else
   ) => {
     val () = prstr "HDEif("
@@ -461,7 +477,7 @@ case+
     val () = fprint_hidexp (out, _else)
     val () = prstr ")"
   } // end of [HDEif]
-| HDEsif (
+| ~HDEsif (
     _cond, _then, _else
   ) => {
     val () = prstr "HDEsif("
@@ -473,7 +489,7 @@ case+
     val () = prstr ")"
   } // end of [HDEsif]
 //
-| HDEcase (
+| ~HDEcase (
     knd, hdes, hcls
   ) => {
     val () = prstr "HDEcase(\n"
@@ -481,37 +497,37 @@ case+
     val () = prstr "\n"
     val () = fprint_hidexplst (out, hdes)
     val () = prstr "\n"
-    val () = $UT.fprintlst (out, hcls, "\n", fprint_hiclau)
+    val () = $UT.fprintlst<hiclau> (out, hcls, "\n", fprint_hiclau)
     val () = prstr "\n)"
   } // end of [HDEcase]
 //
-| HDElst (
+| ~HDElst (
     lin, hse_elt, hdes
   ) => {
     val () = prstr "HDElst("
-    val () = fprintf (out, "lin= %i", @(lin))
+    val () = (fprint_string (out, "lin= "); fprint_int (out, lin))
     val () = prstr "; "
     val () = fprint_hisexp (out, hse_elt)
     val () = prstr "; "
     val () = fprint_hidexplst (out, hdes)
     val () = prstr ")"
   } // end of [HDElst]
-| HDErec (
+| ~HDErec (
     knd, lhdes, hse_rec
   ) => {
     val () = prstr "HDErec("
-    val () = fprintf (out, "knd= %i", @(knd))
+    val () = (fprint_string (out, "knd= "); fprint_int (out, knd))
     val () = prstr "; "
     val () = fprint_labhidexplst (out, lhdes)
     val () = prstr ")"
   } // end of [HDErec]
-| HDEseq (hdes) => {
+| ~HDEseq (hdes) => {
     val () = prstr "HDEseq("
     val () = fprint_hidexplst (out, hdes)
     val () = prstr ")"
   }
 //
-| HDEselab (
+| ~HDEselab (
     hde, hse_flt, hils
   ) => {
     val () = prstr "HDEselab("
@@ -523,13 +539,13 @@ case+
     val () = prstr ")"
   }
 //
-| HDEptrofvar
+| ~HDEptrofvar
     (d2v) => {
     val () = prstr "HDEptrofvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   }
-| HDEptrofsel
+| ~HDEptrofsel
     (hde, hse_rt, hils) => {
     val () = prstr "HDEptrofsel("
     val () = fprint_hidexp (out, hde)
@@ -542,7 +558,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDErefarg
+| ~HDErefarg
     (knd, freeknd, hde) => {
     val () = prstr "HDErefarg("
     val () = fprint_int (out, knd)
@@ -553,7 +569,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEselvar
+| ~HDEselvar
     (d2v, hse_rt, hils) =>
   {
     val () = prstr "HDEselvar("
@@ -566,7 +582,7 @@ case+
     val () = prstr "]"
     val () = prstr ")"
   }
-| HDEselptr
+| ~HDEselptr
     (hde, hse_rt, hils) =>
   {
     val () = prstr "HDEselptr("
@@ -580,7 +596,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEassgn_var (
+| ~HDEassgn_var (
     d2v_l, hse_rt, hils, hde_r
   ) => {
     val () = prstr "HDEassgn_var("
@@ -595,7 +611,7 @@ case+
     val () = fprint_hidexp (out, hde_r)
     val () = prstr ")"
   }
-| HDEassgn_ptr (
+| ~HDEassgn_ptr (
     hde_l, hse_rt, hils, hde_r
   ) => {
     val () = prstr "HDEassgn_ptr("
@@ -611,7 +627,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDExchng_var (
+| ~HDExchng_var (
     d2v_l, hse_rt, hils, hde_r
   ) => {
     val () = prstr "HDExchng_var("
@@ -626,7 +642,7 @@ case+
     val () = fprint_hidexp (out, hde_r)
     val () = prstr ")"
   }
-| HDExchng_ptr (
+| ~HDExchng_ptr (
     hde_l, hse_rt, hils, hde_r
   ) => {
     val () = prstr "HDExchng_ptr("
@@ -642,7 +658,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEarrpsz (
+| ~HDEarrpsz (
     hse_elt, hdes_elt, asz
   ) => {
     val () = prstr "HDEarrpsz("
@@ -653,7 +669,7 @@ case+
     val () = fprint_int (out, asz)
     val () = prstr ")"
   }
-| HDEarrinit (
+| ~HDEarrinit (
     hse_elt, hde_asz, hdes_elt, asz
   ) => {
     val () = prstr "HDEarrinit("
@@ -665,30 +681,30 @@ case+
     val () = prstr ")"
   }
 //
-| HDEraise(hde) => {
+| ~HDEraise(hde) => {
     val () = prstr "HDEraise("
     val () = fprint_hidexp (out, hde)
     val () = prstr ")"
   }
 //
-| HDEvararg(hdes) => {
+| ~HDEvararg(hdes) => {
     val () = prstr "HDEvararg("
     val () = fprint_hidexplst (out, hdes)
     val ((*closing*)) = prstr ")"
   }
 //
 (*
-| HDEvcopyenv (d2v) => HX: HDEvar(d2v)
+| ~HDEvcopyenv (d2v) => HX: HDEvar(d2v)
 *)
 //
-| HDEtempenver(d2vs) =>
+| ~HDEtempenver(d2vs) =>
   {
     val () = prstr "HDEtempenver("
     val () = fprint_d2varlst (out, d2vs)
     val () = prstr ")"
   }
 //
-| HDElam
+| ~HDElam
     (knd, _arg, _body) =>
   {
     val () = prstr "HDElam("
@@ -700,7 +716,7 @@ case+
     val () = prstr ")"
   } // end of [HDElam]
 //
-| HDEfix
+| ~HDEfix
     (knd, f_d2v, hde_def) =>
   {
     val () = prstr "HDEfix("
@@ -712,12 +728,12 @@ case+
     val () = prstr ")"    
   } // end of [HDEfix]
 //
-| HDEdelay (hde) => {
+| ~HDEdelay (hde) => {
     val () = prstr "HDEdelay("
     val () = fprint_hidexp (out, hde)
     val () = prstr ")"
   }
-| HDEldelay
+| ~HDEldelay
     (hde1, hde2) => {
     val () = prstr "HDEldelay("
     val () = fprint_hidexp (out, hde1)
@@ -726,7 +742,7 @@ case+
     val () = prstr ")"
   } (* end of [HDEldelay] *)
 //
-| HDElazyeval
+| ~HDElazyeval
     (lin, hde) => {
     val () = prstr "HDElazyeval("
     val () = fprint_int (out, lin)
@@ -735,17 +751,17 @@ case+
     val () = prstr ")"
   }
 //
-| HDEloop _ => {
+| ~HDEloop (_, _, _, _) => {
     val () = prstr "HDEloop(...)"
   }
-| HDEloopexn (knd) =>
+| ~HDEloopexn (knd) =>
   {
     val () = prstr "HDEloopexn("
     val () = fprint_int (out, knd)
     val () = prstr ")"
   }
 //
-| HDEtrywith
+| ~HDEtrywith
     (hde, hicls) =>
   {
     val () = prstr "HDEtrywith("
@@ -755,7 +771,7 @@ case+
     val () = prstr ")"
   }
 //
-| HDEerrexp ((*void*)) => prstr "HDEerrexp()"
+| ~HDEerrexp () => prstr "HDEerrexp()"
 //
 (*
 | _ => {
@@ -772,22 +788,23 @@ prerr_hidexp (x) = fprint_hidexp (stderr_ref, x)
 
 implement
 fprint_hidexplst
-  (out, xs) = $UT.fprintlst (out, xs, "; ", fprint_hidexp)
+  (out, xs) = $UT.fprintlst<hidexp> (out, xs, "; ", fprint_hidexp)
 // end of [fprint_hidexplst]
 
 implement
 fprint_hidexpopt
-  (out, opt) = $UT.fprintopt (out, opt, fprint_hidexp)
+  (out, opt) = $UT.fprintopt<hidexp> (out, opt, fprint_hidexp)
 // end of [fprint_hidexpopt]
 
 (* ****** ****** *)
 
 extern
-fun fprint_labhidexp : fprint_type (labhidexp)
+fun fprint_labhidexp (out: FILEref, x: labhidexp): void
 implement
 fprint_labhidexp
   (out, lx) = {
-  val LABHIDEXP (l, x) = lx
+  val l = lx.labhidexp_lab()
+  val x = lx.labhidexp_elt()
   val () =
     $LAB.fprint_label (out, l)
   val () = fprint_string (out, "= ")
@@ -796,7 +813,7 @@ fprint_labhidexp
 
 implement
 fprint_labhidexplst
-  (out, lxs) = $UT.fprintlst (out, lxs, "; ", fprint_labhidexp)
+  (out, lxs) = $UT.fprintlst<labhidexp> (out, lxs, "; ", fprint_labhidexp)
 // end of [fprint_labhidexplst]
 
 (* ****** ****** *)
@@ -804,9 +821,9 @@ fprint_labhidexplst
 implement
 fprint_higmat (out, x) = {
   val () = fprint_string (out, "HIGMAT(")
-  val () = fprint_hidexp (out, x.higmat_exp)
+  val () = fprint_hidexp (out, x.higmat_exp())
   val () = fprint_string (out, "; ")
-  val () = $UT.fprintopt (out, x.higmat_pat, fprint_hipat)
+  val () = $UT.fprintopt<hipat> (out, x.higmat_pat(), fprint_hipat)
   val () = fprint_string (out, ")")
 } // end of [fprint_higmat]
 
@@ -815,9 +832,9 @@ fprint_higmat (out, x) = {
 implement
 fprint_hiclau (out, x) = {
   val () = fprint_string (out, "HICLAU(")
-  val () = fprint_hipatlst (out, x.hiclau_pat)
+  val () = fprint_hipatlst (out, x.hiclau_pat())
   val () = fprint_string (out, " => ")
-  val () = fprint_hidexp (out, x.hiclau_body)
+  val () = fprint_hidexp (out, x.hiclau_body())
   val () = fprint_string (out, ")")
 } // end of [fprint_hiclau]
 
@@ -834,40 +851,40 @@ fprint_string(out, ,(str))
 in (* in-of-let *)
 //
 case+
-hid.hidecl_node
+hidecl_node_view (hid.hidecl_node())
 of // case+
 //
-| HIDnone() =>
+| ~HIDnone() =>
   prstr "HIDnone()"
 //
-| HIDlist(hids) =>
+| ~HIDlist(hids) =>
   {
     val () =
     prstr "HIDlist(\n"
     val () =
-    $UT.fprintlst
+    $UT.fprintlst<hidecl>
       (out, hids, "\n", fprint_hidecl)
     // end of [val]
     val () = prstr "\n)"
   }
 //
-| HIDsaspdec _ => prstr "HIDsaspdec(...)"
-| HIDreassume _ => prstr "HIDreassume(...)"
+| ~HIDsaspdec (_) => prstr "HIDsaspdec(...)"
+| ~HIDreassume (_) => prstr "HIDreassume(...)"
 //
-| HIDextcode
+| ~HIDextcode
     (knd, pos, code) =>
   {
     val () =
     prstr "HIDextcode("
-    val () =
-    fprintf
-    (
-      out, "knd=%i, pos=%i, code=...", @(knd, pos)
-    ) (* fprintf *)
+    val () = fprint_string (out, "knd=")
+    val () = fprint_int (out, knd)
+    val () = fprint_string (out, ", pos=")
+    val () = fprint_int (out, pos)
+    val () = fprint_string (out, ", code=...")
     val () = prstr ")"
   } (* end of [HIDextcode] *)
 //
-| HIDdatdecs
+| ~HIDdatdecs
     (knd, s2cs) => {
     val () = prstr "HIDdatdecs("
     val () = fprint_int (out, knd)
@@ -876,13 +893,13 @@ of // case+
     val () = prstr ")"
   }
 //
-| HIDexndecs (d2cs) => {
+| ~HIDexndecs (d2cs) => {
     val () = prstr "HIDexndecs("
     val () = fprint_d2conlst (out, d2cs)
     val () = prstr ")"
   }
 //
-| HIDdcstdecs
+| ~HIDdcstdecs
     (dck, d2cs) =>
   {
     val () = prstr "HIDdcstdecs("
@@ -892,46 +909,46 @@ of // case+
     val () = prstr ")"
   }
 //
-| HIDfundecs
+| ~HIDfundecs
     (knd, decarg, hfds) =>
   {
     val () = prstr "HIDfundecs(\n"
     val () =
-    $UT.fprintlst
+    $UT.fprintlst<hifundec>
       (out, hfds, "\n", fprint_hifundec)
     // end of [val]
     val () = prstr "\n)"
   } // end of [HIDfundec]
 //
-| HIDvaldecs
+| ~HIDvaldecs
     (knd, hvds) => {
     val () = prstr "HIDvaldecs(\n"
     val () =
-    $UT.fprintlst
+    $UT.fprintlst<hivaldec>
       (out, hvds, "\n", fprint_hivaldec)
     // end of [val]
     val () = prstr "\n)"
   } // end of [HIDvaldec]
-| HIDvaldecs_rec
+| ~HIDvaldecs_rec
     (knd, hvds) => {
     val () = prstr "HIDvaldecs_rec(\n"
     val () =
-    $UT.fprintlst
+    $UT.fprintlst<hivaldec>
       (out, hvds, "\n", fprint_hivaldec)
     // end of [val]
     val () = prstr "\n)"
   } // end of [HIDvaldec_rec]
 //
-| HIDvardecs (hvds) => {
+| ~HIDvardecs (hvds) => {
     val () = prstr "HIDvardecs(\n"
     val () =
-    $UT.fprintlst
+    $UT.fprintlst<hivardec>
       (out, hvds, "\n", fprint_hivardec)
     // end of [val]
     val () = prstr "\n)"
   } // end of [HIDvardec]
 //
-| HIDimpdec
+| ~HIDimpdec
     (knd, himpdec) =>
   {
     val () = prstr "HIDimpdec(\n"
@@ -939,20 +956,20 @@ of // case+
     val () = prstr "\n)"
   } (* end of [HIDimpdec] *)
 //
-| HIDinclude
+| ~HIDinclude
     (knd, hids) =>
   {
     val () = prstr("HIDinclude(")
     val () = fprint_int(out, knd)
     val () = prstr "\n"
     val () =
-    $UT.fprintlst
+    $UT.fprintlst<hidecl>
       (out, hids, "\n", fprint_hidecl)
     // end of [val]
     val () = prstr "\n)"
   } (* end of [HIDinclude] *)
 //
-| HIDstaload
+| ~HIDstaload
     (idopt, cfil, _, _, _) =>
   {
     val () = prstr "HIDstaload("
@@ -960,7 +977,7 @@ of // case+
     $FIL.fprint_filename_full(out, cfil)
     val () = prstr ")"
   } (* end of [HIDstaload] *)
-| HIDstaloadloc
+| ~HIDstaloadloc
     (pfil, nspace, hids) =>
   {
     val () = prstr "HIDstaloadloc("
@@ -970,8 +987,10 @@ of // case+
     val () = prstr ")"
   } (* end of [HIDstaloadloc] *)
 //
-| _ (* rest-of-hidecl *) =>
-  let val () = prstr "HID...(...)" in (*nothing*) end
+| ~HIDextype (_, _) => prstr "HID...(...)"
+| ~HIDextvar (_, _) => prstr "HID...(...)"
+| ~HIDdynload (_) => prstr "HID...(...)"
+| ~HIDlocal (_, _) => prstr "HID...(...)"
 //
 end // end of [fprint_hidecl]
 //
@@ -989,16 +1008,14 @@ fprint_hideclist
   (out, hids) = let
 in
 //
-case+ hids of
-| list_cons
-    (hid, hids) => let
-    val () =
-      fprint_hidecl (out, hid)
-    val () = fprint_newline (out)
-  in
-    fprint_hideclist (out, hids)
-  end // end of [list_cons]
-| list_nil () => ()
+if glist_is_cons (hids) then let
+  val hid = glist_head<hidecl> (hids)
+  val () =
+    fprint_hidecl (out, hid)
+  val () = fprint_newline (out)
+in
+  fprint_hideclist (out, glist_tail<hidecl> (hids))
+end else () // end of [list_cons]
 //
 end // end of [fprint_hideclist]
 
@@ -1007,9 +1024,9 @@ end // end of [fprint_hideclist]
 implement
 fprint_hiimpdec
   (out, himpdec) = {
-  val () = fprint_d2cst (out, himpdec.hiimpdec_cst)
+  val () = fprint_d2cst (out, himpdec.hiimpdec_cst())
   val () = fprint_string (out, " = ")
-  val () = fprint_hidexp (out, himpdec.hiimpdec_def)
+  val () = fprint_hidexp (out, himpdec.hiimpdec_def())
 } // end of [fprint_hiimpdec]
 
 (* ****** ****** *)
@@ -1017,28 +1034,28 @@ fprint_hiimpdec
 implement
 fprint_hifundec
   (out, hvd) = {
-  val () = fprint_d2var (out, hvd.hifundec_var)
+  val () = fprint_d2var (out, hvd.hifundec_var())
   val () = fprint_string (out, " = ")
-  val () = fprint_hidexp (out, hvd.hifundec_def)
+  val () = fprint_hidexp (out, hvd.hifundec_def())
 } // end of [fprint_hifundec]
 
 implement
 fprint_hivaldec
   (out, hvd) = {
-  val () = fprint_hipat (out, hvd.hivaldec_pat)
+  val () = fprint_hipat (out, hvd.hivaldec_pat())
   val () = fprint_string (out, " = ")
-  val () = fprint_hidexp (out, hvd.hivaldec_def)
+  val () = fprint_hidexp (out, hvd.hivaldec_def())
 } // end of [fprint_hivaldec]
 
 implement
 fprint_hivardec
   (out, hvd) = let
   macdef prstr (s) = fprint_string (out, ,(s))
-  val () = fprint_d2var (out, hvd.hivardec_dvar_ptr)
+  val () = fprint_d2var (out, hvd.hivardec_dvar_ptr())
   val () = prstr " : "
-  val () = fprint_hisexp (out, hvd.hivardec_type)
+  val () = fprint_hisexp (out, hvd.hivardec_type())
   val () = prstr " = "
-  val () = $UT.fprintopt (out, hvd.hivardec_init, fprint_hidexp)
+  val () = $UT.fprintopt<hidexp> (out, hvd.hivardec_init(), fprint_hidexp)
 in
   // nothing
 end // end of [fprint_hivardec]

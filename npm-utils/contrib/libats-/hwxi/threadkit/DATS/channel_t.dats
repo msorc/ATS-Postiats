@@ -50,19 +50,24 @@ staload "./../SATS/channel_t.sats"
 //
 (* ****** ****** *)
 //
-datatype
-channel = {
+//
+// HX-2026-10: no GC
+// a channel is a handle to a [channel_vt] cell
+// that is never freed (just like a ref)
+//
+datavtype
+channel_vt = {
 l1,l2,l3:agz
 } CHANNEL of
 (
   ptr(*buf*)
 , size_t(*cap*)
 , mutex(l1), condvar(l2), condvar(l3)
-) (* end of [channel] *)
+) (* end of [channel_vt] *)
 //
 (* ****** ****** *)
 
-assume channel_type(a:vt0p) = channel
+assume channel_type(a:vt0p) = ptr
 
 (* ****** ****** *)
 
@@ -82,7 +87,7 @@ val deq =
 val deq = $UN.castvwtp0{ptr}(deq)
 //
 in
-  CHANNEL(deq, cap, mut, CVisnil, CVisful)
+  $UN.castvwtp0{ptr}(CHANNEL(deq, cap, mut, CVisnil, CVisful))
 end // end of [channel_create_exn]
 
 (* ****** ****** *)
@@ -92,7 +97,10 @@ implement
 channel_get_capacity
   (chan) = let
 //
-val+CHANNEL(ptr, cap, _, _, _) = chan in cap
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
+val+CHANNEL(ptr, cap, _, _, _) = chan2
+val ((*void*)) = $UN.castvwtp0{void}(chan2) in cap
 //
 end // end of [channel_get_capacity]
 //
@@ -115,11 +123,14 @@ implement
 channel_insert
   (chan, x0) = let
 //
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
 val+
 CHANNEL{l1,l2,l3}
 (
 deq, cap, mut, CVisnil, CVisful
-) = chan // end of [val]
+) = chan2 // end of [val]
+val ((*void*)) = $UN.castvwtp0{void}(chan2)
 //
 val
 (pfmut | ()) = mutex_lock(mut)
@@ -148,11 +159,14 @@ channel_insert_opt
   (chan, x0) = opt where
 {
 //
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
 val+
 CHANNEL{l1,l2,l3}
 (
 deq, cap, mut, CVisnil, CVisful
-) = chan // end of [val]
+) = chan2 // end of [val]
+val ((*void*)) = $UN.castvwtp0{void}(chan2)
 //
 val
 (pfmut | ()) = mutex_lock(mut)
@@ -200,11 +214,14 @@ implement
 channel_insert_buf
   (chan, deq, x0) = let
 //
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
 val+
 CHANNEL{l1,l2,l3}
 (
 ptr, cap, mut, CVisnil, CVisful
-) = chan // end of [val]
+) = chan2 // end of [val]
+val ((*void*)) = $UN.castvwtp0{void}(chan2)
 //
 val
 isnot = deqarray_isnot_full<a>(deq)
@@ -256,11 +273,14 @@ channel_takeout
   (chan) = x0_out where
 {
 //
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
 val+
 CHANNEL{l1,l2,l3}
 (
 deq, cap, mut, CVisnil, CVisful
-) = chan // end of [val]
+) = chan2 // end of [val]
+val ((*void*)) = $UN.castvwtp0{void}(chan2)
 //
 val (pfmut | ()) = mutex_lock(mut)
 //
@@ -287,11 +307,14 @@ channel_takeout_opt
   (chan) = opt where
 {
 //
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
 val+
 CHANNEL{l1,l2,l3}
 (
 deq, cap, mut, CVisnil, CVisful
-) = chan // end of [val]
+) = chan2 // end of [val]
+val ((*void*)) = $UN.castvwtp0{void}(chan2)
 //
 val (pfmut | ()) = mutex_lock(mut)
 //
@@ -337,11 +360,14 @@ implement
 channel_takeout_buf
   (chan, deq) = let
 //
+val chan2 =
+$UN.castvwtp0{channel_vt}(chan)
 val+
 CHANNEL{l1,l2,l3}
 (
 ptr, cap, mut, CVisnil, CVisful
-) = chan // end of [val]
+) = chan2 // end of [val]
+val ((*void*)) = $UN.castvwtp0{void}(chan2)
 //
 val
 isnot = deqarray_isnot_nil{a}(deq)

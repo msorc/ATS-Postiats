@@ -550,15 +550,15 @@ stringbuf_insert_list
 //
 fun loop
 (
-  sbf: !stringbuf, xs: List(a), res: int
+  sbf: !stringbuf, xs: !List_vt(a), res: int
 ) : int = let
 in
 //
 case+ xs of
-| list_nil
+| list_vt_nil
     () => res
-  // list_nil
-| list_cons
+  // list_vt_nil
+| list_vt_cons
     (x, xs) => let
     val n =
     stringbuf_insert_val<a>
@@ -566,7 +566,7 @@ case+ xs of
     // end of [val]
   in
     loop (sbf, xs, res + n)
-  end (* end of [list_cons] *)
+  end (* end of [list_vt_cons] *)
 //
 end // end of [loop]
 //

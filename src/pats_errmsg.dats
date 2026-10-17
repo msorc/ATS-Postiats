@@ -33,6 +33,8 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
 staload "./pats_errmsg.sats"
 
 (* ****** ****** *)

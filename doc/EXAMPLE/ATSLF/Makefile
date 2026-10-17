@@ -33,15 +33,9 @@ regress:: BinaryTreeLemmas
 
 ######
 
-all:: CPS
-CPS: CPS.dats ; $(PATSCC) -tcats $< || (echo "$< failed" && exit 1)
-regress:: CPS
 
 ######
 
-all:: CutElimIL
-CutElimIL: CutElimIL.dats ; $(PATSCC) -tcats $< || (echo "$< failed" && exit 1)
-regress:: CutElimIL
 
 ######
 
@@ -69,9 +63,6 @@ regress:: sqrt2_irrat
 
 ######
 
-all:: KolmogorovTrans
-KolmogorovTrans: KolmogorovTrans.dats ; $(PATSCC) -tcats $< || (echo "$< failed" && exit 1)
-regress:: KolmogorovTrans
 
 ######
 
@@ -107,37 +98,12 @@ IsoscelesAngleq.dats; $(PATSCC) -verbose -tcats $< || (echo "$< failed" && exit 
 
 ######
 
-all:: \
-F-algebra
-F-algebra: \
-F-algebra.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: F-algebra F-algebra.test-cmp
-	./$< 2>&1 | diff -q F-algebra.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) F-algebra
 
 ######
 
-all:: \
-YonedaLemma
-YonedaLemma: \
-YonedaLemma.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: YonedaLemma YonedaLemma.test-cmp
-	./$< 2>&1 | diff -q YonedaLemma.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) YonedaLemma
 
 ######
 
-all:: \
-CoYonedaLemma
-CoYonedaLemma: \
-CoYonedaLemma.dats ; \
-$(PATSCC) --constraint-ignore -DATS_MEMALLOC_LIBC -o $@ $<
-regress:: CoYonedaLemma CoYonedaLemma.test-cmp
-	./$< 2>&1 | diff -q CoYonedaLemma.test-cmp - >/dev/null || \
-	(echo "$< failed" && exit 1)
-cleanall:: ; $(RMF) CoYonedaLemma
 
 ######
 

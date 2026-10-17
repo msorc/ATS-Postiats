@@ -32,10 +32,13 @@
 // Start Time: March, 2011
 //
 (* ****** ****** *)
-//
-staload
-ATSPRE = "./pats_atspre.dats"
-//
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
 (* ****** ****** *)
 //
 staload
@@ -44,16 +47,8 @@ LBF = "./pats_lexbuf.sats"
 vtypedef lexbuf = $LBF.lexbuf
 //
 (* ****** ****** *)
-//
-staload
-DQ = "libats/ngc/SATS/deque_arr.sats"
-staload
-_(*DQ*) = "libats/ngc/DATS/deque_arr.dats"
-//
-stadef DEQUE = $DQ.DEQUE // double-ended queue
-//
-(* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
 staload "./pats_lexing.sats"
 
 (* ****** ****** *)
@@ -61,67 +56,71 @@ staload "./pats_lexing.sats"
 staload "./pats_tokbuf.sats"
 
 (* ****** ****** *)
-
-extern castfn u2sz1 (x: uint):<> Size
-
-(* ****** ****** *)
-
+//
+// HX-2026-10: no GC
+// the queue of tokens lives in C (see pats_tokbuf.cats)
+//
 vtypedef
-tokbuf_int_int
-  (m: int, n:int) =
+tokbuf_struct =
 $extype_struct
 "pats_tokbuf_struct" of
 {
-  tbuf= DEQUE (token, m, n)
-, ntok= uint
+  ntok= uint
 , lexbuf= lexbuf
-} // end of [tokbuf]
-typedef tokbuf0 = tokbuf_int_int(0, 0)?
+} // end of [tokbuf_struct]
+//
+vtypedef
+tokbuf_pre =
+$extype_struct
+"pats_tokbuf_struct" of
+{
+  ntok= uint
+, lexbuf= lexbuf?
+} // end of [tokbuf_pre]
 
 (* ****** ****** *)
 
-assume
-tokbuf_vt0ype =
-  [m,n:int | m > 0] tokbuf_int_int (m, n)
-// end of [tokbuf_vt0ype]
-
-(* ****** ****** *)
-
-#define QINISZ 1024 // initial size
+assume tokbuf_vt0ype = tokbuf_struct
 
 (* ****** ****** *)
 //
-macdef
-DQ_deque_initize = $DQ.deque_initialize<token>
-macdef
-DQ_deque_uninitize = $DQ.deque_uninitialize{token}
+extern
+fun
+tokbuf_init
+  (buf: &tokbuf? >> tokbuf_pre): void = "mac#patsopt_tokbuf_init"
+extern
+fun
+tokbuf_fini
+  (buf: &tokbuf_pre >> tokbuf?): void = "mac#patsopt_tokbuf_fini"
+//
+extern
+fun
+tokbuf_qsize
+  (buf: &tokbuf): size_t = "mac#patsopt_tokbuf_qsize"
+extern
+fun
+tokbuf_qget
+  (buf: &tokbuf, i: size_t): ptr = "mac#patsopt_tokbuf_qget"
+extern
+fun
+tokbuf_qins_end
+  (buf: &tokbuf, x: ptr): void = "mac#patsopt_tokbuf_qins_end"
+extern
+fun
+tokbuf_qins_beg
+  (buf: &tokbuf, x: ptr): void = "mac#patsopt_tokbuf_qins_beg"
+extern
+fun
+tokbuf_qclear
+  (buf: &tokbuf, n: size_t): void = "mac#patsopt_tokbuf_qclear"
 //
 (* ****** ****** *)
 
 implement
 tokbuf_initize_filp
-  (pfmod, pffil | buf, p) =
-{
-//
-extern
-prfun
-tokbuf0_trans
-  (buf: &tokbuf? >> tokbuf0): void
-//
-prval
-() = tokbuf0_trans (buf)
-val
-(
-  pfgc, pfarr | pa
-) = array_ptr_alloc<token> (QINISZ)
-//
-val () =
-DQ_deque_initize
-  (pfgc, pfarr | buf.tbuf, QINISZ, pa)
-//
-val () = buf.ntok := 0u
-val () = $LBF.lexbuf_initize_filp (pfmod, pffil | buf.lexbuf, p)
-//
+  (buf, fp) = {
+val () = tokbuf_init (buf)
+val () = $LBF.lexbuf_initize_filp (buf.lexbuf, fp)
 } // end of [tokbuf_initize_filp]
 
 (* ****** ****** *)
@@ -129,27 +128,8 @@ val () = $LBF.lexbuf_initize_filp (pfmod, pffil | buf.lexbuf, p)
 implement
 tokbuf_initize_getc
   (buf, getc) = () where {
-//
-extern
-prfun
-tokbuf0_trans
-  (buf: &tokbuf? >> tokbuf0): void
-//
-prval
-() = tokbuf0_trans (buf)
-//
-val
-(
-  pfgc, pfarr | pa
-) = array_ptr_alloc<token> (QINISZ)
-//
-val () =
-DQ_deque_initize
-  (pfgc, pfarr | buf.tbuf, QINISZ, pa)
-//
-val () = buf.ntok := 0u
+val () = tokbuf_init (buf)
 val () = $LBF.lexbuf_initize_getc (buf.lexbuf, getc)
-//
 } // end of [tokbuf_initize_getc]
 
 (* ****** ****** *)
@@ -157,27 +137,8 @@ val () = $LBF.lexbuf_initize_getc (buf.lexbuf, getc)
 implement
 tokbuf_initize_string
   (buf, inp) = () where {
-//
-extern
-prfun
-tokbuf0_trans
-  (buf: &tokbuf? >> tokbuf0): void
-//
-prval
-() = tokbuf0_trans (buf)
-//
-val
-(
-  pfgc, pfarr | pa
-) = array_ptr_alloc<token> (QINISZ)
-//
-val () =
-DQ_deque_initize
-  (pfgc, pfarr | buf.tbuf, QINISZ, pa)
-//
-val () = buf.ntok := 0u
+val () = tokbuf_init (buf)
 val () = $LBF.lexbuf_initize_string (buf.lexbuf, inp)
-//
 } // end of [tokbuf_initize_string]
 
 (* ****** ****** *)
@@ -185,26 +146,8 @@ val () = $LBF.lexbuf_initize_string (buf.lexbuf, inp)
 implement
 tokbuf_initize_lexbuf
   (buf, lbf) = () where {
-//
-extern
-prfun
-tokbuf0_trans
-  (buf: &tokbuf? >> tokbuf0): void
-//
-prval
-() = tokbuf0_trans (buf)
-val
-(
-  pfgc, pfarr | pa
-) = array_ptr_alloc<token> (QINISZ)
-//
-val () =
-DQ_deque_initize
-  (pfgc, pfarr | buf.tbuf, QINISZ, pa)
-//
-val () = buf.ntok := 0u
+val () = tokbuf_init (buf)
 val () = buf.lexbuf := lbf
-//
 } // end of [tokbuf_initize_lexbuf]
 
 (* ****** ****** *)
@@ -212,18 +155,8 @@ val () = buf.lexbuf := lbf
 implement
 tokbuf_uninitize
   (buf) = () where {
-//
-val (
-  pfgc, pfarr | pa
-) = DQ_deque_uninitize (buf.tbuf)
-//
-val () = array_ptr_free (pfgc, pfarr | pa)
 val () = $LBF.lexbuf_uninitize (buf.lexbuf)
-//
-extern
-prfun tokbuf0_untrans (buf: &tokbuf0 >> tokbuf?): void
-//
-  prval () = tokbuf0_untrans (buf)
+val () = tokbuf_fini (buf)
 } // end of [tokbuf_uninitize]
 
 (* ****** ****** *)
@@ -245,24 +178,15 @@ tokbuf_incby_count (buf, k) = buf.ntok := buf.ntok + k
 implement
 tokbuf_reset (buf) = let
 //
-  prval () = $DQ.lemma_deque_param (buf.tbuf)
-//
   val ntok = buf.ntok
   val () = buf.ntok := 0u
-  val ntok = (u2sz1)ntok
-  val nqsz = $DQ.deque_size (buf.tbuf)
+  val ntok = g0uint2uint_uint_size (ntok)
+  val nqsz = tokbuf_qsize (buf)
 in
-  if ntok < nqsz then let
-    val () =
-      $DQ.deque_clear_beg<token> (buf.tbuf, ntok)
-    // end of [val]
-  in
-    // nothing
-  end else let
-    val () = $DQ.deque_clear_all {token} (buf.tbuf)
-  in
-    // nothing
-  end (* end of [if] *)
+  if ntok < nqsz
+    then tokbuf_qclear (buf, ntok)
+    else tokbuf_qclear (buf, nqsz)
+  // end of [if]
 end // end of [tokbuf_reset]
 
 (* ****** ****** *)
@@ -271,38 +195,19 @@ implement
 tokbuf_get_token
   (buf) = let
 //
-prval () =
-$DQ.lemma_deque_param (buf.tbuf)
-//
-val ntok = (u2sz1)buf.ntok
-val nqsz = $DQ.deque_size (buf.tbuf)
+val ntok = g0uint2uint_uint_size (buf.ntok)
+val nqsz = tokbuf_qsize (buf)
 //
 in
 //
 if
 ntok < nqsz
 then
-  $DQ.deque_get_elt_at<token> (buf.tbuf, ntok)
+  $UN.cast{token}(tokbuf_qget (buf, ntok))
 else let
   val tok =
     lexing_next_token_ncmnt (buf.lexbuf)
-  val m = $DQ.deque_cap {token} (buf.tbuf)
-  val () =
-  if (
-    m > nqsz
-  ) then {
-    val () = $DQ.deque_insert_end<token> (buf.tbuf, tok)
-  } else {
-    val m2 = m + m
-(*
-    val () = println! ("tokbuf_get_token: m2 = ", m2)
-*)
-    val (pfgc2, pfarr2 | p2) = array_ptr_alloc<token> (m2)
-    val (pfgc1, pfarr1 | p1) =
-      $DQ.deque_update_capacity<token> (pfgc2, pfarr2 | buf.tbuf, m2, p2)
-    val () = array_ptr_free (pfgc1, pfarr1 | p1)
-    val () = $DQ.deque_insert_end<token> (buf.tbuf, tok)
-  } (* end of [if] *)
+  val () = tokbuf_qins_end (buf, $UN.cast{ptr}(tok))
 in
   tok
 end // end of [else]
@@ -323,47 +228,19 @@ tokbuf_getinc_token
 
 implement
 tokbuf_discard_all
-  (buf) = while (true) let
+  (buf) = let
   val tok = tokbuf_getinc_token (buf)
-(*
-  val () = println! ("tokbuf_discard_all: tok = ", tok)
-*)
 in
-  case+ tok.token_node of T_EOF () => break | _ => continue
+  if token_node_is_T_EOF (tok.token_node())
+    then () else tokbuf_discard_all (buf)
 end // end of [tokbuf_discard_all]
 
 (* ****** ****** *)
 
 implement
 tokbuf_unget_token
-  (buf, tok) = let
-//
-prval () =
-  $DQ.lemma_deque_param (buf.tbuf)
-//
-val n = $DQ.deque_size (buf.tbuf)
-val m = $DQ.deque_cap {token} (buf.tbuf)
-//
-in
-//
-if(
-m > n
-) then (
-  $DQ.deque_insert_beg<token> (buf.tbuf, tok)
-) else let
-  val m2 = m + m
-(*
-  val () = println! ("tokbuf_get_token: m2 = ", m2)
-*)
-  val (pfgc2, pfarr2 | p2) = array_ptr_alloc<token> (m2)
-  val (pfgc1, pfarr1 | p1) =
-    $DQ.deque_update_capacity<token> (pfgc2, pfarr2 | buf.tbuf, m2, p2)
-  val () = array_ptr_free (pfgc1, pfarr1 | p1)
-in
-  $DQ.deque_insert_beg<token> (buf.tbuf, tok)
-end (* end of [if] *)
-//
-end // end of [tokbuf_unget_token]
+  (buf, tok) = tokbuf_qins_beg (buf, $UN.cast{ptr}(tok))
+// end of [tokbuf_unget_token]
 
 (* ****** ****** *)
 

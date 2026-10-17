@@ -171,22 +171,25 @@ prval ((*void*)) = fpf (ctx)
 
 implement
 sort_error
-  (s2t0) = res where
+  (ar, s2t0) = res where
 {
 //
 val () =
-prerrln!
-  ("sort_error: s2t0 = ", s2t0)
+prerr("sort_error: s2t0 = ")
+val () =
+fprint_s2rt(ar, stderr_ref, s2t0)
+val () = prerr_newline()
 //
 val () = assertloc(false)
-val res = sort_error(s2t0)
+val res = sort_error(ar, s2t0)
 //
 } (* end of [sort_error] *)
 
 (* ****** ****** *)
 
 implement
-sort_make_s2rt(s2t0) = let
+sort_make_s2rt
+  (ar, s2t0) = let
 //
 (*
 val () =
@@ -195,36 +198,36 @@ println! ("sort_make: s2t0 = ", s2t0)
 //
 in
 //
-case+ s2t0 of
+case+
+s2rt_view(ar, s2t0)
+of // case+
+| ~S2RTint() => sort_int()
+| ~S2RTaddr() => sort_int()
+| ~S2RTbool() => sort_bool()
+| ~S2RTreal() => sort_real()
 //
-| S2RTint() => sort_int()
-| S2RTaddr() => sort_int()
-| S2RTbool() => sort_bool()
+| ~S2RTcls() => sort_mk_cls()
+| ~S2RTeff() => sort_mk_eff()
 //
-| S2RTreal() => sort_real()
-(*
-| S2RTfloat() => sort_float()
-| S2RTstring() => sort_string()
-*)
+| ~S2RTtype() => sort_mk_type()
+| ~S2RTvtype() => sort_mk_vtype()
+| ~S2RTt0ype() => sort_mk_t0ype()
+| ~S2RTvt0ype() => sort_mk_vt0ype()
 //
-| S2RTcls() => sort_mk_cls()
-| S2RTeff() => sort_mk_eff()
+| ~S2RTprop() => sort_mk_prop()
+| ~S2RTview() => sort_mk_view()
 //
-| S2RTtype() => sort_mk_type()
-| S2RTvtype() => sort_mk_vtype()
-| S2RTt0ype() => sort_mk_t0ype()
-| S2RTvt0ype() => sort_mk_vt0ype()
+| ~S2RTtkind() => sort_mk_tkind()
 //
-| S2RTprop() => sort_mk_prop()
-| S2RTview() => sort_mk_view()
-//
-| S2RTtkind() => sort_mk_tkind()
-//
-| S2RTnamed(sym) =>
-    sort_mk_abstract(sym.name())
+| ~S2RTnamed(sym) =>
+    sort_mk_abstract
+    (
+      $UN.cast{string}(symbol_get_name(ar, sym))
+    ) (* sort_mk_abstract *)
   // end of [S2RTnamed]
 //
-| _(*rest-of-S2RT*) => sort_error(s2t0)
+| v0(*rest-of-S2RT*) =>
+    (s2rt_view_free(v0); sort_error(ar, s2t0))
 //
 end (* end of [sort_make_s2rt] *)
 

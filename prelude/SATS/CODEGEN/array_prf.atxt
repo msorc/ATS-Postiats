@@ -123,6 +123,6 @@ array_v_ungroup
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "array_prf_atxt.txt")
 %}\

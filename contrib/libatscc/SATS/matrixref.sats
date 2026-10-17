@@ -40,41 +40,41 @@ overload [] with matrixref_set_at of 100
 (* ****** ****** *)
 //
 fun
-matrixref_exists_cloref
+matrixref_exists_cloptr
   {a:vt@ype}{m,n:int}
 (
   matrixref(a, m, n)
 , nrow: int(m), ncol: int(n)
-, ftest: (natLt(m), natLt(n)) -<cloref1> bool
+, ftest: (natLt(m), natLt(n)) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-fun
 //
 fun
-matrixref_forall_cloref
+matrixref_forall_cloptr
   {a:vt@ype}{m,n:int}
 (
   matrixref(a, m, n)
 , nrow: int(m), ncol: int(n)
-, ftest: (natLt(m), natLt(n)) -<cloref1> bool
+, ftest: (natLt(m), natLt(n)) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
 //
 fun
-matrixref_foreach_cloref
+matrixref_foreach_cloptr
   {a:vt@ype}{m,n:int}
 (
   matrixref(a, m, n)
 , nrow: int(m), ncol: int(n)
-, fwork: (natLt(m), natLt(n)) -<cloref1> void
+, fwork: (natLt(m), natLt(n)) -<cloptr1> void
 ) : void = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
 //
 fun
-matrixref_tabulate_cloref
+matrixref_tabulate_cloptr
   {a:vt@ype}{m,n:nat}
 (
-  int(m), int(n), fopr: (natLt(m), natLt(n)) -<cloref1> a
+  int(m), int(n), fopr: (natLt(m), natLt(n)) -<cloptr1> a
 ) : matrixref(a, m, n) = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
@@ -150,98 +150,58 @@ overload [] with mtrxszref_set_at of 100
 (* ****** ****** *)
 //
 fun
-mtrxszref_exists_cloref
+mtrxszref_exists_cloptr
   {a:t@ype}
 (
-  mtrxszref(a), ftest: (Nat, Nat) -<cloref1> bool
-) : bool = "mac#%" // end-of-function
-fun
-mtrxszref_exists_method
-  {a:t@ype}
-(
-  mtrxszref(a))(ftest: (Nat, Nat) -<cloref1> bool
+  mtrxszref(a), ftest: (Nat, Nat) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-function
 //
 fun
-mtrxszref_forall_cloref
+mtrxszref_forall_cloptr
   {a:t@ype}
 (
-  mtrxszref(a), ftest: (Nat, Nat) -<cloref1> bool
-) : bool = "mac#%" // end-of-function
-fun
-mtrxszref_forall_method
-  {a:t@ype}
-(
-  mtrxszref(a))(ftest: (Nat, Nat) -<cloref1> bool
+  mtrxszref(a), ftest: (Nat, Nat) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-function
 //
-overload
-.exists with mtrxszref_exists_method of 100
-overload
-.forall with mtrxszref_forall_method of 100
 //
 (* ****** ****** *)
 //
 fun
-mtrxszref_foreach_cloref
+mtrxszref_foreach_cloptr
   {a:vt@ype}
 (
- M: mtrxszref(a), fwork: (Nat, Nat) -<cloref1> void
-) : void = "mac#%" // end-of-function
-fun
-mtrxszref_foreach_method
-  {a:vt@ype}
-(
- M: mtrxszref(a))(fwork: (Nat, Nat) -<cloref1> void
+ M: mtrxszref(a), fwork: (Nat, Nat) -<cloptr1> void
 ) : void = "mac#%" // end-of-function
 //
-overload
-.foreach with mtrxszref_foreach_method of 100
 //
 (* ****** ****** *)
 //
 fun
-mtrxszref_foreach_row_cloref
+mtrxszref_foreach_row_cloptr
   {a:vt@ype}
 (
- M: mtrxszref(a), fwork: (Nat, Nat) -<cloref1> void
-) : void = "mac#%" // end-of-function
-fun
-mtrxszref_foreach_row_method
-  {a:vt@ype}
-(
- M: mtrxszref(a))(fwork: (Nat, Nat) -<cloref1> void
+ M: mtrxszref(a), fwork: (Nat, Nat) -<cloptr1> void
 ) : void = "mac#%" // end-of-function
 //
-overload
-.foreach_row with mtrxszref_foreach_row_method of 100
 //
 (* ****** ****** *)
 //
 fun
-mtrxszref_foreach_col_cloref
+mtrxszref_foreach_col_cloptr
   {a:vt@ype}
 (
- M: mtrxszref(a), fwork: (Nat, Nat) -<cloref1> void
-) : void = "mac#%" // end-of-function
-fun
-mtrxszref_foreach_col_method
-  {a:vt@ype}
-(
- M: mtrxszref(a))(fwork: (Nat, Nat) -<cloref1> void
+ M: mtrxszref(a), fwork: (Nat, Nat) -<cloptr1> void
 ) : void = "mac#%" // end-of-function
 //
-overload
-.foreach_col with mtrxszref_foreach_col_method of 100
 //
 (* ****** ****** *)
 //
 fun
-mtrxszref_tabulate_cloref
+mtrxszref_tabulate_cloptr
   {a:vt0p}
   {m,n:nat}
 ( nrow: int(m), ncol: int(n)
-, fopr: (natLt(m), natLt(n)) -<cloref1> a): mtrxszref(a) = "mac#%"
+, fopr: (natLt(m), natLt(n)) -<cloptr1> a): mtrxszref(a) = "mac#%"
 //
 (* ****** ****** *)
 

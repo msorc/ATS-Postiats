@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -92,7 +94,7 @@ out
 ,
 "\
 #\n\
-echo \"The \${ATSHOME}/npm-utils/contrib files have been copied.\"\n\
+echo \"The \\${ATSHOME}/npm-utils/contrib files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -167,7 +169,7 @@ PATSHOME/npm-utils/contrib/atscntrb\
 
 %{
 
-implement main () = ()
+implement main0 () = ()
 
 %}
 

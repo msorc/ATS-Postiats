@@ -33,18 +33,13 @@ typedef res = double
 //
 (* ****** ****** *)
 //
-(*
-fun
-dotprod
-  {n:nat}
-(
-  n: int(n)
-, A: arrayref(res, n), B: arrayref(res, n)
-) : res =
-(
-  ifold<res>(n, lam(res, i) => res + A[i]*B[i], 0.0)
-)
-*)
+//
+// HX-2026-10: no GC
+// the arrays are given by pointers to their
+// contents (instead of arrayrefs)
+//
+macdef
+get_at(A, i) = $UNSAFE.ptr0_get_at_int<res>(,(A), ,(i))
 //
 (* ****** ****** *)
 //
@@ -53,12 +48,12 @@ dotprod
   {n:nat}
 (
   n: int(n)
-, A: arrayref(res, n), B: arrayref(res, n)
+, A: ptr, B: ptr
 ) : res = let
 //
 var
 fopr =
-lam@(res: res, i: natLt(n)) : res =<clo1> res + A[i]*B[i]
+lam@(res: res, i: natLt(n)) : res =<clo1> res + get_at(A, i)*get_at(B, i)
 //
 in
   ifold<res>(n, $UNSAFE.cast(addr@fopr), 0.0)
@@ -96,12 +91,12 @@ dotprod_
   {n:nat}
 (
   n: int(n)
-, A: arrayref(res, n), B: arrayref(res, n)
+, A: ptr, B: ptr
 ) : res = let
 //
 var
 fopr =
-lam@(res: res, i: natLt(n)): res => res + A[i]*B[i]
+lam@(res: res, i: natLt(n)): res => res + get_at(A, i)*get_at(B, i)
 //
 in
   ifold_<res>(n, fopr, 0.0)
@@ -117,11 +112,11 @@ val N = 3
 var A = @[res](1.0, 2.0, 3.0)
 //
 val res =
-dotprod(N, $UNSAFE.cast(addr@A), $UNSAFE.cast(addr@A))
+dotprod(N, addr@A, addr@A)
 val ((*void*)) = println! ("1.0*1.0+2.0*2.0+3.0*3.0 = ", res)
 //
 val res_ =
-dotprod_(N, $UNSAFE.cast(addr@A), $UNSAFE.cast(addr@A))
+dotprod_(N, addr@A, addr@A)
 val ((*void*)) = println! ("1.0*1.0+2.0*2.0+3.0*3.0 = ", res_)
 //
 } (* end of [main0] *)

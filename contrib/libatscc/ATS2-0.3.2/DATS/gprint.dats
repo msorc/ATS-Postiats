@@ -43,13 +43,14 @@ gprint_list
 //
 fun
 loop
+{n:int}
 (
-  xs: List(a), i: int
+  xs: !list_vt(a, n), i: int
 ) : void =
 (
 case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) =>
+| list_vt_nil() => ()
+| list_vt_cons(x, xs) =>
   (
     if i > 0
       then gprint_list$sep();
@@ -64,9 +65,7 @@ gprint_list$beg(); loop(xs, 0); gprint_list$end()
 //
 end // end of [gprint_list]
 
-implement
-(a)(*tmp*)
-gprint_val<List(a)> (xs) = gprint_list<a> (xs)
+
 
 (* ****** ****** *)
 

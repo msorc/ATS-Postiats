@@ -53,9 +53,6 @@ andalso(x, y) =
 (* ****** ****** *)
 //
 macdef
-ifopt(t, x) =
-if(,(t))then(Some(,(x)))else(None())
-macdef
 ifopt_vt(t, x) =
 if(,(t))then(Some_vt(,(x)))else(None_vt())
 //
@@ -67,7 +64,6 @@ ifval(test, v_then, v_else) =
 //
 (* ****** ****** *)
 //
-macdef delay(exp) = $delay(,(exp))
 macdef raise(exn) = $raise(,(exn))
 //
 (*

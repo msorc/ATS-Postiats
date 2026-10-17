@@ -121,7 +121,7 @@ atspre_g1int2uint_llint_ullint(x) atspre_g0int2uint_llint_ullint(x)
 
 %{
 implement
-main(argc, argv) =
+main0(argc, argv) =
 fprint_filsub(stdout_ref, "integer_long_atxt.txt")
 %}\
 

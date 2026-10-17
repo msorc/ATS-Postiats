@@ -23,71 +23,52 @@ test04_dynload();
 
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC (linear closures)
+//
 val A0 =
 arrayref_make_elt{int}(10, 0)
 val () =
-arrayref_foreach_cloref
-(A0, 10, lam(i) => A0[i] := i*i)
+arrayref_foreach_cloptr
+(A0, 10, lam(i) =<cloptr1> A0[i] := i*i)
 val () =
-arrayref_foreach_cloref
-(A0, 10, lam(i) => println!("A0[",i,"]=",A0[i]))
-//
-(* ****** ****** *)
-//
-val A1 =
-array0_make_elt{int}(10, 0)
-val () =
-A1.foreach()(lam(i) => A1[i] := i*i)
-val () =
-A1.foreach()(lam(i) => println!("A1[",i,"]=",A1[i]))
+arrayref_foreach_cloptr
+(A0, 10, lam(i) =<cloptr1> println!("A0[",i,"]=",A0[i]))
 //
 (* ****** ****** *)
 //
 val A1 =
 arrszref_make_elt{int}(10, 0)
 val () =
-A1.foreach()(lam(i) => A1[i] := i*i)
+arrszref_foreach_cloptr
+(A1, lam(i) =<cloptr1> A1[i] := i*i)
 val () =
-A1.foreach()(lam(i) => println!("A1[",i,"]=",A1[i]))
+arrszref_foreach_cloptr
+(A1, lam(i) =<cloptr1> println!("A1[",i,"]=",A1[i]))
 //
 (* ****** ****** *)
 //
 val M0 =
 matrixref_make_elt{int}(2, 5, 0)
 val () =
-matrixref_foreach_cloref
-(M0, 2, 5, lam(i, j) => M0[i,5,j] := i*j)
+matrixref_foreach_cloptr
+(M0, 2, 5, lam(i, j) =<cloptr1> M0[i,5,j] := i*j)
 val () =
-matrixref_foreach_cloref
+matrixref_foreach_cloptr
 ( M0, 2, 5
-, lam(i, j) =>
+, lam(i, j) =<cloptr1>
   println!("M0[", i, ",", j, "]=", M0[i,5,j]))
-//
-(* ****** ****** *)
-//
-val M1 =
-matrix0_make_elt{int}(2, 5, 0)
-val () =
-M1.foreach()(lam(i, j) => M1[i,j] := i*j)
-val () =
-M1.foreach()
-(lam(i, j) => println!("M1[", i, ",", j, "]=", M1[i,j]))
 //
 (* ****** ****** *)
 //
 val M1 =
 mtrxszref_make_elt{int}(2, 5, 0)
 val () =
-M1.foreach()(lam(i, j) => M1[i,j] := i*j)
+mtrxszref_foreach_cloptr
+(M1, lam(i, j) =<cloptr1> M1[i,j] := i*j)
 val () =
-M1.foreach()
-(lam(i, j) => println!("M1[", i, ",", j, "]=", M1[i,j]))
-//
-(* ****** ****** *)
-//
-(*
-val M1_55 = M1[5,5] // Uncaught RangeException
-*)
+mtrxszref_foreach_cloptr
+(M1, lam(i, j) =<cloptr1> println!("M1[", i, ",", j, "]=", M1[i,j]))
 //
 (* ****** ****** *)
 

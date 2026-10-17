@@ -15,44 +15,53 @@
 
 implement
 s2exp_make_node
-  (s2t, s2en) = '{
-  s2exp_srt= s2t, s2exp_node= s2en
-} (* end of [s2exp_make_node] *)
+  (ar, s2t, s2en) = s2exp_S2EXP(ar, s2t, s2en)
 
 (* ****** ****** *)
 //
 implement
-s2exp_var(s2v) =
-  s2exp_make_node(s2v.srt(), S2Evar(s2v))
+s2exp_var(ar, s2v) =
+s2exp_make_node
+(
+  ar, s2var_get_srt(ar, s2v), s2exp_node_S2Evar(ar, s2v)
+) (* end of [s2exp_var] *)
+//
 implement
-s2exp_eqeq(s2e1, s2e2) =
-  s2exp_make_node(s2rt_bool(), S2Eeqeq(s2e1, s2e2))
+s2exp_eqeq(ar, s2e1, s2e2) =
+s2exp_make_node
+(
+  ar, s2rt_bool(ar), s2exp_node_S2Eeqeq(ar, s2e1, s2e2)
+) (* end of [s2exp_eqeq] *)
 //
 (* ****** ****** *)
-//
+
 implement
 s2exp_is_impred
-  (s2e0) = s2rt_is_impred(s2e0.s2exp_srt)
-//
+  (ar, s2e0) =
+  s2rt_is_impred(ar, s2exp_get_srt(ar, s2e0))
+
 (* ****** ****** *)
 
 implement
 fprint_tyreckind
-  (out, knd) = (
+  (ar, out, knd) = (
 //
-case+ knd of
-//
-| TYRECKINDbox() =>
+case+
+tyreckind_view(ar, knd)
+of // case+
+| ~TYRECKINDbox() =>
     fprint! (out, "TYRECKINDbox(", ")")
-| TYRECKINDbox_lin() =>
+| ~TYRECKINDbox_lin() =>
     fprint! (out, "TYRECKINDbox_lin(", ")")
-//
-| TYRECKINDflt0() =>
+| ~TYRECKINDflt0() =>
     fprint! (out, "TYRECKINDflt0(", ")")
-| TYRECKINDflt1(stamp) =>
+| ~TYRECKINDflt1(stamp) =>
     fprint! (out, "TYRECKINDflt1(", stamp, ")")
-| TYRECKINDflt_ext (name) =>
-    fprint! (out, "TYRECKINDflt_ext(", name, ")")
+| ~TYRECKINDflt_ext(name) =>
+  (
+    fprint(out, "TYRECKINDflt_ext(");
+    astring_fprint(ar, out, name); fprint(out, ")")
+  )
 //
 ) (* end of [fprint_tyreckind] *)
 
@@ -60,51 +69,101 @@ case+ knd of
 
 implement
 fprint_s2exp
-  (out, s2e) = let
+  (ar, out, s2e) = let
+//
+macdef
+prs(x) = fprint_string(out, ,(x))
+//
 in
 //
 case+
-s2e.s2exp_node
+s2exp_node_view
+  (ar, s2exp_get_node(ar, s2e))
 of // case+
-//
-| S2Eint(i) => fprint! (out, "S2Eint(", i, ")")
-| S2Eintinf(i) => fprint! (out, "S2Eintinf(", i, ")")
-//
-| S2Ecst(s2c) => fprint! (out, "S2Ecst(", s2c, ")")
-| S2Evar(s2v) => fprint! (out, "S2Evar(", s2v, ")")
-| S2EVar(s2V) => fprint! (out, "S2EVar(", s2V, ")")
-//
-| S2Eeqeq(s2e1, s2e2) =>
-    fprint! (out, "S2Eeqeq(", s2e1, ", ", s2e2, ")")
-//
-| S2Esizeof(s2e) => fprint! (out, "S2Esizeof(", s2e, ")")
-//
-| S2Eapp(s2e_fun, s2es_arg) =>
-    fprint! (out, "S2Eapp(", s2e_fun, "; ", s2es_arg, ")")
-//
-| S2Emetdec(s2es_met, s2es_bound) =>
-    fprint! (out, "S2Emetdec(", s2es_met, "; ", s2es_bound, ")")
-//
-| S2Etop(knd, s2e) =>
-    fprint! (out, "S2Etop(", knd, ", ", s2e, ")")
-//
-| S2Einvar(s2e) => fprint! (out, "S2Einvar(", s2e, ")")
-//
-| S2Efun(nof, s2es, s2e) =>
-    fprint! (out, "S2Efun(", s2es, "; ", s2e, ")")
-//
-| S2Euni(s2vs, s2ps, s2e) =>
-    fprint! (out, "S2Euni(", s2vs, "; ", s2ps, "; ", s2e, ")")
-| S2Eexi(s2vs, s2ps, s2e) =>
-    fprint! (out, "S2Eexi(", s2vs, "; ", s2ps, "; ", s2e, ")")
-//
-| S2Etyrec(knd, npf, s2es_elt) =>
-    fprint! (out, "S2Etyrec(", knd, "; ", s2es_elt, ")")
-//
-| S2Eextype(name) => fprint! (out, "S2Eextype(", name, ")")
-| S2Eextkind(name) => fprint! (out, "S2Eextkind(", name, ")")
-//
-| S2Eerror((*void*)) => fprint! (out, "S2Eerror()")
+| ~S2Eint(i) =>
+    fprint! (out, "S2Eint(", i, ")")
+| ~S2Eintinf(i) =>
+  (
+    prs("S2Eintinf("); astring_fprint(ar, out, i); prs(")")
+  )
+| ~S2Ecst(s2c) =>
+  (
+    prs("S2Ecst("); fprint_s2cst(ar, out, s2c); prs(")")
+  )
+| ~S2Evar(s2v) =>
+  (
+    prs("S2Evar("); fprint_s2var(ar, out, s2v); prs(")")
+  )
+| ~S2EVar(s2V) =>
+  (
+    prs("S2EVar("); fprint_s2Var(ar, out, s2V); prs(")")
+  )
+| ~S2Eeqeq(s2e1, s2e2) =>
+  (
+    prs("S2Eeqeq(");
+    fprint_s2exp(ar, out, s2e1); prs(", ");
+    fprint_s2exp(ar, out, s2e2); prs(")")
+  )
+| ~S2Esizeof(s2e) =>
+  (
+    prs("S2Esizeof("); fprint_s2exp(ar, out, s2e); prs(")")
+  )
+| ~S2Eapp(s2e_fun, s2es_arg) =>
+  (
+    prs("S2Eapp(");
+    fprint_s2exp(ar, out, s2e_fun); prs("; ");
+    fprint_s2explst(ar, out, s2es_arg); prs(")")
+  )
+| ~S2Emetdec(s2es_met, s2es_bound) =>
+  (
+    prs("S2Emetdec(");
+    fprint_s2explst(ar, out, s2es_met); prs("; ");
+    fprint_s2explst(ar, out, s2es_bound); prs(")")
+  )
+| ~S2Etop(knd, s2e) =>
+  (
+    fprint!(out, "S2Etop(", knd, ", ");
+    fprint_s2exp(ar, out, s2e); prs(")")
+  )
+| ~S2Einvar(s2e) =>
+  (
+    prs("S2Einvar("); fprint_s2exp(ar, out, s2e); prs(")")
+  )
+| ~S2Efun(nof, s2es, s2e) =>
+  (
+    prs("S2Efun(");
+    fprint_s2explst(ar, out, s2es); prs("; ");
+    fprint_s2exp(ar, out, s2e); prs(")")
+  )
+| ~S2Euni(s2vs, s2ps, s2e) =>
+  (
+    prs("S2Euni(");
+    fprint_s2varlst(ar, out, s2vs); prs("; ");
+    fprint_s2explst(ar, out, s2ps); prs("; ");
+    fprint_s2exp(ar, out, s2e); prs(")")
+  )
+| ~S2Eexi(s2vs, s2ps, s2e) =>
+  (
+    prs("S2Eexi(");
+    fprint_s2varlst(ar, out, s2vs); prs("; ");
+    fprint_s2explst(ar, out, s2ps); prs("; ");
+    fprint_s2exp(ar, out, s2e); prs(")")
+  )
+| ~S2Etyrec(knd, npf, s2es_elt) =>
+  (
+    prs("S2Etyrec(");
+    fprint_tyreckind(ar, out, knd); prs("; ");
+    fprint_labs2explst(ar, out, s2es_elt); prs(")")
+  )
+| ~S2Eextype(name) =>
+  (
+    prs("S2Eextype("); fprint_symbol(ar, out, name); prs(")")
+  )
+| ~S2Eextkind(name) =>
+  (
+    prs("S2Eextkind("); fprint_symbol(ar, out, name); prs(")")
+  )
+| ~S2Eerror((*void*)) => prs("S2Eerror()")
 //
 end // end of [fprint_s2exp]
 
@@ -112,39 +171,24 @@ end // end of [fprint_s2exp]
 
 implement
 fprint_s2explst
-  (out, s2es) = let
-//
-implement
-fprint_list$sep<> (out) = fprint_string (out, ", ")
-//
-in
-  fprint_list<s2exp> (out, s2es)
-end // end of [fprint_s2explst]
+  (ar, out, xs) = fprint_alist_sep(ar, out, xs, ", ", fprint_s2exp)
 
 (* ****** ****** *)
 
 implement
 fprint_labs2exp
-  (out, ls2e) = let
-//
-val+SLABELED(l, s2e) = ls2e
-//
-in
-  fprint! (out, l, "->", s2e)
-end // end of [fprint_labs2exp]
+  (ar, out, ls2e) =
+(
+  fprint_label(ar, out, labs2exp_get_lab(ar, ls2e));
+  fprint_string(out, "->");
+  fprint_s2exp(ar, out, labs2exp_get_exp(ar, ls2e))
+) (* end of [fprint_labs2exp] *)
 
 (* ****** ****** *)
 
 implement
 fprint_labs2explst
-  (out, ls2es) = let
-//
-implement
-fprint_list$sep<> (out) = fprint_string (out, ", ")
-//
-in
-  fprint_list<labs2exp> (out, ls2es)
-end // end of [fprint_labs2explst]
+  (ar, out, xs) = fprint_alist_sep(ar, out, xs, ", ", fprint_labs2exp)
 
 (* ****** ****** *)
 

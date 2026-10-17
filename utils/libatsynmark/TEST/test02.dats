@@ -9,10 +9,11 @@
 //
 // HX: this example shows how to get position-synmarks
 //
+// HX-2026-10: no GC (ATS2 port of the ATS1 version of this file)
+//
 (* ****** ****** *)
 
-staload _ = "prelude/DATS/list.dats"
-staload _ = "prelude/DATS/list_vt.dats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 //
@@ -20,16 +21,18 @@ staload
 "./../SATS/libatsynmark.sats"
 //
 (* ****** ****** *)
-
-dynload "./../dynloadall.dats"
-
+//
+extern
+fun
+libatsynmark_dynloadall(): void = "ext#libatsynmark_dynloadall"
+//
 (* ****** ****** *)
 
 fun
 fileref_get_tokenlst
   (inp: FILEref): tokenlst_vt = let
 //
-val cs = char_list_vt_make_file (inp)
+val cs = libatsynmark_char_list_vt_make_file (inp)
 //
 val lbf = lexbufobj_make_charlst_vt (cs)
 //
@@ -44,8 +47,10 @@ end // end of [fileref_get_tokenlst]
 (* ****** ****** *)
 
 implement
-main( argc
-    , argv ) = let
+main0( argc
+     , argv ) = let
+//
+val () = libatsynmark_dynloadall ()
 //
 fun loop (
   xs: psynmarklst_vt
@@ -66,14 +71,15 @@ end // end of [loop]
 //
 var stadyn: int = 1
 val () = (
-  if argc >= 2 then (
-    case+ argv.[1] of
-    | "-s" => stadyn := 0
-    | "-d" => stadyn := 1
-    | "--static" => stadyn := 0
-    | "--dynamic" => stadyn := 1
-    | _ (* rest *) => ((*void*))
-  ) // end of [if]
+  if argc >= 2 then let
+    val a1 = argv[1]
+  in
+    if a1 = "-s" then stadyn := 0
+    else if a1 = "-d" then stadyn := 1
+    else if a1 = "--static" then stadyn := 0
+    else if a1 = "--dynamic" then stadyn := 1
+    else ((*void*))
+  end // end of [if]
 ) : void // end of [val]
 //
 val inp = stdin_ref
@@ -88,7 +94,7 @@ val ((*void*)) = loop (psms)
 //
 in
   // nothing
-end // end of [main]
+end // end of [main0]
 
 (* ****** ****** *)
 

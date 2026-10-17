@@ -36,9 +36,6 @@
 #include
 "share/atspre_staload.hats"
 //
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
 //
 #include
 "share/HATS\
@@ -56,6 +53,8 @@
 //
 #staload
 "utils/atexting/SATS/atexting.sats"
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -71,10 +70,10 @@ atext2id
 ) : string =
 (
 case+
-txt.atext_node
+atext_node_view(txt.atext_node())
 of
-| TEXTtoken(tok) => token_strngfy(tok)
-| _(*rest-of-TEXT*) => "__unrecognized__"
+| ~TEXTtoken(tok) => token_strngfy(tok)
+| v0(*rest-of-TEXT*) => (atext_node_view_free(v0); "__unrecognized__")
 )
 
 fun
@@ -87,11 +86,11 @@ atext2int
 (txt: atext): int =
 (
 case+
-txt.atext_node
+atext_node_view(txt.atext_node())
 of
-| TEXTtoken(tok) => token2int(tok)
-| TEXTstring(rep) => g0string2int_int(rep)
-| _(*rest-of-TEXT*) => (0)
+| ~TEXTtoken(tok) => token2int(tok)
+| ~TEXTstring(rep) => g0string2int_int(rep)
+| v0(*rest-of-TEXT*) => (atext_node_view_free(v0); (0))
 )
 fun
 atext2int_eval
@@ -100,13 +99,13 @@ atext2int_eval
 val txt2 =
 (
 case+
-txt.atext_node
+atext_node_view(txt.atext_node())
 of // case+
-| TEXTdefname _ =>
+| ~TEXTdefname _ =>
   atext_defname_eval(txt)
-| TEXTfuncall _ =>
+| ~TEXTfuncall _ =>
   atext_funcall_eval(txt)
-| _(*rest-of-TEXT*) => txt
+| v0(*rest-of-TEXT*) => (atext_node_view_free(v0); txt)
 ) : atext // end of [val]
 //
 in
@@ -119,13 +118,13 @@ unquote
 (
 //
 case+
-txt0.atext_node
+atext_node_view(txt0.atext_node())
 of // case+
-| TEXTsquote(txts) =>
-    atext_make_list(txt0.atext_loc, txts)
-| TEXTdquote(tok, txts) =>
-    atext_make_list(txt0.atext_loc, txts)
-| _(* non-text-quote *) => txt0
+| ~TEXTsquote(txts) =>
+    atext_make_list(txt0.atext_loc(), txts)
+| ~TEXTdquote(tok, txts) =>
+    atext_make_list(txt0.atext_loc(), txts)
+| v0(* non-text-quote *) => (atext_node_view_free(v0); txt0)
 //
 ) (* end of [unquote] *)
 
@@ -142,10 +141,10 @@ if
 then let
 //
 val rep = g0int2string(i)
-val rep = strptr2string(rep)
+val rep = strptr2gstring(rep)
 val rep = atext_make_string(loc, rep)
 //
-val def = TEXTDEFval(rep)
+val def = atextdef_TEXTDEFval(rep)
 val
 (pfpush | ()) =
 the_atextstk_push1(id, def)
@@ -171,18 +170,18 @@ __int_foreach__
   loc: loc_t, xs: atextlst
 ) : atext = let
 //
-val-cons0(x0, xs) = xs
+val-~GLcons(x0, xs) = glist_view(xs)
 val id = atext2id(x0)
 //
-val-cons0(x1, xs) = xs
+val-~GLcons(x1, xs) = glist_view(xs)
 val n0 = atext2int_eval(x1)
 //
-val-cons0(x2, xs) = xs
+val-~GLcons(x2, xs) = glist_view(xs)
 //
 val res = list_vt_nil()
 val res = __auxmain__(0, n0, loc, id, x2, res)
 val res = list_vt_reverse(res)
-val res = list0_of_list_vt(res)
+val res = glist_make_list_vt(res)
 in
   atext_make_list(loc, res)
 end // end of [__int_foreach__]
@@ -192,7 +191,7 @@ in (* in-of-local *)
 val () =
 the_atextmap_insert
 ( "int_foreach"
-, TEXTDEFfun(lam(loc, xs) => __int_foreach__(loc, xs))
+, atextdef_TEXTDEFfun(lam(loc, xs) => __int_foreach__(loc, xs))
 ) (* the_atextdef_insert *)
 
 end // end of [local]

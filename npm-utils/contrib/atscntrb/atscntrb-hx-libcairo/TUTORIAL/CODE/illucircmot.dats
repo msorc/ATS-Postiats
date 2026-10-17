@@ -122,7 +122,7 @@ fn draw_ring
 //
   fun loop {i:nat | i <= n} .<n-i>.
     (cr: !cr l, angle: dbl, i: int i, bw: int, yb: int)
-    :<cloref1> void = let
+    : void = let
     val _sin = sin angle and _cos = cos angle
     val x1 = rad1 * _cos and y1 = rad1 * _sin
     val x2 = rad2 * _cos and y2 = rad2 * _sin

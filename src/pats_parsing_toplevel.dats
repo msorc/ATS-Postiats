@@ -31,11 +31,21 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: April, 2011
 //
+
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (see PORTING.md, section "Parser")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload
@@ -51,9 +61,72 @@ staload "./pats_syntax.sats"
 
 staload "./pats_parsing.sats"
 
+staload _(*templates*) = "./pats_syntax.dats"
+staload _(*templates*) = "./pats_parsing_util.dats"
+
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
+#define l2l glist_make_list_vt
+
+(* ****** ****** *)
+//
+// HX: the tokens at which the parser resumes after an error
+//
+fn
+is_toplevel_resume(x: tnode): bool =
+(
+  token_node_is_T_EOF(x)
+//
+|| token_node_is_T_STACST(x)
+|| token_node_is_T_STADEF(x)
+//
+|| token_node_is_T_SORTDEF(x)
+|| token_node_is_T_DATASORT(x)
+//
+|| token_node_is_T_ASSUME(x)
+|| token_node_is_T_REASSUME(x)
+//
+|| token_node_is_T_ABSTYPE(x)
+|| token_node_is_T_TYPEDEF(x)
+|| token_node_is_T_DATATYPE(x)
+|| token_node_is_T_EXCEPTION(x)
+//
+|| token_node_is_T_FUN(x)
+|| token_node_is_T_VAL(x)
+|| token_node_is_T_VAR(x)
+//
+|| token_node_is_T_IMPLEMENT(x)
+//
+|| token_node_is_T_FIXITY(x)
+|| token_node_is_T_NONFIX(x)
+|| token_node_is_T_SYMINTR(x)
+|| token_node_is_T_SYMELIM(x)
+//
+|| token_node_is_T_LOCAL(x)
+//
+|| token_node_is_T_STATIC(x)
+|| token_node_is_T_EXTERN(x)
+//
+|| token_node_is_T_SRPERROR(x)
+|| token_node_is_T_SRPPRERR(x)
+|| token_node_is_T_SRPPRINT(x)
+//
+|| token_node_is_T_SRPASSERT(x)
+//
+|| token_node_is_T_SRPUNDEF(x)
+|| token_node_is_T_SRPDEFINE(x)
+//
+|| token_node_is_T_SRPIF(x)
+|| token_node_is_T_SRPIFDEF(x)
+|| token_node_is_T_SRPIFNDEF(x)
+//
+|| token_node_is_T_SRPINCLUDE(x)
+//
+|| token_node_is_T_SRPSTALOAD(x)
+|| token_node_is_T_SRPDYNLOAD(x)
+//
+|| token_node_is_T_SRPREQUIRE(x)
+) (* end of [is_toplevel_resume] *)
 
 (* ****** ****** *)
 
@@ -74,62 +147,9 @@ println! ("pskip_tokbuf: tok = ", tok)
 *)
 in
 //
-case+
-tok.token_node of
-//
-| T_EOF () => tok
-//
-| T_STACST () => tok
-| T_STADEF () => tok
-//
-| T_SORTDEF () => tok
-| T_DATASORT () => tok
-//
-| T_ASSUME () => tok
-| T_REASSUME () => tok
-//
-| T_ABSTYPE _ => tok
-| T_TYPEDEF _ => tok
-| T_DATATYPE _ => tok
-| T_EXCEPTION () => tok
-//
-| T_FUN _ => tok
-| T_VAL _ => tok
-| T_VAR _ => tok
-//
-| T_IMPLEMENT _ => tok
-//
-| T_FIXITY _ => tok
-| T_NONFIX () => tok
-| T_SYMINTR () => tok
-| T_SYMELIM () => tok
-//
-| T_LOCAL () => tok
-//
-| T_STATIC () => tok
-| T_EXTERN () => tok
-//
-| T_SRPERROR () => tok
-| T_SRPPRERR () => tok
-| T_SRPPRINT () => tok
-//
-| T_SRPASSERT () => tok
-//
-| T_SRPUNDEF () => tok
-| T_SRPDEFINE () => tok
-//
-| T_SRPIF () => tok
-| T_SRPIFDEF () => tok
-| T_SRPIFNDEF () => tok
-//
-| T_SRPINCLUDE () => tok
-//
-| T_SRPSTALOAD () => tok
-| T_SRPDYNLOAD () => tok
-//
-| T_SRPREQUIRE () => tok
-//
-| _ => let
+if is_toplevel_resume(tok.token_node())
+  then tok
+  else let
     val () = tokbuf_incby1 (buf) in pskip_tokbuf (buf)
   end (* end of [_] *)
 //
@@ -141,22 +161,17 @@ pskip1_tokbuf_reset
 //
 val tok = tokbuf_get_token (buf)
 //
+val tnode = tok.token_node()
+//
 val () =
-(
-case+
-tok.token_node of
-//
-| T_EOF ((*void*)) => ()
-//
-| tnode
-  when tnode_is_comment (tnode) => ()
-//
-| _ => {
-    val loc = tok.token_loc
-    val err = parerr_make (loc, PE_DISCARD)
-    val ((*void*)) = the_parerrlst_add (err)
-  } // end of [_]
-) : void // end of [val]
+if token_node_is_T_EOF(tnode) then ()
+else if tnode_is_comment(tnode) then ()
+else let
+  val loc = tok.token_loc()
+  val err = parerr_make (loc, PE_DISCARD)
+in
+  the_parerrlst_add (err)
+end // end of [if]
 //
 val () = tokbuf_incby1 (buf)
 //
@@ -178,58 +193,46 @@ p_toplevel_fun
 ) : d0eclist = let
   fun loop (
     buf: &tokbuf
-  , res: &d0eclist_vt? >> d0eclist_vt
   , nerr: &int >> int, f: parser (d0ecl)
-  ) : void = let
+  , res: List0_vt(d0ecl) // HX: in the reverse order
+  ) : List0_vt(d0ecl) = let
     val nerr0 = nerr
     val d0ecl = f (buf, 1(*bt*), nerr)
   in
-    case+ 0 of
-    | _ when
-        nerr > nerr0 => let
+    if nerr > nerr0 then let
         val tok0 = tokbuf_get_token (buf)
 //
-        val () = (
-          case+ tok0.token_node of
-          | T_EOF () => (nerr := nerr0) | _ (*non-EOF*) => ()
-        ) : void // end of [val]
+        val () =
+          if token_node_is_T_EOF (tok0.token_node())
+            then (nerr := nerr0) else ()
 //
         val tok1 = pskip1_tokbuf_reset (buf)
 //
       in
-        case+ tok1.token_node of
-        | T_EOF () => (res := list_vt_nil()) | _ => loop (buf, res, nerr, f)
-      end // end of [_ when ...]
-    | _ (*noerror*) => let
+        if token_node_is_T_EOF (tok1.token_node())
+          then res else loop (buf, nerr, f, res)
+      end // end of [nerr > nerr0]
+    else let (*noerror*)
 //
         val () = tokbuf_reset (buf)
 //
         val () = let
           val xs = // HX: for skipping semicolons
-            pstar_fun{token}(buf, 1(*bt*), p_SEMICOLON) in list_vt_free (xs)
+            pstar_fun<token>(buf, 1(*bt*), p_SEMICOLON) in list_vt_free (xs)
           // end of [val]
         end // end of [val]
 //
-        val () =
-        res :=
-          list_vt_cons{d0ecl}{0}(d0ecl, ?)
-        // end of [val]
-        val+list_vt_cons (_, !p_res1) = res
-        val () = loop (buf, !p_res1, nerr, f)
-        prval ((*void*)) = fold@ (res) // HX: no-op
-//
       in
-        // nothing
+        loop (buf, nerr, f, list_vt_cons (d0ecl, res))
       end // end of [_]
    end (* end of [loop] *)
   val () = nerr := 0
-  var res: d0eclist_vt
-  val () = loop (buf, res, nerr, f)
+  val res = loop (buf, nerr, f, list_vt_nil ())
 //
   val _(*EOF*) = p_EOF (buf, 0(*bt*), nerr) // HX: no more tokens 
 //
 in
-  list_of_list_vt(res)
+  l2l(list_vt_reverse(res))
 end // end of [p_toplevel_fun]
 
 (* ****** ****** *)

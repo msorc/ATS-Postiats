@@ -17,14 +17,13 @@ ATS_DYNLOADNAME "test01_dynload"
 //
 (* ****** ****** *)
 //
-val () =
-repeat(3, $delay(println!("Hello, world!")))
+// HX-2026-10: no GC (linear closures)
 //
 val () =
-(3).repeat()(lam() => println!("Hello, world!"))
+repeat(3, lam() =<cloptr1> println!("Hello, world!"))
 //
 val () =
-(3).foreach()(lam(i) => println!(i, ": Hello, world!"))
+int_foreach_cloptr(3, lam(i) =<cloptr1> println!(i, ": Hello, world!"))
 //
 (* ****** ****** *)
 

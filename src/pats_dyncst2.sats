@@ -33,6 +33,16 @@
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_dyncst2.sats, see PORTING.md, "Level 2 translation (trans2)").
+// A [d2cstref] is a cell of the global arena: the symbol and the constant found so far (null if none).
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+
 staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
@@ -54,7 +64,7 @@ d2cstref_equ_cst(r0: d2cstref, d2c: d2cst): bool
 
 (* ****** ****** *)
 
-val the_sizeof_vt0ype_size : d2cstref
+val the_sizeof_vt0ype_size : d2cstref = "ext#patsopt_the_sizeof_vt0ype_size"
 
 (* ****** ****** *)
 
@@ -66,4 +76,4 @@ fun dyncst2_initialize ((*void*)): void
 
 (* ****** ****** *)
 
-(* end of [pats_stacst2.sats] *)
+(* end of [pats_dyncst2.sats] *)

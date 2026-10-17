@@ -59,57 +59,67 @@ vtypedef stringbuf = $SBF.stringbuf
 //
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC
+// tokens are linear (e.g., values of a datavtype)
+//
 absvtype
-tokener_vtype(a: type) = ptr
+tokener_vtype(a: vtype) = ptr
 vtypedef
-tokener(a: type) = tokener_vtype(a)
+tokener(a: vtype) = tokener_vtype(a)
 //
 (* ****** ****** *)
 //
-fun{a:type}
+fun{a:vtype}
 tokener_free(tknr: tokener(a)): void
 //
 (* ****** ****** *)
 //
-fun{a:type}
+fun{a:vtype}
 tokener_make_cstream(cs0: cstream): tokener(a)
 //
 (* ****** ****** *)
 //
-fun{a:type}
+fun{a:vtype}
 tokener_get_token (lxbf: !tokener(a)): (a)
 //
 fun{
-token:type
+token:vtype
 } tokener_get_token$main
 (
   cs0: !cstream, i0: &int >> _, sbf: !stringbuf
 ) : token // end of [tokener_get_token$main]
 //
+// HX: for freeing a token (that is never used)
+//
+fun{token:vtype} tokener$token_free(token): void
+//
 (* ****** ****** *)
-
-absvtype tokener2_vtype(a:type) = ptr
-vtypedef tokener2(a:type) = tokener2_vtype(a)
-
+absvtype tokener2_vtype(a:vtype) = ptr
+vtypedef tokener2(a:vtype) = tokener2_vtype(a)
 (* ****** ****** *)
-
-fun{a:type}
+fun{a:vtype}
 tokener2_free(t2nkr: tokener2(a)): void
-fun{a:type}
+fun{a:vtype}
 tokener2_make_tokener(tokener(a)): tokener2(a)
-
 (* ****** ****** *)
+//
+// HX-2026-10:
+// [tokener2_get] moves the current token out; the
+// token is then either put back ([tokener2_unget]) or
+// kept by the caller ([tokener2_getaft]), in which case
+// the next token becomes the current one
 //
 absview token_v
 //
-fun{a:type}
+fun{a:vtype}
 tokener2_get (!tokener2(a)): (token_v | a)
-fun{a:type}
-tokener2_unget (token_v | !tokener2(a)): void
-fun{a:type}
+fun{a:vtype}
+tokener2_unget (token_v | !tokener2(a), a): void
+fun{a:vtype}
 tokener2_getaft (token_v | !tokener2(a)): void
 //
-fun{a:type} tokener2_getout (!tokener2(a)): (a)
+fun{a:vtype} tokener2_getout (!tokener2(a)): (a)
 //
 (* ****** ****** *)
 

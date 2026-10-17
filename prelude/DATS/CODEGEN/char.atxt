@@ -120,6 +120,6 @@ implement fprint_val<schar> = fprint_schar
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "char_atxt.txt")
 %}\

@@ -106,42 +106,48 @@ end // end of [channeg_list]
 
 (* ****** ****** *)
 
+(* ****** ****** *)
+
+// HX-2026-10: no GC (the lists are linear)
+//
 implement
-list2sslist{a}(xs) = let
+list2sslist_vt{a}(xs) = let
 //
 fun
 fserv
 (
-  chp: chanpos(sslist(a)), xs: List(a)
+  chp: chanpos(sslist(a)), xs: List0_vt(a)
 ) : void =
 (
 case+ xs of
-| list_nil() => let
+| ~list_vt_nil() => let
     val () =
     chanpos_list_nil(chp) in chanpos_nil_wait(chp)
-  end // end of [list_nil]
-| list_cons(x, xs) => let
+  end // end of [list_vt_nil]
+| ~list_vt_cons(x, xs) => let
     val () =
     chanpos_list_cons(chp)
     val () = chanpos_send{a}(chp, x) in fserv(chp, xs)
-  end // end of [list_cons]
+  end // end of [list_vt_cons]
 )
+//
+prval () = lemma_list_vt_param(xs)
 //
 in
   channeg_create(llam(chp) => fserv(chp, xs))
-end // end of [list2sslist]
+end // end of [list2sslist_vt]
 
 (* ****** ****** *)
 
 implement
-sslist2list
+sslist2list_vt
   {a}(chn) = let
 //
 fun
 loop
 (
-  chn: channeg(sslist(a)), xs: List0(a)
-) : List0(a) = let
+  chn: channeg(sslist(a)), xs: List0_vt(a)
+) : List0_vt(a) = let
 //
 val opt = channeg_list(chn)
 //
@@ -150,14 +156,14 @@ in
 case+ opt of
 | channeg_list_nil() => (channeg_nil_close(chn); xs)
 | channeg_list_cons() => let
-    val x = channeg_send(chn) in loop(chn, list_cons(x, xs))
+    val x = channeg_send(chn) in loop(chn, list_vt_cons(x, xs))
   end // end of [channeg_list_cons]
 //
 end // end of [loop]
 //
 in
-  list_reverse(loop(chn, list_nil(*void*)))
-end // end of [sslist2list]
+  list_vt_reverse(loop(chn, list_vt_nil(*void*)))
+end // end of [sslist2list_vt]
 
 (* ****** ****** *)
 

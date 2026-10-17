@@ -16,11 +16,11 @@ LIBATSCC2JS_targetloc
 "{$LIBATSCC2JS}/mylibies.hats"
 //
 staload
-"{$LIBATSCC2JS}/SATS/Node.js/basics.sats"
+"{$LIBATSCC2JS}/Node.js/SATS/basics.sats"
 staload
-"{$LIBATSCC2JS}/SATS/Node.js/fprint.sats"
+"{$LIBATSCC2JS}/Node.js/SATS/fprint.sats"
 staload
-"{$LIBATSCC2JS}/SATS/Node.js/process.sats"
+"{$LIBATSCC2JS}/Node.js/SATS/process.sats"
 //
 (* ****** ****** *)
 

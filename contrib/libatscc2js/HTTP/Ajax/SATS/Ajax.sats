@@ -54,8 +54,8 @@ LIBATSCC2JS_targetloc
 (* ****** ****** *)
 
 typedef Xmldoc = Xmldoc
-typedef Xmldoclst = Xmldoclst
-typedef Xmldocopt = Xmldocopt
+vtypedef Xmldoclst = Xmldoclst
+vtypedef Xmldocopt = Xmldocopt
 
 (* ****** ****** *)
 //

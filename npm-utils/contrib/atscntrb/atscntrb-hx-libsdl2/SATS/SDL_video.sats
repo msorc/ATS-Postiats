@@ -131,7 +131,7 @@ fun SDL_GetWindowSurface
 //
 fun SDL_UpdateWindowSurface (win: !SDL_Window_ptr1): int = "mac#%"
 fun SDL_UpdateWindowSurfaceRects{n:nat}
-  (win: !SDL_Window_ptr1, rects: arrayref(SDL_Rect, n), n: int(n)): int = "mac#%"
+  (win: !SDL_Window_ptr1, rects: &(@[SDL_Rect][n]), n: int(n)): int = "mac#%"
 //
 (* ****** ****** *)
 

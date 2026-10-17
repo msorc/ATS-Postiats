@@ -65,19 +65,23 @@ end // end of [unpack_test_sep]
 
 local
 
-val cnt = ref<int> (0)
+var cnt: int = 0
+val cnt = ref_make_viewptr{int}(view@cnt | addr@cnt)
 
 in (* in of [local] *)
 
+//
+// HX-2026-10: no GC (the caller frees the name)
+//
 fun
-genfname () = let
+genfname (): Strptr1 = let
   val n = !cnt
   val () = !cnt := n + 1
   val BSZ = i2sz(64)
   val (pf, pfgc | p) = malloc_gc(BSZ)
   val _ = $extfcall (int, "snprintf", p, BSZ, "%s%i", FNAME_PREFIX, n)
 in
-  $UN.castvwtp0{string}((pf, pfgc | p))
+  $UN.castvwtp0{Strptr1}((pf, pfgc | p))
 end // end of [genfname]
 
 end // end of [local]
@@ -95,7 +99,9 @@ val (pf, fpf | p0) =
 //
 prval [n:int] EQINT() = g1uint_get_index (n0)
 //
-val ans = unpack_test_sep ($UN.cast{arrayref(char,n)}(p0), n0)
+val (pfa, fpfa | pa) = $UN.ptr0_vtake{@[char][n]}(p0)
+val ans = unpack_test_sep (!pa, n0)
+prval () = fpfa (pfa)
 //
 prval () = fpf (pf)
 //
@@ -195,7 +201,7 @@ auxcheck{n:nat}
 (
   inp: FILEref
 , sbf: !stringbuf
-, mdval: arrayref(uchar,n), mdlen: int(n)
+, mdval: ptr(*@[uchar][n]*), mdlen: int(n)
 ) : bool = let
 //
 fun CK
@@ -229,7 +235,7 @@ loop{i:nat | i <= n}
           val p0 = ptr_succ<char> (p0)
           val c1 = $UN.ptr0_get<char> (p0)
           val p0 = ptr_succ<char> (p0)
-          val ans = CK (mdval[i], c0, c1)
+          val ans = CK ($UN.ptr0_get_at<uchar>(mdval, i), c0, c1)
         in
           if ans then loop (p0, n0-2, i+1) else false
         end // end of [then]
@@ -258,28 +264,33 @@ end // end of [auxcheck]
 fun
 auxwrite{n:nat}
 (
-  fname: string, data: arrayref(uchar, n), n: size_t(n)
+  fname: string, data: ptr, n: size_t(n)
 ) : void = let
 //
 val fname2 = genfname ()
-val opt = fileref_open_opt (fname2, file_mode_w)
+val fname2_ = $UN.strptr2string (fname2)
+val opt = fileref_open_opt (fname2_, file_mode_w)
 //
-in
-//
+val () =
+(
 case+ opt of
 | ~Some_vt (out) =>
   {
-    val p = ptrcast(data)
+    val p = data
     val (
       pf, fpf | p
     ) = $UN.ptr_vtake{bytes(n)}(p)
     val nwrit = $STDIO.fwrite0 (!p, i2sz(1), n, out)
     prval () = fpf (pf)
+    val ((*void*)) = fileref_close (out)
     val ((*void*)) =
-    fprintln! (stdout_ref, "unpack_copy_from(", fname, ", ", fname2, ")")
+    fprintln! (stdout_ref, "unpack_copy_from(", fname, ", ", fname2_, ")")
   }
 | ~None_vt ((*void*)) => ()
+) : void // end of [val]
 //
+in
+  strptr_free (fname2)
 end // end of [auxwrite]
 
 (* ****** ****** *)
@@ -315,7 +326,7 @@ assertloc (nwrit > 0)
 val nwrit1 = pred(nwrit)
 val ret =
 EVP_DigestUpdate (
-  ctx, $UN.cast{arrayref(uchar,nw-1)}(p0), nwrit1
+  ctx, $UN.cast(p0), nwrit1
 ) (* end of [val] *)
 //
 var mdlen: int = 0
@@ -326,12 +337,12 @@ prval [mdlen:int] EQINT() = g1int_get_index(mdlen)
 //
 val ans =
 auxcheck (
-  inp, sbf, $UN.cast{arrayref(uchar,mdlen)}(p_mdval), mdlen
+  inp, sbf, p_mdval, mdlen
 ) (* end of [val] *)
 //
 val () =
 if not(ans) then
-  auxwrite (fname, $UN.cast{arrayref(uchar,nw-1)}(p0), nwrit1)
+  auxwrite (fname, p0, nwrit1)
 //
 prval () = fpf2 (pf2)
 //

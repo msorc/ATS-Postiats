@@ -14,9 +14,6 @@ ATEXTING_targetloc
 "share/atspre_staload.hats"
 #include
 "share/HATS\
-/atspre_staload_libats_ML.hats"
-#include
-"share/HATS\
 /atslib_staload_libats_libc.hats"
 //
 (* ****** ****** *)
@@ -29,6 +26,8 @@ macdef atoi = $STDLIB.atoi
 "{$ATEXTING}/mylibies.hats"
 //
 #staload $ATEXTING
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 #staload $ATEXTING_TEXTDEF
 //
 #include
@@ -81,16 +80,16 @@ token_is_int
   (x: token): bool =
 (
 case+
-x.token_node of
-| TOKint _ => true | _ => false
+token_node_view(x.token_node()) of
+| ~TOKint _ => true | v0 => (token_node_view_free(v0); false)
 )
 fun
 atext_is_int(x: atext): bool =
 (
 case+
-x.atext_node of
-| TEXTtoken(tok) =>
-  token_is_int(tok) | _ => false
+atext_node_view(x.atext_node()) of
+| ~TEXTtoken(tok) =>
+  token_is_int(tok) | v0 => (atext_node_view_free(v0); false)
 )
 //
 fun
@@ -98,16 +97,16 @@ token_is_sharp
   (x: token): bool =
 (
 case+
-x.token_node of
-| TOKsharp(ns) => ns = "#" | _ => false
+token_node_view(x.token_node()) of
+| ~TOKsharp(ns) => ns = "#" | v0 => (token_node_view_free(v0); false)
 )
 fun
 atext_is_sharp(x: atext): bool =
 (
 case+
-x.atext_node of
-| TEXTtoken(tok) =>
-  token_is_sharp(tok) | _ => false
+atext_node_view(x.atext_node()) of
+| ~TEXTtoken(tok) =>
+  token_is_sharp(tok) | v0 => (atext_node_view_free(v0); false)
 )
 //
 fun
@@ -117,18 +116,18 @@ token_is_char
 ) : bool =
 (
 case+
-x.token_node of
-| TOKspchr(i) =>
-  int2char0(i) = c | _ => false
+token_node_view(x.token_node()) of
+| ~TOKspchr(i) =>
+  int2char0(i) = c | v0 => (token_node_view_free(v0); false)
 )
 fun
 atext_is_char
   (x: atext, c: char): bool =
 (
 case+
-x.atext_node of
-| TEXTtoken(tok) =>
-  token_is_char(tok, c) | _ => false
+atext_node_view(x.atext_node()) of
+| ~TEXTtoken(tok) =>
+  token_is_char(tok, c) | v0 => (atext_node_view_free(v0); false)
 )
 //
 overload fprint with fprint_atext of 10
@@ -153,9 +152,9 @@ aux0
 , res: atextlst_vt
 ) : atextlst_vt =
 (
-case+ xs of
-| list0_nil() => res
-| list0_cons(x, xs) => aux1(x, xs, res)
+case+ glist_view(xs) of
+| ~GLnil() => res
+| ~GLcons(x, xs) => aux1(x, xs, res)
 )
 //
 and
@@ -187,10 +186,10 @@ aux2
 , res: atextlst_vt
 ) : atextlst_vt =
 (
-case+ xs of
-| list0_nil() =>
+case+ glist_view(xs) of
+| ~GLnil() =>
   list_vt_cons(x1, res)
-| list0_cons(x, xs) =>
+| ~GLcons(x, xs) =>
   if is_srp(x)
     then aux3(x1, x, xs, res)
     else aux1(x, xs, list_vt_cons(x1, res))
@@ -206,10 +205,10 @@ aux3
 , res: atextlst_vt
 ) : atextlst_vt =
 (
-case+ xs of
-| list0_nil() =>
+case+ glist_view(xs) of
+| ~GLnil() =>
   list_vt_cons(x2, list_vt_cons(x1, res))
-| list0_cons(x, xs) =>
+| ~GLcons(x, xs) =>
   if is_int(x)
     then aux4(x1, x2, x, xs, res)
     else aux1(x, xs, list_vt_cons(x2, list_vt_cons(x1, res)))
@@ -226,10 +225,10 @@ aux4
 , res: atextlst_vt
 ) : atextlst_vt =
 (
-case+ xs of
-| list0_nil() =>
+case+ glist_view(xs) of
+| ~GLnil() =>
   list_vt_cons(x3, list_vt_cons(x2, list_vt_cons(x1, res)))
-| list0_cons(x, xs) =>
+| ~GLcons(x, xs) =>
   if is_semi(x)
     then aux5(x1, x2, x3, x, xs, res)
     else aux1(x, xs, list_vt_cons(x3, list_vt_cons(x2, list_vt_cons(x1, res))))
@@ -248,20 +247,20 @@ aux5
 ) : atextlst_vt = let
 //
 val-
-TEXTtoken(tok) = x3.atext_node
+~TEXTtoken(tok) = atext_node_view(x3.atext_node())
 //
-val-TOKint(int) = tok.token_node
+val-~TOKint(int) = token_node_view(tok.token_node())
 //
 val int = atoi(int)
 val chr = int2char0(int)
 val str = (
 //
 if int != 0
-  then string_sing($UN.cast(chr)) else ""
+  then strptr2gstring($UN.castvwtp0{Strptr1}(string_sing($UN.cast(chr)))) else ""
 // end of [if]
 ) : string // end of [val]
 //
-val loc = x1.atext_loc + x4.atext_loc
+val loc = x1.atext_loc() + x4.atext_loc()
 val txt = atext_make_string(loc, str)
 //
 in
@@ -276,19 +275,19 @@ auxlst
   xs: atextlst
 ) : atextlst =
 (
-list0_of_list_vt
+glist_make_list_vt
   (list_vt_reverse(aux0(xs, list_vt_nil)))
 )
 //
 in
 //
 case+
-x0.atext_node of
-| TEXTsquote(xs) =>
-  atext_make(x0.atext_loc, TEXTsquote(auxlst(xs)))
-| TEXTdquote(nq, xs) =>
-  atext_make(x0.atext_loc, TEXTdquote(nq, auxlst(xs)))
-| _(* rest-of-TEXT *) => x0
+atext_node_view(x0.atext_node()) of
+| ~TEXTsquote(xs) =>
+  atext_make(x0.atext_loc(), atext_node_TEXTsquote(auxlst(xs)))
+| ~TEXTdquote(nq, xs) =>
+  atext_make(x0.atext_loc(), atext_node_TEXTdquote(nq, auxlst(xs)))
+| v0(* rest-of-TEXT *) => (atext_node_view_free(v0); x0)
 //
 end // end of [dehtmlize_qt]
 
@@ -299,9 +298,9 @@ end // end of [local]
 implement
 dehtmlize_first(xs) =
 (
-case+ xs of
-| list0_nil() => xs
-| list0_cons(x, xs) => list0_cons(dehtmlize_qt(x), xs)
+case+ glist_view(xs) of
+| ~GLnil() => xs
+| ~GLcons(x, xs) => glist_cons(dehtmlize_qt(x), xs)
 )
 //
 (* ****** ****** *)
@@ -310,7 +309,7 @@ local
 
 val
 def0 =
-TEXTDEFfun
+atextdef_TEXTDEFfun
 (
   lam(loc, xs) => atext_make_nil(loc)
 ) (* TEXTDEFfun *)
@@ -326,7 +325,7 @@ end // end of [local]
 val () =
 the_atextmap_insert
 ( "sats2xhtml_docbook"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) => let
       val t_end =
@@ -336,7 +335,7 @@ the_atextmap_insert
       val t_code = sats2xhtml(loc, dehtmlize_first(xs))
     in
       atext_make_list
-        (loc, g0ofg1($list{atext}(t_beg, t_code, t_end)))
+        (loc, glist_make_list_vt<atext>($list{atext}(t_beg, t_code, t_end)))
       // atext_make_list
     end // end of [lam]
   ) (* TEXTDEFfun *)
@@ -347,7 +346,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "dats2xhtml_docbook"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) => let
       val t_end =
@@ -357,7 +356,7 @@ the_atextmap_insert
       val t_code = dats2xhtml(loc, dehtmlize_first(xs))
     in
       atext_make_list
-        (loc, g0ofg1($list{atext}(t_beg, t_code, t_end)))
+        (loc, glist_make_list_vt<atext>($list{atext}(t_beg, t_code, t_end)))
       // atext_make_list
     end // end of [lam]
   ) (* TEXTDEFfun *)

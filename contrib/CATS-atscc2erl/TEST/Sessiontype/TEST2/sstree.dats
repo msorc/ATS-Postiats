@@ -51,7 +51,8 @@ staload "./../SATS/basis.sats"
 //
 (* ****** ****** *)
 //
-datatype
+// HX-2026-10: no GC (trees are linear)
+datavtype
 tree(a:t@ype) =
   | tree_nil of ()
   | tree_cons of (a, tree(a), tree(a))
@@ -117,13 +118,13 @@ fserv
 ) : void =
 (
 case+ xs of
-| tree_nil() => let
+| ~tree_nil() => let
     val () =
     chanpos_tree_nil(chp)
   in
     chanpos_nil_wait(chp)
   end // end of [tree_nil]
-| tree_cons (x, xs1, xs2) => let
+| ~tree_cons (x, xs1, xs2) => let
     val () =
     chanpos_tree_cons(chp)
     val chn1 = tree2sstree(xs1)

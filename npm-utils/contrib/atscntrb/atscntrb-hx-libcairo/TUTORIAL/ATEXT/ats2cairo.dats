@@ -81,28 +81,34 @@ end // end of [myimagelink]
 
 local
 
-val theCodeLst = ref<atextlst> (list_nil)
+var theCodeLst_var: atextlst = glist_nil()
+val theCodeLst =
+  ref_make_viewptr{atextlst}(view@ theCodeLst_var | addr@ theCodeLst_var)
 
 in // in of [local]
 
-fun theCodeLst_add (x: atext) =
-  !theCodeLst := list_cons (x, !theCodeLst)
+fun theCodeLst_add (x: atext): void =
+  ref_set_elt (theCodeLst, glist_cons (x, ref_get_elt (theCodeLst)))
 
-fun theCodeLst_get (): atextlst = let
-  val xs = list_reverse (!theCodeLst) in list_of_list_vt (xs)
-end // end of [theCodeLst_get]
+fun theCodeLst_get (): atextlst = glist_reverse (ref_get_elt (theCodeLst))
 
 fun fprint_theCodeLst
   (out: FILEref): void = let
-  fun loop (xs: atextlst, i: int):<cloref1> void =
-    case+ xs of
-    | list_cons (x, xs) => let
-        val () = if i > 0 then fprint_newline (out)
-        val () = fprint_atext (out, x)
-      in
-        loop (xs, i+1)
-      end // end of [list_cons]
-    | list_nil () => ()
+//
+fun loop
+(
+  xs: atextlst, i: int
+) : void =
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs) => let
+      val () = if i > 0 then fprint_newline (out)
+      val () = fprint_atext (out, x)
+    in
+      loop (xs, i+1)
+    end // end of [GLcons]
+  | ~GLnil () => ()
+// end of [loop]
+//
 in
   loop (theCodeLst_get (),  0)
 end // end of [fprint_theCodeLst]

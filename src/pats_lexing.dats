@@ -37,17 +37,17 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+#include "share/atspre_staload.hats"
 //
 (* ****** ****** *)
 
 staload
 UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
-staload UTL = "./pats_utils.sats"
 staload LOC = "./pats_location.sats"
 
 (* ****** ****** *)
@@ -57,25 +57,25 @@ staload "./pats_lexing.sats"
 
 (* ****** ****** *)
 //
-#define u2c char_of_uchar
+#define u2c uchar2char0
 //
-#define i2c char_of_int
-#define c2i int_of_char
+#define i2c int2char0
+#define c2i char2int0
 //
-#define i2uc uchar_of_int
-#define uc2i int_of_uchar
+#define i2uc int2uchar0
+#define uc2i uchar2int0
 //
-#define i2u uint_of_int
-#define u2i int_of_uint
+#define i2u g0int2uint_int_uint
+#define u2i g0uint2int_uint_int
 //
-#define l2u uint_of_lint
-#define sz2i int1_of_size1
+fn l2u(x: lint): uint = $UN.cast{uint}(x)
+#define sz2i g0uint2int_size_int
 //
 (* ****** ****** *)
 
-macdef T_INT_oct (x, sfx) = T_INT (8, ,(x), ,(sfx))
-macdef T_INT_dec (x, sfx) = T_INT (10, ,(x), ,(sfx))
-macdef T_INT_hex (x, sfx) = T_INT (16, ,(x), ,(sfx))
+macdef T_INT_oct (x, sfx) = token_node_T_INT (8, ,(x), ,(sfx))
+macdef T_INT_dec (x, sfx) = token_node_T_INT (10, ,(x), ,(sfx))
+macdef T_INT_hex (x, sfx) = token_node_T_INT (16, ,(x), ,(sfx))
 
 (* ****** ****** *)
 //
@@ -88,6 +88,20 @@ macdef posdecby1
 macdef posincbyc
   (pos, i) = $LOC.position_incby_char (,(pos), ,(i))
 //
+(* ****** ****** *)
+
+//
+// HX-2026-10: a string that is kept in a token is copied into the global
+// arena (it is never freed); the strptr is released
+//
+fn
+strptr2gstring
+  (str: Strptr1): string = s where
+{
+  val s = the_garena_strdup ($UN.castvwtp1{string}(str))
+  val ((*void*)) = strptr_free (str)
+} (* end of [strptr2gstring] *)
+
 (* ****** ****** *)
 
 fun
@@ -132,64 +146,64 @@ char_for_escaped
 
 datatype lexsym =
 //
-  | LS_NONE of () // dummy
+  | LS_NONE // dummy
 //
-  | LS_VAL of () // for val+ and val-
-  | LS_CASE of () // for case+ and case-
+  | LS_VAL // for val+ and val-
+  | LS_CASE // for case+ and case-
 //
-  | LS_ADDR of () // for addr@
+  | LS_ADDR // for addr@
 //
-  | LS_FOLD of () // for fold@
-  | LS_FREE of () // for free@
+  | LS_FOLD // for fold@
+  | LS_FREE // for free@
 //
-  | LS_FIX of () // for fix@
-  | LS_LAM of () // for lam@
-  | LS_LLAM of () // for llam@
-//
-(*
-  | LS_REF of () // 'ref@' is removed
-*)
-//
-  | LS_T of () // for t@ype
-  | LS_VT of () // for vt@ype
-//
-  | LS_PROP of () // for prop+ and prop-
-  | LS_VIEW of () // for view+ and view- and view@
-//
-  | LS_TYPE of () // for type+ and type-
-  | LS_TBOX of () // for tbox+ and tbox-
-  | LS_TFLT of () // for tflt+ and tflt-
-//
-  | LS_TYPES of () // for types+ and types-
-//
-  | LS_VTYPE of () // for vtype+ and vtype-
-  | LS_VTBOX of () // for vtbox+ and vtbox-
-  | LS_VTFLT of () // for vtflt+ and vtflt-
-//
-  | LS_T0YPE of () // for t0ype+ and t0ype-
-  | LS_VT0YPE of () // for vt0ype+ and vt0ype-
-//
-  | LS_VIEWT of () // for viewt@ype
-  | LS_VIEWTYPE of () // for viewtype+ and viewtype-
-  | LS_VIEWT0YPE of () // for viewt0ype+ and viewt0ype-
-//
-  | LS_ABST of () // for abst@ype
-  | LS_ABSVT of () // for absvt@ype
-  | LS_ABSVIEWT of () // for absviewt@ype
-//
-  | LS_FOR of () // for for*
-  | LS_WHILE of () // for while*
+  | LS_FIX // for fix@
+  | LS_LAM // for lam@
+  | LS_LLAM // for llam@
 //
 (*
-  | LS_LTBANG of () // "<!" // not a symbol
-  | LS_LTDOLLAR of () // "<$" // not a symbol
+  | LS_REF // 'ref@' is removed
 *)
 //
-  | LS_QMARKGT of () // "?>" // not a symbol
+  | LS_T // for t@ype
+  | LS_VT // for vt@ype
 //
-  | LS_SLASH2 of () // "//" line comment
-  | LS_SLASHSTAR of () // "/*" block comment
-  | LS_SLASH4 of () // "////" // rest-of-file comment
+  | LS_PROP // for prop+ and prop-
+  | LS_VIEW // for view+ and view- and view@
+//
+  | LS_TYPE // for type+ and type-
+  | LS_TBOX // for tbox+ and tbox-
+  | LS_TFLT // for tflt+ and tflt-
+//
+  | LS_TYPES // for types+ and types-
+//
+  | LS_VTYPE // for vtype+ and vtype-
+  | LS_VTBOX // for vtbox+ and vtbox-
+  | LS_VTFLT // for vtflt+ and vtflt-
+//
+  | LS_T0YPE // for t0ype+ and t0ype-
+  | LS_VT0YPE // for vt0ype+ and vt0ype-
+//
+  | LS_VIEWT // for viewt@ype
+  | LS_VIEWTYPE // for viewtype+ and viewtype-
+  | LS_VIEWT0YPE // for viewt0ype+ and viewt0ype-
+//
+  | LS_ABST // for abst@ype
+  | LS_ABSVT // for absvt@ype
+  | LS_ABSVIEWT // for absviewt@ype
+//
+  | LS_FOR // for for*
+  | LS_WHILE // for while*
+//
+(*
+  | LS_LTBANG // "<!" // not a symbol
+  | LS_LTDOLLAR // "<$" // not a symbol
+*)
+//
+  | LS_QMARKGT // "?>" // not a symbol
+//
+  | LS_SLASH2 // "//" line comment
+  | LS_SLASHSTAR // "/*" block comment
+  | LS_SLASH4 // "////" // rest-of-file comment
 //
 // end of [lexsym]
 
@@ -197,229 +211,160 @@ datatype lexsym =
 
 local
 //
-// HX:
-// linear-probing based HB
-// seems very unwieldy to use
-//
-%{^
-typedef ats_ptr_type string ;
-typedef ats_ptr_type lexsym ;
-%} // end of [%{^]
 staload
-"libats/SATS/hashtable_linprb.sats"
+"libats/SATS/hashtbl_linprb.sats"
 staload _(*anon*) =
-"libats/DATS/hashtable_linprb.dats"
+"libats/DATS/hashtbl_linprb.dats"
+staload "libats/SATS/hashfun.sats"
+staload _(*anon*) =
+"libats/DATS/hashfun.dats"
 //
 #define HASHTBLSZ 53
 //
-symintr encode decode
-//
-abstype string_t = $extype"string"
-extern castfn string_encode (x: string):<> string_t
-extern castfn string_decode (x: string_t):<> string
-overload encode with string_encode
-overload decode with string_decode
-//
-abstype lexsym_t = $extype"lexsym"
-extern castfn lexsym_encode (x: lexsym):<> lexsym_t
-extern castfn lexsym_decode (x: lexsym_t):<> lexsym
-overload encode with lexsym_encode
-overload decode with lexsym_decode
-//
-typedef key = string_t
-typedef itm = lexsym_t
-typedef keyitm = (key, itm)
+typedef key = string
+typedef itm = lexsym
 //
 implement
-keyitem_nullify<keyitm>
-  (x) = () where {
-  extern prfun __assert (x: &keyitm? >> keyitm): void
-  prval () = __assert (x)
-  val () = x.0 := $UN.cast{key} (null)
-  prval () = Opt_some (x)
-} (* end of [keyitem_nullify] *)
-//
-implement
-keyitem_isnot_null<keyitm>
-  (x) = b where {
-  extern prfun __assert1 (x: &Opt(keyitm) >> keyitm): void
-  prval () = __assert1 (x)
-  val b = $UN.cast{ptr} (x.0) <> null
-  val [b:bool] b = bool1_of_bool (b)
-  extern prfun __assert2 (x: &keyitm >> opt (keyitm, b)): void
-  prval () = __assert2 (x)
-} (* end of [keyitem_isnot_null] *)
-//
-implement
-hash_key<key> (x, _) = string_hash_33 (decode(x))
+hash_key<key> (x) =
+  string_hash_multiplier (33UL, 5381UL, x)
 implement
 equal_key_key<key>
-  (x1, x2, _) = compare (decode(x1), decode(x2)) = 0
-// end of [equal_key_key]
+  (x1, x2) = (compare (x1, x2) = 0)
 //
-val hash0 = $UN.cast{hash(key)} (null)
-val eqfn0 = $UN.cast{eqfn(key)} (null)
-val [l:addr] ptbl = hashtbl_make_hint<key,itm> (hash0, eqfn0, HASHTBLSZ)
+val the_lexsymtbl =
+  $UN.castvwtp0{ptr}(hashtbl_make_nil<key,itm> (i2sz(HASHTBLSZ)))
 //
 fun insert (
-  ptbl: !HASHTBLptr (key, itm, l)
-, k: string, i: lexsym
+  k: string, i: lexsym
 ) : void = () where {
-  val k = encode (k); val i = encode (i)
-  var res: lexsym_t
-  val _ = hashtbl_insert<key,itm> (ptbl, k, i, res)
-  prval () = opt_clear (res)
+  val tbl = $UN.castvwtp0{hashtbl(key,itm)}(the_lexsymtbl)
+  val opt = hashtbl_insert_opt<key,itm> (tbl, k, i)
+  val () = (case+ opt of ~Some_vt _ => () | ~None_vt () => ())
+  val _ = $UN.castvwtp0{ptr}(tbl)
 } // end of [insert]
 //
-val () = insert (ptbl, "val", LS_VAL)
-val () = insert (ptbl, "case", LS_CASE)
+val () = insert ("val", LS_VAL)
+val () = insert ("case", LS_CASE)
 //
-val () = insert (ptbl, "addr", LS_ADDR)
+val () = insert ("addr", LS_ADDR)
 //
-val () = insert (ptbl, "fold", LS_FOLD)
-val () = insert (ptbl, "free", LS_FREE)
+val () = insert ("fold", LS_FOLD)
+val () = insert ("free", LS_FREE)
 //
-val () = insert (ptbl, "lam", LS_LAM)
-val () = insert (ptbl, "llam", LS_LLAM)
-val () = insert (ptbl, "fix", LS_FIX)
+val () = insert ("lam", LS_LAM)
+val () = insert ("llam", LS_LLAM)
+val () = insert ("fix", LS_FIX)
 //
 (*
-val () = insert (ptbl, "ref", LS_REF) // 'ref@' removed
+val () = insert ("ref", LS_REF) // 'ref@' removed
 *)
 //
-val () = insert (ptbl, "t", LS_T)
-val () = insert (ptbl, "vt", LS_VT)
+val () = insert ("t", LS_T)
+val () = insert ("vt", LS_VT)
 //
-val () = insert (ptbl, "prop", LS_PROP)
-val () = insert (ptbl, "view", LS_VIEW)
+val () = insert ("prop", LS_PROP)
+val () = insert ("view", LS_VIEW)
 //
-val () = insert (ptbl, "type", LS_TYPE)
-val () = insert (ptbl, "tbox", LS_TBOX)
-val () = insert (ptbl, "tflt", LS_TFLT)
+val () = insert ("type", LS_TYPE)
+val () = insert ("tbox", LS_TBOX)
+val () = insert ("tflt", LS_TFLT)
 //
-val () = insert (ptbl, "types", LS_TYPES)
+val () = insert ("types", LS_TYPES)
 //
-val () = insert (ptbl, "vtype", LS_VTYPE)
-val () = insert (ptbl, "vtbox", LS_VTBOX)
-val () = insert (ptbl, "vtflt", LS_VTFLT)
+val () = insert ("vtype", LS_VTYPE)
+val () = insert ("vtbox", LS_VTBOX)
+val () = insert ("vtflt", LS_VTFLT)
 //
-val () = insert (ptbl, "t0ype", LS_T0YPE) // = t@ype
-val () = insert (ptbl, "vt0ype", LS_VT0YPE) // = vt@ype
+val () = insert ("t0ype", LS_T0YPE) // = t@ype
+val () = insert ("vt0ype", LS_VT0YPE) // = vt@ype
 //
-val () = insert (ptbl, "viewt", LS_VIEWT)
-val () = insert (ptbl, "viewtype", LS_VIEWTYPE)
-val () = insert (ptbl, "viewt0ype", LS_VIEWT0YPE) // = viewt@ype
+val () = insert ("viewt", LS_VIEWT)
+val () = insert ("viewtype", LS_VIEWTYPE)
+val () = insert ("viewt0ype", LS_VIEWT0YPE) // = viewt@ype
 //
-val () = insert (ptbl, "abst", LS_ABST)
-val () = insert (ptbl, "absvt", LS_ABSVT)
-val () = insert (ptbl, "absviewt", LS_ABSVIEWT)
+val () = insert ("abst", LS_ABST)
+val () = insert ("absvt", LS_ABSVT)
+val () = insert ("absviewt", LS_ABSVIEWT)
 //
-val () = insert (ptbl, "for", LS_FOR)
-val () = insert (ptbl, "while", LS_WHILE)
+val () = insert ("for", LS_FOR)
+val () = insert ("while", LS_WHILE)
 //
-val rtbl = HASHTBLref_make_ptr {key,itm} (ptbl)
 //
 in (* in of [local] *)
 
 fun
 IDENT_alp_get_lexsym
   (x: string): lexsym = let
-  val (fptbl | ptbl) = HASHTBLref_takeout_ptr (rtbl)
-  var res: itm?
-  val b = hashtbl_search<key,itm> (ptbl, encode(x), res)
-  prval () = fptbl (ptbl)
+  val tbl = $UN.castvwtp0{hashtbl(key,itm)}(the_lexsymtbl)
+  val opt = hashtbl_search_opt<key,itm> (tbl, x)
+  val _ = $UN.castvwtp0{ptr}(tbl)
 in
-//
-if b then let
-  prval () = opt_unsome {itm} (res) in decode (res)
-end else let
-  prval () = opt_unnone {itm} (res) in LS_NONE (*void*)
-end // end of [if]
-//
+  case+ opt of
+  | ~Some_vt (sym) => sym
+  | ~None_vt ((*void*)) => LS_NONE
 end // end of [IDENT_alp_get_lexsym]
 
 end // end of [local]
 
 (* ****** ****** *)
 
-local
 //
-staload
-STRING = "libc/SATS/string.sats" // for [string.cats]
+// HX-2026-10: [x] is a symbolic identifier (hence non-empty);
+// the chars are inspected one after the other (no reading past the NUL)
 //
-extern
-fun substrncmp
-  (x1: string, i1: int, x2: string, i2: int): int = "mac#atslib_substrcmp"
-//
-macdef
-slash2_test (x, i) = (substrncmp (,(x), ,(i), "//", 0) = 0)
-//
-in (*in-of-local*)
+fn
+str_at (x: string, i: int): char =
+  $UN.ptr0_get<char> (ptr0_add_gint<char> ($UN.cast{ptr}(x), i))
 
 fun
 IDENT_sym_get_lexsym
   (x: string): lexsym = let
 //
-val x = string1_of_string (x)
+val x0 = str_at (x, 0)
 //
-in
-//
-if
-string_isnot_atend (x, 0)
-then let
-  val x0 = x[0]
 in
 //
 case+ x0 of
-(*
-| '<' =>
-  if
-  string_isnot_atend (x, 1)
-  then let
-    val x1 = x[1]
-  in
-    case+ x1 of
-    | '!' => LS_LTBANG ()
-    | '$' => LS_LTDOLLAR ()
-    | _ (*rest*) => LS_NONE ()
-  end // end of [then]
-  else LS_NONE () // end of [else]
-*)
 | '?' =>
   if
-  string_isnot_atend (x, 1)
-  then let
-    val x1 = x[1]
+  str_at (x, 1) = '>'
+  then LS_QMARKGT else LS_NONE
+| '/' => let
+    val x1 = str_at (x, 1)
   in
     case+ x1 of
-    | '>' => LS_QMARKGT () | _ => LS_NONE ()
-  end // end of [then]
-  else LS_NONE () // end of [else]
-| '/' =>
-  if
-  string_isnot_atend (x, 1)
-  then let
-    val x1 = x[1]
-  in
-    case+ x1 of
-    | '*' => LS_SLASHSTAR ()
-    | '/' => if slash2_test (x, 2) then LS_SLASH4 () else LS_SLASH2 ()
-    | _ (*rest*) => LS_NONE ()
-  end // end of [then]
-  else LS_NONE () // end of [else]
-| _ (*rest-of-char*) => LS_NONE ()
-//
-end // end of [then]
-else LS_NONE () // end of [else]
+    | '*' => LS_SLASHSTAR
+    | '/' =>
+      if (
+        str_at (x, 2) = '/'
+      ) then (
+        if (str_at (x, 3) = '/' andalso str_at (x, 4) = '\000')
+          then LS_SLASH4 else LS_SLASH2
+      ) else LS_SLASH2
+    | _ (*rest*) => LS_NONE
+  end // end of ['/']
+| _ (*rest-of-char*) => LS_NONE
 //
 end // end of [IDENT_sym_get_lexsym]
-
-end // end of [local]
 
 (* ****** ****** *)
 //
 fun
-BLANK_test (c: char): bool = char_isspace (c)
+str_contains
+  (str: string, c: char): bool = let
+  fun loop (p: ptr, c: char): bool = let
+    val c1 = $UN.ptr0_get<char> (p)
+  in
+    if c1 = '\000'
+      then false
+      else (if c1 = c then true else loop (ptr0_succ<char> (p), c))
+  end // end of [loop]
+in
+  loop ($UN.cast{ptr}(str), c)
+end // end of [str_contains]
+//
+fun
+BLANK_test (c: char): bool = isspace_char (c)
 //
 (* ****** ****** *)
 
@@ -462,7 +407,7 @@ val
 symbolic = "%&+-./:=@~`^|*!?<>#$"
 *)
 in
-  string_contains(symbolic, c)
+  str_contains(symbolic, c)
 end // end of [SYMBOLIC_test]
 
 (* ****** ****** *)
@@ -486,16 +431,16 @@ if ('0' <= c)
 (* ****** ****** *)
 //
 fun DIGIT_test
-  (c: char): bool = char_isdigit (c)
+  (c: char): bool = isdigit_char (c)
 fun XDIGIT_test
-  (c: char): bool = char_isxdigit (c)
+  (c: char): bool = isxdigit_char (c)
 //
 (* ****** ****** *)
 //
 fun INTSP_test
-  (c: char): bool = string_contains ("LlUu", c)
+  (c: char): bool = str_contains ("LlUu", c)
 fun FLOATSP_test
-  (c: char): bool = string_contains ("fFlL", c)
+  (c: char): bool = str_contains ("fFlL", c)
 //
 (* ****** ****** *)
 //
@@ -519,7 +464,7 @@ local
 in(*in-of-local*)
 //
 fun ESCHAR_test
-  (c: char): bool = string_contains (ESCAPED, c)
+  (c: char): bool = str_contains (ESCAPED, c)
 //
 end // end of [local]
 
@@ -706,21 +651,16 @@ testing_literal
   (buf, pos, lit) = res where
 {
 //
-val
-[n:int]
-lit = string1_of_string (lit)
-//
 fun loop
-  {k:nat | k <= n} .<n-k>.
 (
   buf: &lexbuf
-, nchr: uint, lit: string n, k: size_t k
+, nchr: uint, lit: ptr, k: int
 ) : int = let
-  val isnot = string_isnot_atend (lit, k)
+  val c = $UN.ptr0_get<char> (lit)
 in
 //
 if
-isnot
+c != '\000'
 then let
   val i = lexbuf_get_char (buf, nchr)
 in
@@ -728,19 +668,19 @@ in
 if (
 i >= 0
 ) then (
-  if ((i2c)i = lit[k])
-   then loop (buf, succ(nchr), lit, k+1) else ~1
+  if ((i2c)i = c)
+   then loop (buf, succ(nchr), ptr0_succ<char> (lit), k+1) else ~1
   // end of [if]
 ) else (~1) // end of [if]
 //
 end // end of [then]
-else (sz2i)k // end of [else]
+else k // end of [else]
 //
 end // end of [loop]
 //
 val nchr0 =
   lexbufpos_diff (buf, pos)
-val res = loop (buf, nchr0, lit, 0)
+val res = loop (buf, nchr0, $UN.cast{ptr}(lit), 0)
 val () = (
 //
 if res >= 0
@@ -798,7 +738,7 @@ case+ 0 of
     val () = lexbuf_get_position (buf, pos2)
     val () = $LOC.position_incby_count (pos2, succ(nchr))
     val loc = $LOC.location_make_pos_pos (pos1, pos2)
-    val err = lexerr_make (loc, LE_DIGIT_oct_89 (c))
+    val err = lexerr_make (loc, lexerr_node_LE_DIGIT_oct_89 (c))
     val ((*void*)) = the_lexerrlst_add (err)
   } (* end of [8--9] *)
 | _ (*non-DIGIT*) => false
@@ -888,7 +828,7 @@ then let
     val loc =
       lexbufpos_get_location (buf, pos)
     val err =
-      lexerr_make (loc, LE_FEXPONENT_empty)
+      lexerr_make (loc, lexerr_node_LE_FEXPONENT_empty())
     val ((*void*)) = the_lexerrlst_add (err)
   } (* end of [if] *) // end of [val]
 //
@@ -934,7 +874,7 @@ then let
     val loc =
       lexbufpos_get_location (buf, pos)
     val err =
-      lexerr_make (loc, LE_FEXPONENT_empty)
+      lexerr_make (loc, lexerr_node_LE_FEXPONENT_empty())
     val ((*void*)) = the_lexerrlst_add (err)
   } (* end of [if] *) // end of [val]
 //
@@ -986,7 +926,7 @@ then let
     val loc =
       lexbufpos_get_location (buf, pos)
     val err =
-      lexerr_make (loc, LE_FEXPONENT_empty)
+      lexerr_make (loc, lexerr_node_LE_FEXPONENT_empty())
     val ((*void*)) = the_lexerrlst_add (err)
   } (* end of [if] *) // end of [val]
 *)
@@ -1039,7 +979,7 @@ then let
     val loc =
       lexbufpos_get_location (buf, pos)
     val err =
-      lexerr_make (loc, LE_FINTFRAC_missing)
+      lexerr_make (loc, lexerr_node_LE_FINTFRAC_missing())
     val ((*void*)) = the_lexerrlst_add (err)
   } (* end of [if] *)
 in
@@ -1048,7 +988,7 @@ in
     val loc =
       lexbufpos_get_location (buf, pos)
     val err =
-      lexerr_make (loc, LE_FEXPONENT_missing)
+      lexerr_make (loc, lexerr_node_LE_FEXPONENT_missing())
     val ((*void*)) = the_lexerrlst_add (err)
   in (u2i)k1 + 1
   end // end of [else]
@@ -1065,9 +1005,8 @@ end // end of [testing_hexiexp]
 
 implement
 token_make
-  (loc, node) = '{
-  token_loc= loc, token_node= node
-} (* end of [token_make] *)
+  (loc, node) = token_TOKEN (loc, node)
+// end of [token_make]
 
 (* ****** ****** *)
 
@@ -1103,7 +1042,7 @@ val ((*void*)) = the_lexerrlst_add (lexerr_make (loc, node))
 val ((*void*)) = lexbuf_set_position (buf, pos)
 //
 in
-  token_make (loc, T_ERR)
+  token_make (loc, token_node_T_ERR())
 end // end of [lexbufpos_lexerr_reset]
 
 (* ****** ****** *)
@@ -1189,13 +1128,13 @@ i >= 0
 //
 case+ (i2c)i of
 | '\n' => (
-    lexbufpos_token_reset (buf, pos, T_COMMENT_line)
+    lexbufpos_token_reset (buf, pos, token_node_T_COMMENT_line())
   ) (* end of [EOL] *)
 | _ (*non-EOL*) => let
     val () = posincby1 (pos) in lexing_COMMENT_line (buf, pos)
   end (* end of [_] *)
 //
-) else lexbufpos_token_reset (buf, pos, T_COMMENT_line)
+) else lexbufpos_token_reset (buf, pos, token_node_T_COMMENT_line())
 //
 end // end of [lexing_COMMENT_line]
 
@@ -1209,7 +1148,7 @@ fun
 feof (
   buf: &lexbuf, pos: &position
 ) : token =
-  lexbufpos_lexerr_reset (buf, pos, LE_COMMENT_block_unclose)
+  lexbufpos_lexerr_reset (buf, pos, lexerr_node_LE_COMMENT_block_unclose())
 // end of [feof]
 //
 val i = lexbufpos_get_char (buf, pos)
@@ -1222,7 +1161,7 @@ then (
   case+ (i2c)i of
   | '*' when
       testing_literal (buf, pos, "*/") >= 0 =>
-      lexbufpos_token_reset (buf, pos, T_COMMENT_block)
+      lexbufpos_token_reset (buf, pos, token_node_T_COMMENT_block())
     // end of ['*']
   | _ => let
       val () = posincbyc (pos, i) in
@@ -1246,16 +1185,16 @@ feof
 , pos: &position
 , xs: list_vt (position, l)
 ) : token = let
-  val list_vt_cons(!p_x, _) = xs
+  val+ @list_vt_cons(x, _) = xs
   val loc =
-    $LOC.location_make_pos_pos(!p_x, pos)
-prval () = fold@ (xs)
-  val () = list_vt_free (xs)
-  val err = lexerr_make (loc, LE_COMMENT_block_unclose)
+    $LOC.location_make_pos_pos(x, pos)
+  prval () = fold@ (xs)
+  val () = list_vt_free<position> (xs)
+  val err = lexerr_make (loc, lexerr_node_LE_COMMENT_block_unclose())
   val () = the_lexerrlst_add (err)
   val () = lexbuf_set_position (buf, pos)
 in
-  token_make (loc, T_ERR)
+  token_make (loc, token_node_T_ERR())
 end // end of [feof]
 //
 val i = lexbufpos_get_char (buf, pos)
@@ -1281,15 +1220,14 @@ i >= 0
   | '*' when
       testing_literal
         (buf, pos, "*)") >= 0 => let
-      val+~list_vt_cons (_, xs) = xs
+      val+ ~list_vt_cons (_, xs) = xs
     in
       case+ xs of
-      | list_vt_cons _ => let
-          prval () = fold@ (xs) in
+      | list_vt_cons _ =>
           lexing_COMMENT_block_ml (buf, pos, xs)
-        end // end of [list_vt_cons]
+        // end of [list_vt_cons]
       | ~list_vt_nil () =>
-          lexbufpos_token_reset (buf, pos, T_COMMENT_block)
+          lexbufpos_token_reset (buf, pos, token_node_T_COMMENT_block())
         // end of [list_vt_nil]
       (* end of [case] *)
     end // end of ['*']
@@ -1312,7 +1250,7 @@ in
     val () = posincbyc (pos, i) in
     lexing_COMMENT_rest (buf, pos)
   end else (
-    lexbufpos_token_reset (buf, pos, T_COMMENT_rest)
+    lexbufpos_token_reset (buf, pos, token_node_T_COMMENT_rest())
   ) // end of [if]
 end // end of [lexing_COMMENT_rest]
 
@@ -1434,7 +1372,7 @@ then let
         val ((*set*)) = lexbuf_set_position (buf, pos)
 //
       in
-        token_make (loc, T_EXTCODE(knd, string_of_strptr(str)))
+        token_make (loc, token_node_T_EXTCODE(knd, strptr2gstring(str)))
       end else let
         val () = posincby1 (pos) in lexing_EXTCODE_knd (buf, pos, knd)
       end // end of [if]
@@ -1445,7 +1383,7 @@ then let
 end // end of [then]
 else
 (
-  lexbufpos_lexerr_reset (buf, pos, LE_EXTCODE_unclose)
+  lexbufpos_lexerr_reset (buf, pos, lexerr_node_LE_EXTCODE_unclose())
 ) (* end of [else] *)
 //
 end // end of [lexing_EXTCODE_knd]
@@ -1468,15 +1406,13 @@ in
   case+ (i2c)i of
   | '*' => let
       val () = posincby1 (pos)
-      val poslst =
-        list_vt_cons{position}(?, list_vt_nil)
-      val list_vt_cons (!p_x, _) = poslst
-      val () = lexbuf_get_position (buf, !p_x)
-      prval () = fold@ (poslst)
+      var x: position
+      val () = lexbuf_get_position (buf, x)
+      val poslst = list_vt_cons{position}(x, list_vt_nil)
     in
       lexing_COMMENT_block_ml (buf, pos, poslst)
     end // end of ['*']
-  | _ => lexbufpos_token_reset (buf, pos, T_LPAREN)
+  | _ => lexbufpos_token_reset (buf, pos, token_node_T_LPAREN())
 end // end of [lexing_LPAREN]
 
 (* ****** ****** *)
@@ -1492,9 +1428,9 @@ in
   case+ (i2c)i of
   | '\(' => let
       val () = posincby1 (pos) in
-      lexbufpos_token_reset (buf, pos, T_COMMALPAREN)
+      lexbufpos_token_reset (buf, pos, token_node_T_COMMALPAREN())
     end // end of ['(']
-  | _ => lexbufpos_token_reset (buf, pos, T_COMMA)
+  | _ => lexbufpos_token_reset (buf, pos, token_node_T_COMMA())
 end // end of [lexing_COMMA]
 
 (* ****** ****** *)
@@ -1516,15 +1452,15 @@ case+ (i2c)i of
 //
 | '\(' => let
     val () = posincby1 (pos) in
-    lexbufpos_token_reset (buf, pos, T_ATLPAREN)
+    lexbufpos_token_reset (buf, pos, token_node_T_ATLPAREN())
   end
 | '\[' => let
     val () = posincby1 (pos) in
-    lexbufpos_token_reset (buf, pos, T_ATLBRACKET)
+    lexbufpos_token_reset (buf, pos, token_node_T_ATLBRACKET())
   end
 | '\{' => let
     val () = posincby1 (pos) in
-    lexbufpos_token_reset (buf, pos, T_ATLBRACE)
+    lexbufpos_token_reset (buf, pos, token_node_T_ATLBRACE())
   end
 //
 | _ (*rest*) => let
@@ -1556,7 +1492,7 @@ case+ (i2c)i of
 //
 | '<' => let
     val () = posincby1 (pos) in
-    lexbufpos_token_reset (buf, pos, T_COLONLT)
+    lexbufpos_token_reset (buf, pos, token_node_T_COLONLT())
   end // end of ['<']
 | _ (*rest*) => let
     val k =
@@ -1579,24 +1515,19 @@ FLOATDOT_test
 (* ****** ****** *)
 
 fun
-string2int (x: string) = let
+string2int (x: string): int = let
 //
 fun loop
-  {n:int}
-  {i:nat | i <= n} .<n-i>. (
-  x: string n, i: size_t i, res: int
-) :<> int =
-  if string_isnot_atend (x, i) then let
-    val c = x[i]; val res = 10 * res + (c - '0')
-  in
-    loop (x, i+1, res)
-  end else res // end of [if]
-// end of [loop]
-//
-val x = string1_of_string (x)
+  (p: ptr, res: int): int = let
+  val c = $UN.ptr0_get<char> (p)
+in
+  if c != '\000'
+    then loop (ptr0_succ<char> (p), 10 * res + (char2int0(c) - char2int0('0')))
+    else res
+end // end of [loop]
 //
 in
-  loop (x, 0, 0)
+  loop ($UN.cast{ptr}(x), 0)
 end // end of [string2int]
 
 (* ****** ****** *)
@@ -1632,7 +1563,7 @@ case+ 0 of
   in
     if k0 >= 0
       then lexing_FLOAT_deciexp (buf, pos)
-      else lexbufpos_token_reset (buf, pos, T_ERR)
+      else lexbufpos_token_reset (buf, pos, token_node_T_ERR())
     // end of [if]
   end // end of [nspace > 0]
 //
@@ -1644,7 +1575,7 @@ case+ 0 of
     val int = string2int ($UN.castvwtp1{string}(str))
     val () = strptr_free (str)
   in
-    lexbufpos_token_reset (buf, pos, T_DOTINT (int))
+    lexbufpos_token_reset (buf, pos, token_node_T_DOTINT (int))
   end // end of [DOTINT]
 //
 | _ => lexbufpos_token_reset (buf, pos, DOT)
@@ -1666,7 +1597,7 @@ in
   case+ c of
   | '\(' => let // '%(' initiates macro syntax
       val () = posincby1 (pos) in
-      lexbufpos_token_reset (buf, pos, T_PERCENTLPAREN)
+      lexbufpos_token_reset (buf, pos, token_node_T_PERCENTLPAREN())
     end // end of ['\(']
   | '\{' when // '%{' must start at the beginning of a newline
       $LOC.position_get_ncol (pos) = 1 => let
@@ -1722,7 +1653,7 @@ in
   | '\[' => let
       val () = posincby1 (pos)
     in
-      lexbufpos_token_reset (buf, pos, T_HASHLBRACKET)
+      lexbufpos_token_reset (buf, pos, token_node_T_HASHLBRACKET())
     end // end of ['\(']
   | _ when
       IDENTFST_test (c) => let
@@ -1753,7 +1684,7 @@ in
   case+ c of
   | '\(' => let // '`(' initiates macro syntax
       val () = posincby1 (pos) in
-      lexbufpos_token_reset (buf, pos, T_BQUOTELPAREN)
+      lexbufpos_token_reset (buf, pos, token_node_T_BQUOTELPAREN())
     end // end of ['\(']
   | _ => let
       val k = testing_symbolicseq0 (buf, pos) in
@@ -1852,7 +1783,7 @@ in
       val k = testing_xdigitseq0 (buf, pos)
     in
       if k = 0u || k > 2u then
-        lexbufpos_lexerr_reset (buf, pos, LE_CHAR_hex)
+        lexbufpos_lexerr_reset (buf, pos, lexerr_node_LE_CHAR_hex())
       else
         lexing_char_hex (buf, pos, k)
       // end of [if]
@@ -1864,7 +1795,7 @@ in
       val k = testing_octalseq0 (buf, pos)
     in
       if k = 0u || k > 3u then
-        lexbufpos_lexerr_reset (buf, pos, LE_CHAR_oct)
+        lexbufpos_lexerr_reset (buf, pos, lexerr_node_LE_CHAR_oct())
       else
         lexing_char_oct (buf, pos, k)
       // end of [if]
@@ -1880,8 +1811,8 @@ lexing_char_closing
   val res = testing_litchar (buf, pos, '\'')
 in
   if res >= 0
-    then lexbufpos_token_reset (buf, pos, T_CHAR (c))
-    else lexbufpos_lexerr_reset (buf, pos, LE_CHAR_unclose)
+    then lexbufpos_token_reset (buf, pos, token_node_T_CHAR (c))
+    else lexbufpos_lexerr_reset (buf, pos, lexerr_node_LE_CHAR_unclose())
   // end of [if]
 end // end of [lexing_char_closing]
 
@@ -1903,11 +1834,11 @@ then let
   case+ c of
 //
   | '\(' =>
-    lexbufpos_token_reset(buf, pos, T_QUOTELPAREN)
+    lexbufpos_token_reset(buf, pos, token_node_T_QUOTELPAREN())
   | '\[' =>
-    lexbufpos_token_reset(buf, pos, T_QUOTELBRACKET)
+    lexbufpos_token_reset(buf, pos, token_node_T_QUOTELBRACKET())
   | '\{' =>
-    lexbufpos_token_reset(buf, pos, T_QUOTELBRACE)
+    lexbufpos_token_reset(buf, pos, token_node_T_QUOTELBRACE())
 //
   | _ when c = '\\' => lexing_char_special(buf, pos)
 //
@@ -1915,7 +1846,7 @@ then let
 //
 end // end of [then]
 else (
-  lexbufpos_lexerr_reset(buf, pos, LE_QUOTE_dangling)
+  lexbufpos_lexerr_reset(buf, pos, lexerr_node_LE_QUOTE_dangling())
 ) (* end of [else] *)
 //
 end // end of [lexing_QUOTE]
@@ -1930,13 +1861,18 @@ local
 //
 (* ****** ****** *)
 
-staload "libats/SATS/linqueue_arr.sats"
-staload _(*anon*) = "libats/DATS/linqueue_arr.dats"
-staload _(*anon*) = "libats/ngc/DATS/deque_arr.dats"
-
-(* ****** ****** *)
-
-vtypedef Q(m:int, n:int) = QUEUE(uchar, m, n)
+//
+// HX-2026-10: the queue of chars is a malloc-ed buffer (see pats_lexing.cats)
+//
+extern
+fun
+strbuf_new(): ptr = "mac#patsopt_strbuf_new"
+extern
+fun
+strbuf_ins(sb: ptr, c: int): void = "mac#patsopt_strbuf_ins"
+extern
+fun
+strbuf_free(sb: ptr): Strptr1 = "mac#patsopt_strbuf_free"
 
 (* ****** ****** *)
 
@@ -1970,7 +1906,7 @@ lexing_string_char_oct
 //
   val () = if (n = 3) then {
     val loc = $LOC.location_make_pos_pos (pos, pos)
-    val err = lexerr_make (loc, LE_STRING_char_oct)
+    val err = lexerr_make (loc, lexerr_node_LE_STRING_char_oct())
     val () = the_lexerrlst_add (err)
   } // end of [if]
 //
@@ -2010,7 +1946,7 @@ lexing_string_char_hex
 //
   val () = if (n = 2) then {
     val loc = $LOC.location_make_pos_pos (pos, pos)
-    val err = lexerr_make (loc, LE_STRING_char_hex)
+    val err = lexerr_make (loc, lexerr_node_LE_STRING_char_hex())
     val () = the_lexerrlst_add (err)
   } // end of [if]
 //
@@ -2062,22 +1998,19 @@ regerr
   buf: &lexbuf, pos: &position
 ) : void = let
   val loc = lexbufpos_get_location (buf, pos)
-  val err = lexerr_make (loc, LE_STRING_unclose)
+  val err = lexerr_make (loc, lexerr_node_LE_STRING_unclose())
 in
   the_lexerrlst_add (err)
 end // end of [regerr]
 //
-fn*
+fun
 loop
-{m,n:int | m > 0}
 (
   buf: &lexbuf
 , pos: &position
-, q: &Q(m, n) >> Q(m, n)
-, m: size_t (m), n: size_t (n)
-) : #[m,n:nat] size_t(n) = let
+, sb: ptr
+) : void = let
   val i = lexbufpos_get_char (buf, pos)
-  prval () = lemma_queue_param (q) // m >= n >= 0
 in
 //
 if
@@ -2087,69 +2020,32 @@ then let
   val () = posincbyc (pos, i)
 in
   case+ c of
-  | '"' => n // string is properly closed
+  | '"' => () // string is properly closed
   | '\\' => let
       var err: int = 0
       val i =
       lexing_string_char_special(buf, pos, err)
     in
       if err = AGAIN
-        then loop(buf, pos, q, m, n)
-        else loop_ins(buf, pos, q, m, n, i)
-      // end of [if]
+        then loop(buf, pos, sb)
+        else let
+          val () = strbuf_ins (sb, uc2i((i2uc)i)) in loop(buf, pos, sb)
+        end // end of [if]
     end // end of ['\\']
-  | _(*rest*) => loop_ins (buf, pos, q, m, n, i)
+  | _(*rest*) => let
+      val () = strbuf_ins (sb, uc2i((i2uc)i)) in loop(buf, pos, sb)
+    end // end of [_]
 end // end of [then]
-else let
-  val () = regerr(buf, pos) in queue_size{uchar}(q)
-end (* end of [else] *)
+else regerr(buf, pos)
 //
 end // end of [loop]
 //
-and
-loop_ins
-{m,n:int | m > 0}
-(
-  buf: &lexbuf
-, pos: &position
-, q: &Q(m, n) >> Q(m, n)
-, m: size_t (m), n: size_t (n), i: int
-) : #[m,n:nat] size_t (n) = let
-  val c = (i2uc)i
-  prval () =
-    lemma_queue_param(q) // m >= n >= 0
-  // end of [prval]
-in
-  case+ 0 of
-  | _ when m > n => let
-      val () =
-      queue_insert<uchar>(q, c)
-    in
-      loop(buf, pos, q, m, n+1)
-    end // end of [m > n]
-  | _ (* m <= n *) => let
-      val m2 = m + m
-      val () =
-        queue_update_capacity<uchar>(q, m2)
-      // end of [val]
-      val ((*inserted*)) = queue_insert(q, c)
-    in
-      loop(buf, pos, q, m2, n+1)
-    end // end of [m <= n]
-end // end of [loop_ins]
-//
-var q: QUEUE0(uchar)
-#define m0 128 // HX: chosen randomly
-val () = queue_initialize<uchar> (q, m0)
-//
-val n = loop (buf, pos, q, m0, 0)
-val str = $UTL.queue_get_strptr1 (q, 0, n)
-val str = string_of_strptr (str)
-//
-val () = queue_uninitialize (q)
+val sb = strbuf_new ()
+val () = loop (buf, pos, sb)
+val str = strptr2gstring (strbuf_free (sb))
 //
 in
-  lexbufpos_token_reset (buf, pos, T_STRING(str))
+  lexbufpos_token_reset (buf, pos, token_node_T_STRING(str))
 end // end of [lexing_DQUOTE]
 
 end // end of [local]
@@ -2395,25 +2291,25 @@ case+ (i2c)i of
 | '<' => let
     val () = posincby1 (pos)
     val str = lexbuf_get_strptr1 (buf, k)
-    val str = string_of_strptr (str)
+    val str = strptr2gstring (str)
   in
-    lexbufpos_token_reset (buf, pos, T_IDENT_tmp (str))
+    lexbufpos_token_reset (buf, pos, token_node_T_IDENT_tmp (str))
   end
 //
 | '\[' => let
     val () = posincby1 (pos)
     val str = lexbuf_get_strptr1 (buf, k)
-    val str = string_of_strptr (str)
+    val str = strptr2gstring (str)
   in
-    lexbufpos_token_reset (buf, pos, T_IDENT_arr (str))
+    lexbufpos_token_reset (buf, pos, token_node_T_IDENT_arr (str))
   end
 //
 | '!' => let
     val () = posincby1 (pos)
     val str = lexbuf_get_strptr1 (buf, k)
-    val str = string_of_strptr (str)
+    val str = strptr2gstring (str)
   in
-    lexbufpos_token_reset (buf, pos, T_IDENT_ext (str))
+    lexbufpos_token_reset (buf, pos, token_node_T_IDENT_ext (str))
   end
 //
 | _ (*rest*) => let
@@ -2563,11 +2459,11 @@ case+ sym of
       tnode_search ($UN.castvwtp1{string}{mystr}(mystr))
     // end of [val]
   in
-    case+ tnode of
-    | T_NONE () => let
-        val mystr = string_of_strptr (mystr)
+    case+ 0 of
+    | _ when token_node_is_T_NONE (tnode) => let
+        val mystr = strptr2gstring (mystr)
       in
-        lexbufpos_token_reset (buf, pos, T_IDENT_alp (mystr))
+        lexbufpos_token_reset (buf, pos, token_node_T_IDENT_alp (mystr))
       end
     | _ (*not-NONE*) => let
         val () = strptr_free (mystr) in lexbufpos_token_reset (buf, pos, tnode)
@@ -2629,11 +2525,11 @@ case+ sym of
       tnode_search ($UN.castvwtp1{string}{mystr}(mystr))
     // end of [val]
   in
-    case+ tnode of
-    | T_NONE () => let
-        val mystr = string_of_strptr (mystr)
+    case+ 0 of
+    | _ when token_node_is_T_NONE (tnode) => let
+        val mystr = strptr2gstring (mystr)
       in
-        lexbufpos_token_reset (buf, pos, T_IDENT_sym (mystr))
+        lexbufpos_token_reset (buf, pos, token_node_T_IDENT_sym (mystr))
       end // end of [T_NONE]
     | _ => let
         val () = strptr_free (mystr) in lexbufpos_token_reset (buf, pos, tnode)
@@ -2659,14 +2555,13 @@ val tnode =
 //
 in
 //
-case+
-tnode of
-| T_NONE () => let
+case+ 0 of
+| _ when token_node_is_T_NONE (tnode) => let
     val mystr =
-      string_of_strptr (mystr)
+      strptr2gstring (mystr)
     // end of [val]
   in
-    lexbufpos_token_reset (buf, pos, T_IDENT_dlr (mystr))
+    lexbufpos_token_reset (buf, pos, token_node_T_IDENT_dlr (mystr))
   end // end of [T_NONE]
 | _(*rest*) => let
     val () = strptr_free (mystr) in
@@ -2691,15 +2586,14 @@ val tnode =
 //
 in
 //
-case+
-tnode of
+case+ 0 of
 //
-| T_NONE () => let
+| _ when token_node_is_T_NONE (tnode) => let
     val mystr =
-      string_of_strptr(mystr)
+      strptr2gstring (mystr)
     // end of [val]
   in
-    lexbufpos_token_reset (buf, pos, T_IDENT_srp(mystr))
+    lexbufpos_token_reset (buf, pos, token_node_T_IDENT_srp(mystr))
   end // end of [T_NONE]
 //
 | _ (*rest*) => let
@@ -2717,9 +2611,9 @@ lexing_FLOAT_deciexp
   (buf, pos) = let
   val k = testing_floatspseq0 (buf, pos)
   val str = lexbufpos_get_strptr1 (buf, pos)
-  val str = string_of_strptr (str)
+  val str = strptr2gstring (str)
 in
-  lexbufpos_token_reset (buf, pos, T_FLOAT(10(*base*), str, k))
+  lexbufpos_token_reset (buf, pos, token_node_T_FLOAT(10(*base*), str, k))
 end // end of [lexing_FLOAT_deciexp]
 
 (* ****** ****** *)
@@ -2729,9 +2623,9 @@ lexing_FLOAT_hexiexp
   (buf, pos) = let
   val k = testing_floatspseq0 (buf, pos)
   val str = lexbufpos_get_strptr1 (buf, pos)
-  val str = string_of_strptr (str)
+  val str = strptr2gstring (str)
 in
-  lexbufpos_token_reset (buf, pos, T_FLOAT(16(*base*), str, k))
+  lexbufpos_token_reset (buf, pos, token_node_T_FLOAT(16(*base*), str, k))
 end // end of [lexing_FLOAT_hexiexp]
 
 (* ****** ****** *)
@@ -2757,7 +2651,7 @@ case+ 0 of
 | _ (*integer*) => let
     val k2 = testing_intspseq0 (buf, pos)
     val str = lexbufpos_get_strptr1 (buf, pos)
-    val str = string_of_strptr (str)
+    val str = strptr2gstring (str)
   in
     lexbufpos_token_reset (buf, pos, T_INT_dec(str, k2))
   end // end of [_]
@@ -2786,7 +2680,7 @@ val k2 =
   testing_intspseq0 (buf, pos)
 val str =
   lexbufpos_get_strptr1 (buf, pos)
-val str = string_of_strptr (str)
+val str = strptr2gstring (str)
 //
 in
   lexbufpos_token_reset (buf, pos, T_INT_oct(str, k2))
@@ -2819,7 +2713,7 @@ case+ 0 of
       val () = if k1 = 0u then {
         // YD-2018-07-10: fix hex float format.
         val loc = lexbufpos_get_location (buf, pos)
-        val err = lexerr_make (loc, LE_FINTFRAC_missing)
+        val err = lexerr_make (loc, lexerr_node_LE_FINTFRAC_missing())
         val () = the_lexerrlst_add (err)
       }
   in
@@ -2828,11 +2722,11 @@ case+ 0 of
 | _ (*integer*) => let
     val k2 = testing_intspseq0 (buf, pos)
     val str = lexbufpos_get_strptr1 (buf, pos)
-    val str = string_of_strptr (str)
+    val str = strptr2gstring (str)
     val () = if k1 = 0u then {
       // YD-2018-07-10: fix hex int format.
       val loc = lexbufpos_get_location (buf, pos)
-      val err = lexerr_make (loc, LE_IDIGITS_empty)
+      val err = lexerr_make (loc, lexerr_node_LE_IDIGITS_empty())
       val () = the_lexerrlst_add (err)
     }
   in
@@ -2912,19 +2806,19 @@ case+ 0 of
 | _ when c0 = '\(' =>
     lexing_LPAREN (buf, pos) // handling "(*"
 | _ when (c0 = ')') =>
-    lexbufpos_token_reset (buf, pos, T_RPAREN)
+    lexbufpos_token_reset (buf, pos, token_node_T_RPAREN())
 | _ when c0 = '\[' =>
-    lexbufpos_token_reset (buf, pos, T_LBRACKET)
+    lexbufpos_token_reset (buf, pos, token_node_T_LBRACKET())
 | _ when (c0 = ']') =>
-    lexbufpos_token_reset (buf, pos, T_RBRACKET)
+    lexbufpos_token_reset (buf, pos, token_node_T_RBRACKET())
 | _ when c0 = '\{' =>
-    lexbufpos_token_reset (buf, pos, T_LBRACE)
+    lexbufpos_token_reset (buf, pos, token_node_T_LBRACE())
 | _ when (c0 = '}') =>
-    lexbufpos_token_reset (buf, pos, T_RBRACE)
+    lexbufpos_token_reset (buf, pos, token_node_T_RBRACE())
 //
 | _ when c0 = ',' => lexing_COMMA (buf, pos)
 | _ when c0 = ';' =>
-    lexbufpos_token_reset (buf, pos, T_SEMICOLON)
+    lexbufpos_token_reset (buf, pos, token_node_T_SEMICOLON())
 //
 | _ when c0 = '@' => lexing_AT (buf, pos)
 | _ when c0 = ':' => lexing_COLON (buf, pos)
@@ -2938,7 +2832,7 @@ case+ 0 of
 | _ when (c0 = '`') => lexing_BQUOTE (buf, pos)
 //
 | _ when c0 = '\\' =>
-    lexbufpos_token_reset (buf, pos, T_BACKSLASH)
+    lexbufpos_token_reset (buf, pos, token_node_T_BACKSLASH())
 //
 | _ when
     IDENTFST_test (c0) => let
@@ -2976,7 +2870,7 @@ case+ 0 of
       lexbufpos_get_location (buf, pos)
     // end of [loc]
     val err =
-      lexerr_make (loc, LE_UNSUPPORTED_char(c0))
+      lexerr_make (loc, lexerr_node_LE_UNSUPPORTED_char(c0))
     // end of [val]
     val ((*void*)) = the_lexerrlst_add (err)
     val ((*void*)) = lexbuf_set_position (buf, pos)
@@ -2986,7 +2880,7 @@ case+ 0 of
 //
 end // end of [then]
 else (
-  lexbufpos_token_reset (buf, pos, T_EOF(*last*))
+  lexbufpos_token_reset (buf, pos, token_node_T_EOF()(*last*))
 ) (* end of [else] *)
 //
 end // end of [lexing_next_token]
@@ -3001,17 +2895,17 @@ val tok = lexing_next_token (buf)
 //
 in
 //
-case+
-tok.token_node of
-| T_COMMENT_line _ =>
+case+ 0 of
+| _ when token_node_is_T_COMMENT_line (tok.token_node()) =>
   lexing_next_token_ncmnt (buf) // HX: skip
-| T_COMMENT_block _ =>
+| _ when token_node_is_T_COMMENT_block (tok.token_node()) =>
   lexing_next_token_ncmnt (buf) // HX: skip
 //
 // HX-2011:
 // each rest-of-file comment is treated as EOF
 //
-| T_COMMENT_rest _ => token_make (tok.token_loc, T_EOF)
+| _ when token_node_is_T_COMMENT_rest (tok.token_node()) =>
+  token_make (tok.token_loc(), token_node_T_EOF())
 //
 | _ (*non-COMMENT*) => tok
 //

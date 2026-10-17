@@ -323,6 +323,6 @@ overload ptrcast with matrixptrout2ptr
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "matrixptr_atxt.txt")
 %}\

@@ -33,11 +33,26 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_svar.dats, see PORTING.md, "Type-checking environment (trans3_env)")
 //
+
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 
 (* ****** ****** *)
@@ -46,51 +61,56 @@ staload "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
+#include "./pats_trans3_env.hats"
+
+(* ****** ****** *)
+
 local
-
-assume s2varbindmap_push_v = unit_v
-
+//
+// HX: the map is a (persistent) linear value kept in a cell; [with_map] takes it out and puts it back
+//
 val the_s2varbindmap =
-  ref_make_elt<s2varbindmap> (s2varbindmap_make_nil ())
+  gcell_make<ptr> ($UN.castvwtp0{ptr} (s2varbindmap_make_nil ()))
 // end of [val]
 
-viewtypedef s2varlstlst_vt = List_vt (s2varlst_vt)
-val the_s2varlst = ref_make_elt<s2varlst_vt> (list_vt_nil)
-val the_s2varlstlst = ref_make_elt<s2varlstlst_vt> (list_vt_nil)
+typedef s2varlst = glist (s2var)
+val the_s2varlst = gcell_make<s2varlst> (glist_nil ())
+val the_s2varlstlst = gcell_make<glist(s2varlst)> (glist_nil ())
 
 fun auxrmv (
-  map: &s2varbindmap, s2vs: s2varlst_vt
+  map: &s2varbindmap >> _, s2vs: s2varlst
 ) : void =
-  case+ s2vs of
-  | ~list_vt_cons (s2v, s2vs) => let
+  case+ glist_view (s2vs) of
+  | ~GLcons (s2v, s2vs) => let
       val () = s2varbindmap_remove (map, s2v) in auxrmv (map, s2vs)
-    end // end of [list_vt_cons]
-  | ~list_vt_nil () => ()
+    end // end of [GLcons]
+  | ~GLnil () => ()
 // end of [auxrmv]
 
 in // in of [local]
 
 implement
 the_s2varbindmap_pop
-  (pf | (*nothing*)) = let
+  ((*nothing*)) = let
 //
-prval unit_v () = pf
 val s2vs = let
-  val (vbox pf | pp) = ref_get_view_ptr (the_s2varlstlst)
+  val xss = gcell_get<glist(s2varlst)> (the_s2varlstlst)
 in
-  case+ !pp of
-  | ~list_vt_cons (xs, xss) => let val () = !pp := xss in xs end
-  | list_vt_nil () => let prval () = fold@ (!pp) in list_vt_nil end
-end : s2varlst_vt
+  case+ glist_view (xss) of
+  | ~GLcons (xs, xss) => let
+      val () = gcell_set<glist(s2varlst)> (the_s2varlstlst, xss) in xs
+    end
+  | ~GLnil () => glist_nil ()
+end : s2varlst
 val s2vs = xs where {
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varlst)
-  val xs = !p
-  val () = !p := s2vs
+  val xs = gcell_get<s2varlst> (the_s2varlst)
+  val () = gcell_set<s2varlst> (the_s2varlst, s2vs)
 } // end of [val]
 val () = let
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varbindmap)
+  var map = $UN.castvwtp0{s2varbindmap} (gcell_get<ptr> (the_s2varbindmap))
+  val () = auxrmv (map, s2vs)
 in
-  $effmask_ref (auxrmv (!p, s2vs))
+  gcell_set<ptr> (the_s2varbindmap, $UN.castvwtp0{ptr} (map))
 end // end of [val]
 //
 in
@@ -100,61 +120,58 @@ end // end of [the_s2varbindmap_pop]
 implement
 the_s2varbindmap_push () = let
   val s2vs = s2vs where {
-    val (vbox pf | p) = ref_get_view_ptr (the_s2varlst)
-    val s2vs = !p
-    val () = !p := list_vt_nil ()
+    val s2vs = gcell_get<s2varlst> (the_s2varlst)
+    val () = gcell_set<s2varlst> (the_s2varlst, glist_nil ())
   } // end of [val]
-  val (vbox pf | pp) = ref_get_view_ptr (the_s2varlstlst)
-  val () = !pp := list_vt_cons (s2vs, !pp)
+  val xss = gcell_get<glist(s2varlst)> (the_s2varlstlst)
 in
-  (unit_v () | ())
+  gcell_set<glist(s2varlst)> (the_s2varlstlst, glist_cons (s2vs, xss))
 end // end of [the_s2varbindmap_push]
+
+fun
+fprint_s2varbindmap_aux (
+  out: FILEref, kis: List0_vt @(s2var, s2exp)
+) : void =
+  case+ kis of
+  | ~list_vt_cons (ki, kis) => let
+      val () = fprint_s2var (out, ki.0)
+      val () = fprint_string (out, " -> ")
+      val () = fprint_s2exp (out, ki.1)
+      val () = fprint_newline (out)
+    in
+      fprint_s2varbindmap_aux (out, kis)
+    end // end of [list_vt_cons]
+  | ~list_vt_nil () => ()
+// end of [fprint_s2varbindmap_aux]
 
 implement
 fprint_the_s2varbindmap (out) = let
-  fun aux (
-    out: FILEref, kis: List_vt @(s2var, s2exp)
-  ) : void =
-    case+ kis of
-    | ~list_vt_cons (ki, kis) => let
-        val () = fprint_s2var (out, ki.0)
-        val () = fprint_string (out, " -> ")
-        val () = fprint_s2exp (out, ki.1)
-        val () = fprint_newline (out)
-      in
-        aux (out, kis)
-      end // end of [list_vt_cons]
-    | ~list_vt_nil () => ()
-  // end of [aux]
-  val kis = let
-    val (vbox pf | p) = ref_get_view_ptr (the_s2varbindmap)
-  in
-    $effmask_ref (s2varbindmap_listize (!p))
-  end // end of [val]
+  var map = $UN.castvwtp0{s2varbindmap} (gcell_get<ptr> (the_s2varbindmap))
+  val kis = s2varbindmap_listize (map)
+  val () = gcell_set<ptr> (the_s2varbindmap, $UN.castvwtp0{ptr} (map))
 in
-  aux (out, kis)
+  fprint_s2varbindmap_aux (out, kis)
 end // end of [fprint_the_s2varbindmap]
 
 implement
 the_s2varbindmap_search (s2v) = let
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varbindmap)
+  var map = $UN.castvwtp0{s2varbindmap} (gcell_get<ptr> (the_s2varbindmap))
+  val res = s2varbindmap_search (map, s2v)
+  val () = gcell_set<ptr> (the_s2varbindmap, $UN.castvwtp0{ptr} (map))
 in
-  $effmask_ref (s2varbindmap_search (!p, s2v))
+  res
 end // end of [the_s2varbindmap_search]
 
 implement
 the_s2varbindmap_insert (s2v, s2f) = let
 //
-val () = let
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varlst)
-in
-  !p := list_vt_cons (s2v, !p)
-end // end of [val]
+val () = gcell_set<s2varlst> (the_s2varlst, glist_cons (s2v, gcell_get<s2varlst> (the_s2varlst)))
 //
 val () = let
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varbindmap)
+  var map = $UN.castvwtp0{s2varbindmap} (gcell_get<ptr> (the_s2varbindmap))
+  val () = s2varbindmap_insert (map, s2v, s2f)
 in
-  $effmask_ref (s2varbindmap_insert (!p, s2v, s2f))
+  gcell_set<ptr> (the_s2varbindmap, $UN.castvwtp0{ptr} (map))
 end // end of [val]
 //
 in
@@ -165,20 +182,20 @@ implement
 the_s2varbindmap_freetop () = let
 //
 val s2vs = xs where {
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varlst)
-  val xs = !p
-  val () = !p := list_vt_nil ()
+  val xs = gcell_get<s2varlst> (the_s2varlst)
+  val () = gcell_set<s2varlst> (the_s2varlst, glist_nil ())
 } // end of [val]
 //
 val () = let
-  val (vbox pf | p) = ref_get_view_ptr (the_s2varbindmap)
+  var map = $UN.castvwtp0{s2varbindmap} (gcell_get<ptr> (the_s2varbindmap))
+  val () = auxrmv (map, s2vs)
 in
-  $effmask_ref (auxrmv (!p, s2vs))
+  gcell_set<ptr> (the_s2varbindmap, $UN.castvwtp0{ptr} (map))
 end // end of [val]
 //
 in
   (*nothing*)
-end // end of [the_s2varbinmap_freetop]
+end // end of [the_s2varbindmap_freetop]
 
 end // end of [local]
 

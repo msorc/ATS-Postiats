@@ -1,0 +1,574 @@
+%{
+#define ATSCODEFORMAT "txt"
+#if (ATSCODEFORMAT == "txt")
+#include "utils/atsdoc/HATS/postiatsatxt.hats"
+#endif // end of [ATSCCODEFORMAT]
+val _thisfilename = atext_strcst"char.sats"
+val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
+//
+fun
+fprint_print_prerr_decl
+  (tnm: string): atext = let
+//
+val ent = sprintf ("\
+fun print_%s(x: %s): void = \"mac#%%\"
+fun prerr_%s(x: %s): void = \"mac#%%\"
+overload print with print_%s
+overload prerr with prerr_%s
+fun fprint_%s : fprint_type (%s) = \"mac#%%\"
+overload fprint with fprint_%s\
+", @(
+ tnm, tnm, tnm, tnm, tnm, tnm, tnm, tnm, tnm
+)
+) // end of [sprintf] // end of [val]
+//
+in
+  atext_strptr(ent)
+end // end of [fprint_print_prerr_decl]
+//
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+\
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/SATS/CODEGEN/char.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("hwxi AT cs DOT bu DOT edu")
+#atscode_start_time("September, 2011")
+
+#atscode_separator()
+//
+praxi
+lemma_char_size
+(
+// argumentless
+) : [sizeof(char)==sizeof(byte)] void
+praxi
+lemma_schar_size
+(
+// argumentless
+) : [sizeof(schar)==sizeof(byte)] void
+praxi
+lemma_uchar_size
+(
+// argumentless
+) : [sizeof(uchar)==sizeof(byte)] void
+//
+#atscode_separator()
+//
+castfn char2schar0(c: char):<> schar
+castfn schar2char0(c: schar):<> char
+//
+castfn char2uchar0(c: char):<> uchar
+castfn uchar2char0(c: uchar):<> char
+//
+#atscode_separator()
+//
+fun int2char0(i: int):<> char = "mac\#%"
+fun int2schar0(i: int):<> schar = "mac\#%"
+fun int2uchar0(i: int):<> uchar = "mac\#%"
+//
+fun uint2uchar0(u: uint):<> uchar = "mac\#%"
+//
+#atscode_separator()
+
+fun char2int0(c: char):<> int = "mac\#%"
+fun schar2int0(c: schar):<> int = "mac\#%"
+fun uchar2int0(c: uchar):<> int = "mac\#%"
+
+#atscode_separator()
+
+fun char2uint0(c: char):<> uint = "mac\#%"
+fun schar2uint0(c: schar):<> uint = "mac\#%"
+fun uchar2uint0(c: uchar):<> uint = "mac\#%"
+
+#atscode_separator()
+
+fun char2u2int0(c: char):<> int = "mac\#%"
+fun char2u2uint0(c: char):<> uint = "mac\#%"
+
+#atscode_separator()
+//
+fun
+char0_iseqz(c: char):<> bool = "mac\#%"
+fun
+char0_isneqz(c: char):<> bool = "mac\#%"
+//
+overload iseqz with char0_iseqz of 0
+overload isneqz with char0_isneqz of 0
+//
+#atscode_separator()
+//
+fun add_char0_int0
+  (c: char, i: int):<> char = "mac\#%"
+fun sub_char0_int0
+  (c: char, i: int):<> char = "mac\#%"
+fun sub_char0_char0
+  (c1: char, c2: char):<> int = "mac\#%"
+//
+overload + with add_char0_int0 of 0
+overload - with sub_char0_int0 of 0
+overload - with sub_char0_char0 of 0
+//
+#atscode_separator()
+
+%{
+fun
+fun_char_cmp0_decl
+  (opr: string): atext = let
+//
+val fopr_d = (
+  case+ opr of
+  | "lt" => "<" | "lte" => "<="
+  | "gt" => ">" | "gte" => ">="
+  | "eq" => "=" | "neq" => "!="
+  | _ => opr
+) : string // end of [val]
+//
+val ent =
+sprintf ("\
+fun %s_char0_char0
+  (c1: char, c2: char):<> bool = \"mac#%%\"
+overload %s with %s_char0_char0 of 0\
+", @(
+ opr, fopr_d, opr
+)
+) // end of [sprintf] // end of [val]
+//
+in
+  atext_strptr (ent)
+end // end of [fun_char_cmp0_decl]
+%}\
+\
+#fun_char_cmp0_decl("lt")
+#fun_char_cmp0_decl("lte")
+
+#fun_char_cmp0_decl("gt")
+#fun_char_cmp0_decl("gte")
+
+#fun_char_cmp0_decl("eq")
+#fun_char_cmp0_decl("neq")
+overload <> with neq_char0_char0 of 0
+
+fun compare_char0_char0
+  (c1: char, c2: char):<> int = "mac\#%"
+overload compare with compare_char0_char0 of 0
+
+#atscode_separator()
+//
+castfn g0ofg1_char(c: Char):<> char
+castfn g1ofg0_char(c: char):<> Char
+//
+overload g0ofg1 with g0ofg1_char // index-erasing
+overload g1ofg0 with g1ofg0_char // index-inducing
+//
+#atscode_separator()
+//
+castfn
+char2schar1
+  {c:int}(c: char(c)):<> schar(c)
+castfn
+schar2char1
+  {c:int}(c: schar(c)):<> char(c)
+//
+castfn
+char2uchar1
+  {c:int}(c: char(c)):<> uchar(i2u8(c))
+castfn
+uchar2char1
+  {c:int}(c: uchar(c)):<> char(u2i8(c))
+//
+#atscode_separator()
+//
+fun
+char2int1
+  {c:int}(c: char(c)):<> int(c) = "mac\#%"
+fun
+schar2int1
+  {c:int}(c: schar(c)):<> int(c) = "mac\#%"
+fun
+uchar2int1
+  {c:int}(c: uchar(c)):<> int(c) = "mac\#%"
+//
+#atscode_separator()
+//
+fun
+char1_iseqz
+  {c:int}(c: char(c)):<> bool(c == 0) = "mac\#%"
+fun
+char1_isneqz
+  {c:int}(c: char(c)):<> bool(c != 0) = "mac\#%"
+//
+overload iseqz with char1_iseqz of 10
+overload isneqz with char1_isneqz of 10
+//
+#atscode_separator()
+
+%{
+fun
+fun_char_cmp1_decl
+(
+  opr: string
+) : atext = let
+//
+val fopr_s = (
+  case+ opr of
+  | "lt" => "<" | "lte" => "<="
+  | "gt" => ">" | "gte" => ">="
+  | "eq" => "==" | "neq" => "!="
+  | _ => opr
+) : string // end of [val]
+val fopr_d = (
+  case+ opr of
+  | "lt" => "<" | "lte" => "<="
+  | "gt" => ">" | "gte" => ">="
+  | "eq" => "=" | "neq" => "!="
+  | _ => opr
+) : string // end of [val]
+//
+val ent = sprintf ("\
+fun
+%s_char1_char1
+  {c1,c2:int}
+  (c1: char(c1), c2: char(c2)):<> bool(c1 %s c2) = \"mac#%%\"
+overload %s with %s_char1_char1 of 20\
+", @(
+ opr, fopr_s, fopr_d, opr
+)
+) // end of [sprintf] // end of [val]
+//
+in
+  atext_strptr (ent)
+end // end of [fun_char_cmp1_decl]
+%}\
+\
+#fun_char_cmp1_decl("lt")
+#fun_char_cmp1_decl("lte")
+
+#fun_char_cmp1_decl("gt")
+#fun_char_cmp1_decl("gte")
+
+#fun_char_cmp1_decl("eq")
+#fun_char_cmp1_decl("neq")
+overload <> with neq_char1_char1 of 20
+
+#atscode_decl_strcst('\
+fun compare_char1_char1
+  {c1,c2:int}
+  (c1: char c1, c2: char c2) :<> int(c1-c2) = "mac\#%"
+overload compare with compare_char1_char1 of 20
+')\
+
+#atscode_separator()
+//
+fun eq_char0_int0 : (char, int) -<fun0> bool = "mac\#%"
+fun eq_int0_char0 : (int, char) -<fun0> bool = "mac\#%"
+overload = with eq_char0_int0 of 0
+overload = with eq_int0_char0 of 0
+fun neq_char0_int0 : (char, int) -<fun0> bool = "mac\#%"
+fun neq_int0_char0 : (int, char) -<fun0> bool = "mac\#%"
+overload != with neq_char0_int0 of 0
+overload <> with neq_char0_int0 of 0
+overload != with neq_int0_char0 of 0
+overload <> with neq_int0_char0 of 0
+//
+fun compare_char0_int0 : (char, int) -<fun0> int = "mac\#%"
+fun compare_int0_char0 : (int, char) -<fun0> int = "mac\#%"
+overload compare with compare_char0_int0
+overload compare with compare_int0_char0
+//
+#atscode_separator()
+//
+// unsigned characters
+//
+#atscode_separator()
+
+%{
+fun
+fun_uchar_cmp0_decl (
+  opr: string, fopr: string
+) : atext = let
+//
+val ent = sprintf ("\
+fun %s_uchar0_uchar0
+  (c1: uchar, c2: uchar):<> bool = \"mac#%%\"
+overload %s with %s_uchar0_uchar0 of 0\
+", @(
+ opr, fopr, opr
+)
+) // end of [sprintf] // end of [val]
+//
+in
+  atext_strptr (ent)
+end // end of [fun_uchar_cmp0_decl]
+%}\
+\
+#fun_uchar_cmp0_decl("lt", "<")
+#fun_uchar_cmp0_decl("lte", "<=")
+
+#fun_uchar_cmp0_decl("gt", ">")
+#fun_uchar_cmp0_decl("gte", ">=")
+
+#fun_uchar_cmp0_decl("eq", "=")
+#fun_uchar_cmp0_decl("neq", "!=")
+overload <> with neq_uchar0_uchar0 of 0
+
+#atscode_decl_strcst('\
+fun compare_uchar0_uchar0
+  (c1: uchar, c2: uchar):<> int = "mac\#%"
+overload compare with compare_uchar0_uchar0 of 0
+')\
+
+#atscode_separator()
+
+%{
+fun
+fun_uchar_cmp1_decl
+  (opr: string): atext = let
+//
+val fopr_s = (
+  case+ opr of
+  | "lt" => "<" | "lte" => "<="
+  | "gt" => ">" | "gte" => ">="
+  | "eq" => "==" | "neq" => "!="
+  | _ => opr
+) : string // end of [val]
+val fopr_d = (
+  case+ opr of
+  | "lt" => "<" | "lte" => "<="
+  | "gt" => ">" | "gte" => ">="
+  | "eq" => "=" | "neq" => "!="
+  | _ => opr
+) : string // end of [val]
+//
+val ent =
+sprintf ("\
+fun
+%s_uchar1_uchar1
+  {c1,c2:int}
+  (c1: uchar(c1), c2: uchar(c2)) :<> bool(c1 %s c2) = \"mac#%%\"
+overload %s with %s_uchar1_uchar1 of 20\
+", @(
+ opr, fopr_s, fopr_d, opr
+)
+) // end of [sprintf] // end of [val]
+//
+in
+  atext_strptr (ent)
+end // end of [fun_uchar_cmp1_decl]
+%}\
+\
+#fun_uchar_cmp1_decl("lt")
+#fun_uchar_cmp1_decl("lte")
+
+#fun_uchar_cmp1_decl("gt")
+#fun_uchar_cmp1_decl("gte")
+
+#fun_uchar_cmp1_decl("eq")
+#fun_uchar_cmp1_decl("neq")
+overload <> with neq_uchar1_uchar1 of 20
+
+#atscode_decl_strcst('\
+fun compare_uchar1_uchar1
+  {c1,c2:int}
+  (c1: uchar c1, c2: uchar c2) :<> int(c1-c2) = "mac\#%"
+overload compare with compare_uchar1_uchar1 of 20
+')\
+
+#atscode_separator()
+
+sortdef tk = tkind
+
+#atscode_separator()
+
+fun{tk:tk}
+g0int_of_char(c: char):<> g0int(tk)
+fun{tk:tk}
+g0int_of_schar(c: schar):<> g0int(tk)
+fun{tk:tk}
+g0int_of_uchar(c: uchar):<> g0int(tk)
+
+fun{tk:tk}
+g0uint_of_uchar(c: uchar):<> g0uint(tk)
+
+#atscode_separator()
+
+fun{tk:tk}
+g1int_of_char1 // c:int8
+  {c:int} (c: char(c)):<> g1int(tk, c)
+// end of [g1int_of_char1]
+fun{tk:tk}
+g1int_of_schar1 // c:int8
+  {c:int} (c: schar(c)):<> g1int(tk, c)
+// end of [g1int_of_schar1]
+fun{tk:tk}
+g1int_of_uchar1 // c:uint8
+  {c:int} (c: uchar(c)):<> g1int(tk, c)
+// end of [g1int_of_uchar1]
+
+#atscode_decl_strcst('\
+(*
+** HX: g1uint_of_schar1: schar -> int -> uint
+*)
+fun{tk:tk}
+g1uint_of_uchar1
+  {c:int} (c: uchar(c)):<> g1uint(tk, c)
+// end of [g1uint_of_uchar1]
+')\
+
+#atscode_separator()
+#atscode_decl_strcst('\
+//
+// HX:
+// return is dynamically allocated
+//
+fun{}
+char2string(c: char):<> string
+fun{}
+char2strptr(c: char):<!wrt> Strptr1
+//
+')\
+\
+#atscode_separator()
+
+#fprint_print_prerr_decl("char")
+#fprint_print_prerr_decl("schar")
+#fprint_print_prerr_decl("uchar")
+
+#atscode_separator()
+
+%{
+fun
+fun_isX_decl
+(
+  isX: string
+) : atext = let
+//
+val ent =
+sprintf ("\
+fun %s_int(c: int):<> bool = \"mac#%%\"
+fun %s_char(c: char):<> bool = \"mac#%%\"
+//
+symintr %s
+overload %s with %s_int of 0
+overload %s with %s_char of 0
+//\
+", @(
+ isX, isX, isX, isX, isX, isX, isX
+)
+) // end of [sprintf] // end of [val]
+//
+in
+  atext_strptr (ent)
+end // end of [fun_isX_decl]
+%}\
+\
+#fun_isX_decl("isalpha")
+#fun_isX_decl("isalnum")
+
+#fun_isX_decl("isascii")
+
+#fun_isX_decl("isblank")
+#fun_isX_decl("isspace")
+
+#fun_isX_decl("iscntrl")
+
+#fun_isX_decl("isdigit")
+#fun_isX_decl("isxdigit")
+
+#fun_isX_decl("isgraph")
+#fun_isX_decl("isprint")
+#fun_isX_decl("ispunct")
+
+#fun_isX_decl("islower")
+#fun_isX_decl("isupper")
+
+#atscode_separator()
+
+fun toascii (c: int):<> int = "mac\#%"
+
+#atscode_separator()
+
+symintr tolower
+fun tolower_int(c: int):<> int = "mac\#%"
+fun tolower_char(c: char):<> char = "mac\#%"
+overload tolower with tolower_int
+overload tolower with tolower_char
+
+symintr toupper
+fun toupper_int(c: int):<> int = "mac\#%"
+fun toupper_char(c: char):<> char = "mac\#%"
+overload toupper with toupper_int
+overload toupper with toupper_char
+
+#atscode_separator()
+
+fun int2digit (i: intBtw(0, 10)): char = "mac\#%"
+fun int2xdigit (i: intBtw(0, 16)): char = "mac\#%"
+fun int2xxdigit (i: intBtw(0, 16)): char = "mac\#%"
+
+#atscode_separator()
+
+symintr c2uc
+overload c2uc with char2uchar0 of 0
+overload c2uc with char2uchar1 of 10
+symintr uc2c
+overload uc2c with uchar2char0 of 0
+overload uc2c with uchar2char1 of 10
+
+#atscode_separator()
+
+symintr char2i
+overload char2i with char2int0 of 0
+symintr char2ui
+overload char2ui with char2uint0 of 0
+symintr uchar2i
+overload uchar2i with uchar2int0 of 0
+symintr uchar2ui
+overload uchar2ui with uchar2uint0 of 0
+
+#atscode_separator()
+
+symintr char2u2i
+overload char2u2i with char2u2int0 of 0
+symintr char2u2ui
+overload char2u2ui with char2u2uint0 of 0
+
+#atscode_separator()
+//
+fun int2byte0(i: int): byte = "mac\#%"
+fun byte2int0(b: byte):<> int = "mac\#%"
+//
+fun uint2byte0(u: uint): byte = "mac\#%"
+fun byte2uint0(b: byte):<> uint = "mac\#%"
+//
+symintr byte2i
+overload byte2i with byte2int0 of 0
+symintr i2byte
+overload i2byte with int2byte0 of 0
+//
+symintr byte2ui
+overload byte2i with byte2uint0 of 0
+symintr ui2byte
+overload i2byte with uint2byte0 of 0
+//
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+//
+implement
+main (argc, argv) =
+  fprint_filsub (stdout_ref, "char_atxt.txt")
+//
+%}\

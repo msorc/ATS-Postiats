@@ -33,11 +33,11 @@ event(a:t@ype) = event_type(a)
 (* ****** ****** *)
 //
 fun spawn
-  (f: () -<cloref1> void): thread_id = "mac#%"
+  (f: () -<cloptr1> void): thread_id = "mac#%"
 //
 fun
 spawnc{a:t@ype}
-  (f: (a) -<cloref1> void, env: a): thread_id = "mac#%"
+  (f: (a) -<cloptr1> void, env: a): thread_id = "mac#%"
 //
 (* ****** ****** *)
 

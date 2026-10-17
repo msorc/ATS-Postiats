@@ -25,11 +25,7 @@ ATSLANG_GITHUB_ATSLIB_CONTRIB
 #require
 "{$ATSLANG_GITHUB_ATSLIB_CONTRIB}/libats-hwxi/intinf/SATS/intinf.sats"
 #require
-"{$ATSLANG_GITHUB_ATSLIB_CONTRIB}/libats-hwxi/intinf/SATS/intinf_t.sats"
-#require
 "{$ATSLANG_GITHUB_ATSLIB_CONTRIB}/libats-hwxi/intinf/SATS/intinf_vt.sats"
-#require
-"{$ATSLANG_GITHUB_ATSLIB_CONTRIB}/libats-hwxi/intinf/DATS/intinf_t.dats"
 #require
 "{$ATSLANG_GITHUB_ATSLIB_CONTRIB}/libats-hwxi/intinf/DATS/intinf_vt.dats"
 //

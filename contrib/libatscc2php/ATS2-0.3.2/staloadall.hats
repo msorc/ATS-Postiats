@@ -37,13 +37,12 @@ _(*anon*) = "./DATS/basics.dats"
 //
 (* ****** ****** *)
 //
-#staload "./SATS/list.sats"
-#staload _ = "./DATS/list.dats"
 //
 (* ****** ****** *)
 //
-#staload "./SATS/stream.sats"
-#staload _ = "./DATS/stream.dats"
+//
+#staload "./SATS/list_vt.sats"
+#staload _ = "./DATS/list_vt.dats"
 //
 #staload "./SATS/stream_vt.sats"
 #staload _ = "./DATS/stream_vt.dats"
@@ -77,15 +76,7 @@ _(*anon*) = "./DATS/basics.dats"
 // HX: un-indexed list
 // HX: un-indexed array
 //
-#staload "./SATS/ML/list0.sats"
-#staload "./SATS/ML/array0.sats"
-#staload "./SATS/ML/option0.sats"
-#staload "./SATS/ML/matrix0.sats"
 //
-#staload _ = "./DATS/ML/list0.dats"
-#staload _ = "./DATS/ML/array0.dats"
-#staload _ = "./DATS/ML/option0.dats"
-#staload _ = "./DATS/ML/matrix0.dats"
 //
 (* ****** ****** *)
 

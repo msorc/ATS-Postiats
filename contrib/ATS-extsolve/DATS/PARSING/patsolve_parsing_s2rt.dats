@@ -18,91 +18,79 @@ local
 
 fun
 aux_S2RTbas
+  {l:addr}
 (
-  x0: jsonval
-) : s2rt = let
+  ar: !arena(l)
+, tbls: ptables(l), x0: jsonval
+) : s2rt(l) = let
 //
-val-JSONarray(xs) = x0
-val () =
-  assertloc(length(xs) >= 1)
-//
-val-JSONstring(name) = xs[0]
-//
-(*
-val () =
-println!
-  ("parse_s2rt: aux_S2RTbas: name = ", name)
-*)
+val name =
+  parse_string(jsonval_array_get(x0, 0))
 //
 in
 //
 case+ name of
 //
-| "int" => S2RTint()
-| "addr" => S2RTaddr()
-| "bool" => S2RTbool()
+| "int" => s2rt_S2RTint(ar)
+| "addr" => s2rt_S2RTaddr(ar)
+| "bool" => s2rt_S2RTbool(ar)
+| "real" => s2rt_S2RTreal(ar)
 //
-| "real" => S2RTreal()
+| "cls" => s2rt_S2RTeff(ar)
+| "eff" => s2rt_S2RTeff(ar)
 //
-| "cls" => S2RTeff()
-| "eff" => S2RTeff()
+| "type" => s2rt_S2RTtype(ar)
+| "t@ype" => s2rt_S2RTt0ype(ar)
+| "t0ype" => s2rt_S2RTt0ype(ar)
 //
-| "type" => S2RTtype()
-| "t@ype" => S2RTt0ype()
-| "t0ype" => S2RTt0ype()
+| "viewtype" => s2rt_S2RTvtype(ar)
+| "viewt@ype" => s2rt_S2RTvt0ype(ar)
+| "viewt0ype" => s2rt_S2RTvt0ype(ar)
 //
-| "viewtype" => S2RTvtype()
-| "viewt@ype" => S2RTvt0ype()
-| "viewt0ype" => S2RTvt0ype()
+| "prop" => s2rt_S2RTprop(ar)
+| "view" => s2rt_S2RTview(ar)
 //
-| "prop" => S2RTprop()
-| "view" => S2RTview()
+| "tkind" => s2rt_S2RTtkind(ar)
 //
-| "tkind" => S2RTtkind()
-//
-| _(*rest*) => S2RTnamed(symbol_make_name(name))
+| _(*rest*) =>
+    s2rt_S2RTnamed
+      (ar, symbol_make_name(ar, ptables_get_symtbl(ar, tbls), name))
+    // s2rt_S2RTnamed
 //
 end // end of [aux_S2RTbas]
 
 fun
 aux_S2RTfun
+  {l:addr}
 (
-  x0: jsonval
-) : s2rt = let
-//
-val-JSONarray(xs) = x0
-val () = assertloc (length(xs) >= 2)
+  ar: !arena(l)
+, tbls: ptables(l), x0: jsonval
+) : s2rt(l) = let
 //
 val arg =
-  parse_s2rtlst (xs[0])
-//
-val res = parse_s2rt (xs[1])
+  parse_s2rtlst(ar, tbls, jsonval_array_get(x0, 0))
+val res =
+  parse_s2rt(ar, tbls, jsonval_array_get(x0, 1))
 //
 in
-  S2RTfun (arg, res)
+  s2rt_S2RTfun(ar, arg, res)
 end // end of [aux_S2RTfun]
 
 in (* in-of-local *)
 
 implement
 parse_s2rt
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-
-JSONobject(lxs) = jsnv0
-//
-val-
-list_cons (lx, lxs) = lxs
+val name = jsonval_get_name(jsnv0)
+val jsnv2 = jsonval_get_value(jsnv0)
 //
 in
 //
-case+ lx.0 of
-//
-| "S2RTbas" => aux_S2RTbas (lx.1)
-//
-| "S2RTfun" => aux_S2RTfun (lx.1)
-//
-| _(*rest-of-S2RT*) => S2RTerror((*void*))
+case+ name of
+| "S2RTbas" => aux_S2RTbas(ar, tbls, jsnv2)
+| "S2RTfun" => aux_S2RTfun(ar, tbls, jsnv2)
+| _(*rest-of-S2RT*) => s2rt_S2RTerror(ar)
 //
 end // end of [parse_s2rt]
 
@@ -110,44 +98,23 @@ end // end of [local]
 
 (* ****** ****** *)
 
-local
-//
-val
-the_s2rtdatmap = ref<s2rtdatlst>(list_nil)
-//
-extern
-fun
-the_s2rtdatmap_set
-  (s2rtdatlst): void = "ext#patsolve_the_s2rtdatmap_set"
-//
-in (* in-of-local *)
-
-implement
-the_s2rtdatmap_get() = !the_s2rtdatmap
-implement
-the_s2rtdatmap_set(s2tds) = !the_s2rtdatmap := s2tds
-
-end // end of [local]
-
-(* ****** ****** *)
-
 implement
 parse_s2rtdat
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-
-~Some_vt(x1) = jsnv0["s2rtdat_sym"]
-val-
-~Some_vt(x2) = jsnv0["s2rtdat_stamp"]
-val-
-~Some_vt(x3) = jsnv0["s2rtdat_sconlst"]
+val x1 =
+  jsonval_get_field_exn(jsnv0, "s2rtdat_sym")
+val x2 =
+  jsonval_get_field_exn(jsnv0, "s2rtdat_stamp")
+val x3 =
+  jsonval_get_field_exn(jsnv0, "s2rtdat_sconlst")
 //
-val name = parse_symbol (x1)
-val stamp = parse_stamp (x2)
-val s2cs0 = parse_s2cstlst (x3)
+val name = parse_symbol(ar, tbls, x1)
+val stamp = parse_stamp(x2)
+val s2cs0 = parse_s2cstlst(ar, tbls, x3)
 //
 in
-  s2rtdat_make(name, stamp, s2cs0)
+  s2rtdat_make(ar, name, stamp, s2cs0)
 end // end of [parse_s2rtdat]
 
 (* ****** ****** *)

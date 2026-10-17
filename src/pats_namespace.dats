@@ -25,6 +25,7 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -33,109 +34,114 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_namespace.dats, see PORTING.md)
+// The four lists (the current file environments, the stack of the saved ones, and the
+// list of the saved pairs, as two parallel lists) are immutable [glist]s in cells of the
+// global arena; nothing is freed.
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_namespace.sats"
 
 (* ****** ****** *)
 //
-vtypedef
-fenvlst_vt = List_vt (filenv)
-vtypedef
-fenvlstlst_vt = List_vt (fenvlst_vt)
-vtypedef
-savedlst_vt = List_vt @(fenvlst_vt, fenvlstlst_vt)
-//
-(* ****** ****** *)
-//
-fn
-fenvlst_vt_free
-(
-  ns: fenvlst_vt
-) :<> void = list_vt_free (ns)
-//
-fun
-fenvlstlst_vt_free
-  {n:nat} .<n>.
-  (nss: list_vt (fenvlst_vt, n)):<> void = 
-(
-  case+ nss of
-  | ~list_vt_nil ((*void*)) => ()
-  | ~list_vt_cons (ns, nss) => let
-      val () = fenvlst_vt_free (ns) in fenvlstlst_vt_free (nss)
-    end // end of [list_vt_cons]
-) (* end of [fenvlstlst_vt_free] *)
+typedef
+fenvlst = glist (filenv)
+typedef
+fenvlstlst = glist (fenvlst)
+typedef
+fenvlstsaved = glist (fenvlst) // HX: the first components of the saved pairs
+typedef
+fenvlstlstsaved = glist (fenvlstlst) // HX: the second components
 //
 (* ****** ****** *)
 
 local
 
-val the_fenvlst = ref<fenvlst_vt> (list_vt_nil)
-val the_fenvlstlst = ref<fenvlstlst_vt> (list_vt_nil)
-val the_savedlst = ref<savedlst_vt> (list_vt_nil)
+val the_fenvlst = let
+  val p = the_garena_alloc (sizeof<fenvlst>)
+  val () = $UN.ptr0_set<fenvlst> (p, glist_nil ())
+in p end // end of [val]
+val the_fenvlstlst = let
+  val p = the_garena_alloc (sizeof<fenvlstlst>)
+  val () = $UN.ptr0_set<fenvlstlst> (p, glist_nil ())
+in p end // end of [val]
+val the_savedlst_1 = let
+  val p = the_garena_alloc (sizeof<fenvlstsaved>)
+  val () = $UN.ptr0_set<fenvlstsaved> (p, glist_nil ())
+in p end // end of [val]
+val the_savedlst_2 = let
+  val p = the_garena_alloc (sizeof<fenvlstlstsaved>)
+  val () = $UN.ptr0_set<fenvlstlstsaved> (p, glist_nil ())
+in p end // end of [val]
 
 in (* in of [local] *)
 
 implement
+the_namespace_get_fenvlst () = $UN.ptr0_get<fenvlst> (the_fenvlst)
+implement
+the_namespace_get_fenvlstlst () = $UN.ptr0_get<fenvlstlst> (the_fenvlstlst)
+
+implement
 the_namespace_add
   (x) = () where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_fenvlst)
-  // end of [val]
-  val () = !p := list_vt_cons (x, !p)
+  val xs = $UN.ptr0_get<fenvlst> (the_fenvlst)
+  val () = $UN.ptr0_set<fenvlst> (the_fenvlst, glist_cons (x, xs))
 } // end of [the_namespace_add]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 the_namespace_search
-  {a} (f) = let
-//
-typedef fenvlst = List (filenv)
-typedef fenvlstlst = List (fenvlst)
+  (env, f) = let
 //
 fun auxlst (
-  f: !filenv -<cloptr1> Option_vt a, ns: fenvlst
+  env: ptr
+, f: (ptr, filenv) -> Option_vt a, ns: fenvlst
 ) : Option_vt a =
 (
-  case+ ns of
-  | list_cons (n, ns) => (
-      case+ f (n)  of ~None_vt () => auxlst (f, ns) | ans => ans
+  case+ glist_view (ns) of
+  | ~GLcons (n, ns) => (
+      case+ f (env, n) of ~None_vt () => auxlst (env, f, ns) | ans => ans
     ) // end of [list_cons]
-  | list_nil ((*void*)) => None_vt ()
+  | ~GLnil ((*void*)) => None_vt ()
 ) (* end of [auxlst] *)
 //
 fun auxlstlst (
-  f: !filenv -<cloptr1> Option_vt a, nss: fenvlstlst
+  env: ptr
+, f: (ptr, filenv) -> Option_vt a, nss: fenvlstlst
 ) : Option_vt a =
 (
-  case+ nss of
-  | list_cons
+  case+ glist_view (nss) of
+  | ~GLcons
       (ns, nss) => (
-      case+ auxlst (f, ns) of
-      | ~None_vt () => auxlstlst (f, nss) | ans => ans
+      case+ auxlst (env, f, ns) of
+      | ~None_vt () => auxlstlst (env, f, nss) | ans => ans
     ) // end of [list_cons]
-  | list_nil () => None_vt () // end of [list_nil]
+  | ~GLnil () => None_vt () // end of [list_nil]
 ) (* end of [auxlstlst] *)
 //
-val r_ns =
-__cast (the_fenvlst) where
-{
-  extern castfn __cast (r: ref (fenvlst_vt)): ref (fenvlst)
-} (* end of [where] *) // end of [val]
-//
-val r_nss =
-__cast (the_fenvlstlst) where {
-   extern castfn __cast (r: ref (fenvlstlst_vt)): ref (fenvlstlst)
-} (* end of [where] *) // end of [val]
+val ns = the_namespace_get_fenvlst ()
+val nss = the_namespace_get_fenvlstlst ()
 //
 in
 //
-case+ auxlst (f, !r_ns) of
-| ~None_vt () => auxlstlst (f, !r_nss) | ans => ans
+case+ auxlst (env, f, ns) of
+| ~None_vt () => auxlstlst (env, f, nss) | ans => ans
 //
 end // end of [the_namespace_search]
 
@@ -143,17 +149,10 @@ end // end of [the_namespace_search]
 
 implement
 the_namespace_pop () = let
-  val ns = ns where {
-    val (vbox pf | p) = ref_get_view_ptr (the_fenvlstlst)
-    val-~list_vt_cons (ns, nss) = !p
-    val () = !p := nss
-  }
-  val ns0 = ns0 where {
-    val (vbox pf | p) = ref_get_view_ptr (the_fenvlst)
-    val ns0 = !p
-    val () = !p := ns
-  }
-  val () = fenvlst_vt_free (ns0)
+  val nss = $UN.ptr0_get<fenvlstlst> (the_fenvlstlst)
+  val ns = glist_head (nss) // HX: val-~list_vt_cons (ns, nss) = !p
+  val () = $UN.ptr0_set<fenvlstlst> (the_fenvlstlst, glist_tail (nss))
+  val () = $UN.ptr0_set<fenvlst> (the_fenvlst, ns)
 in
   // nothing
 end // end of [the_namespace_pop]
@@ -163,18 +162,11 @@ end // end of [the_namespace_pop]
 implement
 the_namespace_push () = let
 //
-  val ns = ns where {
-    val (vbox pf | p) =
-      ref_get_view_ptr (the_fenvlst)
-    val ns = !p
-    val () = !p := list_vt_nil ()
-  } (* end of [val] *)
+  val ns = $UN.ptr0_get<fenvlst> (the_fenvlst)
+  val () = $UN.ptr0_set<fenvlst> (the_fenvlst, glist_nil ())
 //
-  val () = () where {
-    val (vbox pf | p) =
-      ref_get_view_ptr (the_fenvlstlst)
-    val () = !p := list_vt_cons (ns, !p)
-  } (* end of [val] *)
+  val nss = $UN.ptr0_get<fenvlstlst> (the_fenvlstlst)
+  val () = $UN.ptr0_set<fenvlstlst> (the_fenvlstlst, glist_cons (ns, nss))
 //
 in
   // nothing
@@ -185,20 +177,15 @@ end // end of [the_namespace_push]
 implement
 the_namespace_localjoin () = let
 //
-  val ns2 = ns2 where {
-    val (vbox pf | p) =
-      ref_get_view_ptr (the_fenvlstlst)
-    val-~list_vt_cons (ns1, nss) = !p
-    val () = fenvlst_vt_free (ns1)
-    val-~list_vt_cons (ns2, nss) = nss
-    val () = !p := nss
-  } (* end of [val] *)
+  val nss = $UN.ptr0_get<fenvlstlst> (the_fenvlstlst)
+  val ns1 = glist_head (nss) // HX: freed in ATS1
+  val nss = glist_tail (nss)
+  val ns2 = glist_head (nss)
+  val nss = glist_tail (nss)
+  val () = $UN.ptr0_set<fenvlstlst> (the_fenvlstlst, nss)
 //
-  val () = () where {
-    val (vbox pf | p) =
-      ref_get_view_ptr (the_fenvlst)
-    val () = !p := list_vt_append (!p, ns2)
-  } (* end of [val] *)
+  val ns = $UN.ptr0_get<fenvlst> (the_fenvlst)
+  val () = $UN.ptr0_set<fenvlst> (the_fenvlst, glist_append<filenv> (ns, ns2))
 //
 in
   // nothing
@@ -210,23 +197,16 @@ implement
 the_namespace_save
   () = () where {
 //
-val x = x where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_fenvlst)
-  val x = !p; val () = !p := list_vt_nil ()
-} (* end of [val] *)
+val x = $UN.ptr0_get<fenvlst> (the_fenvlst)
+val () = $UN.ptr0_set<fenvlst> (the_fenvlst, glist_nil ())
 //
-val xs = xs where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_fenvlstlst)
-  val xs = !p; val () = !p := list_vt_nil ()
-} (* end of [val] *)
+val xs = $UN.ptr0_get<fenvlstlst> (the_fenvlstlst)
+val () = $UN.ptr0_set<fenvlstlst> (the_fenvlstlst, glist_nil ())
 //
-val () = () where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_savedlst)
-  val () = !p := list_vt_cons ((x, xs), !p)
-} (* end of [val] *)
+val saved1 = $UN.ptr0_get<fenvlstsaved> (the_savedlst_1)
+val saved2 = $UN.ptr0_get<fenvlstlstsaved> (the_savedlst_2)
+val () = $UN.ptr0_set<fenvlstsaved> (the_savedlst_1, glist_cons (x, saved1))
+val () = $UN.ptr0_set<fenvlstlstsaved> (the_savedlst_2, glist_cons (xs, saved2))
 //
 } (* end of [the_namespace_save] *)
 
@@ -236,23 +216,15 @@ implement
 the_namespace_restore
   () = () where {
 //
-val x = x where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_savedlst)
-  val-~list_vt_cons (x, xs) = !p; val () = (!p := xs)
-} (* end of [val] *)
+val saved1 = $UN.ptr0_get<fenvlstsaved> (the_savedlst_1)
+val saved2 = $UN.ptr0_get<fenvlstlstsaved> (the_savedlst_2)
+val x0 = glist_head (saved1)
+val x1 = glist_head (saved2)
+val () = $UN.ptr0_set<fenvlstsaved> (the_savedlst_1, glist_tail (saved1))
+val () = $UN.ptr0_set<fenvlstlstsaved> (the_savedlst_2, glist_tail (saved2))
 //
-val () = () where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_fenvlst)
-  val () = fenvlst_vt_free (!p); val () = (!p := x.0)
-} (* end of [val] *)
-//
-val () = () where {
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_fenvlstlst)
-  val () = fenvlstlst_vt_free (!p); val () = (!p := x.1)
-} (* end of [val] *)
+val () = $UN.ptr0_set<fenvlst> (the_fenvlst, x0)
+val () = $UN.ptr0_set<fenvlstlst> (the_fenvlstlst, x1)
 //
 } (* end of [the_namespace_restore] *)
 

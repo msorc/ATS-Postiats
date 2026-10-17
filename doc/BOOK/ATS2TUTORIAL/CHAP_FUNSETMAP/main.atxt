@@ -387,9 +387,9 @@ section #mycodelink("chap_funsetmap_map.dats", "on-line").
 
 %{
 //
-staload STDIO = "libc/SATS/stdio.sats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 //
-implement main () = {
+implement main0 () = {
 //
 val filr =
   $STDIO.fopen_ref_exn ("../TEMP/chap_funsetmap.dats", file_mode_w)

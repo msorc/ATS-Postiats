@@ -6,12 +6,12 @@
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
+PATSHOMEQ="$(PATSHOME)"
 
 ######
 
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 
@@ -35,7 +35,7 @@ html: main.db $(DBSRC) ; jw -b html --output HTML/ main.db
 ######
 
 chap_hello.exe: \
-  chap_hello_atxt.dats; $(ATSCC) -D_ATS_GCATS -o $@ $< -latsdoc
+  chap_hello_atxt.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -latsdoc
 chap_hello_atxt.dats: \
   ATEXT/chap_hello.atxt; $(ATSDOC) --outcode $@ -i $< > chap_hello_atxt.txt
 chap_hello_atxt.db: chap_hello.exe ; ./chap_hello.exe > $@
@@ -45,7 +45,7 @@ cleanall:: ; $(RMF) chap_hello_atxt.*
 ######
 
 chap_objtypes.exe: \
-  chap_objtypes_atxt.dats; $(ATSCC) -D_ATS_GCATS -o $@ $< -latsdoc
+  chap_objtypes_atxt.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -latsdoc
 chap_objtypes_atxt.dats: \
   ATEXT/chap_objtypes.atxt; $(ATSDOC) --outcode $@ -i $< > chap_objtypes_atxt.txt
 chap_objtypes_atxt.db: chap_objtypes.exe ; ./chap_objtypes.exe > $@
@@ -55,7 +55,7 @@ cleanall:: ; $(RMF) chap_objtypes_atxt.*
 ######
 
 chap_funtypes.exe: \
-  chap_funtypes_atxt.dats; $(ATSCC) -D_ATS_GCATS -o $@ $< -latsdoc
+  chap_funtypes_atxt.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -latsdoc
 chap_funtypes_atxt.dats: \
   ATEXT/chap_funtypes.atxt; $(ATSDOC) --outcode $@ -i $< > chap_funtypes_atxt.txt
 chap_funtypes_atxt.db: chap_funtypes.exe ; ./chap_funtypes.exe > $@
@@ -65,7 +65,7 @@ cleanall:: ; $(RMF) chap_funtypes_atxt.*
 ######
 
 chap_drawline.exe: \
-  chap_drawline_atxt.dats; $(ATSCC) -D_ATS_GCATS -o $@ $< -latsdoc
+  chap_drawline_atxt.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -latsdoc
 chap_drawline_atxt.dats: \
   ATEXT/chap_drawline.atxt; $(ATSDOC) --outcode $@ -i $< > chap_drawline_atxt.txt
 chap_drawline_atxt.db: chap_drawline.exe ; ./chap_drawline.exe > $@
@@ -75,7 +75,7 @@ cleanall:: ; $(RMF) chap_drawline_atxt.*
 ######
 
 chap_drawrectcirc.exe: \
-  chap_drawrectcirc_atxt.dats; $(ATSCC) -D_ATS_GCATS -o $@ $< -latsdoc
+  chap_drawrectcirc_atxt.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -latsdoc
 chap_drawrectcirc_atxt.dats: \
   ATEXT/chap_drawrectcirc.atxt; $(ATSDOC) --outcode $@ -i $< > chap_drawrectcirc_atxt.txt
 chap_drawrectcirc_atxt.db: chap_drawrectcirc.exe ; ./chap_drawrectcirc.exe > $@
@@ -85,7 +85,7 @@ cleanall:: ; $(RMF) chap_drawrectcirc_atxt.*
 ######
 
 chap_drawtext.exe: \
-  chap_drawtext_atxt.dats; $(ATSCC) -D_ATS_GCATS -o $@ $< -latsdoc
+  chap_drawtext_atxt.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -latsdoc
 chap_drawtext_atxt.dats: \
   ATEXT/chap_drawtext.atxt; $(ATSDOC) --outcode $@ -i $< > chap_drawtext_atxt.txt
 chap_drawtext_atxt.db: chap_drawtext.exe ; ./chap_drawtext.exe > $@

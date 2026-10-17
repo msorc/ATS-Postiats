@@ -31,15 +31,23 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: March, 2011
 //
+
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC. The parser combinators are templates taking
+// function pointers (type [parser(a)]); the lists are built as [List0_vt]
+// by an accumulator (the ATS1 code filled a cell in place). The semantics
+// (backtracking, [err], [bt]) are those of src/pats_parsing_util.dats.
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -55,12 +63,15 @@ staload "./pats_tokbuf.sats" // for token buffering
 
 staload "./pats_parsing.sats"
 
+staload _(*templates*) = "./pats_syntax.dats"
+
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 tokbuf_set_ntok_null
   (buf, n0) = let
-  val () = tokbuf_set_ntok (buf, n0) in synent_null ()
+  val () = tokbuf_set_ntok (buf, n0) in synent_null<a> ()
 end // end of [tokbuf_set_ntok_null]
 
 (* ****** ****** *)
@@ -72,14 +83,14 @@ ptoken_fun
 ) = let
   val tok = tokbuf_get_token (buf)
 in
-  if f (tok.token_node) then let
+  if f (tok.token_node()) then let
     val () = tokbuf_incby1 (buf) in tok
   end else let
-    val loc = tok.token_loc
+    val loc = tok.token_loc()
     val () = err := err + 1
     val () = the_parerrlst_add_ifnbt (bt, loc, enode)
   in
-    $UN.cast{token}(null)
+    synent_null<token> ()
   end // end of [_]
 //
 end // end of [ptoken_fun]
@@ -91,7 +102,7 @@ ptoken_test_fun
   (buf, f) = let
   val tok = tokbuf_get_token (buf)
 in
-  if f (tok.token_node) then let
+  if f (tok.token_node()) then let
     val () = tokbuf_incby1 (buf) in true
   end else false
 end // end of [ptoken_test_fun]
@@ -99,12 +110,13 @@ end // end of [ptoken_test_fun]
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 ptokentopt_fun
   (buf, f1, f2) = let
   val n0 = tokbuf_get_ntok (buf)
   val tok = tokbuf_get_token (buf)
 in
-  if f1 (tok.token_node) then let
+  if f1 (tok.token_node()) then let
     val () = tokbuf_incby1 (buf)
     var err: int = 0
     val ent = f2 (buf, 0(*bt*), err)
@@ -121,39 +133,23 @@ end // end of [ptokentopt_fun]
 // HX: looping if [f] is nullable!
 //
 implement
-pstar_fun{a}
+{a}(*tmp*)
+pstar_fun
   (buf, bt, f) = let
 //
-  vtypedef res_vt = List_vt (a)
-//
   fun loop (
-    buf: &tokbuf
-  , res: &res_vt? >> res_vt
-  , err: &int
-  ) :<cloref1> void = let
+    buf: &tokbuf, err: &int, acc: List0_vt(a)
+  ) : List0_vt(a) = let
     val x = f (buf, 1(*bt*), err)
   in
-    case+ 0 of
-    | _ when err > 0 => let
-        val () = res := list_vt_nil
-      in
-        // nothing
-      end
-    | _ => let
-        val () =
-        res := list_vt_cons{a}{0}(x, ?)
-        val+list_vt_cons (_, !p_res1) = res
-        val ((*void*)) = loop (buf, !p_res1, err)
-        prval ((*void*)) = fold@ (res)
-      in
-        // nothing
-      end (* end of [_] *)
+    if err > 0
+      then list_vt_reverse (acc) // [x] is null
+      else loop (buf, err, list_vt_cons (x, acc))
   end // end of [loop]
-  var res: res_vt
   var err: int = 0
-  val () = loop (buf, res, err)
+//
 in
-  res (* properly ordered *)
+  loop (buf, err, list_vt_nil ()) (* properly ordered *)
 end // end of [pstar_fun]
 
 (* ****** ****** *)
@@ -161,106 +157,92 @@ end // end of [pstar_fun]
 // HX: looping if [f] is nullable!
 //
 implement
-pstar_sep_fun{a}
+{a}(*tmp*)
+pstar_sep_fun
   (buf, bt, sep, f) = let
 //
-  vtypedef res_vt = List_vt (a)
-//
   fun loop (
-    buf: &tokbuf
-  , res: &res_vt? >> res_vt
-  , err: &int
-  ) :<cloref1> void = let
+    buf: &tokbuf, err: &int, acc: List0_vt(a)
+  ) : List0_vt(a) = let
     val n0 = tokbuf_get_ntok (buf)
   in
     if sep (buf) then let
       val x = f (buf, 0(*bt*), err)
     in
-      case+ 0 of
-      | _ when err > 0 => let
-          val () = tokbuf_set_ntok (buf, n0)
-          val () = res := list_vt_nil ()
-        in
-          // nothing
-        end
-      | _ => let
-          val () =
-            res := list_vt_cons{a}{0}(x, ?)
-          // end of [val]
-          val+list_vt_cons (_, !p_res1) = res
-          val () = loop (buf, !p_res1, err)
-          prval () = fold@ (res)
-        in    
-          // nothing
-        end
-     end else (
-       res := list_vt_nil ()
-     ) // end of [val]
+      if err > 0 then let
+        val () = tokbuf_set_ntok (buf, n0) in list_vt_reverse (acc)
+      end else loop (buf, err, list_vt_cons (x, acc))
+    end else list_vt_reverse (acc)
   end // end of [loop]
-  var res: res_vt
   var err: int = 0
-  val () = loop (buf, res, err)
+//
 in
-  res (* properly ordered *)
+  loop (buf, err, list_vt_nil ()) (* properly ordered *)
 end // end of [pstar_sep_fun]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pstar_COMMA_fun
   (buf, bt, f) =
-  pstar_sep_fun (buf, bt, p_COMMA_test, f)
+  pstar_sep_fun<a> (buf, bt, p_COMMA_test, f)
 // end of [pstar_COMMA_fun]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pstar_fun0_sep
   (buf, bt, f, sep) = let
   var err: int = 0
   val x0 = f (buf, 1(*bt*), err)
 in
 //
-case+ 0 of
-| _ when
-    err > 0 => list_vt_nil () // HX: normal
-| _ => let
-    val xs = pstar_sep_fun (buf, 1(*bt*), sep, f)
+if err > 0
+  then list_vt_nil () // HX: normal
+  else let
+    val xs = pstar_sep_fun<a> (buf, 1(*bt*), sep, f)
   in
     list_vt_cons (x0, xs)
-  end // end of [_]
+  end // end of [else]
 //
 end // end of [pstar_fun0_sep]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pstar_fun0_BAR
   (buf, bt, f) =
-  pstar_fun0_sep (buf, bt, f, p_BAR_test)
+  pstar_fun0_sep<a> (buf, bt, f, p_BAR_test)
 // end of [pstar_fun0_BAR]
 
 implement
+{a}(*tmp*)
 pstar_fun0_COMMA
   (buf, bt, f) =
-  pstar_fun0_sep (buf, bt, f, p_COMMA_test)
+  pstar_fun0_sep<a> (buf, bt, f, p_COMMA_test)
 // end of [pstar_fun0_COMMA]
 
 implement
+{a}(*tmp*)
 pstar_fun0_SEMICOLON
   (buf, bt, f) =
-  pstar_fun0_sep (buf, bt, f, p_SEMICOLON_test)
+  pstar_fun0_sep<a> (buf, bt, f, p_SEMICOLON_test)
 // end of [pstar_fun0_SEMICOLON]
 
 implement
+{a}(*tmp*)
 pstar_fun0_BARSEMI
   (buf, bt, f) =
-  pstar_fun0_sep (buf, bt, f, p_BARSEMI_test)
+  pstar_fun0_sep<a> (buf, bt, f, p_BARSEMI_test)
 // end of [pstar_fun0_BARSEMI]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pstar_fun1_sep
 (
   buf, bt, err, f, sep
@@ -268,32 +250,33 @@ pstar_fun1_sep
   val x0 = f (buf, bt, err)
 in
 //
-case+ 0 of
-| _ when
-    synent_isnot_null(x0) => let
+if synent_isnot_null<a> (x0)
+  then let
     val xs =
-      pstar_sep_fun (buf, 1(*bt*), sep, f)
+      pstar_sep_fun<a> (buf, 1(*bt*), sep, f)
     // end of [val]
   in
     list_vt_cons (x0, xs)
   end
-| _ => let
+  else let
     val () = err := err + 1 in list_vt_nil((*error*))
-  end (* end of [_] *)
+  end (* end of [else] *)
 //
 end // end of [pstar_fun1_sep]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pstar_fun1_AND
   (buf, bt, err, f) =
-  pstar_fun1_sep (buf, bt, err, f, p_AND_test)
+  pstar_fun1_sep<a> (buf, bt, err, f, p_AND_test)
 // end of [pstar_fun1_AND]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pstar1_fun
 (
   buf, bt, err, f
@@ -301,23 +284,23 @@ pstar1_fun
   val x0 = f (buf, bt, err)
 in
 //
-case+ 0 of
-| _ when
-    synent_isnot_null (x0) => let
-    val xs = pstar_fun (buf, 1(*bt*), f)
+if synent_isnot_null<a> (x0)
+  then let
+    val xs = pstar_fun<a> (buf, 1(*bt*), f)
   in
     list_vt_cons (x0, xs)
   end
-| _ => let
+  else let
     val () = err := err + 1 in list_vt_nil ()
-  end (* end of [_] *)
+  end (* end of [else] *)
 //
 end // end of [pplus_fun]
 
 (* ****** ****** *)
 
 implement
-popt_fun{a}
+{a}(*tmp*)
+popt_fun
   (buf, bt, f) = let
   var err: int = 0
   val x = f (buf, 1(*bt*), err)
@@ -328,7 +311,8 @@ end // end of [popt_fun]
 (* ****** ****** *)
 
 implement
-pseq2_fun{a1,a2}
+{a1,a2}(*tmp*)
+pseq2_fun
 (
   buf, bt, err, f1, f2
 ) = let
@@ -346,7 +330,7 @@ val bt = 0
 val ent2 =
 (
   if err <= err0
-    then f2(buf, bt, err) else synent_null()
+    then f2(buf, bt, err) else synent_null<a2>()
   // end of [if]
 ) : a2 // end of [val]
 //
@@ -361,7 +345,8 @@ end // end of [pseq2_fun]
 (* ****** ****** *)
 
 implement
-pseq3_fun{a1,a2,a3}
+{a1,a2,a3}(*tmp*)
+pseq3_fun
 (
   buf, bt, err, f1, f2, f3
 ) = let
@@ -379,13 +364,13 @@ val bt = 0
 val ent2 =
 (
   if err <= err0
-    then f2 (buf, bt, err) else synent_null()
+    then f2 (buf, bt, err) else synent_null<a2>()
   // end of [if]
 ) : a2 // end of [val]
 val ent3 =
 (
   if err <= err0
-    then f3 (buf, bt, err) else synent_null()
+    then f3 (buf, bt, err) else synent_null<a3>()
   // end of [if]
 ) : a3 // end of [val]
 //
@@ -400,7 +385,8 @@ end // end of [pseq3_fun]
 (* ****** ****** *)
 
 implement
-ptest_fun{a}
+{a}(*tmp*)
+ptest_fun
   (buf, f, ent) = let
   var err: int = 0
   val () = ent := synent_encode (f (buf, 1(*bt*), err))
@@ -411,6 +397,7 @@ end // end of [ptest_fun]
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 list12_free
   (ent) = (
   case+ ent of
@@ -421,75 +408,73 @@ list12_free
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 plist12_fun
-  {a}(buf, bt, f) = let
+  (buf, bt, f) = let
 //
 val xs1 =
-  pstar_fun0_COMMA{a}(buf, bt, f)
+  pstar_fun0_COMMA<a>(buf, bt, f)
 //
 val tok = tokbuf_get_token (buf)
 //
-macdef incby1 () = tokbuf_incby1 (buf)
-//
 in
 //
-case+
-tok.token_node of
-| T_BAR () => let
-    val () = incby1 ()
-    val xs2 = pstar_fun0_COMMA{a}(buf, bt, f)
+if token_node_is_T_BAR (tok.token_node())
+  then let
+    val () = tokbuf_incby1 (buf)
+    val xs2 = pstar_fun0_COMMA<a>(buf, bt, f)
   in
     LIST12two (xs1, xs2)
   end
-| _ => LIST12one (xs1)
+  else LIST12one (xs1)
 //
 end // end of [plist12_fun]
 
 (* ****** ****** *)
 
 implement
-p1list12_fun{a}
+{a}(*tmp*)
+p1list12_fun
   (x, buf, bt, f) = let
 //
 val xs1 =
-pstar_sep_fun{a}
+pstar_sep_fun<a>
   (buf, bt, p_COMMA_test, f)
 //
 val xs1 = list_vt_cons{a}(x, xs1)
 //
 val tok = tokbuf_get_token (buf)
 //
-macdef incby1 () = tokbuf_incby1 (buf)
-//
 in
 //
-case+
-tok.token_node of
-| T_BAR () => let
-    val () = incby1 ()
-    val xs2 = pstar_fun0_COMMA{a}(buf, bt, f)
+if token_node_is_T_BAR (tok.token_node())
+  then let
+    val () = tokbuf_incby1 (buf)
+    val xs2 = pstar_fun0_COMMA<a>(buf, bt, f)
   in
     LIST12two (xs1, xs2)
   end
-| _ (*non-BAR*) => LIST12one (xs1)
+  else LIST12one (xs1) (*non-BAR*)
 //
 end // end of [p1list12_fun]
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 pif_fun (
   buf, bt, err, f, err0
 ) = (
 //
 if err <= err0
-  then f (buf, bt, err) else synent_null ((*void*))
+  then f (buf, bt, err) else synent_null<a> ((*void*))
 //
 ) (* end of [pif_fun] *)
 
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 ptokwrap_fun
 (
   buf, bt, err, f, enode
@@ -504,11 +489,44 @@ ptokwrap_fun
     then let
       val () = tokbuf_set_ntok (buf, n0)
     in
-      the_parerrlst_add_ifnbt (bt, tok.token_loc, enode)
+      the_parerrlst_add_ifnbt (bt, tok.token_loc(), enode)
     end // end of [then]
   // end of [val]
   val () = err := err + err0
 } (* end of [ptokwrap_fun] *)
+
+(* ****** ****** *)
+
+(* ****** ****** *)
+//
+// HX: it is here (not in pats_parsing_decl.dats) because the
+// parsers of dynamic expressions and of declarations instantiate it
+//
+implement
+{a}(*tmp*)
+p_d0eclseq_fun
+  (buf, bt, f) = let
+//
+fun loop (
+  buf: &tokbuf
+, err: &int, acc: List0_vt(a)
+) : List0_vt(a) = let
+  val x = f (buf, 1(*bt*), err)
+in
+  if err > 0 then list_vt_reverse (acc) // HX: [x] is dropped
+  else let
+    val semilst = pstar_fun<token>(buf, 1(*bt*), p_SEMICOLON)
+    val () = list_vt_free (semilst)
+  in
+    loop (buf, err, list_vt_cons (x, acc))
+  end // end of [else]
+end // end of [loop]
+//
+var err: int = 0
+//
+in
+  loop (buf, err, list_vt_nil ()) (* properly ordered *)
+end // end of [p_d0eclseq_fun]
 
 (* ****** ****** *)
 

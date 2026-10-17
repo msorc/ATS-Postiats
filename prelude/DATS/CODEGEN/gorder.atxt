@@ -189,6 +189,6 @@ gmin_val_val(x, y) =
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_atxt.txt")
 %}\

@@ -139,9 +139,9 @@ code used in this chapter.\
 %{
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
 //
-implement main () =
+implement main0 () =
 {
 //
 val filr =

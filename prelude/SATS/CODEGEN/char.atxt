@@ -568,7 +568,7 @@ overload i2byte with uint2byte0 of 0
 %{
 //
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "char_atxt.txt")
 //
 %}\

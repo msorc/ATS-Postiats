@@ -31,11 +31,37 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: May, 2012
 //
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_ptrof.dats, see PORTING.md, "Level 3 translation, group 4")
+//
 (* ****** ****** *)
-//
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+#include "./mylibies.hats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
 staload
-ATSPRE = "./pats_atspre.dats"
-//
+LOC = "./pats_location.sats"
+typedef loc_t = $LOC.location
+
 (* ****** ****** *)
 
 staload "./pats_errmsg.sats"
@@ -79,30 +105,31 @@ auxerr_pfobj
   val () = prerr "] failed to turn up a result."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_pfobj_search_none (loc0, s2l))
+  the_trans3errlst_add (trans3err_T3E_pfobj_search_none (loc0, s2l))
 end // end of [auxerr_pfobj]
 
 fun auxlabs
 (
   d3ls: d3lablst
-) : s2lablst = (
-  case+ d3ls of
-  | list_cons (d3l, d3ls) => (
-    case+ d3l.d3lab_node of
-    | D3LABlab (lab) => let
-        val s2l = S2LABlab (lab)
+) : s2lablst =
+  if glist_is_cons (d3ls) then let
+    val d3l = glist_head (d3ls)
+    val d3ls = glist_tail (d3ls)
+  in
+    case+ d3lab_node_view (d3l.d3lab_node ()) of
+    | ~D3LABlab (lab) => let
+        val s2l = s2lab_S2LABlab (lab)
       in
-        list_cons (s2l, auxlabs d3ls)
+        glist_cons (s2l, auxlabs d3ls)
       end // end of [D3LABlab]
-    | D3LABind (ind) => let
+    | ~D3LABind (ind) => let
         val ind = d3explst_get_type (ind)
-        val s2l = S2LABind (ind)
+        val s2l = s2lab_S2LABind (ind)
       in
-        list_cons (s2l, auxlabs d3ls)      
+        glist_cons (s2l, auxlabs d3ls)
       end // end of [D3LABind]
-    ) // end of [list_ons]
-  | list_nil () => list_nil ()
-) // end of [auxlabs]
+  end else glist_nil ()
+// end of [auxlabs]
 
 fun auxmain
 (
@@ -121,7 +148,7 @@ val () = s2rt := s2e_elt
 var linrest: int = 0 and sharing: int = 0
 //
 val
-(
+@(
   s2e_sel, s2ps
 ) =
 s2exp_get_dlablst_linrest_sharing
@@ -181,7 +208,7 @@ auxerr_nonptr
   val () = prerr ": the dynamic expression is expected to be a pointer."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d3exp_nonderef (d3e))
+  the_trans3errlst_add (trans3err_T3E_d3exp_nonderef (d3e))
 end // end of [auxerr_nonptr]
 
 fun
@@ -195,20 +222,20 @@ auxerr_nonmut
   val () = prerr "] is not mutable and thus [addr@] cannot be applied."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d2var_nonmut (loc0, d2v))
+  the_trans3errlst_add (trans3err_T3E_d2var_nonmut (loc0, d2v))
 end // end of [auxerr_nonmut]
 
 fun
 auxerr_nonlval (
   d2e0: d2exp
 ) : void = let
-  val loc0 = d2e0.d2exp_loc
+  val loc0 = d2e0.d2exp_loc ()
   val () = prerr_error3_loc (loc0)
   val () = prerr ": [addr@] operation cannot be performed"
   val () = prerr ": a left-value is required but a non-left-value is given."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d2exp_nonlval (d2e0))
+  the_trans3errlst_add (trans3err_T3E_d2exp_nonlval (d2e0))
 end // end of [auxerr_nonlval]
 
 in // in of [local]
@@ -222,75 +249,77 @@ fun
 d2exp_trup_ptrof_ptrsel
   (loc0: loc_t, d2e: d2exp, d2ls: d2lablst): d3exp
 
-implement
-d2exp_trup_ptrof
-  (d2e0) = let
-//
 fun
-aux
+d2exp_trup_ptrof_aux
 (
   d2e0: d2exp, d2e: d2exp
 ) : d3exp = let
 //
-val loc0 = d2e0.d2exp_loc
+val loc0 = d2e0.d2exp_loc ()
 //
 in
 //
 case+
-d2e.d2exp_node
+d2exp_node_view (d2e.d2exp_node ())
 of // case+
 //
-| D2Evar(d2v) => let
+| ~D2Evar(d2v) => let
     val opt = d2var_get_addr (d2v)
   in
-    case+ opt of
-    | Some _ => let
+    case+ gopt_view (opt) of
+    | ~GOsome _ => let
         val s2e =
           d2var_get_type_some (loc0, d2v)
         // end of [val]
       in
         d3exp_ptrofvar (loc0, s2e, d2v)
       end // end of [Some]
-    | None ((*void*)) => let
+    | ~GOnone ((*void*)) => let
         val () =
         auxerr_nonmut (loc0, d2v) in d3exp_errexp (loc0)
       end // end of [None]
   end (* end of [D2Evar] *)
 //
-| D2Ederef(_(*!*), d2e) =>
-    d2exp_trup_ptrof_ptrsel(loc0, d2e, list_nil)
+| ~D2Ederef(_(*!*), d2e) =>
+    d2exp_trup_ptrof_ptrsel(loc0, d2e, glist_nil ())
   // end of [D2Ederef]
 //
-| D2Eselab(d2e, d2ls) =>
+| ~D2Eselab(d2e, d2ls) =>
   (
   case+
-  d2e.d2exp_node
+  d2exp_node_view (d2e.d2exp_node ())
   of (* case+ *)
-  | D2Evar (d2v) =>
+  | ~D2Evar (d2v) =>
       d2exp_trup_ptrof_varsel (loc0, d2v, d2ls)
     // end of [D2Evar]
-  | D2Ederef(_(*!*), d2e) =>
+  | ~D2Ederef(_(*!*), d2e) =>
       d2exp_trup_ptrof_ptrsel (loc0, d2e, d2ls)
     // end of [D2Ederef]
-  | _ => let
+  | v => let
+      val () = d2exp_node_view_free (v)
       val () = auxerr_nonlval (d2e0) in d3exp_errexp (loc0)
     end // end of [_]
   ) (* end of [D2Esel] *)
 //
-(*
-| D2Esing (d2e) => aux (d2e0, d2e)
-*)
-//
-| _ (*rest-of-d2exp*) => let
+| v (*rest-of-d2exp*) => let
+    val () = d2exp_node_view_free (v)
     val () = auxerr_nonlval (d2e0) in d3exp_errexp (loc0)
   end // end of [_]
 //
-end // end of [aux]
+end // end of [d2exp_trup_ptrof_aux]
+
+implement
+d2exp_trup_ptrof
+  (d2e0) = let
 //
-val-D2Eptrof (d2e) = d2e0.d2exp_node
+// HX: [val-D2Eptrof (d2e) = d2e0.d2exp_node] (MatchError)
 //
 in
-  aux (d2e0, d2e)
+  case+ d2exp_node_view (d2e0.d2exp_node ()) of
+  | ~D2Eptrof (d2e) => d2exp_trup_ptrof_aux (d2e0, d2e)
+  | v => (
+      d2exp_node_view_free (v); assertloc (false); d3exp_errexp (d2e0.d2exp_loc ())
+    ) (* end of [rest-of-d2exp] *)
 end // end of [d2exp_trup_ptrof]
 
 (* ****** ****** *)
@@ -303,19 +332,20 @@ in
 //
 if ismut then let
   val d3ls = d2lablst_trup (d2ls)
-  val-Some (s2e_ptr) = d2var_get_type (d2v)
+  val () = assertloc (gopt_is_some (d2var_get_type (d2v))) // HX: [val-Some]
+  val s2e_ptr = gopt_unsome (d2var_get_type (d2v))
   val d3e_ptr = d3exp_ptrofvar (loc0, s2e_ptr, d2v)
 in
 //
-case+ d3ls of
-| list_cons _ => let
-    val-Some (s2l) = d2var_get_addr (d2v)
+if glist_is_cons (d3ls) then let
+    val () = assertloc (gopt_is_some (d2var_get_addr (d2v))) // HX: [val-Some]
+    val s2l = gopt_unsome (d2var_get_addr (d2v))
     var s2rt: s2exp
     val s2e_prj = s2addr_ptrof (loc0, s2l, d3ls, s2rt)
   in
     d3exp_ptrofsel (loc0, s2e_prj, d3e_ptr, s2rt, d3ls)
   end // end of [list_cons]
-| list_nil () => d3e_ptr // end of [list_nil]
+else d3e_ptr // end of [list_nil]
 //
 end else let
   val () =
@@ -342,10 +372,9 @@ case+ opt of
 | ~Some_vt (s2l) => let
     var s2rt: s2exp
     val s2e_prj = (
-      case+ d3ls of
-      | list_cons _ =>
+      if glist_is_cons (d3ls) then
           s2addr_ptrof (loc0, s2l, d3ls, s2rt)
-      | list_nil () => let
+      else let
           val () =
             s2rt := s2exp_void_t0ype () in s2exp_ptr_addr_type (s2l)
           // end of [val]

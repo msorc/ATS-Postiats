@@ -1,0 +1,51 @@
+######
+#
+# Libatsynmark: marking the syntax of ATS2
+#
+######
+
+libatsynmark is a library of functions for marking the (level-1) syntax of
+ATS2 source: the tokens (lexbufobj_get_tokenlst), the position-synmarks of
+the tokens and of the syntax trees (listize_token2psynmark,
+lexbufobj_level1_psynmarkize), the XHTML of a piece of code
+(string_pats2xhtmlize_bground, string_pats2xhtmlize_embedded and the charlst
+versions), and the declarations of a file for building the ATSLIB documentation
+(charlst_declitemize, d0eclreplst_find_synop). The interface is
+SATS/libatsynmark.sats. pats2xhtml (../atsynmark) is built on it.
+
+It is written in ATS2 without GC and is built by patsopt and the C compiler on
+top of the modules of the compiler (src/pats_lexing, pats_tokbuf, pats_parsing,
+pats_syntax, ...) and of libatsopt.a, the compiler as a library: ATS1 is not
+needed. The differences from the ATS1 version are listed at the top of
+SATS/libatsynmark.sats and in src/PORTING.md ("pats2xhtml and libatsynmark").
+
+######
+
+Building:
+
+  make                  # BUILD/libatsynmark.a (see Makefile_build, Makefile_vars)
+  make install          # copies it to $(PATSHOME)/ccomp/atslib/lib
+  make check            # typechecks the files
+  make test             # TEST/: test01 test02 test03 and the md5 suite (python3)
+
+A program that uses it links with libatsynmark.a, libatsopt.a and -lgmp (-lgmp
+is not needed if libatsopt.a was built with C3NSTRINTKND=intknd):
+
+  patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$PATSHOME/src \
+    -o prog prog.dats -L$PATSHOME/utils/libatsynmark/BUILD -latsynmark \
+    -L$PATSHOME/src -latsopt -lgmp
+
+and calls libatsynmark_dynloadall() before anything else (it initializes
+libatsopt; the ATS1 version had `dynload "utils/libatsynmark/dynloadall.dats"`).
+
+TEST/: test01 prints the tokens of STDIN, test02 the position-synmarks, test03
+calls the functions of the API on a file (see its header). The md5 suite
+(TEST/suite.py, expected.md5, cases/) runs pats2xhtml, test01, test02 and test03 on
+the edge cases that it generates (unterminated comments, strings and chars, every kind
+of number, directives, external code, unicode, CRLF, very long lines, the command line of
+pats2xhtml, ...) and on a few real files, in a temporary directory with the locale C, and
+compares the md5 of the results with expected.md5, which was produced by the ATS1 build of
+the same programs: the suite does not depend on the directory of the checkout, the locale,
+or ATS1. `suite.py update` regenerates expected.md5 from ATS1 builds.
+
+###### end of [README for Libatsynmark] ######

@@ -19,13 +19,14 @@ staload UN = $UNSAFE
 
 (* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
 //
 implement
-lexerr_make (loc, node) =
-  '{ lexerr_loc= loc, lexerr_node= node }
+lexerr_make (loc, node) = lexerr_LEXERR(loc, node)
 //
 (* ****** ****** *)
 //
@@ -47,17 +48,18 @@ fprint_lexerr
   (out, x) = let
 //
 val () =
-fprint! (out, x.lexerr_loc, ": ")
+fprint! (out, x.lexerr_loc(), ": ")
 //
 in
 //
 case+
-x.lexerr_node of
-| LEXERR_FEXPONENT_nil () =>
+lexerr_node_view(x.lexerr_node())
+of // case+
+| ~LEXERR_FEXPONENT_nil () =>
   {
     val () = fprintln! (out, "Floating number exponent is nil")
   }
-| LEXERR_UNSUPPORTED_char (c) =>
+| ~LEXERR_UNSUPPORTED_char (c) =>
   {
     val i = char2int0(c)
     val () = fprintln! (out, "Unrecognized char: ", c, "(", i, ")")
@@ -71,15 +73,13 @@ implement
 fprint_lexerrlst
   (out, xs) =
 (
-//
-case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs) =>
   {
     val () = fprint_lexerr (out, x)
     val () = fprint_lexerrlst (out, xs)
   }
-//
 ) (* end of [fprint_lexerrlst] *)
 
 (* ****** ****** *)
@@ -98,7 +98,18 @@ the_lexerrlst_print_free
   if nerr > 0 then
   {
     val () = fprint (stderr_ref, "LexingErrors:\n")
-    val () = fprint_lexerrlst (stderr_ref, $UN.list_vt2t(xs))
+    fun
+    prlst{n:int}
+    (
+      xs: !list_vt(lexerr, n)
+    ) : void =
+    (
+      case+ xs of
+      | list_vt_nil() => ()
+      | list_vt_cons(x, xs1) =>
+          (fprint_lexerr(stderr_ref, x); prlst(xs1))
+    ) (* end of [prlst] *)
+    val () = prlst(xs)
   } (* end of [if] *)
   val ((*freed*)) = list_vt_free (xs)
 //

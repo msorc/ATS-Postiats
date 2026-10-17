@@ -1,12 +1,14 @@
 %{
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
-staload TIME = "libc/SATS/time.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 //
 dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 //
 %}\
 %{
@@ -18,7 +20,7 @@ val ent = sprintf ("\
 all:: %s.cats\n\
 %s.cats: %s_atxt.exe ; ./$< > $@\n\
 %s_atxt.exe: %s_atxt.dats\n\
-	$(ATSCC) $(GCFLAG) -o $@ %s_atxt.dats -latsdoc\n\
+	$(PATSCC) $(PATSCCFLAGS) -o $@ %s_atxt.dats -latsdoc\n\
 %s_atxt.dats: %s.atxt\n\
 	$(ATSDOC) --outcode $@ -i %s.atxt > %s_atxt.txt\n\
 clean:: ; $(RMF) %s_atxt.exe\n\
@@ -33,23 +35,17 @@ end // end of [make_entry]
 
 %}\
 #
-#
 # A simple Makefile
 #
-#
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSOPT=$(ATSHOMEQ)/bin/atsopt
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSHOMEQ="$(PATSHOME)"
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
-#
-GCFLAG=
-#
-# GCFLAG=-D_ATS_GCATS
+PATSCCFLAGS=-DATS_MEMALLOC_LIBC
 #
 ######
 
@@ -79,15 +75,11 @@ all::
 #make_entry("fprintf")
 #make_entry("filebas")
 
-#make_entry("list")
 #make_entry("list_vt")
-#make_entry("option")
 #make_entry("array")
 #make_entry("arrayptr")
-#make_entry("arrayref")
 #make_entry("matrix")
 #make_entry("matrixptr")
-#make_entry("matrixref")
 
 ######
 
@@ -106,5 +98,5 @@ cleanall:: clean
 \
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
 %}\

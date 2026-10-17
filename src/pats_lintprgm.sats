@@ -32,6 +32,21 @@
 // Time: February 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_lintprgm.sats, see PORTING.md
+// "Constraint solver (lintprgm)")
+//
+(* ****** ****** *)
+
+%{#
+#include "pats_lintprgm_myint.cats"
+%} // end of [%{#]
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
 
 staload "./pats_basics.sats"
 
@@ -168,9 +183,9 @@ compare_myint_myint (x: !myint(a), y: !myint(a)):<> int
 ** A[0] + A[1]*x1 + A[2]*x2 + ... + A[n]*xn >= 0
 **
 *)
-absvtype myintvec (a:t@ype, n: int) // initialized
-absvtype myintvec0 (a:t@ype, n: int) // uninitialized
-absvtype myintvecout (a:t@ype, n: int, l:addr) // SHELL
+absvtype myintvec (a:t@ype, n: int) = ptr // initialized
+absvtype myintvec0 (a:t@ype, n: int) = ptr // uninitialized
+absvtype myintvecout (a:t@ype, n: int, l:addr) = ptr // SHELL
 
 praxi lemma_myintvec_params
   {a:t@ype}{n:int} (iv: !myintvec (a, n)): [n>=0] void
@@ -191,23 +206,23 @@ castfn
 myintvec_takeout
   {a:t@ype}{n:int} (
   iv: !myintvec (a, n) >> myintvecout (a, n, l)
-) :<> #[l:addr] (array_v (myint(a), n, l) | ptr l)
+) :<> #[l:addr] (array_v (myint(a), l, n) | ptr l)
 castfn
 myintvec0_takeout
   {a:t@ype}{n:int} (
   iv: !myintvec0 (a, n) >> myintvecout (a, n, l)
-) :<> #[l:addr] (array_v (myint(a)?, n, l) | ptr l)
+) :<> #[l:addr] (array_v (myint(a)?, l, n) | ptr l)
 
 prfun
 myintvecout_addback
   {a:t@ype}{n:int}{l:addr} (
-  pf: array_v (myint(a), n, l)
+  pf: array_v (myint(a), l, n)
 | iv: !myintvecout (a, n, l) >> myintvec (a, n)
 ) : void // end of [myintvecout_addback]
 prfun
 myintvecout0_addback
   {a:t@ype}{n:int}{l:addr} (
-  pf: array_v (myint(a)?, n, l)
+  pf: array_v (myint(a)?, l, n)
 | iv: !myintvecout (a, n, l) >> myintvec0 (a, n)
 ) : void // end of [myintvecout0_addback]
 
@@ -215,11 +230,11 @@ myintvecout0_addback
 
 fun{a:t@ype}
 myintvec_get_at
-  {n:int} (iv: !myintvec (a, n), i: natLt n):<> myint(a)
+  {n:int} (iv: !myintvec (a, n), i: natLt n): myint(a)
 overload [] with myintvec_get_at
 fun{a:t@ype}
 myintvec_set_at
-  {n:int} (iv: !myintvec (a, n), i: natLt n, x: myint(a)):<> void
+  {n:int} (iv: !myintvec (a, n), i: natLt n, x: myint(a)): void
 overload [] with myintvec_set_at
 
 fun{a:t@ype}
@@ -236,25 +251,25 @@ myintvec_compare_at
 
 fun{a:t@ype}
 myintvec0_make
-  {n:nat} (n: int n):<> myintvec0 (a, n)
+  {n:nat} (n: int n): myintvec0 (a, n)
 // end of [myintvec0_make]
 fun myintvec0_free
-  {a:t@ype}{n:int} (iv: myintvec0 (a, n), n: int n):<> void
+  {a:t@ype}{n:int} (iv: myintvec0 (a, n), n: int n): void
 // end of [myintvec0_free]
 
 fun{a:t@ype}
 myintvec_make
-  {n:nat} (n: int n):<> myintvec (a, n) // initialized with zeros
+  {n:nat} (n: int n): myintvec (a, n) // initialized with zeros
 // end of [myintvec_make]
 fun{a:t@ype}
 myintvec_free
-  {n:int} (iv: myintvec (a, n), n: int n):<> void
+  {n:int} (iv: myintvec (a, n), n: int n): void
 // end of [myintvec_free]
 
 (* ****** ****** *)
 
-viewtypedef
-myintveclst (a:t@ype, n:int) = List_vt (myintvec (a, n))
+vtypedef
+myintveclst (a:t@ype, n:int) = List0_vt (myintvec (a, n))
 
 fun{a:t@ype}
 fprint_myintveclst {n:int}
@@ -267,17 +282,18 @@ print_myintveclst
 
 fun{a:t@ype}
 myintveclst_free
-  {n:int} (ivs: myintveclst (a, n), n: int n):<> void
+  {n:int} (ivs: myintveclst (a, n), n: int n): void
 // end of [myintveclst_free]
 
 (* ****** ****** *)
 //
 // HX: it is mapped
-abstype s3exp // to [s3exp] in pats_constraint3
+abstype s3exp_type = ptr // to [s3exp] in pats_constraint3
+typedef s3exp = s3exp_type
 typedef nat2 = natLt (2)
 typedef int2 = intBtwe (~2, 2)
 
-dataviewtype
+datavtype
 icnstr (a:t@ype, int) =
   | {n:int}
     // knd: gte/lt: 2/~2; eq/neq: 1/~1
@@ -289,7 +305,7 @@ icnstr (a:t@ype, int) =
 // end of [icnstr]
 
 where icnstrlst
-  (a:t@ype, n:int) = List_vt (icnstr(a, n))
+  (a:t@ype, n:int) = List0_vt (icnstr(a, n))
 // end of [icnstrlst]
 
 (* ****** ****** *)
@@ -371,7 +387,7 @@ myintvec_inspect_neq
 
 fun{a:t@ype}
 myintveclst_inspect_gte
-  {n:pos} (ivs: &myintveclst (a, n), n: int n): Ans2
+  {n:pos} (ivs: &myintveclst (a, n) >> myintveclst (a, n), n: int n): Ans2
 // end of [myintveclst_inspect_gte]
 
 (* ****** ****** *)
@@ -392,7 +408,7 @@ myintvec_normalize_gte
 
 fun{a:t@ype}
 myintveclst_normalize_gte
-  {n:pos} (ivs: &myintveclst (a, n), n: int n): void
+  {n:pos} (ivs: &myintveclst (a, n) >> myintveclst (a, n), n: int n): void
 // end of [myintveclst_normalize_gte]
 
 (* ****** ****** *)
@@ -401,7 +417,7 @@ myintveclst_normalize_gte
 //
 fun{a:t@ype}
 myintvec_copy {n:int}
-  (vec: !myintvec (a, n), n: int n):<> myintvec (a, n)
+  (vec: !myintvec (a, n), n: int n): myintvec (a, n)
 // end of [myintvec_copy]
 //
 // HX: return a copy of [cff*vec]
@@ -409,16 +425,17 @@ myintvec_copy {n:int}
 fun{a:t@ype}
 myintvec_copy_cff {n:int} (
   cff: !myint(a), vec: !myintvec (a, n), n: int n
-) :<> myintvec (a, n) // end of [myintvec_copy_cff]
+) : myintvec (a, n) // end of [myintvec_copy_cff]
 
 (* ****** ****** *)
 //
 // vec1 := vec2
+// HX: declared in ATS1 but never implemented
 //
 fun{a:t@ype}
 myintvec_assign {n:int} (
   iv1: !myintvec (a, n), iv2: !myintvec (a, n), n: int n
-) :<> void // end of [myintvec_assign]
+) : void // end of [myintvec_assign]
 
 (* ****** ****** *)
 //
@@ -426,14 +443,14 @@ myintvec_assign {n:int} (
 //
 fun{a:t@ype}
 myintvec_negate {n:int}
-  (vec: !myintvec (a, n), n: int n):<> void
+  (vec: !myintvec (a, n), n: int n): void
 // end of [myintvec_negate]
 
 (* ****** ****** *)
 
 fun{a:t@ype}
 myintvec_scale {n:int}
-  (cff: !myint (a), vec: !myintvec (a, n), n: int n):<> void
+  (cff: !myint (a), vec: !myintvec (a, n), n: int n): void
 // end of [myintvec_scale]
 
 (* ****** ****** *)
@@ -443,27 +460,30 @@ myintvec_scale {n:int}
 fun{a:t@ype}
 myintvec_addby {n:int} (
   vec1: !myintvec (a, n), vec2: !myintvec (a, n), n: int n
-) :<> void // end of [myintvec_addby]
+) : void // end of [myintvec_addby]
 //
 // vec1 := vec1 - vec2
 //
 fun{a:t@ype}
 myintvec_subby {n:int} (
   vec1: !myintvec (a, n), vec2: !myintvec (a, n), n: int n
-) :<> void // end of [myintvec_subby]
+) : void // end of [myintvec_subby]
 //
 // vec1 := vec1 + cff * vec2
 //
 fun{a:t@ype}
 myintvec_addby_cff {n:int} (
   vec1: !myintvec (a, n), cff: !myint(a), vec2: !myintvec (a, n), n: int n
-) :<> void // end of [myintvec_addby_cff]
+) : void // end of [myintvec_addby_cff]
 
 (* ****** ****** *)
-
+//
+// HX-2026-10: the "hint" sets of the solver
+// (a set of indices; no allocation for [n <= 63], see pats_lintprgm_solve.dats)
+//
 typedef
 index (n:int) = intBtw (1, n)
-abstype indexset (n:int)
+abstype indexset (n:int) = ptr
 
 fun indexset_nil {n:int} ():<> indexset (n)
 fun indexset_is_member
@@ -479,7 +499,7 @@ fun indexset_add
 *)
 fun{a:t@ype}
 icnstrlst_solve {n:pos} (
-  iset(*hint*): indexset (n), ics: &icnstrlst (a, n), n: int n
+  iset(*hint*): indexset (n), ics: &icnstrlst (a, n) >> icnstrlst (a, n), n: int n
 ) : Ans2 // end of [icnstrlst_solve]
 
 (* ****** ****** *)

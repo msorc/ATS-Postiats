@@ -246,10 +246,6 @@ overload free with cloptr_free of 0
 (* ****** ****** *)
 //
 fun
-{a:t0p}
-lazy_force(lazyval: lazy(INV(a))):<!laz> (a)
-//
-fun
 {a:vt0p}
 lazy_vt_force(lazyval: lazy_vt(INV(a))):<!all> (a)
 //
@@ -258,7 +254,6 @@ lazy_vt_force(lazyval: lazy_vt(INV(a))):<!all> (a)
 // HX-2016-08:
 // this is assumed internally!
 //
-overload ! with lazy_force of 0
 overload ! with lazy_vt_force of 0
 *)
 //
@@ -274,16 +269,6 @@ lazy_vt_free
 //
 overload ~ with lazy_vt_free of 0
 overload free with lazy_vt_free of 0
-//
-(* ****** ****** *)
-//
-// HX-2014:
-// macro implemented in [pats_ccomp_instrset]
-//
-fun
-lazy2cloref
-  {a:t0p}
-  (lazy(a)): ((*void*)) -<cloref1> (a) = "mac#%"
 //
 (* ****** ****** *)
 
@@ -443,6 +428,17 @@ prfun unit_v_elim (pf: unit_v): void
 //
 (* ****** ****** *)
 //
+// HX-2026-10:
+// A view put into a box can never be taken back;
+// this is how a (shared) reference to memory that
+// is never freed (e.g., statically allocated) is
+// formed now that [ref] is no longer available.
+//
+praxi
+vbox_make_view{v:view}(pf: v): vbox(v)
+//
+(* ****** ****** *)
+//
 abstype
 boxed_t0ype_type(a:t@ype+) = unit
 absvtype
@@ -479,45 +475,6 @@ vtypedef
 arrayptr
   (a:vt0p, n:int) = [l:addr] arrayptr(a, l, n)
 //
-abstype
-arrayref_vt0ype_int_type
-  (a:vt@ype(*elt*), n:int(*size*)) = ptr
-stadef arrayref = arrayref_vt0ype_int_type
-//
-abstype
-arrszref_vt0ype_type(a: vt@ype) = ptr
-typedef arrszref(a:vt0p) = arrszref_vt0ype_type(a)
-//
-(* ****** ****** *)
-//
-datatype
-// t@ype+: covariant
-list_t0ype_int_type
-  (a:t@ype+, int) =
-  | list_nil(a, 0) of ()
-  | {n:int | n >= 0}
-    list_cons(a, n+1) of (a, list_t0ype_int_type(a, n))
-// end of [datatype]
-stadef list = list_t0ype_int_type
-typedef
-List(a:t0p) = [n:int] list(a, n)
-typedef
-List0(a:t0p) = [n:int | n >= 0] list(a, n)
-typedef
-List1(a:t0p) = [n:int | n >= 1] list(a, n)
-typedef listLt
-  (a:t0p, n:int) = [k:nat | k < n] list(a, k)
-typedef listLte
-  (a:t0p, n:int) = [k:nat | k <= n] list(a, k)
-typedef listGt
-  (a:t0p, n:int) = [k:int | k > n] list(a, k)
-typedef listGte
-  (a:t0p, n:int) = [k:int | k >= n] list(a, k)
-typedef listBtw
-  (a:t0p, m:int, n:int) = [k:int | m <= k; k < n] list(a, k)
-typedef listBtwe
-  (a:t0p, m:int, n:int) = [k:int | m <= k; k <= n] list(a, k)
-//
 (* ****** ****** *)
 //
 datavtype
@@ -550,13 +507,6 @@ vtypedef listBtwe_vt
 //
 (* ****** ****** *)
 //
-datatype
-stream_con(a:t@ype+) =
-  | stream_nil of ((*void*))
-  | stream_cons of (a, stream(a))
-//
-where stream (a:t@ype) = lazy (stream_con(a))
-//
 datavtype
 stream_vt_con
   (a:vt@ype+) =
@@ -567,17 +517,6 @@ where
 stream_vt(a:vt@ype) = lazy_vt(stream_vt_con(a))
 //
 (* ****** ****** *)
-//
-datatype
-// t@ype+: covariant
-option_t0ype_bool_type
-(
-  a:t@ype+, bool
-) = // option_t0ype_bool_type
-  | Some(a, true) of (INV(a)) | None(a, false)
-// end of [datatype]
-stadef option = option_t0ype_bool_type
-typedef Option(a:t0p) = [b:bool] option(a, b)
 //
 datavtype
 // vt@ype+: covariant

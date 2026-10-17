@@ -30,21 +30,15 @@
 //
 (* ****** ****** *)
 //
-#staload "./SATS/list.sats"
-#staload _ = "./DATS/list.dats"
 //
 #staload "./SATS/list_vt.sats"
 #staload _ = "./DATS/list_vt.dats"
 //
 (* ****** ****** *)
 //
-#staload "./SATS/option.sats"
-#staload _ = "./DATS/option.dats"
 //
 (* ****** ****** *)
 //
-#staload "./SATS/stream.sats"
-#staload _ = "./DATS/stream.dats"
 //
 #staload "./SATS/stream_vt.sats"
 #staload _ = "./DATS/stream_vt.dats"
@@ -77,10 +71,6 @@
 //
 (* ****** ****** *)
 //
-#staload
-"./SATS/ML/list0.sats" // un-indexed list
-#staload
-_(*anon*) = "./DATS/ML/list0.dats" // un-indexed list
 //
 (* ****** ****** *)
 

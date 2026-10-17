@@ -8,7 +8,6 @@ staload "./atslex.sats"
 
 (* ****** ****** *)
 
-dynload "atslex.sats"
 dynload "atslex_charset.dats"
   
 (* ****** ****** *)

@@ -29,15 +29,20 @@ inductive definition:
 
 %{
 //
-fun itemizedlist
-  (xs: atextlst): atext = let
+//
+// HX: [itemizedlist{x1, x2}] is [itemizedlist$lst(x1, x2)] (the list of
+// the arguments is not made: ATS2 has no nonlinear list)
+//
+fun itemizedlist$lst
+  (x1: atext, x2: atext): atext = let
+  val xs = glist_cons (x1, glist_cons (x2, glist_nil()))
   val sep = atext_newline ()
   val _itms = atext_concatxtsep (xs, sep)
   val _beg = atext_strcst "<itemizedlist>\n"
   val _end = atext_strcst "\n</itemizedlist>"
 in
   atext_apptxt3 (_beg, _itms, _end)
-end // end of [itemizedlist]
+end // end of [itemizedlist$lst]
 %}
 
 #ignore("\
@@ -198,9 +203,9 @@ code used in this chapter.\
 
 %{
 //
-staload STDIO = "libc/SATS/stdio.sats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 //
-implement main () = {
+implement main0 () = {
 //
 val filr =
   $STDIO.fopen_ref_exn ("../TEMP/chap_hordfun.dats", file_mode_w)

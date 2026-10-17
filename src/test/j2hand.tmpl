@@ -1,0 +1,6 @@
+(* the part of the test of the level-2 jsonize (j2_gen.py) that is written in the chunks (generated from j2hand.tmpl, see t3hand.tmpl for the conventions:
+   "2|" lines are ATS2 only, "1|" lines ATS1 only): the JSON text of a result *)
+(* ****** ****** *)
+fun dd_jsonval (x: jsonval): void = fprint_jsonval (dd_out, x)
+2|fun mkscstextdef (k: int): scstextdef = if k mod 2 = 0 then scstextdef_SCSTEXTDEFnone () else scstextdef_SCSTEXTDEFsome ("sx")
+1|fun mkscstextdef (k: int): scstextdef = if k mod 2 = 0 then SCSTEXTDEFnone () else SCSTEXTDEFsome ("sx")

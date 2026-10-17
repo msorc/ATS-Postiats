@@ -257,5 +257,5 @@ atspre_string_make_vsnprintf
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "string_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "string_atxt.txt")
 %}\

@@ -61,12 +61,7 @@ channeg_array_cons
 //
 (* ****** ****** *)
 //
-fun
-list2ssarray
-  {a:t0p}{n:int}(list(a, n)): channeg(ssarray(a, n))
-fun
-ssarray2list
-  {a:t0p}{n:int}(channeg(ssarray(a, n)), int(n)): list(a, n)
+// HX-2026-10: no GC (the lists are linear)
 //
 fun
 list2ssarray_vt

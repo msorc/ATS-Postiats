@@ -79,21 +79,48 @@ atscntrb_jsonc_lh_entry_get_val(atstype_ptr ent)
 
 /* ****** ****** */
 //
+//
+// HX-2026-10:
+// json-c-0.13 dropped the [name] argument of the
+// lh_*table_new functions; it is ignored for later versions
+//
+#if (JSON_C_VERSION_NUM >= ((0 << 16) | (13 << 8)))
+#define JSONC_LH_TABLE_NONAME 1
+#endif
+//
+#ifdef JSONC_LH_TABLE_NONAME
+#define \
+atscntrb_jsonc_lh_table_new(size, name, free_fn, hash_fn, equal_fn) \
+  lh_table_new(size, (lh_entry_free_fn*)free_fn, hash_fn, equal_fn)
+#else
 #define atscntrb_jsonc_lh_table_new lh_table_new
+#endif
 //
 #define atscntrb_jsonc_lh_char_hash lh_char_hash
 #define atscntrb_jsonc_lh_char_equal lh_char_equal
 //
+#ifdef JSONC_LH_TABLE_NONAME
+#define \
+atscntrb_jsonc_lh_kchar_table_new(size, name, free_fn) \
+  lh_kchar_table_new(size, (lh_entry_free_fn*)free_fn)
+#else
 #define \
 atscntrb_jsonc_lh_kchar_table_new(size, name, free_fn) \
   lh_kchar_table_new(size, name, (lh_entry_free_fn*)free_fn)
+#endif
 //
 #define atscntrb_jsonc_lh_ptr_hash lh_ptr_hash
 #define atscntrb_jsonc_lh_ptr_equal lh_ptr_equal
 //
+#ifdef JSONC_LH_TABLE_NONAME
+#define \
+atscntrb_jsonc_lh_kptr_table_new(size, name, free_fn) \
+  lh_kptr_table_new(size, (lh_entry_free_fn*)free_fn)
+#else
 #define \
 atscntrb_jsonc_lh_kptr_table_new(size, name, free_fn) \
   lh_kptr_table_new(size, name, (lh_entry_free_fn*)free_fn)
+#endif
 //
 #define atscntrb_jsonc_lh_table_free lh_table_free
 //

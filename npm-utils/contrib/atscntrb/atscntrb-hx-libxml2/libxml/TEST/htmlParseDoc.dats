@@ -43,8 +43,7 @@ val-
 ~Some_vt(inp) =
 fileref_open_opt(filename, file_mode_r)
 val cs = fileref_get_file_charlst (inp)
-val str = string_make_list ($UN.castvwtp1{List0(charNZ)}(cs))
-val () = list_vt_free (cs)
+val str = string_make_list_vt ($UN.castvwtp0{List0_vt(charNZ)}(cs))
 val encoding = stropt_none((*void*))
 //
 val doc = htmlParseDoc ($UN.castvwtp1{xmlString}(str), encoding)

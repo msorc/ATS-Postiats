@@ -16,17 +16,8 @@ RMF=rm -f
 ######
 
 all:: ; \
-$(PATSOPT) -d ./DATS/list.dats | \
-$(ATSCC2PHP) -o ./output/DATS/list_dats.php -i
-all:: ; \
 $(PATSOPT) -d ./DATS/list_vt.dats | \
 $(ATSCC2PHP) -o ./output/DATS/list_vt_dats.php -i
-all:: ; \
-$(PATSOPT) -d ./DATS/option.dats | \
-$(ATSCC2PHP) -o ./output/DATS/option_dats.php -i
-all:: ; \
-$(PATSOPT) -d ./DATS/stream.dats | \
-$(ATSCC2PHP) -o ./output/DATS/stream_dats.php -i
 all:: ; \
 $(PATSOPT) -d ./DATS/stream_vt.dats | \
 $(ATSCC2PHP) -o ./output/DATS/stream_vt_dats.php -i
@@ -55,9 +46,6 @@ $(ATSCC2PHP) -o ./output/DATS/reference_dats.php -i
 ######
 
 all:: ; \
-$(PATSOPT) -d ./DATS/funarray.dats | \
-$(ATSCC2PHP) -o ./output/DATS/funarray_dats.php -i
-all:: ; \
 $(PATSOPT) -d ./DATS/slistref.dats | \
 $(ATSCC2PHP) -o ./output/DATS/slistref_dats.php -i
 all:: ; \
@@ -66,18 +54,6 @@ $(ATSCC2PHP) -o ./output/DATS/qlistref_dats.php -i
 
 ######
 
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/list0.dats | \
-$(ATSCC2PHP) -o ./output/DATS/ML/list0_dats.php -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/array0.dats | \
-$(ATSCC2PHP) -o ./output/DATS/ML/array0_dats.php -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/option0.dats | \
-$(ATSCC2PHP) -o ./output/DATS/ML/option0_dats.php -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/matrix0.dats | \
-$(ATSCC2PHP) -o ./output/DATS/ML/matrix0_dats.php -i
 
 ######
 #
@@ -129,10 +105,7 @@ CATS/PHParref_cats.php \
 
 all_in_one:: ; \
 $(CAT) >>$(LIBATSCC2PHP_ALL_PHP) \
-output/DATS/list_dats.php \
 output/DATS/list_vt_dats.php \
-output/DATS/option_dats.php \
-output/DATS/stream_dats.php \
 output/DATS/stream_vt_dats.php \
 output/DATS/filebas_dats.php \
 output/DATS/intrange_dats.php \
@@ -141,13 +114,8 @@ output/DATS/PHParref_dats.php \
 output/DATS/arrayref_dats.php \
 output/DATS/matrixref_dats.php \
 output/DATS/reference_dats.php \
-output/DATS/funarray_dats.php \
 output/DATS/slistref_dats.php \
 output/DATS/qlistref_dats.php \
-output/DATS/ML/list0_dats.php \
-output/DATS/ML/array0_dats.php \
-output/DATS/ML/option0_dats.php \
-output/DATS/ML/matrix0_dats.php \
 
 ######
 #
@@ -167,7 +135,6 @@ clean:: ; $(RMF) *~ */*~
 
 cleanall:: clean
 cleanall:: ; $(RMF) output/DATS/*_?ats.php
-cleanall:: ; $(RMF) output/DATS/ML/*_?ats.php
 cleanall:: ; $(RMF) $(LIBATSCC2PHP_ALL_PHP)
 
 ######

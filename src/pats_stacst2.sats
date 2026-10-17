@@ -33,12 +33,23 @@
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_stacst2.sats)
+// [s2cstref] is a cell of the global arena (a symbol and the constant found so far, null if none);
+// the values [the_xxx: s2cstref] have C names (they are made when the module is dynloaded).
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
 
-abstype s2cstref_type // boxed
+abstype s2cstref_type = ptr // boxed
 typedef s2cstref = s2cstref_type
 
 (* ****** ****** *)
@@ -59,180 +70,180 @@ fun s2cstref_equ_exp(s2cr: s2cstref, s2e: s2exp): bool
 //
 (* ****** ****** *)
 //
-val the_true_bool : s2cstref
-val the_false_bool : s2cstref
+val the_true_bool : s2cstref = "ext#patsopt_the_true_bool"
+val the_false_bool : s2cstref = "ext#patsopt_the_false_bool"
 //
-val the_neg_bool : s2cstref // bool -> bool
-val the_add_bool_bool : s2cstref // (bool, bool) -> bool
-val the_mul_bool_bool : s2cstref // (bool, bool) -> bool
-val the_eq_bool_bool : s2cstref // (bool, bool) -> bool
-val the_neq_bool_bool : s2cstref // (bool, bool) -> bool
+val the_neg_bool : s2cstref = "ext#patsopt_the_neg_bool" // bool -> bool
+val the_add_bool_bool : s2cstref = "ext#patsopt_the_add_bool_bool" // (bool, bool) -> bool
+val the_mul_bool_bool : s2cstref = "ext#patsopt_the_mul_bool_bool" // (bool, bool) -> bool
+val the_eq_bool_bool : s2cstref = "ext#patsopt_the_eq_bool_bool" // (bool, bool) -> bool
+val the_neq_bool_bool : s2cstref = "ext#patsopt_the_neq_bool_bool" // (bool, bool) -> bool
 //
-val the_neg_int : s2cstref // : (int) -> int
-val the_add_int_int : s2cstref // : (int, int) -> int
-val the_sub_int_int : s2cstref // : (int, int) -> int
-val the_mul_int_int : s2cstref // : (int, int) -> int
-val the_div_int_int : s2cstref // : (int, int) -> int
-val the_ndiv_int_int : s2cstref // : (int, int) -> int
-val the_idiv_int_int : s2cstref // : (int, int) -> int
+val the_neg_int : s2cstref = "ext#patsopt_the_neg_int" // : (int) -> int
+val the_add_int_int : s2cstref = "ext#patsopt_the_add_int_int" // : (int, int) -> int
+val the_sub_int_int : s2cstref = "ext#patsopt_the_sub_int_int" // : (int, int) -> int
+val the_mul_int_int : s2cstref = "ext#patsopt_the_mul_int_int" // : (int, int) -> int
+val the_div_int_int : s2cstref = "ext#patsopt_the_div_int_int" // : (int, int) -> int
+val the_ndiv_int_int : s2cstref = "ext#patsopt_the_ndiv_int_int" // : (int, int) -> int
+val the_idiv_int_int : s2cstref = "ext#patsopt_the_idiv_int_int" // : (int, int) -> int
 //
-val the_lt_int_int : s2cstref // : (int, int) -> bool
-val the_lte_int_int : s2cstref // : (int, int) -> bool
-val the_gt_int_int : s2cstref // : (int, int) -> bool
-val the_gte_int_int : s2cstref // : (int, int) -> bool
-val the_eq_int_int : s2cstref // : (int, int) -> bool
-val the_neq_int_int : s2cstref // : (int, int) -> bool
+val the_lt_int_int : s2cstref = "ext#patsopt_the_lt_int_int" // : (int, int) -> bool
+val the_lte_int_int : s2cstref = "ext#patsopt_the_lte_int_int" // : (int, int) -> bool
+val the_gt_int_int : s2cstref = "ext#patsopt_the_gt_int_int" // : (int, int) -> bool
+val the_gte_int_int : s2cstref = "ext#patsopt_the_gte_int_int" // : (int, int) -> bool
+val the_eq_int_int : s2cstref = "ext#patsopt_the_eq_int_int" // : (int, int) -> bool
+val the_neq_int_int : s2cstref = "ext#patsopt_the_neq_int_int" // : (int, int) -> bool
 //
-val the_abs_int : s2cstref // (int) -> int
-val the_absrel_int_int : s2cstref // : (int, int) -> bool
-val the_sgn_int : s2cstref // (int) -> int
-val the_sgnrel_int_int : s2cstref // : (int, int) -> bool
+val the_abs_int : s2cstref = "ext#patsopt_the_abs_int" // (int) -> int
+val the_absrel_int_int : s2cstref = "ext#patsopt_the_absrel_int_int" // : (int, int) -> bool
+val the_sgn_int : s2cstref = "ext#patsopt_the_sgn_int" // (int) -> int
+val the_sgnrel_int_int : s2cstref = "ext#patsopt_the_sgnrel_int_int" // : (int, int) -> bool
 //
-val the_max_int_int : s2cstref // : (int, int) -> int
-val the_min_int_int : s2cstref // : (int, int) -> int
-val the_maxrel_int_int_int : s2cstref // : (int, int, int) -> bool
-val the_minrel_int_int_int : s2cstref // : (int, int, int) -> bool
+val the_max_int_int : s2cstref = "ext#patsopt_the_max_int_int" // : (int, int) -> int
+val the_min_int_int : s2cstref = "ext#patsopt_the_min_int_int" // : (int, int) -> int
+val the_maxrel_int_int_int : s2cstref = "ext#patsopt_the_maxrel_int_int_int" // : (int, int, int) -> bool
+val the_minrel_int_int_int : s2cstref = "ext#patsopt_the_minrel_int_int_int" // : (int, int, int) -> bool
 //
-val the_ndivrel_int_int_int : s2cstref // : (int, int, int) -> bool
-val the_idivrel_int_int_int : s2cstref // : (int, int, int) -> bool
+val the_ndivrel_int_int_int : s2cstref = "ext#patsopt_the_ndivrel_int_int_int" // : (int, int, int) -> bool
+val the_idivrel_int_int_int : s2cstref = "ext#patsopt_the_idivrel_int_int_int" // : (int, int, int) -> bool
 //
-val the_ifint_bool_int_int : s2cstref // : (bool, int, int) -> int
-val the_ifintrel_bool_int_int_int : s2cstref // : (bool, int, int, int) -> bool
+val the_ifint_bool_int_int : s2cstref = "ext#patsopt_the_ifint_bool_int_int" // : (bool, int, int) -> int
+val the_ifintrel_bool_int_int_int : s2cstref = "ext#patsopt_the_ifintrel_bool_int_int_int" // : (bool, int, int, int) -> bool
 //
 (*
-val the_int_of_bool : s2cstref // : (bool) -> int
-val the_bool_of_int : s2cstref // : (int) -> bool
+val the_int_of_bool : s2cstref = "ext#patsopt_the_int_of_bool" // : (bool) -> int
+val the_bool_of_int : s2cstref = "ext#patsopt_the_bool_of_int" // : (int) -> bool
 *)
 (*
 // HX: char equals int8
 // HX-2012-06-12: removed
-val the_int_of_char : s2cstref // : (char) -> int
-and the_char_of_int : s2cstref // : (int) -> char
+val the_int_of_char : s2cstref = "ext#patsopt_the_int_of_char" // : (char) -> int
+val the_char_of_int : s2cstref = "ext#patsopt_the_char_of_int" // : (int) -> char
 *)
 (*
 ** HX: addr is treated as (signed) int
 *)
-val the_int_of_addr : s2cstref // : (addr) -> int
-and the_addr_of_int : s2cstref // : (int) -> addr
+val the_int_of_addr : s2cstref = "ext#patsopt_the_int_of_addr" // : (addr) -> int
+val the_addr_of_int : s2cstref = "ext#patsopt_the_addr_of_int" // : (int) -> addr
 //
-val the_null_addr : s2cstref
-val the_lt_addr_addr : s2cstref // : (addr, addr) -> bool
-val the_lte_addr_addr : s2cstref // : (addr, addr) -> bool
-val the_gt_addr_addr : s2cstref // : (addr, addr) -> bool
-val the_gte_addr_addr : s2cstref // : (addr, addr) -> bool
-val the_eq_addr_addr : s2cstref // : (addr, addr) -> bool
-val the_neq_addr_addr : s2cstref // : (addr, addr) -> bool
+val the_null_addr : s2cstref = "ext#patsopt_the_null_addr"
+val the_lt_addr_addr : s2cstref = "ext#patsopt_the_lt_addr_addr" // : (addr, addr) -> bool
+val the_lte_addr_addr : s2cstref = "ext#patsopt_the_lte_addr_addr" // : (addr, addr) -> bool
+val the_gt_addr_addr : s2cstref = "ext#patsopt_the_gt_addr_addr" // : (addr, addr) -> bool
+val the_gte_addr_addr : s2cstref = "ext#patsopt_the_gte_addr_addr" // : (addr, addr) -> bool
+val the_eq_addr_addr : s2cstref = "ext#patsopt_the_eq_addr_addr" // : (addr, addr) -> bool
+val the_neq_addr_addr : s2cstref = "ext#patsopt_the_neq_addr_addr" // : (addr, addr) -> bool
 //
-val the_add_addr_int : s2cstref // (addr, int) -> addr
-val the_sub_addr_int : s2cstref // (addr, int) -> addr
-val the_sub_addr_addr : s2cstref // (addr, addr) -> int
+val the_add_addr_int : s2cstref = "ext#patsopt_the_add_addr_int" // (addr, int) -> addr
+val the_sub_addr_int : s2cstref = "ext#patsopt_the_sub_addr_int" // (addr, int) -> addr
+val the_sub_addr_addr : s2cstref = "ext#patsopt_the_sub_addr_addr" // (addr, addr) -> int
 //
 (* ****** ****** *)
 
-val the_types_nil : s2cstref // : types
-val the_types_cons : s2cstref // : (vt@ype, types) -> types
-
-(* ****** ****** *)
-
-val the_lte_cls_cls : s2cstref // : (cls, cls) -> bool
-val the_gte_cls_cls : s2cstref // : (cls, cls) -> bool
-val the_lterel_cls_cls : s2cstref // : (cls, cls, bool) -> bool
-val the_gterel_cls_cls : s2cstref // : (cls, cls, bool) -> bool
+val the_types_nil : s2cstref = "ext#patsopt_the_types_nil" // : types
+val the_types_cons : s2cstref = "ext#patsopt_the_types_cons" // : (vt@ype, types) -> types
 
 (* ****** ****** *)
 
-val the_atstkind_type : s2cstref
-val the_atstkind_t0ype : s2cstref
+val the_lte_cls_cls : s2cstref = "ext#patsopt_the_lte_cls_cls" // : (cls, cls) -> bool
+val the_gte_cls_cls : s2cstref = "ext#patsopt_the_gte_cls_cls" // : (cls, cls) -> bool
+val the_lterel_cls_cls : s2cstref = "ext#patsopt_the_lterel_cls_cls" // : (cls, cls, bool) -> bool
+val the_gterel_cls_cls : s2cstref = "ext#patsopt_the_gterel_cls_cls" // : (cls, cls, bool) -> bool
+
+(* ****** ****** *)
+
+val the_atstkind_type : s2cstref = "ext#patsopt_the_atstkind_type"
+val the_atstkind_t0ype : s2cstref = "ext#patsopt_the_atstkind_t0ype"
 
 (* ****** ****** *)
 //
-val the_bool_t0ype : s2cstref
-val the_bool_bool_t0ype : s2cstref
+val the_bool_t0ype : s2cstref = "ext#patsopt_the_bool_t0ype"
+val the_bool_bool_t0ype : s2cstref = "ext#patsopt_the_bool_bool_t0ype"
 //
 (* ****** ****** *)
 //
-val the_int_kind : s2cstref
-val the_uint_kind : s2cstref
-val the_lint_kind : s2cstref
-val the_ulint_kind : s2cstref
-val the_llint_kind : s2cstref
-val the_ullint_kind : s2cstref
-val the_size_kind : s2cstref
-val the_ssize_kind : s2cstref
+val the_int_kind : s2cstref = "ext#patsopt_the_int_kind"
+val the_uint_kind : s2cstref = "ext#patsopt_the_uint_kind"
+val the_lint_kind : s2cstref = "ext#patsopt_the_lint_kind"
+val the_ulint_kind : s2cstref = "ext#patsopt_the_ulint_kind"
+val the_llint_kind : s2cstref = "ext#patsopt_the_llint_kind"
+val the_ullint_kind : s2cstref = "ext#patsopt_the_ullint_kind"
+val the_size_kind : s2cstref = "ext#patsopt_the_size_kind"
+val the_ssize_kind : s2cstref = "ext#patsopt_the_ssize_kind"
 //
-val the_g0int_t0ype : s2cstref
-val the_g1int_int_t0ype : s2cstref
-val the_g0uint_t0ype : s2cstref
-val the_g1uint_int_t0ype : s2cstref
+val the_g0int_t0ype : s2cstref = "ext#patsopt_the_g0int_t0ype"
+val the_g1int_int_t0ype : s2cstref = "ext#patsopt_the_g1int_int_t0ype"
+val the_g0uint_t0ype : s2cstref = "ext#patsopt_the_g0uint_t0ype"
+val the_g1uint_int_t0ype : s2cstref = "ext#patsopt_the_g1uint_int_t0ype"
 //
-val the_char_t0ype : s2cstref
-val the_char_int_t0ype : s2cstref
-val the_schar_t0ype : s2cstref
-val the_schar_int_t0ype : s2cstref
-val the_uchar_t0ype : s2cstref
-val the_uchar_int_t0ype : s2cstref
+val the_char_t0ype : s2cstref = "ext#patsopt_the_char_t0ype"
+val the_char_int_t0ype : s2cstref = "ext#patsopt_the_char_int_t0ype"
+val the_schar_t0ype : s2cstref = "ext#patsopt_the_schar_t0ype"
+val the_schar_int_t0ype : s2cstref = "ext#patsopt_the_schar_int_t0ype"
+val the_uchar_t0ype : s2cstref = "ext#patsopt_the_uchar_t0ype"
+val the_uchar_int_t0ype : s2cstref = "ext#patsopt_the_uchar_int_t0ype"
 //
-val the_float_kind : s2cstref
-val the_double_kind : s2cstref
-val the_ldouble_kind : s2cstref
-val the_g0float_t0ype : s2cstref
+val the_float_kind : s2cstref = "ext#patsopt_the_float_kind"
+val the_double_kind : s2cstref = "ext#patsopt_the_double_kind"
+val the_ldouble_kind : s2cstref = "ext#patsopt_the_ldouble_kind"
+val the_g0float_t0ype : s2cstref = "ext#patsopt_the_g0float_t0ype"
 //
-val the_string_type : s2cstref
-val the_string_int_type : s2cstref
+val the_string_type : s2cstref = "ext#patsopt_the_string_type"
+val the_string_int_type : s2cstref = "ext#patsopt_the_string_int_type"
 //
-val the_literal_float : s2cstref
-val the_literal_string : s2cstref
+val the_literal_float : s2cstref = "ext#patsopt_the_literal_float"
+val the_literal_string : s2cstref = "ext#patsopt_the_literal_string"
 //
-val the_ptr_type : s2cstref
-val the_ptr_addr_type : s2cstref
+val the_ptr_type : s2cstref = "ext#patsopt_the_ptr_type"
+val the_ptr_addr_type : s2cstref = "ext#patsopt_the_ptr_addr_type"
 //
 (*
-val the_p2tr_vt0ype_addr_type : s2cstref
+val the_p2tr_vt0ype_addr_type : s2cstref = "ext#patsopt_the_p2tr_vt0ype_addr_type"
 *)
 //
-val the_atsvoid_t0ype : s2cstref
+val the_atsvoid_t0ype : s2cstref = "ext#patsopt_the_atsvoid_t0ype"
 //
-val the_unit_prop : s2cstref
-val the_unit_view : s2cstref
+val the_unit_prop : s2cstref = "ext#patsopt_the_unit_prop"
+val the_unit_view : s2cstref = "ext#patsopt_the_unit_view"
 //
-val the_exception_vtype : s2cstref
+val the_exception_vtype : s2cstref = "ext#patsopt_the_exception_vtype"
 //
-val the_arrpsz_vt0ype_int_vt0ype : s2cstref
+val the_arrpsz_vt0ype_int_vt0ype : s2cstref = "ext#patsopt_the_arrpsz_vt0ype_int_vt0ype"
 //
 (*
-val the_list0_t0ype_type : s2cstref
+val the_list0_t0ype_type : s2cstref = "ext#patsopt_the_list0_t0ype_type"
 *)
 //
-val the_list_t0ype_int_type : s2cstref
-val the_list_vt0ype_int_vtype : s2cstref
+val the_list_t0ype_int_type : s2cstref = "ext#patsopt_the_list_t0ype_int_type"
+val the_list_vt0ype_int_vtype : s2cstref = "ext#patsopt_the_list_vt0ype_int_vtype"
 //
-val the_vbox_view_prop : s2cstref
-val the_ref_vt0ype_type : s2cstref
+val the_vbox_view_prop : s2cstref = "ext#patsopt_the_vbox_view_prop"
+val the_ref_vt0ype_type : s2cstref = "ext#patsopt_the_ref_vt0ype_type"
 //
-val the_lazy_t0ype_type : s2cstref
-val the_lazy_vt0ype_vtype : s2cstref
+val the_lazy_t0ype_type : s2cstref = "ext#patsopt_the_lazy_t0ype_type"
+val the_lazy_vt0ype_vtype : s2cstref = "ext#patsopt_the_lazy_vt0ype_vtype"
 //
-val the_sizeof_t0ype_int: s2cstref
+val the_sizeof_t0ype_int : s2cstref = "ext#patsopt_the_sizeof_t0ype_int"
 //
-val the_at_vt0ype_addr_view: s2cstref
+val the_at_vt0ype_addr_view : s2cstref = "ext#patsopt_the_at_vt0ype_addr_view"
 //
-val the_invar_prop_prop: s2cstref
-val the_invar_view_view: s2cstref
-val the_invar_t0ype_t0ype: s2cstref
-val the_invar_vt0ype_vt0ype: s2cstref
+val the_invar_prop_prop : s2cstref = "ext#patsopt_the_invar_prop_prop"
+val the_invar_view_view : s2cstref = "ext#patsopt_the_invar_view_view"
+val the_invar_t0ype_t0ype : s2cstref = "ext#patsopt_the_invar_t0ype_t0ype"
+val the_invar_vt0ype_vt0ype : s2cstref = "ext#patsopt_the_invar_vt0ype_vt0ype"
 //
 (* ****** ****** *)
 
-val the_vcopyenv_view_view : s2cstref
-val the_vcopyenv_vt0ype_vt0ype : s2cstref
+val the_vcopyenv_view_view : s2cstref = "ext#patsopt_the_vcopyenv_view_view"
+val the_vcopyenv_vt0ype_vt0ype : s2cstref = "ext#patsopt_the_vcopyenv_vt0ype_vt0ype"
 
 (* ****** ****** *)
 
-val the_bottom_t0ype_uni: s2cstref // = {a:t@ype} (a)
-val the_bottom_t0ype_exi: s2cstref // = [a:t@ype | false] (a)
+val the_bottom_t0ype_uni : s2cstref = "ext#patsopt_the_bottom_t0ype_uni" // = {a:t@ype} (a)
+val the_bottom_t0ype_exi : s2cstref = "ext#patsopt_the_bottom_t0ype_exi" // = [a:t@ype | false] (a)
 
-val the_bottom_vt0ype_uni: s2cstref // = {a:vt@ype} (a)
-val the_bottom_vt0ype_exi: s2cstref // = [a:vt@ype | false] (a)
+val the_bottom_vt0ype_uni : s2cstref = "ext#patsopt_the_bottom_vt0ype_uni" // = {a:vt@ype} (a)
+val the_bottom_vt0ype_exi : s2cstref = "ext#patsopt_the_bottom_vt0ype_exi" // = [a:vt@ype | false] (a)
 
 (* ****** ****** *)
 //
@@ -390,8 +401,6 @@ s2exp_list0_t0ype_type (s2e: s2exp): s2exp
 *)
 //
 fun
-s2exp_list_t0ype_int_type(s2e: s2exp, n: int): s2exp
-fun
 s2exp_list_vt0ype_int_vtype(s2e: s2exp, n: int): s2exp
 //
 (* ****** ****** *)
@@ -406,7 +415,6 @@ fun un_s2exp_ref_vt0ype_type(s2f: s2hnf): Option_vt(s2exp)
 //
 (* ****** ****** *)
 
-fun s2exp_lazy_t0ype_type(s2e: s2exp): s2exp
 fun un_s2exp_lazy_t0ype_type(s2f: s2hnf): Option_vt(s2exp)
 
 fun s2exp_lazy_vt0ype_vtype(s2e: s2exp): s2exp
@@ -449,22 +457,22 @@ fun s2exp_vcopyenv_vt (s2e: s2exp): s2exp
 // HX-2013-09:
 // only for internal use!
 //
-val the_atstype_int : s2cstref
-val the_atstype_bool : s2cstref
-val the_atstype_uint : s2cstref
-val the_atstype_size : s2cstref
-val the_atstype_ssize : s2cstref
+val the_atstype_int : s2cstref = "ext#patsopt_the_atstype_int"
+val the_atstype_bool : s2cstref = "ext#patsopt_the_atstype_bool"
+val the_atstype_uint : s2cstref = "ext#patsopt_the_atstype_uint"
+val the_atstype_size : s2cstref = "ext#patsopt_the_atstype_size"
+val the_atstype_ssize : s2cstref = "ext#patsopt_the_atstype_ssize"
 //
 (* ****** ****** *)
 
-val the_effnil : s2cstref
-val the_effall : s2cstref
-val the_effntm : s2cstref
-val the_effexn : s2cstref
-val the_effref : s2cstref
-val the_effwrt : s2cstref
-val the_add_eff_eff : s2cstref // = add_eff_eff
-val the_sub_eff_eff : s2cstref // = sub_eff_eff
+val the_effnil : s2cstref = "ext#patsopt_the_effnil"
+val the_effall : s2cstref = "ext#patsopt_the_effall"
+val the_effntm : s2cstref = "ext#patsopt_the_effntm"
+val the_effexn : s2cstref = "ext#patsopt_the_effexn"
+val the_effref : s2cstref = "ext#patsopt_the_effref"
+val the_effwrt : s2cstref = "ext#patsopt_the_effwrt"
+val the_add_eff_eff : s2cstref = "ext#patsopt_the_add_eff_eff" // = add_eff_eff
+val the_sub_eff_eff : s2cstref = "ext#patsopt_the_sub_eff_eff" // = sub_eff_eff
 
 (* ****** ****** *)
 

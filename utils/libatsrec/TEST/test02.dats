@@ -15,10 +15,6 @@ streamize_fileref_line
 //
 (* ****** ****** *)
 //
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
-//
 (* ****** ****** *)
 //
 #include "./../mylibies.hats"

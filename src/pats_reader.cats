@@ -37,10 +37,19 @@
 
 /* ****** ****** */
 
+/*
+** HX-2026-10: no GC
+** the reader is a tagged struct (no closures stored in it):
+** kind 0: rptr is a FILE* (closed by uninitize)
+** kind 1: rptr is a linear closure () -<lincloptr1> int
+** kind 2: rptr is a string, ridx the current index
+** kind 3: rptr is a list_vt(char) (the remaining chars)
+*/
 typedef struct {
 //
-  ats_ptr_type getchar ; // () -<cloref1> int
-  ats_ptr_type freeres ; // () -> void
+  atstype_int rkind ;
+  atstype_ptr rptr ;
+  atstype_size ridx ;
 //
 } pats_reader_struct ;
 

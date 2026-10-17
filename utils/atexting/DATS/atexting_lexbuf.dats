@@ -47,6 +47,9 @@
 #staload
 "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 #define

@@ -33,6 +33,8 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
 staload "./pats_fixity.sats"
 
 (* ****** ****** *)
@@ -47,7 +49,7 @@ fprint_assoc (out, x) =
 
 (* ****** ****** *)
 
-assume prec_t0ype: t@ype = int
+assume prec_t0ype = int
 
 (* ****** ****** *)
 
@@ -129,7 +131,8 @@ implement precedence_dec (p, i) = prec_make_int (p - i)
 
 (* ****** ****** *)
 
-implement compare_prec_prec (p1, p2) = compare_int_int (p1, p2)
+implement compare_prec_prec (p1, p2) =
+  if p1 < p2 then ~1 else (if p1 > p2 then 1 else 0)
 
 (* ****** ****** *)
 

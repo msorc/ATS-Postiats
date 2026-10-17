@@ -20,152 +20,113 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 
-local
-
-typedef
-key = string and itm = int
-
-in (* in-of-local *)
-
-#include "libats/ML/HATS/myhashtblref.hats"
-
-end // end of [local]
-
-(* ****** ****** *)
-
-local
 //
-val
-the_s2cinterp_map =
-  myhashtbl_make_nil(1024)
+// HX-2026-10:
+// the constants defined in the preamble (by name);
+// this used to be a (GC-managed) hashtable
 //
+extern
 fun
-s2cinterp_insert(name: string): void =
-{
-//
-val-~None_vt() =
-  myhashtbl_insert(the_s2cinterp_map, name, 0)
-// end of [val]
-} (* end of [s2cinterp_insert] *)
-//
-in (* in-of-local *)
+s2cinterp_is_builtin(name: string): bool
 //
 implement
-s2cst_get_s2cinterp
-  (s2c) = let
+s2cinterp_is_builtin
+  (name) =
+(
+case+ name of
+| "unit_p" => true
+| "neg_int" => true
+| "abs_int" => true
+| "sgn_int" => true
+| "add_int_int" => true
+| "sub_int_int" => true
+| "mul_int_int" => true
+| "div_int_int" => true
+| "mod_int_int" => true
+| "idiv_int_int" => true
+| "ndiv_int_int" => true
+| "eq_int_int" => true
+| "lt_int_int" => true
+| "gt_int_int" => true
+| "lte_int_int" => true
+| "gte_int_int" => true
+| "neq_int_int" => true
+| "max_int_int" => true
+| "min_int_int" => true
+| "null_addr" => true
+| "add_addr_int" => true
+| "sub_addr_int" => true
+| "lt_addr_addr" => true
+| "gt_addr_addr" => true
+| "lte_addr_addr" => true
+| "gte_addr_addr" => true
+| "eq_addr_addr" => true
+| "neq_addr_addr" => true
+| "true_bool" => true
+| "false_bool" => true
+| "neg_bool" => true
+| "add_bool_bool" => true
+| "mul_bool_bool" => true
+| "eq_bool_bool" => true
+| "lt_bool_bool" => true
+| "gt_bool_bool" => true
+| "lte_bool_bool" => true
+| "gte_bool_bool" => true
+| "neq_bool_bool" => true
+| "int2real" => true
+| "neg_real" => true
+| "abs_real" => true
+| "sgn_real" => true
+| "floor_real" => true
+| "add_real_real" => true
+| "sub_real_real" => true
+| "mul_real_real" => true
+| "div_real_real" => true
+| "mod_real_real" => true
+| "eq_real_real" => true
+| "lt_real_real" => true
+| "gt_real_real" => true
+| "lte_real_real" => true
+| "gte_real_real" => true
+| "neq_real_real" => true
+| "max_real_real" => true
+| "min_real_real" => true
+| _(*rest*) => false
+) (* end of [s2cinterp_is_builtin] *)
 //
-val ptr =
-  s2cst_get_payload(s2c)
+(* ****** ****** *)
+//
+// HX:
+// the payload caches the answer:
+// 1: not builtin; 2: builtin
+//
+implement
+s2cst_is_builtin
+  (ar, s2c) = let
+//
+val ptr = s2cst_get_payload(ar, s2c)
 //
 in
 //
 if
 ptr > 0
-then $UN.cast{s2cstopt}(ptr)
+then ($UN.cast{intptr}(ptr) = $UN.cast{intptr}(2))
 else let
 //
-val key = symbol_get_name(s2c.name())
-val opt = myhashtbl_search(the_s2cinterp_map, key)
-val itm =
-(
-  case+ opt of
-  | ~None_vt _ => None() | ~Some_vt _ => Some(s2c)
-) : s2cstopt // end of [val]
-val () = s2cst_set_payload(s2c, $UN.cast{ptr}(itm))
+val key =
+  symbol_get_name(ar, s2cst_get_name(ar, s2c))
+val ans =
+  s2cinterp_is_builtin($UN.cast{string}(key))
+//
+val () =
+s2cst_set_payload
+  (ar, s2c, $UN.cast{ptr}(if ans then 2 else 1))
 //
 in
-  itm
+  ans
 end // end of [else]
 //
-end // end of [s2cst_get_s2cinterp]
-//
-implement
-the_s2cinterp_initize() =
-{
-//
-macdef
-insert = s2cinterp_insert
-//
-val () = insert("unit_p")
-//
-val () = insert("neg_int")
-val () = insert("abs_int")
-val () = insert("sgn_int")
-//
-val () = insert("add_int_int")
-val () = insert("sub_int_int")
-val () = insert("mul_int_int")
-val () = insert("div_int_int")
-val () = insert("mod_int_int")
-//
-val () = insert("idiv_int_int")
-val () = insert("ndiv_int_int")
-//
-val () = insert("eq_int_int")
-val () = insert("lt_int_int")
-val () = insert("gt_int_int")
-val () = insert("lte_int_int")
-val () = insert("gte_int_int")
-val () = insert("neq_int_int")
-//
-val () = insert("max_int_int")
-val () = insert("min_int_int")
-//
-val () = insert("null_addr")
-//
-val () = insert("add_addr_int")
-val () = insert("sub_addr_int")
-//
-val () = insert("lt_addr_addr")
-val () = insert("gt_addr_addr")
-val () = insert("lte_addr_addr")
-val () = insert("gte_addr_addr")
-val () = insert("eq_addr_addr")
-val () = insert("neq_addr_addr")
-//
-val () = insert("true_bool")
-val () = insert("false_bool")
-//
-val () = insert("neg_bool")
-//
-val () = insert("add_bool_bool")
-val () = insert("mul_bool_bool")
-//
-val () = insert("eq_bool_bool")
-val () = insert("lt_bool_bool")
-val () = insert("gt_bool_bool")
-val () = insert("lte_bool_bool")
-val () = insert("gte_bool_bool")
-val () = insert("neq_bool_bool")
-//
-//
-val () = insert("int2real")
-//
-val () = insert("neg_real")
-val () = insert("abs_real")
-val () = insert("sgn_real")
-val () = insert("floor_real")
-//
-val () = insert("add_real_real")
-val () = insert("sub_real_real")
-val () = insert("mul_real_real")
-val () = insert("div_real_real")
-val () = insert("mod_real_real")
-//
-val () = insert("eq_real_real")
-val () = insert("lt_real_real")
-val () = insert("gt_real_real")
-val () = insert("lte_real_real")
-val () = insert("gte_real_real")
-val () = insert("neq_real_real")
-//
-val () = insert("max_real_real")
-val () = insert("min_real_real")
-//
-//
-} (* end of [the_s2cinterp_initize] *)
-
-end // end of [local]
+end // end of [s2cst_is_builtin]
 
 (* ****** ****** *)
 

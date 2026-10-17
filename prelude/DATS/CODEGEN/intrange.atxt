@@ -252,6 +252,6 @@ fun aux0
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "intrange_atxt.txt")
 %}\

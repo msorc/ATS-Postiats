@@ -35,8 +35,21 @@
 #ifndef PATS_LINTPRGM_MYINT_CATS
 #define PATS_LINTPRGM_MYINT_CATS
 
-typedef ats_int_type intknd ; // -> int
-typedef ats_ptr_type gmpknd ; // -> intinf in libats/SATS/intinf.sats
+typedef atstype_int intknd ; // -> int
+typedef atstype_ptr gmpknd ; // -> a malloc-ed mpz_t (pats_lintprgm_myint_gmp.cats)
+
+/*
+** HX-2026-10: the gcd of the prelude of ATS1 (the sign of the arguments is ignored)
+*/
+static inline
+atstype_int
+patsopt_lintprgm_gcd_int_int (atstype_int m0, atstype_int n0) {
+  int m, n, t ;
+  if (m0 >= 0) m = m0; else m = -m0 ;
+  if (n0 >= 0) n = n0; else n = -n0 ;
+  while (m) { t = n % m ; n = m ; m = t ; }
+  return n ;
+}
 
 #endif // end of [PATS_LINTPRGM_MYINT_CATS]
 

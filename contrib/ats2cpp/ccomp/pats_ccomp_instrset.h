@@ -51,19 +51,26 @@
 #define ATStyclo() struct{ void *cfun; }
 #define ATStysum() struct{ int contag; }
 */
-#define ATStyexn() struct{ int exntag; char *exnmsg; }
-#define ATStylist(tyelt) struct{ tyelt head; void *tail; }
+//
+// HX-2026-10:
+// a single (may_alias) type for each kind of access
+// (each expansion of an anonymous struct type would be
+// a distinct type)
+//
+typedef ATSstruct { int exntag; char *exnmsg; } atstype_tyexn ;
+#define ATStyexn() atstype_tyexn
+#define ATStylist(tyelt) ATSstruct{ tyelt head; void *tail; }
 
 /* ****** ****** */
 //
 typedef
-struct{
+ATSstruct{
 void *cfun;
 } ATStyclo ;
 typedef ATStyclo *ATStyclo_ptr ;
 //
 typedef
-struct{
+ATSstruct{
 int contag;
 } ATStysum ;
 typedef ATStysum *ATStysum_ptr ;

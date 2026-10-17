@@ -33,9 +33,18 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_dynexp2_dmac.dats, see PORTING.md)
+// The cell of ATS1 ([ref (d2mac_struct)]) is the record [d2mac] of pats_dynexp2.spec.
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
@@ -55,28 +64,11 @@ typedef symbolopt = $SYM.symbolopt
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
-
-typedef
-d2mac_struct = @{
-  d2mac_loc= location
-, d2mac_sym= symbol
-, d2mac_kind= int // short/long: 0/1
-, d2mac_arglst= m2acarglst // argument
-, d2mac_def= d2exp // definition
-, d2mac_stamp= stamp // uniqueness stamp
-} // end of [d2mac_struct]
-
-(* ****** ****** *)
-
-local
-
-assume d2mac_type = ref (d2mac_struct)
-
-in // in of [local]
 
 implement
 d2mac_make (
@@ -84,57 +76,30 @@ d2mac_make (
 ) = let
 //
 val stamp = $STMP.d2mac_stamp_make ()
-val (pfgc, pfat | p) = ptr_alloc<d2mac_struct> ()
-prval () = free_gc_elim {d2mac_struct?} (pfgc)
 //
-val () = p->d2mac_loc := loc
-val () = p->d2mac_sym := name
-val () = p->d2mac_kind := knd
-val () = p->d2mac_arglst := xs
-val () = p->d2mac_def := def
-val () = p->d2mac_stamp := stamp
-//
-in // in of [let]
-//
-ref_make_view_ptr (pfat | p)
-//
+in
+  d2mac_new (loc, name, knd, xs, def, stamp)
 end // end of [d2mac_make]
 
 implement
-d2mac_get_loc (d2m) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_loc
-end // end of [d2cst_get_loc]
+d2mac_get_loc (d2m) = d2mac_loc (d2m)
 
 implement
-d2mac_get_sym (d2m) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_sym
-end // end of [d2mac_get_sym]
+d2mac_get_sym (d2m) = d2mac_sym (d2m)
 
 implement
-d2mac_get_kind (d2m) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_kind
-end // end of [d2mac_get_kind]
+d2mac_get_kind (d2m) = d2mac_kind (d2m)
 
 implement
-d2mac_get_arglst (d2m) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_arglst
-end // end of [d2mac_get_arglst]
+d2mac_get_arglst (d2m) = d2mac_arglst (d2m)
 
 implement
-d2mac_get_def (d2m) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_def
-end // end of [d2mac_get_def]
+d2mac_get_def (d2m) = d2mac_def (d2m)
 implement
-d2mac_set_def (d2m, def) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_def := def
-end // end of [d2mac_set_def]
+d2mac_set_def (d2m, def) = set_d2mac_def (d2m, def)
 
 implement
-d2mac_get_stamp (d2m) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2m) in p->d2mac_stamp
-end // end of [d2mac_get_stamp]
-
-end // end of [local
+d2mac_get_stamp (d2m) = d2mac_stamp (d2m)
 
 (* ****** ****** *)
 
@@ -144,11 +109,11 @@ fprint_m2acarg
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ x of
-| M2ACARGsta (s2vs) => (
+case+ m2acarg_view (x) of
+| ~M2ACARGsta (s2vs) => (
     prstr "M2ACARGsta("; fprint_s2varlst (out, s2vs); prstr ")"
   ) // end of [M2ACARGsta]
-| M2ACARGdyn (d2vs) => (
+| ~M2ACARGdyn (d2vs) => (
     prstr "M2ACARGdyn("; fprint_d2varlst (out, d2vs); prstr ")"
   ) // end of [M2ACARGdyn]
 //
@@ -156,7 +121,7 @@ end // end of [fprint_m2acarg]
 
 implement
 fprint_m2acarglst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_m2acarg)
+  (out, xs) = $UT.fprintlst<m2acarg> (out, xs, ", ", fprint_m2acarg)
 // end of [fprint_m2acarglst]
 
 (* ****** ****** *)

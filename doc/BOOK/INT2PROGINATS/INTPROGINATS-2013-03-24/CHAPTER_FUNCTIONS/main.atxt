@@ -1,8 +1,5 @@
 %{
 //
-dynload
-"libatsdoc/dynloadall.dats"
-//
 #include "./../proginatsatxt.dats"
 //
 %}\
@@ -1234,5 +1231,5 @@ is in general not a recommended programming style in ATS.
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

@@ -17,7 +17,7 @@ Time of Generation: #timestamp()\
 #para('\
 
 As is in C, file inclusion inside ATS code is done through the use of the
-directive #emphasis("\\\#include"). For instance, the following line
+directive #emphasis("\\\\\#include"). For instance, the following line
 indicates that a file named #emphasis("foobar") is included, that is, this
 line is to be replaced with the content of the file #emphasis("foobar"):
 
@@ -50,5 +50,5 @@ OCaml.\
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

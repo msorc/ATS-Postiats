@@ -44,13 +44,17 @@ macdef ptr_of_ref = ref_get_ptr
 
 #atscode_separator()
 
-fun{a:vt0p}
-ref(x: a):<!wrt> ref(a)
-fun{a:vt0p}
-ref_make_elt(x: a):<!wrt> ref(a)
 
 #atscode_separator()
 
+//
+// HX-2026-10: no GC
+// A reference is formed by giving up the view of
+// some memory for good; it is meant for memory that
+// is never freed (e.g., statically allocated). There
+// is no longer any function for heap-allocating a
+// reference ([ref] and [ref_make_elt] are removed).
+//
 castfn
 ref_make_viewptr
   {a:vt0p}{l:addr}
@@ -59,8 +63,6 @@ ref_make_viewptr
 
 #atscode_separator()
 
-fun{a:vt0p}
-ref_make_type_elt(TYPE(a), a):<!wrt> ref(a)
 
 #atscode_separator()
 //
@@ -122,6 +124,6 @@ overload [] with ref_set_elt // ref[] := (val)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "reference_atxt.txt")
 %}\

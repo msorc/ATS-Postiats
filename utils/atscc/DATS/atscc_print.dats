@@ -66,7 +66,7 @@ issome(opt) = stropt_is_some(,(opt))
 
 (* ****** ****** *)
 
-typedef ca = commarg
+vtypedef ca = commarg
 
 (* ****** ****** *)
 
@@ -155,17 +155,27 @@ implement
 fprint_commarglst
   (out, cas) = let
 //
-implement
-fprint_val<ca>
-  (out, x) =
-  fprint_commarg(out, x)
-//
-implement
-fprint_list$sep<>
-  (out) = fprint_string(out, " ")
+fun
+loop{n:int}
+(
+  cas: !list_vt(commarg, n), i: int
+) : void =
+(
+case+ cas of
+| list_vt_nil() => ()
+| list_vt_cons(ca, cas1) => let
+    val () =
+    if i > 0
+      then fprint_string(out, " ")
+    // end of [if]
+    val () = fprint_commarg(out, ca)
+  in
+    loop(cas1, i+1)
+  end // end of [list_vt_cons]
+) (* end of [loop] *)
 //
 in
-  fprint_list<ca> (out, cas)
+  loop(cas, 0)
 end // end of [fprint_ccomarglst]
 
 (* ****** ****** *)
@@ -176,7 +186,7 @@ fprint_atsoptline
 //
 fun aux
 (
-  out: FILEref, ca: commarg, i: int
+  out: FILEref, ca: !commarg, i: int
 ) : void = let
 in
 //
@@ -218,20 +228,20 @@ aux_iats
   val () = fprint! (out, " -IATS ", path)
 }
 //
-fun auxlst
+fun auxlst{n:int}
 (
-  out: FILEref, cas: commarglst, i: int
+  out: FILEref, cas: !list_vt(commarg, n), i: int
 ) : void = let
 in
 //
 case+ cas of
 //
-| list_cons
-    (ca, cas) => let
-    val () = aux (out, ca, i) in auxlst (out, cas, i+1)
-  end // end of [list_cons]
+| list_vt_cons
+    (ca, cas1) => let
+    val () = aux (out, ca, i) in auxlst (out, cas1, i+1)
+  end // end of [list_vt_cons]
 //
-| list_nil ((*void*)) => ()
+| list_vt_nil ((*void*)) => ()
 //
 end // end of [auxlst]
 //
@@ -239,7 +249,8 @@ val
 atsopt = atsopt_get ()
 //
 val () =
-  fprint_string (out, atsopt)
+  fprint_strptr (out, atsopt)
+val () = strptr_free (atsopt)
 //
 val () = auxlst (out, cas, 1(*i*))
 //
@@ -256,6 +267,7 @@ case+ ca0 of
     val name = unsome(opt)
     val outname = atscc_outname (knd, name)
     val () = fprint! (out, " --output ", outname)
+    val () = strptr_free (outname)
     val () =
       if knd = 0 then fprintln! (out, " --static ", name)
     // end of [val]
@@ -273,47 +285,52 @@ implement
 fprint_atsoptline_all
   (out, cas0) = let
 //
-fun auxlst
+fun
+auxsnoc
 (
-  out: FILEref, cas1: commarglst_vt, cas2: commarglst
+  cas1: commarglst, ca2: !commarg
+) : commarglst =
+  list_vt_extend<commarg>(cas1, commarg_copy(ca2))
+//
+fun auxlst{n:int}
+(
+  out: FILEref, cas1: commarglst, cas2: !list_vt(commarg, n)
 ) : void = let
 in
 //
 case+ cas2 of
-| list_nil
-    ((*void*)) => let
-    val () = list_vt_free (cas1) in (*nothing*)
-  end (* end of [list_nil] *)
+| list_vt_nil
+    ((*void*)) => commarglst_free (cas1)
 //
-| list_cons
+| list_vt_cons
     (ca2, cas2) =>
   (
     case+ ca2 of
 //
     | CAvats () => let
         val () =
-          fprint_atsoptline (out, $UN.list_vt2t(cas1), ca2)
+          fprint_atsoptline (out, cas1, ca2)
         // end of [val]
       in
         auxlst (out, cas1, cas2)
       end (* end of [CAvats] *)
     | CAtcats () => let
         val cas1 =
-          list_vt_snoc (cas1, ca2) in auxlst (out, cas1, cas2)
+          auxsnoc (cas1, ca2) in auxlst (out, cas1, cas2)
       end (* end of [CAtcats] *)
 //
     | CAdats _ => let
         val cas1 =
-          list_vt_snoc (cas1, ca2) in auxlst (out, cas1, cas2)
+          auxsnoc (cas1, ca2) in auxlst (out, cas1, cas2)
       end (* end of [CAdats] *)
     | CAiats _ => let
         val cas1 =
-          list_vt_snoc (cas1, ca2) in auxlst (out, cas1, cas2)
+          auxsnoc (cas1, ca2) in auxlst (out, cas1, cas2)
       end (* end of [CAiats] *)
 //
     | CAfilats _ => let
         val () =
-          fprint_atsoptline (out, $UN.list_vt2t(cas1), ca2)
+          fprint_atsoptline (out, cas1, ca2)
         // end of [val]
       in
         auxlst (out, cas1, cas2)
@@ -321,7 +338,7 @@ case+ cas2 of
 //
     | _(*ignored*) => auxlst (out, cas1, cas2)
 //
-  ) (* end of [list_cons] *)
+  ) (* end of [list_vt_cons] *)
 //
 end // end of [auxlst]
 //
@@ -337,7 +354,7 @@ fprint_atsccompline
 //
 fun aux
 (
-  out: FILEref, ca: commarg, i: int
+  out: FILEref, ca: !commarg, i: int
 ) : void = let
 in
 //
@@ -398,7 +415,8 @@ aux_fsats
   val outname =
     atscc_outname (0(*sta*), path)
   val () = fprint (out, ' ')
-  val () = fprint_string (out, outname)
+  val () = fprint_strptr (out, outname)
+  val () = strptr_free (outname)
 }
 and
 aux_fdats
@@ -407,7 +425,8 @@ aux_fdats
   val outname =
     atscc_outname (1(*dyn*), path)
   val () = fprint (out, ' ')
-  val () = fprint_string (out, outname)
+  val () = fprint_strptr (out, outname)
+  val () = strptr_free (outname)
 }
 and
 aux_CCOMPitm
@@ -417,27 +436,31 @@ aux_CCOMPitm
   val () = fprint_string (out, item)
 }
 
-fun auxlst
+fun auxlst{n:int}
 (
-  out: FILEref, cas: commarglst, i: int
+  out: FILEref, cas: !list_vt(commarg, n), i: int
 ) : void = let
 in
 //
 case+ cas of
-| list_cons
-    (ca, cas) => let
-    val () = aux (out, ca, i) in auxlst (out, cas, i+1)
-  end // end of [list_cons]
-| list_nil ((*void*)) => ()
+| list_vt_cons
+    (ca, cas1) => let
+    val () = aux (out, ca, i) in auxlst (out, cas1, i+1)
+  end // end of [list_vt_cons]
+| list_vt_nil ((*void*)) => ()
 //
 end // end of [auxlst]
 //
-val-list_cons (ca, cas) = cas0
+val atsccomp = atsccomp_get ()
+val () = fprint_strptr (out, atsccomp)
+val () = strptr_free (atsccomp)
 //
 val () =
-fprint (out, atsccomp_get ())
-//
-val () = auxlst (out, cas, 1(*i*))
+(
+case+ cas0 of
+| list_vt_nil() => ()
+| list_vt_cons(_, cas) => auxlst (out, cas, 1(*i*))
+) : void // end of [val]
 val () = fprint_newline (out)
 //
 in

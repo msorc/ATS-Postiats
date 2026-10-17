@@ -162,37 +162,37 @@ sllist_make_list
   {n}(xs) = let
 //
 fun loop (
-  nx0: g2node1 (a), xs: List (a)
+  nx0: g2node1 (a), xs: !List_vt(a)
 ) : void = let
 in
 //
 case+ xs of
-| list_cons
+| list_vt_cons
     (x, xs) => let
     val nx1 = g2node_make_elt<a> (x)
     val () = gnode_link11 (nx0, nx1)
   in
     loop (nx1, xs)
   end // end of [loop]
-| list_nil () => let
+| list_vt_nil () => let
     val () = gnode_set_next_null (nx0)
   in
     // nothing
-  end // end of [list_nil]
+  end // end of [list_vt_nil]
 //
 end // end of [loop]
 //
 in
 //
 case+ xs of
-| list_cons
+| list_vt_cons
     (x, xs) => let
     val nx0 = g2node_make_elt<a> (x)
     val () = $effmask_all (loop (nx0, xs))
   in
     sllist0_encode (nx0)
-  end // end of [list_cons]
-| list_nil () => sllist_nil ()
+  end // end of [list_vt_cons]
+| list_vt_nil () => sllist_nil ()
 //
 end // end of [sllist_make_list]
 

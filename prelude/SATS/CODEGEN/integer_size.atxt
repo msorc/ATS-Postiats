@@ -191,6 +191,6 @@ overload sz2u with g1uint2uint_size_uint of 10
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_size_atxt.txt")
 %}\

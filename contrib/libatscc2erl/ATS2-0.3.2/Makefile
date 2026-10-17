@@ -29,18 +29,16 @@ $(PATSOPT2) -d ./DATS/basics.dats | \
 $(ATSCC2ERL) -o ./output/DATS/basics_dats.hrl -i
 #
 all:: ; \
-$(PATSOPT2) -d ./DATS/list.dats | \
-$(ATSCC2ERL) -o ./output/DATS/list_dats.hrl -i
+$(PATSOPT2) -d ./DATS/list_vt.dats | \
+$(ATSCC2ERL) -o ./output/DATS/list_vt_dats.hrl -i
 all:: ; \
-$(PATSOPT2) -d ./DATS/option.dats | \
-$(ATSCC2ERL) -o ./output/DATS/option_dats.hrl -i
+$(PATSOPT2) -d ./DATS/stream_vt.dats | \
+$(ATSCC2ERL) -o ./output/DATS/stream_vt_dats.hrl -i
+#
 all:: ; \
 $(PATSOPT2) -d ./DATS/intrange.dats | \
 $(ATSCC2ERL) -o ./output/DATS/intrange_dats.hrl -i
 #
-all:: ; \
-$(PATSOPT2) -d ./DATS/ML/option0.dats | \
-$(ATSCC2ERL) -o ./output/DATS/ML/option0_dats.hrl -i
 #
 ######
 
@@ -96,10 +94,9 @@ CATS/Erlang/file_cats.hrl \
 libatscc2erl_all:: ; \
 $(CAT) >>$(LIBATSCC2ERL_ALL_HRL) \
 output/DATS/basics_dats.hrl \
-output/DATS/list_dats.hrl \
-output/DATS/option_dats.hrl \
+output/DATS/list_vt_dats.hrl \
+output/DATS/stream_vt_dats.hrl \
 output/DATS/intrange_dats.hrl \
-output/DATS/ML/option0_dats.hrl \
 
 ######
 #
@@ -116,7 +113,6 @@ clean:: ; $(RMF) *~ */*~
 
 cleanall:: clean
 cleanall:: ; $(RMF) output/DATS/*_?ats.hrl
-cleanall:: ; $(RMF) output/DATS/ML/*_?ats.hrl
 cleanall:: ; $(RMF) $(LIBATSCC2ERL_ALL_HRL)
 
 ######

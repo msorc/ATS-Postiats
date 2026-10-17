@@ -142,6 +142,7 @@
 
 (define-macro (ATSSELcon xs i) `(ATSCCget_at ,xs ,i))
 (define-macro (ATSSELboxrec xs i) `(ATSCCget_at ,xs ,i))
+(define-macro (ATSSELfltrec xs i) `(ATSCCget_at ,xs ,i)) ;; HX-2026-10: flat records
 
 ;; ****** ****** ;;
 ;;

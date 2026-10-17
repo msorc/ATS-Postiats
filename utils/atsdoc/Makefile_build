@@ -1,0 +1,78 @@
+#
+# Makefile for atsdoc (run in BUILD/: make -C BUILD -f ../Makefile_build)
+#
+# HX-2026-10: atsdoc is written in ATS2 (no GC) and built by patsopt and the C
+# compiler alone, on top of the ATS2 sources of the compiler (PATSHOME/src) and
+# libatsopt.a (the compiler as a library; `make -C src libatsopt.a`, Makefile_devl
+# or utils/libatsopt). It does not use libatsdoc (the library of the programs
+# that it generates).
+#
+# Targets: atsdoc (the default), gen (regenerate the arena encoding of
+# atsdoc_translate.spec), check (typecheck the files), clean, cleanall
+#
+# Variables: PATSHOME (the repository), PATSOPT, CC, CCFLAGS,
+# LIBATSOPT (the path of libatsopt.a), LIBGMP (-lgmp; empty if libatsopt.a was
+# built with C3NSTRINTKND=intknd)
+#
+
+######
+
+HERE:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+SATS=$(HERE)SATS
+DATS=$(HERE)DATS
+
+include $(HERE)../../libatsdoc/Makefile_vars
+
+######
+
+all:: atsdoc
+
+######
+
+GENHATS=$(SATS)/atsdoc_translate_gen.hats $(DATS)/atsdoc_translate_gen_dats.hats
+
+$(SATS)/atsdoc_translate_gen.hats: $(HERE)atsdoc_translate.spec $(PATSHOME)/utils/arenagen/arenagen.py
+	python3 $(PATSHOME)/utils/arenagen/arenagen.py --global sats $< > $@
+$(DATS)/atsdoc_translate_gen_dats.hats: $(HERE)atsdoc_translate.spec $(PATSHOME)/utils/arenagen/arenagen.py
+	python3 $(PATSHOME)/utils/arenagen/arenagen.py --global dats $< > $@
+
+gen:: ; $(RMF) $(GENHATS)
+gen:: $(GENHATS)
+
+######
+
+MODULES=atsdoc_translate atsdoc_translate_error atsdoc_translate_item atsdoc_main
+
+OBJECTS=$(addsuffix _dats.o,$(MODULES))
+
+atsdoc: $(OBJECTS) $(LIBATSOPT)
+	$(PATSCC) -o $@ $(OBJECTS) $(LIBATSOPT) $(LIBGMP)
+
+######
+
+%_dats.c: $(DATS)/%.dats $(SATS)/atsdoc_translate.sats $(GENHATS) $(PATSHOME)/libatsdoc/CATS/libatsdoc_sbuf.cats
+	$(PATSOPT) --output $@ --dynamic $<
+
+%_dats.o: %_dats.c
+	$(PATSCC) -c -o $@ $<
+
+.PRECIOUS: %_dats.c
+
+######
+
+check:: $(GENHATS)
+	@echo "typecheck $(SATS)/atsdoc_translate.sats"; $(PATSOPT) --typecheck -s $(SATS)/atsdoc_translate.sats >/dev/null || exit 1
+	@for f in $(addprefix $(DATS)/,$(addsuffix .dats,$(MODULES))); do \
+	  echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+
+######
+
+clean:: ; $(RMF) *~
+clean:: ; $(RMF) *_dats.c *_dats.o
+
+cleanall:: clean
+cleanall:: ; $(RMF) atsdoc
+
+distclean:: cleanall
+
+###### end of [Makefile for atsdoc] ######

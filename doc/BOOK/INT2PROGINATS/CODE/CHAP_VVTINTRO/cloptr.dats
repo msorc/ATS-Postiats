@@ -42,12 +42,12 @@ fun{
 a:t@ype}{b:vt@ype
 } list_map_cloptr{n:int}
 (
-  xs: list (a, n), f: !(a) -<cloptr1> b
+  xs: !list_vt (a, n), f: !(a) -<cloptr1> b
 ) : list_vt (b, n) =
 (
   case+ xs of
-  | list_nil () => list_vt_nil ()
-  | list_cons (x, xs) => list_vt_cons (f (x), list_map_cloptr<a><b> (xs, f))
+  | list_vt_nil () => list_vt_nil ()
+  | list_vt_cons (x, xs) => list_vt_cons (f (x), list_map_cloptr<a><b> (xs, f))
 )
 
 (* ****** ****** *)
@@ -63,7 +63,7 @@ val len = list_vt_length (xs)
 //
 val f = lam (x: int): int =<cloptr1> x * len
 val ys =
-list_map_cloptr<int><int> ($UNSAFE.list_vt2t(xs), f)
+list_map_cloptr<int><int> (xs, f)
 val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(f))
 //
 val () = println! ("xs = ", xs) // xs = 0, 1, 2, 3, 4

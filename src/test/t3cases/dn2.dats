@@ -1,0 +1,171 @@
+(* downward typing: lambdas against function types (arity, linearity, funclo, effects), tuples/records of the wrong size, empty sequences, $showtype *)
+#include "share/atspre_staload.hats"
+
+datavtype dvt = DVT of (int)
+fun free_dvt (x: dvt): void = let val+ ~DVT _ = x in end
+overload free with free_dvt
+
+val l1 = (lam (x) => x : (int) -<fun> int)
+val l2 = (lam (x, y) => x : (int) -<fun> int)
+val l3 = (lam (x) => x : (int, int) -<fun> int)
+val l4 = (lam (x: bool) => 1 : (int) -<fun> int)
+val l5 = (lam (x: int): bool => true : (int) -<fun> int)
+val l6 = (llam (x) => x : (int) -<fun> int)
+val l7 = (lam (x) => x : (int) -<fun,lin> int)
+val l8 = (llam (x) => x : (int) -<fun,lin> int)
+val l9 = (lam@ (x) => x : (int) -<fun> int)
+val l10 = (lam (x) =<fun> x : (int) -<cloptr> int)
+val l11 = (lam (x) =<fun,!wrt> x : (int) -<fun> int)
+val l12 = (lam (x) =<fun> x : (int) -<fun,!wrt> int)
+val l13 = (lam (x) =<fun,!exn> x : (int) -<fun> int)
+val l14 = (lam (x) =<fun,!wrt> x : (int) -<fun,!exn> int)
+val l15 = (lam (x) => x : {n:nat} (int n) -<fun> int)
+val l16 = (lam (x) => x : {n:nat} (int n) -<fun> int n)
+val l17 = (lam (x) => x : {n:nat} (int n) -<fun> int (n+1))
+val l18 = (llam (x) => x : {n:nat} (int n) -<fun> int n)
+val l19 = (lam (x) => x : (!int >> int) -<fun> int)
+val l20 = (lam (x) => () : (&int >> int) -<fun> void)
+val l23 = (lam (pf | p) => () : {l:addr} (!int @ l | ptr l) -<fun> void)
+val l24 = (lam (p) => () : {l:addr} (!int @ l | ptr l) -<fun> void)
+val l25 = (lam (pf, pf2 | p) => () : {l:addr} (!int @ l | ptr l) -<fun> void)
+val l26 = (lam (x) => () : (int) -<prf> void)
+val l27 = (lam (x) => () : (int) -<fun> void)
+val l28 = (lam (x) => x : int)
+val l29 = (3 : (int) -<fun> int)
+val l30 = (lam (x: int) => x + 1 : (int) -<fun> int)
+val l31 = (lam (f, x) => f x : ((int) -<fun> int, int) -<fun> int)
+val l32 = (lam (DVT x) => x : (dvt) -<fun> int)
+val l33 = (lam (~DVT x) => x : (dvt) -<fun> int)
+val l34 = (lam (@DVT x) => x : (dvt) -<fun> int)
+val l35 = (lam (x) => () : (dvt) -<fun> void)
+val l36 = (lam (x) => free x : (dvt) -<fun> void)
+val l37 = (lam (x) => () : (!dvt) -<fun> void)
+val l38 = (lam (x) => free x : (!dvt) -<fun> void)
+val l39 = (lam (DVT x) => () : (dvt) -<fun> void)
+val l40 = (lam (DVT x, y) => free y : (dvt, dvt) -<fun> void)
+
+(* tuples and records *)
+val t1 = (@(1, 2) : @(int, int))
+val t2 = (@(1) : @(int, int))
+val t3 = (@(1, 2, 3) : @(int, int))
+val t4 = (@(1, true) : @(int, int))
+val t5 = (@{ a= 1, b= 2 } : @{ a= int, b= int })
+val t6 = (@{ a= 1 } : @{ a= int, b= int })
+val t7 = (@{ a= 1, b= 2, c= 3 } : @{ a= int, b= int })
+val t8 = (@{ a= 1, c= 3 } : @{ a= int, b= int })
+val t9 = (@{ b= 2, a= 1 } : @{ a= int, b= int })
+val t10 = (@(1, 2) : @{ a= int, b= int })
+val t11 = (@{ a= 1, b= 2 } : @(int, int))
+val t12 = (3 : @(int, int))
+val t13 = (3 : @{ a= int, b= int })
+val t14 = ('(1, 2) : @(int, int))
+val t15 = (@(1, 2) : '(int, int))
+val t16 = ('{ a= 1, b= 2 } : @{ a= int, b= int })
+val t17 = (@{ a= 1, b= 2 } : '{ a= int, b= int })
+val t18 = (@{ a= 1, b= true } : @{ a= int, b= int })
+val t19 = (@(1 | 2) : @(int | int))
+val t20 = (@(1) : @(int | int))
+val t21 = (@(1 | 2) : @(int | int, int))
+val t22 = (@(unit_p() | 1) : @(int, int))
+val t23 = (@{ a= 1, b= 2 } : @{ a= int, b= int, c= int })
+val t24 = (@{ a= 1, b= 2, c= 3, d= 4 } : @{ a= int, b= int, c= int })
+val t25 = (@(1, 2) : @(int, int, int))
+val t26 = (@(1, 2, 3, 4) : @(int, int, int))
+val t27 = (@(DVT 1, 2) : @(dvt, int))
+val t28 = (@(DVT 1) : @(dvt, int))
+val t29 = (@{ a= DVT 1, c= 2 } : @{ a= dvt, b= int })
+val t30 = (@(unit_v(), 2) : @(unit_v, int))
+val t31 = (@(unit_v() | 2) : @(unit_v | int))
+
+(* sequences and empty expressions *)
+val s1 = (() : int)
+val s2 = (() : void)
+val s3 = ((1; 2) : int)
+val s4 = ((1; ()) : int)
+val s5 = ((1; ()) : void)
+val s6 = ((print "a"; ()) : int)
+val s7 = (() : void)
+val s8 = (let in end : int)
+val s9 = (let in end : void)
+fun s10 (): void = let in end
+fun s11 (): int = let in () end
+fun s12 (): int = ($showtype 1; 2)
+fun s13 (): int = $showtype (1 + 2)
+fun s14 (x: int): int = ($showtype x)
+fun s15 (x: int): bool = ($showtype x)
+fun s16 (): void = $showtype ()
+val s17 = ($showtype 3 : int)
+fun s18 (): int = if true then $showtype 1 else $showtype 2
+fun s19 (): int = (case+ 1 of | 1 => $showtype 1 | _ => $showtype 2)
+
+(* optional components of loops and ifs *)
+fun o1 (): void = for (;;) ()
+fun o2 (n: int): void = let var i: int = 0 in for (i := 0; i < n; i := i + 1) () end
+fun o3 (n: int): void = let var i: int = 0 in for (; i < n; ) i := i + 1 end
+fun o4 (n: int): void = let var i: int = 0 in for (i := 0; ; i := i + 1) if i > n then () else () end
+fun o5 (n: int): void = let var i: int = 0 in while (i < n) i := i + 1 end
+fun o6 (n: int): int = if n > 0 then 1
+fun o7 (n: int): void = if n > 0 then 1
+fun o8 (n: int): int = if n > 0 then 1 else true
+fun o9 (n: int): int = if n then 1 else 2
+fun o10 (n: bool): int = if n then 1 else 2
+fun o11 {b:bool} (n: bool b): int = if n then 1 else 2
+fun o12 (n: int): void = for (; n; ) ()
+fun o13 (n: int): void = while (n) ()
+fun o14 (n: int): void = while (true; true) ()
+fun o15 (n: int): int = for (;;) ()
+
+
+(* lambdas as arguments: downward typing through the application *)
+fun app1 (f: (int) -<fun> int): int = f 1
+fun app2 (f: (int) -<fun,lin> int): int = f 1
+fun app3 {l:addr} (f: (!int @ l | ptr l) -<fun> void): void = ()
+fun app4 (f: (int) -<fun,!wrt> int): int = 1
+fun app5 (f: (int) -<fun,!exn> int): int = 1
+fun app6 (f: (int) -<cloptr> int): int = 1
+fun app7 (f: (int) -<lincloptr> int): int = (let val r = f 1 in cloptr_free ($UNSAFE.castvwtp0 f); r end)
+fun app8 (f: (int) -<fun> int, g: (int) -<fun> int): int = 1
+fun app9 (f: (&int >> int) -<fun> void): int = 1
+fun app10 (f: ((int) -<fun> int, int) -<fun> int): int = 1
+fun app11 (f: (int) -<fun> (int) -<fun> int): int = 1
+fun app12 (f: (int) -<fun> @(int, int)): int = 1
+val a1 = app1 (lam (x) => x)
+val a2 = app1 (lam (x, y) => x)
+val a3 = app1 (lam () => 1)
+val a4 = app1 (lam (x: bool) => 1)
+val a5 = app1 (lam (x) => true)
+val a6 = app1 (llam (x) => x)
+val a7 = app2 (lam (x) => x)
+val a8 = app2 (llam (x) => x)
+val a9 = app1 (lam@ (x) => x)
+val a10 = app3 (lam (pf | p) => ())
+val a11 = app3 (lam (pf, pf2 | p) => ())
+val a12 = app3 (lam (p) => ())
+val a13 = app4 (lam (x) => x)
+val a14 = app4 (lam (x) =<fun,!wrt> x)
+val a15 = app5 (lam (x) =<fun,!wrt> x)
+val a16 = app1 (lam (x) =<fun,!wrt> x)
+val a17 = app1 (lam (x) =<cloref> x)
+val a18 = app6 (lam (x) => x)
+val a19 = app6 (lam (x) =<cloptr1> x)
+val a20 = app1 (lam (x) =<cloptr1> x)
+val a21 = app8 (lam (x) => x, lam (y) => y)
+val a22 = app8 (lam (x) => x, 3)
+val a23 = app9 (lam (x) => ())
+val a24 = app9 (lam (x: &int >> int) => ())
+val a25 = app10 (lam (f, x) => f x)
+val a26 = app10 (lam (f) => 1)
+val a27 = app11 (lam (x) => lam (y) => x + y)
+val a28 = app11 (lam (x) => lam (y, z) => x + y)
+val a29 = app12 (lam (x) => @(x, x))
+val a30 = app12 (lam (x) => @(x))
+val a31 = app12 (lam (x) => @(x, x, x))
+val a32 = app12 (lam (x) => @{ a= x, b= x })
+val a33 = app1 (fix f (x: int): int => x)
+val a34 = app1 (fix f (x: int): int => f x)
+val a35 = app1 (fix f (x: int, y: int): int => f x)
+val a36 = app1 (fix@ f (x: int): int => x)
+val a37 = app1 (lam {n:int} (x: int n) => x)
+val a38 = app1 (lam (x: int) => x)
+val a39 = app1 (lam (x) => (let in () end))
+val a40 = app1 (lam (x) => ())

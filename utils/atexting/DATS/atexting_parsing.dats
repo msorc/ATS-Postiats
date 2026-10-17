@@ -42,10 +42,6 @@
 //
 (* ****** ****** *)
 //
-staload
-"libats/ML/SATS/basis.sats"
-staload
-"libats/ML/SATS/list0.sats"
 //
 (* ****** ****** *)
 
@@ -55,6 +51,9 @@ staload UN = $UNSAFE
 //
 staload
 "./../SATS/atexting.sats"
+//
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -68,8 +67,8 @@ token_is_spchr
 (
 //
 case+
-tok.token_node of
-| TOKspchr(i) => (int2char0(i) = c) | _ => false
+token_node_view(tok.token_node()) of
+| ~TOKspchr(i) => (int2char0(i) = c) | v0 => (token_node_view_free(v0); false)
 //
 ) (* token_is_COMMA *)
 //
@@ -104,28 +103,29 @@ tok = tokbuf_get_token(buf)
 //
 in
 //
+let
+//
+val isnl =
+(
 case+
-tok.token_node
+token_node_view(tok.token_node())
 of // case+
+| ~TOKbslash(i) => (int2char0(i) = '\n')
+| v0 (* rest-of-token *) => (token_node_view_free(v0); false)
+) : bool // end of [val]
 //
-(*
-| TOKspace _ => let
+in
+//
+if isnl
+  then let
     val () =
     tokbuf_incby_1(buf)
-  in 
+  in
     tokbuf_get1_token(buf)
-  end // end of [TOKspace]
-*)
+  end // end of [then]
+  else tok
 //
-| TOKbslash(i)
-  when int2char0(i) = '\n' => let
-    val () =
-    tokbuf_incby_1(buf)
-  in 
-    tokbuf_get1_token(buf)
-  end // end of [TOKbslash\n]
-//
-| _(* rest-of-token *) => tok
+end // end of [let]
 //
 end // end of [tokbuf_get1_token]
 //
@@ -146,24 +146,24 @@ tok = tokbuf_get_token(buf)
 in
 //
 case+
-tok.token_node
+token_node_view(tok.token_node())
 of // case+
 //
-| TOKspace _ => let
+| ~TOKspace _ => let
     val () =
     tokbuf_incby_1(buf)
   in 
     tokbuf_get2_token(buf)
   end // end of [TOKspace]
 //
-| TOKeol((*void*)) => let
+| ~TOKeol((*void*)) => let
     val () =
     tokbuf_incby_1(buf)
   in 
     tokbuf_get2_token(buf)
   end // end of [TOKeol]
 //
-| TOKbslash(i)
+| ~TOKbslash(i)
   when int2char0(i) = '\n' => let
     val () =
     tokbuf_incby_1(buf)
@@ -171,7 +171,7 @@ of // case+
     tokbuf_get2_token(buf)
   end // end of [TOKbslash\n]
 //
-| _(* rest-of-token *) => tok
+| v0(* rest-of-token *) => (token_node_view_free(v0); tok)
 //
 end // end of [tokbuf_get2_token]
 //
@@ -232,19 +232,19 @@ parsing_atext
 ) : atext = (
 //
 case+
-tok0.token_node
+token_node_view(tok0.token_node())
 of // case+
 //
-| TOKsquote _ => parsing_squote(tok0, buf)
-| TOKdquote _ => parsing_dquote(tok0, buf)
+| ~TOKsquote _ => parsing_squote(tok0, buf)
+| ~TOKdquote _ => parsing_dquote(tok0, buf)
 //
-| TOKsharp _ when
+| ~TOKsharp _ when
   token_is_nsharp(tok0) => parsing_sharp(tok0, buf)
 //
-| TOKcode_beg _ when
+| ~TOKcode_beg _ when
   token_is_atlnbeg(tok0) => parsing_extcode(tok0, buf)
 //
-| _ (*rest-of-token*) => atext_make_token(tok0)
+| v0 (*rest-of-token*) => (token_node_view_free(v0); atext_make_token(tok0))
 //
 ) (* end of [parsing_atext] *)
 
@@ -295,16 +295,16 @@ val () = tokbuf_incby_1(buf)
 in
 //
 case+
-tok0.token_node
+token_node_view(tok0.token_node())
 of // case+
 //
-| TOKsharp _ when
+| ~TOKsharp _ when
   token_is_nsharp(tok0) => parsing_sharp(tok0, buf)
 //
-| TOKcode_beg _ when
+| ~TOKcode_beg _ when
   token_is_atlnbeg(tok0) => parsing_extcode(tok0, buf)
 //
-| _ (*rest-of-token*) => atext_make_token(tok0)
+| v0 (*rest-of-token*) => (token_node_view_free(v0); atext_make_token(tok0))
 //
 end (* end of [parsing_atext_top] *)
 
@@ -323,19 +323,19 @@ val x0 = tokbuf_get2_token(buf)
 in
 //
 case+
-x0.token_node
+token_node_view(x0.token_node())
 of // case+
 //
-| TOKide _ => let
+| ~TOKide _ => let
     val () = incby1(buf)
   in
     parsing_funcall(tok0, x0, buf)
   end // end of [TOKide]
 //
-| _(*non-ident*) =>
+| v0(*non-ident*) => (token_node_view_free(v0);
   (
-    atext_make(tok0.token_loc, TEXTtoken(tok0))
-  ) (* non-ident *)
+    atext_make(tok0.token_loc(), atext_node_TEXTtoken(tok0))
+  ) (* non-ident *))
 //
 end // end of [parsing_sharp]
 
@@ -353,23 +353,21 @@ val x0 = tokbuf_get1_token(buf)
 //
 in
 //
-case+
-x0.token_node
-of // case+
+case+ x0 of // case+
 | _ when
     token_is_LPAREN(x0) => let
     val () = incby1(buf)
     var rparen: tokenopt
     val xs = parsing_atext1seq_rparen(buf, rparen)
-    val loc1 = tok1.token_loc
+    val loc1 = tok1.token_loc()
     val loc2 =
     (
 //
-      case+ rparen of
+      case+ gopt_view(rparen) of
 //
-      | Some(tok) => tok.token_loc
+      | ~GOsome(tok) => tok.token_loc()
 //
-      | None((*err*)) => loc2 where
+      | ~GOnone((*err*)) => loc2 where
         {
           fun
           aux
@@ -377,9 +375,9 @@ of // case+
             loc: loc_t, xs: atextlst
           ) : loc_t =
           (
-            case+ xs of
-            | list0_nil() => loc
-            | list0_cons(x, xs) => aux2(x, xs)
+            case+ glist_view(xs) of
+            | ~GLnil() => loc
+            | ~GLcons(x, xs) => aux2(x, xs)
           )
           and
           aux2
@@ -387,34 +385,34 @@ of // case+
             x: atext, xs: atextlst
           ) : loc_t =
           (
-            case+ xs of
-            | list0_nil() => x.atext_loc
-            | list0_cons(x, xs) => aux2(x, xs)
+            case+ glist_view(xs) of
+            | ~GLnil() => x.atext_loc()
+            | ~GLcons(x, xs) => aux2(x, xs)
           )
           val loc2 = aux(loc1, xs)
           val loc2_end = location_rightmost(loc2)
           val ((*void*)) =
-          the_parerrlst_insert2(loc2_end, PARERR_FUNARG(x0.token_loc))
+          the_parerrlst_insert2(loc2_end, parerr_node_PARERR_FUNARG(x0.token_loc()))
           // end of [val]
         } (* end of [None] *)
 //
     ) (* end of [val] *)
 //
-    val loc = tok0.token_loc + loc2
+    val loc = tok0.token_loc() + loc2
 //
   in
     atext_make
-      (loc, TEXTfuncall(tok0, tok1, xs))
+      (loc, atext_node_TEXTfuncall(tok0, tok1, xs))
     // atext_make
   end // end of [LPAREN]
 //
-| _(*non-LPAREN*) => let
+| _(*non-LPAREN*) => (let
     val loc =
-      tok0.token_loc+tok1.token_loc
+      tok0.token_loc()+tok1.token_loc()
     // end of [val]
   in
-    atext_make(loc, TEXTdefname(tok0, tok1))
-  end // end of [non-LPAREN]
+    atext_make(loc, atext_node_TEXTdefname(tok0, tok1))
+  end) // end of [non-LPAREN]
 //
 end // end of [parsing_funcall]
 
@@ -432,13 +430,11 @@ val tok = tokbuf_get2_token(buf)
 //
 in
 //
-case+
-tok.token_node
-of // case+
+case+ tok of // case+
 | _ when
     token_is_RPAREN(tok) =>
-    let val () = incby1(buf) in Some(tok) end
-| _ (*non-RPAREN*) => None((*void*))
+    let val () = incby1(buf) in gopt_some(tok) end
+| _ (*non-RPAREN*) => (gopt_none((*void*)))
 //
 end // end of [parsing_rparen]
 
@@ -479,7 +475,7 @@ end // end of [loop]
 val xs = loop(buf, list_vt_nil())
 //
 in
-  list0_of_list_vt(list_vt_reverse(xs))
+  glist_make_list_vt(list_vt_reverse(xs))
 end // end of [parsing_commatextseq]
 
 (* ****** ****** *)
@@ -496,22 +492,19 @@ val tok = tokbuf_get2_token(buf)
 //
 in
 //
-case+
-tok.token_node
-of // case+
+case+ tok of // case+
 | _ when
     token_is_RPAREN(tok) => let
     val () = incby1(buf)
   in
-    rparen := Some(tok); list0_nil()
+    rparen := gopt_some(tok); glist_nil()
   end // end of [RPAREN]
-| _ (*non-RPAREN*) =>
-    list0_cons(x0, xs) where
+| _ (*non-RPAREN*) => (glist_cons(x0, xs) where
   {
     val x0 = parsing_atext1(buf)
     val xs = parsing_commatextseq(buf)
     val () = (rparen := parsing_rparen(buf))
-  } (* end of [non-empty] *)
+  } (* end of [non-empty] *))
 //
 end // end of [parsing_atextseq_rparen]
 
@@ -533,40 +526,40 @@ val tok1 = tokbuf_get_token(buf)
 in
 //
 case+
-tok1.token_node
+token_node_view(tok1.token_node())
 of // case+
 //
-| TOKsquote() => let
+| ~TOKsquote() => let
     val () =
       tokbuf_incby_1(buf)
     val loc =
-      tok0.token_loc + tok1.token_loc
+      tok0.token_loc() + tok1.token_loc()
     // end of [val]
     val txts =
-      list0_of_list_vt(list_vt_reverse(txts))
+      glist_make_list_vt(list_vt_reverse(txts))
     // end of [val]
   in
-    atext_make(loc, TEXTsquote(txts))
+    atext_make(loc, atext_node_TEXTsquote(txts))
   end // TOKsquote
 //
-| TOKeof((*void*)) => let
+| ~TOKeof((*void*)) => let
     val () =
       tokbuf_incby_1(buf)
     val loc =
-      tok0.token_loc + tok1.token_loc
+      tok0.token_loc() + tok1.token_loc()
     // end of [val]
     val txts =
-      list0_of_list_vt(list_vt_reverse(txts))
+      glist_make_list_vt(list_vt_reverse(txts))
     // end of [val]
     val () =
     the_parerrlst_insert2
-      (tok1.token_loc, PARERR_SQUOTE(tok0.token_loc))
+      (tok1.token_loc(), parerr_node_PARERR_SQUOTE(tok0.token_loc()))
     // end of [val]
   in
-    atext_make(loc, TEXTsquote(txts))
+    atext_make(loc, atext_node_TEXTsquote(txts))
   end // end of [TOKeof]
 //
-| TOKdquote _ => let
+| ~TOKdquote _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -574,11 +567,11 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKdquote]
 //
-| _ (*non-TOKsquote*) =>
+| v0 (*non-TOKsquote*) => (token_node_view_free(v0);
   let
     val txt = parsing_atext0(buf)
     val txts = cons_vt(txt, txts) in loop(buf, txts)
-  end // end of [non-TOKsquote]
+  end) // end of [non-TOKsquote]
 //
 end // end of [loop]
 //
@@ -596,8 +589,8 @@ dquote_eq
   x: token, y: token
 ) : bool = let
 //
-val-TOKdquote(xs) = x.token_node
-val-TOKdquote(ys) = y.token_node
+val-~TOKdquote(xs) = token_node_view(x.token_node())
+val-~TOKdquote(ys) = token_node_view(y.token_node())
 //
 in
   if xs = ys then true else false
@@ -621,41 +614,41 @@ val tok1 = tokbuf_get_token(buf)
 in
 //
 case+
-tok1.token_node
+token_node_view(tok1.token_node())
 of // case+
-| TOKdquote _ when
+| ~TOKdquote _ when
   dquote_eq(tok0, tok1) =>
   let
     val () =
       tokbuf_incby_1(buf)
     val loc =
-      tok0.token_loc + tok1.token_loc
+      tok0.token_loc() + tok1.token_loc()
     // end of [val]
     val txts =
-      list0_of_list_vt(list_vt_reverse(txts))
+      glist_make_list_vt(list_vt_reverse(txts))
     // end of [val]
   in
-    atext_make(loc, TEXTdquote(tok0, txts))
+    atext_make(loc, atext_node_TEXTdquote(tok0, txts))
   end // TOKdquote_eq
 //
-| TOKeof((*void*)) => let
+| ~TOKeof((*void*)) => let
     val () =
       tokbuf_incby_1(buf)
     val loc =
-      tok0.token_loc + tok1.token_loc
+      tok0.token_loc() + tok1.token_loc()
     // end of [val]
     val txts =
-      list0_of_list_vt(list_vt_reverse(txts))
+      glist_make_list_vt(list_vt_reverse(txts))
     // end of [val]
     val () =
     the_parerrlst_insert2
-      (tok1.token_loc, PARERR_DQUOTE(tok0.token_loc))
+      (tok1.token_loc(), parerr_node_PARERR_DQUOTE(tok0.token_loc()))
     // end of [val]
   in
-    atext_make(loc, TEXTdquote(tok0, txts))
+    atext_make(loc, atext_node_TEXTdquote(tok0, txts))
   end // end of [TOKeof]
 //
-| TOKsquote _ => let
+| ~TOKsquote _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -663,7 +656,7 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKsquote]
 //
-| TOKdquote _ => let
+| ~TOKdquote _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -671,11 +664,11 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKdquote]
 //
-| _ (*non-TOKdquote_eq*) =>
+| v0 (*non-TOKdquote_eq*) => (token_node_view_free(v0);
   let
     val txt = parsing_atext0(buf)
     val txts = cons_vt(txt, txts) in loop(buf, txts)
-  end // end of [non-TOKdquote_eq]
+  end) // end of [non-TOKdquote_eq]
 //
 end // end of [loop]
 //
@@ -703,41 +696,41 @@ val tok1 = tokbuf_get_token(buf)
 in
 //
 case+
-tok1.token_node
+token_node_view(tok1.token_node())
 of // case+
 //
-| TOKcode_end _ when
+| ~TOKcode_end _ when
   token_is_atlnbeg(tok1) => let
     val () =
       tokbuf_incby_1(buf)
     val loc =
-      tok0.token_loc + tok1.token_loc
+      tok0.token_loc() + tok1.token_loc()
     // end of [val]
     val txts =
-      list0_of_list_vt(list_vt_reverse(txts))
+      glist_make_list_vt(list_vt_reverse(txts))
     // end of [val]
   in
-    atext_make(loc, TEXTextcode(tok0, txts, tok1))
+    atext_make(loc, atext_node_TEXTextcode(tok0, txts, tok1))
   end // TOKcode_end
 //
-| TOKeof((*void*)) => let
+| ~TOKeof((*void*)) => let
     val () =
       tokbuf_incby_1(buf)
     val loc =
-      tok0.token_loc + tok1.token_loc
+      tok0.token_loc() + tok1.token_loc()
     // end of [val]
     val txts =
-      list0_of_list_vt(list_vt_reverse(txts))
+      glist_make_list_vt(list_vt_reverse(txts))
     // end of [val]
     val () =
     the_parerrlst_insert2
-      (tok1.token_loc, PARERR_EXTCODE(tok0.token_loc))
+      (tok1.token_loc(), parerr_node_PARERR_EXTCODE(tok0.token_loc()))
     // end of [val]
   in
-    atext_make(loc, TEXTextcode(tok0, txts, tok1))
+    atext_make(loc, atext_node_TEXTextcode(tok0, txts, tok1))
   end // end of [TOKeof]
 //
-| TOKsharp _ => let
+| ~TOKsharp _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -745,7 +738,7 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKsharp]
 //
-| TOKsquote _ => let
+| ~TOKsquote _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -753,7 +746,7 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKsquote]
 //
-| TOKdquote _ => let
+| ~TOKdquote _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -761,7 +754,7 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKdquote]
 //
-| TOKcode_beg _ => let
+| ~TOKcode_beg _ => let
     val () =
       tokbuf_incby_1(buf)
     // end of [val]
@@ -769,11 +762,11 @@ of // case+
     val txts = cons_vt(txt, txts) in loop(buf, txts)
   end // end of [TOKcode_beg]
 //
-| _ (*non-TOKcode_end*) =>
+| v0 (*non-TOKcode_end*) => (token_node_view_free(v0);
   let
     val txt = parsing_atext0(buf)
     val txts = cons_vt(txt, txts) in loop(buf, txts)
-  end // end of [non-TOKcode_end]
+  end) // end of [non-TOKcode_end]
 //
 end // end of [loop]
 //
@@ -803,16 +796,16 @@ parsing_atext_top(buf)
 in
 //
 case+
-txt.atext_node
+atext_node_view(txt.atext_node())
 of // case+
 //
-| TEXTtoken(tok)
+| ~TEXTtoken(tok)
   when token_is_eof(tok) =>
-  list0_of_list_vt(list_vt_reverse(txts))
+  glist_make_list_vt(list_vt_reverse(txts))
 //
-| _(*non-TEXTtoken_eof*) => let
+| v0(*non-TEXTtoken_eof*) => (atext_node_view_free(v0); let
     val txts = list_vt_cons(txt, txts) in loop(buf, txts)
-  end // end of [non-TEXTtoken_eof]
+  end) // end of [non-TEXTtoken_eof]
 //
 end // end of [loop]
 //
@@ -905,7 +898,7 @@ in
 //
 case+ opt of
 | ~None_vt() =>
-    list0_nil()
+    glist_nil()
 | ~Some_vt(infil) =>
     txtlst where
   {

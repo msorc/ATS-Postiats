@@ -105,5 +105,5 @@ atspre_g1uint2uint_usint_uint(x) atspre_g0uint2uint_usint_uint(x)
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "integer_short_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "integer_short_atxt.txt")
 %}\

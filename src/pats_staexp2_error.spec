@@ -1,0 +1,22 @@
+# arenagen specification for pats_staexp2_error.sats: the static errors of the unification (--compact)
+# python3 ../utils/arenagen/arenagen.py --global sats pats_staexp2_error.spec > pats_staexp2_error_gen.hats
+# python3 ../utils/arenagen/arenagen.py --global --compact dats pats_staexp2_error.spec > pats_staexp2_error_gen_dats.hats
+type staerr
+  STAERR_label_equal (location, label, label)
+  STAERR_stamp_equal (location, stamp, stamp)
+  STAERR_funclo_equal (location, funclo, funclo)
+  STAERR_clokind_equal (location, int, int)
+  STAERR_linearity_equal (location, int, int)
+  STAERR_pfarity_equal (location, int, int)
+  STAERR_s2eff_subeq (location, s2eff, s2eff)
+  STAERR_boxity_equal (location, int, tyreckind)
+  STAERR_tyreckind_equal (location, tyreckind, tyreckind)
+  STAERR_refval_equal (location, int, int)
+  STAERR_s2zexp_merge (location, s2zexp, s2zexp)
+  STAERR_s2exp_equal (location, s2exp, s2exp)
+  STAERR_s2exp_tyleq (location, s2exp, s2exp)
+  STAERR_s2Var_s2exp_solve (location, s2Var, s2exp)
+  STAERR_s2explst_length (location, int)
+  STAERR_labs2explst_length (location, int)
+  STAERR_wths2explst_shape (location, wths2explst, wths2explst)
+  STAERR_s2exp_linearity (location, s2exp)

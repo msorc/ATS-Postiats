@@ -36,9 +36,6 @@
 #include
 "share/atspre_staload.hats"
 //
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
 //
 (* ****** ****** *)
 
@@ -48,6 +45,8 @@
 //
 #staload
 "utils/atexting/SATS/atexting.sats"
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 #staload
 "utils/atexting/SATS/atexting_textdef.sats"
 //
@@ -103,7 +102,7 @@ val () =
 the_atextmap_insert
 (
   "patsyntax"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
     lam(loc, xs) => __patsyntax__(loc, xs)
   ) (* TEXTDEFfun *)
 ) (* the_atextmap_insert *)
@@ -121,7 +120,7 @@ __ats2xhtml__
 ) : string = let
 //
 val-
-cons0(x0, _) = xs
+~GLcons(x0, _) = glist_view(xs)
 //
 val code = atext_strngfy(x0)
 //
@@ -153,13 +152,13 @@ dats2xhtml(loc, xs) =
 val () =
 the_atextmap_insert
 ( "sats2xhtml"
-, TEXTDEFfun(lam(loc, xs) => sats2xhtml(loc, xs))
+, atextdef_TEXTDEFfun(lam(loc, xs) => sats2xhtml(loc, xs))
 ) (* the_atextmap_insert *)
 //
 val () =
 the_atextmap_insert
 ( "dats2xhtml"
-, TEXTDEFfun(lam(loc, xs) => dats2xhtml(loc, xs))
+, atextdef_TEXTDEFfun(lam(loc, xs) => dats2xhtml(loc, xs))
 ) (* the_atextmap_insert *)
 //
 end // end of [local]

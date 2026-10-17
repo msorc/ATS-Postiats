@@ -42,7 +42,7 @@ val-~Some_vt(inp) =
   fileref_open_opt (fname, file_mode_r)
 //
 val cs0 =
-cstream_make_cloref
+cstream_make_cloptr
   (lam () => $STDLIB.fgetc0 (inp))
 //
 val xs = cstream_get_charlst (cs0, ~1)

@@ -1,0 +1,79 @@
+#
+# The linear constraint solver (pats_lintprgm*.dats), ATS2 port of src/pats_lintprgm*.dats.
+# See ../../PORTING.md, "Constraint solver (lintprgm)".
+#
+#   export PATSHOME=<repo root>; export PATH=$PATSHOME/bin:$PATH
+#   make test            ATS2 only: the output of the drivers on lp_small_*.txt is the md5 of the ATS1 output (lp_small.md5)
+#   make compare         the differential test against the ATS1 driver (needs the ATS1 environment of ../pardump1.sh):
+#                        generates DATA/*.txt (lpgen.py), runs lp1_* and lp2_*, compares (SEEDS, COUNT)
+#   make asan            AddressSanitizer build (leaks included) on lp_small_*.txt
+#   make cover           gcov coverage (by ATS line) on lp_small_*.txt
+#   make mutate          the mutation test (lpmutate.py) against the ATS1 output of lp_small_*.txt
+#   make bench           speed: ATS1 and ATS2 on the problems of the family bench
+#
+# The two kinds of integers of the solver: gmp (myint(gmpknd), -lgmp) and int (myint(intknd)); both drivers are built
+# for both kinds (lp2_gmp, lp2_int, lp1_gmp, lp1_int).
+#
+OUT=../lp_out
+DATA=$(OUT)/data
+SEEDS_GMP=11 12 13
+SEEDS_INT=21 22
+COUNT=8000
+
+all: test
+
+$(OUT):
+	mkdir -p $(OUT) $(DATA)
+
+lp2_gmp lp2_int: lp2_%: $(OUT) lpdrv2.dats lpdrv_common.hats lpdrv_decls.hats lpdrv.c lpdrv.h $(wildcard ../../pats_lintprgm*)
+	sh lpdrv2.sh $* $(OUT)/$@
+lp1_gmp lp1_int: lp1_%: $(OUT) lpdrv1.dats lpdrv_common.hats lpdrv_decls.hats lpdrv.c lpdrv.h 
+	sh lpdrv1.sh $* $(OUT)
+
+# the small corpora (committed, lp_small.md5 is the md5 of the output of the ATS1 drivers)
+test: lp2_gmp lp2_int
+	@a=`$(OUT)/lp2_gmp lp_small_gmp.txt | md5sum | awk '{print $$1}'`; b=`$(OUT)/lp2_int lp_small_int.txt | md5sum | awk '{print $$1}'`; \
+	test "$$a $$b" = "`head -1 lp_small.md5`" && echo "lp: output as expected" || { echo "lp: output differs from lp_small.md5"; exit 1; }
+
+# regenerate the small corpora and their md5 (needs the ATS1 environment)
+small: lp1_gmp lp1_int
+	python3 lpgen.py 1 120 gmp > lp_small_gmp.txt; python3 lpgen.py 2 12 gmp wide >> lp_small_gmp.txt
+	python3 lpgen.py 3 120 int > lp_small_int.txt; python3 lpgen.py 4 12 int wide >> lp_small_int.txt
+	a=`$(OUT)/lp1_gmp lp_small_gmp.txt | md5sum | awk '{print $$1}'`; b=`$(OUT)/lp1_int lp_small_int.txt | md5sum | awk '{print $$1}'`; echo "$$a $$b" > lp_small.md5
+
+compare: lp1_gmp lp1_int lp2_gmp lp2_int
+	@for s in $(SEEDS_GMP); do python3 lpgen.py $$s $(COUNT) gmp > $(DATA)/gmp$$s.txt; done
+	@for s in $(SEEDS_INT); do python3 lpgen.py $$s $(COUNT) int > $(DATA)/int$$s.txt; done
+	@for f in $(DATA)/gmp*.txt; do b=`basename $$f .txt`; $(OUT)/lp1_gmp $$f > $(DATA)/$$b.o1 & $(OUT)/lp2_gmp $$f > $(DATA)/$$b.o2 & wait; \
+	  cmp $(DATA)/$$b.o1 $(DATA)/$$b.o2 && echo "$$b: identical, `wc -l < $(DATA)/$$b.o1` lines" && python3 lpcheck.py $(DATA)/$$b.o2 | tail -1; done
+	@for f in $(DATA)/int*.txt; do b=`basename $$f .txt`; $(OUT)/lp1_int $$f > $(DATA)/$$b.o1 & $(OUT)/lp2_int $$f > $(DATA)/$$b.o2 & wait; \
+	  cmp $(DATA)/$$b.o1 $(DATA)/$$b.o2 && echo "$$b: identical, `wc -l < $(DATA)/$$b.o1` lines"; done
+
+asan: $(OUT)
+	sh lpdrv2.sh gmp $(OUT)/lp2_gmp_asan -g -fsanitize=address
+	sh lpdrv2.sh int $(OUT)/lp2_int_asan -g -fsanitize=address
+	$(OUT)/lp2_gmp_asan lp_small_gmp.txt > /dev/null && $(OUT)/lp2_int_asan lp_small_int.txt > /dev/null && echo "lp: asan, no error and no leak"
+
+cover:
+	sh lpcover.sh gmp lp_small_gmp.txt
+	sh lpcover.sh int lp_small_int.txt
+
+# the reference of the mutations is the output of the ATS1 driver
+mutate: lp1_gmp lp1_int
+	$(OUT)/lp1_gmp lp_small_gmp.txt > $(OUT)/mut_gmp.ref; $(OUT)/lp1_int lp_small_int.txt > $(OUT)/mut_int.ref
+	python3 lpmutate.py gmp lp_small_gmp.txt $(OUT)/mut_gmp.ref
+	python3 lpmutate.py int lp_small_int.txt $(OUT)/mut_int.ref
+
+# speed (the family bench: records B, only solved)
+bench: lp1_gmp lp1_int lp2_gmp lp2_int
+	python3 lpgen.py 7 30000 gmp bench 4 > $(DATA)/benchA.txt
+	python3 lpgen.py 8 30000 int bench 4 > $(DATA)/benchC.txt
+	/usr/bin/time -f "ATS1 gmp: %U s" $(OUT)/lp1_gmp $(DATA)/benchA.txt > $(DATA)/b1.out
+	/usr/bin/time -f "ATS2 gmp: %U s" $(OUT)/lp2_gmp $(DATA)/benchA.txt > $(DATA)/b2.out; cmp $(DATA)/b1.out $(DATA)/b2.out
+	/usr/bin/time -f "ATS1 int: %U s" $(OUT)/lp1_int $(DATA)/benchC.txt > $(DATA)/b1.out
+	/usr/bin/time -f "ATS2 int: %U s" $(OUT)/lp2_int $(DATA)/benchC.txt > $(DATA)/b2.out; cmp $(DATA)/b1.out $(DATA)/b2.out
+
+clean:
+	$(RM) -r $(OUT) *_dats.c *.o
+
+.PHONY: all test small compare asan cover mutate bench clean

@@ -87,43 +87,6 @@ prval() =
 
 (* ****** ****** *)
 //
-implement
-ssarray2list
-  {a}(chn, n) =
-  list_vt2t(ssarray2list_vt(chn, n))
-//
-(* ****** ****** *)
-
-implement
-list2ssarray
-  {a}(xs) = let
-//
-fun
-fserv{n:int}
-(
-  chp: chanpos(ssarray(a, n)), xs: list(a, n)
-) : void =
-(
-case+ xs of
-| list_nil () => let
-    prval() =
-    chanpos_array_nil(chp)
-  in
-    chanpos_nil_wait (chp)
-  end // end of [nil]
-| list_cons (x, xs) => let
-    prval() =
-    chanpos_array_cons(chp)
-    val () = chanpos_send{a}(chp, x)
-  in
-    fserv(chp, xs)
-  end // end of [cons]
-) (* end of [fserv] *)
-//
-in
-  channeg_create(llam(chp) => fserv(chp, xs))
-end // end of [list2ssarray]
-
 (* ****** ****** *)
 
 implement

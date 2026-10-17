@@ -1,29 +1,38 @@
-#
-# This directory contains
-# C-files used for bootstraping ATS2
-#
+CBOOT: the bootstrap C bundle of patsopt
+========================================
 
-######
-#
-# HX-2014-04-02:
-# for generating *_?ats.c files:
-#
-# make -C prelude
-# make -C libc
-# make -C libats
-#
-######
+The compiler is written in ATS2. To build it without any ATS compiler, the C code that a working patsopt
+generates for every module is distributed as a bundle in this directory. Nothing here is kept in git except this
+README, Makefile, mkboot.sh and .gitignore: the bundle is generated and is part of release tarballs.
 
-#
-# A sequence of command-lines
-# for manually bootstrapping ATS2:
-#
+Generating (needs a working patsopt and python3; see ../README)
 
-$ libtoolize --force
-$ aclocal
-$ autoheader
-$ automake --force-missing --add-missing
-$ autoconf
-$ ./configure
+    make -C src CBOOT [PATSOPT=...]       # runs mkboot.sh
 
-###### end of [README] ######
+mkboot.sh generates, for C3NSTRINTKND=gmpknd and intknd, the C code of every module (pats_*_dats.c, pats_error_sats.c, the
+main module with and without main() for libatsopt, libatsopt_ext_dats.c) and writes:
+
+    *.c               the C code that does not depend on the integer kind (the time stamps of the generated code are removed)
+    gmpknd/*.c intknd/*.c   the modules that differ (pats_intinf, pats_lintprgm_myint, pats_constraint3_solve)
+    pats_runtime_ats1.c, libatsopt_ext.c   hand-written C of src/
+    inc/              the headers that the C code includes: ccomp/runtime, prelude/CATS, libats/CATS, src/*.cats
+    modules.mk        the lists of the files (included by Makefile)
+
+The generated *_gen*.hats files (arena encodings) are already expanded in the C code: python3 is not needed to use the bundle.
+
+Using (a C compiler, make and libgmp; nothing else)
+
+    make -C src/CBOOT -j8                  # ./patsopt (needs gmp)
+    make -C src/CBOOT KIND=intknd          # ./patsopt without gmp
+    make -C src/CBOOT libatsopt.a          # the library version (the API of utils/libatsopt)
+    make -C src/CBOOT CC=clang CFLAGS=-O1 LDFLAGS=...
+
+Then build the real compiler from the sources with it (stage 2; the bundle's patsopt is stage 1, compiled from the C that
+the compiler that generated the bundle produced):
+
+    make -C src PATSOPT=$PWD/src/CBOOT/patsopt         # PATSHOME = this repository
+    # or: make -f Makefile_devl PATSOPT=$PWD/src/CBOOT/patsopt all
+
+If the compiler that generated the bundle is itself a stage-2 build, the C of the bundle is the C that the normal build
+compiles: the patsopt of the bundle and the one of `make -C src` are then the same program up to the path strings in the
+generated C (comments and assertion messages hold the paths of the tree that generated the bundle).

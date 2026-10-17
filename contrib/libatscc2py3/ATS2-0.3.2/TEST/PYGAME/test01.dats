@@ -31,7 +31,7 @@ val npnf = pygame_init_ret()
 val ((*void*)) = println! ("np = ", npnf.0)
 val ((*void*)) = println! ("nf = ", npnf.1)
 //
-val res = $tup(500,500)
+val res = @(500,500)
 val screen = display_set_mode(res)
 val _(*Rect*) = screen.fill(Color(0, 0, 0))
 //
@@ -49,10 +49,10 @@ val r0 = Rect(100, 100, 300, 300)
 val _rect_ = screen2.fill(c1, r0, 0)
 //
 val _rect_ =
-  draw_circle(screen2, Color(0,0,0), $tup(250,250), 100)
+  draw_circle(screen2, Color(0,0,0), @(250,250), 100)
 //
 val _rect_ =
-  screen.blit(screen2, $tup(0, 0))
+  screen.blit(screen2, @(0, 0))
 //
 val ((*void*)) = display_flip((*void*))
 //

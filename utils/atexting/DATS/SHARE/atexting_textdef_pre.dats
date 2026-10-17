@@ -36,9 +36,6 @@
 #include
 "share/atspre_staload.hats"
 //
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
 //
 #include
 "share/HATS\
@@ -56,6 +53,8 @@
 //
 #staload
 "utils/atexting/SATS/atexting.sats"
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -63,7 +62,7 @@ local
 
 val
 def0 =
-TEXTDEFfun
+atextdef_TEXTDEFfun
 (
 lam(loc, _) =>
   atext_make_string(loc, "\n")
@@ -94,7 +93,7 @@ val str2 =
 (
 if
 isneqz(str)
-then strptr2string(strptr1_copy(str))
+then strptr2gstring(strptr1_copy(str))
 else "__ctime()__"
 // end of [if]
 ) : string // end of [val]
@@ -105,7 +104,7 @@ prval ((*void*)) = fpf(str)
 
 val
 def0 =
-TEXTDEFfun
+atextdef_TEXTDEFfun
 (
 lam(loc, _) =>
   atext_make_string(loc, __ctime__())
@@ -128,7 +127,7 @@ __float__
 ) : atext = let
 //
 val-
-cons0(x, xs) = xs
+~GLcons(x, xs) = glist_view(xs)
 //
 val rep = atext_strngfy(x)
 //
@@ -138,17 +137,22 @@ $list{string}
   "$UN.cast{litdouble(", rep, ")}(", rep, ")"
 ) (* end of [val] *)
 //
-val strs = g0ofg1(strs)
+val strs = (strs)
 //
 in
 //
-atext_make_string(loc, stringlst_concat(strs))
+let
+  val str =
+  strptr2gstring(stringlst_concat(strs))
+in
+  list_vt_free(strs); atext_make_string(loc, str)
+end // end of [let]
 //
 end // end of [__float__]
 
 val
 def0 =
-TEXTDEFfun(lam(loc, xs) => __float__(loc, xs))
+atextdef_TEXTDEFfun(lam(loc, xs) => __float__(loc, xs))
 
 in (* in-of-local *)
 
@@ -166,24 +170,29 @@ __string__
   loc: loc_t, xs: atextlst
 ) : atext = let
 //
-val-cons0(x, xs) = xs
+val-~GLcons(x, xs) = glist_view(xs)
 val rep = atext_strngfy(x)
 //
 val strs =
 $list{string}
   ("$UN.cast{litstring(", rep, ")}(", rep, ")")
 //
-val strs = g0ofg1(strs)
+val strs = (strs)
 //
 in
 //
-atext_make_string(loc, stringlst_concat(strs))
+let
+  val str =
+  strptr2gstring(stringlst_concat(strs))
+in
+  list_vt_free(strs); atext_make_string(loc, str)
+end // end of [let]
 //
 end // end of [__string__]
 
 val
 def0 =
-TEXTDEFfun(lam(loc, xs) => __string__(loc, xs))
+atextdef_TEXTDEFfun(lam(loc, xs) => __string__(loc, xs))
 
 in (* in-of-local *)
 
@@ -204,25 +213,26 @@ the_atext_outchanlst_top
 
 local
 //
-datatype outchan =
-  | OUTCHANref of (FILEref)
-  | OUTCHANptr of (FILEref)
+// HX-2026-10: no GC (flat)
+// 0: OUTCHANref; 1: OUTCHANptr
+//
+typedef
+outchan = @(int, FILEref)
 //
 fun
 outchan_get_fileref
-  (x: outchan): FILEref =
-(
-  case+ x of
-  | OUTCHANref(filr) => filr
-  | OUTCHANptr(filp) => filp
-) (* end of [outchan_get_fileref] *)
+  (x: outchan): FILEref = x.1
 //
 typedef
-outchanlst = list0(outchan)
+outchanlst = glist(outchan)
 //
-val
-the_outchanlst =
-  ref<outchanlst>(list0_nil())
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_outchanlst_var: outchanlst = glist_nil()
+val the_outchanlst =
+  ref_make_viewptr{outchanlst}(view@the_outchanlst_var | addr@the_outchanlst_var)
 //
 fun
 __fopen_out__
@@ -233,7 +243,7 @@ __fopen_out__
 in
 //
 !the_outchanlst :=
-  list0_cons(OUTCHANref(stdout_ref), xs)
+  glist_cons(@(0, stdout_ref), xs)
 // !the_outchanlst
 end // end of [__fopen_out__]
 fun
@@ -245,7 +255,7 @@ __fopen_err__
 in
 //
 !the_outchanlst :=
-  list0_cons(OUTCHANref(stderr_ref), xs)
+  glist_cons(@(0, stderr_ref), xs)
 // !the_outchanlst
 end // end of [__fopen_err__]
 
@@ -268,12 +278,12 @@ case+ opt of
 | ~None_vt() => {
     val () =
     !the_outchanlst :=
-      list0_cons(OUTCHANref(stderr_ref), xs)
+      glist_cons(@(0, stderr_ref), xs)
     // end of [val]
   } (* None_vt *)
 | ~Some_vt(filr) =>
   (
-    !the_outchanlst := list0_cons(OUTCHANptr(filr), xs)
+    !the_outchanlst := glist_cons(@(1, filr), xs)
   ) (* Some_vt *)
 //
 end // end of [__fopen_path__]
@@ -290,15 +300,13 @@ val xs = !the_outchanlst
 //
 in
 //
-case+ xs of
-| list0_nil() => ()
-| list0_cons(x, xs) => let
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) => let
     val () = !the_outchanlst := xs
   in
-    case+ x of
-    | OUTCHANref(filr) => ()
-    | OUTCHANptr(filp) => fileref_close(filp)
-  end // end of [list0_cons]
+    if x.0 > 0 then fileref_close(x.1)
+  end // end of [list_cons]
 //
 end // end of [__fclose_top__]
 //
@@ -309,7 +317,7 @@ __fclose_all__
 ) : void = let
 //
 val xs = !the_outchanlst
-val () = !the_outchanlst := list0_nil
+val () = !the_outchanlst := glist_nil()
 //
 in
 //
@@ -319,17 +327,15 @@ auxlst(xs) where
 fun
 aux(x: outchan): void =
 (
-case+ x of
-| OUTCHANref(filr) => ()
-| OUTCHANptr(filp) => fileref_close(filp)
+if x.0 > 0 then fileref_close(x.1)
 ) (* end of [aux] *)
 //
 fun
 auxlst(xs: outchanlst): void =
 (
-case+ xs of
-| list0_nil() => ()
-| list0_cons(x, xs) => (aux(x); auxlst(xs))
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) => (aux(x); auxlst(xs))
 ) (* end of [auxlst] *)
 //
 } (* end of [where] *)
@@ -347,9 +353,9 @@ val xs = !the_outchanlst
 //
 in
 //
-case+ xs of
-| list0_nil() => stdout_ref
-| list0_cons(x, xs) => outchan_get_fileref(x)
+case+ glist_view(xs) of
+| ~GLnil() => stdout_ref
+| ~GLcons(x, xs) => outchan_get_fileref(x)
 //
 end // end of [the_atext_outchanlst_top]
 //
@@ -358,7 +364,7 @@ end // end of [the_atext_outchanlst_top]
 val () =
 the_atextmap_insert
 ( "atext_fopen_out"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => (
     __fopen_out__(); atext_make_nil(loc)
   ) (* lam *)
@@ -368,7 +374,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "atext_fopen_err"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => (
     __fopen_err__(); atext_make_nil(loc)
   ) (* lam *)
@@ -378,19 +384,19 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "atext_fopen_path"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => let
     val-
-    cons0(x0, xs) = xs
+    ~GLcons(x0, xs) = glist_view(xs)
     val path = atext_strngfy(x0)
     var xs: atextlst = xs
     val mode =
     (
-      case+ xs of
-      | list0_nil() => "w"
-      | list0_cons(x1, xs2) =>
+      case+ glist_view(xs) of
+      | ~GLnil() => "w"
+      | ~GLcons(x1, xs2) =>
           (xs := xs2; atext_strngfy(x1))
-        // end of [list0_cons]
+        // end of [list_cons]
     ) : string // end of [val]
   in
     __fopen_path__(path, mode); atext_make_nil(loc)
@@ -401,7 +407,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "atext_fclose_top"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => (
     __fclose_top__(); atext_make_nil(loc)
   ) (* lam *)
@@ -411,7 +417,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "atext_fclose_all"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => (
     __fclose_all__(); atext_make_nil(loc)
   ) (* lam *)
@@ -430,13 +436,13 @@ auxlst
   out: FILEref, xs: atextlst
 ) : void =
 (
-case+ xs of
-| list0_nil() => ()
-| list0_cons
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons
     (x, xs) => auxlst(out, xs) where
   {
     val () = fprint(out, atext_strngfy(x))
-  } (* end of [list0_cons] *)
+  } (* end of [list_cons] *)
 ) (* end of [auxlst] *)
 //
 fun
@@ -470,7 +476,7 @@ in (* in-of-local *)
 val () =
 the_atextmap_insert
 ( "atext_fprint"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => (
     __fprint__(xs); atext_make_nil(loc)
   ) (* lam *)
@@ -480,7 +486,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "atext_fprintln"
-, TEXTDEFfun(
+, atextdef_TEXTDEFfun(
   lam(loc, xs) => (
     __fprintln__(xs); atext_make_nil(loc)
   ) (* lam *)

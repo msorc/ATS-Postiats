@@ -176,7 +176,7 @@ chn = $UN.castvwtp0{channeg(sstest3)}(chn)
 //
 in
 //
-channeg1_recv(chn, 0, lam(chn) => StartIt_aft(chn))
+channeg1_recv(chn, 0, llam(chn) => StartIt_aft(chn))
 //
 end // end of [StartIt]
 
@@ -187,7 +187,7 @@ StartIt_aft
   (chn) = let
 //
 val k0 =
-lam(chn: channeg_nil) =<cloref1>
+llam(chn: channeg_nil) =<lincloptr1>
   let extvar "Started" = false in channeg1_close(chn) end
 //
 implement
@@ -211,10 +211,10 @@ channeg1_repeat_disj
 , lam(chn, k0) =>
   channeg1_send
   ( chn
-  , lam(chn, a1) =>
+  , llam(chn, a1) =>
     channeg1_send
     ( chn
-    , lam(chn, a2) =>
+    , llam(chn, a2) =>
       ReplyIt_repeat(chn, k0, chmsg_parse(a1), chmsg_parse(a2))
     )
   )
@@ -244,10 +244,10 @@ in
 //
 channeg1_recv
 ( chn, res
-, lam(chn) =>
+, llam(chn) =>
   channeg1_send
   ( chn
-  , lam(chn, yn) => PostRep(chn, k0, n, chmsg_parse(yn))
+  , llam(chn, yn) => PostRep(chn, k0, n, chmsg_parse(yn))
   )
 )
 //
@@ -268,6 +268,7 @@ implement
 PostRep(chn, k0, n, yn) = let
 //
   val () = k0(chn)
+  val () = cfun_free(k0)
 //
 in
   if yn
@@ -301,7 +302,7 @@ in
 //
 channeg1_repeat_disj
 (
-  chn, k0, lam(chn, k0) => ReplyIt(chn, k0, N[], a1, a2)
+  chn, k0, channeg_nullify_make(lam(chn, k0) =<cloptr1> ReplyIt(chn, k0, N[], a1, a2))
 )
 //
 end (* end of [ReplyIt_repeat] *)

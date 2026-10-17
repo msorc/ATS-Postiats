@@ -33,37 +33,67 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans1_error.dats).
+// The errors are kept in a cell of the global arena as a [glist].
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload ERR = "./pats_error.sats"
 
 (* ****** ****** *)
 
+staload
+LOC = "./pats_location.sats"
+typedef location = $LOC.location
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+staload "./pats_syntax.sats"
+staload "./pats_staexp1.sats"
+staload "./pats_dynexp1.sats"
 staload "./pats_trans1.sats"
 
 (* ****** ****** *)
+
+#include "./pats_trans1_gen_dats.hats"
+
+(* ****** ****** *)
 //
-vtypedef
-trans1errlst_vt = List_vt (trans1err)
+typedef
+trans1errlst = glist (trans1err)
 //
 (* ****** ****** *)
 
 local
 
-val
-the_trans1errlst = ref<trans1errlst_vt> (list_vt_nil)
+val the_trans1errlst = let
+  val p = the_garena_alloc (sizeof<trans1errlst>)
+  val () = $UN.ptr0_set<trans1errlst> (p, glist_nil ())
+in
+  p
+end // end of [val]
 
 fun
 the_trans1errlst_get
 (
 // argumentless
-) : trans1errlst_vt = let
-  val (vbox pf | p) = ref_get_view_ptr (the_trans1errlst)
-  val xs = !p
-  val () = !p := list_vt_nil ()
+) : trans1errlst = let
+  val xs = $UN.ptr0_get<trans1errlst> (the_trans1errlst)
+  val () = $UN.ptr0_set<trans1errlst> (the_trans1errlst, glist_nil ())
 in
   xs
 end // end of [the_trans1errlst_get]
@@ -73,8 +103,8 @@ in (* in-of-local *)
 implement
 the_trans1errlst_add
   (x) = () where {
-  val (vbox pf | p) = ref_get_view_ptr (the_trans1errlst)
-  val () = !p := list_vt_cons (x, !p)
+  val xs = $UN.ptr0_get<trans1errlst> (the_trans1errlst)
+  val () = $UN.ptr0_set<trans1errlst> (the_trans1errlst, glist_cons (x, xs))
 } (* end of [the_trans1errlst_add] *)
 
 implement
@@ -83,18 +113,14 @@ the_trans1errlst_finalize () =
   val xs =
     the_trans1errlst_get ()
   // end of [val]
-  val nxs = list_vt_length (xs)
-  val ((*freed*)) = list_vt_free (xs)
-// (*
+  val nxs = glist_length (xs)
   val () =
   if nxs > 0 then {
-    val () =
-    fprintf (
-      stderr_ref
-    , "patsopt(TRANS1): there are [%i] errors in total.\n", @(nxs)
-    ) (* end of [fprintf] *)
+    val err = stderr_ref
+    val () = fprint_string (err, "patsopt(TRANS1): there are [")
+    val () = fprint_int (err, nxs)
+    val () = fprint_string (err, "] errors in total.\n")
   } (* end of [if] *) // end of [val]
-// *)
   val () =
   if nxs > 0
     then $raise($ERR.PATSOPT_TRANS1_EXN())

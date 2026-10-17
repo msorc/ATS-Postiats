@@ -15,10 +15,6 @@ streamize_fileref_line
 //
 (* ****** ****** *)
 //
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
-//
 (* ****** ****** *)
 //
 #include "./../mylibies.hats"
@@ -41,10 +37,15 @@ fileref_open_opt
 val-
 ~Some_vt(inp) = opt
 //
-val xs = streamize_fileref_gvhashtbl(inp, 8)
+val xs = streamize_fileref_atsrec(inp)
 //
 val ((*void*)) =
-  stream_vt_foreach_cloptr(xs, lam(x) => fprintln!(stdout_ref, x))
+stream_vt_foreach_cloptr
+(
+  xs
+, lam(x) =>
+  (fprint_atsrec(stdout_ref, x); print_newline(); atsrec_free(x))
+) (* stream_vt_foreach_cloptr *)
 //
 } (* end of [main0] *)
 

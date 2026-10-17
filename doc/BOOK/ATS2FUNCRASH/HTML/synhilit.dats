@@ -85,14 +85,19 @@ main0{n}
   argc, argv
 ) = let
 //
-val argv1 =
-ptr_succ<string> ($UN.castvwtp1{ptr}(argv))
-//
-implement(env)
-array_foreach$fwork<string><env> (x, env) = process_one(x)
+fun
+loop
+(
+  argv: !argv(n), i: natLte(n)
+) : void =
+(
+  if i < argc
+    then (process_one(argv[i]); loop(argv, i+1))
+  // end of [if]
+)
 //
 in
-  ignoret(arrayref_foreach($UN.castvwtp1{arrayref(string,n-1)}(argv1), i2sz(argc-1)))
+  loop(argv, 1)
 end (* end of [main0] *)
 
 (* ****** ****** *)

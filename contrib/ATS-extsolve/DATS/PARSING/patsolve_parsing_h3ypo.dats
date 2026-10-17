@@ -13,110 +13,70 @@
 *)
 
 (* ****** ****** *)
-//
+
+macdef
+JAG(x0, i) = jsonval_array_get(,(x0), ,(i))
+
+(* ****** ****** *)
+
 extern
 fun
-parse_h3ypo_node (jsonval): h3ypo_node
-//
+parse_h3ypo_node{l:addr}
+  (ar: !arena(l), tbls: ptables(l), jsnv: jsonval): h3ypo_node(l)
+
 (* ****** ****** *)
 
 implement
 parse_h3ypo
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-(*
-val () =
-println!
+val loc =
+parse_location
 (
-  "parse_h3ypo: jsnv0 = ", jsnv0
-) (* end of [val] *)
-*)
-//
-val-JSONobject(lxs) = jsnv0
-val () = assertloc(length(lxs) >= 2)
-//
-val+list_cons(lx, lxs) = lxs
-val loc = parse_location (lx.1)
-//
-val+list_cons(lx, lxs) = lxs
-val node = parse_h3ypo_node (lx.1)
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "h3ypo_loc")
+)
+val node =
+parse_h3ypo_node
+(
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "h3ypo_node")
+)
 //
 in
-//
-  h3ypo_make_node (loc, node)
-//
+  h3ypo_make_node(ar, loc, node)
 end // end of [parse_h3ypo]
 
 (* ****** ****** *)
 
-local
-
-fun
-aux_H3YPOprop
-(
-  x0: jsonval
-) : h3ypo_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  H3YPOprop(parse_s2exp(x))
-end (* end of [aux_H3YPOprop] *)
-
-fun
-aux_H3YPObind
-(
-  x0: jsonval
-) : h3ypo_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x_1, xs) = xs
-val-list_cons (x_2, xs) = xs
-//
-in
-  H3YPObind(parse_s2var(x_1), parse_s2exp(x_2))
-end (* end of [aux_H3YPObind] *)
-
-fun
-aux_H3YPOeqeq
-(
-  x0: jsonval
-) : h3ypo_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x_1, xs) = xs
-val-list_cons (x_2, xs) = xs
-//
-in
-  H3YPOeqeq(parse_s2exp(x_1), parse_s2exp(x_2))
-end (* end of [aux_H3YPOeqeq] *)
-
-in (* in-of-local *)
-
 implement
 parse_h3ypo_node
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-JSONobject(lxs) = jsnv0
-//
-val-list_cons (lx, lxs) = lxs
-val name = lx.0 and jsnv2 = lx.1
+val name = jsonval_get_name(jsnv0)
+val x0 = jsonval_get_value(jsnv0)
 //
 in
 //
 case+ name of
-//
-| "H3YPOprop" => aux_H3YPOprop(jsnv2)
-| "H3YPObind" => aux_H3YPObind(jsnv2)
-| "H3YPOeqeq" => aux_H3YPOeqeq(jsnv2)
-//
+| "H3YPOprop" =>
+    h3ypo_node_H3YPOprop(ar, parse_s2exp(ar, tbls, JAG(x0, 0)))
+| "H3YPObind" => let
+    val s2v1 = parse_s2var(ar, tbls, JAG(x0, 0))
+    val s2e2 = parse_s2exp(ar, tbls, JAG(x0, 1))
+  in
+    h3ypo_node_H3YPObind(ar, s2v1, s2e2)
+  end // end of [H3YPObind]
+| "H3YPOeqeq" => let
+    val s2e1 = parse_s2exp(ar, tbls, JAG(x0, 0))
+    val s2e2 = parse_s2exp(ar, tbls, JAG(x0, 1))
+  in
+    h3ypo_node_H3YPOeqeq(ar, s2e1, s2e2)
+  end // end of [H3YPOeqeq]
 | _(*unrecognized*) =>
    let val () = assertloc(false) in exit(1) end
 //
 end // end of [parse_h3ypo_node]
-
-end // end of [local]
 
 (* ****** ****** *)
 

@@ -79,14 +79,6 @@ cleanall:: ; $(RMF) multable_dats.php
 ######
 
 all:: \
-twice_dats.php
-twice_dats.php: twice.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2PHP) -o $@
-cleanall:: ; $(RMF) twice_dats.php
-
-######
-
-all:: \
 rtfind_dats.php
 rtfind_dats.php: rtfind.dats ; \
 $(PATSOPT) -d $< | $(ATSCC2PHP) -o $@
@@ -108,12 +100,6 @@ queens_dats.php: queens.dats ; \
 $(PATSOPT) -d $< | $(ATSCC2PHP) -o $@
 cleanall:: ; $(RMF) queens_dats.php
 
-all:: \
-queens_comb_dats.php
-queens_comb_dats.php: queens_comb.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2PHP) -o $@
-cleanall:: ; $(RMF) queens_comb_dats.php
-
 ######
 
 all:: \
@@ -123,12 +109,6 @@ $(PATSOPT) -d $< | $(ATSCC2PHP) -o $@
 cleanall:: ; $(RMF) refcount_dats.php
 
 ######
-
-all:: \
-sieve_lazy_dats.php
-sieve_lazy_dats.php: sieve_lazy.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2PHP) -o $@
-cleanall:: ; $(RMF) sieve_lazy_dats.php
 
 all:: \
 sieve_llazy_dats.php

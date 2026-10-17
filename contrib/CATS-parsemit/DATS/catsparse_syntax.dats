@@ -25,6 +25,8 @@ STRING =
 //
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 staload "./../SATS/catsparse_syntax.sats"
 
@@ -58,7 +60,7 @@ synent_isnot_null (ent) = isneqz ($UN.cast2ptr(ent))
 //
 implement
 i0dex_make_sym
-  (loc, sym) = '{ i0dex_loc= loc, i0dex_sym= sym }
+  (loc, sym) = i0de_I0DE(loc, sym)
 //
 implement
 i0dex_make_string
@@ -70,15 +72,15 @@ end // end of [i0dex_make_string]
 //
 fun
 s0exp_make_node
-  (loc, node) = '{
-  s0exp_loc=loc, s0exp_node=node
-} (* end of [s0exp_make_node] *)
+(
+  loc: loc_t, node: s0exp_node_view
+) : s0exp = s0exp_S0EXP(loc, s0exp_node_encode(node))
 //
 (* ****** ****** *)
 //
 implement
 s0exp_ide (loc, id) =
-  s0exp_make_node (loc, S0Eide (id.i0dex_sym))
+  s0exp_make_node (loc, S0Eide (id.i0dex_sym()))
 //
 implement
 s0exp_list (loc, s0es) = s0exp_make_node (loc, S0Elist (s0es))
@@ -87,9 +89,9 @@ implement
 s0exp_appid (id, s0e) = let
 //
 val loc =
-  id.i0dex_loc ++ s0e.s0exp_loc
+  id.i0dex_loc() ++ s0e.s0exp_loc()
 //
-val-S0Elist (s0es) = s0e.s0exp_node
+val-~S0Elist (s0es) = s0exp_node_view(s0e.s0exp_node())
 //
 in
   s0exp_make_node (loc, S0Eappid (id, s0es))
@@ -103,15 +105,15 @@ end // end of [s0exp_appid]
 //
 fun
 d0exp_make_node
-  (loc, node) = '{
-  d0exp_loc=loc, d0exp_node=node
-} (* end of [d0exp_make_node] *)
+(
+  loc: loc_t, node: d0exp_node_view
+) : d0exp = d0exp_D0EXP(loc, d0exp_node_encode(node))
 //
 (* ****** ****** *)
 //
 implement
 d0exp_ide (id) = let
-  val loc = id.i0dex_loc
+  val loc = id.i0dex_loc()
 in
   d0exp_make_node(loc, D0Eide(id))
 end // end of [d0exp_ide]
@@ -126,9 +128,9 @@ d0exp_appid
   (id, d0e_arg) = let
 //
 val loc =
-  id.i0dex_loc ++ d0e_arg.d0exp_loc
+  id.i0dex_loc() ++ d0e_arg.d0exp_loc()
 //
-val-D0Elist (d0es_arg) = d0e_arg.d0exp_node
+val-~D0Elist (d0es_arg) = d0exp_node_view(d0e_arg.d0exp_node())
 //
 in
   d0exp_make_node (loc, D0Eappid (id, d0es_arg))
@@ -139,9 +141,9 @@ d0exp_appexp
   (d0e_fun, d0e_arg) = let
 //
 val loc =
-  d0e_fun.d0exp_loc ++ d0e_arg.d0exp_loc
+  d0e_fun.d0exp_loc() ++ d0e_arg.d0exp_loc()
 //
-val-D0Elist (d0es_arg) = d0e_arg.d0exp_node
+val-~D0Elist (d0es_arg) = d0exp_node_view(d0e_arg.d0exp_node())
 //
 in
   d0exp_make_node (loc, D0Eappexp (d0e_fun, d0es_arg))
@@ -156,7 +158,7 @@ ATSPMVint_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVint (int))
@@ -169,7 +171,7 @@ ATSPMVintrep_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVintrep (int))
@@ -184,7 +186,7 @@ ATSPMVbool_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVbool (tfv))
@@ -199,7 +201,7 @@ ATSPMVfloat_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVfloat (float))
@@ -214,7 +216,7 @@ ATSPMVstring_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVstring (str))
@@ -229,7 +231,7 @@ ATSPMVi0nt_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVi0nt (int))
@@ -244,7 +246,7 @@ ATSPMVf0loat_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVf0loat (float))
@@ -259,7 +261,7 @@ ATSPMVempty_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVempty(0))
@@ -272,7 +274,7 @@ ATSPMVextval_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVextval(toks))
@@ -287,7 +289,7 @@ ATSPMVrefarg0_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVrefarg0 (d0e))
@@ -302,7 +304,7 @@ ATSPMVrefarg1_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVrefarg1 (d0e))
@@ -317,7 +319,7 @@ ATSPMVfunlab_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVfunlab (flab))
@@ -332,10 +334,10 @@ ATSPMVcfunlab_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-val+SIGNED (_, knd) = knd
-val-D0Elist (d0es) = arg.d0exp_node
+val+~SIGNED(_, knd) = signed_view(knd)
+val-~D0Elist (d0es) = d0exp_node_view(arg.d0exp_node())
 //
 in
   d0exp_make_node (loc, ATSPMVcfunlab(knd, fl, d0es))
@@ -350,7 +352,7 @@ ATSPMVcastfn_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSPMVcastfn(fid, s0e_res, arg))
@@ -365,7 +367,7 @@ ATSCSTSPmyloc_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCSTSPmyloc (str))
@@ -380,7 +382,7 @@ ATSCKiseqz_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKiseqz (d0e))
@@ -393,7 +395,7 @@ ATSCKisneqz_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKisneqz (d0e))
@@ -408,7 +410,7 @@ ATSCKptriscons_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKptriscons (d0e))
@@ -421,7 +423,7 @@ ATSCKptrisnull_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKptrisnull (d0e))
@@ -436,7 +438,7 @@ ATSCKpat_int_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKpat_int (d0e, int))
@@ -449,7 +451,7 @@ ATSCKpat_bool_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKpat_bool (d0e, bool))
@@ -462,7 +464,7 @@ ATSCKpat_string_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSCKpat_string (d0e, string))
@@ -477,9 +479,9 @@ ATSCKpat_con0_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-val+SIGNED (_, ctag) = ctag
+val+~SIGNED(_, ctag) = signed_view(ctag)
 //
 in
   d0exp_make_node (loc, ATSCKpat_con0 (d0e, ctag))
@@ -494,9 +496,9 @@ ATSCKpat_con1_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-val+SIGNED (_, ctag) = ctag
+val+~SIGNED(_, ctag) = signed_view(ctag)
 //
 in
   d0exp_make_node (loc, ATSCKpat_con1 (d0e, ctag))
@@ -511,7 +513,7 @@ ATSSELcon_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSSELcon (d0e, s0e, lab))
@@ -526,7 +528,7 @@ ATSSELrecsin_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSSELrecsin (d0e, s0e, lab))
@@ -541,7 +543,7 @@ ATSSELboxrec_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSSELboxrec (d0e, s0e, lab))
@@ -556,7 +558,7 @@ ATSSELfltrec_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0exp_make_node (loc, ATSSELfltrec (d0e, s0e, lab))
@@ -571,9 +573,9 @@ ATSextfcall_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-val-D0Elist(d0es_arg) = _arg.d0exp_node
+val-~D0Elist(d0es_arg) = d0exp_node_view(_arg.d0exp_node())
 //
 in
   d0exp_make_node (loc, ATSextfcall (_fun, d0es_arg))
@@ -588,9 +590,9 @@ ATSextmcall_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-val-D0Elist(d0es_arg) = _arg.d0exp_node
+val-~D0Elist(d0es_arg) = d0exp_node_view(_arg.d0exp_node())
 //
 in
   d0exp_make_node (loc, ATSextmcall (_obj, _mtd, d0es_arg))
@@ -605,17 +607,17 @@ ATSfunclo_fun_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 val d0e_fun =
   d0exp_make_node (loc, ATSfunclo_fun(d0e, arg, res))
 //
 in
 //
-case+ opt of
-| None () => d0e
-| Some (d0e_arg) => let
-    val loc2 = loc ++ d0e_arg.d0exp_loc
-    val-D0Elist (d0es_arg) = d0e_arg.d0exp_node
+case+ gopt_view(opt) of
+| ~GOnone () => d0e
+| ~GOsome (d0e_arg) => let
+    val loc2 = loc ++ d0e_arg.d0exp_loc()
+    val-~D0Elist (d0es_arg) = d0exp_node_view(d0e_arg.d0exp_node())
   in
     d0exp_make_node (loc2, D0Eappexp(d0e_fun, d0es_arg))
   end // end of [Some]
@@ -631,17 +633,17 @@ ATSfunclo_clo_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 val d0e_clo =
   d0exp_make_node (loc, ATSfunclo_clo(d0e, arg, res))
 //
 in
 //
-case+ opt of
-| None () => d0e
-| Some (d0e_arg) => let
-    val loc2 = loc ++ d0e_arg.d0exp_loc
-    val-D0Elist (d0es_arg) = d0e_arg.d0exp_node
+case+ gopt_view(opt) of
+| ~GOnone () => d0e
+| ~GOsome (d0e_arg) => let
+    val loc2 = loc ++ d0e_arg.d0exp_loc()
+    val-~D0Elist (d0es_arg) = d0exp_node_view(d0e_arg.d0exp_node())
   in
     d0exp_make_node (loc2, D0Eappexp(d0e_clo, d0es_arg))
   end // end of [Some]
@@ -654,11 +656,9 @@ implement
 tyfld_make
   (s0e, id) = let
 //
-val loc = s0e.s0exp_loc ++ id.i0dex_loc
+val loc = s0e.s0exp_loc() ++ id.i0dex_loc()
 //
-in '{
-  tyfld_loc= loc, tyfld_node= TYFLD (id, s0e)
-} end // end of [tyfld_make]
+in tyfld_TYFLDREC(loc, tyfld_node_encode(TYFLD (id, s0e))) end // end of [tyfld_make]
 
 (* ****** ****** *)
 
@@ -668,20 +668,15 @@ tyrec_make
   tok1, tyflds, tok2
 ) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
-in '{
-  tyrec_loc= loc, tyrec_node= tyflds
-} end // end of [tyrec_make]
+in tyrec_TYREC(loc, tyflds) end // end of [tyrec_make]
 
 (* ****** ****** *)
 //
 implement
 f0arg_none
-  (s0e) = '{
-  f0arg_loc= s0e.s0exp_loc
-, f0arg_node= F0ARGnone (s0e)
-} (* end of [f0arg_none] *)
+  (s0e) = f0arg_F0ARG(s0e.s0exp_loc(), f0arg_node_encode(F0ARGnone (s0e))) (* end of [f0arg_none] *)
 //
 implement
 f0arg_some
@@ -693,18 +688,15 @@ val () = println! ("f0arg_some: s0e = ", s0e)
 *)
 //
 val loc =
-  s0e.s0exp_loc ++ id.i0dex_loc
+  s0e.s0exp_loc() ++ id.i0dex_loc()
 //
-in '{
-  f0arg_loc= loc
-, f0arg_node= F0ARGsome (id, s0e)
-} end // end of [f0arg_some]
+in f0arg_F0ARG(loc, f0arg_node_encode(F0ARGsome (id, s0e))) end // end of [f0arg_some]
 //
 (* ****** ****** *)
 //
 implement
 f0marg_isneqz
-  (f0ma) = isneqz (f0ma.f0marg_node)
+  (f0ma) = glist_is_cons (f0ma.f0marg_node())
 //
 (* ****** ****** *)
 
@@ -715,11 +707,9 @@ f0marg_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-in '{
-  f0marg_loc= loc, f0marg_node = f0as
-} end // end of [f0marg_make]
+in f0marg_F0MARG(loc, f0as) end // end of [f0marg_make]
 
 (* ****** ****** *)
 //
@@ -728,31 +718,27 @@ fkind_extern
   (tok1, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-in '{
-  fkind_loc= loc, fkind_node = FKextern ()
-} end // end of [fkind_extern]
+in fkind_FKIND(loc, FKextern ()) end // end of [fkind_extern]
 //
 implement
 fkind_static
   (tok1, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
-in '{
-  fkind_loc= loc, fkind_node = FKstatic ()
-} end // end of [fkind_static]
+in fkind_FKIND(loc, FKstatic ()) end // end of [fkind_static]
 //
 (* ****** ****** *)
 
 implement
 f0head_get_f0arglst
-  (fhd) = f0ma.f0marg_node where
+  (fhd) = f0ma.f0marg_node() where
 {
 //
-val+F0HEAD (_, f0ma, _) = fhd.f0head_node
+val+~F0HEAD (_, f0ma, _) = f0head_node_view(fhd.f0head_node())
 //
 } (* end of [f0head_get_f0arglst] *)
 
@@ -765,12 +751,9 @@ f0head_make
 ) = let
 //
 val loc =
-  res.s0exp_loc ++ marg.f0marg_loc
+  res.s0exp_loc() ++ marg.f0marg_loc()
 //
-in '{
-  f0head_loc= loc
-, f0head_node= F0HEAD (id, marg, res)
-} end // end of [f0head_make]
+in f0head_F0HEADREC(loc, f0head_node_encode(F0HEAD (id, marg, res))) end // end of [f0head_make]
 
 (* ****** ****** *)
 //
@@ -946,11 +929,9 @@ tmpdec_make_none
 ) = let
 //
 val loc =
-tok_kwd.token_loc ++ tok_end.token_loc
+tok_kwd.token_loc() ++ tok_end.token_loc()
 //
-in '{
-  tmpdec_loc= loc, tmpdec_node= TMPDECnone (tmp)
-} end // end of [tmpdec_make_none]
+in tmpdec_TMPDEC(loc, tmpdec_node_encode(TMPDECnone (tmp))) end // end of [tmpdec_make_none]
 
 (* ****** ****** *)
 
@@ -961,11 +942,9 @@ tmpdec_make_some
 ) = let
 //
 val loc =
-tok_kwd.token_loc ++ tok_end.token_loc
+tok_kwd.token_loc() ++ tok_end.token_loc()
 //
-in '{
-  tmpdec_loc= loc, tmpdec_node= TMPDECsome (tmp, s0e)
-} end // end of [tmpdec_make_some]
+in tmpdec_TMPDEC(loc, tmpdec_node_encode(TMPDECsome (tmp, s0e))) end // end of [tmpdec_make_some]
 
 (* ****** ****** *)
 
@@ -973,12 +952,12 @@ implement
 instrlst_skip_linepragma
   (inss) = (
 //
-case+ inss of
-| list_nil () => list_nil ()
-| list_cons (ins, inss2) =>
+case+ glist_view(inss) of
+| ~GLnil () => glist_nil()
+| ~GLcons (ins, inss2) =>
   (
-    case+ ins.instr_node of
-    | ATSlinepragma _ => inss2 | _ => inss
+    case+ instr_node_view(ins.instr_node()) of
+    | ~ATSlinepragma _ => inss2 | v0 => (instr_node_view_free(v0); inss)
   )
 //
 ) (* end of [instrlst_skip_linepragma] *)
@@ -987,8 +966,8 @@ case+ inss of
 
 fun
 instr_make_node (
-  loc: loc_t, node: instr_node
-) : instr = '{ instr_loc= loc, instr_node= node }
+  loc: loc_t, node: instr_node_view
+) : instr = instr_INSTR(loc, instr_node_encode(node))
 
 (* ****** ****** *)
 
@@ -1000,21 +979,21 @@ ATSif_make
 //
 val loc =
 (
-case+ insopt2 of
-| Some (ins2) => tok_if.token_loc ++ ins2.instr_loc
-| None ((*void*)) => tok_if.token_loc ++ ins1.instr_loc
+case+ gopt_view(insopt2) of
+| ~GOsome (ins2) => tok_if.token_loc() ++ ins2.instr_loc()
+| ~GOnone ((*void*)) => tok_if.token_loc() ++ ins1.instr_loc()
 ) : loc_t // end of [val]
 //
 val inss_then = let
-  val-ATSthen(inss) = ins1.instr_node in inss
+  val-~ATSthen(inss) = instr_node_view(ins1.instr_node()) in inss
 end // end of [val]
 val inssopt_else = (
 //
-case+ insopt2 of
-| Some (ins2) => let
-    val-ATSelse(inss) = ins2.instr_node in Some(inss)
+case+ gopt_view(insopt2) of
+| ~GOsome (ins2) => let
+    val-~ATSelse(inss) = instr_node_view(ins2.instr_node()) in gopt_some(inss)
   end // end of [Some]
-| None ((*void*)) => None ()
+| ~GOnone ((*void*)) => gopt_none()
 //
 ) : instrlstopt // end of [val]
 //
@@ -1031,7 +1010,7 @@ ATSifthen_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSifthen (d0e, inss))
@@ -1046,7 +1025,7 @@ ATSifnthen_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSifnthen (d0e, inss))
@@ -1059,7 +1038,7 @@ ATSthen_make
   (tok1, inss, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSthen (inss))
@@ -1070,7 +1049,7 @@ ATSelse_make
   (tok1, inss, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSelse (inss))
@@ -1084,7 +1063,7 @@ ATSbranchseq_make
   tok1, inss, tok2
 ) = let
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSbranchseq (inss))
@@ -1104,14 +1083,14 @@ auxlst
   xs: instrlst, res: res
 ) : res =
 (
-case+ xs of
-| list_nil() => res
-| list_cons(x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil() => res
+| ~GLcons(x, xs) =>
   (
-    case+ x.instr_node of
-    | ATSINSlab(lab) =>
+    case+ instr_node_view(x.instr_node()) of
+    | ~ATSINSlab(lab) =>
         auxlst(xs, cons_vt(lab, res))
-    | _(*non-ATSINSlab*) => auxlst(xs, res)
+    | v0(*non-ATSINSlab*) => (instr_node_view_free(v0); auxlst(xs, res))
   )
 ) (* end of [auxlst] *)
 //
@@ -1121,23 +1100,23 @@ auxlst2
   xs: instrlst, res: res
 ) : res =
 (
-case+ xs of
-| list_nil () => res
-| list_cons (x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil () => res
+| ~GLcons (x, xs) =>
   (
-    case- x.instr_node of
-    | ATSbranchseq(inss) =>
+    case- instr_node_view(x.instr_node()) of
+    | ~ATSbranchseq(inss) =>
       auxlst2(xs, auxlst(inss, res))
   ) (* end of [list_cons] *)
 ) (* end of [auxlst2] *)
 //
 val-
-ATScaseofseq(inss) = ins0.instr_node
+~ATScaseofseq(inss) = instr_node_view(ins0.instr_node())
 //
 val res = auxlst2(inss, list_vt_nil())
 //
 in
-  list_vt2t(list_vt_reverse(res))
+  glist_make_list_vt(list_vt_reverse(res))
 end // end of [caseofseq_get_tmplablst]
 
 (* ****** ****** *)
@@ -1148,7 +1127,7 @@ ATScaseofseq_make
   tok1, inss, tok2
 ) = let
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATScaseofseq (inss))
@@ -1162,12 +1141,12 @@ funbodyseq_get_funlab
 {
 //
 val-
-ATSfunbodyseq(inss) = ins0.instr_node
+~ATSfunbodyseq(inss) = instr_node_view(ins0.instr_node())
 val
 inss = instrlst_skip_linepragma (inss)
 //
-val-list_cons (ins1, _(*inss2*)) = inss
-val-ATSINSflab (flab) = ins1.instr_node
+val-~GLcons (ins1, _(*inss2*)) = glist_view(inss)
+val-~ATSINSflab (flab) = instr_node_view(ins1.instr_node())
 //
 } // end of [funbodyseq_get_funlab]
 
@@ -1179,7 +1158,7 @@ ATSfunbodyseq_make
   tok1, inss, tok2
 ) = let
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSfunbodyseq (inss))
@@ -1194,7 +1173,7 @@ ATSreturn_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSreturn (tmp))
@@ -1209,7 +1188,7 @@ ATSreturn_void_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSreturn_void (tmp))
@@ -1221,7 +1200,7 @@ implement
 ATSlinepragma_make
   (tok_kwd, line, file) = let
 //
-val loc = tok_kwd.token_loc ++ file.token_loc
+val loc = tok_kwd.token_loc() ++ file.token_loc()
 //
 in
   instr_make_node (loc, ATSlinepragma (line, file))
@@ -1238,7 +1217,7 @@ ATSINSlab_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSlab (lab))
@@ -1253,7 +1232,7 @@ ATSINSgoto_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSgoto (lab))
@@ -1268,7 +1247,7 @@ ATSINSflab_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSflab (flab))
@@ -1283,7 +1262,7 @@ ATSINSfgoto_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSfgoto (flab))
@@ -1298,7 +1277,7 @@ ATSINSfreeclo_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSfreeclo (d0e))
@@ -1311,7 +1290,7 @@ ATSINSfreecon_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSfreecon (d0e))
@@ -1326,7 +1305,7 @@ ATSINSmove_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove (tmp, d0e))
@@ -1341,7 +1320,7 @@ ATSINSmove_void_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_void (tmp, d0e))
@@ -1356,7 +1335,7 @@ ATSINSmove_nil_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_nil (tmp))
@@ -1371,7 +1350,7 @@ ATSINSmove_con0_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_con0 (tmp, ctag))
@@ -1386,7 +1365,7 @@ ATSINSmove_con1_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_con1 (inss))
@@ -1401,7 +1380,7 @@ ATSINSmove_con1_new_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_con1_new (tmp, s0e))
@@ -1416,7 +1395,7 @@ ATSINSstore_con1_tag_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSstore_con1_tag (tmp, ctag))
@@ -1431,7 +1410,7 @@ ATSINSstore_con1_ofs_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSstore_con1_ofs (tmp, s0e, lab, d0e))
@@ -1446,7 +1425,7 @@ ATSINSmove_boxrec_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_boxrec (inss))
@@ -1461,7 +1440,7 @@ ATSINSmove_boxrec_new_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_boxrec_new (tmp, s0e))
@@ -1476,7 +1455,7 @@ ATSINSstore_boxrec_ofs_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
 //
@@ -1494,7 +1473,7 @@ ATSINSmove_fltrec_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_fltrec (inss))
@@ -1509,7 +1488,7 @@ ATSINSstore_fltrec_ofs_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
 //
@@ -1527,7 +1506,7 @@ ATSINSmove_delay_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_delay(tmp, s0e_res, thunk))
@@ -1542,7 +1521,7 @@ ATSINSmove_lazyeval_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_lazyeval(tmp, s0e_res, lazyval))
@@ -1557,7 +1536,7 @@ ATSINSmove_ldelay_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_ldelay(tmp, s0e_res, thunk))
@@ -1572,7 +1551,7 @@ ATSINSmove_llazyeval_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_llazyeval(tmp, s0e_res, lazyval))
@@ -1586,7 +1565,7 @@ ATStailcalseq_make
   tok1, inss, tok2
 ) = let
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATStailcalseq (inss))
@@ -1601,7 +1580,7 @@ ATSINSmove_tlcal_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSmove_tlcal (apy, d0e))
@@ -1616,7 +1595,7 @@ ATSINSargmove_tlcal_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSargmove_tlcal (arg, apy))
@@ -1631,7 +1610,7 @@ ATSINSextvar_assign_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSextvar_assign (ext, d0e_r))
@@ -1646,7 +1625,7 @@ ATSINSdyncst_valbind_make
 ) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSdyncst_valbind (d2c, d0e_r))
@@ -1659,7 +1638,7 @@ ATSINScaseof_fail_make
   (tok1, errmsg, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINScaseof_fail(errmsg))
@@ -1672,7 +1651,7 @@ ATSINSdeadcode_fail_make
   (tok1, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSINSdeadcode_fail(tok1))
@@ -1685,7 +1664,7 @@ ATSdynload_make
   (tok1, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSdynload(0))
@@ -1698,7 +1677,7 @@ ATSdynloadset_make
   (tok1, id, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSdynloadset(id))
@@ -1711,7 +1690,7 @@ ATSdynloadfcall_make
   (tok1, id, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSdynloadfcall(id))
@@ -1724,7 +1703,7 @@ ATSdynloadflag_sta_make
   (tok1, id, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSdynloadflag_sta(id))
@@ -1737,7 +1716,7 @@ ATSdynloadflag_ext_make
   (tok1, id, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   instr_make_node (loc, ATSdynloadflag_ext(id))
@@ -1755,11 +1734,11 @@ fcount
   xs: instrlst, res: int
 ) : int =
 (
-case+ xs of
-| list_nil () => res
-| list_cons (x, xs) => (
-    case+ x.instr_node of
-    | ATSfunbodyseq _ => fcount (xs, res+1) | _ => fcount (xs, res)
+case+ glist_view(xs) of
+| ~GLnil () => res
+| ~GLcons (x, xs) => (
+    case+ instr_node_view(x.instr_node()) of
+    | ~ATSfunbodyseq _ => fcount (xs, res+1) | v0 => (instr_node_view_free(v0); fcount (xs, res))
   ) (* end of [list_cons] *)
 )
 //
@@ -1786,24 +1765,24 @@ fprintln! (stdout_ref, "istailcal: aux: x = ", x)
 in
 //
 case+
-x.instr_node
+instr_node_view(x.instr_node())
 of // case+
-| ATStailcalseq _ => true
-| ATSif (_, _then, _else) =>
+| ~ATStailcalseq _ => true
+| ~ATSif (_, _then, _else) =>
     if auxlst (_then) then true else auxlstopt (_else)
-| ATSbranchseq (inss) => auxlst (inss)
-| ATScaseofseq (inss) => auxlst (inss)
-| ATSfunbodyseq (inss) => auxlst (inss)
-| _(*rest-of-instr*) => false
+| ~ATSbranchseq (inss) => auxlst (inss)
+| ~ATScaseofseq (inss) => auxlst (inss)
+| ~ATSfunbodyseq (inss) => auxlst (inss)
+| v0(*rest-of-instr*) => (instr_node_view_free(v0); false)
 //
 end // end of [aux]
 //
 and auxlst
   (xs: instrlst): bool =
 (
-case+ xs of
-| list_nil () => false
-| list_cons (x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil () => false
+| ~GLcons (x, xs) =>
     if aux (x) then true else auxlst (xs)
   // end of [list_cons]
 )
@@ -1811,8 +1790,8 @@ case+ xs of
 and auxlstopt
   (opt: instrlstopt): bool =
 (
-case+ opt of
-| None () => false | Some (inss) => auxlst (inss)
+case+ gopt_view(opt) of
+| ~GOnone () => false | ~GOsome(inss) => auxlst (inss)
 )
 //
 in
@@ -1822,8 +1801,8 @@ end // end of [istailcal]
 in
 //
 case+
-fbody.f0body_node of
-| F0BODY
+f0body_node_view(fbody.f0body_node()) of
+| ~F0BODY
     (tds, inss) => let
     val nf = fcount (inss, 0)
 (*
@@ -1845,7 +1824,7 @@ f0body_get_tmpdeclst
 (
 //
 case+
-fbody.f0body_node of F0BODY (tds, _) => tds
+f0body_node_view(fbody.f0body_node()) of ~F0BODY (tds, _) => tds
 //
 ) (* end of [f0body_get_tmpdeclst] *)
 
@@ -1857,7 +1836,7 @@ f0body_get_bdinstrlst
 (
 //
 case+
-fbody.f0body_node of F0BODY (_, inss) => inss
+f0body_node_view(fbody.f0body_node()) of ~F0BODY (_, inss) => inss
 //
 ) (* end of [f0body_get_bdinstrlst] *)
 
@@ -1870,11 +1849,9 @@ f0body_make
 ) = let
 //
 val loc =
-  tok_beg.token_loc ++ tok_end.token_loc
+  tok_beg.token_loc() ++ tok_end.token_loc()
 //
-in '{
-  f0body_loc= loc, f0body_node= F0BODY (tmps, inss)
-} end // end of [f0body_make]
+in f0body_F0BODYREC(loc, f0body_node_encode(F0BODY (tmps, inss))) end // end of [f0body_make]
 
 (* ****** ****** *)
 
@@ -1882,11 +1859,9 @@ implement
 f0decl_none
   (head) = let
 //
-val loc = head.f0head_loc
+val loc = head.f0head_loc()
 //
-in '{
-  f0decl_loc= loc, f0decl_node= F0DECLnone(head)
-} end // end of [f0decl_none]
+in f0decl_F0DECLREC(loc, f0decl_node_encode(F0DECLnone(head))) end // end of [f0decl_none]
 
 (* ****** ****** *)
 
@@ -1895,19 +1870,17 @@ f0decl_some
   (head, body) = let
 //
 val loc =
-  head.f0head_loc ++ body.f0body_loc
+  head.f0head_loc() ++ body.f0body_loc()
 //
-in '{
-  f0decl_loc= loc, f0decl_node= F0DECLsome(head, body)
-} end // end of [f0decl_some]
+in f0decl_F0DECLREC(loc, f0decl_node_encode(F0DECLsome(head, body))) end // end of [f0decl_some]
 
 (* ****** ****** *)
 
 fun
 d0ecl_make_node
 (
-  loc: loc_t, node: d0ecl_node
-) : d0ecl = '{ d0ecl_loc= loc, d0ecl_node= node }
+  loc: loc_t, node: d0ecl_node_view
+) : d0ecl = d0ecl_D0ECLREC(loc, d0ecl_node_encode(node))
 
 (* ****** ****** *)
 
@@ -1915,7 +1888,7 @@ implement
 d0ecl_include
   (tok, fname) = let
 //
-val loc = tok.token_loc ++ fname.token_loc
+val loc = tok.token_loc() ++ fname.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cinclude (fname))
@@ -1929,7 +1902,7 @@ d0ecl_ifdef
   tok1, id, d0cs, tok2
 ) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cifdef (id, d0cs))
@@ -1943,7 +1916,7 @@ d0ecl_ifndef
   tok1, id, d0cs, tok2
 ) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cifdef (id, d0cs))
@@ -1956,7 +1929,7 @@ d0ecl_assume
   (tok1, name, tok2) = let
 //
 val loc =
-  tok1.token_loc ++ tok2.token_loc
+  tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cassume (name))
@@ -1968,7 +1941,7 @@ implement
 d0ecl_dyncst_mac
   (tok1, name, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdyncst_mac (name))
@@ -1980,7 +1953,7 @@ implement
 d0ecl_dyncst_extfun
   (tok1, name, s0es, s0e, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
 //
@@ -1994,7 +1967,7 @@ implement
 d0ecl_dyncst_valdec
   (tok1, name, d0c_type, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdyncst_valdec(name, d0c_type))
@@ -2006,7 +1979,7 @@ implement
 d0ecl_dyncst_valimp
   (tok1, name, d0v_type, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdyncst_valimp(name, d0v_type))
@@ -2018,7 +1991,7 @@ implement
 d0ecl_typedef
   (tok, tyrec, id) = let
 //
-val loc = tok.token_loc ++ id.i0dex_loc
+val loc = tok.token_loc() ++ id.i0dex_loc()
 //
 in
   d0ecl_make_node (loc, D0Ctypedef (id, tyrec))
@@ -2032,7 +2005,7 @@ d0ecl_extcode
   tok1, extcode, tok2
 ) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cextcode (extcode))
@@ -2044,20 +2017,20 @@ implement
 d0ecl_statmp_none
   (tok1, tmp, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
-  d0ecl_make_node (loc, D0Cstatmp (tmp, None()))
+  d0ecl_make_node (loc, D0Cstatmp (tmp, gopt_none()))
 end // end of [d0ecl_statmp_none]
 //
 implement
 d0ecl_statmp_some
   (tok1, tmp, s0e, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
-  d0ecl_make_node (loc, D0Cstatmp (tmp, Some(s0e)))
+  d0ecl_make_node (loc, D0Cstatmp (tmp, gopt_some(s0e)))
 end // end of [d0ecl_statmp_some]
 //
 (* ****** ****** *)
@@ -2066,7 +2039,7 @@ implement
 d0ecl_fundecl
   (fk, fdec) = let
 //
-val loc = fk.fkind_loc ++ fdec.f0decl_loc
+val loc = fk.fkind_loc() ++ fdec.f0decl_loc()
 //
 in
   d0ecl_make_node (loc, D0Cfundecl (fk, fdec))
@@ -2080,7 +2053,7 @@ d0ecl_closurerize
   tok1, fl, env, arg, res, tok2
 ) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cclosurerize (fl, env, arg, res))
@@ -2092,7 +2065,7 @@ implement
 d0ecl_dynloadflag_init
   (tok1, flag, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdynloadflag_init (flag))
@@ -2102,7 +2075,7 @@ implement
 d0ecl_dynloadflag_minit
   (tok1, flag, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdynloadflag_minit (flag))
@@ -2114,7 +2087,7 @@ implement
 d0ecl_dynexn_dec
   (tok1, idexn, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdynexn_dec (idexn))
@@ -2124,7 +2097,7 @@ implement
 d0ecl_dynexn_extdec
   (tok1, idexn, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdynexn_extdec (idexn))
@@ -2134,7 +2107,7 @@ implement
 d0ecl_dynexn_initize
   (tok1, idexn, fullname, tok2) = let
 //
-val loc = tok1.token_loc ++ tok2.token_loc
+val loc = tok1.token_loc() ++ tok2.token_loc()
 //
 in
   d0ecl_make_node (loc, D0Cdynexn_initize (idexn, fullname))

@@ -1,0 +1,254 @@
+(* the test doubles of the driver of the level-3 translation test, group 2 (g2_gen.py): the functions of the other groups of the trans3 port that the
+   modules pats_trans3_{dynexp_dn,appsym,caseof,patcon} call (src/pats_trans3.sats), generated from this template (see t3hand.tmpl: "2|" lines are ATS2 only,
+   "1|" lines ATS1 only, "<<(" is "@(" in ATS2 and "(" in ATS1). Each one prints a line "T3 name args" (the order of the calls and their arguments are
+   observable) and returns a result that depends only on its arguments, identically in the two languages. See PORTING.md, "Level 3 translation, group 2". *)
+(* ****** ****** *)
+2|fun g2_dloc (e: d2exp): location = e.d2exp_loc ()
+1|fun g2_dloc (e: d2exp): location = e.d2exp_loc
+2|fun g2_eloc (e: d3exp): location = e.d3exp_loc ()
+1|fun g2_eloc (e: d3exp): location = e.d3exp_loc
+2|fun g2_ploc (p: p2at): location = p.p2at_loc ()
+1|fun g2_ploc (p: p2at): location = p.p2at_loc
+//
+// the type of a typed leaf: D2Eann_type (e, s2e) has the type s2e, every other expression has the type void
+//
+2|fun g2_ty_of (d2e: d2exp): s2exp = (
+2|  case+ d2exp_node_view (d2e.d2exp_node ()) of
+2|  | ~D2Eann_type (_, s2e) => s2e
+2|  | v => (d2exp_node_view_free (v); s2exp_void_t0ype ())
+2|)
+1|fun g2_ty_of (d2e: d2exp): s2exp = (
+1|  case+ d2e.d2exp_node of
+1|  | D2Eann_type (_, s2e) => s2e
+1|  | _ => s2exp_void_t0ype ()
+1|)
+//
+2|fun g2_vty (d2v: d2var): s2exp = (
+2|  case+ gopt_view (d2var_get_type (d2v)) of ~GOsome (s2e) => s2e | ~GOnone () => s2exp_void_t0ype ()
+2|)
+1|fun g2_vty (d2v: d2var): s2exp = (
+1|  case+ d2var_get_type (d2v) of Some (s2e) => s2e | None () => s2exp_void_t0ype ()
+1|)
+//
+// a linear variable that is used is consumed if it is local to the enclosing linear function (as d2exp_trup_var_nonmut does), else it is an error
+//
+2|fun g2_consume (loc0: location, d2v: d2var): void =
+2|  if d2var_get_linval (d2v) >= 0 then (
+2|    if the_d2varenv_d2var_is_llamlocal (d2v)
+2|      then (d2var_inc_linval (d2v); d2var_set_type (d2v, gopt_none ()))
+2|      else let
+2|        val () = ($LOC.prerr_location (loc0); prerr_string ": error(3)")
+2|        val () = (prerr_string ": the linear dynamic variable ["; prerr_d2var (d2v); prerr_string "] is expected to be local but it is not."; prerr_newline ())
+2|      in the_trans3errlst_add (trans3err_T3E_d2var_trup_llamlocal (d2v)) end
+2|  ) else ()
+1|fun g2_consume (loc0: location, d2v: d2var): void =
+1|  if d2var_get_linval (d2v) >= 0 then (
+1|    if the_d2varenv_d2var_is_llamlocal (d2v)
+1|      then (d2var_inc_linval (d2v); d2var_set_type (d2v, None ()))
+1|      else let
+1|        val () = ($LOC.prerr_location (loc0); prerr_string ": error(3)")
+1|        val () = (prerr_string ": the linear dynamic variable ["; prerr_d2var (d2v); prerr_string "] is expected to be local but it is not."; prerr_newline ())
+1|      in the_trans3errlst_add (T3E_d2var_trup_llamlocal (d2v)) end
+1|  ) else ()
+//
+// [d2exp_trup]: a typed leaf has its type, a (linear) variable is consumed (as d2exp_trup_var_nonmut does: linval incremented, type removed),
+// every other expression has the type void
+//
+2|implement d2exp_trup (d2e) = let
+2|  val () = (dd_ps "T3 d2exp_trup "; dd_d2exp d2e; dd_nl ())
+2|in
+2|  case+ d2exp_node_view (d2e.d2exp_node ()) of
+2|  | ~D2Evar (d2v) => let
+2|      val s2e = g2_vty (d2v)
+2|      val () = g2_consume (g2_dloc d2e, d2v)
+2|    in d3exp_var (g2_dloc d2e, s2e, d2v) end
+2|  | ~D2Eann_type (_, s2e) => d3exp_top (g2_dloc d2e, s2e)
+2|  | v => (d2exp_node_view_free (v); d3exp_top (g2_dloc d2e, s2exp_void_t0ype ()))
+2|end
+1|implement d2exp_trup (d2e) = let
+1|  val () = (dd_ps "T3 d2exp_trup "; dd_d2exp d2e; dd_nl ())
+1|in
+1|  case+ d2e.d2exp_node of
+1|  | D2Evar (d2v) => let
+1|      val s2e = g2_vty (d2v)
+1|      val () = g2_consume (g2_dloc d2e, d2v)
+1|    in d3exp_var (g2_dloc d2e, s2e, d2v) end
+1|  | D2Eann_type (_, s2e) => d3exp_top (g2_dloc d2e, s2e)
+1|  | _ => d3exp_top (g2_dloc d2e, s2exp_void_t0ype ())
+1|end
+//
+2|fun g2_trups (xs: d2explst): d3explst = (
+2|  case+ glist_view (xs) of
+2|  | ~GLnil () => glist_nil ()
+2|  | ~GLcons (x, xs1) => let val y = d2exp_trup (x) val ys = g2_trups (xs1) in glist_cons<d3exp> (y, ys) end
+2|)
+1|fun g2_trups (xs: d2explst): d3explst = (
+1|  case+ xs of
+1|  | list_nil () => list_nil ()
+1|  | list_cons (x, xs1) => let val y = d2exp_trup (x) val ys = g2_trups (xs1) in list_cons (y, ys) end
+1|)
+implement d2explst_trup (d2es) = let
+  val () = (dd_ps "T3 d2explst_trup "; dd_d2explst d2es; dd_nl ())
+in
+  g2_trups (d2es)
+end
+//
+implement d3exp_trdn (d3e, s2e) = let
+  val () = (dd_ps "T3 d3exp_trdn "; dd_d3exp d3e; dd_ps " : "; dd_s2exp s2e; dd_nl ())
+in
+  d3exp_ann_type (g2_eloc d3e, d3e, s2e)
+end
+//
+implement d3explst_trdn_arg (d3es, s2es) = let
+  val () = (dd_ps "T3 d3explst_trdn_arg "; dd_d3explst d3es; dd_ps " : "; dd_s2explst s2es; dd_nl ())
+in
+  d3es
+end
+//
+2|implement p2at_trdn (p2t, s2e) = let
+2|  val () = (dd_ps "T3 p2at_trdn "; dd_p2at p2t; dd_ps " : "; dd_s2exp s2e; dd_nl ())
+2|  val loc = g2_ploc p2t
+2|in
+2|  case+ p2at_node_view (p2t.p2at_node ()) of
+2|  | ~P2Tvar (d2v) => p3at_var (loc, s2e, d2v)
+2|  | ~P2Tany () => p3at_any (loc, s2e, d2var_make_any (loc))
+2|  | ~P2Trefas (d2v, p2t1) => p3at_refas (loc, s2e, d2v, p3at_errpat (g2_ploc p2t1, s2e))
+2|  | ~P2Tcon (_, _, _, _, _, _) => p2at_trdn_con (p2t, s2exp2hnf s2e)
+2|  | v => (p2at_node_view_free (v); p3at_errpat (loc, s2e))
+2|end
+1|implement p2at_trdn (p2t, s2e) = let
+1|  val () = (dd_ps "T3 p2at_trdn "; dd_p2at p2t; dd_ps " : "; dd_s2exp s2e; dd_nl ())
+1|  val loc = g2_ploc p2t
+1|in
+1|  case+ p2t.p2at_node of
+1|  | P2Tvar (d2v) => p3at_var (loc, s2e, d2v)
+1|  | P2Tany () => p3at_any (loc, s2e, d2var_make_any (loc))
+1|  | P2Trefas (d2v, p2t1) => p3at_refas (loc, s2e, d2v, p3at_errpat (g2_ploc p2t1, s2e))
+1|  | P2Tcon (_, _, _, _, _, _) => p2at_trdn_con (p2t, s2exp2hnf s2e)
+1|  | _ => p3at_errpat (loc, s2e)
+1|end
+//
+// [p2atlst_trdn], [p2atlst_trdn_arg]: the list of the patterns is matched against the list of the types
+// (serr: +1 for a pattern in excess, -1 for each type without a pattern); the result has the length of the types
+//
+2|fun g2_p3_loop (loc: location, p2ts: p2atlst, s2es: s2explst, serr: &int): List0_vt (p3at) = (
+2|  case+ glist_view (s2es) of
+2|  | ~GLnil () => (
+2|    case+ glist_view (p2ts) of
+2|    | ~GLnil () => list_vt_nil ()
+2|    | ~GLcons (_, _) => (serr := serr + 1; list_vt_nil ())
+2|    )
+2|  | ~GLcons (s2e, s2es1) => (
+2|    case+ glist_view (p2ts) of
+2|    | ~GLnil () => let
+2|        val () = serr := serr - 1
+2|        val p3t = p3at_errpat (loc, s2e)
+2|        val rest = g2_p3_loop (loc, glist_nil (), s2es1, serr)
+2|      in list_vt_cons (p3t, rest) end
+2|    | ~GLcons (p2t, p2ts1) => let
+2|        val p3t = p2at_trdn (p2t, s2e)
+2|        val rest = g2_p3_loop (loc, p2ts1, s2es1, serr)
+2|      in list_vt_cons (p3t, rest) end
+2|    )
+2|)
+1|fun g2_p3_loop (loc: location, p2ts: p2atlst, s2es: s2explst, serr: &int): List (p3at) = (
+1|  case+ s2es of
+1|  | list_nil () => (
+1|    case+ p2ts of
+1|    | list_nil () => list_nil ()
+1|    | list_cons (_, _) => (serr := serr + 1; list_nil ())
+1|    )
+1|  | list_cons (s2e, s2es1) => (
+1|    case+ p2ts of
+1|    | list_nil () => let
+1|        val () = serr := serr - 1
+1|        val p3t = p3at_errpat (loc, s2e)
+1|        val rest = g2_p3_loop (loc, list_nil (), s2es1, serr)
+1|      in list_cons (p3t, rest) end
+1|    | list_cons (p2t, p2ts1) => let
+1|        val p3t = p2at_trdn (p2t, s2e)
+1|        val rest = g2_p3_loop (loc, p2ts1, s2es1, serr)
+1|      in list_cons (p3t, rest) end
+1|    )
+1|)
+2|implement p2atlst_trdn (loc, p2ts, s2es, serr) = let
+2|  val () = (dd_ps "T3 p2atlst_trdn "; dd_location loc; dd_ps " "; dd_p2atlst p2ts; dd_ps " : "; dd_s2explst s2es; dd_nl ())
+2|in
+2|  glist_make_list_vt (g2_p3_loop (loc, p2ts, s2es, serr))
+2|end
+1|implement p2atlst_trdn {n} (loc, p2ts, s2es, serr) = let
+1|  val () = (dd_ps "T3 p2atlst_trdn "; dd_location loc; dd_ps " "; dd_p2atlst p2ts; dd_ps " : "; dd_s2explst s2es; dd_nl ())
+1|in
+1|  $UN.cast{list (p3at, n)} (g2_p3_loop (loc, p2ts, s2es, serr))
+1|end
+2|implement p2atlst_trdn_arg (loc, npf, p2ts, s2es, serr) = let
+2|  val () = (dd_ps "T3 p2atlst_trdn_arg "; dd_location loc; dd_ps " "; dd_int npf; dd_ps " "; dd_p2atlst p2ts; dd_ps " : "; dd_s2explst s2es; dd_nl ())
+2|in
+2|  glist_make_list_vt (g2_p3_loop (loc, p2ts, s2es, serr))
+2|end
+1|implement p2atlst_trdn_arg {n} (loc, npf, p2ts, s2es, serr) = let
+1|  val () = (dd_ps "T3 p2atlst_trdn_arg "; dd_location loc; dd_ps " "; dd_int npf; dd_ps " "; dd_p2atlst p2ts; dd_ps " : "; dd_s2explst s2es; dd_nl ())
+1|in
+1|  $UN.cast{list (p3at, n)} (g2_p3_loop (loc, p2ts, s2es, serr))
+1|end
+//
+implement guard_trdn (loc, gval, gtyp) =
+  (dd_ps "T3 guard_trdn "; dd_location loc; dd_ps " "; dd_bool gval; dd_ps " "; dd_s2exp gtyp; dd_nl ())
+//
+implement funarg_patck_exhaust (loc0, p2ts, s2es) =
+  (dd_ps "T3 funarg_patck_exhaust "; dd_location loc0; dd_ps " "; dd_p2atlst p2ts; dd_ps " : "; dd_s2explst s2es; dd_nl ())
+//
+implement fshowtype_d3exp_dn (d3e) =
+  (dd_ps "T3 fshowtype_d3exp_dn "; dd_d3exp d3e; dd_nl ())
+//
+implement d3exp_linheap_check (d3e) = let
+  val () = (dd_ps "T3 d3exp_linheap_check "; dd_d3exp d3e; dd_nl ())
+in
+  d3e
+end
+//
+implement d2eclist_tr (d2cs) = let
+  val () = (dd_ps "T3 d2eclist_tr "; dd_d2eclist d2cs; dd_nl ())
+in
+  LC_d3eclist (d3ecl_none (mkloc (77)), LN_d3eclist ())
+end
+//
+implement d2exp_trup_cst (loc, d2c) = let
+  val () = (dd_ps "T3 d2exp_trup_cst "; dd_location loc; dd_ps " "; dd_d2cst d2c; dd_nl ())
+in
+  d3exp_cst (loc, d2cst_get_type d2c, d2c)
+end
+implement d2exp_trup_var (loc, d2v) = let
+  val () = (dd_ps "T3 d2exp_trup_var "; dd_location loc; dd_ps " "; dd_d2var d2v; dd_nl ())
+in
+  d3exp_var (loc, g2_vty d2v, d2v)
+end
+implement d2exp_trup_tmpcst (loc, d2c, t2mas) = let
+  val () = (dd_ps "T3 d2exp_trup_tmpcst "; dd_location loc; dd_ps " "; dd_d2cst d2c; dd_ps " "; dd_t2mpmarglst t2mas; dd_nl ())
+in
+  d3exp_tmpcst (loc, d2cst_get_type d2c, d2c, t2mas)
+end
+implement d2exp_trup_tmpvar (loc, d2v, t2mas) = let
+  val () = (dd_ps "T3 d2exp_trup_tmpvar "; dd_location loc; dd_ps " "; dd_d2var d2v; dd_ps " "; dd_t2mpmarglst t2mas; dd_nl ())
+in
+  d3exp_tmpvar (loc, g2_vty d2v, d2v, t2mas)
+end
+implement d23exp_trup_applst (d2e0, d3e_fun, d2as) = let
+  val () = (dd_ps "T3 d23exp_trup_applst "; dd_d2exp d2e0; dd_ps " "; dd_d3exp d3e_fun; dd_ps " "; dd_d2exparglst d2as; dd_nl ())
+in
+  d3e_fun
+end
+//
+implement d3exp_fun_restore (fc, d3e_fun) = let
+  val () = (dd_ps "T3 d3exp_fun_restore "; dd_funclo fc; dd_ps " "; dd_d3exp d3e_fun; dd_nl ())
+in
+  d3e_fun
+end
+implement d3explst_arg_restore (d3es, s2es_arg, wths2es) = let
+  val () = (dd_ps "T3 d3explst_arg_restore "; dd_d3explst d3es; dd_ps " "; dd_s2explst s2es_arg; dd_ps " "; dd_wths2explst wths2es; dd_nl ())
+in
+  d3es
+end
+//
+implement d3lvalist_set_pat_type_left (d3es, p3ts) =
+  (dd_ps "T3 d3lvalist_set_pat_type_left "; dd_d3explst d3es; dd_ps " "; dd_p3atlst p3ts; dd_nl ())

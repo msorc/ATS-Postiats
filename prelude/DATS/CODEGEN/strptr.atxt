@@ -359,8 +359,10 @@ case+ xs of
 | ~list_vt_nil () => strptr_null ()
 | ~list_vt_cons (x, ~list_vt_nil ()) => x
 | _ => let
-    val res =
-      stringlst_concat ($UN.castvwtp1{List(string)}(xs))
+    val xs2 =
+      $UN.castvwtp1{List_vt(string)}(xs)
+    val res = stringlst_concat (xs2)
+    prval () = $UN.cast2void (xs2)
     val () =
     loop (xs) where {
       fun loop {n:nat} .<n>.
@@ -510,6 +512,6 @@ end // end of [strnptr_rforeach_env]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "strptr_atxt.txt")
 %}\

@@ -32,6 +32,12 @@
 // Time: February 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_lintprgm_print.dats)
+//
+#include "share/atspre_staload.hats"
+//
+(* ****** ****** *)
 
 staload "./pats_lintprgm.sats"
 
@@ -45,19 +51,25 @@ fprint_myintvec
     lemma_myintvec_params (iv)
   // end of [prval]
 //
-  viewtypedef x = myint(a)
+  vtypedef x = myint(a)
+//
+  fun loop
+    {n:nat}{l:addr} .<n>.
+  (
+    pf: !array_v (x, l, n) | out: FILEref, p: ptr l, n: int n, i: int
+  ) : void =
+    if n > 0 then let
+      prval (pf1, pf2) = array_v_uncons {x} (pf)
+      val () = if i > 0 then fprint_string (out, ", ")
+      val () = fprint_myint<a> (out, !p)
+      val () = loop (pf2 | out, ptr_succ<x> (p), n-1, i+1)
+      prval () = pf := array_v_cons {x} (pf1, pf2)
+    in
+      // nothing
+    end // end of [if]
+//
   val (pf | p) = myintvec_takeout (iv)
-  var i: int = 0
-  viewdef v = int@i
-  var !p_clo =
-    @lam (pf: !v | x: &x): void => let
-    val () = if i > 0 then fprint (out, ", ")
-    val () = i := i + 1
-  in
-    fprint_myint (out, x)
-  end // end of [var]
-  val n = size1_of_int1 (n)
-  val () = array_ptr_foreach_vclo<x> {v} (view@(i) | !p, !p_clo, n)
+  val () = loop (pf | out, p, n, 0)
   prval () = myintvecout_addback (pf | iv)
 in
   (*nothing*)
@@ -74,15 +86,15 @@ implement{a}
 fprint_myintveclst
   (out, xs, n) =
   case+ xs of
-  | list_vt_cons
-      (!p_x, !p_xs) => let
-      val () = fprint_myintvec (out, !p_x, n)
+  | @list_vt_cons
+      (x, xs1) => let
+      val () = fprint_myintvec<a> (out, x, n)
       val () = fprint_newline (out)
-      val () = fprint_myintveclst (out, !p_xs, n)
+      val () = fprint_myintveclst<a> (out, xs1, n)
     in
       fold@ (xs)
     end // end of [list_vt]
-  | list_vt_nil () => fold@ (xs)
+  | list_vt_nil () => ()
 // end of [fprint_myintveclst]
 
 implement{a}
@@ -99,41 +111,41 @@ fprint_icnstr
 in
 //
 case+ ic of
-| ICvec
-    (knd, !p_ivec) => let
+| @ICvec
+    (knd, ivec) => let
     val () = prstr "ICvec("
+    val knd1 = knd
     val () = (
-      case+ knd of
-      |  1 => prstr "=="
-      | ~1 => prstr "!="
-      |  2 => prstr ">="
-      | ~2 => prstr "<<"
-      | _ => fprint_int (out, knd)
+      if knd1 = 1 then prstr "=="
+      else if knd1 = ~1 then prstr "!="
+      else if knd1 = 2 then prstr ">="
+      else if knd1 = ~2 then prstr "<<"
+      else fprint_int (out, knd1)
     ) : void // end of [val]
     val () = prstr "; "
-    val () = fprint_myintvec<a> (out, !p_ivec, n)
+    val () = fprint_myintvec<a> (out, ivec, n)
     val () = prstr ")"
   in
     fold@ (ic)
   end // end of [ICvec]
-| ICveclst
-    (knd, !p_ics) => let
+| @ICveclst
+    (knd, ics1) => let
     val () = prstr "ICveclst("
+    val knd1 = knd
     val () = (
-      case knd of
-      | 0 => prstr "conj"
-      | 1 => prstr "disj"
-      | _ => fprint_int (out, knd)
+      if knd1 = 0 then prstr "conj"
+      else if knd1 = 1 then prstr "disj"
+      else fprint_int (out, knd1)
     ) : void // end of [val]
     val () = prstr ";"
     val () = prstr "\n"
-    val () = fprint_icnstrlst (out, !p_ics, n)
+    val () = fprint_icnstrlst<a> (out, ics1, n)
     val () = prstr ")"
   in
     fold@ (ic)
   end // end of [ICveclst]
 //
-  | ICerr _ => let
+  | @ICerr _ => let
       val () = prstr "ICerr("
       val () = fprint_string (out, "...")
       val () = prstr ")"
@@ -154,15 +166,15 @@ implement{a}
 fprint_icnstrlst
   (out, ics, n) = (
   case+ ics of
-  | list_vt_cons
-      (!p_ic, !p_ics) => let
-      val () = fprint_icnstr<a> (out, !p_ic, n)
+  | @list_vt_cons
+      (ic, ics1) => let
+      val () = fprint_icnstr<a> (out, ic, n)
       val () = fprint_newline (out)
-      val () = fprint_icnstrlst<a> (out, !p_ics, n)
+      val () = fprint_icnstrlst<a> (out, ics1, n)
     in
       fold@ (ics)
     end // end of [list_vt_cons]
-  | list_vt_nil () => fold@ ics
+  | list_vt_nil () => ()
 ) // end of [fprint_icnstrlst]
 
 implement{a}

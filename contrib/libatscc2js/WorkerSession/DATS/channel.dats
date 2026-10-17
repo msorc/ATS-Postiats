@@ -54,6 +54,7 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 //
+staload "./../../SATS/JSarray.sats"
 staload "./../SATS/channel.sats"
 //
 (* ****** ****** *)
@@ -84,51 +85,46 @@ chmsg_parse<string>(msg) = $UN.cast{string}(msg)
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC
+// (JSON) arrays are received as JSarrays (instead of list0)
+//
 implement
 (a:t@ype)
-chmsg_parse<list0(a)>(msg) = let
+chmsg_parse<JSarray(a)>(msg) = let
+//
+val A = $UN.cast{JSarray(chmsg(a))}(msg)
+val n = JSarray_length(A)
+val B = JSarray_nil{a}()
 //
 fun
-aux{n:nat}
-(
-  xs: list(chmsg(a), n)
-) : list0(a) =
-(
-case+ xs of
-//
-| list_nil
-    () => list0_nil()
-  // list_nil
-//
-| list_cons
-    (x, xs) => let
-    val x =
-      chmsg_parse<a>(x)
-    // end of [val]
-  in
-    list0_cons(x, aux(xs))
-  end // end of [list_cons]
-//
-)
+loop(i: int): void =
+  if i < n
+    then let
+      val _ = JSarray_push(B, chmsg_parse<a>(JSarray_get_at(A, i)))
+    in
+      loop(i+1)
+    end // end of [then]
+  // end of [if]
 //
 in
-  aux($UN.cast{List0(chmsg(a))}(msg))
-end // end of [chmsg_parse<list0(a)>]
+  loop(0); B
+end // end of [chmsg_parse<JSarray(a)>]
 
 (* ****** ****** *)
 
 implement
 (a:t@ype
 ,b:t0ype)
-chmsg_parse<$tup(a,b)>(msg) = let
+chmsg_parse<@(a,b)>(msg) = let
 //
 val
 msg =
-$UN.cast{$tup(chmsg(a),chmsg(b))}(msg)
+$UN.cast{@(chmsg(a),chmsg(b))}(msg)
 //
 in
-  $tup(chmsg_parse<a>(msg.0), chmsg_parse<b>(msg.1))
-end // end of [chmsg_parse<$tup(a,b)>]
+  @(chmsg_parse<a>(msg.0), chmsg_parse<b>(msg.1))
+end // end of [chmsg_parse<@(a,b)>]
 
 (* ****** ****** *)
 
@@ -136,15 +132,15 @@ implement
 (a:t@ype
 ,b:t0ype
 ,c:t0ype)
-chmsg_parse<$tup(a,b,c)>(msg) = let
+chmsg_parse<@(a,b,c)>(msg) = let
 //
 val
 msg =
-$UN.cast{$tup(chmsg(a),chmsg(b),chmsg(c))}(msg)
+$UN.cast{@(chmsg(a),chmsg(b),chmsg(c))}(msg)
 //
 in
-  $tup(chmsg_parse<a>(msg.0), chmsg_parse<b>(msg.1), chmsg_parse<c>(msg.2))
-end // end of [chmsg_parse<$tup(a,b,c)>]
+  @(chmsg_parse<a>(msg.0), chmsg_parse<b>(msg.1), chmsg_parse<c>(msg.2))
+end // end of [chmsg_parse<@(a,b,c)>]
 
 (* ****** ****** *)
 

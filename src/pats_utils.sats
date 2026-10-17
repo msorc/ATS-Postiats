@@ -33,8 +33,12 @@
 //
 (* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+
 fun
-eqref_type{a:type}(x1: a, x2: a):<> bool
+eqref_type{a:t@ype}(x1: a, x2: a):<> bool
 
 (* ****** ****** *)
 //
@@ -83,7 +87,7 @@ a:t@ype
 } fprintlst
 (
   out: FILEref
-, xs: List a
+, xs: glist(a)
 , sep: string
 , fprint: (FILEref, a) -> void
 ) : void // end of [fprintlst]
@@ -93,7 +97,7 @@ a:t@ype
 } fprintopt
 (
   out: FILEref
-, opt: Option a
+, opt: gopt(a)
 , fprint: (FILEref, a) -> void
 ) : void // end of [fprintopt]
 
@@ -102,37 +106,38 @@ a:t@ype
 // HX-2011:
 // for ordered lists
 //
-abstype lstord (a:type)
+abstype lstord_type (a:t@ype) = ptr
+typedef lstord(a:t@ype) = lstord_type(a)
 //
-fun lstord_nil {a:type} (): lstord (a)
-fun lstord_sing {a:type} (x: a): lstord (a)
+fun{a:t@ype} lstord_nil (): lstord (a)
+fun{a:t@ype} lstord_sing (x: a): lstord (a)
 //
-fun
-lstord_insert{a:type}
+fun{a:t@ype}
+lstord_insert
 (
-  xs: lstord a, x: a, cmp: (a, a) -<fun> int
+  xs: lstord a, x: a, cmp: (a, a) -> int
 ) : lstord (a) // end of [lstord_insert]
-fun
-lstord_union{a:type}
+fun{a:t@ype}
+lstord_union
 (
-  xs: lstord a, ys: lstord a, cmp: (a, a) -<fun> int
+  xs: lstord a, ys: lstord a, cmp: (a, a) -> int
 ) : lstord (a) // end of [lstord_union]
 
 (*
 ** HX: it returns a list of the duplicates in [xs]
 *)
-fun lstord_get_dups
-  {a:type} (xs: lstord a, cmp: (a, a) -<fun> int): List (a)
+fun{a:t@ype} lstord_get_dups
+  (xs: lstord a, cmp: (a, a) -> int): glist(a)
 // end of [lstord_get_dups]
 
-fun lstord2list {a:type} (xs: lstord a): List (a)
+fun{a:t@ype} lstord2list (xs: lstord a): glist(a)
 
 (* ****** ****** *)
 //
-abstype charset_type
+abstype charset_type = ptr
 typedef charset = charset_type
 //
-typedef charlst = List (char)
+typedef charlst = glist(char)
 vtypedef charlst_vt = List_vt (char)
 //
 fun charset_sing (x: char): charset
@@ -145,33 +150,21 @@ fun fprint_charset (out: FILEref, xs: charset): void
 //
 (* ****** ****** *)
 
-local
-//
-staload Q = "libats/SATS/linqueue_arr.sats"
-//
-vtypedef QUEUE (m:int, n:int) = $Q.QUEUE (uchar, m, n)
-//
-in (* in of [local] *)
-//
-fun
-queue_get_strptr1
-  {m,n:int}
-  {st,ln:nat | st+ln <= n}
-(
-  q: &QUEUE (m, n), st: size_t st, ln: size_t ln
-) : strptr1 // end-of-function
-//
-end // end of [local]
+(*
+** HX: [queue_get_strptr1] relied on libats/linqueue_arr, which
+** is gone; see PORTING.md (Open problems)
+*)
 
 (* ****** ****** *)
 
 local
 
-staload FCNTL = "libc/SATS/fcntl.sats"
+staload FCNTL = "libats/libc/SATS/fcntl.sats"
+staload UNISTD = "libats/libc/SATS/unistd.sats"
 
 in (*in-of-local*)
 
-stadef fildes_v = $FCNTL.fildes_v
+stadef fildes_v = $UNISTD.fildes_v
 
 (*
 //
@@ -183,7 +176,7 @@ fun
 file2strptr
   {fd:int} (
   pf: !fildes_v fd  | fd: int fd
-) : strptr0 = "patsopt_file2strptr" // end of [file2strptr]
+) : Strptr0 = "patsopt_file2strptr" // end of [file2strptr]
 //
 end // end of [local]
 
@@ -192,7 +185,7 @@ end // end of [local]
 fun{
 a:t@ype
 } tostring_fprint
-  (prfx: string, fpr: (FILEref, a) -> void, x: a): strptr0
+  (prfx: string, fpr: (FILEref, a) -> void, x: a): Strptr0
 // end of [tostring_fprint]
 
 (* ****** ****** *)

@@ -4,11 +4,10 @@
 
 ######
 
-ATSHOMEQ = "$(ATSHOME)"
 
 ######
 
-ATSDOC = $(ATSHOMEQ)/bin/atsdoc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 

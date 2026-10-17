@@ -301,7 +301,7 @@ end // end of [strlencmp]
 implement
 {}(*tmp*)
 string_make_list(cs) =
-  string_make_listlen(cs, list_length(cs))
+  string_make_listlen(cs, list_vt_length(cs))
 // end of [string_make_list]
 
 implement
@@ -309,20 +309,21 @@ implement
 string_make_listlen
   {n}(cs, n) = let
 //
-prval () = lemma_list_param (cs)
+prval () = lemma_list_vt_param (cs)
 //
 fun loop
   {n:nat} .<n>.
 (
-  cs: list (char, n), n: int n, p: ptr
+  cs: !list_vt(charNZ, n), n: int n, p: ptr
 ) :<!wrt> ptr = let
 in
-  if n > 0 then let
-    val+list_cons (c, cs) = cs
-    val () = $UN.ptr0_set<char>(p, c)
-  in
-    loop (cs, n-1, ptr_succ<char>(p))
-  end else p // end of [if]
+  case+ cs of
+  | list_vt_cons (c, cs1) => let
+      val () = $UN.ptr0_set<char>(p, c)
+    in
+      loop (cs1, n-1, ptr_succ<char>(p))
+    end // end of [list_vt_cons]
+  | list_vt_nil () => p
 end // end of [loop]
 //
 val n1 = n + 1
@@ -344,7 +345,7 @@ end // end of [string_make_listlen]
 implement
 {}(*tmp*)
 string_make_rlist(cs) =
-  string_make_rlistlen(cs, list_length(cs))
+  string_make_rlistlen(cs, list_vt_length(cs))
 // end of [string_make_rlist]
 
 implement
@@ -352,25 +353,23 @@ implement
 string_make_rlistlen
   {n}(cs, n) = let
 //
-prval() = lemma_list_param (cs)
+prval() = lemma_list_vt_param (cs)
 //
 fun loop
   {n:nat} .<n>.
 (
-  cs: list(char, n), n: int n, p: ptr
+  cs: !list_vt(charNZ, n), n: int n, p: ptr
 ) :<!wrt> ptr = let
 in
 //
-if
-n > 0
-then let
-  val p1 = ptr_pred<char>(p)
-  val+list_cons (c, cs) = cs
-  val () = $UN.ptr0_set<char>(p1, c)
-in
-  loop (cs, n-1, p1)
-end // end of [then]
-else (p) // end of [else]
+case+ cs of
+| list_vt_cons (c, cs1) => let
+    val p1 = ptr_pred<char>(p)
+    val () = $UN.ptr0_set<char>(p1, c)
+  in
+    loop (cs1, n-1, p1)
+  end // end of [list_vt_cons]
+| list_vt_nil () => (p)
 //
 end // end of [loop]
 //
@@ -410,8 +409,7 @@ string_make_listlen_vt
   (cs, n) = str where
 {
 //
-  val cs2 = $UN.list_vt2t(cs)
-  val str = string_make_listlen(cs2, n)
+  val str = string_make_listlen(cs, n)
   val ((*freed*)) = list_vt_free<char>(cs)
 //
 } (* end of [string_make_listlen_vt] *)
@@ -435,8 +433,7 @@ string_make_rlistlen_vt
   (cs, n) = str where
 {
 //
-  val cs2 = $UN.list_vt2t(cs)
-  val str = string_make_rlistlen(cs2, n)
+  val str = string_make_rlistlen(cs, n)
   val ((*freed*)) = list_vt_free<char>(cs)
 //
 } (* end of [string_make_rlistlen_vt] *)
@@ -462,69 +459,6 @@ val () = $UN.ptr0_set<char>(p_dst + ln, CNUL)
 in
   castvwtp_trans{strnptr(ln)}((pf, pfgc | p_dst))
 end // end of [string_make_substring]
-
-#atscode_separator()
-
-implement
-{}(*tmp*)
-string_make_stream
-  (cs) = let
-//
-fun
-loop
-{l:addr}
-{n:int}
-{i:nat|i <= n}
-(
-  pf: b0ytes(n)@l
-, fpf: mfree_gc_v(l)
-| cs: stream(charNZ)
-, p0: ptr(l), pi: ptr, n: size_t(n), i: size_t(i)
-) : Strptr1 = (
-if
-(i < n)
-then
-(
-case+ !cs of
-| stream_nil() => let
-    val () =
-    $UN.ptr0_set<char>(pi, CNUL)
-  in
-    $UN.castvwtp0((pf, fpf | p0))
-  end // end of [stream_nil]
-| stream_cons(c, cs) => let
-    val () = $UN.ptr0_set<char>(pi, c)
-  in
-    loop
-    ( pf, fpf
-    | cs, p0, ptr_succ<char>(pi), n, succ(i))
-  end // end of [stream_cons]
-)
-else let
-//
-  val n2 = n + n
-  val (pf2, fpf2 | p02) = malloc_gc(n2)
-//
-  val _(*p02*) = memcpy(p02, p0, i)
-  val ((*freed*)) = mfree_gc(pf, fpf | p0)
-//
-in
-  loop
-  (pf2, fpf2 | cs, p02, ptr_add<char>(p02, i), n2, i)
-end // end of [
-) (* end of [loop] *)
-//
-val n0 =
-string_make_stream$bufsize<>()
-//
-val n0 = i2sz(n0)
-val (pf, fpf | p0) = malloc_gc(n0)
-//
-in
-//
-  $effmask_all(loop(pf, fpf | cs, p0, p0, n0, i2sz(0)))
-//
-end // end of [string_make_stream]
 
 #atscode_separator()
 
@@ -712,7 +646,7 @@ string_fset_at_size
   val s1 = string1_copy(s0)
 in
 //
-let val () = s1[i] := c in strnptr2string(s1) end
+let val () = s1[i] := c in s1 end
 //
 end // end of [string_fset_at_size]
 //
@@ -863,8 +797,7 @@ var xs = @[string](x1, x2, x3)
 //
 in
 //
-stringarr_concat<>
-  ($UN.cast{arrayref(string,3)}(addr@xs), i2sz(3))
+stringarr_concat<>(xs, i2sz(3))
 //
 end // end of [string0_append3]
 
@@ -877,8 +810,7 @@ var xs = @[string](x1, x2, x3, x4)
 //
 in
 //
-stringarr_concat<>
-  ($UN.cast{arrayref(string,4)}(addr@xs), i2sz(4))
+stringarr_concat<>(xs, i2sz(4))
 //
 end // end of [string0_append4]
 
@@ -891,8 +823,7 @@ var xs = @[string](x1, x2, x3, x4, x5)
 //
 in
 //
-stringarr_concat<>
-  ($UN.cast{arrayref(string,5)}(addr@xs), i2sz(5))
+stringarr_concat<>(xs, i2sz(5))
 //
 end // end of [string0_append5]
 
@@ -905,8 +836,7 @@ var xs = @[string](x1, x2, x3, x4, x5, x6)
 //
 in
 //
-stringarr_concat<>
-  ($UN.cast{arrayref(string,6)}(addr@xs), i2sz(6))
+stringarr_concat<>(xs, i2sz(6))
 //
 end // end of [string0_append6]
 
@@ -960,8 +890,7 @@ else
 //
 end // end of [loop2]
 //
-val p1 =
-  $UN.cast{ptr}(xs)
+val p1 = addr@xs
 //
 val A0 =
   arrayptr_make_uninitized<size_t>(asz)
@@ -991,28 +920,51 @@ end // end of [stringarr_concat]
 implement
 {}(*tmp*)
 stringlst_concat
-  (xs) = res where
-{
+  (xs) = let
 //
-val n = list_length(xs)
+fun
+len
+(
+  xs: !List_vt(string), n: size_t
+) : size_t =
+(
+case+ xs of
+| list_vt_nil() => n
+| list_vt_cons(x, xs1) => len(xs1, n + string_length(x))
+) (* end of [len] *)
 //
-prval() = lemma_list_param(xs)
+fun
+cpy
+(
+  xs: !List_vt(string), p: ptr
+) : ptr =
+(
+case+ xs of
+| list_vt_nil() => p
+| list_vt_cons(x, xs1) => let
+    val nx = string_length(x)
+    val _(*ptr*) = memcpy(p, $UN.cast{ptr}(x), nx)
+  in
+    cpy(xs1, ptr_add<char>(p, nx))
+  end // end of [list_vt_cons]
+) (* end of [cpy] *)
 //
-prval
-[n:int]
-EQINT() = eqint_make_gint(n)
-typedef
-stringarr = arrayref(string,n)
+val ntot =
+  $effmask_all(len(xs, i2sz(0)))
 //
-val xs2 = arrayptr_make_list (n, xs)
+val
+( pf
+, pfgc
+| pres
+) = malloc_gc(g1ofg0(succ(ntot)))
 //
-val res =
-stringarr_concat
-  ($UN.castvwtp1{stringarr}(xs2), i2sz(n))
+val pend = $effmask_all(cpy(xs, pres))
+val ((*void*)) =
+  $effmask_all($UN.ptr0_set<char>(pend, CNUL))
 //
-val ((*freed*)) = arrayptr_free{string}(xs2)
-//
-} (* end of [stringlst_concat] *)
+in
+  castvwtp_trans{Strptr1}((pf, pfgc | pres))
+end // end of [stringlst_concat]
 
 #atscode_separator()
 //
@@ -1459,6 +1411,6 @@ atspre_string_make_vsnprintf
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "string_atxt.txt")
 %}\

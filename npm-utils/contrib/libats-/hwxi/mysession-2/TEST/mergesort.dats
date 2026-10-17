@@ -311,7 +311,7 @@ end // end of [sslist_msort]
 extern
 fun
 {a:t@ype}
-mergesort(xs: List(a)): List(a)
+mergesort(xs: List_vt(a)): List0_vt(a)
 //
 (* ****** ****** *)
 
@@ -320,11 +320,11 @@ implement
 mergesort(xs) = let
 //
 val n = length(xs)
-val chn = list2sslist(xs)
+val chn = list2sslist_vt<a>(xs)
 val chn = sslist_msort(n, chn)
 //
 in
-  sslist2list(chn)
+  sslist2list_vt<a>(chn)
 end // end of [mergesort]
 
 (* ****** ****** *)
@@ -342,11 +342,17 @@ main0 () =
 val xs =
 $list{int}(3, 9, 8, 2, 5, 7, 4, 6, 0, 1)
 //
-val () = fprintln! (stdout_ref, "xs =\n", xs)
+val () = fprint! (stdout_ref, "xs =\n")
+val () = fprint_list_vt (stdout_ref, xs)
+val () = fprint_newline (stdout_ref)
 //
 val xs = mergesort<int> (xs)
 //
-val () = fprintln! (stdout_ref, "xs(sorted) =\n", xs)
+val () = fprint! (stdout_ref, "xs(sorted) =\n")
+val () = fprint_list_vt (stdout_ref, xs)
+val () = fprint_newline (stdout_ref)
+//
+val () = list_vt_free (xs)
 //
 } (* end of [main0] *)
 

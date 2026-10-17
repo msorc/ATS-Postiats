@@ -44,8 +44,8 @@ abstype Xmldoc_type
 (* ****** ****** *)
 //
 typedef Xmldoc = Xmldoc_type
-typedef Xmldoclst = List0(Xmldoc)
-typedef Xmldocopt = Option(Xmldoc)
+vtypedef Xmldoclst = List0_vt(Xmldoc)
+vtypedef Xmldocopt = Option_vt(Xmldoc)
 //
 (* ****** ****** *)
 

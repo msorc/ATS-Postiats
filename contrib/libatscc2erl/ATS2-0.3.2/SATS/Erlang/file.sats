@@ -81,9 +81,9 @@ get_cwd_1(Drive) = $extfcall(ERLval, "file:get_cwd", Drive)
 *)
 //
 fun
-ats2get_cwd_0_opt(): Option(filename) = "mac#%"
+ats2get_cwd_0_opt(): Option_vt(filename) = "mac#%"
 fun
-ats2get_cwd_1_opt(Drive: string): Option(filename) = "mac#%"
+ats2get_cwd_1_opt(Drive: string): Option_vt(filename) = "mac#%"
 //
 overload ats2get_cwd_opt with ats2get_cwd_0_opt
 overload ats2get_cwd_opt with ats2get_cwd_1_opt
@@ -97,10 +97,10 @@ ats2del_dir_opt(Dir: name_all): bool = "mac#%"
 //
 fun
 ats2list_dir_opt
-  (Dir: name_all): Option(ERLlist(filename)) = "mac#%"
+  (Dir: name_all): Option_vt(ERLlist(filename)) = "mac#%"
 fun
 ats2list_dir_all_opt
-  (Dir: name_all): Option(ERLlist(filename_all)) = "mac#%"
+  (Dir: name_all): Option_vt(ERLlist(filename_all)) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -118,7 +118,7 @@ ats2make_symlink_opt
 //
 fun
 ats2read_file_opt
-  (Filename: name_all): Option(binary) = "mac#%"
+  (Filename: name_all): Option_vt(binary) = "mac#%"
 //
 (* ****** ****** *)
 //

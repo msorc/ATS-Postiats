@@ -9,10 +9,9 @@
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSOPT=$(ATSHOMEQ)/bin/atsopt
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
+PATSCCFLAGS=-DATS_MEMALLOC_LIBC
 
 ######
 
@@ -31,7 +30,7 @@ LDPATH += -L$(PATSHOME)/utils/libatsynmark
 ######
 
 INCLUDE:=-I $(PATSHOMEQ)/src
-INCLATS:=-IATS $(SHAREDOCU) -IATS $(PATSHOMEQ) -IATS $(ATSHOMEQ)
+INCLATS:=-IATS $(SHAREDOCU) -IATS $(PATSHOMEQ)
 
 ######
 
@@ -44,24 +43,18 @@ all:: all_html
 ######
 
 DECLATEXT= \
-  declatext_sats.o \
   declatext_dats.o \
 
-declatext_sats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/declatext.sats
 declatext_dats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/declatext.dats
+  $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -c $(SHAREDOCU)/declatext.dats
 
 ######
 
 HTMLGENDECL= \
-  htmlgendecl_sats.o \
   htmlgendecl_dats.o \
 
-htmlgendecl_sats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/htmlgendecl.sats
 htmlgendecl_dats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/htmlgendecl.dats
+  $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -c $(SHAREDOCU)/htmlgendecl.dats
 
 htmlgendecl_atxt.dats: ; \
   $(ATSDOC) --outcode $@ -i $(SHAREDOCU)/htmlgendecl.atxt > htmlgendecl_atxt.txt
@@ -73,7 +66,7 @@ all_html::
 all_html:: HTML/cstream.html
 HTML/cstream.html:   cstream_atxt.exe ; ./$< > $@
 cstream_atxt.txt: cstream.atxt ; $(CAT) $< |   $(ATSDOC) --prefix __datatok --outcode htmlgendecl_data_atxt.dats > $@
-cstream_atxt.exe: htmlgendecl_atxt.dats   cstream_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ;   $(ATSCC) $(INCLUDE) $(INCLATS) $(ATSGCFLAG) -o $@ $<     $(DECLATEXT) $(HTMLGENDECL) $(LDPATH) -latsynmark -latsopt -latsdoc -lats -lgmp
+cstream_atxt.exe: htmlgendecl_atxt.dats   cstream_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ;   $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -o $@ $<     $(DECLATEXT) $(HTMLGENDECL) $(LDPATH) -latsynmark -latsdoc -latslib -latsopt -lgmp
 upload_cstream:: ;   scp HTML/cstream.html ats-hwxi,ats-lang@web.sourceforge.net:htdocs/LIBRARY/contrib/libats-hwxi/cstream/SATS/DOCUGEN/HTML/
 clean:: ; $(RMF) cstream_atxt.exe
 cleanall:: ; $(RMF) HTML/cstream.html
@@ -81,7 +74,7 @@ cleanall:: ; $(RMF) HTML/cstream.html
 all_html:: HTML/cstream_tokener.html
 HTML/cstream_tokener.html:   cstream_tokener_atxt.exe ; ./$< > $@
 cstream_tokener_atxt.txt: cstream_tokener.atxt ; $(CAT) $< |   $(ATSDOC) --prefix __datatok --outcode htmlgendecl_data_atxt.dats > $@
-cstream_tokener_atxt.exe: htmlgendecl_atxt.dats   cstream_tokener_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ;   $(ATSCC) $(INCLUDE) $(INCLATS) $(ATSGCFLAG) -o $@ $<     $(DECLATEXT) $(HTMLGENDECL) $(LDPATH) -latsynmark -latsopt -latsdoc -lats -lgmp
+cstream_tokener_atxt.exe: htmlgendecl_atxt.dats   cstream_tokener_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ;   $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -o $@ $<     $(DECLATEXT) $(HTMLGENDECL) $(LDPATH) -latsynmark -latsdoc -latslib -latsopt -lgmp
 upload_cstream_tokener:: ;   scp HTML/cstream_tokener.html ats-hwxi,ats-lang@web.sourceforge.net:htdocs/LIBRARY/contrib/libats-hwxi/cstream/SATS/DOCUGEN/HTML/
 clean:: ; $(RMF) cstream_tokener_atxt.exe
 cleanall:: ; $(RMF) HTML/cstream_tokener.html

@@ -151,9 +151,13 @@ channel1_append
 //
 val
 fserv =
-$UN.castvwtp0{(ptr)-<cloref1>void}(fserv)
+$UN.castvwtp0{(ptr)-<lincloptr1>void}(fserv)
 //
 val () = fserv($UN.castvwtp1{ptr}(tchan))
+//
+// HX-2026-10: no GC
+//
+val () = cloptr_free($UN.castvwtp0{cloptr(void)}(fserv))
 //
 prval ((*void*)) = $UN.castview2void(tchan)
 //
@@ -193,7 +197,7 @@ in
   // nothing
 end // end of [lam@]
 val () = 
-  cintset_foreach_cloref(n, G, $UN.cast(addr@fwork))
+  cintset_foreach_clo(n, G, fwork)
 //
 prval ((*void*)) = $UN.castview2void(tchan)
 //
@@ -232,7 +236,7 @@ in
   // nothing
 end // end of [lam@]
 val () = 
-  cintset_foreach_cloref(n, G, $UN.cast(addr@fwork))
+  cintset_foreach_clo(n, G, fwork)
 //
 prval ((*void*)) = $UN.castview2void(tchan)
 //
@@ -274,7 +278,7 @@ in
   // nothing
 end // end of [lam@]
 val () = 
-  intset_foreach_cloref(G, $UN.cast(addr@fwork))
+  intset_foreach_clo(G, fwork)
 //
 prval ((*void*)) = $UN.castview2void(tchan)
 //

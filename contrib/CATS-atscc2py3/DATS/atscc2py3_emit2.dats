@@ -36,6 +36,8 @@ CATSPARSEMIT_targetloc
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 #staload
 "{$CATSPARSEMIT}/SATS/catsparse.sats"
 #staload
@@ -58,18 +60,23 @@ the_statmpdeclst_insert(d0ecl): void
 
 local
 //
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_statmps_var: d0eclist = glist_nil((*void*))
 val the_statmps =
-  ref<d0eclist> (list_nil(*void*))
+  ref_make_viewptr{d0eclist}(view@the_statmps_var | addr@the_statmps_var)
 //
 in (* in-of-local *)
 //
 implement
 the_statmpdeclst_get () =
-  list_vt2t(list_reverse(!the_statmps))
+  glist_reverse(!the_statmps)
 //
 implement
 the_statmpdeclst_insert (d0c) = let
-  val d0cs = !the_statmps in !the_statmps := list_cons (d0c, d0cs)
+  val d0cs = !the_statmps in !the_statmps := glist_cons (d0c, d0cs)
 end // end of [the_statmpdeclst_insert]
 //
 end // end of [local]
@@ -90,20 +97,20 @@ fun auxlst
   out: FILEref, xs: d0eclist
 ) : void =
 (
-case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) => let
+case+ glist_view(xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs) => let
     val-
-    D0Cstatmp
-      (tmp, opt) = x.d0ecl_node
+    ~D0Cstatmp
+      (tmp, opt) = d0ecl_node_view(x.d0ecl_node())
     // end of [val]
   in
-    case+ opt of
-    | None _ =>
+    case+ gopt_view(opt) of
+    | ~GOnone _ =>
       (
         auxlst(out, xs)
       ) (* None *)
-    | Some _ => let
+    | ~GOsome _ => let
         val () = emit_ENDL(out)
         val () = emit_nspc(out, ind)
         val () =
@@ -137,14 +144,14 @@ auxlst
   out: FILEref, f0as: f0arglst, i: int
 ) : void =
 (
-case+ f0as of
-| list_nil() => ()
-| list_cons(f0a, f0as) =>
+case+ glist_view(f0as) of
+| ~GLnil() => ()
+| ~GLcons(f0a, f0as) =>
   (
     case-
-    f0a.f0arg_node
+    f0arg_node_view(f0a.f0arg_node())
     of (* case- *)
-    | F0ARGsome (arg, _) => let
+    | ~F0ARGsome (arg, _) => let
         val () =
         if i > 0
           then emit_text (out, ", ")
@@ -158,12 +165,12 @@ case+ f0as of
 //
 in
 //
-case+ f0as of
-| list_nil() =>
+case+ glist_view(f0as) of
+| ~GLnil() =>
   {
     // nothing
   } (* list_nil *)
-| list_cons _ =>
+| ~GLcons _ =>
   {
     val () =
     emit_nspc (out, 4(*ind*))
@@ -191,17 +198,17 @@ fun auxlst
   out: FILEref, tds: tmpdeclst
 ) : void =
 (
-case+ tds of
-| list_nil () => ()
-| list_cons (td, tds) =>
+case+ glist_view(tds) of
+| ~GLnil () => ()
+| ~GLcons (td, tds) =>
   (
     case+
-    td.tmpdec_node
+    tmpdec_node_view(td.tmpdec_node())
     of (* case+ *)
-    | TMPDECnone
+    | ~TMPDECnone
         (tmp) => auxlst (out, tds)
       // end of [TMPDECnone]
-    | TMPDECsome
+    | ~TMPDECsome
         (tmp, _) => let
         val () = emit_nspc (out, 2(*ind*))
         val () = emit_tmpvar (out, tmp)
@@ -232,14 +239,14 @@ fun auxlst
   out: FILEref, tds: tmpdeclst, i: int
 ) : void =
 (
-case+ tds of
-| list_nil () => ()
-| list_cons (td, tds) =>
+case+ glist_view(tds) of
+| ~GLnil () => ()
+| ~GLcons (td, tds) =>
   (
-    case+ td.tmpdec_node of
-    | TMPDECnone
+    case+ tmpdec_node_view(td.tmpdec_node()) of
+    | ~TMPDECnone
         (tmp) => auxlst (out, tds, i)
-    | TMPDECsome
+    | ~TMPDECsome
         (tmp, _) => let
         val () =
         if i > 0 then
@@ -254,9 +261,9 @@ case+ tds of
 //
 in
 //
-case+ tds of
-| list_nil () => ()
-| list_cons _ =>
+case+ glist_view(tds) of
+| ~GLnil () => ()
+| ~GLcons _ =>
   {
     val () =
     emit_nspc (out, 4(*ind*))
@@ -286,9 +293,9 @@ fun auxlst
 ) : void =
 (
 //
-case+ inss of
-| list_nil() => ()
-| list_cons(_, inss) =>
+case+ glist_view(inss) of
+| ~GLnil() => ()
+| ~GLcons(_, inss) =>
   {
     val () =
       emit_nspc (out, 2(*ind*))
@@ -323,9 +330,9 @@ fun auxlst
   out: FILEref, inss: instrlst, i: int
 ) : void =
 (
-case+ inss of
-| list_nil() => ()
-| list_cons(_, inss) => let
+case+ glist_view(inss) of
+| ~GLnil() => ()
+| ~GLcons(_, inss) => let
     val () =
       if i >= 2 then emit_text (out, ", ")
     val () =
@@ -340,9 +347,9 @@ case+ inss of
 //
 in
 //
-case+ inss of
-| list_nil () => ()
-| list_cons _ =>
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons _ =>
   {
     val () =
     emit_nspc (out, 4(*ind*))
@@ -412,13 +419,43 @@ the_caseofseqlst_set (inss: instrlst): void
 
 local
 //
-val the_f0arglst = ref<f0arglst> (list_nil)
-val the_tmpdeclst = ref<tmpdeclst> (list_nil)
 //
-val the_funbodylst = ref<instrlst> (list_nil)
+// HX-2026-10: no GC (made of a static var)
 //
-val the_branchlablst = ref<labelist> (list_nil)
-val the_caseofseqlst = ref<instrlst> (list_nil)
+var
+the_f0arglst_var: f0arglst = glist_nil()
+val the_f0arglst =
+  ref_make_viewptr{f0arglst}(view@the_f0arglst_var | addr@the_f0arglst_var)
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_tmpdeclst_var: tmpdeclst = glist_nil()
+val the_tmpdeclst =
+  ref_make_viewptr{tmpdeclst}(view@the_tmpdeclst_var | addr@the_tmpdeclst_var)
+//
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_funbodylst_var: instrlst = glist_nil()
+val the_funbodylst =
+  ref_make_viewptr{instrlst}(view@the_funbodylst_var | addr@the_funbodylst_var)
+//
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_branchlablst_var: labelist = glist_nil()
+val the_branchlablst =
+  ref_make_viewptr{labelist}(view@the_branchlablst_var | addr@the_branchlablst_var)
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_caseofseqlst_var: instrlst = glist_nil()
+val the_caseofseqlst =
+  ref_make_viewptr{instrlst}(view@the_caseofseqlst_var | addr@the_caseofseqlst_var)
 //
 in (* in-of-local *)
 
@@ -455,7 +492,7 @@ implement
 funlab_get_index
   (fl0) = let
 //
-val n0 = fl0.i0dex_sym
+val n0 = fl0.i0dex_sym()
 //
 fun
 auxlst
@@ -463,17 +500,17 @@ auxlst
   xs: instrlst, i: int
 ) : int = (
 //
-case+ xs of
-| list_nil () => ~1(*error*)
-| list_cons (x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil () => ~1(*error*)
+| ~GLcons (x, xs) =>
   (
-    case+ x.instr_node of
-    | ATSfunbodyseq _ => let
+    case+ instr_node_view(x.instr_node()) of
+    | ~ATSfunbodyseq _ => let
         val fl = funbodyseq_get_funlab (x)
       in
-        if n0 = fl.i0dex_sym then i else auxlst (xs, i+1)
+        if n0 = fl.i0dex_sym() then i else auxlst (xs, i+1)
       end // end of [ATSfunbodyseq]
-    | _ (*non-ATSfunbody*) => auxlst (xs, i)
+    | v0 (*non-ATSfunbody*) => (instr_node_view_free(v0); auxlst (xs, i))
   ) (* end of [list_cons] *)
 //
 ) (* end of [auxlst] *)
@@ -488,7 +525,7 @@ implement
 tmplab_get_index
   (lab0) = let
 //
-val n0 = lab0.i0dex_sym
+val n0 = lab0.i0dex_sym()
 //
 fun
 auxlst
@@ -496,10 +533,10 @@ auxlst
   xs: labelist, i: int
 ) : int =
 (
-case+ xs of
-| list_nil () => ~1(*error*)
-| list_cons (x, xs) =>
-    if n0 = x.i0dex_sym then i else auxlst (xs, i+1)
+case+ glist_view(xs) of
+| ~GLnil () => ~1(*error*)
+| ~GLcons (x, xs) =>
+    if n0 = x.i0dex_sym() then i else auxlst (xs, i+1)
   // end of [list_cons]
 )
 //
@@ -539,9 +576,9 @@ fun auxlst
   xs: instrlst, i: int
 ) : int =
 (
-case xs of
-| list_nil() => ~1(*error*)
-| list_cons(x, xs) =>
+case glist_view(xs) of
+| ~GLnil() => ~1(*error*)
+| ~GLcons(x, xs) =>
     if $UN.cast2ptr(x) = p0 then i else auxlst (xs, i+1)
   // end of [list_cons]
 )
@@ -570,12 +607,12 @@ fun auxlst
   out: FILEref, xs: instrlst, i: int
 ) : int =
 (
-case+ xs of
-| list_nil() => i
-| list_cons(x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil() => i
+| ~GLcons(x, xs) =>
   (
-    case+ x.instr_node of
-    | ATSINSlab (lab) => let
+    case+ instr_node_view(x.instr_node()) of
+    | ~ATSINSlab (lab) => let
         val ((*void*)) =
           if i >= 2 then emit_text(out, ", ")
         // end of [val]
@@ -585,7 +622,7 @@ case+ xs of
       in
         auxlst (out, xs, i+1)
       end // end of [ATSINSlab]
-    | _(*non-ATSINSlab*) => auxlst (out, xs, i)
+    | v0(*non-ATSINSlab*) => (instr_node_view_free(v0); auxlst (out, xs, i))
   ) (* list_cons *)
 ) (* end of [auxlst] *)
 //
@@ -594,16 +631,16 @@ fun auxlst2
   out: FILEref, xs: instrlst, i: int
 ) : void =
 (
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) => let
-    val-ATSbranchseq(inss) = x.instr_node
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) => let
+    val-~ATSbranchseq(inss) = instr_node_view(x.instr_node())
   in
     auxlst2 (out, xs, auxlst (out, inss, i))
   end // end of [list_cons]
 ) (* end of [auxlst2] *)
 //
-val-ATScaseofseq(inss) = ins0.instr_node
+val-~ATScaseofseq(inss) = instr_node_view(ins0.instr_node())
 //
 val () = emit_nspc (out, 2(*ind*))
 val () = emit_text (out, "mbranch_")
@@ -625,9 +662,9 @@ emit_branchmaplst
   out: FILEref, inss: instrlst
 ) : void =
 (
-case+ inss of
-| list_nil () => ()
-| list_cons (ins, inss) =>
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons (ins, inss) =>
   {
     val () = emit_branchmap (out, ins)
     val () = emit_branchmaplst (out, inss)
@@ -654,9 +691,9 @@ f0body_collect_caseof
 in
 //
 case+
-fbody.f0body_node
+f0body_node_view(fbody.f0body_node())
 of // case+
-| F0BODY(tds, inss) => instrlst_collect_caseof(inss)
+| ~F0BODY(tds, inss) => instrlst_collect_caseof(inss)
 //
 end // end of [f0body_collect_caseof]
 //
@@ -673,29 +710,29 @@ aux
 ) : res =
 (
 case+
-ins.instr_node of
+instr_node_view(ins.instr_node()) of
 //
-| ATScaseofseq
+| ~ATScaseofseq
     (inss) => (
     auxlst(inss, cons_vt(ins, res))
   ) (* end of [ATScaseofseq] *)
-| ATSbranchseq(inss) => auxlst(inss, res)
+| ~ATSbranchseq(inss) => auxlst(inss, res)
 //
-| ATSif (
+| ~ATSif (
     d0e, inss, inssopt
   ) => let
     val res = auxlst(inss, res)
   in
-    case+ inssopt of
-    | None((*void*)) => res | Some(inss) => auxlst(inss, res)
+    case+ gopt_view(inssopt) of
+    | ~GOnone((*void*)) => res | ~GOsome(inss) => auxlst(inss, res)
   end // end of [ATSif]
 //
-| ATSifthen(d0e, inss) => auxlst(inss, res)
-| ATSifnthen(d0e, inss) => auxlst(inss, res)
+| ~ATSifthen(d0e, inss) => auxlst(inss, res)
+| ~ATSifnthen(d0e, inss) => auxlst(inss, res)
 //
-| ATSfunbodyseq(inss) => auxlst(inss, res)
+| ~ATSfunbodyseq(inss) => auxlst(inss, res)
 //
-| _ (*rest-of-instr*) => res
+| v0 (*rest-of-instr*) => (instr_node_view_free(v0); res)
 //
 ) (* end of [aux] *)
 //
@@ -705,18 +742,18 @@ auxlst
   inss: instrlst, res: res
 ) : res =
 (
-case+ inss of
-| list_cons
+case+ glist_view(inss) of
+| ~GLcons
     (ins, inss) => let
     val res = aux (ins, res) in auxlst (inss, res)
   end // end of [list_cons]
-| list_nil ((*void*)) => res
+| ~GLnil ((*void*)) => res
 )
 //
 val res = auxlst(inss, list_vt_nil)
 //
 in
-  list_vt2t(list_vt_reverse(res))
+  glist_make_list_vt(list_vt_reverse(res))
 end // end of [instrlst_collect_caseof]
 //
 (* ****** ****** *)
@@ -746,6 +783,9 @@ fun emit2_ATSINSmove_con1
 //
 extern
 fun emit2_ATSINSmove_boxrec
+  (out: FILEref, ind: int, ins: instr) : void
+extern
+fun emit2_ATSINSmove_fltrec
   (out: FILEref, ind: int, ins: instr) : void
 //
 extern
@@ -782,9 +822,9 @@ emit2_instr
 in
 //
 case+
-ins0.instr_node of
+instr_node_view(ins0.instr_node()) of
 //
-| ATSif
+| ~ATSif
   (
     d0e, inss, inssopt
   ) =>
@@ -803,14 +843,14 @@ ins0.instr_node of
     val () =
     (
       case+
-      inssopt
+      gopt_view(inssopt)
       of (*case+*)
-      | None() => ()
-      | Some(inss) =>
+      | ~GOnone() => ()
+      | ~GOsome(inss) =>
         (
-           case+ inss of
-           | list_nil _ => ()
-           | list_cons _ => {
+           case+ glist_view(inss) of
+           | ~GLnil _ => ()
+           | ~GLcons _ => {
                val () = emit_nspc (out, ind)
                val () = emit_text (out, "else:\n")
                val () = emit2_instrlst (out, ind+2, inss)
@@ -823,10 +863,10 @@ ins0.instr_node of
 //
   } (* end of [ATSif] *)
 //
-| ATSifthen (d0e, inss) =>
+| ~ATSifthen (d0e, inss) =>
   {
 //
-    val-list_sing(ins) = inss
+    val ins = glist_head(inss)
 //
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "if(")
@@ -834,10 +874,10 @@ ins0.instr_node of
     val ((*closing*)) = emit_text (out, "): ")
     val () = emit_instr (out, ins)
   }
-| ATSifnthen (d0e, inss) =>
+| ~ATSifnthen (d0e, inss) =>
   {
 //
-    val-list_sing(ins) = inss
+    val ins = glist_head(inss)
 //
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "if not(")
@@ -846,13 +886,13 @@ ins0.instr_node of
     val () = emit_instr (out, ins)
   }
 //
-| ATSbranchseq (inss) =>
+| ~ATSbranchseq (inss) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATSbranch")
   }
 //
-| ATScaseofseq (inss) =>
+| ~ATScaseofseq (inss) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATScaseofseq_beg")
@@ -871,19 +911,19 @@ ins0.instr_node of
     val () = emit_text (out, "#ATScaseofseq_end")
   }
 //
-| ATSreturn (tmp) =>
+| ~ATSreturn (tmp) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "return ")
     val () = emit_tmpvar (out, tmp)
   }
-| ATSreturn_void (tmp) =>
+| ~ATSreturn_void (tmp) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "return#_void")
   }
 //
-| ATSlinepragma (line, file) =>
+| ~ATSlinepragma (line, file) =>
   {
     val () = emit_text (out, "#line ")
     val () = emit_PMVint (out, line)
@@ -891,13 +931,13 @@ ins0.instr_node of
     val () = emit_PMVstring (out, file)
   }
 //
-| ATSINSlab (lab) =>
+| ~ATSINSlab (lab) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#")
     val () = emit_label (out, lab)
   }
-| ATSINSgoto (lab) =>
+| ~ATSINSgoto (lab) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "tmplab_py = ")
@@ -910,13 +950,13 @@ ins0.instr_node of
     ) (* end of [val] *)
   }
 //
-| ATSINSflab (flab) =>
+| ~ATSINSflab (flab) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_SHARP (out)
     val () = emit_label (out, flab)
   }
-| ATSINSfgoto (flab) =>
+| ~ATSINSfgoto (flab) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "funlab_py = ")
@@ -928,7 +968,7 @@ ins0.instr_node of
     ) (* end of [val] *)
   }
 //
-| ATSINSfreeclo (d0e) =>
+| ~ATSINSfreeclo (d0e) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATSINSfreeclo")
@@ -937,7 +977,7 @@ ins0.instr_node of
     val () = emit_RPAREN (out)
     val () = emit_SEMICOLON (out)
   }
-| ATSINSfreecon (d0e) =>
+| ~ATSINSfreecon (d0e) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATSINSfreecon")
@@ -947,7 +987,7 @@ ins0.instr_node of
     val () = emit_SEMICOLON (out)
   }
 //
-| ATSINSmove (tmp, d0e) =>
+| ~ATSINSmove (tmp, d0e) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_tmpvar (out, tmp)
@@ -956,19 +996,19 @@ ins0.instr_node of
     ) (* end of [val] *)
   } (* end of [ATSINSmove] *)
 //
-| ATSINSmove_void (tmp, d0e) =>
+| ~ATSINSmove_void (tmp, d0e) =>
   {
     val () = emit_nspc (out, ind)
     val () = (
-      case+ d0e.d0exp_node of
-      | ATSPMVempty _ =>
+      case+ d0exp_node_view(d0e.d0exp_node()) of
+      | ~ATSPMVempty _ =>
           emit_text (out, "None#ATSINSmove_void")
         // end of [ATSPMVempty]
-      | _ (*non-ATSPMVempty*) => emit_d0exp (out, d0e)
+      | v0 (*non-ATSPMVempty*) => (d0exp_node_view_free(v0); emit_d0exp (out, d0e))
     ) : void // end of [val]
   } (* end of [ATSINSmove_void] *)
 //
-| ATSINSmove_nil (tmp) =>
+| ~ATSINSmove_nil (tmp) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_tmpvar (out, tmp)
@@ -976,7 +1016,7 @@ ins0.instr_node of
     val () = emit_text (out, "None")
   }
 //
-| ATSINSmove_con0 (tmp, tag) =>
+| ~ATSINSmove_con0 (tmp, tag) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_tmpvar (out, tmp)
@@ -985,23 +1025,25 @@ ins0.instr_node of
     ) (* end of [val] *)
   }
 //
-| ATSINSmove_con1 _ =>
+| ~ATSINSmove_con1 _ =>
     emit2_ATSINSmove_con1 (out, ind, ins0)
 //
-| ATSINSmove_boxrec _ =>
+| ~ATSINSmove_boxrec _ =>
     emit2_ATSINSmove_boxrec (out, ind, ins0)
+| ~ATSINSmove_fltrec _ =>
+    emit2_ATSINSmove_fltrec (out, ind, ins0)
 //
-| ATSINSmove_delay _ =>
+| ~ATSINSmove_delay _ =>
     emit2_ATSINSmove_delay (out, ind, ins0)
-| ATSINSmove_lazyeval _ =>
+| ~ATSINSmove_lazyeval _ =>
     emit2_ATSINSmove_lazyeval (out, ind, ins0)
 //
-| ATSINSmove_ldelay _ =>
+| ~ATSINSmove_ldelay _ =>
     emit2_ATSINSmove_ldelay (out, ind, ins0)
-| ATSINSmove_llazyeval _ =>
+| ~ATSINSmove_llazyeval _ =>
     emit2_ATSINSmove_llazyeval (out, ind, ins0)
 //
-| ATStailcalseq (inss) =>
+| ~ATStailcalseq (inss) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATStailcalseq_beg")
@@ -1012,7 +1054,7 @@ ins0.instr_node of
   
   } (* end of [ATStailcalseq] *)
 //
-| ATSINSmove_tlcal (tmp, d0e) =>
+| ~ATSINSmove_tlcal (tmp, d0e) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_tmpvar (out, tmp)
@@ -1020,7 +1062,7 @@ ins0.instr_node of
     val () = emit_d0exp (out, d0e)  
   } (* end of [ATSINSmove_tlcal] *)
 //
-| ATSINSargmove_tlcal (tmp1, tmp2) =>
+| ~ATSINSargmove_tlcal (tmp1, tmp2) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_tmpvar (out, tmp1)
@@ -1028,7 +1070,7 @@ ins0.instr_node of
     val () = emit_tmpvar (out, tmp2)
   } (* end of [ATSINSargmove_tlcal] *)
 //
-| ATSINSextvar_assign (ext, d0e_r) =>
+| ~ATSINSextvar_assign (ext, d0e_r) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_d0exp (out, ext)
@@ -1036,7 +1078,7 @@ ins0.instr_node of
     val () = emit_d0exp (out, d0e_r)
     val () = emit_SEMICOLON (out)
   }
-| ATSINSdyncst_valbind (d2c, d0e_r) =>
+| ~ATSINSdyncst_valbind (d2c, d0e_r) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_i0de (out, d2c)
@@ -1045,7 +1087,7 @@ ins0.instr_node of
     val () = emit_SEMICOLON (out)
   }
 //
-| ATSINScaseof_fail (errmsg) =>
+| ~ATSINScaseof_fail (errmsg) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "ATSINScaseof_fail")
@@ -1054,21 +1096,21 @@ ins0.instr_node of
     val () = emit_RPAREN (out)
     val () = emit_SEMICOLON (out)
   }
-| ATSINSdeadcode_fail (__tok__) =>
+| ~ATSINSdeadcode_fail (__tok__) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "ATSINSdeadcode_fail()")
     val () = emit_SEMICOLON (out)
   }
 //
-| ATSdynload (dummy) =>
+| ~ATSdynload (dummy) =>
   {
     val () = emit_nspc (out, ind)   
     val () = emit_text (out, "#ATSdynload()")
     val () = emit_the_statmpdeclst (out, ind)
   }
 //
-| ATSdynloadset (flag) =>
+| ~ATSdynloadset (flag) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATSdynloadset\n")
@@ -1078,7 +1120,7 @@ ins0.instr_node of
     ) (* end of [val] *)
   }
 //
-| ATSdynloadfcall (fcall) =>
+| ~ATSdynloadfcall (fcall) =>
   {
     val () = emit_nspc (out, ind)
     val () = emit_text (out, "#ATSdynloadfcall\n")
@@ -1088,7 +1130,7 @@ ins0.instr_node of
     // end of [val]
   }
 //
-| ATSdynloadflag_sta (flag) =>
+| ~ATSdynloadflag_sta (flag) =>
   {
     val () = emit_nspc (out, ind)   
     val () = emit_text (out, "#ATSdynloadflag_sta\n")
@@ -1098,7 +1140,7 @@ ins0.instr_node of
     ) (* end of [val] *)
   }
 //
-| ATSdynloadflag_ext (flag) =>
+| ~ATSdynloadflag_ext (flag) =>
   {
     val () = emit_nspc (out, ind)   
     val () = emit_text (out, "#ATSdynloadflag_ext\n")
@@ -1108,11 +1150,11 @@ ins0.instr_node of
     ) (* end of [val] *)
   }
 //
-| _ (*rest-of-instr*) =>
+| v0 (*rest-of-instr*) => (instr_node_view_free(v0);
   {
     val () = emit_nspc (out, ind)
     val ((*error*)) = fprint! (out, "UNRECOGNIZED-INSTRUCTION: ", ins0)
-  }
+  })
 //
 end // end of [emit2_instr]
 
@@ -1142,9 +1184,9 @@ emit2_instrlst
   out, ind, inss
 ) = (
 //
-case+ inss of
-| list_nil () => ()
-| list_cons
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons
     (ins, inss) => let
     val () = emit2_instr (out, ind, ins)
   in
@@ -1159,7 +1201,7 @@ implement
 emit2_ATSfunbodyseq
   (out, ind, ins) = let
 //
-val-ATSfunbodyseq (inss) = ins.instr_node
+val-~ATSfunbodyseq (inss) = instr_node_view(ins.instr_node())
 //
 in
   emit2_instrlst (out, ind, inss)
@@ -1177,35 +1219,35 @@ getarglst
   inss: instrlst
 ) : d0explst =
 (
-case+ inss of
-| list_nil () => list_nil ()
-| list_cons (ins, inss) => let
-    val-ATSINSstore_con1_ofs (_, _, _, d0e) = ins.instr_node
+case+ glist_view(inss) of
+| ~GLnil () => glist_nil ()
+| ~GLcons (ins, inss) => let
+    val-~ATSINSstore_con1_ofs (_, _, _, d0e) = instr_node_view(ins.instr_node())
     val d0es = getarglst (inss)
   in
-    list_cons (d0e, d0es)
+    glist_cons (d0e, d0es)
   end // end of [list_cons]
 )
 //
-val-ATSINSmove_con1 (inss) = ins0.instr_node
+val-~ATSINSmove_con1 (inss) = instr_node_view(ins0.instr_node())
 //
-val-list_cons (ins, inss) = inss
-val-ATSINSmove_con1_new (tmp, _) = ins.instr_node  
+val-~GLcons (ins, inss) = glist_view(inss)
+val-~ATSINSmove_con1_new (tmp, _) = instr_node_view(ins.instr_node())  
 //
-var opt: tokenopt = None()
+var opt: tokenopt = gopt_none()
 //
 val inss =
 (
-case+ inss of
-| list_nil () => inss
-| list_cons (ins, inss2) =>
+case+ glist_view(inss) of
+| ~GLnil () => inss
+| ~GLcons (ins, inss2) =>
   (
-    case+ ins.instr_node of
-    | ATSINSstore_con1_tag
+    case+ instr_node_view(ins.instr_node()) of
+    | ~ATSINSstore_con1_tag
         (tmp, tag) => let
-        val () = opt := Some(tag) in inss2
+        val () = opt := gopt_some(tag) in inss2
       end // end of [ATSINSstore_con1_tag]
-    | _ (*non-ATSINSstore_con1_tag*) => inss
+    | v0 (*non-ATSINSstore_con1_tag*) => (instr_node_view_free(v0); inss)
   )
 ) : instrlst
 //
@@ -1216,22 +1258,22 @@ val () = emit_text (out, " = ")
 val () = emit_LPAREN (out)
 val () =
 (
-case+ opt of
-| None () => ()
-| Some (tag) => emit_PMVint (out, tag)
+case+ gopt_view(opt) of
+| ~GOnone () => ()
+| ~GOsome (tag) => emit_PMVint (out, tag)
 ) : void // end of [val]
 val () =
 (
-case+ opt of
-| None _ => emit_d0explst (out, d0es)
-| Some _ => emit_d0explst_1 (out, d0es)
+case+ gopt_view(opt) of
+| ~GOnone _ => emit_d0explst (out, d0es)
+| ~GOsome _ => emit_d0explst_1 (out, d0es)
 ) : void // end of [val]
 //
 val ntup =
 (
-case+ opt of
-| None _ => list_length<d0exp>(d0es)
-| Some _ => list_length<d0exp>(d0es) + 1
+case+ gopt_view(opt) of
+| ~GOnone _ => glist_length<d0exp>(d0es)
+| ~GOsome _ => glist_length<d0exp>(d0es) + 1
 ) : int (* end of [val] *)
 //
 val () =
@@ -1255,26 +1297,26 @@ getarglst
   inss: instrlst
 ) : d0explst =
 (
-case+ inss of
+case+ glist_view(inss) of
 //
-| list_nil() => list_nil ()
+| ~GLnil() => glist_nil ()
 //
-| list_cons(ins, inss) => let
-    val-ATSINSstore_boxrec_ofs(_, _, _, d0e) = ins.instr_node
+| ~GLcons(ins, inss) => let
+    val-~ATSINSstore_boxrec_ofs(_, _, _, d0e) = instr_node_view(ins.instr_node())
     val d0es = getarglst(inss)
   in
-    list_cons (d0e, d0es)
+    glist_cons (d0e, d0es)
   end // end of [list_cons]
 //
 ) (* end of [getarglst] *)
 //
 val-
-ATSINSmove_boxrec(inss) = ins0.instr_node
+~ATSINSmove_boxrec(inss) = instr_node_view(ins0.instr_node())
 //
 val-
-list_cons(ins, inss) = inss
+~GLcons(ins, inss) = glist_view(inss)
 val-
-ATSINSmove_boxrec_new(tmp, _) = ins.instr_node  
+~ATSINSmove_boxrec_new(tmp, _) = instr_node_view(ins.instr_node())  
 //
 val d0es = getarglst (inss)
 //
@@ -1286,7 +1328,7 @@ val () = emit_d0explst (out, d0es)
 //
 val () =
 (
-if list_is_sing(d0es)
+if (glist_length(d0es) = 1)
   then emit_text(out, ", )") else emit_RPAREN (out)
 // end of [if]
 ) (* end of [val] *)
@@ -1296,12 +1338,64 @@ in
 end // end of [emit2_ATSINSmove_boxrec]
 
 (* ****** ****** *)
+//
+// HX-2026-10:
+// flat records are represented as boxed ones
+//
+implement
+emit2_ATSINSmove_fltrec
+  (out, ind, ins0) = let
+//
+fun
+getarglst
+(
+  inss: instrlst
+) : d0explst =
+(
+case+ glist_view(inss) of
+//
+| ~GLnil() => glist_nil ()
+//
+| ~GLcons(ins, inss) => let
+    val-~ATSINSstore_fltrec_ofs(_, _, _, d0e) = instr_node_view(ins.instr_node())
+    val d0es = getarglst(inss)
+  in
+    glist_cons (d0e, d0es)
+  end // end of [list_cons]
+//
+) (* end of [getarglst] *)
+//
+val-
+~ATSINSmove_fltrec(inss) = instr_node_view(ins0.instr_node())
+//
+val-~ATSINSstore_fltrec_ofs(tmp, _, _, _) = instr_node_view((glist_head(inss)).instr_node())  
+//
+val d0es = getarglst (inss)
+//
+val () = emit_nspc (out, ind)
+val () = emit_tmpvar (out, tmp)
+val () = emit_text (out, " = ")
+val () = emit_LPAREN (out)
+val () = emit_d0explst (out, d0es)
+//
+val () =
+(
+if (glist_length(d0es) = 1)
+  then emit_text(out, ", )") else emit_RPAREN (out)
+// end of [if]
+) (* end of [val] *)
+//
+in
+  // nothing
+end // end of [emit2_ATSINSmove_fltrec]
+
+(* ****** ****** *)
 
 implement
 emit2_ATSINSmove_delay
   (out, ind, ins0) = let
 //
-val-ATSINSmove_delay(tmp, s0e, thunk) = ins0.instr_node
+val-~ATSINSmove_delay(tmp, s0e, thunk) = instr_node_view(ins0.instr_node())
 //
 val () =
   emit_nspc(out, ind)
@@ -1326,8 +1420,8 @@ emit2_ATSINSmove_lazyeval
   (out, ind, ins0) = let
 //
 val-
-ATSINSmove_lazyeval
-  (tmp, s0e, lazyval) = ins0.instr_node
+~ATSINSmove_lazyeval
+  (tmp, s0e, lazyval) = instr_node_view(ins0.instr_node())
 //
 val () = emit_nspc(out, ind)
 //
@@ -1352,8 +1446,8 @@ emit2_ATSINSmove_ldelay
   (out, ind, ins0) = let
 //
 val-
-ATSINSmove_ldelay
-  (tmp, s0e, thunk) = ins0.instr_node
+~ATSINSmove_ldelay
+  (tmp, s0e, thunk) = instr_node_view(ins0.instr_node())
 //
 val () = emit_nspc (out, ind)
 //
@@ -1373,8 +1467,8 @@ emit2_ATSINSmove_llazyeval
   (out, ind, ins0) = let
 //
 val-
-ATSINSmove_llazyeval
-  (tmp, s0e, lazyval) = ins0.instr_node
+~ATSINSmove_llazyeval
+  (tmp, s0e, lazyval) = instr_node_view(ins0.instr_node())
 //
 val () =
   emit_nspc(out, ind)
@@ -1409,17 +1503,17 @@ emit_d0ecl
 in
 //
 case+
-d0c0.d0ecl_node of
+d0ecl_node_view(d0c0.d0ecl_node()) of
 //
-| D0Cinclude _ => ()
+| ~D0Cinclude _ => ()
 //
-| D0Cifdef _ => ()
-| D0Cifndef _ => ()
+| ~D0Cifdef _ => ()
+| ~D0Cifndef _ => ()
 //
-| D0Ctypedef (id, def) =>
-    typedef_insert (id.i0dex_sym, def)
+| ~D0Ctypedef (id, def) =>
+    typedef_insert (id.i0dex_sym(), def)
 //
-| D0Cassume (id) =>
+| ~D0Cassume (id) =>
   {
     val () = emit_ENDL (out)
     val () =
@@ -1429,26 +1523,26 @@ d0c0.d0ecl_node of
     ) (* end of [val] *)
   }
 //
-| D0Cdyncst_mac _ => ()
-| D0Cdyncst_extfun _ => ()
-| D0Cdyncst_valdec _ => ()
-| D0Cdyncst_valimp _ => ()
+| ~D0Cdyncst_mac _ => ()
+| ~D0Cdyncst_extfun _ => ()
+| ~D0Cdyncst_valdec _ => ()
+| ~D0Cdyncst_valimp _ => ()
 //
-| D0Cstatmp
+| ~D0Cstatmp
     (tmp, opt) =>
   {
     val () = emit_ENDL (out)
     val () = the_statmpdeclst_insert (d0c0)
     val () = (
-      case+ opt of
-      | Some _ => () | None () => emit_text(out, "#")
+      case+ gopt_view(opt) of
+      | ~GOsome _ => () | ~GOnone () => emit_text(out, "#")
     ) (* end of [val] *)
     val () = (
       emit_tmpvar (out, tmp); emit_text (out, " = None\n")
     ) (* end of [val] *)
   } (* end of [D0Cstatmp] *)
 //
-| D0Cextcode (toks) =>
+| ~D0Cextcode (toks) =>
   {
     val () = emit_ENDL (out)
     val () =
@@ -1459,22 +1553,22 @@ d0c0.d0ecl_node of
     val ((*void*)) = emit_newline (out)
   } (* end of [D0Cextcode] *)
 //
-| D0Cfundecl
+| ~D0Cfundecl
     (fk, f0d) => emit_f0decl (out, f0d)
 //
-| D0Cclosurerize
+| ~D0Cclosurerize
   (
     fl, env, arg, res
   ) => emit_closurerize (out, fl, env, arg, res)
 //
-| D0Cdynloadflag_init
+| ~D0Cdynloadflag_init
     (flag) => (
 //
 // HX-2015-05-22:
 // it is skipped as Python does not have a link-time!
 //  
   ) (* end of [D0Cdynloadflag_init] *)
-| D0Cdynloadflag_minit
+| ~D0Cdynloadflag_minit
     (flag) => {
     val () = emit_ENDL (out)
     val () = (
@@ -1482,15 +1576,15 @@ d0c0.d0ecl_node of
     ) (* end of [val] *)
   } (* end of [D0Cdynloadflag_minit] *)
 //
-| D0Cdynexn_dec(idexn) =>
+| ~D0Cdynexn_dec(idexn) =>
   (
     emit_text(out, "## dynexn_dec("); emit_i0de(out, idexn); emit_text(out, ")\n")
   ) (* end of [D0Cdynexn_dec] *)
-| D0Cdynexn_extdec(idexn) =>
+| ~D0Cdynexn_extdec(idexn) =>
   (
     emit_text(out, "## dynexn_extdec("); emit_i0de(out, idexn); emit_text(out, ")\n")
   ) (* end of [D0Cdynexn_extdec] *)
-| D0Cdynexn_initize(idexn, fullname) =>
+| ~D0Cdynexn_initize(idexn, fullname) =>
   (
     emit_text(out, "## dynexn_initize("); emit_i0de(out, idexn); emit_text(out, ")\n")
   ) (* end of [D0Cdynexn_initize] *)
@@ -1518,14 +1612,14 @@ emit2_tmpdec
 in
 //
 case+
-td.tmpdec_node of
+tmpdec_node_view(td.tmpdec_node()) of
 //
-| TMPDECnone (tmp) =>
+| ~TMPDECnone (tmp) =>
   {
     val () = emit_nspc (out, ind)
     val () = (emit_SHARP (out); emit_tmpvar (out, tmp))
   }
-| TMPDECsome (tmp, s0e) =>
+| ~TMPDECsome (tmp, s0e) =>
   {
     val () = emit_nspc (out, ind)
     val () = (emit_tmpvar (out, tmp); emit_text (out, " = None"))
@@ -1540,9 +1634,9 @@ emit2_tmpdeclst
   out, ind, tds
 ) = (
 //
-case+ tds of
-| list_nil () => ()
-| list_cons (td, tds) =>
+case+ glist_view(tds) of
+| ~GLnil () => ()
+| ~GLcons (td, tds) =>
   {
     val () = emit2_tmpdec (out, ind, td)
     val () = emit_ENDL (out)
@@ -1578,8 +1672,8 @@ fun auxlst
 val inss =
 instrlst_skip_linepragma (inss)
 //
-val-list_cons (ins, inss) = inss
-val-ATSINSlab (lab) = ins.instr_node
+val-~GLcons (ins, inss) = glist_view(inss)
+val-~ATSINSlab (lab) = instr_node_view(ins.instr_node())
 //
 val () = emit_nspc (out, 2)
 val () = emit_text (out, "def")
@@ -1602,19 +1696,19 @@ and auxlst2
 ) : void = let
 in
 //
-case+ inss of
+case+ glist_view(inss) of
 //
-| list_nil ((*none*)) =>
+| ~GLnil ((*none*)) =>
   {
     val () = emit_nspc (out, 4)
     val () = emit_text (out, "return\n")  
   } (* end of [list_nil] *)
 //
-| list_cons
+| ~GLcons
     (ins1, inss2) =>
   (
-    case ins1.instr_node of
-    | ATSINSlab (lab) =>
+    case instr_node_view(ins1.instr_node()) of
+    | ~ATSINSlab (lab) =>
       {
         val () = emit_nspc (out, 4)
         val () = emit_label (out, lab)
@@ -1623,13 +1717,13 @@ case+ inss of
         val () = emit_text (out, "return\n")
         val () = auxlst (out, inss)
       }
-    | _ (*non-ATSINSlab*) =>
+    | v0 (*non-ATSINSlab*) => (instr_node_view_free(v0);
       {
         val () = (
           emit2_instr (out, 4, ins1); emit_ENDL (out)
         ) (* end of [val] *)
         val () = auxlst2 (out, lab, inss2)
-      } (* end of [non-ATSINSlab] *)
+      } (* end of [non-ATSINSlab] *))
   ) (* end of [list_cons] *)
 //
 end // (* end of [auxlst2] *)
@@ -1640,7 +1734,7 @@ implement
 emit_branchseq
   (out, ins0) = let
 //
-val-ATSbranchseq (inss) = ins0.instr_node
+val-~ATSbranchseq (inss) = instr_node_view(ins0.instr_node())
 //
 in
   auxlst (out, inss)
@@ -1656,9 +1750,9 @@ emit_branchseqlst
   out: FILEref, inss: instrlst
 ) : void =
 (
-case+ inss of
-| list_nil () => ()
-| list_cons (ins, inss) =>
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons (ins, inss) =>
   {
     val () = emit_branchseq (out, ins)
     val () = emit_branchseqlst (out, inss)
@@ -1707,7 +1801,7 @@ emit_caseofseq
   out: FILEref, ins0: instr
 ) : void = let
 //
-val-ATScaseofseq(inss) = ins0.instr_node
+val-~ATScaseofseq(inss) = instr_node_view(ins0.instr_node())
 //
 val tls = caseofseq_get_tmplablst (ins0)
 val ((*update*)) = the_branchlablst_set (tls)
@@ -1724,9 +1818,9 @@ emit_caseofseqlst
   out: FILEref, inss: instrlst
 ) : void =
 (
-case+ inss of
-| list_nil () => ()
-| list_cons (ins, inss) =>
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons (ins, inss) =>
   {
     val () = emit_caseofseq (out, ins)
     val () = emit_caseofseqlst (out, inss)
@@ -1759,10 +1853,10 @@ emit_f0arg
 in
 //
 case+
-f0a.f0arg_node of
+f0arg_node_view(f0a.f0arg_node()) of
 //
-| F0ARGnone _ => emit_text (out, "__NONE__")
-| F0ARGsome (arg, s0e) => emit_tmpvar (out, arg)
+| ~F0ARGnone _ => emit_text (out, "__NONE__")
+| ~F0ARGsome (arg, s0e) => emit_tmpvar (out, arg)
 //
 end // end of [emit_f0arg]
 
@@ -1778,9 +1872,9 @@ loop
   out: FILEref, f0as: f0arglst, i: int
 ) : void =
 (
-case+ f0as of
-| list_nil () => ()
-| list_cons (f0a, f0as) => let
+case+ glist_view(f0as) of
+| ~GLnil () => ()
+| ~GLcons (f0a, f0as) => let
     val () =
       if i > 0 then emit_text (out, ", ")
     // end of [val]
@@ -1790,7 +1884,7 @@ case+ f0as of
 )
 //
 in
-  loop (out, f0ma.f0marg_node, 0)
+  loop (out, f0ma.f0marg_node(), 0)
 end // end of [emit_f0marg]
 
 (* ****** ****** *)
@@ -1807,8 +1901,8 @@ val () = the_f0arglst_set (f0as)
 in
 //
 case+
-fhd.f0head_node of
-| F0HEAD
+f0head_node_view(fhd.f0head_node()) of
+| ~F0HEAD
     (fid, f0ma, res) =>
   {
     val () = emit_tmpvar (out, fid)
@@ -1876,11 +1970,11 @@ auxlst
   out: FILEref, inss: instrlst
 ) : void =
 (
-case+ inss of
-| list_nil () => ()
-| list_cons
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons
     (ins0, inss1) => let
-    val-list_cons (ins1, inss2) = inss1
+    val-~GLcons (ins1, inss2) = glist_view(inss1)
     val () = emit2_ATSfunbodyseq (out, 2(*ind*), ins0)
     val () = emit2_instr_ln (out, 2(*ind*), ins1)
   in
@@ -1892,9 +1986,9 @@ case+ inss of
 in
 //
 case+
-fbody.f0body_node of
+f0body_node_view(fbody.f0body_node()) of
 //
-| F0BODY (tds, inss) => auxlst (out, inss)
+| ~F0BODY (tds, inss) => auxlst (out, inss)
 //
 end // end of [emit_f0body_0]
 
@@ -1910,11 +2004,11 @@ auxlst
   out: FILEref, inss: instrlst
 ) : void =
 (
-case+ inss of
-| list_nil () => ()
-| list_cons
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons
     (ins0, inss1) => let
-    val-list_cons (ins1, inss2) = inss1
+    val-~GLcons (ins1, inss2) = glist_view(inss1)
     val () = emit2_ATSfunbodyseq (out, 4(*ind*), ins0)
     val () = emit_nspc (out, 4(*ind*))
     val () = emit_text (out, "if (funlab_py == 0): break\n")
@@ -1933,9 +2027,9 @@ val () = emit_text (out, "funlab_py = 0\n")
 val () =
 (
 case+
-fbody.f0body_node of
+f0body_node_view(fbody.f0body_node()) of
 //
-| F0BODY (tds, inss) => auxlst (out, inss)
+| ~F0BODY (tds, inss) => auxlst (out, inss)
 //
 )
 //
@@ -1959,9 +2053,9 @@ fun auxlst
   out: FILEref, xs: instrlst, i: int
 ) : void =
 (
-case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) => let
+case+ glist_view(xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs) => let
     val fl =
       funbodyseq_get_funlab (x)
     val () =
@@ -1971,7 +2065,7 @@ case+ xs of
     val () = emit_int (out, i)
     val () = emit_text (out, ": ")
     val () = emit_label (out, fl)
-    val-list_cons (_, xs) = xs
+    val-~GLcons (_, xs) = glist_view(xs)
   in
     auxlst (out, xs, i+1)
   end // end of [list_cons]
@@ -2003,10 +2097,10 @@ fun auxfun
   out: FILEref, ins0: instr
 ) : void = let
 //
-val-ATSfunbodyseq(inss) = ins0.instr_node
+val-~ATSfunbodyseq(inss) = instr_node_view(ins0.instr_node())
 //
-val-list_cons (ins1, inss) = inss
-val-ATSINSflab (fl) = ins1.instr_node
+val-~GLcons (ins1, inss) = glist_view(inss)
+val-~ATSINSflab (fl) = instr_node_view(ins1.instr_node())
 //
 val () = emit_nspc (out, 2)
 val () = emit_text (out, "def")
@@ -2029,11 +2123,11 @@ fun auxlst
   out: FILEref, inss: instrlst
 ) : void =
 (
-case+ inss of
-| list_nil () => ()
-| list_cons _ => let
-    val-list_cons (ins0, inss) = inss
-    val-list_cons (ins1, inss) = inss
+case+ glist_view(inss) of
+| ~GLnil () => ()
+| ~GLcons _ => let
+    val-~GLcons (ins0, inss) = glist_view(inss)
+    val-~GLcons (ins1, inss) = glist_view(inss)
     val () = auxfun (out, ins0)
     val () = emit2_instr_newline (out, 4(*ind*), ins1)
   in
@@ -2084,9 +2178,9 @@ emit_f0decl
 in
 //
 case+
-fdec.f0decl_node of
-| F0DECLnone (fhd) => () 
-| F0DECLsome (fhd, fbody) =>
+f0decl_node_view(fdec.f0decl_node()) of
+| ~F0DECLnone (fhd) => () 
+| ~F0DECLsome (fhd, fbody) =>
   {
     val () = emit_ENDL (out)
     val () = emit_text (out, "def")
@@ -2112,9 +2206,9 @@ loop
 ) : void =
 (
 //
-case+ d0cs of
-| list_nil () => ()
-| list_cons
+case+ glist_view(d0cs) of
+| ~GLnil () => ()
+| ~GLcons
     (d0c, d0cs) => let
     val () =
       emit_d0ecl (out, d0c)

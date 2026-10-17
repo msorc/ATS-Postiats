@@ -155,7 +155,7 @@ fun gdbm_errno_get (): GDBMerror = "mac#%"
 val
 gdbm_version : string = "mac#%"
 val
-gdbm_version_number : arrayref(int, 3) = "mac#mac%"
+gdbm_version_number : ptr(*int[3]*) = "mac#mac%"
 //
 (* ****** ****** *)
 

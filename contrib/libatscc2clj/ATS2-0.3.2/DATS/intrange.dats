@@ -35,9 +35,7 @@ staload "./../SATS/integer.sats"
 //
 (* ****** ****** *)
 //
-staload "./../SATS/list.sats"
 //
-staload "./../SATS/stream.sats"
 staload "./../SATS/stream_vt.sats"
 //
 (* ****** ****** *)

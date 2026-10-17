@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -62,7 +64,7 @@ packpostamble () = let
 val out = stdout_ref
 val () = fprint_string (out, "\
 #\n\
-echo \"The \${ATSHOME}/doc/EXAMPLE/INTRO files have been copied.\"\n\
+echo \"The \\${ATSHOME}/doc/EXAMPLE/INTRO files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -218,7 +220,7 @@ The ATSHOME/doc/EXAMPLE/INTRO\
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

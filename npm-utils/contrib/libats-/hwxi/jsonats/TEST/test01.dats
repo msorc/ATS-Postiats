@@ -62,21 +62,20 @@ val cs0 = cstream_make_fileref (inp)
 val tknr =
   tokener_make_cstream (cs0)
 //
-var tok: token =
-  tokener_get_token<token> (tknr)
-//
-val () =
-while (true)
-{
-val () =
-  fprintln! (stdout_ref, "tok = ", tok)
-val () =
+fun
+loop
 (
-  case+ tok of
-  | TOKeof () => $break
-  | _ => (tok := tokener_get_token<token> (tknr))
-) : void // end of [val]
-} (* end of [where] *) // end of [val]
+  tknr: !tokener(token)
+) : void = let
+  val tok = tokener_get_token<token> (tknr)
+  val () = fprintln! (stdout_ref, "tok = ", tok)
+  val iseof = (case+ tok of TOKeof () => true | _ => false): bool
+  val () = token_free (tok)
+in
+  if iseof then () else loop (tknr)
+end // end of [loop]
+//
+val () = loop (tknr)
 //
 val ((*void*)) = tokener_free (tknr)
 //

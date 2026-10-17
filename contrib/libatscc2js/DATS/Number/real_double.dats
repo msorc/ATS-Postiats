@@ -56,7 +56,7 @@ typedef real0 = [r:real] real_real_t0ype(r)
 
 (* ****** ****** *)
 //
-staload "./../../SATS/JSmath.sats"
+staload "./../../SATS/JSLIBC/JSmath.sats"
 //
 #include
 "libats/DATS/Number/SHARE/real.dats"

@@ -67,6 +67,16 @@ val arglst =
 // HX: skipping argv[0]
 //
 val-~list_vt_cons(arg, arglst) = arglst
+val () = commarg_free(arg) where
+{
+  fun commarg_free(x: commarg): void =
+  (
+    case+ x of
+    | ~CAhelp _ => () | ~CAgitem _ => ()
+    | ~CAinput _ => () | ~CAoutput _ => ()
+    | ~CAscript _ => () | ~CAargend() => ()
+  )
+}
 //
 val ((*void*)) = patsolve_commarglst (arglst)
 //

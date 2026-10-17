@@ -227,8 +227,8 @@ boolexp =
 | Not of (boolexp) // negation
 | Less of (intexp, intexp) // Less(x, y): x < y
 | LessEq of (intexp, intexp) // LessEq(x, y): x <= y
-| Conj of (boolexp, boolexp) // Conj(x, y): x /\ y
-| Disj of (boolexp, boolexp) // Disj(x, y): x \/ y
+| Conj of (boolexp, boolexp) // Conj(x, y): x /\\\ y
+| Disj of (boolexp, boolexp) // Disj(x, y): x \\\/ y
 ')
 
 The code below implements two mutually recursive functions
@@ -305,9 +305,9 @@ code used in this chapter plus some code for testing.\
 
 %{
 //
-staload STDIO = "libc/SATS/stdio.sats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 //
-implement main () = {
+implement main0 () = {
 //
 val filr =
   $STDIO.fopen_ref_exn ("../TEMP/chap_datatypes.dats", file_mode_w)

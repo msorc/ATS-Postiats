@@ -56,6 +56,7 @@ _(*TUPLE*) = "{$PATSPRE}/DATS/tuple.dats"
 (* ****** ****** *)
 
 #staload _ = "{$PATSPRE}/DATS/memory.dats"
+//
 #staload _ = "{$PATSPRE}/DATS/reference.dats"
 
 (* ****** ****** *)
@@ -71,29 +72,24 @@ _(*TUPLE*) = "{$PATSPRE}/DATS/tuple.dats"
 
 (* ****** ****** *)
 //
-#staload _ = "{$PATSPRE}/DATS/list.dats"
 #staload _ = "{$PATSPRE}/DATS/list_vt.dats"
 //
 (* ****** ****** *)
 //
-#staload _ = "{$PATSPRE}/DATS/option.dats"
 #staload _ = "{$PATSPRE}/DATS/option_vt.dats"
 //
 (* ****** ****** *)
 //
 #staload _ = "{$PATSPRE}/DATS/array.dats"
 #staload _ = "{$PATSPRE}/DATS/arrayptr.dats"
-#staload _ = "{$PATSPRE}/DATS/arrayref.dats"
 //
 (* ****** ****** *)
 //
 #staload _ = "{$PATSPRE}/DATS/matrix.dats"
 #staload _ = "{$PATSPRE}/DATS/matrixptr.dats"
-#staload _ = "{$PATSPRE}/DATS/matrixref.dats"
 //
 (* ****** ****** *)
 //
-#staload _ = "{$PATSPRE}/DATS/stream.dats"
 #staload _ = "{$PATSPRE}/DATS/stream_vt.dats"
 //
 (* ****** ****** *)

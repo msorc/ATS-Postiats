@@ -14,7 +14,7 @@ LDPATH := -L$(ATSHOME)/ccomp/lib
 LDPATH += -L$(ATSHOME)/ccomp/lib64
 #
 LIBRARY = \
--latsynmark -latsopt -lats -lgmp -lgc
+-latsynmark -latsopt -lats -lgmp
 #
 ATSRUNTIME=$(ATSHOME)/ccomp/runtime
 #
@@ -28,7 +28,7 @@ mytexting: \
 mytexting.dats ; \
 $(PATSCC) -verbose \
   -O2 -o bin/$@ mytexting.dats \
-  -D_ATS_GCBDW -DATS_MEMALLOC_GCBDW \
+  -DATS_MEMALLOC_LIBC \
   $(ATSRUNTIME)/ats_prelude.c $(LDPATH) $(LIBRARY)
 #
 ######

@@ -64,11 +64,6 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-(defmacro
- ats2cljpre_CLJlist2list_rev[xs]
-`(reduce #(ats2cljpre_list_cons %2 %1) atscc2clj_null ~xs)
-) ; defmacro
-;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro

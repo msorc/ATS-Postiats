@@ -141,6 +141,6 @@ fun g0uint2uint_uint64_uint (x: uint64):<> uint = "mac\#%"
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_fixed_atxt.txt")
 %}\

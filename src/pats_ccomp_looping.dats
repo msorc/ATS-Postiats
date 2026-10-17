@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -31,6 +31,24 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: March, 2013
 //
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_looping.dats, see PORTING.md,
+// "ccomp group C1 (ccompenv/environ/caseof/looping/trywith/lazyeval)")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -49,28 +67,29 @@ implement
 hidexp_ccomp_loop
   (env, res, hde0)  = let
 //
-val loc0 = hde0.hidexp_loc
-val hse0 = hde0.hidexp_type
-val-HDEloop (init, test, post, body) = hde0.hidexp_node
+val loc0 = hde0.hidexp_loc()
+val hse0 = hde0.hidexp_type()
+val-~HDEloop (init, test, post, body) = hidexp_node_view(hde0.hidexp_node())
 //
 val res_init =
 (
-case+ init of
-| Some (hde) => let
-    var res = instrseq_make_nil ()
+case+ gopt_view(init) of
+| ~GOsome (hde) => let
+    val res = instrseq_make_nil ()
     val _(*void*) = hidexp_ccomp (env, res, hde)
   in
     instrseq_get_free (res)
   end // end of [Some]
-| None () => list_nil ()
+| ~GOnone () => glist_nil ()
 ) : instrlst // end of [val]
 //
 val tlab_init = tmplab_make (loc0)
 val tlab_fini = tmplab_make (loc0)
 val tlab_cont =
 (
-case+ post of
-| Some _ => tmplab_make (loc0) | None _ => tlab_init
+if gopt_is_some (post)
+  then tmplab_make (loc0) else tlab_init
+// end of [if]
 ) : tmplab // end of [val]
 //
 val (
@@ -83,14 +102,14 @@ val res_test = instrseq_get_free (res_test)
 //
 val res_post =
 (
-case+ post of
-| Some (hde) => let
-    var res = instrseq_make_nil ()
+case+ gopt_view(post) of
+| ~GOsome (hde) => let
+    val res = instrseq_make_nil ()
     val _(*void*) = hidexp_ccomp (env, res, hde)
   in
     instrseq_get_free (res)
   end // end of [Some]
-| None () => list_nil ()
+| ~GOnone () => glist_nil ()
 ) : instrlst // end of [val]
 //
 val res_body = instrseq_make_nil ()
@@ -117,9 +136,9 @@ implement
 hidexp_ccomp_loopexn
   (env, res, hde0)  = let
 //
-val loc0 = hde0.hidexp_loc
-val hse0 = hde0.hidexp_type
-val-HDEloopexn (knd) =  hde0.hidexp_node
+val loc0 = hde0.hidexp_loc()
+val hse0 = hde0.hidexp_type()
+val-~HDEloopexn (knd) =  hidexp_node_view(hde0.hidexp_node())
 //
 val tlab =
 (

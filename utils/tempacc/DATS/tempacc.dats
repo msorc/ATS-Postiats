@@ -50,30 +50,68 @@
 //
 #staload "./../SATS/atscc.sats"
 //
+#staload UN = $UNSAFE
+//
 (* ****** ****** *)
 //
 #staload _(*anon*) = "./atscc_util.dats"
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10:
+// [cas] is linear; a branch that borrows it is
+// wrapped in a function so that the type of [cas]
+// in the caller is unaffected by the branching
+//
+fun
+ccomp_exec_if
+{n:int}
+(
+  cont: bool
+, verb: int
+, cas: !list_vt(commarg, n)
+, status: &int >> _
+) : void =
+if cont then
+{
+//
+val cmd = atsccomp_get2(cas)
+val arglst = atsccompline_make (cas)
+val () =
+(
+  status :=
+  atsccompline_exec(verb, $UN.strptr2string(cmd), arglst)
+) (* end of [val] *)
+val () = strptr_free(cmd)
+//
+} (* end of [if] *) // end of [ccomp_exec_if]
+//
+fun
+cleanaft_exec_if
+{n:int}
+(
+  cont: bool
+, verb: int
+, cas: !list_vt(commarg, n)
+) : void =
+(
+  if cont then atscc_cleanaft_exec(verb, cas)
+) (* end of [cleanaft_exec_if] *)
+//
 implement
 main0(argc, argv) =
 {
 //
 var status: int = 0
 //
-val cas =
-atsccproc_commline(argc, argv)
 //
 // HX-2015-03-22:
 // [tempacc] for [tempacc -vats]
+// (handled by [atsccproc_commline])
 //
 val cas =
-(
-if argc >= 2
-  then cas else cas+'[CAvats]
-// end of [i]
-) : commarglst
+atsccproc_commline(argc, argv)
 //
 val help = atscc_is_help(cas)
 //
@@ -91,46 +129,27 @@ val cmd = atsopt_get()
 val argss = atsoptline_make_all(cas)
 val () =
   status :=
-  atsoptline_exec_all(verb, cmd, argss)
+  atsoptline_exec_all(verb, $UN.strptr2string(cmd), argss)
+val () = strptr_free(cmd)
 //
+val ccomp = atsccomp_cont(cas)
 val cont =
 (
-  if status = 0 then true else false
-) : bool // end of [val]
-val cont =
-(
-  if cont then atsccomp_cont(cas) else false
+  if status = 0 then ccomp else false
 ) : bool // end of [val]
 val () =
-if cont then
-{
+  ccomp_exec_if(cont, verb, cas, status)
 //
-val cmd = atsccomp_get2(cas)
-val arglst = atsccompline_make (cas)
-val () =
-(
-  status := atsccompline_exec(verb, cmd, arglst)
-) (* end of [val] *)
-//
-} (* end of [if] *) // end of [val]
-//
+val cleanaft = atscc_cleanaft_cont(cas)
 val cont =
 (
-  if status = 0 then true else false
-) : bool // end of [val]
-val cont =
-(
-  if cont
-    then atscc_cleanaft_cont(cas) else false
-  // end of [if]
+  if status = 0 then cleanaft else false
 ) : bool // end of [val]
 //
 val () =
-(
-  if cont
-    then atscc_cleanaft_exec(verb, cas) else ()
-  // end of [if]
-) : void // end of [val]
+  cleanaft_exec_if(cont, verb, cas)
+//
+val () = commarglst_free(cas)
 //
 val () =
 exit_void

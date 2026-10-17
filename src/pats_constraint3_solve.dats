@@ -33,18 +33,28 @@
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (ATS2 port of src/pats_constraint3_solve.dats, see PORTING.md, "Constraint solving (constraint3)")
+// The kind of the integers of the solver (C3NSTRINTKND of pats_params.hats, or -DATS C3NSTRINTKND=intknd) is chosen
+// by [pats_lintprgm_myint.dats], which is #include-d below (LP-1); this module staloads the templates and is dynloaded.
+//
+(* ****** ****** *)
+//
 #include "./pats_params.hats"
 //
 (* ****** ****** *)
-//
-staload
-ATSPRE = "./pats_atspre.dats"
-//
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
 (* ****** ****** *)
-//
-staload
-UN = "prelude/SATS/unsafe.sats"
-//
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -57,6 +67,7 @@ staload _(*anon*) = "./pats_utils.dats"
 (* ****** ****** *)
 
 staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
@@ -75,23 +86,32 @@ staload "./pats_trans3_env.sats"
 (* ****** ****** *)
 
 staload "./pats_lintprgm.sats"
-staload "./pats_constraint3.sats"
-
-(* ****** ****** *)
-
-local
+//
+// HX: staloading a .dats opens the names of the .sats that it staloads, hence
+// the order: the [s3exp] of pats_constraint3.sats must be the last one defined
+//
+staload _(*anon*) = "./pats_lintprgm.dats"
+staload _(*anon*) = "./pats_lintprgm_print.dats"
 //
 #include "./pats_lintprgm_myint.dats"
 //
-in (*nothing*) end
+// HX: [pats_lintprgm_solve.dats] is #include-d (its templates use functions that are
+// local to it, and its indexset_* functions are defined in the object of this module)
+//
+#include "./pats_lintprgm_solve.dats"
+//
+(* ****** ****** *)
+
+staload "./pats_constraint3.sats"
+staload _(*anon*) = "./pats_constraint3_icnstr.dats"
+
+(* ****** ****** *)
+
+#include "./pats_constraint3.hats"
 
 (* ****** ****** *)
 
 local
-
-staload _(*anon*) = "./pats_lintprgm.dats"
-staload _(*anon*) = "./pats_lintprgm_solve.dats"
-staload _(*anon*) = "./pats_constraint3_icnstr.dats"
 
 fun{
 a:t@ype
@@ -109,7 +129,7 @@ a:t@ype
         (s2v, s2vs) => let
         val ind = s2varindmap_find (vim, s2v)
         val res = (
-          if ind > 0 then indexset_add (res, ind) else res
+          if ind > 0 then indexset_add{n+1} (res, ind) else res
         ) : res // end of [val]
       in
         loop (s2vs, vim, res)
@@ -119,7 +139,7 @@ a:t@ype
   val s2vs = s3exp_get_fvs (s3e)
   val s2vs = s2varset_vt_listize_free (s2vs)
 in
-  loop (s2vs, vim, indexset_nil ())
+  loop (s2vs, vim, indexset_nil{n+1} ())
 end // end of [indexset_make_s3exp]
 
 (* ****** ****** *)
@@ -130,7 +150,7 @@ a:t@ype
 (
   loc0: location
 , vim: !s2varindmap (n), n: int n
-, s3ps_asmp: s3explst, s3p_conc: s3exp
+, s3ps_asmp: !s3explst_vt, s3p_conc: s3exp
 ) : int(*~1/0*) = let
 //
 // HX: note that the order is reversed:
@@ -144,26 +164,21 @@ fun
 loop
 (
   loc0: location
-, vim: !s2varindmap (n), n: int n, s3ps: s3explst
+, vim: !s2varindmap (n), n: int n, s3ps: !s3explst_vt
 , res: res
 ) : res = let
 in
   case+ s3ps of
-  | list_nil
-      ((*void*)) => res
-  | list_cons
-      (s3p, s3ps) => let
+  | @list_vt_nil
+      ((*void*)) => (fold@ (s3ps); res)
+  | @list_vt_cons
+      (s3p, s3ps1) => let
       val ic =
         s3exp2icnstr<a> (loc0, vim, n, s3p)
       // end ofl[val]
-(*
-      val () = (
-        println! ("auxsolve: loop: s3p = ", s3p);
-        print "auxsolve: loop: ic = "; print_icnstr (ic, n+1); print_newline ();
-      ) (* end of [val] *)
-*)
+      val res = loop (loc0, vim, n, s3ps1, list_vt_cons (ic, res))
     in
-      loop (loc0, vim, n, s3ps, list_vt_cons (ic, res))
+      fold@ (s3ps); res
     end // end of [list_cons]
 end // end of [loop]
 //
@@ -176,15 +191,7 @@ val ic_conc =
 //
 val ic_conc_neg = icnstr_negate<a> (ic_conc)
 //
-(*
-val () =
-(
-  print ("auxsolve: ic_conc_neg = ");
-  print_icnstr (ic_conc_neg, n+1); print_newline ()
-) (* end of [val] *)
-*)
-//
-val iset = indexset_make_s3exp (vim, s3p_conc)
+val iset = indexset_make_s3exp<a> (vim, s3p_conc)
 //
 // HX: this is the entire constraint matrix
 var ics_all
@@ -194,9 +201,6 @@ val ans =
   icnstrlst_solve<a> (iset, ics_all, n+1)
 val () = icnstrlst_free<a> (ics_all, n+1)
 //
-(*
-val () = println! ("auxsolve: ans = ", ans)
-*)
 in
 //
 ans // ~1: contradiction reached; 0: undecided yet
@@ -212,8 +216,7 @@ s3explst_solve_s2exp
 val s3p = s3exp_make (env, s2p)
 val s3p =
 (
-  case+ s3p of
-  | S3Eerr _ => let
+  if s3exp_is_S3Eerr (s3p) then let
       val () = prerr_warning3_loc (loc0)
       val () = prerr ": the constraint ["
       val () = pprerr_s2exp (s2p)
@@ -222,40 +225,23 @@ val s3p =
     in
       s3exp_false // HX: make it the worst scenario
     end // end of [S3Eerr]
-  | _ => s3p // end of [_]
+  else s3p // end of [_]
 ) : s3exp // end of [val]
 //
 var status: int = 0
 val () = (
-  case+ s3p of
-  | S3Ebool (true) => status := ~1
-  | _ => ()
+  case+ s3exp_view (s3p) of
+  | ~S3Ebool (b) => if b then status := ~1
+  | v => s3exp_view_free (v)
 ) // end of [val]
 //
 val () = if status >= 0 then {
 val s3p_conc =
   s3exp_lintize (env, s3p) // HX: processed for being turned into a vector
 //
-val (s2vs, s3ps) = s2vbcfenv_extract (env)
-val s2vs_ =
-  $UN.castvwtp1 {s2varlst} (s2vs) // HX: cannot be SHARED!
-val s3ps_asmp =
-  $UN.castvwtp1 {s3explst} (s3ps) // HX: cannot be SHARED!
+val @(s2vs, s3ps_asmp) = s2vbcfenv_extract (env)
 //
-(*
-val () = begin
-  print "s3explst_solve_s2exp: s2vs = ";
-  print_s2varlst (s2vs_); print_newline ();
-  print "s3explst_solve_s2exp: s3ps =\n";
-  $UT.fprintlst (
-    stdout_ref, s3ps_asmp, "\n", fprint_s3exp
-  ) ; print_newline ();
-  println! ("s3explst_solve_s2exp: s2p = ", s2p);
-  println! ("s3explst_solve_s2exp: s3p = ", s3p);
-end // end of [val]
-*)
-//
-val (vim, n) = s2varindmap_make (s2vs)
+val @(vim, n) = s2varindmap_make (s2vs)
 //
 // HX: [C3NSTRINTKND] defined in [pats_params.hats]
 //
@@ -272,15 +258,9 @@ val () = status := ans
 //
 val () = s2varindmap_free (vim)
 val () = list_vt_free (s2vs)
-and () = list_vt_free (s3ps)
+and () = list_vt_free (s3ps_asmp)
 //
 } (* end of [status >= 0] *)
-//
-(*
-val () = (
-  println! ("s3explst_solve_s2exp: status = ", status)
-) (* end of [val] *)
-*)
 //
 in
   status(*~1/0*)
@@ -368,17 +348,15 @@ fun prlst (
   p2tcs: p2atcstlst
 ) : void = let
 in
-  case+ p2tcs of
-  | list_cons
-      (p2tc, p2tcs) => let
+  if glist_is_cons (p2tcs) then let
       val () =
-        fprint_p2atcst (stderr_ref, p2tc)
+        fprint_p2atcst (stderr_ref, glist_head<p2atcst> (p2tcs))
       // end of [val]
       val () = fprint_newline (stderr_ref)
     in
-      prlst (p2tcs)
+      prlst (glist_tail<p2atcst> (p2tcs))
     end // end of [list_cons]
-  | list_nil () => ()
+  else ()
 end // end of [prlst]
 //
 in
@@ -410,8 +388,8 @@ implement
 c3nstr_solve_errmsg
   (c3t, unsolved) = let
 //
-val loc0 = c3t.c3nstr_loc
-val c3tk = c3t.c3nstr_kind
+val loc0 = c3t.c3nstr_loc ()
+val c3tk = c3t.c3nstr_kind ()
 //
 fun
 prerr_c3nstr_if
@@ -423,22 +401,23 @@ prerr_c3nstr_if
 //
 in
 //
-case+ c3tk of
-| C3TKmain((*void*)) =>
+case+ c3nstrkind_view (c3tk) of
+| ~C3TKmain((*void*)) =>
   (
     if unsolved = 0u
       then let
         val () =
         prerr_error3_loc (loc0)
-        val () =
-        prerrln! (": unsolved constraint: ", c3t)
+        val () = prerr ": unsolved constraint: "
+        val () = prerr_c3nstr (c3t)
+        val () = prerr_newline ()
       in
         0 // this one is treated as an error
       end // end of [then]
       else 0 // this errmsg has already been reported
     // end of [if]
   ) (* end of [C3STRKmain] *)
-| C3TKcase_exhaustiveness
+| ~C3TKcase_exhaustiveness
     (casknd, p2tcs) => let
     val () =
     prerr_case_exhaustiveness_errmsg (loc0, casknd, p2tcs)
@@ -449,7 +428,7 @@ case+ c3tk of
     | CK_case_neg () => 0 (*deadcode*)
   end // end of [C3TKcase_exhaustiveness]
 //
-| C3TKtermet_isnat
+| ~C3TKtermet_isnat
     () => 0 where {
     val () =
     prerr_error3_loc (loc0)
@@ -461,7 +440,7 @@ case+ c3tk of
     prerr_c3nstr_if (unsolved, c3t)
     val () = prerr_newline ((*void*))
   } // end of [C3TKtermet_isnat]
-| C3TKtermet_isdec
+| ~C3TKtermet_isdec
     () => 0 where {
     val () = prerr_error3_loc (loc0)
     val () = prerr
@@ -473,40 +452,47 @@ case+ c3tk of
     val () = prerr_newline ((*void*))
   } // end of [C3STRKmetric_dec]
 //
-| C3TKsome_fin _ =>
+| ~C3TKsome_fin _ =>
     (0) where {
     val () = prerr_error3_loc (loc0)
-    val ((*void*)) =
-      prerrln! ": unsolved constraint for var preservation"
+    val ((*void*)) = (
+      prerr ": unsolved constraint for var preservation"; prerr_newline ()
+    )
   } (* end of [C3TKsome_fin] *)
-| C3TKsome_lvar _ =>
+| ~C3TKsome_lvar _ =>
     (0) where {
     val () = prerr_error3_loc (loc0)
-    val ((*void*)) =
-      prerrln! ": unsolved constraint for lvar preservation"
+    val ((*void*)) = (
+      prerr ": unsolved constraint for lvar preservation"; prerr_newline ()
+    )
   } (* end of [C3TKsome_lvar] *)
-| C3TKsome_vbox _ =>
+| ~C3TKsome_vbox _ =>
     (0) where {
     val () = prerr_error3_loc (loc0)
-    val ((*void*)) = 
-      prerrln! ": unsolved constraint for vbox preservation"
+    val ((*void*)) = (
+      prerr ": unsolved constraint for vbox preservation"; prerr_newline ()
+    )
   } (* end of [C3TKsome_vbox] *)
 //
-| C3TKlstate
+| ~C3TKlstate
     () => 0 where {
     val () =
     prerr_error3_loc (loc0)
-    val () = prerrln! ": unsolved constraint for lstate merging"
+    val () = (
+      prerr ": unsolved constraint for lstate merging"; prerr_newline ()
+    )
   } // end of [C3TKlstate]
-| C3TKlstate_var
+| ~C3TKlstate_var
     (d2v) => 0 where {
     val () =
     prerr_error3_loc (loc0)
-    val () =
-    prerrln! (": unsolved constraint for merging the lstate of [", d2v, "]")
+    val () = prerr ": unsolved constraint for merging the lstate of ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "]"
+    val () = prerr_newline ()
   } // end of [C3TKlstate_var]
 //
-| C3TKloop(knd) =>
+| ~C3TKloop(knd) =>
     (0) where {
     val () =
     prerr_error3_loc (loc0)
@@ -519,12 +505,13 @@ case+ c3tk of
     val () = prerr_newline ((*void*))
   } (* end of [C3TKloop] *)
 //
-| C3TKsolverify() =>
+| ~C3TKsolverify() =>
     (0) where {
     val () =
     prerr_error3_loc (loc0)
-    val () =
-    prerrln! ": the constraint is expected to be verified externally."
+    val () = (
+      prerr ": the constraint is expected to be verified externally."; prerr_newline ()
+    )
   } (* end of [C3TKsolver] *)
 //
 end // end of [c3nstr_solve_errmsg]
@@ -537,14 +524,7 @@ c3nstr_solve_main
   env, c3t, unsolved, err
 ) = let
 //
-val loc0 = c3t.c3nstr_loc
-//
-(*
-//
-val () =
-println! ("c3nstr_solve_main: c3t = ", c3t)
-//
-*)
+val loc0 = c3t.c3nstr_loc ()
 //
 var
 status: int = (
@@ -552,16 +532,16 @@ status: int = (
 // ~1: solved; 0: unsolved
 //
 case+
-c3t.c3nstr_node
+c3nstr_node_view (c3t.c3nstr_node ())
 of // case+
-| C3NSTRprop s2p =>
+| ~C3NSTRprop s2p =>
     c3nstr_solve_prop (loc0, env, s2p, err)
   // end of [C3NSTRprop]
-| C3NSTRitmlst(s3is) =>
+| ~C3NSTRitmlst(s3is) =>
     c3nstr_solve_itmlst (loc0, env, s3is, unsolved, err)
   // end of [C3NSTRitmlst]
 //
-| C3NSTRsolverify(s2e_prop) => 
+| ~C3NSTRsolverify(s2e_prop) => 
     c3nstr_solve_solverify (loc0, env, s2e_prop, err)
 //
 ) : int // end of [val]
@@ -577,14 +557,6 @@ then
   val () = if iswarn > 0 then (status := ~1)
 } (* end of [if] *)
 //
-(*
-//
-val () =
-println!
-  ("c3nstr_solve_main: status = ", status)
-//
-*)
-//
 val () =
   if status >= 0 then (unsolved := unsolved + 1u)
 //
@@ -596,16 +568,9 @@ end // end of [c3nstr_solve_main]
 
 implement
 c3nstr_solve_prop
-  (loc0, env, s2p, err) = let
-(*
-  val () = begin
-    print "c3nstr_solve_prop: s2p = ";
-    pprint_s2exp (s2p); print_newline ();
-  end // end of [val]
-*)
-in
+  (loc0, env, s2p, err) = (
   s3explst_solve_s2exp (loc0, env, s2p, err)
-end // end of [c3nstr_solve_prop]
+) // end of [c3nstr_solve_prop]
 
 (* ****** ****** *)
 
@@ -614,78 +579,47 @@ c3nstr_solve_itmlst
 (
   loc0, env, s3is, unsolved, err
 ) = let
-(*
-//
-val () = begin
-  print "c3str_solve_itmlst: s3is = ";
-  fprint_s3itmlst (stdout_ref, s3is); print_newline ();
-end // end of [val]
-//
-*)
 in
 //
-case+ s3is of
-| list_nil() => ~1
-| list_cons(s3i, s3is) =>
-  (
-  case+ s3i of
-  | S3ITMsvar(s2v) => let
+if glist_is_cons (s3is) then let
+  val s3i = glist_head<s3itm> (s3is)
+  val s3is = glist_tail<s3itm> (s3is)
+in
+  case+ s3itm_view (s3i) of
+  | ~S3ITMsvar(s2v) => let
       val () = s2vbcfenv_add_svar (env, s2v)
     in
       c3nstr_solve_itmlst(loc0, env, s3is, unsolved, err)
     end // end of [S3ITMsvar]
-  | S3ITMhypo(h3p) => let
+  | ~S3ITMhypo(h3p) => let
       val s3p = s3exp_make_h3ypo (env, h3p)
       val () = (
-        case+ s3p of
-        | S3Eerr _ => let
-(*
-            val () = begin
-              prerr_warning3_loc (loc0);
-              prerr ": unused hypothesis: ["; prerr_h3ypo (h3p); prerr "]";
-              prerr_newline ()
-            end // end of [val]
-*)
-          in
-            // nothing
-          end // end of [S3Eerr]
-        | _ (*non-S3Eerr*) => let
+        if s3exp_is_S3Eerr (s3p) then () // nothing
+        else let
             val s3p = s3exp_lintize(env, s3p) in s2vbcfenv_add_sbexp (env, s3p)
           end // end of [_]
       ) : void // end of [val]
     in
       c3nstr_solve_itmlst(loc0, env, s3is, unsolved, err)
     end // end of [S3ITMhypo]
-  | S3ITMsVar(s2V) =>
+  | ~S3ITMsVar(s2V) =>
       c3nstr_solve_itmlst(loc0, env, s3is, unsolved, err)
-  | S3ITMcnstr(c3t) =>
+  | ~S3ITMcnstr(c3t) =>
       c3nstr_solve_itmlst_cnstr(loc0, env, s3is, c3t, unsolved, err)
-  | S3ITMcnstr_ref(ctr) => let
-      val ref = ctr.c3nstroptref_ref
-    in
-      case+ !ref of
-      | None () => ~1(*solved*)
-      | Some c3t =>
+  | ~S3ITMcnstr_ref(ctr) => (
+      case+ gopt_view (ctr.c3nstroptref_val ()) of
+      | ~GOnone () => ~1(*solved*)
+      | ~GOsome c3t =>
           c3nstr_solve_itmlst_cnstr(loc0, env, s3is, c3t, unsolved, err)
         // end of [Some]
-    end // end of [S3ITMcnstr_ref]
-  | S3ITMdisj(s3iss_disj) =>
+    ) // end of [S3ITMcnstr_ref]
+  | ~S3ITMdisj(s3iss_disj) =>
       c3nstr_solve_itmlst_disj(loc0, env, s3is, s3iss_disj, unsolved, err)
 //
-  | S3ITMsolassert(s2e_prop) => let
-(*
-      val () =
-      print! "c3nstr_solve_itmlst"
-      val () =
-      println!
-        (": S3ITMsolassert: s2e_prop = ", s2e_prop)
-      // end of [val]
-*)
-    in
+  | ~S3ITMsolassert(s2e_prop) =>
       c3nstr_solve_itmlst(loc0, env, s3is, unsolved, err)
-    end // end of [S3ITMsolassert]
 //
-  ) (* end of [list_cons] *)
+end else ~1 (*list_nil*)
 //
 end // end of [c3nstr_solve_itmlst]
 
@@ -696,13 +630,13 @@ c3nstr_solve_itmlst_cnstr
 (
   loc0, env, s3is, c3t, unsolved, err
 ) = let
-  val (pf1 | ()) = s2vbcfenv_push (env)
-  val (pf2 | ()) = the_s2varbindmap_push ()
+  val () = s2vbcfenv_push (env)
+  val () = the_s2varbindmap_push ()
   val ans1 =
     c3nstr_solve_main (env, c3t, unsolved, err)
   // end of [val]
-  val () = the_s2varbindmap_pop (pf2 | (*none*))
-  val () = s2vbcfenv_pop (pf1 | env)
+  val () = the_s2varbindmap_pop ()
+  val () = s2vbcfenv_pop (env)
   val ans2 =
     c3nstr_solve_itmlst (loc0, env, s3is, unsolved, err)
   // end of [val]
@@ -717,31 +651,21 @@ c3nstr_solve_itmlst_disj
 (
   loc0, env, s3is0, s3iss(*disj*), unsolved, err
 ) = let
-(*
-//
-val () =
-(
-  println! ("c3nstr_solve_itmlst_disj: s3iss = ...")
-) (* end of [val] *)
-//
-*)
 in
 //
-case+ s3iss of
-| list_nil
-    ((*void*)) => ~1(*solved*)
-  // end of [list_nil]
-| list_cons
-    (s3is, s3iss) => let
-    val (pf1 | ()) = s2vbcfenv_push (env)
-    val (pf2 | ()) = the_s2varbindmap_push ()
-    val s3is1 = list_append (s3is, s3is0)
+if glist_is_cons (s3iss) then let
+    val s3is = glist_head<s3itmlst> (s3iss)
+    val s3iss = glist_tail<s3itmlst> (s3iss)
+    val () = s2vbcfenv_push (env)
+    val () = the_s2varbindmap_push ()
+    val s3is1 = glist_append<s3itm> (s3is, s3is0)
     val _(*ans*) = c3nstr_solve_itmlst (loc0, env, s3is1, unsolved, err)
-    val ((*void*)) = the_s2varbindmap_pop (pf2 | (*none*))
-    val ((*void*)) = s2vbcfenv_pop (pf1 |env)
+    val ((*void*)) = the_s2varbindmap_pop ()
+    val ((*void*)) = s2vbcfenv_pop (env)
   in
     c3nstr_solve_itmlst_disj (loc0, env, s3is0, s3iss, unsolved, err)
   end // end of [list_cons]
+else ~1(*solved*) // end of [list_nil]
 //
 end // end of [c3nstr_solve_itmlst_disj]
 
@@ -749,57 +673,29 @@ end // end of [c3nstr_solve_itmlst_disj]
 
 implement
 c3nstr_solve_solverify
-  (loc0, env, s2e_prop, err) = let
-//
-(*
-val () =
-println!
-  ("c3nstr_solve_solverify: s2e_prop = ", s2e_prop)
-// end of [val]
-*)
-//
-in
-  0(*unsolved*)
-end // end of [c3nstr_solve_solverify]
+  (loc0, env, s2e_prop, err) = 0(*unsolved*)
+// end of [c3nstr_solve_solverify]
 
 (* ****** ****** *)
 
 implement
 c3nstr_ats2_solve (c3t) = let
-(*
 //
-val () =
-(
-  println! ("c3nstr_ats2_solve: c3t = ", c3t)
-) (* end of [val] *)
-//
-*)
 var env: s2vbcfenv = s2vbcfenv_nil ()
 //
 // HX-2010-09-09: this is needed for solving
 val () = the_s2varbindmap_freetop () // top-level constraints!!!
 //
 var
-unsolved: uint = 0u and err: int = 0
+unsolved: uint = 0u
+var err: int = 0
 val _(*status*) = c3nstr_solve_main (env, c3t, unsolved, err)
 val ((*freed*)) = s2vbcfenv_free (env)
 //
 in
 //
-case+ 0 of
-| _ when
-    unsolved = 0u => let
-(*
-    val () =
-    prerrln!
-      ("typechecking is finished successfully!")
-    // end of [val]
-*)
-  in
-    // nothing
-  end // end of [unsolved = 0]
-| _ (*unsolved*) => // unsolved > 0
-  {
+if unsolved = 0u then () // nothing
+else let (* unsolved > 0 *)
     val () = prerr "typechecking has failed"
     val () =
     if unsolved <= 1u
@@ -809,12 +705,11 @@ case+ 0 of
     if unsolved >= 2u
       then prerr ": there are some unsolved constraints"
     // end of [if]
-    val () =
-    prerrln! (
-      ": please inspect the above reported error message(s) for information."
-    ) (* end of [val] *)
-    val () = $ERR.abort{void}()
-  } (* end of [_ when unsolved > 0] *)
+    val () = prerr ": please inspect the above reported error message(s) for information."
+    val () = prerr_newline ()
+  in
+    $ERR.abort<void>()
+  end (* end of [_ when unsolved > 0] *)
 //
 end // end of [c3nstr_ats2_solve]
 

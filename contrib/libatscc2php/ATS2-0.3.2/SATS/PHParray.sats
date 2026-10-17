@@ -39,9 +39,10 @@ PHParray_make_elt
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (the list is borrowed)
 fun
-PHParray_make_list
-  {a:t0p}(xs: List(INV(a))): PHParray(a) = "mac#%"
+PHParray_make_list_vt
+  {a:t0p}(xs: !List_vt(INV(a))): PHParray(a) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -63,25 +64,30 @@ overload [] with PHParray_get_at of 100
 (* ****** ****** *)
 //
 fun
-PHParray2list
-  {a:t0p}(A: PHParray(a)): List0(a) = "mac#%"
+PHParray2list_vt
+  {a:t0p}(A: PHParray(a)): List0_vt(a) = "mac#%"
 fun
-PHParray2list_rev
-  {a:t0p}(A: PHParray(a)): List0(a) = "mac#%"
+PHParray2list_vt_rev
+  {a:t0p}(A: PHParray(a)): List0_vt(a) = "mac#%"
 //
 (* ****** ****** *)
 //
+// HX-2026-10:
+// the closures (cloptr) given to the following
+// functions are consumed
+//
 fun
-PHParray2list_map
+PHParray2list_vt_map
   {a:t0p}{b:t0p}
-  (A: PHParray(a), fopr: cfun(a, b)): List0(b) = "mac#%"
+  (A: PHParray(a), fopr: cfun(a, b)): List0_vt(b) = "mac#%"
 fun
-PHParray2list_map_rev
+PHParray2list_vt_map_rev
   {a:t0p}{b:t0p}
-  (A: PHParray(a), fopr: cfun(a, b)): List0(b) = "mac#%"
+  (A: PHParray(a), fopr: cfun(a, b)): List0_vt(b) = "mac#%"
 //
 (* ****** ****** *)
 //
+// HX-2026-10: [test] and [fwork] are consumed
 fun
 PHParray_forall
   {a:t0p}

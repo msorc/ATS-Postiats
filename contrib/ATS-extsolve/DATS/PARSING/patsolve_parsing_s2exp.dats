@@ -13,327 +13,139 @@
 *)
 
 (* ****** ****** *)
-//
+
+macdef
+JAG(x0, i) = jsonval_array_get(,(x0), ,(i))
+
+(* ****** ****** *)
+
 extern
 fun
-parse_s2exp_node (jsonval): s2exp_node
-//
+parse_s2exp_node{l:addr}
+  (ar: !arena(l), tbls: ptables(l), jsnv: jsonval): s2exp_node(l)
+
 (* ****** ****** *)
 
 implement
 parse_s2exp
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-(*
-val () =
-println!
+val s2t =
+parse_s2rt
 (
-  "parse_s2exp: jsnv0 = ", jsnv0
-) (* end of [val] *)
-*)
-//
-val-JSONobject(lxs) = jsnv0
-val () = assertloc(length(lxs) >= 2)
-//
-val+list_cons(lx, lxs) = lxs
-val s2t = parse_s2rt (lx.1)
-//
-val+list_cons(lx, lxs) = lxs
-val s2en = parse_s2exp_node (lx.1)
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "s2exp_srt")
+)
+val s2en =
+parse_s2exp_node
+(
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "s2exp_node")
+)
 //
 in
-//
-  s2exp_make_node (s2t, s2en)
-//
+  s2exp_make_node(ar, s2t, s2en)
 end // end of [parse_s2exp]
 
 (* ****** ****** *)
 
-local
-
-fun
-aux_S2Eint
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S2Eint(parse_int(x))
-end (* end of [aux_S2Eint] *)
-
-fun
-aux_S2Eintinf
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S2Eintinf(parse_string(x))
-end (* end of [aux_S2Eintinf] *)
-
-fun
-aux_S2Ecst
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons(x, xs) = xs
-//
-val s2c = parse_s2cst(x)
-//
-in
-  s2cst_incby1_nused(s2c); S2Ecst(s2c)
-end (* end of [aux_S2Ecst] *)
-
-fun
-aux_S2Evar
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S2Evar(parse_s2var(x))
-end (* end of [aux_S2Evar] *)
-
-fun
-aux_S2EVar
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S2EVar(parse_s2Var(x))
-end (* end of [aux_S2EVar] *)
-
-fun
-aux_S2Eeqeq
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x_1, xs) = xs
-val-list_cons (x_2, xs) = xs
-//
-in
-  S2Eeqeq(parse_s2exp(x_1), parse_s2exp(x_2))
-end (* end of [aux_S2Eeqeq] *)
-
-fun
-aux_S2Esizeof
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S2Esizeof(parse_s2exp(x))
-end (* end of [aux_S2Esizeof] *)
-
-fun
-aux_S2Eapp
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x_fun, xs) = xs
-val-list_cons (x_arg, xs) = xs
-//
-in
-  S2Eapp(parse_s2exp(x_fun), parse_s2explst(x_arg))
-end (* end of [aux_S2Eapp] *)
-
-fun
-aux_S2Emetdec
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x_met, xs) = xs
-val-list_cons (x_bound, xs) = xs
-//
-in
-  S2Emetdec(parse_s2explst(x_met), parse_s2explst(x_bound))
-end (* end of [aux_S2Emetdec] *)
-
-fun
-aux_S2Etop
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-val-list_cons (x2, xs) = xs
-//
-in
-  S2Etop(parse_int(x1), parse_s2exp(x2))
-end (* end of [aux_S2Etop] *)
-
-fun
-aux_S2Einvar
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S2Einvar(parse_s2exp(x))
-end (* end of [aux_S2Einvar] *)
-
-fun
-aux_S2Efun
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-val-list_cons (x2, xs) = xs
-val-list_cons (x3, xs) = xs
-//
-in
-  S2Efun(parse_int(x1), parse_s2explst(x2), parse_s2exp(x3))
-end (* end of [aux_S2Efun] *)
-
-fun
-aux_S2Euni
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-val-list_cons (x2, xs) = xs
-val-list_cons (x3, xs) = xs
-//
-in
-  S2Euni(parse_s2varlst(x1), parse_s2explst(x2), parse_s2exp(x3))
-end (* end of [aux_S2Euni] *)
-
-fun
-aux_S2Eexi
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-val-list_cons (x2, xs) = xs
-val-list_cons (x3, xs) = xs
-//
-in
-  S2Eexi(parse_s2varlst(x1), parse_s2explst(x2), parse_s2exp(x3))
-end (* end of [aux_S2Eexi] *)
-
-fun
-aux_S2Etyrec
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-val-list_cons (x2, xs) = xs
-val-list_cons (x3, xs) = xs
-//
-in
-  S2Etyrec(parse_tyreckind(x1), parse_int(x2), parse_labs2explst(x3))
-end (* end of [aux_S2Etyrec] *)
-
-fun
-aux_S2Eextype
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-//
-in
-  S2Eextype(parse_symbol(x1))
-end (* end of [aux_S2Eextype] *)
-
-fun
-aux_S2Eextkind
-(
-  x0: jsonval
-) : s2exp_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-//
-in
-  S2Eextkind(parse_symbol(x1))
-end (* end of [aux_S2Eextkind] *)
-
-in (* in-of-local *)
-
 implement
 parse_s2exp_node
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-JSONobject(lxs) = jsnv0
+val name = jsonval_get_name(jsnv0)
+val x0 = jsonval_get_value(jsnv0)
 //
-val-list_cons (lx, lxs) = lxs
-val name = lx.0 and jsnv2 = lx.1
+macdef
+s2exp(x) = parse_s2exp(ar, tbls, ,(x))
+macdef
+s2explst(x) = parse_s2explst(ar, tbls, ,(x))
+macdef
+s2varlst(x) = parse_s2varlst(ar, tbls, ,(x))
+macdef
+symbol(x) = parse_symbol(ar, tbls, ,(x))
 //
 in
 //
 case+ name of
-//
-| "S2Eint" => aux_S2Eint(jsnv2)
-| "S2Eintinf" => aux_S2Eintinf(jsnv2)
-//
-| "S2Ecst" => aux_S2Ecst(jsnv2)
-//
-| "S2Evar" => aux_S2Evar(jsnv2)
-//
-| "S2EVar" => aux_S2EVar(jsnv2)
-//
-| "S2Eeqeq" => aux_S2Eeqeq(jsnv2)
-//
-| "S2Esizeof" => aux_S2Esizeof(jsnv2)
-//
-| "S2Eapp" => aux_S2Eapp(jsnv2)
-//
-| "S2Emetdec" => aux_S2Emetdec(jsnv2)
-//
-| "S2Etop" => aux_S2Etop(jsnv2)
-//
-| "S2Einvar" => aux_S2Einvar(jsnv2)
-//
-| "S2Efun" => aux_S2Efun(jsnv2)
-//
-| "S2Euni" => aux_S2Euni(jsnv2)
-| "S2Eexi" => aux_S2Eexi(jsnv2)
-//
-| "S2Etyrec" => aux_S2Etyrec(jsnv2)
-//
-| "S2Eextype" => aux_S2Eextype(jsnv2)
-| "S2Eextkind" => aux_S2Eextkind(jsnv2)
-//
-| "S2Eignored" => S2Eerror(*void*)
-//
+| "S2Eint" =>
+    s2exp_node_S2Eint(ar, parse_int(JAG(x0, 0)))
+| "S2Eintinf" =>
+    s2exp_node_S2Eintinf
+      (ar, astring_make(ar, parse_string(JAG(x0, 0))))
+    // s2exp_node_S2Eintinf
+| "S2Ecst" => let
+    val s2c =
+      parse_s2cst(ar, tbls, JAG(x0, 0))
+    // end of [val]
+  in
+    s2cst_incby1_nused(ar, s2c); s2exp_node_S2Ecst(ar, s2c)
+  end // end of [S2Ecst]
+| "S2Evar" =>
+    s2exp_node_S2Evar(ar, parse_s2var(ar, tbls, JAG(x0, 0)))
+| "S2EVar" =>
+    s2exp_node_S2EVar(ar, parse_s2Var(ar, tbls, JAG(x0, 0)))
+| "S2Eeqeq" => let
+    val s2e1 = s2exp(JAG(x0, 0))
+    val s2e2 = s2exp(JAG(x0, 1))
+  in
+    s2exp_node_S2Eeqeq(ar, s2e1, s2e2)
+  end // end of [S2Eeqeq]
+| "S2Esizeof" =>
+    s2exp_node_S2Esizeof(ar, s2exp(JAG(x0, 0)))
+| "S2Eapp" => let
+    val s2e_fun = s2exp(JAG(x0, 0))
+    val s2es_arg = s2explst(JAG(x0, 1))
+  in
+    s2exp_node_S2Eapp(ar, s2e_fun, s2es_arg)
+  end // end of [S2Eapp]
+| "S2Emetdec" => let
+    val s2es_met = s2explst(JAG(x0, 0))
+    val s2es_bound = s2explst(JAG(x0, 1))
+  in
+    s2exp_node_S2Emetdec(ar, s2es_met, s2es_bound)
+  end // end of [S2Emetdec]
+| "S2Etop" => let
+    val knd = parse_int(JAG(x0, 0))
+    val s2e = s2exp(JAG(x0, 1))
+  in
+    s2exp_node_S2Etop(ar, knd, s2e)
+  end // end of [S2Etop]
+| "S2Einvar" =>
+    s2exp_node_S2Einvar(ar, s2exp(JAG(x0, 0)))
+| "S2Efun" => let
+    val npf = parse_int(JAG(x0, 0))
+    val s2es = s2explst(JAG(x0, 1))
+    val s2e = s2exp(JAG(x0, 2))
+  in
+    s2exp_node_S2Efun(ar, npf, s2es, s2e)
+  end // end of [S2Efun]
+| "S2Euni" => let
+    val s2vs = s2varlst(JAG(x0, 0))
+    val s2ps = s2explst(JAG(x0, 1))
+    val s2e = s2exp(JAG(x0, 2))
+  in
+    s2exp_node_S2Euni(ar, s2vs, s2ps, s2e)
+  end // end of [S2Euni]
+| "S2Eexi" => let
+    val s2vs = s2varlst(JAG(x0, 0))
+    val s2ps = s2explst(JAG(x0, 1))
+    val s2e = s2exp(JAG(x0, 2))
+  in
+    s2exp_node_S2Eexi(ar, s2vs, s2ps, s2e)
+  end // end of [S2Eexi]
+| "S2Etyrec" => let
+    val knd = parse_tyreckind(ar, tbls, JAG(x0, 0))
+    val npf = parse_int(JAG(x0, 1))
+    val ls2es = parse_labs2explst(ar, tbls, JAG(x0, 2))
+  in
+    s2exp_node_S2Etyrec(ar, knd, npf, ls2es)
+  end // end of [S2Etyrec]
+| "S2Eextype" =>
+    s2exp_node_S2Eextype(ar, symbol(JAG(x0, 0)))
+| "S2Eextkind" =>
+    s2exp_node_S2Eextkind(ar, symbol(JAG(x0, 0)))
+| "S2Eignored" => s2exp_node_S2Eerror(ar)
 | _(*unrecognized*) => 
   let
     val () =
@@ -347,52 +159,26 @@ case+ name of
 //
 end // end of [parse_s2exp_node]
 
-end // end of [local]
-
 (* ****** ****** *)
-
-local
-
-fun
-aux_SLABELED
-(
-  x0: jsonval
-) : labs2exp = let
-//
-(*
-val () =
-println!
-(
-  "parse_labs2exp: aux_SLABELED: x0 = ", x0
-) (* end of [val] *)
-*)
-//
-val-JSONarray(xs) = x0
-val-list_cons (x1, xs) = xs
-val-list_cons (x2, xs) = xs
-val-list_cons (x3, xs) = xs
-//
-in
-  SLABELED(parse_label(x1), parse_s2exp(x3))
-end (* end of [aux_SLABELED] *)
-
-in (* in-of-local *)
 
 implement
 parse_labs2exp
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-JSONobject(lxs) = jsnv0
-//
-val-list_cons (lx, lxs) = lxs
-val name = lx.0 and jsnv2 = lx.1
+val name = jsonval_get_name(jsnv0)
+val x0 = jsonval_get_value(jsnv0)
 //
 in
 //
 case+ name of
-//
-| "SL0ABELED" => aux_SLABELED(jsnv2)
-//
+| "SL0ABELED" => let
+    val lab =
+      parse_label(ar, tbls, JAG(x0, 0))
+    val s2e =
+      parse_s2exp(ar, tbls, JAG(x0, 2))
+  in
+    labs2exp_SLABELED(ar, lab, s2e)
+  end // end of [SL0ABELED]
 | _(*unrecognized*) => 
   let
     val () =
@@ -405,8 +191,6 @@ case+ name of
   end // end of [unrecognized]
 //
 end // end of [parse_labs2exp]
-
-end // end of [local]
 
 (* ****** ****** *)
 

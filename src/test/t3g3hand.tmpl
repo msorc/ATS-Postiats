@@ -1,0 +1,189 @@
+(* the part of the test of the level-3 translation, group 3 (t3g3_gen.py) that is written in the chunks (generated from t3g3hand.tmpl, see t3hand.tmpl for the
+   conventions: "2|" lines are ATS2 only, "1|" lines ATS1 only, "<<(" is "@(" in ATS2 and "(" in ATS1): the wrappers of the functions of pats_trans3_{p2at,selab,fldfrat,lvalres} *)
+(* ****** ****** *)
+//
+// after each call: the static errors (stderr) and the count of the errors of the translation
+//
+fun g3_kint (): s2exp = s2exp_cst (s2cstref_get_cst (the_int_kind))
+fun g3_end (): void = (prerr_the_staerrlst (); t3chk ())
+
+// the d2vars of a pattern and of the translated pattern, with the view variable of a variable that is passed by reference: they are updated by the translation
+2|fun g3_dvs_loop (xs: d2varlst): void =
+2|  case+ glist_view (xs) of
+2|  | ~GLnil () => ()
+2|  | ~GLcons (v, xs) => (chk_d2var v; (case+ gopt_view (d2var_get_view v) of ~GOsome (w) => chk_d2var w | ~GOnone () => ()); g3_dvs_loop xs)
+1|fun g3_dvs_loop (xs: List (d2var)): void =
+1|  case+ xs of
+1|  | list_nil () => ()
+1|  | list_cons (v, xs) => (chk_d2var v; (case+ d2var_get_view v of Some (w) => chk_d2var w | None () => ()); g3_dvs_loop xs)
+2|fun g3_dvs (p: p2at): void = g3_dvs_loop ($UT.lstord2list<d2var> (p.p2at_dvs ()))
+1|fun g3_dvs (p: p2at): void = g3_dvs_loop ($UT.lstord2list (p.p2at_dvs))
+2|fun g3_dvslst (ps: p2atlst): void =
+2|  case+ glist_view (ps) of ~GLnil () => () | ~GLcons (p, ps) => (g3_dvs p; g3_dvslst ps)
+1|fun g3_dvslst (ps: p2atlst): void =
+1|  case+ ps of list_nil () => () | list_cons (p, ps) => (g3_dvs p; g3_dvslst ps)
+2|fun g3_p3dv (p: p3at): void = (
+2|  case+ p3at_node_view (p.p3at_node ()) of
+2|  | ~P3Tany (v) => chk_d2var v
+2|  | ~P3Tvar (v) => chk_d2var v
+2|  | ~P3Tvbox (v) => chk_d2var v
+2|  | ~P3Trefas (v, q) => (chk_d2var v; g3_p3dv q)
+2|  | ~P3Tann (q, _) => g3_p3dv q
+2|  | ~P3Texist (_, q) => g3_p3dv q
+2|  | ~P3Trec (_, _, _, lps) => g3_p3dv_labs lps
+2|  | ~P3Tlst (_, _, ps) => g3_p3dv_lst ps
+2|  | v => p3at_node_view_free (v)
+2|) and g3_p3dv_labs (lps: labp3atlst): void =
+2|  case+ glist_view (lps) of ~GLnil () => () | ~GLcons (lp, lps) => (g3_p3dv (lp.labp3at_elt ()); g3_p3dv_labs lps)
+2|and g3_p3dv_lst (ps: p3atlst): void =
+2|  case+ glist_view (ps) of ~GLnil () => () | ~GLcons (p, ps) => (g3_p3dv p; g3_p3dv_lst ps)
+1|fun g3_p3dv (p: p3at): void = (
+1|  case+ p.p3at_node of
+1|  | P3Tany (v) => chk_d2var v
+1|  | P3Tvar (v) => chk_d2var v
+1|  | P3Tvbox (v) => chk_d2var v
+1|  | P3Trefas (v, q) => (chk_d2var v; g3_p3dv q)
+1|  | P3Tann (q, _) => g3_p3dv q
+1|  | P3Texist (_, q) => g3_p3dv q
+1|  | P3Trec (_, _, _, lps) => g3_p3dv_labs lps
+1|  | P3Tlst (_, _, ps) => g3_p3dv_lst ps
+1|  | _ => ()
+1|) and g3_p3dv_labs (lps: labp3atlst): void =
+1|  case+ lps of list_nil () => () | list_cons (lp, lps) => (case+ lp of LABP3AT (_, q) => g3_p3dv q; g3_p3dv_labs lps)
+1|and g3_p3dv_lst (ps: p3atlst): void =
+1|  case+ ps of list_nil () => () | list_cons (p, ps) => (g3_p3dv p; g3_p3dv_lst ps)
+//
+// pats_trans3_p2at
+//
+fun g3_syn (p: p2at): void = let
+  val e = p2at_syn_type (p)
+in
+  (dd_s2exp e; dd_ps " <- "; dd_p2at p; dd_nl (); g3_end ())
+end
+fun g3_synlst (ps: p2atlst): void = let
+  val es = p2atlst_syn_type (ps)
+in
+  (dd_s2explst es; dd_ps " <- "; dd_p2atlst ps; dd_nl (); g3_end ())
+end
+fun g3_trup_arg (p: p2at): void = let
+  val p3 = p2at_trup_arg (p)
+in
+  (dd_p3at p3; dd_ps " <- "; dd_p2at p; dd_nl (); g3_dvs p; g3_p3dv p3; g3_end ())
+end
+fun g3_trup_arglst (npf: int, ps: p2atlst): void = let
+  val p3s = p2atlst_trup_arg (npf, ps)
+in
+  (dd_p3atlst p3s; dd_ps " <- "; dd_p2atlst ps; dd_nl (); g3_dvslst ps; g3_p3dv_lst p3s; g3_end ())
+end
+fun g3_trdn_arg (p: p2at, e: s2exp): void = let
+  val p3 = p2at_trdn_arg (p, e)
+in
+  (dd_p3at p3; dd_ps " <- "; dd_p2at p; dd_nl (); g3_dvs p; g3_p3dv p3; g3_end ())
+end
+fun g3_trdn_arglst (loc: location, npf: int, ps: p2atlst, es: s2explst): void = let
+  var serr: int = 0
+  val p3s = p2atlst_trdn_arg (loc, npf, ps, es, serr)
+in
+  (dd_p3atlst p3s; dd_ps " serr="; dd_int serr; dd_ps " <- "; dd_p2atlst ps; dd_nl (); g3_dvslst ps; g3_p3dv_lst p3s; g3_end ())
+end
+fun g3_trdn (p: p2at, e: s2exp): void = let
+  val p3 = p2at_trdn (p, e)
+in
+  (dd_p3at p3; dd_ps " <- "; dd_p2at p; dd_nl (); g3_dvs p; g3_p3dv p3; g3_end ())
+end
+fun g3_trdnlst (loc: location, ps: p2atlst, es: s2explst): void = let
+  var serr: int = 0
+  val p3s = p2atlst_trdn (loc, ps, es, serr)
+in
+  (dd_p3atlst p3s; dd_ps " serr="; dd_int serr; dd_ps " <- "; dd_p2atlst ps; dd_nl (); g3_dvslst ps; g3_p3dv_lst p3s; g3_end ())
+end
+fun g3_guard (loc: location, b: bool, e: s2exp): void = (guard_trdn (loc, b, e); g3_end ())
+//
+// pats_trans3_selab
+//
+fun g3_d2lab (d2l: d2lab): void = let
+  val d3l = d2lab_trup (d2l)
+in
+  (dd_d3lab d3l; dd_nl (); g3_end ())
+end
+fun g3_d2lablst (d2ls: d2lablst): void = let
+  val d3ls = d2lablst_trup (d2ls)
+in
+  (dd_d3lablst d3ls; dd_nl (); g3_end ())
+end
+fun g3_linrest (loc: location, e: s2exp, d3ls: d3lablst): void = let
+  var linrest: int = 0
+  var sharing: int = 0
+  val <<(e1, ps) = s2exp_get_dlablst_linrest_sharing (loc, e, d3ls, linrest, sharing)
+in
+  (dd_s2exp e1; dd_ps " "; dd_listvt_s2exp ps; dd_ps " linrest="; dd_int linrest; dd_ps " sharing="; dd_int sharing; dd_nl (); g3_end ())
+end
+2|fun g3_dd_ctxopt (x: s2ctxtopt, probe: s2exp): void =
+2|  case+ gopt_view (x) of
+2|  | ~GOsome (c) => (dd_ps "Some("; dd_s2exp (s2ctxt_hrepl (c, probe)); dd_ps ")")
+2|  | ~GOnone () => dd_ps "None"
+1|fun g3_dd_ctxopt (x: s2ctxtopt, probe: s2exp): void =
+1|  case+ x of
+1|  | Some (c) => (dd_ps "Some("; dd_s2exp (s2ctxt_hrepl (c, probe)); dd_ps ")")
+1|  | None () => dd_ps "None"
+fun g3_context (loc: location, e: s2exp, d3ls: d3lablst): void = let
+  var ctx: s2ctxtopt = ON_s2ctxtopt ()
+  val e1 = s2exp_get_dlablst_context (loc, e, d3ls, ctx)
+in
+  (dd_s2exp e1; dd_ps " "; g3_dd_ctxopt (ctx, s2exp_int (999)); dd_nl (); g3_end ())
+end
+fun g3_context_check (loc: location, e: s2exp, d3ls: d3lablst): void = let
+  var ctx: s2ctxtopt = ON_s2ctxtopt ()
+  val <<(e1, ps) = s2exp_get_dlablst_context_check (loc, e, d3ls, ctx)
+in
+  (dd_s2exp e1; dd_ps " "; dd_listvt_s2exp ps; dd_ps " "; g3_dd_ctxopt (ctx, s2exp_int (999)); dd_nl (); g3_end ())
+end
+fun g3_selab (loc: location, d2rt: d2exp, d2ls: d2lablst): void = let
+  val d3e = d2exp_trup_selab (loc, d2rt, d2ls)
+in
+  (dd_d3exp d3e; dd_nl (); g3_end ())
+end
+//
+// pats_trans3_fldfrat
+//
+fun g3_foldat (d2e: d2exp): void = let
+  val d3e = d2exp_trup_foldat (d2e)
+in
+  (dd_d3exp d3e; dd_nl (); g3_end ())
+end
+fun g3_freeat (d2e: d2exp): void = let
+  val d3e = d2exp_trup_freeat (d2e)
+in
+  (dd_d3exp d3e; dd_nl (); g3_end ())
+end
+//
+// pats_trans3_lvalres
+//
+fun g3_exch (loc: location, s2l: s2exp, d3ls: d3lablst, e: s2exp): void = let
+  val e1 = s2addr_exch_type (loc, s2l, d3ls, e)
+in
+  (dd_s2exp e1; dd_nl (); g3_end ())
+end
+fun g3_set_type (refval: int, d3e: d3exp, e: s2exp): void = let
+  var err: int = 0
+  val () = d3lval_set_type_err (refval, d3e, e, err)
+in
+  (dd_ps "err="; dd_int err; dd_ps " "; dd_d3exp d3e; dd_nl (); g3_end ())
+end
+fun g3_pat_left (d3e: d3exp, p3t: p3at): void = (d3lval_set_pat_type_left (d3e, p3t); dd_d3exp d3e; dd_nl (); g3_end ())
+fun g3_patlst_left (d3es: d3explst, p3ts: p3atlst): void = (d3lvalist_set_pat_type_left (d3es, p3ts); dd_d3explst d3es; dd_nl (); g3_end ())
+fun g3_arg_set_type (refval: int, d3e: d3exp, e: s2exp): void = let
+  val k = d3lval_arg_set_type (refval, d3e, e)
+in
+  (dd_ps "freeknd="; dd_int k; dd_ps " "; dd_d3exp d3e; dd_nl (); g3_end ())
+end
+fun g3_fun_restore (fc: funclo, d3e: d3exp): void = let
+  val d3e1 = d3exp_fun_restore (fc, d3e)
+in
+  (dd_d3exp d3e1; dd_ps " <- "; dd_d3exp d3e; dd_nl (); g3_end ())
+end
+fun g3_arg_restore (d3es: d3explst, es: s2explst, ws: wths2explst): void = let
+  val d3es1 = d3explst_arg_restore (d3es, es, ws)
+in
+  (dd_d3explst d3es1; dd_ps " <- "; dd_d3explst d3es; dd_nl (); g3_end ())
+end

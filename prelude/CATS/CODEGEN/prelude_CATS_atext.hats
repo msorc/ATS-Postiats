@@ -11,8 +11,6 @@
 (* ****** ****** *)
 //
 staload
-_(*anon*) = "prelude/DATS/list.dats"
-staload
 _(*anon*) = "prelude/DATS/list_vt.dats"
 //
 (* ****** ****** *)
@@ -292,47 +290,47 @@ g0int_implist
   (tnm: string): atext = let
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fun_neg_decl(tnm), res)
-val () = res := list_cons(fun_abs_decl(tnm), res)
+val () = res := glist_cons(fun_neg_decl(tnm), res)
+val () = res := glist_cons(fun_abs_decl(tnm), res)
 //
-val () = res := list_cons(fun_succ_decl(tnm), res)
-val () = res := list_cons(fun_pred_decl(tnm), res)
+val () = res := glist_cons(fun_succ_decl(tnm), res)
+val () = res := glist_cons(fun_pred_decl(tnm), res)
 //
-val () = res := list_cons(fun_half_decl(tnm), res)
+val () = res := glist_cons(fun_half_decl(tnm), res)
 //
-val () = res := list_cons(fun_aop_decl("add", tnm), res)
-val () = res := list_cons(fun_aop_decl("sub", tnm), res)
-val () = res := list_cons(fun_aop_decl("mul", tnm), res)
-val () = res := list_cons(fun_aop_decl("div", tnm), res)
-val () = res := list_cons(fun_aop_decl("mod", tnm), res)
-val () = res := list_cons(fun_aop_decl("nmod", tnm), res)
+val () = res := glist_cons(fun_aop_decl("add", tnm), res)
+val () = res := glist_cons(fun_aop_decl("sub", tnm), res)
+val () = res := glist_cons(fun_aop_decl("mul", tnm), res)
+val () = res := glist_cons(fun_aop_decl("div", tnm), res)
+val () = res := glist_cons(fun_aop_decl("mod", tnm), res)
+val () = res := glist_cons(fun_aop_decl("nmod", tnm), res)
 //
-val () = res := list_cons(fun_asx_decl("asl", tnm), res)
-val () = res := list_cons(fun_asx_decl("asr", tnm), res)
+val () = res := glist_cons(fun_asx_decl("asl", tnm), res)
+val () = res := glist_cons(fun_asx_decl("asr", tnm), res)
 //
-val () = res := list_cons(fun_cmp_decl("lt", tnm), res)
-val () = res := list_cons(fun_cmp_decl("lte", tnm), res)
-val () = res := list_cons(fun_cmp_decl("gt", tnm), res)
-val () = res := list_cons(fun_cmp_decl("gte", tnm), res)
-val () = res := list_cons(fun_cmp_decl("eq", tnm), res)
-val () = res := list_cons(fun_cmp_decl("neq", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("lt", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("lte", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("gt", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("gte", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("eq", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("neq", tnm), res)
 //
-val () = res := list_cons(fun_compare_decl(tnm), res)
+val () = res := glist_cons(fun_compare_decl(tnm), res)
 //
-val () = res := list_cons(fun_mxmn_decl("max", tnm), res)
-val () = res := list_cons(fun_mxmn_decl("min", tnm), res)
+val () = res := glist_cons(fun_mxmn_decl("max", tnm), res)
+val () = res := glist_cons(fun_mxmn_decl("min", tnm), res)
 //
-val () = res := list_cons(fun_cmpz_decl("isltz", tnm), res)
-val () = res := list_cons(fun_cmpz_decl("isltez", tnm), res)
-val () = res := list_cons(fun_cmpz_decl("isgtz", tnm), res)
-val () = res := list_cons(fun_cmpz_decl("isgtez", tnm), res)
-val () = res := list_cons(fun_cmpz_decl("iseqz", tnm), res)
-val () = res := list_cons(fun_cmpz_decl("isneqz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isltz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isltez", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isgtz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isgtez", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("iseqz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isneqz", tnm), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0int_implist]
 
 fun
@@ -356,45 +354,45 @@ in
 end // end of [fun_g1int_decl]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr_decl("abs", tnm), res)
-val () = res := list_cons(fopr_decl("neg", tnm), res)
+val () = res := glist_cons(fopr_decl("abs", tnm), res)
+val () = res := glist_cons(fopr_decl("neg", tnm), res)
 //
-val () = res := list_cons(fopr_decl("succ", tnm), res)
-val () = res := list_cons(fopr_decl("pred", tnm), res)
-val () = res := list_cons(fopr_decl("half", tnm), res)
+val () = res := glist_cons(fopr_decl("succ", tnm), res)
+val () = res := glist_cons(fopr_decl("pred", tnm), res)
+val () = res := glist_cons(fopr_decl("half", tnm), res)
 //
-val () = res := list_cons(fopr_decl("add", tnm), res)
-val () = res := list_cons(fopr_decl("sub", tnm), res)
-val () = res := list_cons(fopr_decl("mul", tnm), res)
-val () = res := list_cons(fopr_decl("div", tnm), res)
+val () = res := glist_cons(fopr_decl("add", tnm), res)
+val () = res := glist_cons(fopr_decl("sub", tnm), res)
+val () = res := glist_cons(fopr_decl("mul", tnm), res)
+val () = res := glist_cons(fopr_decl("div", tnm), res)
 (*
 val () =
-res := list_cons(fopr_decl("mod", tnm), res) // HX: skipped
+res := glist_cons(fopr_decl("mod", tnm), res) // HX: skipped
 *)
-val () = res := list_cons(fopr_decl("nmod", tnm), res)
+val () = res := glist_cons(fopr_decl("nmod", tnm), res)
 //
-val () = res := list_cons(fopr_decl("lt", tnm), res)
-val () = res := list_cons(fopr_decl("lte", tnm), res)
-val () = res := list_cons(fopr_decl("gt", tnm), res)
-val () = res := list_cons(fopr_decl("gte", tnm), res)
-val () = res := list_cons(fopr_decl("eq", tnm), res)
-val () = res := list_cons(fopr_decl("neq", tnm), res)
-val () = res := list_cons(fopr_decl("compare", tnm), res)
+val () = res := glist_cons(fopr_decl("lt", tnm), res)
+val () = res := glist_cons(fopr_decl("lte", tnm), res)
+val () = res := glist_cons(fopr_decl("gt", tnm), res)
+val () = res := glist_cons(fopr_decl("gte", tnm), res)
+val () = res := glist_cons(fopr_decl("eq", tnm), res)
+val () = res := glist_cons(fopr_decl("neq", tnm), res)
+val () = res := glist_cons(fopr_decl("compare", tnm), res)
 //
-val () = res := list_cons(fopr_decl("max", tnm), res)
-val () = res := list_cons(fopr_decl("min", tnm), res)
+val () = res := glist_cons(fopr_decl("max", tnm), res)
+val () = res := glist_cons(fopr_decl("min", tnm), res)
 //
-val () = res := list_cons(fopr_decl("isltz", tnm), res)
-val () = res := list_cons(fopr_decl("isltez", tnm), res)
-val () = res := list_cons(fopr_decl("isgtz", tnm), res)
-val () = res := list_cons(fopr_decl("isgtez", tnm), res)
-val () = res := list_cons(fopr_decl("iseqz", tnm), res)
-val () = res := list_cons(fopr_decl("isneqz", tnm), res)
+val () = res := glist_cons(fopr_decl("isltz", tnm), res)
+val () = res := glist_cons(fopr_decl("isltez", tnm), res)
+val () = res := glist_cons(fopr_decl("isgtz", tnm), res)
+val () = res := glist_cons(fopr_decl("isgtez", tnm), res)
+val () = res := glist_cons(fopr_decl("iseqz", tnm), res)
+val () = res := glist_cons(fopr_decl("isneqz", tnm), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g1int_implist]
 
 end // end of [local] // for g0int_implist and g1int_implist
@@ -677,53 +675,53 @@ in (* in of [local] *)
 fun g0uint_implist
   (tnm: string): atext = let
 //
-var res: atextlst = list_nil
+var res: atextlst = glist_nil()
 //
-val () = res := list_cons(fun_succ_decl(tnm), res)
-val () = res := list_cons(fun_pred_decl(tnm), res)
+val () = res := glist_cons(fun_succ_decl(tnm), res)
+val () = res := glist_cons(fun_pred_decl(tnm), res)
 //
-val () = res := list_cons(fun_half_decl(tnm), res)
+val () = res := glist_cons(fun_half_decl(tnm), res)
 //
-val () = res := list_cons(fun_aop_decl("add", tnm), res)
-val () = res := list_cons(fun_aop_decl("sub", tnm), res)
-val () = res := list_cons(fun_aop_decl("mul", tnm), res)
-val () = res := list_cons(fun_aop_decl("div", tnm), res)
-val () = res := list_cons(fun_aop_decl("mod", tnm), res)
+val () = res := glist_cons(fun_aop_decl("add", tnm), res)
+val () = res := glist_cons(fun_aop_decl("sub", tnm), res)
+val () = res := glist_cons(fun_aop_decl("mul", tnm), res)
+val () = res := glist_cons(fun_aop_decl("div", tnm), res)
+val () = res := glist_cons(fun_aop_decl("mod", tnm), res)
 //
-val () = res := list_cons(fun_lsx_decl("lsl", tnm), res)
-val () = res := list_cons(fun_lsx_decl("lsr", tnm), res)
+val () = res := glist_cons(fun_lsx_decl("lsl", tnm), res)
+val () = res := glist_cons(fun_lsx_decl("lsr", tnm), res)
 //
-val () = res := list_cons(fun_lnot_decl(tnm), res)
-val () = res := list_cons(fun_bitop_decl("lor", tnm), res)
-val () = res := list_cons(fun_bitop_decl("land", tnm), res)
-val () = res := list_cons(fun_bitop_decl("lxor", tnm), res)
+val () = res := glist_cons(fun_lnot_decl(tnm), res)
+val () = res := glist_cons(fun_bitop_decl("lor", tnm), res)
+val () = res := glist_cons(fun_bitop_decl("land", tnm), res)
+val () = res := glist_cons(fun_bitop_decl("lxor", tnm), res)
 //
-val () = res := list_cons(fun_cmp_decl("lt", tnm), res)
-val () = res := list_cons(fun_cmp_decl("lte", tnm), res)
-val () = res := list_cons(fun_cmp_decl("gt", tnm), res)
-val () = res := list_cons(fun_cmp_decl("gte", tnm), res)
-val () = res := list_cons(fun_cmp_decl("eq", tnm), res)
-val () = res := list_cons(fun_cmp_decl("neq", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("lt", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("lte", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("gt", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("gte", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("eq", tnm), res)
+val () = res := glist_cons(fun_cmp_decl("neq", tnm), res)
 //
-val () = res := list_cons(fun_compare_decl(tnm), res)
+val () = res := glist_cons(fun_compare_decl(tnm), res)
 //
-val () = res := list_cons(fun_mxmn_decl("max", tnm), res)
-val () = res := list_cons(fun_mxmn_decl("min", tnm), res)
+val () = res := glist_cons(fun_mxmn_decl("max", tnm), res)
+val () = res := glist_cons(fun_mxmn_decl("min", tnm), res)
 //
 (*
-val () = res := list_cons(fun_cmpz_decl("isltz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isltz", tnm), res)
 *)
-val () = res := list_cons(fun_cmpz_decl("isltez", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isltez", tnm), res)
 //
-val () = res := list_cons(fun_cmpz_decl("isgtz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isgtz", tnm), res)
 (*
-val () = res := list_cons(fun_cmpz_decl("isgtez", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isgtez", tnm), res)
 *)
-val () = res := list_cons(fun_cmpz_decl("iseqz", tnm), res)
-val () = res := list_cons(fun_cmpz_decl("isneqz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("iseqz", tnm), res)
+val () = res := glist_cons(fun_cmpz_decl("isneqz", tnm), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0uint_implist]
 
 fun
@@ -747,47 +745,47 @@ in
 end // end of [fun_g1uint_decl]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr_decl("succ", tnm), res)
-val () = res := list_cons(fopr_decl("pred", tnm), res)
-val () = res := list_cons(fopr_decl("half", tnm), res)
+val () = res := glist_cons(fopr_decl("succ", tnm), res)
+val () = res := glist_cons(fopr_decl("pred", tnm), res)
+val () = res := glist_cons(fopr_decl("half", tnm), res)
 //
-val () = res := list_cons(fopr_decl("add", tnm), res)
-val () = res := list_cons(fopr_decl("sub", tnm), res)
-val () = res := list_cons(fopr_decl("mul", tnm), res)
-val () = res := list_cons(fopr_decl("div", tnm), res)
-val () = res := list_cons(fopr_decl("mod", tnm), res)
+val () = res := glist_cons(fopr_decl("add", tnm), res)
+val () = res := glist_cons(fopr_decl("sub", tnm), res)
+val () = res := glist_cons(fopr_decl("mul", tnm), res)
+val () = res := glist_cons(fopr_decl("div", tnm), res)
+val () = res := glist_cons(fopr_decl("mod", tnm), res)
 //
 (*
 val () =
-res := list_cons(fopr_decl("nmod", tnm), res) // HX: skipped
+res := glist_cons(fopr_decl("nmod", tnm), res) // HX: skipped
 *)
 //
-val () = res := list_cons(fopr_decl("lt", tnm), res)
-val () = res := list_cons(fopr_decl("lte", tnm), res)
-val () = res := list_cons(fopr_decl("gt", tnm), res)
-val () = res := list_cons(fopr_decl("gte", tnm), res)
-val () = res := list_cons(fopr_decl("eq", tnm), res)
-val () = res := list_cons(fopr_decl("neq", tnm), res)
-val () = res := list_cons(fopr_decl("compare", tnm), res)
+val () = res := glist_cons(fopr_decl("lt", tnm), res)
+val () = res := glist_cons(fopr_decl("lte", tnm), res)
+val () = res := glist_cons(fopr_decl("gt", tnm), res)
+val () = res := glist_cons(fopr_decl("gte", tnm), res)
+val () = res := glist_cons(fopr_decl("eq", tnm), res)
+val () = res := glist_cons(fopr_decl("neq", tnm), res)
+val () = res := glist_cons(fopr_decl("compare", tnm), res)
 //
-val () = res := list_cons(fopr_decl("max", tnm), res)
-val () = res := list_cons(fopr_decl("min", tnm), res)
+val () = res := glist_cons(fopr_decl("max", tnm), res)
+val () = res := glist_cons(fopr_decl("min", tnm), res)
 //
 (*
-val () = res := list_cons(fopr_decl("isltz", tnm), res)
+val () = res := glist_cons(fopr_decl("isltz", tnm), res)
 *)
-val () = res := list_cons(fopr_decl("isltez", tnm), res)
-val () = res := list_cons(fopr_decl("isgtz", tnm), res)
+val () = res := glist_cons(fopr_decl("isltez", tnm), res)
+val () = res := glist_cons(fopr_decl("isgtz", tnm), res)
 (*
-val () = res := list_cons(fopr_decl("isgtez", tnm), res)
+val () = res := glist_cons(fopr_decl("isgtez", tnm), res)
 *)
-val () = res := list_cons(fopr_decl("iseqz", tnm), res)
-val () = res := list_cons(fopr_decl("isneqz", tnm), res)
+val () = res := glist_cons(fopr_decl("iseqz", tnm), res)
+val () = res := glist_cons(fopr_decl("isneqz", tnm), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g1uint_implist]
 
 end // end of [local] // for g0uint_implist and g1uint_implist

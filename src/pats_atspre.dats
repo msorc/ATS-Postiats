@@ -32,19 +32,29 @@
 // Start Time: August, 2013
 //
 (* ****** ****** *)
+//
+// HX-2026-10: port of src/pats_atspre.dats. The ATS1 file includes the
+// implementations of the ATS1 prelude (pointer, reference, list, list_vt,
+// array, option, option_vt) so that the compiler can staload them as
+// $ATSPRE. The same includes are kept, but only for the ATS2 prelude
+// files that still exist: DATS/list.dats and DATS/option.dats are gone
+// (no-GC prelude, see CLAUDE.md). Nothing of src loads this file (every
+// module starts with #include "share/atspre_staload.hats"); it is kept as
+// a standalone check that the implementations compile (Makefile: check).
+//
+#include "share/atspre_staload.hats"
+//
+(* ****** ****** *)
 
 #include "prelude/DATS/pointer.dats"
 #include "prelude/DATS/reference.dats"
 
 (* ****** ****** *)
 
-#include "prelude/DATS/list.dats"
 #include "prelude/DATS/list_vt.dats"
 #include "prelude/DATS/array.dats"
-#include "prelude/DATS/option.dats"
 #include "prelude/DATS/option_vt.dats"
 
 (* ****** ****** *)
 
 (* end of [pats_atspre.dats] *)
-

@@ -21,14 +21,8 @@ all_in_one::
 ######
 
 all:: ; \
-$(PATSOPT) -d ./DATS/list.dats | \
-$(ATSCC2PL) -o ./output/DATS/list_dats.pl -i
-all:: ; \
-$(PATSOPT) -d ./DATS/option.dats | \
-$(ATSCC2PL) -o ./output/DATS/option_dats.pl -i
-all:: ; \
-$(PATSOPT) -d ./DATS/stream.dats | \
-$(ATSCC2PL) -o ./output/DATS/stream_dats.pl -i
+$(PATSOPT) -d ./DATS/list_vt.dats | \
+$(ATSCC2PL) -o ./output/DATS/list_vt_dats.pl -i
 all:: ; \
 $(PATSOPT) -d ./DATS/stream_vt.dats | \
 $(ATSCC2PL) -o ./output/DATS/stream_vt_dats.pl -i
@@ -42,9 +36,6 @@ $(ATSCC2PL) -o ./output/DATS/reference_dats.pl -i
 ######
 #
 all:: ; \
-$(PATSOPT) -d ./DATS/funarray.dats | \
-$(ATSCC2PL) -o ./output/DATS/funarray_dats.pl -i
-all:: ; \
 $(PATSOPT) -d ./DATS/slistref.dats | \
 $(ATSCC2PL) -o ./output/DATS/slistref_dats.pl -i
 all:: ; \
@@ -53,15 +44,6 @@ $(ATSCC2PL) -o ./output/DATS/qlistref_dats.pl -i
 #
 ######
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/list0.dats | \
-$(ATSCC2PL) -o ./output/DATS/ML/list0_dats.pl -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/array0.dats | \
-$(ATSCC2PL) -o ./output/DATS/ML/array0_dats.pl -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/option0.dats | \
-$(ATSCC2PL) -o ./output/DATS/ML/option0_dats.pl -i
 #
 ######
 #
@@ -113,18 +95,12 @@ CATS/PLarray_cats.pl \
 
 libatscc2pl_all:: ; \
 $(CAT) >>$(LIBATSCC2PL_ALL_PL) \
-output/DATS/list_dats.pl \
-output/DATS/option_dats.pl \
-output/DATS/stream_dats.pl \
+output/DATS/list_vt_dats.pl \
 output/DATS/stream_vt_dats.pl \
 output/DATS/intrange_dats.pl \
 output/DATS/reference_dats.pl \
-output/DATS/funarray_dats.pl \
 output/DATS/slistref_dats.pl \
 output/DATS/qlistref_dats.pl \
-output/DATS/ML/list0_dats.pl \
-output/DATS/ML/array0_dats.pl \
-output/DATS/ML/option0_dats.pl \
 
 ######
 #
@@ -143,7 +119,6 @@ clean:: ; $(RMF) *~ */*~
 
 cleanall:: clean
 cleanall:: ; $(RMF) output/DATS/*_dats.pl
-cleanall:: ; $(RMF) output/DATS/ML/*_dats.pl
 cleanall:: ; $(RMF) $(LIBATSCC2PL_ALL_PL)
 
 ######

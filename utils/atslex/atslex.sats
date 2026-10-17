@@ -4,8 +4,13 @@
 
 (* ****** ****** *)
 
-abstype charset_type = ptr
-typedef charset = charset_type
+//
+// HX-2026-10: no GC
+// a charset is a flat bitmap (256 bits): no heap
+// allocation is involved in any of the operations
+//
+abst@ype charset_t0ype = @(uint64, uint64, uint64, uint64)
+typedef charset = charset_t0ype
 
 (* ****** ****** *)
 //

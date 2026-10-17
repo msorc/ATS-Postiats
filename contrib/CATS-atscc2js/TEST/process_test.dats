@@ -26,9 +26,9 @@ staload
 "{$LIBATSCC2JS}/SATS/print.sats"
 //
 staload
-"{$LIBATSCC2JS}/SATS/Node.js/basics.sats"
+"{$LIBATSCC2JS}/Node.js/SATS/basics.sats"
 staload
-"{$LIBATSCC2JS}/SATS/Node.js/process.sats"
+"{$LIBATSCC2JS}/Node.js/SATS/process.sats"
 //
 (* ****** ****** *)
 //

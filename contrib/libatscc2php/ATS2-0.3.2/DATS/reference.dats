@@ -52,4 +52,11 @@ end // end of [ref_set_elt]
 
 (* ****** ****** *)
 
+implement
+ref_exch_elt{a}(r, x) = let
+  val r = $UN.cast{PHPref(a)}(r) in PHPref_exch_elt(r, x)
+end // end of [ref_exch_elt]
+
+(* ****** ****** *)
+
 (* end of [reference.dats] *)

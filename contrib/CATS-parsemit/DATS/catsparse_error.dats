@@ -19,6 +19,8 @@ staload UN = $UNSAFE
 
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload
 "./../SATS/catsparse.sats"
 staload

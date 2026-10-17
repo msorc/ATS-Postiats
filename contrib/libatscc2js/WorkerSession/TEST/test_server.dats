@@ -55,21 +55,21 @@ $CHANNEL.chanpos1_recv
 (
 chp
 ,
-lam(chp, _) => let
+llam(chp, _) => let
   val a1 = double2int(100*JSmath_random())
   val a2 = double2int(100*JSmath_random())
 in
   $CHANNEL.chanpos1_send
   ( chp, a1
-  , lam(chp) =>
+  , llam(chp) =>
     $CHANNEL.chanpos1_send
     ( chp, a2
-    , lam(chp) =>
+    , llam(chp) =>
       $CHANNEL.chanpos1_recv
       ( chp
-      , lam(chp, res) =>
+      , llam(chp, res) =>
         $CHANNEL.chanpos1_send
-        ( chp, ($CHANNEL.chmsg_parse(res) = a1 * a2), lam(chp) => $CHANNEL.chanpos1_close(chp))
+        ( chp, ($CHANNEL.chmsg_parse(res) = a1 * a2), llam(chp) => $CHANNEL.chanpos1_close(chp))
       )
     )
   )

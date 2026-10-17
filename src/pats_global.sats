@@ -33,15 +33,13 @@
 //
 (* ****** ****** *)
 //
-(*
+// HX-2026-10: no GC (ATS2 port of src/pats_global.sats). The flags are
+// cells of the global arena; [List] is [glist].
 //
-// HX-2017-05-26:
-// This is likely to be a
-// very poor design!!!
-fun
-patsopt_global_initset(): void
-*)
-//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
 (* ****** ****** *)
 
 fun the_PACKNAME_get(): Stropt
@@ -57,22 +55,13 @@ fun the_ATSRELOC_get_decl(): ptr
 fun the_ATSRELOC_set_decl(d0c: ptr): void
 
 (* ****** ****** *)
-(*
-//
-// HX-2014-06-06:
-// [STALOADFLAG] is no longer in use
-//
-fun the_STALOADFLAG_get (): int
-fun the_STALOADFLAG_set (flag: int): void
-*)
-(* ****** ****** *)
 
 fun the_DYNLOADFLAG_get(): int
 fun the_DYNLOADFLAG_set(flag: int): void
 
 (* ****** ****** *)
 
-fun the_DYNLOADNAME_get(): stropt
+fun the_DYNLOADNAME_get(): Stropt
 fun the_DYNLOADNAME_set_none((*void*)): void
 fun the_DYNLOADNAME_set_name(name: string): void
 
@@ -83,32 +72,18 @@ fun the_MAINATSFLAG_set(flag: int): void
 
 (* ****** ****** *)
 
-fun the_STATIC_PREFIX_get(): stropt
+fun the_STATIC_PREFIX_get(): Stropt
 fun the_STATIC_PREFIX_set_none((*void*)): void
 fun the_STATIC_PREFIX_set_name(name: string): void
 
 (* ****** ****** *)
 //
-fun the_IATS_dirlst_get (): List (string)
+fun the_IATS_dirlst_get (): glist(string)
 //
 // HX: ppush: permanent push
 //
-fun the_IATS_dirlst_ppush(dir: string):<!ref> void
+fun the_IATS_dirlst_ppush(dir: string): void
 //
-(*
-// HX: ppushb: permanent push from back
-fun the_IATS_dirlst_ppushb (dir: string):<!ref> void
-*)
-//
-(* ****** ****** *)
-(*
-//
-// HX-2017-02-02:
-// --assume-check=0
-fun the_ASSUME_check_get(): int
-fun the_ASSUME_check_set(flag: int): void
-//
-*)
 (* ****** ****** *)
 //
 fun the_DEBUGATS_dbgflag_get(): int

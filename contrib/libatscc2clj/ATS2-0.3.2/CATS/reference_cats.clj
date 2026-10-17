@@ -31,6 +31,11 @@
 (defmacro
  ats2cljpre_ref_set_elt[r x0] `(reset! ~r ~x0)
 )
+;; HX-2026-10: for linear contents
+(defmacro
+ ats2cljpre_ref_exch_elt[r x0]
+`(let [x1# (deref ~r)] (reset! ~r ~x0) x1#)
+)
 ;;
 ;; ****** ****** ;;
 

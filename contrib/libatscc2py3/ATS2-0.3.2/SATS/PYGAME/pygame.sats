@@ -18,9 +18,9 @@ ATS_EXTERN_PREFIX "ats2py_pygame_"
 
 (* ****** ****** *)
 
-typedef int2 = $tup(int, int)
-typedef int3 = $tup(int, int, int)
-typedef int4 = $tup(int, int, int, int)
+typedef int2 = @(int, int)
+typedef int3 = @(int, int, int)
+typedef int4 = @(int, int, int, int)
 
 (* ****** ****** *)
 
@@ -54,7 +54,7 @@ fun
 pygame_init_ret
 (
 // argumentless
-) : $tup(int(*npass*), int(*nfail*)) = "mac#%"
+) : @(int(*npass*), int(*nfail*)) = "mac#%"
 //
 (* ****** ****** *)
 

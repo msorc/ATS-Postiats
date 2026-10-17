@@ -14,6 +14,9 @@ INTSET =
 _(*INTSET*) =
 "./DATS/basis_intset.dats"
 //
+// HX-2026-10: intsets are in the global arena
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 #staload

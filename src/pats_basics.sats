@@ -40,7 +40,8 @@ fprint_vtype(a:viewt@ype) = (FILEref, !a) -> void
 
 (* ****** ****** *)
 
-val VIEWT0YPE_knd : int // = VIEWT0YPE_int
+fun VIEWT0YPE_knd_get ((*void*)): int = "ext#patsopt_VIEWT0YPE_knd_get"
+macdef VIEWT0YPE_knd = VIEWT0YPE_knd_get()
 
 (* ****** ****** *)
 
@@ -131,12 +132,12 @@ fun valkind2caskind (knd: valkind): caskind
 
 datatype
 dcstkind =
-  | DCKfun of ()
-  | DCKval of ()
-  | DCKpraxi of ()
-  | DCKprfun of ()
-  | DCKprval of ()
-  | DCKcastfn of ()
+  | DCKfun
+  | DCKval
+  | DCKpraxi
+  | DCKprfun
+  | DCKprval
+  | DCKcastfn
 // end of [dcstkind]
 
 fun dcstkind_is_fun (dck: dcstkind):<> bool
@@ -160,17 +161,19 @@ funclo =
 // function or closure
 //
   | FUNCLOfun (* function *)
-  | FUNCLOclo of int (*knd*) // closure: knd=1/0/~1: ptr/clo/ref
+  | FUNCLOcloptr (* closure: knd=1 *)
+  | FUNCLOclo0 (* closure: knd=0 *)
+  | FUNCLOcloref (* closure: knd=~1 *)
+//
+fun FUNCLOclo (knd: int): funclo // knd=1/0/~1: ptr/clo/ref
+fun funclo_get_clokind (fc: funclo): int // 1/0/~1, or 0 for FUNCLOfun
 //
 (* ****** ****** *)
 //
-typedef fcopt = Option (funclo)
+vtypedef fcopt = Option_vt (funclo)
 vtypedef fcopt_vt = Option_vt (funclo)
 //
 (* ****** ****** *)
-
-macdef FUNCLOcloptr = FUNCLOclo (CLOPTR)
-macdef FUNCLOcloref = FUNCLOclo (CLOREF)
 
 (* ****** ****** *)
 
@@ -200,14 +203,13 @@ debug_flag_set
 //
 fun
 prerrf_ifdebug
-  {ts:types}
 (
-  fmt: printf_c ts, arg: ts
-) : void = "patsopt_prerrf_ifdebug"
+  fmt: string, loc: string, msg: string
+) : void = "ext#patsopt_prerrf_ifdebug"
 //
 macdef
 filprerr_ifdebug (x) =
-  prerrf_ifdebug (": [%s]: %s", @(#FILENAME, ,(x)))
+  prerrf_ifdebug (": [%s]: %s", $mylocation, ,(x))
 //
 (* ****** ****** *)
 //

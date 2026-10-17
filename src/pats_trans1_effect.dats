@@ -32,12 +32,30 @@
 // Start Time: April, 2011
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_trans1_effect.dats)
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
 
 staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
 staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
@@ -87,10 +105,6 @@ fn name_is_lazy (name: string): bool = name = "laz"
 
 (* ****** ****** *)
 
-val effvars_nil: effvarlst = list_nil ()
-
-(* ****** ****** *)
-
 local
 
 fun
@@ -101,135 +115,132 @@ loop_err
 {
 //
   val () =
-  prerr_error1_loc (tag.e0fftag_loc)
+  prerr_error1_loc (tag.e0fftag_loc ())
   val () =
   prerrln! (": unrecognized effect constant: [", name, "]")
 //
-  val () = $ERR.abort_interr ((*reachable*))
+  val () = $ERR.abort_interr<void> ((*reachable*))
 //
 } (* end of [loop_err] *)
 
+//
+// HX: [fcopt] is linear: the old content is consumed before the update
+//
+fn fcopt_set
+  (fcopt: &fcopt >> _, fc: funclo): void = let
+  val () = (
+    case+ fcopt of ~Some_vt _ => () | ~None_vt () => ()
+  ) : void // end of [val]
+in
+  fcopt := Some_vt (fc)
+end // end of [fcopt_set]
+
 fun loop
 (
-  fcopt: &fcopt
+  fcopt: &fcopt >> _
 , lin: &int, prf: &int
 , efs: &effset, evs: &effvarlst
 , tags: e0fftaglst
 ) : void = let
 in
 //
-case+ tags of
-| list_cons (tag, tags) => let
-    val () = case+ tag.e0fftag_node of
+case+ glist_view (tags) of
+| ~GLcons (tag, tags) => let
+    val () = (case+ e0fftag_node_view (tag.e0fftag_node ()) of
 //
-    | E0FFTAGvar ev => evs := list_cons (ev, evs)
+    | ~E0FFTAGvar ev => evs := glist_cons (ev, evs)
 //
-    | E0FFTAGint (int) =>
+    | ~E0FFTAGint (int) =>
       {
-        val () = evs := effvars_nil
+        val () = evs := glist_nil ()
         val () = if int = 0 then efs := effset_nil
         val () = if int = 1 then efs := effset_all
       } // end of [E0FFTAGint]
 //
-    | E0FFTAGcst (isneg, name)
-        when name_is_all name =>
-      {
-        val () = evs := effvars_nil
-        val () = if isneg > 0 then efs := effset_nil else efs := effset_all
-      } // end of [E0FFTAGcst when ...]
-    | E0FFTAGcst (isneg, name)
-        when name_is_nil name =>
-      {
-        val () = evs := effvars_nil
-        val () = if isneg > 0 then efs := effset_all else efs := effset_nil
-      } // end of [E0FFTAGcst when ...]
-    | E0FFTAGcst (isneg, name)
-        when name_is_lazy name =>
-      {
-        val () = evs := effvars_nil
-        val () = if isneg > 0 then
-          efs := effset_add (effset_nil, effect_ref) // HX: nonsensical
-        val () = if isneg = 0 then
-          efs := effset_del (effset_all, effect_ref) // HX: !laz = 1,~ref
-      } // end of [E0FFTAGcst when ...]
-//
-    | E0FFTAGcst (isneg, name) =>
+    | ~E0FFTAGcst (isneg, name) =>
       (
-        case+ 0 of
-        | _ when name_is_ntm name => {
-            val () = if isneg > 0 then efs := effset_del (efs, effect_ntm)
-            val () = if isneg = 0 then efs := effset_add (efs, effect_ntm)
-          } // end of [_ when ...]
-        | _ when name_is_exn name => {
-            val () = if isneg > 0 then efs := effset_del (efs, effect_exn)
-            val () = if isneg = 0 then efs := effset_add (efs, effect_exn)
-          } // end of [_ when ...]
-        | _ when name_is_ref name => {
-            val () = if isneg > 0 then efs := effset_del (efs, effect_ref)
-            val () = if isneg = 0 then efs := effset_add (efs, effect_ref)
-          } // end of [_ when ...]
-        | _ when name_is_wrt name => {
-            val () = if isneg > 0 then efs := effset_del (efs, effect_wrt)
-            val () = if isneg = 0 then efs := effset_add (efs, effect_wrt)
-          } // end of [_ when ...]
-//
-        | _ when name_is_exnref name => {
-            val () = if isneg > 0 then
-              efs := effset_del (effset_del (efs, effect_exn), effect_ref)
-            val () = if isneg = 0 then
-              efs := effset_add (effset_add (efs, effect_exn), effect_ref)
-          } // end of [_ when ...]
-        | _ when name_is_exnwrt name => {
-            val () = if isneg > 0 then
-              efs := effset_del (effset_del (efs, effect_exn), effect_wrt)
-            val () = if isneg = 0 then
-              efs := effset_add (effset_add (efs, effect_exn), effect_wrt)
-          } // end of [_ when ...]
-        | _ when name_is_exnrefwrt name => {
-            val () = if isneg > 0 then
-              efs := effset_del (effset_del (effset_del (efs, effect_exn), effect_ref), effect_wrt)
-            val () = if isneg = 0 then
-              efs := effset_add (effset_add (effset_add (efs, effect_exn), effect_ref), effect_wrt)
-          } // end of [_ when ...]
-//
-        | _ when name_is_refwrt name => {
-            val () = if isneg > 0 then
-              efs := effset_del (effset_del (efs, effect_ref), effect_wrt)
-            val () = if isneg = 0 then
-              efs := effset_add (effset_add (efs, effect_ref), effect_wrt)
-          } // end of [_ when ...]
-//
-        | _ => loop_err (tag, name)
+        if name_is_all name then
+        {
+          val () = evs := glist_nil ()
+          val () = if isneg > 0 then efs := effset_nil else efs := effset_all
+        } else if name_is_nil name then
+        {
+          val () = evs := glist_nil ()
+          val () = if isneg > 0 then efs := effset_all else efs := effset_nil
+        } else if name_is_lazy name then
+        {
+          val () = evs := glist_nil ()
+          val () = if isneg > 0 then
+            efs := effset_add (effset_nil, effect_ref) // HX: nonsensical
+          val () = if isneg = 0 then
+            efs := effset_del (effset_all, effect_ref) // HX: !laz = 1,~ref
+        } else
+        (
+          if name_is_ntm name then {
+              val () = if isneg > 0 then efs := effset_del (efs, effect_ntm)
+              val () = if isneg = 0 then efs := effset_add (efs, effect_ntm)
+            } else if name_is_exn name then {
+              val () = if isneg > 0 then efs := effset_del (efs, effect_exn)
+              val () = if isneg = 0 then efs := effset_add (efs, effect_exn)
+            } else if name_is_ref name then {
+              val () = if isneg > 0 then efs := effset_del (efs, effect_ref)
+              val () = if isneg = 0 then efs := effset_add (efs, effect_ref)
+            } else if name_is_wrt name then {
+              val () = if isneg > 0 then efs := effset_del (efs, effect_wrt)
+              val () = if isneg = 0 then efs := effset_add (efs, effect_wrt)
+            } else if name_is_exnref name then {
+              val () = if isneg > 0 then
+                efs := effset_del (effset_del (efs, effect_exn), effect_ref)
+              val () = if isneg = 0 then
+                efs := effset_add (effset_add (efs, effect_exn), effect_ref)
+            } else if name_is_exnwrt name then {
+              val () = if isneg > 0 then
+                efs := effset_del (effset_del (efs, effect_exn), effect_wrt)
+              val () = if isneg = 0 then
+                efs := effset_add (effset_add (efs, effect_exn), effect_wrt)
+            } else if name_is_exnrefwrt name then {
+              val () = if isneg > 0 then
+                efs := effset_del (effset_del (effset_del (efs, effect_exn), effect_ref), effect_wrt)
+              val () = if isneg = 0 then
+                efs := effset_add (effset_add (effset_add (efs, effect_exn), effect_ref), effect_wrt)
+            } else if name_is_refwrt name then {
+              val () = if isneg > 0 then
+                efs := effset_del (effset_del (efs, effect_ref), effect_wrt)
+              val () = if isneg = 0 then
+                efs := effset_add (effset_add (efs, effect_ref), effect_wrt)
+            } else loop_err (tag, name)
+        ) (* end of [else] *)
       ) // end of [E0FFTAGcst]
 //
-    | E0FFTAGprf () => prf := 1
+    | ~E0FFTAGprf () => prf := 1
 //
-    | E0FFTAGlin (i(*nil/all*)) => let
+    | ~E0FFTAGlin (i(*nil/all*)) => let
         val () = lin := 1 // linearity
       in
-        if i > 0 then (efs := effset_all; evs := effvars_nil)
+        if i > 0 then (efs := effset_all; evs := glist_nil ())
       end // end of [E0FFTAGlin]
 //
-    | E0FFTAGfun (uln, i(*nil/all*)) => let
+    | ~E0FFTAGfun (uln, i(*nil/all*)) => let
         val () = if (uln >= 0) then lin := uln
-        val () = fcopt := Some (FUNCLOfun ())
+        val () = fcopt_set (fcopt, FUNCLOfun ())
       in
-        if i > 0 then (efs := effset_all; evs := effvars_nil)
+        if i > 0 then (efs := effset_all; evs := glist_nil ())
       end // end of [E0FFTAGfun]
 //
-    | E0FFTAGclo (uln, knd, i) => let
+    | ~E0FFTAGclo (uln, knd, i) => let
         // knd : 1/~1:ptr/ref; i : nil/all
         val () = if (uln >= 0) then lin := uln
-        val () = fcopt := Some (FUNCLOclo (knd))
+        val () = fcopt_set (fcopt, FUNCLOclo (knd))
       in
-        if i > 0 then (efs := effset_all; evs := effvars_nil)
+        if i > 0 then (efs := effset_all; evs := glist_nil ())
       end // end of [E0FFTAGclo]
 //
+    ) : void // end of [val]
   in
     loop (fcopt, lin, prf, efs, evs, tags)
-  end // end of [let] // end of [list_cons]
+  end // end of [let] // end of [GLcons]
 //
-| list_nil () => () // end of [list_nil]
+| ~GLnil () => () // end of [GLnil]
 //
 end // end of [loop]
 
@@ -239,24 +250,20 @@ implement
 e0fftaglst_tr
   (tags) = let
 //
-var fcopt: fcopt = None()
+var fcopt: fcopt = None_vt ()
 var lin: int = 0 and prf: int = 0
-var efs: effset = effset_nil and evs: effvarlst = effvars_nil
+var efs: effset = effset_nil and evs: effvarlst = glist_nil ()
 val () = loop (fcopt, lin, prf, efs, evs, tags)
 val efc =
 (
-case+ 0 of
-//
-| _ when
-    (efs = effset_all) => EFFCSTall ()
-//
-| _ when
-    (efs = effset_nil) =>
-    (
-      case+ evs of list_nil () => EFFCSTnil () | _ => EFFCSTset (efs, evs)
-    )
-//
-| _ => EFFCSTset (efs, evs)
+if
+  (efs = effset_all) then effcst_EFFCSTall ()
+else if
+  (efs = effset_nil) then
+  (
+    if glist_is_nil (evs) then effcst_EFFCSTnil () else effcst_EFFCSTset (efs, evs)
+  )
+else effcst_EFFCSTset (efs, evs)
 //
 ) : effcst // end of [val]
 //

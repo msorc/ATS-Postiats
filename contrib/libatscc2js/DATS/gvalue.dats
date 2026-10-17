@@ -24,24 +24,24 @@ ATS_STATIC_PREFIX "_ats2jspre_gvalue_"
 (* ****** ****** *)
 
 implement
-gvalue_nil() = GVnil()
+gvalue_nil() = gvalue_encode(GVnil())
 
 (* ****** ****** *)
 
 implement
-gvalue_int(x) = GVint(x)
+gvalue_int(x) = gvalue_encode(GVint(x))
 
 (* ****** ****** *)
 
 implement
-gvalue_bool(x) = GVbool(x)
+gvalue_bool(x) = gvalue_encode(GVbool(x))
 
 (* ****** ****** *)
 
 implement
-gvalue_float(x) = GVfloat(x)
+gvalue_float(x) = gvalue_encode(GVfloat(x))
 implement
-gvalue_string(x) = GVstring(x)
+gvalue_string(x) = gvalue_encode(GVstring(x))
 
 (* ****** ****** *)
 

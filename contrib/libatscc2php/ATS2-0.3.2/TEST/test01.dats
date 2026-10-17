@@ -29,10 +29,13 @@ include "./../output/libatscc2php_all.php";
 
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC (linear closures)
+//
 val () =
-repeat(3, $delay(println!("Hello, world!")))
+repeat(3, lam() =<cloptr1> println!("Hello, world!"))
 val () =
-(3).foreach()(lam(i) =<cloref1> println!(i, ": Hello, world!"))
+int_foreach_cloptr(3, lam(i) =<cloptr1> println!(i, ": Hello, world!"))
 //
 (* ****** ****** *)
 

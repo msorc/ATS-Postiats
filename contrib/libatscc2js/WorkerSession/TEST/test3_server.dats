@@ -50,10 +50,10 @@ chanpos1_sstest2
 //
 chanpos1_send
 ( chp, a1
-, lam(chp) =>
+, llam(chp) =>
   chanpos1_send
   ( chp, a2
-  , lam(chp) => let
+  , llam(chp) => let
 //
       val N = ref{int}(3)
 //
@@ -74,13 +74,13 @@ chanpos1_send
       ) : void =
         chanpos1_recv
         ( chp
-        , lam(chp, res) =>
+        , llam(chp, res) =>
           chanpos1_send
-          (chp, check(chmsg_parse(res)), lam(chp) => k0(chp))
+          (chp, check(chmsg_parse(res)), llam(chp) => (k0(chp); cfun_free(k0)))
         ) (* end of [lam] *)
 //
     in
-      chanpos1_repeat_disj(chp, k0, lam (chp, k0) => fserv(chp, k0))
+      chanpos1_repeat_disj(chp, k0, chanpos_nullify_make(lam (chp, k0) =<cloptr1> fserv(chp, k0)))
     end // end of [lam]
   )
 )
@@ -100,7 +100,7 @@ chanpos1_recv
 (
 chp
 ,
-lam(chp, _) => let
+llam(chp, _) => let
 //
 val N = ref{int}(3)
 //
@@ -113,7 +113,7 @@ in
 chanpos1_repeat_disj
 (
   chp
-, lam(chp) => chanpos1_close(chp)
+, llam(chp) => chanpos1_close(chp)
 , lam(chp, k0) =>
   let
     val a1 =

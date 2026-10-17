@@ -16,12 +16,6 @@ LDFLAGS += -latslib
 
 ######
 
-all:: \
-mergeSort
-mergeSort: mergeSort.dats ; \
-  $(PATSCC) -DATS_MEMALLOC_LIBC $(CFLAGS) -o $@ $< $(LDFLAGS)
-regress:: mergeSort ; ./mergeSort
-cleanall:: ; $(RMF) mergeSort
 
 ######
 

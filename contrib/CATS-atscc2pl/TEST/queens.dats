@@ -69,7 +69,7 @@ LIBATSCC2PL_targetloc
 (* ****** ****** *)
 
 typedef
-int8 = $tup (
+int8 = @(
   int, int, int, int, int, int, int, int
 ) // end of [int8]
 
@@ -107,40 +107,40 @@ fun board_get
 
 fun board_set
   (bd: int8, i: int, j:int): int8 = let
-  val $tup(x0, x1, x2, x3, x4, x5, x6, x7) = bd
+  val @(x0, x1, x2, x3, x4, x5, x6, x7) = bd
 in
   case+ i of
   | 0 => let
       val x0 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [0]
   | 1 => let
       val x1 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [1]
   | 2 => let
       val x2 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [2]
   | 3 => let
       val x3 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [3]
   | 4 => let
       val x4 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [4]
   | 5 => let
       val x5 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [5]
   | 6 => let
       val x6 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [6]
   | 7 => let
       val x7 = j in
-      $tup(x0, x1, x2, x3, x4, x5, x6, x7)
+      @(x0, x1, x2, x3, x4, x5, x6, x7)
     end // end of [7]
   | _ (*error*) => bd
 end // end of [board_set]
@@ -218,7 +218,7 @@ val
 nsol =
 search
 (
-  $tup(0, 0, 0, 0, 0, 0, 0, 0), 0, 0, 0
+  @(0, 0, 0, 0, 0, 0, 0, 0), 0, 0, 0
 ) (* end of [val] *)
 //
 } (* end of [main0_pl] *)

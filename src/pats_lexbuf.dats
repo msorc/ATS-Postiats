@@ -32,24 +32,15 @@
 // Start Time: March, 2011
 //
 (* ****** ****** *)
-//
-staload
-ATSPRE = "./pats_atspre.dats"
-//
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
 (* ****** ****** *)
 
-staload UT = "./pats_utils.sats"
+staload UN = "prelude/SATS/unsafe.sats"
 staload LOC = "./pats_location.sats"
 
-(* ****** ****** *)
-//
-staload
-Q = "libats/SATS/linqueue_arr.sats"
-//
-stadef QUEUE = $Q.QUEUE
-staload _(*anon*) = "libats/DATS/linqueue_arr.dats"
-staload _(*anon*) = "libats/ngc/DATS/deque_arr.dats"
-//
 (* ****** ****** *)
 
 staload
@@ -62,128 +53,104 @@ staload "./pats_lexbuf.sats"
 
 (* ****** ****** *)
 //
-#define uc2i int_of_uchar
-#define i2uc uchar_of_int
+#define uc2i uchar2int0
+#define i2uc int2uchar0
 //
-#define u2i int_of_uint
-#define u2l lint_of_uint
-#define u2sz size_of_uint
+#define u2i g0uint2int_uint_int
+fn u2l(x: uint): lint = $UN.cast{lint}(x)
+#define u2sz g0uint2uint_uint_size
 //
-#define l2u uint_of_lint
-#define l2sz size_of_lint
+fn l2u(x: lint): uint = $UN.cast{uint}(x)
+fn l2sz(x: lint): size_t = $UN.cast{size_t}(x)
 //
-#define sz2i int_of_size
-#define sz2l lint_of_size
-//
-#define size1 size1_of_size
+#define sz2i g0uint2int_size_int
+fn sz2l(x: size_t): lint = $UN.cast{lint}(x)
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC
+// the character queue lives in C (see pats_lexbuf.cats)
+//
 vtypedef
-lexbuf_int_int
-  (m: int, n:int) =
+lexbuf_struct =
 $extype_struct
 "pats_lexbuf_struct" of {
-  cbuf= QUEUE (uchar, m, n) // character buffer
-, base= lint
+  base= lint
 , base_nrow=int, base_ncol= int
 , nspace= int
 , reader= reader
-} (* end of [lexbuf] *)
+} (* end of [lexbuf_struct] *)
 //
-typedef lexbuf0 = lexbuf_int_int(0, 0)?
+assume lexbuf_vt0ype = lexbuf_struct
 //
-(* ****** ****** *)
-
-assume
-lexbuf_vt0ype =
-  [m,n:int] lexbuf_int_int (m, n)
-// end of [lexbuf_vt0ype]
-
-(* ****** ****** *)
-
-#define QINISZ 1024 // initial size
-#define QDELTA 1024 // subsequent increment
-
-(* ****** ****** *)
+vtypedef
+lexbuf_pre =
+$extype_struct
+"pats_lexbuf_struct" of {
+  base= lint
+, base_nrow=int, base_ncol= int
+, nspace= int
+, reader= reader?
+} (* end of [lexbuf_pre] *)
 //
-macdef
-Q_queue_initize = $Q.queue_initialize<uchar>
-macdef
-Q_queue_uninitize = $Q.queue_uninitialize{uchar}
+extern
+fun
+lexbuf_init
+  (buf: &lexbuf? >> lexbuf_pre): void = "mac#patsopt_lexbuf_init"
+extern
+fun
+lexbuf_fini
+  (buf: &lexbuf_pre >> lexbuf?): void = "mac#patsopt_lexbuf_fini"
+//
+extern
+fun
+lexbuf_qsize
+  (buf: &lexbuf): size_t = "mac#patsopt_lexbuf_qsize"
+extern
+fun
+lexbuf_qget
+  (buf: &lexbuf, i: size_t): int = "mac#patsopt_lexbuf_qget"
+extern
+fun
+lexbuf_qins
+  (buf: &lexbuf, c: int): void = "mac#patsopt_lexbuf_qins"
+extern
+fun
+lexbuf_qclear
+  (buf: &lexbuf, n: size_t): void = "mac#patsopt_lexbuf_qclear"
+extern
+fun
+lexbuf_qsub
+  (buf: &lexbuf, st: size_t, ln: size_t): ptr = "mac#patsopt_lexbuf_qsub"
 //
 (* ****** ****** *)
 
 implement
 lexbuf_initize_filp
-  (pfmod, pffil | buf, p0) =
+  (buf, fp) = () where
 {
-//
-extern
-prfun
-lexbuf0_trans
-  (buf: &lexbuf? >> lexbuf0): void
-//
-prval
-() = lexbuf0_trans (buf)
-//
-val () = buf.base := 0L
-val () = buf.base_nrow := 0
-val () = buf.base_ncol := 0
-val () = buf.nspace := 0
-//
-val () = Q_queue_initize (buf.cbuf, QINISZ)
-val () = $R.reader_initize_filp (pfmod, pffil | buf.reader, p0)
-//
+val () = lexbuf_init (buf)
+val () = $R.reader_initize_filp (buf.reader, fp)
 } (* end of [lexbuf_initize_filp] *)
 
 (* ****** ****** *)
 
 implement
 lexbuf_initize_getc
-  (buf, getc) =
+  (buf, getc) = () where
 {
-//
-extern
-prfun
-lexbuf0_trans
-  (buf: &lexbuf? >> lexbuf0): void
-//
-prval
-() = lexbuf0_trans (buf)
-//
-val () = buf.base := 0L
-val () = buf.base_nrow := 0
-val () = buf.base_ncol := 0
-val () = buf.nspace := 0
-//
-val () = Q_queue_initize (buf.cbuf, QINISZ)
+val () = lexbuf_init (buf)
 val () = $R.reader_initize_getc (buf.reader, getc)
-//
 } (* end of [lexbuf_initize_getc] *)
 
 (* ****** ****** *)
 
 implement
 lexbuf_initize_string
-  (buf, inp) =
+  (buf, inp) = () where
 {
-//
-extern
-prfun
-lexbuf0_trans
-  (buf: &lexbuf? >> lexbuf0): void
-//
-prval
-() = lexbuf0_trans (buf)
-//
-val () = buf.base := 0L
-val () = buf.base_nrow := 0
-val () = buf.base_ncol := 0
-val () = buf.nspace := 0
-val () = Q_queue_initize (buf.cbuf, QINISZ)
+val () = lexbuf_init (buf)
 val () = $R.reader_initize_string (buf.reader, inp)
-//
 } (* end of [lexbuf_initize_string] *)
 
 (* ****** ****** *)
@@ -191,23 +158,8 @@ val () = $R.reader_initize_string (buf.reader, inp)
 implement
 lexbuf_initize_charlst_vt
   (buf, inp) = () where {
-//
-extern
-prfun
-lexbuf0_trans
-  (buf: &lexbuf? >> lexbuf0): void
-//
-prval
-() = lexbuf0_trans(buf)
-//
-val () = buf.base := 0L
-val () = buf.base_nrow := 0
-val () = buf.base_ncol := 0
-val () = buf.nspace := 0
-//
-val () = Q_queue_initize (buf.cbuf, QINISZ)
+val () = lexbuf_init (buf)
 val () = $R.reader_initize_charlst_vt (buf.reader, inp)
-//
 } (* end of [lexbuf_initize_charlst_vt] *)
 
 (* ****** ****** *)
@@ -215,15 +167,8 @@ val () = $R.reader_initize_charlst_vt (buf.reader, inp)
 implement
 lexbuf_uninitize
   (buf) = () where {
-//
-val () = Q_queue_uninitize (buf.cbuf)
 val () = $R.reader_uninitize (buf.reader)
-//
-extern
-prfun
-lexbuf0_untrans (buf: &lexbuf0 >> lexbuf?): void
-//
-prval ((*void*)) = lexbuf0_untrans (buf)
+val () = lexbuf_fini (buf)
 } // end of [lexbuf_uninitize]
 
 (* ****** ****** *)
@@ -259,9 +204,6 @@ implement
 lexbuf_set_position
   (buf, pos) = let
 //
-prval () =
-  $Q.lemma_queue_param (buf.cbuf)
-//
 val base = buf.base
 val ntot = $LOC.position_get_ntot (pos)
 //
@@ -269,26 +211,15 @@ val () = buf.base := ntot
 val () = buf.base_nrow := $LOC.position_get_nrow (pos)  
 val () = buf.base_ncol := $LOC.position_get_ncol (pos)  
 //
-val nchr = ntot - base
-val nchr = size1(l2sz(nchr))
-val nbuf = $Q.queue_size (buf.cbuf)
+val nchr = (l2sz)(ntot - base)
+val nbuf = lexbuf_qsize (buf)
 //
 in
 //
 if
 nchr < nbuf
-then let
-  val () =
-    $Q.queue_clear<uchar> (buf.cbuf, nchr)
-  // end of [val]
-in
-  // nothing
-end // end of [then]
-else let
-  val () = $Q.queue_clear_all{uchar}(buf.cbuf)
-in
-  // nothing
-end // end of [else]
+then lexbuf_qclear (buf, nchr)
+else lexbuf_qclear (buf, nbuf)
 //
 end // end of [lexbuf_set_position]
 
@@ -318,42 +249,22 @@ implement
 lexbuf_get_char
   (buf, nchr) = let
 //
-prval
-() = $Q.lemma_queue_param (buf.cbuf)
-//
 val nchr = (u2sz)nchr
-val nchr = (size1)nchr
-val n = $Q.queue_size (buf.cbuf)
+val n = lexbuf_qsize (buf)
 //
 in
 //
 if
 nchr < n
-then let
-//
-  val c =
-  $Q.queue_get_elt_at<uchar> (buf.cbuf, nchr)
-//
-in
-  (uc2i)c
-end // end of [then]
+then lexbuf_qget (buf, nchr)
 else let
   val i = $R.reader_get_char (buf.reader)
 in
   if i >= 0 then let
     val c = (i2uc)i
-    val m = $Q.queue_cap {uchar} (buf.cbuf)
+    val () = lexbuf_qins (buf, uc2i(c))
   in
-    if m > n then let
-      val () = $Q.queue_insert<uchar> (buf.cbuf, c)
-    in
-      i
-    end else let
-      val () = $Q.queue_update_capacity<uchar> (buf.cbuf, m+QDELTA)
-      val () = $Q.queue_insert<uchar> (buf.cbuf, c)
-    in
-      i
-    end // end of [if]
+    i
   end else
     i (* EOF *)
   // end of [if]
@@ -378,22 +289,19 @@ implement
 lexbuf_incby_count
   (buf, cnt) = let
 //
-  prval () = $Q.lemma_queue_param (buf.cbuf)
-//
   val nchr = u2sz(cnt)
-  val nchr = (size1)nchr
-  val n = $Q.queue_size (buf.cbuf)
+  val n = lexbuf_qsize (buf)
 in
   if nchr < n then let
     val () = buf.base := buf.base + (u2l)cnt
     val () = buf.base_ncol := buf.base_ncol + (u2i)cnt
-    val () = $Q.queue_clear<uchar> (buf.cbuf, nchr)
+    val () = lexbuf_qclear (buf, nchr)
   in
     // nothing
   end else let
     val () = buf.base := buf.base + (sz2l)n
     val () = buf.base_ncol := buf.base_ncol + (sz2i)n
-    val () = $Q.queue_clear_all {uchar} (buf.cbuf)
+    val () = lexbuf_qclear (buf, n)
   in
     // nothing
   end (* end of [if] *)
@@ -419,26 +327,16 @@ implement
 lexbuf_get_substrptr0
   (buf, st, ln) = let
 //
-  prval () = $Q.lemma_queue_param (buf.cbuf)
-//
   val i = u2sz(st)
-  val i = (size1)i
   val k = u2sz(ln)
-  val [k:int] k = (size1)k
-  val n = $Q.queue_size (buf.cbuf)
-//
-(*
-  val () = println! ("lexbuf_get_strptr: i = ", i)
-  val () = println! ("lexbuf_get_strptr: k = ", k)
-  val () = println! ("lexbuf_get_strptr: n = ", n)
-*)
+  val n = lexbuf_qsize (buf)
 //
 in
 //
 if i + k <= n then
-  $UT.queue_get_strptr1 (buf.cbuf, i, k)
+  $UN.castvwtp0{Strptr0}(lexbuf_qsub (buf, i, k))
 else
-  strptr_null ()
+  $UN.castvwtp0{Strptr0}(the_null_ptr)
 // end of [if]
 //
 end // end of [lexbuf_get_substrptr0]
@@ -448,20 +346,27 @@ lexbuf_get_substrptr1
   (buf, st, ln) = str where {
   val str = lexbuf_get_substrptr0 (buf, st, ln)
   val ((*void*)) = assertloc (strptr_isnot_null (str))
+  val str = $UN.castvwtp0{Strptr1}(str)
 } // end of [lexbuf_get_substrptr1]
 
 (* ****** ****** *)
 
 implement
 lexbufpos_get_strptr0
-  (buf, pos) =
-  lexbuf_get_strptr0(buf, lexbufpos_diff(buf, pos))
+  (buf, pos) = let
+  val ln = lexbufpos_diff(buf, pos)
+in
+  lexbuf_get_strptr0(buf, ln)
+end
 // end of [lexbufpos_get_strptr0]
 
 implement
 lexbufpos_get_strptr1
-  (buf, pos) = 
-  lexbuf_get_strptr1(buf, lexbufpos_diff(buf, pos))
+  (buf, pos) = let
+  val ln = lexbufpos_diff(buf, pos)
+in
+  lexbuf_get_strptr1(buf, ln)
+end
 // end of [lexbufpos_get_strptr1]
 
 (* ****** ****** *)

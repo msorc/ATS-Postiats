@@ -98,13 +98,6 @@ gequal_ref_ref (x: &INV(a), y: &a):<> bool
 (* ****** ****** *)
 
 fun{a:t0p}
-tostring_val (x: a):<> string
-fun{a:vt0p}
-tostring_ref (x: &INV(a)):<> string
-
-(* ****** ****** *)
-
-fun{a:t0p}
 tostrptr_val (x: a):<!wrt> Strptr1
 fun{a:vt0p}
 tostrptr_ref (x: &INV(a)):<!wrt> Strptr1

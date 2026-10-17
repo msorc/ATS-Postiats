@@ -79,9 +79,9 @@ sieve_con
   ~cons(n, ns2) = !ns; val p = n
   val ps = sieve
   (
-    stream_vt_filter_cloref
-      (ns2, lam x => nmod_int1_int1(x, p) > 0)
-    // stream_vt_filter_cloref
+    stream_vt_filter_cloptr
+      (ns2, lam x =<cloptr1> nmod_int1_int1(x, p) > 0)
+    // stream_vt_filter_cloptr
   ) (* end of [val] *)
 in
   cons(p, ps)

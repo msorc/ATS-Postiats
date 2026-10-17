@@ -293,5 +293,5 @@ atscntrb_jansson_json_object_get1_exnmsg
 #atscode_eof_strsub_for_C("\#thisfilename$")\
 
 %{
-implement main () = fprint_filsub (stdout_ref, "jansson_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "jansson_atxt.txt")
 %}\

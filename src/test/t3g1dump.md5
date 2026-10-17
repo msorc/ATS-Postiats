@@ -1,0 +1,1 @@
+47bdfa5829d1e8fa33a21fe8884b4c39 3e516d895f597d078901f2093e97e321  (T3G1SEED=1 T3G1SCALE=3: md5 of the stdout and the stderr of the ATS1 build t3g1dump1; make t3g1 checks the ATS2 build against it)

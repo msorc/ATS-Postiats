@@ -60,6 +60,6 @@ implement fprint_val<bool> = fprint_bool
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "bool_atxt.txt")
 %}\

@@ -33,16 +33,22 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_jsonize.dats)
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 //
 staload
 UN = "prelude/SATS/unsafe.sats"
-staload
-_(*UN*) = "prelude/DATS/unsafe.dats"
 //
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -54,14 +60,14 @@ INTINF = "./pats_intinf.sats"
 
 (* ****** ****** *)
 
-staload "./pats_stamp.sats"
-staload "./pats_symbol.sats"
-staload "./pats_location.sats"
-staload "./pats_filename.sats"
+staload STA = "./pats_stamp.sats"
+staload SYM = "./pats_symbol.sats"
+staload LOC = "./pats_location.sats"
+staload FIL = "./pats_filename.sats"
 
 (* ****** ****** *)
 
-staload "./pats_label.sats"
+staload LAB = "./pats_label.sats"
 
 (* ****** ****** *)
 
@@ -69,131 +75,162 @@ staload "./pats_jsonize.sats"
 
 (* ****** ****** *)
 
-implement
-jsonval_int (i) = JSONint (i)
-
-implement
-jsonval_intinf (i) = JSONintinf (i)
-
-implement
-jsonval_bool (b) = JSONbool (b)
-
-implement
-jsonval_double (d) = JSONfloat (d)
-
-implement
-jsonval_string (str) = JSONstring (str)
+#include "./pats_jsonize_gen_dats.hats"
 
 (* ****** ****** *)
 
 implement
-jsonval_location (loc) = JSONlocation (loc)
+jsonval_int (i) = jsonval_JSONint (i)
+
 implement
-jsonval_filename (fil) = JSONfilename (fil)
+jsonval_intinf (i) = jsonval_JSONintinf (i)
+
+implement
+jsonval_bool (b) = jsonval_JSONbool (b)
+
+implement
+jsonval_double (d) = jsonval_JSONfloat (d)
+
+implement
+jsonval_string (str) = jsonval_JSONstring (str)
+
+(* ****** ****** *)
+
+implement
+jsonval_location (loc) = jsonval_JSONlocation (loc)
+implement
+jsonval_filename (fil) = jsonval_JSONfilename (fil)
+
+(* ****** ****** *)
+
+implement
+jsonval_sing (x) = jsonval_JSONlist (glist_sing(x))
+implement
+jsonval_pair (x1, x2) =
+  jsonval_JSONlist (glist_cons(x1, glist_sing(x2)))
 
 (* ****** ****** *)
 //
-#define nil list_nil
-//
-#define :: list_cons
-#define cons list_cons
-//
-(* ****** ****** *)
-
-implement
-jsonval_sing (x) = JSONlist (list_sing(x))
-implement
-jsonval_pair (x1, x2) = JSONlist (list_pair(x1, x2))
-
-(* ****** ****** *)
+fn lv
+(
+  l: string, x: jsonval, lxs: labjsonvalist
+) : labjsonvalist = glist_cons(labjsonval_new(l, x), lxs)
 //
 implement
 jsonval_labval1 (l, x) =
-  JSONlablist (list_cons((l, x), list_nil))
+  jsonval_JSONlablist (glist_sing(labjsonval_new(l, x)))
 implement
 jsonval_labval2 (l1, x1, l2, x2) =
-  JSONlablist (list_cons((l1, x1), list_cons((l2, x2), list_nil)))
+  jsonval_JSONlablist
+    (lv(l1, x1, glist_sing(labjsonval_new(l2, x2))))
 implement
 jsonval_labval3
 (
   l1, x1, l2, x2, l3, x3
-) = JSONlablist ((l1, x1) :: (l2, x2) :: (l3, x3) :: list_nil(*void*))
+) = jsonval_JSONlablist
+(
+  lv(l1, x1, lv(l2, x2, glist_sing(labjsonval_new(l3, x3))))
+)
 implement
 jsonval_labval4
 (
   l1, x1, l2, x2, l3, x3, l4, x4
-) = JSONlablist ((l1, x1) :: (l2, x2) :: (l3, x3) :: (l4, x4) :: list_nil)
+) = jsonval_JSONlablist
+(
+  lv(l1, x1, lv(l2, x2, lv(l3, x3, glist_sing(labjsonval_new(l4, x4)))))
+)
 //
 implement
 jsonval_labval5
 (
   l1, x1, l2, x2, l3, x3, l4, x4, l5, x5
-) = JSONlablist
+) = jsonval_JSONlablist
 (
-  (l1, x1) :: (l2, x2) :: (l3, x3) :: (l4, x4) :: (l5, x5) :: list_nil
+  lv(l1, x1, lv(l2, x2, lv(l3, x3, lv(l4, x4,
+    glist_sing(labjsonval_new(l5, x5))))))
 )
 implement
 jsonval_labval6
 (
   l1, x1, l2, x2, l3, x3, l4, x4, l5, x5, l6, x6
-) = JSONlablist
+) = jsonval_JSONlablist
 (
-  (l1, x1) :: (l2, x2) :: (l3, x3) :: (l4, x4) :: (l5, x5) :: (l6, x6) :: list_nil
+  lv(l1, x1, lv(l2, x2, lv(l3, x3, lv(l4, x4, lv(l5, x5,
+    glist_sing(labjsonval_new(l6, x6)))))))
 )
 implement
 jsonval_labval7
 (
   l1, x1, l2, x2, l3, x3, l4, x4, l5, x5, l6, x6, l7, x7
-) = JSONlablist
+) = jsonval_JSONlablist
 (
-  (l1, x1) :: (l2, x2) :: (l3, x3) :: (l4, x4) :: (l5, x5) :: (l6, x6) :: (l7, x7) :: list_nil
+  lv(l1, x1, lv(l2, x2, lv(l3, x3, lv(l4, x4, lv(l5, x5, lv(l6, x6,
+    glist_sing(labjsonval_new(l7, x7))))))))
 )
 implement
 jsonval_labval8
 (
   l1, x1, l2, x2, l3, x3, l4, x4, l5, x5, l6, x6, l7, x7, l8, x8
-) = JSONlablist
+) = jsonval_JSONlablist
 (
-  (l1, x1) :: (l2, x2) :: (l3, x3) :: (l4, x4) :: (l5, x5) :: (l6, x6) :: (l7, x7) :: (l8, x8) :: list_nil
+  lv(l1, x1, lv(l2, x2, lv(l3, x3, lv(l4, x4, lv(l5, x5, lv(l6, x6, lv(l7, x7,
+    glist_sing(labjsonval_new(l8, x8)))))))))
 )
 //
 (* ****** ****** *)
 //
 implement
 jsonval_conarg0
-  (con) = jsonval_conarglst (con, list_nil)
+  (con) = jsonval_conarglst (con, glist_nil((*void*)))
 implement
 jsonval_conarg1
   (con, arg1) =
-  jsonval_conarglst (con, list_sing (arg1))
+  jsonval_conarglst (con, glist_sing (arg1))
 implement
 jsonval_conarg2
   (con, arg1, arg2) =
-  jsonval_conarglst (con, list_pair (arg1, arg2))
+  jsonval_conarglst (con, glist_cons (arg1, glist_sing (arg2)))
 implement
 jsonval_conarg3
   (con, arg1, arg2, arg3) =
-  jsonval_conarglst (con, arg1 :: arg2 :: arg3 :: list_nil)
+  jsonval_conarglst
+    (con, glist_cons (arg1, glist_cons (arg2, glist_sing (arg3))))
 implement
 jsonval_conarg4
   (con, arg1, arg2, arg3, arg4) =
-  jsonval_conarglst (con, arg1 :: arg2 :: arg3 :: arg4 :: list_nil())
+  jsonval_conarglst
+  (
+    con
+  , glist_cons (arg1, glist_cons (arg2, glist_cons (arg3, glist_sing (arg4))))
+  )
 //
 implement
 jsonval_conarglst
-  (con, arglst) = jsonval_labval1 (con, JSONlist (arglst))
+  (con, arglst) = jsonval_labval1 (con, jsonval_JSONlist (arglst))
 // end of [jsonval_conarglst]
   
 (* ****** ****** *)
 //
 implement
-jsonval_none () = JSONoption (None())
+jsonval_none () = jsonval_JSONoption (gopt_none((*void*)))
 implement
-jsonval_some (x) = JSONoption (Some(x))
+jsonval_some (x) = jsonval_JSONoption (gopt_some(x))
 //
 (* ****** ****** *)
 
 local
+
+fn
+fprint_hex2
+(
+  out: FILEref, i: int
+) : void = let
+  fn hex (d: int): char =
+    if d < 10 then int2char0(char2int0('0') + d)
+    else int2char0(char2int0('A') + (d - 10))
+in
+  fprint_char (out, hex (i / 16)); fprint_char (out, hex (i mod 16))
+end // end of [fprint_hex2]
 
 fun
 fprint_jsonval_string
@@ -218,11 +255,13 @@ case+ c of
 | '\f' => fprint_string (out, "\\f")
 | _ (*rest-of-char*) =>
   (
-    if char_isprint(c)
+    if isprint_char(c)
       then fprint_char(out, c)
       else let
-        val uc = uchar_of_char(c) in
-        fprintf (out, "\\u00%.2X", @($UN.cast2uint(uc)))
+        val uc = char2int0(c)
+        val uc = (if uc < 0 then uc + 256 else uc): int
+      in
+        fprint_string (out, "\\u00"); fprint_hex2 (out, uc)
       end // end of [else]
     // end of [if]
   ) (* end of [_] *)
@@ -241,7 +280,7 @@ in
 //
 if
 c != '\000'
-then (auxch(out, c); loop (out, p+sizeof<char>)) else ()
+then (auxch(out, c); loop (out, ptr0_succ<char> (p))) else ()
 //
 end // end of [loop]
 //
@@ -264,56 +303,56 @@ prstr (str) = fprint_string (out, ,(str))
 //
 in
 //
-case+ x0 of
+case+ jsonval_view(x0) of
 //
-| JSONnul () => prstr "{}"
+| ~JSONnul () => prstr "{}"
 //
-| JSONint (i) => fprint_int (out, i)
-| JSONintinf (i) =>
+| ~JSONint (i) => fprint_int (out, i)
+| ~JSONintinf (i) =>
   {
     val () = fprint_char (out, '"')
     val () = $INTINF.fprint_intinf (out, i)
     val () = fprint_char (out, '"')
   }
 //
-| JSONbool (b) => fprint_bool (out, b)
-| JSONfloat (d) => fprint_double (out, d)
+| ~JSONbool (b) => fprint_bool (out, b)
+| ~JSONfloat (d) => fprint_double (out, d)
 //
-| JSONstring (str) => fprint_jsonval_string (out, str)
+| ~JSONstring (str) => fprint_jsonval_string (out, str)
 //
-| JSONlocation (loc) =>
+| ~JSONlocation (loc) =>
   {
     val () = prstr "\""
-    val () = fprint_location (out, loc)
+    val () = $LOC.fprint_location (out, loc)
     val () = prstr "\""
   } (* end of [JSONlocation] *)
-| JSONfilename (fil) =>
+| ~JSONfilename (fil) =>
   {
     val () = prstr "\""
-    val () = fprint_filename_full (out, fil)
+    val () = $FIL.fprint_filename_full (out, fil)
     val () = prstr "\""
   } (* end of [JSONfilename] *)
 //
-| JSONlist (xs) =>
+| ~JSONlist (xs) =>
   {
     val () = prstr "["
     val () = fprint_jsonvalist (out, xs)
     val () = prstr "]"
   }
-| JSONlablist (lxs) =>
+| ~JSONlablist (lxs) =>
   {
     val () = prstr "{"
     val () = fprint_labjsonvalist (out, lxs)
     val () = prstr "}"
   }
 //
-| JSONoption (opt) =>
+| ~JSONoption (opt) =>
   {
     val () = prstr "["
     val () =
     (
-      case+ opt of
-      | Some x => fprint_jsonval (out, x) | None () => ()
+      case+ gopt_view(opt) of
+      | ~GOsome x => fprint_jsonval (out, x) | ~GOnone () => ()
     ) : void // end of [val]
     val () = prstr "]"
   }
@@ -335,17 +374,17 @@ fun aux
 ) : void = let
 in
 //
-case+ xs0 of
-| list_nil () => ()
-| list_cons (x, xs) => let
+case+ glist_view(xs0) of
+| ~GLnil () => ()
+| ~GLcons (x, xs) => let
     val () =
       if i > 0
-        then fprint (out, ", ")
+        then fprint_string (out, ", ")
       // end of [if]
     val () = fprint_jsonval (out, x)
   in
     aux (out, xs, i+1)
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [aux]
 //
@@ -366,21 +405,22 @@ fun aux
 ) : void = let
 in
 //
-case+ lxs0 of
-| list_nil () => ()
-| list_cons
+case+ glist_view(lxs0) of
+| ~GLnil () => ()
+| ~GLcons
     (lx, lxs) => let
     val () =
       if i > 0
-        then fprint (out, ", ")
+        then fprint_string (out, ", ")
       // end of [if]
-    val () =
-      fprintf (out, "\"%s\"", @(lx.0))
+    val () = fprint_char (out, '"')
+    val () = fprint_string (out, lx.labjsonval_lab())
+    val () = fprint_char (out, '"')
     val () = fprint_string (out, ": ")
-    val () = fprint_jsonval (out, lx.1)
+    val () = fprint_jsonval (out, lx.labjsonval_val())
   in
     aux (out, lxs, i+1)
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [aux]
 //
@@ -392,17 +432,17 @@ end // end of [fprint_labjsonvalist]
 
 local
 
-fun aux0
+fn aux0
 (
   name: string
 ) : jsonval = let
   val name = jsonval_string (name)
-  val arglst = JSONlist (list_nil())
+  val arglst = jsonval_JSONlist (glist_nil((*void*)))
 in
   jsonval_labval2 ("funclo_name", name, "funclo_arglst", arglst)
 end // end of [aux0]
 
-fun aux1
+fn aux1
 (
   name: string, arg: jsonval
 ) : jsonval = let
@@ -419,7 +459,8 @@ jsonize_funclo (fc) =
 (
   case+ fc of
   | FUNCLOfun () => aux0 ("FUNCLOfun")
-  | FUNCLOclo (knd) => aux1 ("FUNCLOclo", jsonval_int (knd))
+  | _ (*FUNCLOclo*) =>
+      aux1 ("FUNCLOclo", jsonval_int (funclo_get_clokind (fc)))
 ) (* end of [jsonize_funclo] *)
 
 end // end of [local]
@@ -488,20 +529,20 @@ case+ knd of
 //
 implement
 jsonize_stamp(x0) =
-  jsonval_int(stamp_get_int(x0))
+  jsonval_int($STA.stamp_get_int(x0))
 //
 (* ****** ****** *)
 //
 implement
 jsonize_symbol(sym) =
-  jsonval_string(symbol_get_name(sym))
+  jsonval_string($SYM.symbol_get_name(sym))
 implement
 jsonize_symbolopt(opt) =
 (
 //
-case+ opt of
-| None() => jsonval_none()
-| Some(x) => jsonval_some(jsonize_symbol(x))
+case+ gopt_view(opt) of
+| ~GOnone() => jsonval_none()
+| ~GOsome(x) => jsonval_some(jsonize_symbol(x))
 //
 ) (* end of [jsonize_symbolopt] *)
 //
@@ -517,7 +558,7 @@ jsonize_filename(fil) = jsonval_filename (fil)
 implement
 jsonize_label(lab) = let
 //
-val opt = label_get_int(lab)
+val opt = $LAB.label_get_int(lab)
 //
 in
 //
@@ -528,7 +569,7 @@ case+ opt of
     jsonval_labval1 ("LABint", jsv)
   end (* end of [Some_vt] *)
 | ~None_vt ((*void*)) => let
-    val opt = label_get_sym (lab)
+    val opt = $LAB.label_get_sym (lab)
   in
     case+ opt of
     | ~Some_vt (sym) => let
@@ -536,7 +577,7 @@ case+ opt of
       in
         jsonval_labval1 ("LABsym", jsv)
       end // end of [Some_vt]
-    | ~None_vt ((*void*)) => JSONnul ((*void*))
+    | ~None_vt ((*void*)) => jsonval_JSONnul ((*void*))
   end (* end of [None_vt] *)
 //
 end // end of [jsonize_label]
@@ -544,25 +585,32 @@ end // end of [jsonize_label]
 (* ****** ****** *)
 //
 implement
-jsonize_ignored(x0) = JSONnul((*void*)) 
+{a}(*tmp*)
+jsonize_ignored(x0) = jsonval_JSONnul((*void*))
 //
 (* ****** ****** *)
+//
+// HX: the elements are mapped from the head, as [list_map_fun] of ATS1
+//
+fun{a:t@ype}
+jsonize_list_loop
+(
+  xs: glist(a), f: jsonize_ftype (a), res: List0_vt(jsonval)
+) : List0_vt(jsonval) =
+(
+  case+ glist_view (xs) of
+  | ~GLnil () => list_vt_reverse (res)
+  | ~GLcons (x, xs1) => let
+      val y = f (x) in jsonize_list_loop<a> (xs1, f, list_vt_cons (y, res))
+    end // end of [GLcons]
+) (* end of [jsonize_list_loop] *)
 
 implement
 {a}(*tmp*)
-jsonize_list_fun(xs, f) = let
-//
-(*
-val () =
-  println! ("jsonize_option_fun")
-*)
-//
-val
-jsvs = list_map_fun<a> (xs, f)
-//
-val jsvs = list_of_list_vt(jsvs) in JSONlist (jsvs)
-//
-end // end of [jsonize_list_fun]
+jsonize_list_fun(xs, f) =
+  jsonval_JSONlist
+    (glist_make_list_vt (jsonize_list_loop<a> (xs, f, list_vt_nil ())))
+// end of [jsonize_list_fun]
 
 (* ****** ****** *)
 
@@ -570,15 +618,10 @@ implement
 {a}(*tmp*)
 jsonize_option_fun(opt, f) = let
 //
-(*
-val () =
-  println! ("jsonize_option_fun")
-*)
-//
 in
 //
-case+ opt of
-| None() => jsonval_none() | Some(x) => jsonval_some(f(x))
+case+ gopt_view(opt) of
+| ~GOnone() => jsonval_none() | ~GOsome(x) => jsonval_some(f(x))
 //
 end // end of [jsonize_option_fun]
 

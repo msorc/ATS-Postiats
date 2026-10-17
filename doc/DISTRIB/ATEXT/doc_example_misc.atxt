@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -62,7 +64,7 @@ packpostamble () = let
 val out = stdout_ref
 val () = fprint_string (out, "\
 #\n\
-echo \"The \${ATSHOME}/doc/EXAMPLE/MISC files have been copied.\"\n\
+echo \"The \\${ATSHOME}/doc/EXAMPLE/MISC files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -105,7 +107,6 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("arith_overflow.dats")
 
 (* ****** ****** *)
 
@@ -122,11 +123,9 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("autodiff.dats")
 
 (* ****** ****** *)
 
-#packfilename("fib_memo.dats")
 
 (* ****** ****** *)
 
@@ -134,7 +133,6 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("hanoi.dats")
 
 (* ****** ****** *)
 
@@ -147,36 +145,24 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("memoization.dats")
 
 (* ****** ****** *)
 
-#packfilename("morse_enum.dats")
 
 (* ****** ****** *)
 
-#packfilename("monad_list.dats")
-#packfilename("monad_maybe.dats")
-#packfilename("monad_state.dats")
 
 (* ****** ****** *)
 
-#packfilename("myfixptcomb.dats")
 
 (* ****** ****** *)
 
-#packfilename("mysendmailist.dats")
 
 (* ****** ****** *)
 
-#packfilename("passwdgen.dats")
 
 (* ****** ****** *)
 
-#packfilename("queens_lazy.dats")
-#packfilename("queens_loop.dats")
-#packfilename("queens_comb.dats")
-#packfilename("queens_lincomb.dats")
 
 (* ****** ****** *)
 
@@ -188,7 +174,6 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("sieve.dats")
 
 (* ****** ****** *)
 
@@ -196,15 +181,12 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("stdlib_bsearch.dats")
 
 (* ****** ****** *)
 
-#packfilename("strmat.dats")
 
 (* ****** ****** *)
 
-#packfilename("totient.dats")
 
 (* ****** ****** *)
 
@@ -212,11 +194,9 @@ The ATSHOME/doc/EXAMPLE/MISC\
 
 (* ****** ****** *)
 
-#packfilename("tempfunctor.dats")
 
 (* ****** ****** *)
 
-#packfilename("word-chain.dats")
 
 (* ****** ****** *)
 
@@ -225,7 +205,7 @@ The ATSHOME/doc/EXAMPLE/MISC\
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

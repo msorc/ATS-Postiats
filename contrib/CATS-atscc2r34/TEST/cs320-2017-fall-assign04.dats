@@ -109,9 +109,9 @@ val () = assertloc(n0 >= 2)
 val
 Daily_price_changes =
 (
-R34vector_tabulate_cloref{double}
+R34vector_tabulate_cloptr{double}
 ( n0-1
-, lam(i) =>
+, lam(i) =<cloptr1>
   fopr(Adj_Close_data[i+1], Adj_Close_data[i+2]))
 ) where
 {
@@ -144,7 +144,7 @@ if
 !(libatscc2r34.is.loaded)
 )
 {
-  sys.source("./libatscc2r34/libatscc2r34_all.R")
+  sys.source("./libatscc2r34/libatscc2r34_all.R", envir = globalenv())
 }
 ######
 %} // end of [%{^]

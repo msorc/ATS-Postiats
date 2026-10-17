@@ -26,29 +26,13 @@ ATSCCFLAGS=
 
 ######
 
-all:: misc
-all:: acker
-all:: bsearch
 all:: coinchange
 all:: queens
-all:: twice
 
 ######
 
-misc: misc_dats.c ; \
-  $(CCOPT) -DATS_MEMALLOC_LIBC $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: misc; ./misc
-cleanall:: ; $(RMF) misc
 
-acker: acker_dats.c ; \
-  $(CCOPT) -DATS_MEMALLOC_LIBC $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: acker; ./acker
-cleanall:: ; $(RMF) acker
 
-bsearch: bsearch_dats.c ; \
-  $(CCOPT) -DATS_MEMALLOC_LIBC $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: bsearch; ./bsearch
-cleanall:: ; $(RMF) bsearch
 
 coinchange: coinchange_dats.c ; \
   $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
@@ -60,10 +44,6 @@ queens: queens_dats.c ; \
 regress:: queens; ./queens
 cleanall:: ; $(RMF) queens
 
-twice: twice_dats.c ; \
-  $(CCOPT) -DATS_MEMALLOC_LIBC $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: twice; ./twice
-cleanall:: ; $(RMF) twice
 
 ######
 

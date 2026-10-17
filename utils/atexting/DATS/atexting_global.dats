@@ -40,12 +40,20 @@
 //
 #staload "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
 local
 //
-val
-the_nsharp_ref = ref<int>(0)
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_nsharp_ref_var: int = 0
+val the_nsharp_ref =
+  ref_make_viewptr{int}(view@the_nsharp_ref_var | addr@the_nsharp_ref_var)
 //
 in (* in-of-local *)
 //
@@ -149,10 +157,11 @@ implement
 fprint_atextdef
   (out, def0) = (
 //
-case+ def0 of
-| TEXTDEFnil() => fprint(out, "TEXTDEFnil()")
-| TEXTDEFval _ => fprint(out, "TEXTDEFval(...)")
-| TEXTDEFfun _ => fprint(out, "TEXTDEFfun(...)")
+case+ atextdef_view(def0) of
+| ~TEXTDEFnil() => fprint(out, "atextdef_TEXTDEFnil()")
+| ~TEXTDEFval _ => fprint(out, "atextdef_TEXTDEFval(...)")
+| ~TEXTDEFfun _ => fprint(out, "atextdef_TEXTDEFfun(...)")
+| ~TEXTDEFfstr _ => fprint(out, "atextdef_TEXTDEFfstr(...)")
 //
 ) (* end of [fprint_atextdef] *)
 
@@ -176,10 +185,10 @@ val def =
 //
 in
 //
-case+ def of
-| TEXTDEFnil() =>
+case+ atextdef_view(def) of
+| ~TEXTDEFnil() =>
   the_atextdef_search(k0)
-| _(*non-TEXTDEFnil*) => def
+| v0(*non-TEXTDEFnil*) => (atextdef_view_free(v0); def)
 //
 end // end of [the_atextdef_search2]
 
@@ -199,9 +208,13 @@ keyitmlst_vt =
 typedef
 mystack = ref(keyitmlst_vt)
 //
-val
-the_atextstk =
-ref<keyitmlst_vt>(list_vt_nil)
+//
+// HX-2026-10: no GC (made of a static var)
+//
+var
+the_atextstk_var: keyitmlst_vt = list_vt_nil
+val the_atextstk =
+  ref_make_viewptr{keyitmlst_vt}(view@the_atextstk_var | addr@the_atextstk_var)
 //
 assume
 the_atextstk_v(n:int) = unit_v
@@ -253,7 +266,7 @@ loop
 (
 case+ kxs of
 | list_vt_nil
-    () => TEXTDEFnil()
+    () => atextdef_TEXTDEFnil()
   // list_vt_nil
 | @list_vt_cons(kx, kxs_) =>
   (
@@ -279,23 +292,38 @@ end // end of [local]
 (* ****** ****** *)
 
 local
-
-typedef
-key = string and itm = atextdef
-
-in (* in-of-local *)
 //
-#include "libats/ML/HATS/myhashtblref.hats"
+// HX-2026-10: no GC
+// the map is a linear hashtable (hashtbl_chain) that is
+// kept as a pointer: it is taken out and put back by each
+// operation (the definitions are in the global arena)
 //
-end // end of [local]
-
-(* ****** ****** *)
-
-local
+typedef key = string and itm = atextdef
 //
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/hashtbl_chain.sats"
+staload _ = "libats/DATS/qlist.dats"
+staload _ = "libats/DATS/hashfun.dats"
+staload _ = "libats/DATS/linmap_list.dats"
+staload _ = "libats/DATS/hashtbl_chain.dats"
+//
+vtypedef map = hashtbl(key, itm)
+//
+var
+the_atextmap_var: ptr =
+  $UN.castvwtp0{ptr}(hashtbl_make_nil<key,itm>(i2sz(1024)))
 val
 the_atextmap =
-  myhashtbl_make_nil(1024)
+  ref_make_viewptr{ptr}(view@the_atextmap_var | addr@the_atextmap_var)
+//
+fn
+the_atextmap_takeout
+  ((*void*)): map = $UN.castvwtp0{map}(the_atextmap[])
+fn
+the_atextmap_putback
+  (tbl: map): void = let
+  val _ = $UN.castvwtp0{ptr}(tbl) in ((*void*))
+end // end of [the_atextmap_putback]
 //
 in (* in-of-local *)
 
@@ -303,48 +331,48 @@ implement
 the_atextmap_search
   (k0) = let
 //
-val
-opt =
-the_atextmap.search(k0)
+val tbl = the_atextmap_takeout()
+val opt = hashtbl_search_opt<key,itm>(tbl, k0)
+val ((*void*)) = the_atextmap_putback(tbl)
 //
 in
 //
 case+ opt of
 | ~Some_vt(def0) => def0
-| ~None_vt((*void*)) => TEXTDEFnil()
+| ~None_vt((*void*)) => atextdef_TEXTDEFnil()
 //
-end // end of [the_atextdef_search]
+end // end of [the_atextmap_search]
 
 implement
 the_atextmap_insert
   (k0, def0) = let
 //
-val
-opt =
-the_atextmap.insert(k0, def0)
+val tbl = the_atextmap_takeout()
+var res: itm
+val found = hashtbl_insert<key,itm>(tbl, k0, def0, res)
+prval () = opt_clear(res)
+val ((*void*)) = the_atextmap_putback(tbl)
 //
 in
-//
-case opt of
-| ~None_vt() => () | ~Some_vt _ => ()
-//
+  // nothing
 end // end of [the_atextmap_insert]
 
 implement
+the_atextmap_remove
+  (k0) = let
+//
+val tbl = the_atextmap_takeout()
+val _(*removed*) = hashtbl_remove<key,itm>(tbl, k0)
+val ((*void*)) = the_atextmap_putback(tbl)
+//
+in
+  // nothing
+end // end of [the_atextmap_remove]
+
+implement
 the_atextmap_insert_fstring
-  (k0, fstr) = (
-//
-the_atextmap_insert
-( k0
-, TEXTDEFfun
-  (
-    lam(loc, xs) =>
-      atext_make_string(loc, fstr(xs))
-    // end of [lam]
-  )
-) (* the_atextmap_insert *)
-//
-) (* the_atextmap_insert_fstring *)
+  (k0, fstr) =
+  the_atextmap_insert(k0, atextdef_TEXTDEFfstr(fstr))
 
 end // end of [local]
 

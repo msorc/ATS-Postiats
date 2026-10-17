@@ -8,10 +8,6 @@ platform:
 environment:
     global:
         CYG_MIRROR: http://cygwin.mirror.constant.com
-        ATS1PACK: ats-lang-anairiats-0.2.12
-        ATS1PACKTGZ: ats-lang-anairiats-0.2.12.tgz
-        ATS1PACKURL: http://ats-lang.github.io/ATS-Anairiats/ats-lang-anairiats-0.2.12.tgz
-        ATSHOMERELOC: ATS-0.2.12
         PATSCONTRIBURL: https://github.com/githwxi/ATS-Postiats-contrib.git
 
     matrix:
@@ -34,7 +30,6 @@ cache:
 init:
     # Set Windows environment variables so they're accessible from within cygwin
     - 'FOR /F "tokens=* USEBACKQ" %%F IN (`%CYG_PATH% %APPVEYOR_BUILD_FOLDER%`) DO SET BUILD_FOLDER=%%F'
-    - 'FOR /F "tokens=* USEBACKQ" %%F IN (`%CYG_PATH% %APPVEYOR_BUILD_FOLDER%/ats-lang-anairiats-0.2.12`) DO SET ATSHOME=%%F'
     - 'FOR /F "tokens=* USEBACKQ" %%F IN (`%CYG_PATH% %APPVEYOR_BUILD_FOLDER%`) DO SET PATSHOME=%%F'
     - 'FOR /F "tokens=* USEBACKQ" %%F IN (`%CYG_PATH% %APPVEYOR_BUILD_FOLDER%/ATS-Postiats-contrib`) DO SET PATSHOMERELOC=%%F'
     - git config --global core.symlinks true
@@ -48,15 +43,14 @@ init:
     - '%CYG_INSTALL% "wget"'
     - '%CYG_SH% "wget rawgit.com/transcode-open/apt-cyg/master/apt-cyg"'
     - '%CYG_SH% "install apt-cyg /bin"'
-    - '%CYG_SH% "apt-cyg install make autoconf automake gcc-core libtool intltool pkg-config git libgc-devel libgmp-devel"'
+    - '%CYG_SH% "apt-cyg install make autoconf automake gcc-core libtool intltool pkg-config git libgmp-devel"'
     - 'echo Setup Cygwin dependencies is finished!'
 
 before_build:
     - 'set PATH=%PATH%;%CYG_ROOT%/bin'
-    - 'echo Build ATS1(with GC)...'
-    - '%CYG_SH% "cd $BUILD_FOLDER && curl -O $ATS1PACKURL && tar -zxf $ATS1PACKTGZ"'
-    - '%CYG_SH% "cd $BUILD_FOLDER/$ATS1PACK; exec 0</dev/null; ./configure && make all"'
-    - 'echo Build ATS1(with GC) is finished!'
+    - 'echo Build the stage-0 compiler (ATS2 0.4.2; ATS1 is not needed)...'
+    - '%CYG_SH% "cd $BUILD_FOLDER && exec 0</dev/null; sh travis-ci/install-ats2.sh 0.4.2"'
+    - 'echo Build the stage-0 compiler is finished!'
     - 'echo Download ATS2-contrib...'
     - '%CYG_SH% "cd $BUILD_FOLDER && git clone $PATSCONTRIBURL"'
     - 'echo Download ATS2-contrib is finished!'
@@ -68,8 +62,6 @@ build_script:
     - 'echo Repo build commit is: %APPVEYOR_REPO_COMMIT%'
     - '%CYG_SH% "echo PATSHOME=$PATSHOME"'
     - 'echo Build ATS2...'
-    - '%CYG_SH% "cd $PATSHOME; exec 0</dev/null; make -f codegen/Makefile_atslib"'
-    - '%CYG_SH% "cd $PATSHOME; exec 0</dev/null; make -f Makefile_devl src_depend"'
-    - '%CYG_SH% "cd $PATSHOME; exec 0</dev/null; make -f Makefile_devl"'
+    - '%CYG_SH% "cd $PATSHOME; exec 0</dev/null; make -f Makefile_devl PATSOPT=$HOME/ats2-stage0/bin/patsopt STAGE0HOME=$HOME/ats2-stage0/lib/ats2-postiats-0.4.2"'
 
 test: off

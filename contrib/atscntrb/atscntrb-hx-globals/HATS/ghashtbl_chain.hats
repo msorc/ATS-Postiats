@@ -100,11 +100,6 @@ fun takeout_all (): List0_vt @(key, itm)
 
 (* ****** ****** *)
 //
-extern
-fun
-foreach_cloref
-  (fwork: (key, &itm >> _) -<cloref1> void): void
-//
 (* ****** ****** *)
 
 local
@@ -289,18 +284,6 @@ prval ((*void*)) = $UNSAFE.cast2void (htbl)
 
 (* ****** ****** *)
 
-implement
-foreach_cloref(fwork) =
-{
-//
-val htbl =
-$UNSAFE.castvwtp0{HTBL}(the_hashtbl_ptr)
-val kxs = hashtbl_foreach_cloref (htbl, fwork)
-prval ((*void*)) = $UNSAFE.cast2void (htbl)
-//
-} (* end of [foreach_cloref] *)
-
-(* ****** ****** *)
 
 end // end of [local]
 

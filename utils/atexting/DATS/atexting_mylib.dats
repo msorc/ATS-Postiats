@@ -82,7 +82,7 @@ end // end of [local]
 
 local
 #include
-"{$HX_CSTREAM}/DATS/cstream_cloref.dats"
+"{$HX_CSTREAM}/DATS/cstream_cloptr.dats"
 in (*in-of-local *)
 end // end of [local]
 

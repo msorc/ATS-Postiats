@@ -13,10 +13,6 @@ streamize_fileref_line
 //
 (* ****** ****** *)
 //
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
-//
 (* ****** ****** *)
 //
 #include "./../mylibies.hats"
@@ -33,7 +29,7 @@ fun
 line_lines_get_key_value
 (
   line: string
-, lines: List(string)
+, lines: !List0_vt(string)
 ) : (Strptr1(*key*), Strptr1(*value*))
 //
 implement
@@ -61,12 +57,12 @@ fun
 loop
 (
   neol: int
-, lines: List(string), buf: !stringbuf
+, lines: !List0_vt(string), buf: !stringbuf
 ) : void =
 (
 case+ lines of
-| list_nil() => ()
-| list_cons(x, xs) =>
+| list_vt_nil() => ()
+| list_vt_cons(x, xs) =>
   loop(neol, xs, buf) where
   {
     val () =
@@ -110,8 +106,10 @@ val ((*void*)) = println! ("line1: key = ", key)
 //
 val ((*void*)) = strptr_free(key)
 //
+val lines = $list_vt{string}(line2, line3)
 val (key, value) =
-line_lines_get_key_value(line1, list_pair(line2, line3))
+line_lines_get_key_value(line1, lines)
+val ((*void*)) = list_vt_free(lines)
 //
 val ((*void*)) = println! ("line1: key = (", key, ")")
 val ((*void*)) = println! ("line1: value = (", value, ")")

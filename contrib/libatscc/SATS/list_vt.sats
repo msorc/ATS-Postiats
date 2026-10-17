@@ -69,4 +69,14 @@ overload revappend with list_vt_reverse_append of 100
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10:
+// freeing a list (of nonlinear elements)
+//
+fun
+list_vt_free
+  {a:t0p}(xs: List_vt(a)): void = "mac#%"
+//
+(* ****** ****** *)
+
 (* end of [list_vt.sats] *)

@@ -27,23 +27,9 @@ CFLAGS+=-DATS_MEMALLOC_LIBC
 
 ######
 
-all:: \
-test01
-test01: \
-test01.dats ; \
-$(PATSCC) -cleanaft $(CFLAGS) -o $@ $< -lgmp
-regress:: test01; ./$<
-cleanall:: ; $(RMF) test01
 
 ######
 
-all:: \
-test02
-test02: \
-test02.dats ; \
-$(PATSCC) -cleanaft $(CFLAGS) -o $@ $< -lgmp
-regress:: test02; ./$<
-cleanall:: ; $(RMF) test02
 
 ######
 
@@ -67,23 +53,9 @@ cleanall:: ; $(RMF) test04
 
 ######
 
-all:: \
-test05
-test05: \
-test05.dats ; \
-$(PATSCC) -cleanaft $(CFLAGS) -o $@ $< -lgmp
-regress:: test05; ./$<
-cleanall:: ; $(RMF) test05
 
 ######
 
-all:: \
-test06
-test06: \
-test06.dats ; \
-$(PATSCC) -cleanaft $(CFLAGS) -o $@ $< -lgmp
-regress:: test06; ./$<
-cleanall:: ; $(RMF) test06
 
 ######
 

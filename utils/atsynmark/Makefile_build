@@ -1,127 +1,64 @@
-######
 #
-# Makefile for atsynmark
+# Makefile for atsynmark: pats2xhtml (run in BUILD/: make -C BUILD -f ../Makefile_build)
 #
-######
-
-ATSHOMEQ="$(ATSHOME)"
-PATSHOMEQ="$(PATSHOME)"
-
-######
-
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
-
-######
-
-INCLUDE:=-I $(PATSHOMEQ)/src
-INCLATS:=-IATS $(PATSHOMEQ) -IATS $(ATSHOMEQ)
+# HX-2026-10: pats2xhtml is written in ATS2 (no GC) and built by patsopt and the C
+# compiler alone, with libatsynmark.a (utils/libatsynmark) and libatsopt.a (the compiler
+# as a library: `make -C src libatsopt.a`, Makefile_devl or utils/libatsopt). ATS1 is
+# not needed. Both libraries are built here if they are missing.
+#
+# Targets: pats2xhtml (the default), check (typecheck the files), clean, cleanall
+#
+# Variables: PATSHOME (the repository), PATSOPT, CC, CCFLAGS,
+# LIBATSOPT (the path of libatsopt.a), LIBGMP (-lgmp; empty if libatsopt.a was
+# built with C3NSTRINTKND=intknd)
+#
 
 ######
 
-CCFLAGS=-fPIC -O2
+HERE:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+SATS=$(HERE)SATS
+DATS=$(HERE)DATS
+
+include $(HERE)../libatsynmark/Makefile_vars
 
 ######
 
 all:: pats2xhtml
 
 ######
-#
-# CBOOT:: ; $(CPF) pats_*_sats.c CBOOT
-# CBOOT:: ; $(CPF) pats_*_dats.c CBOOT
-# CBOOT:: ; $(CPF) pats2xhtml_sats.c CBOOT
-# CBOOT:: ; $(CPF) pats2xhtml_*_dats.c CBOOT
-#
-######
-#
-# OBJECTS := \
-#   pats_utils_sats.o \
-#   pats_utils_dats.o \
-#   pats_global_sats.o \
-#   pats_global_dats.o \
-#   pats_errmsg_sats.o \
-#   pats_errmsg_dats.o \
-#   pats_comarg_sats.o \
-#   pats_comarg_dats.o \
-#   pats_symbol_sats.o \
-#   pats_symbol_dats.o \
-#   pats_filename_sats.o \
-#   pats_filename_dats.o \
-#   pats_intinf_sats.o \
-#   pats_effect_sats.o \
-#   pats_effect_dats.o \
-#   pats_symmap_sats.o \
-#   pats_symmap_dats.o \
-#   pats_symenv_sats.o \
-#   pats_symenv_dats.o \
-#   pats_staexp1_sats.o \
-#   pats_staexp1_dats.o \
-#   pats_staexp1_print_dats.o \
-#   pats_dynexp1_sats.o \
-#   pats_dynexp1_dats.o \
-#   pats_dynexp1_print_dats.o \
-#   pats_trans1_sats.o \
-#   pats_trans1_env_sats.o \
-#   pats_trans1_env_dats.o \
-#   pats_e1xpval_sats.o \
-#   pats_e1xpval_dats.o \
-#   pats_e1xpval_error_dats.o \
-#   pats_trans1_e0xp_dats.o \
-#   pats_trans1_error_dats.o \
-#   pats2xhtml_sats.o \
-#   pats2xhtml_level1_dats.o \
-#
-######
-#
-# %_sats.o: \
-#   $(PATSHOME)/src/%.sats; \
-#   $(ATSCC) $(INCLUDE) $(INCLATS) $(CCFLAGS) -c $<
-#
-# %_dats.o: \
-#   $(PATSHOME)/src/%.dats; \
-#   $(ATSCC) $(INCLUDE) $(INCLATS) $(CCFLAGS) -c $<
-#
-######
-##
-pats2xhtml_sats.o: \
-./../SATS/pats2xhtml.sats; \
-$(ATSCC) $(INCLUDE) $(INCLATS) -c $<
-##
-pats2xhtml_level1_dats.o: \
-./../DATS/pats2xhtml_level1.dats; \
-$(ATSCC) $(INCLUDE) $(INCLATS) -c $<
-##
-######
-#
-LDPATH :=
-LDPATH += -L"$(ATSHOME)/ccomp/lib"
-#
-LIBRARY += -latsynmark -latsopt -lats -lgmp
-#
-######
-##
-pats2xhtml: \
-./../SATS/pats2xhtml.sats \
-./../DATS/pats2xhtml_main.dats \
-./../DATS/pats2xhtml_level1.dats ; \
-$(ATSCC) -O2 $(INCLUDE) $(INCLATS) -o $@ $^ $(OBJECTS) $(LDPATH) $(LIBRARY)
-##
-cleanall:: ; $(RMF) pats2xhtml
-##
+
+OBJECTS=pats2xhtml_main_dats.o pats2xhtml_level1_dats.o
+
+pats2xhtml: $(OBJECTS) $(LIBSYNMARK) $(LIBATSOPT)
+	$(PATSCC) -o $@ $(OBJECTS) $(LIBSYNMARK) $(LIBATSOPT) $(LIBGMP)
+
 ######
 
-CPF=cp -f
-RMF=rm -f
+pats2xhtml_main_dats.c: $(DATS)/pats2xhtml_main.dats $(SATS)/pats2xhtml.sats
+	$(PATSOPT) --output $@ --dynamic $<
+pats2xhtml_level1_dats.c: $(DATS)/pats2xhtml_level1.dats $(SATS)/pats2xhtml.sats $(LIBSYNMARK)
+	$(PATSOPT) --output $@ --dynamic $<
+
+%_dats.o: %_dats.c
+	$(PATSCC) -c -o $@ $<
+
+.PRECIOUS: %_dats.c
+
+######
+
+check::
+	@for f in $(SATS)/pats2xhtml.sats; do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
+	@for f in $(DATS)/pats2xhtml_level1.dats $(DATS)/pats2xhtml_main.dats; do \
+	  echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
 
 ######
 
 clean:: ; $(RMF) *~
-clean:: ; $(RMF) */*~
-clean:: ; $(RMF) *_?ats.c
-clean:: ; $(RMF) *_?ats.o
-
-######
+clean:: ; $(RMF) *_dats.c *_dats.o
 
 cleanall:: clean
+cleanall:: ; $(RMF) pats2xhtml
+
+distclean:: cleanall
 
 ###### end of [Makefile for atsynmark] ######

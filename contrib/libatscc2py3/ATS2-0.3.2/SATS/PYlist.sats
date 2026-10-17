@@ -149,9 +149,9 @@ PYlist_reduce
 (* ****** ****** *)
 //
 fun
-PYlist2list{a:t0p} (xs: PYlist(a)): List0(a) = "mac#%"
+PYlist2list_vt{a:t0p} (xs: PYlist(a)): List0_vt(a) = "mac#%"
 fun
-PYlist2list_rev{a:t0p} (xs: PYlist(a)): List0(a) = "mac#%"
+PYlist2list_vt_rev{a:t0p} (xs: PYlist(a)): List0_vt(a) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -160,13 +160,12 @@ PYlist_string_join(xs: PYlist(string)): string = "mac#%"
 //
 (* ****** ****** *)
 //
-// HX-2016-05-25:
-// Implemented in [list.dats]
+// HX-2026-10: no GC (the list is borrowed)
 //
 fun
-PYlist_oflist{a:t0p}(xs: List(INV(a))): PYlist(a) = "mac#%"
+PYlist_oflist_vt{a:t0p}(xs: !List_vt(INV(a))): PYlist(a) = "mac#%"
 fun
-PYlist_oflist_rev{a:t0p}(xs: List(INV(a))): PYlist(a) = "mac#%"
+PYlist_oflist_vt_rev{a:t0p}(xs: !List_vt(INV(a))): PYlist(a) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -174,7 +173,7 @@ fun{a:t0p}
 PYlist_sort_1(xs: PYlist(a)): void // = "mac#%"
 fun
 PYlist_sort_2{a:t0p}
-  (xs: PYlist(a), cmp: (a, a) -<cloref1> int): void = "mac#%"
+  (xs: PYlist(a), cmp: (a, a) -<cloptr1> int): void = "mac#%"
 //
 (* ****** ****** *)
 //

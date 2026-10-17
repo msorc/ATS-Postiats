@@ -80,22 +80,22 @@ foldleft_list
   (xs, ini) = let
 //
 prval () =
-lemma_list_param (xs)
+lemma_list_vt_param (xs)
 //
 fun loop
   {n:nat} .<n>.
 (
-  xs: list (x, n), acc: res
+  xs: !list_vt(x, n), acc: res
 ) : res =
 (
 case+ xs of
-| list_cons
+| list_vt_cons
     (x, xs) => let
     val acc = foldleft_list$fwork<x><res> (acc, x)
   in
     loop (xs, acc)
-  end // end of [list_cons]
-| list_nil((*void*)) => acc
+  end // end of [list_vt_cons]
+| list_vt_nil((*void*)) => acc
 ) (* end of [loop] *)
 //
 in

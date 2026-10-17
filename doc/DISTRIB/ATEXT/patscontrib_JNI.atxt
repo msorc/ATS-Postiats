@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -136,7 +138,7 @@ packfilesynop(x) = atext_nil((*void*))
 
 %{
 
-implement main () = ()
+implement main0 () = ()
 
 %}
 

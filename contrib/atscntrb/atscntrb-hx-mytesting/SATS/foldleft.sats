@@ -55,7 +55,7 @@ fun
 {x:t0p}
 {res:vt0p}
 foldleft_list
-  (xs: List(x), ini: res): res
+  (xs: !List_vt(x), ini: res): res
 fun
 {x:t0p}
 {res:vt0p}

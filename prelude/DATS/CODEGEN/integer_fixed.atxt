@@ -110,6 +110,6 @@ g0uint2uint<uint64knd,uintknd> = g0uint2uint_uint64_uint
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_fixed_atxt.txt")
 %}\

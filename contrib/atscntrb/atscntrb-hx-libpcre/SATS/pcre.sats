@@ -239,9 +239,9 @@ fun
 pcre_exec{n,n2:int}
 (
   code: !pcreptr1, extra: !pcreptr0_extra
-, subject: arrayref(char, n), length: int n
+, subject: ptr(*char[n]*), length: int n
 , startoffset: natLte(n), options: uint(*bits*)
-, ovector: arrayref(int, n2), ovecsize: int(n2)
+, ovector: ptr(*int[n2]*), ovecsize: int(n2)
 ) : int = "mac#%" // end of [pcre_exec]
 
 (* ****** ****** *)

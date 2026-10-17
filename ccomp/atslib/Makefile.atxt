@@ -4,17 +4,17 @@ staload
 UN = "prelude/SATS/unsafe.sats"
 //
 staload
-_(*anon*) = "prelude/DATS/list.dats"
-staload
 _(*anon*) = "prelude/DATS/list_vt.dats"
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
-staload TIME = "libc/SATS/time.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 //
 dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 //
 %}\
 %{
@@ -28,32 +28,19 @@ fun comment
 fun stringrepl
   (str: string, c0: char, c1: char): string = let
 //
-fun loop {n:nat}
-(
-  str: string n, i: sizeLte n, res: List_vt (char)
-) :<cloref1> List_vt (char) = let
+fun loop (p: ptr): void = let
+  val c = $UN.ptr0_get<char> (p)
 in
-//
-if string_isnot_atend (str, i) then let
-  val c = str[i]
-in
-  if c != c0 then
-    loop (str, i+1, list_vt_cons (c, res))
-  else
-    loop (str, i+1, list_vt_cons (c1, res))
-  // end of [if]
-end else res // end of [if]
-//
+  if c != '\000' then (
+    if c = c0 then $UN.ptr0_set<char> (p, c1); loop (ptr0_succ<char> (p))
+  ) (* end of [if] *)
 end // end of [loop]
 //
-val str = string1_of_string (str)
-val cs = loop (str, (size1_of_int1)0, list_vt_nil)
-val len = list_vt_length (cs)
-val sbuf = string_make_list_rev_int ($UN.linlst2lst(cs), len)
-val () = list_vt_free (cs)
+val str2 = string0_copy (str)
+val () = loop ($UN.castvwtp1{ptr}(str2))
 //
 in
-  $UN.castvwtp0{string}(sbuf)
+  $UN.castvwtp0{string}(str2)
 end // end of [stringrepl]
 
 fun
@@ -119,7 +106,6 @@ CCFLAGS=-fPIC -O2
 DATSMEMALLOC=
 #
 # DATSMEMALLOC=-DATS_MEMALLOC_LIBC
-# DATSMEMALLOC=-DATS_MEMALLOC_GCBDW
 #
 ######
 
@@ -165,13 +151,6 @@ atslib:: atslib_libats
 
 ######
 
-#make_entry("libats", "DATS/funmap_list.dats")
-#make_entry("libats", "DATS/funmap_avltree.dats")
-#make_entry("libats", "DATS/funset_listord.dats")
-#make_entry("libats", "DATS/funset_avltree.dats")
-#make_entry("libats", "DATS/funarray_braunt.dats")
-#make_entry("libats", "DATS/fundeque_fngtree.dats")
-#make_entry("libats", "DATS/funralist_nested.dats")
 
 ######
 
@@ -185,45 +164,6 @@ atslib:: atslib_libats
 ######
 
 #make_entry("libats", "DATS/hashtbl_chain.dats")
-
-######
-
-atslib:: atslib_libats_ML
-
-######
-
-#make_entry("libats/ML", "DATS/list0.dats")
-#make_entry("libats/ML", "DATS/option0.dats")
-#make_entry("libats/ML", "DATS/array0.dats")
-#make_entry("libats/ML", "DATS/matrix0.dats")
-#make_entry("libats/ML", "DATS/string.dats")
-#make_entry("libats/ML", "DATS/strarr.dats")
-
-######
-
-#make_entry("libats/ML", "DATS/argvec.dats")
-
-######
-
-#make_entry("libats/ML", "DATS/gvalue.dats")
-
-######
-
-#make_entry("libats/ML", "DATS/dynarray.dats")
-#make_entry("libats/ML", "DATS/hashtblref.dats")
-
-######
-
-#make_entry("libats/ML", "DATS/filebas.dats")
-#make_entry("libats/ML", "DATS/filebas_dirent.dats")
-
-######
-
-#make_entry("libats/ML", "COMPILE/DATS/array0.dats")
-#make_entry("libats/ML", "COMPILE/DATS/string.dats")
-#make_entry("libats/ML", "COMPILE/DATS/funmap.dats")
-#make_entry("libats/ML", "COMPILE/DATS/funarray.dats")
-#make_entry("libats/ML", "COMPILE/DATS/hashtblref.dats")
 
 ######
 
@@ -270,5 +210,5 @@ cleanall:: ; $(RMF) lib/libatslib.a
 ###### end of [Makefile] ######
 \
 %{
-implement main () = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
 %}\

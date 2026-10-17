@@ -49,14 +49,14 @@ fun
 qlistref_foldleft
   {res:vt0p}{a:t0p}
 (
-  qlistref(a), init: res, fopr: (res, a) -<cloref1> res
+  qlistref(a), init: res, fopr: (res, a) -<cloptr1> res
 ) : res = "mac#%" // end of [qlistref_foldleft]
 //
 fun
 qlistref_foldright
   {a:t0p}{res:vt0p}
 (
-  qlistref(a), fopr: (a, res) -<cloref1> res, sink: res
+  qlistref(a), fopr: (a, res) -<cloptr1> res, sink: res
 ) : res = "mac#%" // end of [qlistref_foldright]
 //
 (* ****** ****** *)

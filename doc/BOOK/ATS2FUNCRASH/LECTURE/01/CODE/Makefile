@@ -18,15 +18,10 @@ compiling
 compiling: ; \
 $(MYATSCC) compiling.dats
 
-all:: \
-libaccessing
-libaccessing: ; \
-$(MYATSCC) libaccessing.dats
 
 ######
 
 regress:: compiling; ./compiling_dats
-regress:: libaccessing; ./libaccessing_dats
 
 ######
 

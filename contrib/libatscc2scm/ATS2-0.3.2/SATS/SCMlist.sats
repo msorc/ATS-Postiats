@@ -112,20 +112,22 @@ SCMlist_reverse{a:t0p}(SCMlist(a)): SCMlist(a) = "mac#%"
 (* ****** ****** *)
 //
 fun
-SCMlist2list
-  {a:t0p}(SCMlist(INV(a))): List0(a) = "mac#%"
+SCMlist2list_vt
+  {a:t0p}(SCMlist(INV(a))): List0_vt(a) = "mac#%"
 fun
-SCMlist2list_rev
-  {a:t0p}(SCMlist(INV(a))): List0(a) = "mac#%"
+SCMlist2list_vt_rev
+  {a:t0p}(SCMlist(INV(a))): List0_vt(a) = "mac#%"
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (the list is borrowed)
+//
 fun
-SCMlist_oflist
-  {a:t0p}(xs: List(INV(a))): SCMlist(a) = "mac#%"
+SCMlist_oflist_vt
+  {a:t0p}(xs: !List_vt(INV(a))): SCMlist(a) = "mac#%"
 fun
-SCMlist_oflist_rev
-  {a:t0p}(xs: List(INV(a))): SCMlist(a) = "mac#%"
+SCMlist_oflist_vt_rev
+  {a:t0p}(xs: !List_vt(INV(a))): SCMlist(a) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -135,7 +137,7 @@ SCMlist_sort_1
 fun
 SCMlist_sort_2{a:t0p}
 (
-  xs: SCMlist(INV(a)), cmp: (a, a) -<cloref1> int
+  xs: SCMlist(INV(a)), cmp: (a, a) -<cloptr1> int
 ) : SCMlist(a) = "mac#%" // end-of-function
 //
 (* ****** ****** *)

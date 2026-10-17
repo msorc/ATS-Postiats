@@ -40,43 +40,41 @@ typedef symbol = $SYM.symbol
 (* ****** ****** *)
 
 absvtype
-symmap_vtype (itm:type)
+symmap_vtype (itm:type) = ptr
 stadef symmap = symmap_vtype
 
 (* ****** ****** *)
 
-fun symmap_make_nil
-  {itm:type} ():<> symmap (itm)
+//
+// HX-2026-10: the functions on a symmap are templates, as they are
+// implemented by (template) functions of libats/linmap_avltree
+//
+fun{itm:type} symmap_make_nil ():<> symmap (itm)
 
-fun symmap_free
-  {itm:type} (map: symmap (itm)):<> void
+fun{itm:type} symmap_free (map: symmap (itm)):<> void
 
 (* ****** ****** *)
 
-fun
+fun{itm:type}
 symmap_search
-  {itm:type}
   (map: !symmap itm, k: symbol):<> Option_vt (itm)
 // end of [symmap_search]
 
-fun
-symmap_insert
-  {itm:type} (
+fun{itm:type}
+symmap_insert (
   map: &symmap (itm), key: symbol, itm: itm
 ) :<> void // end of [symmap_insert]
 
 (* ****** ****** *)
 
-fun
-symmap_joinwth
-  {itm:type}(m1: &symmap itm, m2: !symmap itm):<> void
+fun{itm:type}
+symmap_joinwth (m1: &symmap itm, m2: !symmap itm):<> void
 // end of [symmap_joinwth]
 
 (* ****** ****** *)
 
-fun
-fprint_symmap
-  {itm:type} (
+fun{itm:type}
+fprint_symmap (
   out: FILEref, map: !symmap itm, f: (FILEref, itm) -> void
 ) : void // end of [fprint_symmap]
 

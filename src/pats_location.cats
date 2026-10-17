@@ -38,9 +38,9 @@
 /* ****** ****** */
 
 typedef struct {
-  ats_lint_type ntot ;
-  ats_int_type nrow ; // line number
-  ats_int_type ncol ; // line offset
+  atstype_lint ntot ;
+  atstype_int nrow ; // line number
+  atstype_int ncol ; // line offset
 } pats_position_struct ;
 
 /* ****** ****** */

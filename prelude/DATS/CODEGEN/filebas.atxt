@@ -526,15 +526,15 @@ fileref_put_charlst
 //
 fun loop
 (
-  out: FILEref, cs: List(char)
+  out: FILEref, cs: !List_vt(char)
 ) : void = let
 in
 //
 case+ cs of
-| list_nil() => ()
-| list_cons(c, cs) => let
-    val () = fileref_putc(out, c) in loop(out, cs)
-  end // end of [list_cons]
+| list_vt_nil() => ()
+| list_vt_cons(c, cs1) => let
+    val () = fileref_putc(out, c) in loop(out, cs1)
+  end // end of [list_vt_cons]
 //
 end // end of [loop]
 //
@@ -873,8 +873,7 @@ in
   case+ cs of
   | list_vt_cons _ => let
       val str =
-        string_make_rlist
-          ($UN.list_vt2t(cs))
+        string_make_rlist(cs)
         // string_make_rlist
       val () =
         list_vt_free<char>(cs)
@@ -943,10 +942,11 @@ in
 //
 if bsz2 > 0 then
 {
-  val A =
-    $UN.cast{arrayref(char,n2)}(bufp)
+  val (pfA, fpfA | pA) =
+    $UN.ptr_vtake{@[char][n2]}(bufp)
   val () =
-    fileref_foreach$fworkv<env>(A, bsz2, env)
+    fileref_foreach$fworkv<env>(!pA, bsz2, env)
+  prval ((*returned*)) = fpfA(pfA)
   val ((*void*)) = loop (pf | inp, bufp, bsz, env)
 } (* end of [if] *)
 //
@@ -984,7 +984,7 @@ array_foreach$fwork<char><env>
   (x, env) = fileref_foreach$fwork<env> (x, env)
 //
 in
-  ignoret(arrayref_foreach_env<char><env> (A, n, env))
+  ignoret(array_foreach_env<char><env> (A, n, env))
 end // end of [fileref_foreach$fworkv]
 
 #atscode_separator()
@@ -1202,6 +1202,6 @@ val inp = $UN.castvwtp0{FILEref}(inp)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "filebas_atxt.txt")
 %}\

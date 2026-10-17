@@ -67,9 +67,14 @@ EStream_scan_stream_opt
   {a,b,c:t0p}
 (
   xs: EStream(b)
-, ini: a, ys: stream(c)
+, ini: a, ys: stream_vt(c)
 , fopr: cfun(a, b, c, Option_vt(a))
 ) : Property(a) = "mac#%" // end-of-function
+//
+// HX-2026-10: no GC
+// [ys] and [fopr] are consumed; an element of [ys]
+// is used up only if [fopr] returns some new state
+//
 //
 overload scan with EStream_scan_stream_opt
 overload .scan with EStream_scan_stream_opt
@@ -95,9 +100,23 @@ EValue_make_estream_scan
 //
 (* ****** ****** *)
 //
-datatype
-singpair(a: t@ype+) =
-  | Sing of (a) | Pair of (a, a)
+// HX-2026-10: no GC
+// A singpair is either a single (Sing(x0)) or a pair
+// (Pair(x0, x1)) of values; it is a flat tuple (is_pair, x0, x1)
+// (where x1 is meaningless for a single)
+//
+typedef
+singpair(a: t@ype) = @(bool, a, a)
+//
+fun
+singpair_is_pair
+  {a:t0p}(sp: singpair(a)): bool = "mac#%"
+fun
+singpair_get_fst
+  {a:t0p}(sp: singpair(a)): (a) = "mac#%"
+fun
+singpair_get_snd
+  {a:t0p}(sp: singpair(a)): (a) = "mac#%" // for a pair
 //
 (* ****** ****** *)
 //

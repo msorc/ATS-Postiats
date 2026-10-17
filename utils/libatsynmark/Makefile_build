@@ -1,3 +1,22 @@
+#
+# Makefile for libatsynmark (run in BUILD/: make -C BUILD -f ../Makefile_build)
+#
+# HX-2026-10: libatsynmark is written in ATS2 (no GC) and built by patsopt and the C
+# compiler alone, on top of the ATS2 sources of the compiler (PATSHOME/src, the
+# modules of its lexer, parser and syntax trees). ATS1 is not needed.
+#
+# libatsynmark.a only holds the objects of libatsynmark: link a program with
+#
+#   patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h prog.dats \
+#     -L$(PATSHOME)/utils/libatsynmark/BUILD -latsynmark -L$(PATSHOME)/src -latsopt -lgmp
+#
+# where libatsopt.a is the one that `make -C src` (or Makefile_devl, or utils/libatsopt)
+# builds; -lgmp is not needed if it was built with C3NSTRINTKND=intknd. Call
+# libatsynmark_dynloadall() (see SATS/libatsynmark.sats) first.
+#
+# Targets: libatsynmark (the default), gen (regenerate the arena encoding of
+# libatsynmark.spec), check (typecheck all the files), clean, cleanall
+#
 # (***********************************************************************)
 # (*                                                                     *)
 # (*                         Applied Type System                         *)
@@ -35,28 +54,9 @@
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-PATSHOMEQ="$(PATSHOME)"
+HERE:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-######
-
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSCCFLAGS=
-ATSRUNTIME=$(ATSHOMEQ)/ccomp/runtime
-
-######
-
-ATSLIB=$(ATSHOMEQ)/ccomp/lib
-ATSLIB64=$(ATSHOMEQ)/ccomp/lib64
-
-######
-
-CCFLAGS=-fPIC -O2
-
-######
-
-INCLUDE:=-I $(PATSHOMEQ)/src
-INCLATS:=-IATS $(PATSHOMEQ) -IATS $(ATSHOMEQ)
+include $(HERE)Makefile_vars
 
 ######
 
@@ -64,138 +64,66 @@ all:: libatsynmark
 
 ######
 
-SATS=./../SATS
-DATS=./../DATS
+SATS=$(HERE)SATS
+DATS=$(HERE)DATS
 
 ######
-#
-$(CBOOT):: ; $(CPF) dynloadall_dats.c $(CBOOT)
-$(CBOOT):: ; $(CPF) libatsynmark_sats.c $(CBOOT)
-$(CBOOT):: ; $(CPF) libatsynmark_dats.c $(CBOOT)
-$(CBOOT):: ; $(CPF) libatsynmark_*_dats.c $(CBOOT)
-#
-######
 
-SOURCES = \
-  pats_error.sats \
-  pats_error.dats \
-  pats_utils.sats \
-  pats_utils.dats \
-  pats_global.sats \
-  pats_global.dats \
-  pats_basics.sats \
-  pats_basics.dats \
-  pats_symbol.sats \
-  pats_symbol.dats \
-  pats_filename.sats \
-  pats_filename.dats \
-  pats_location.sats \
-  pats_location.dats \
-  pats_reader.sats \
-  pats_reader.dats \
-  pats_lexbuf.sats \
-  pats_lexbuf.dats \
-  pats_lexing.sats \
-  pats_lexing.dats \
-  pats_lexing_token.dats \
-  pats_lexing_print.dats \
-  pats_lexing_error.dats \
-  pats_label.sats \
-  pats_label.dats \
-  pats_fixity.sats \
-  pats_fixity_prec.dats \
-  pats_fixity_fxty.dats \
-  pats_syntax.sats \
-  pats_syntax.dats \
-  pats_syntax_print.dats \
-  pats_tokbuf.sats \
-  pats_tokbuf.dats \
-  pats_parsing.sats \
-  pats_parsing.dats \
-  pats_parsing_error.dats \
-  pats_parsing_util.dats \
-  pats_parsing_kwds.dats \
-  pats_parsing_base.dats \
-  pats_parsing_e0xp.dats \
-  pats_parsing_sort.dats \
-  pats_parsing_staexp.dats \
-  pats_parsing_p0at.dats \
-  pats_parsing_dynexp.dats \
-  pats_parsing_decl.dats \
-  pats_parsing_toplevel.dats \
+GENHATS=$(SATS)/libatsynmark_gen.hats $(DATS)/libatsynmark_gen_dats.hats
+
+$(SATS)/libatsynmark_gen.hats: $(HERE)libatsynmark.spec $(PATSHOME)/utils/arenagen/arenagen.py
+	python3 $(PATSHOME)/utils/arenagen/arenagen.py --global sats $< > $@
+$(DATS)/libatsynmark_gen_dats.hats: $(HERE)libatsynmark.spec $(PATSHOME)/utils/arenagen/arenagen.py
+	python3 $(PATSHOME)/utils/arenagen/arenagen.py --global --compact dats $< > $@
+
+gen:: ; $(RMF) $(GENHATS)
+gen:: $(GENHATS)
 
 ######
-#
-OBJECTS :=
-# OBJECTS := $(patsubst %.sats, %_sats.o, $(SOURCES))
-# OBJECTS := $(patsubst %.dats, %_dats.o, $(OBJECTS))
-#
+
+# the modules of the library (every module is compiled by itself)
+MODULES=libatsynmark libatsynmark_psynmark libatsynmark_pats2xhtml \
+  libatsynmark_pats2xhtml_bground libatsynmark_pats2xhtml_embedded
+
+OBJECTS=$(addsuffix _dats.o,$(MODULES)) dynloadall_dats.o
+
+libatsynmark:: libatsynmark.a
+
+libatsynmark.a: $(OBJECTS)
+	$(RMF) $@; $(AR) rcs $@ $^
+
 ######
 
-libatsynmark:: $(OBJECTS)
+%_dats.c: $(DATS)/%.dats $(SATS)/libatsynmark.sats $(GENHATS)
+	$(PATSOPT) --output $@ --dynamic $<
+
+dynloadall_dats.c: $(HERE)dynloadall.dats $(SATS)/libatsynmark.sats
+	$(PATSOPT) --output $@ --dynamic $<
+
+# the template instantiations of the clients need the .dats of the others
+libatsynmark_pats2xhtml_bground_dats.c libatsynmark_pats2xhtml_embedded_dats.c: \
+  $(DATS)/libatsynmark_psynmark.dats $(DATS)/libatsynmark_pats2xhtml.dats
+
+%_dats.o: %_dats.c
+	$(PATSCC) -fPIC -c -o $@ $<
+
+.PRECIOUS: %_dats.c
 
 ######
-#
-%_sats.o: \
-$(PATSHOME)/src/%.sats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-#
-%_dats.o: \
-$(PATSHOME)/src/%.dats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-#
-######
-#
-libatsynmark:: \
-libatsynmark_sats.o
-libatsynmark_sats.o: \
-$(SATS)/libatsynmark.sats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-libatsynmark:: \
-libatsynmark_dats.o
-libatsynmark_dats.o: \
-$(DATS)/libatsynmark.dats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-#
-libatsynmark:: libatsynmark_psynmark_dats.o
-libatsynmark:: libatsynmark_pats2xhtml_dats.o
-libatsynmark:: libatsynmark_pats2xhtml_bground_dats.o
-libatsynmark:: libatsynmark_pats2xhtml_embedded_dats.o
-#
-libatsynmark_psynmark_dats.o: \
-$(DATS)/libatsynmark_psynmark.dats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-libatsynmark_pats2xhtml_dats.o: \
-$(DATS)/libatsynmark_pats2xhtml.dats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-libatsynmark_pats2xhtml_bground_dats.o: \
-$(DATS)/libatsynmark_pats2xhtml_bground.dats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-libatsynmark_pats2xhtml_embedded_dats.o: \
-$(DATS)/libatsynmark_pats2xhtml_embedded.dats ; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-#
-######
-#
-libatsynmark:: \
-dynloadall_dats.o
-dynloadall_dats.o: ./../dynloadall.dats; \
-  $(ATSCC) $(INCLATS) $(INCLUDE) $(CCFLAGS) -c $<; $(AR) -r libatsynmark.a $@
-#
-######
 
-AR=ar
-CPF=cp -f
-RMF=rm -f
+check:: $(GENHATS)
+	@for f in $(SATS)/libatsynmark.sats; do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
+	@for f in $(addprefix $(DATS)/,$(addsuffix .dats,$(MODULES))) $(HERE)dynloadall.dats; do \
+	  echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
 
 ######
 
 clean:: ; $(RMF) *~
-clean:: ; $(RMF) *_?ats.c *_?ats.o
+clean:: ; $(RMF) *_dats.c *_dats.o
 
 cleanall:: clean
 cleanall:: ; $(RMF) libatsynmark.a
 
 distclean:: cleanall
 
-###### end of [Makefile] ######
+###### end of [Makefile for libatsynmark] ######

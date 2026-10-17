@@ -68,12 +68,9 @@ stringBtwe
 //
 #atscode_separator()
 //
-typedef stringlst = List0(string)
 vtypedef stringlst_vt = List0_vt(string)
 //
 #atscode_separator()
-//
-typedef stringopt = Option(string)
 //
 #atscode_separator()
 
@@ -274,24 +271,24 @@ fun{
 fun{}
 string_make_list
   {n:int}
-  (cs: list(charNZ, n)):<!wrt> strnptr(n)
+  (cs: !list_vt(charNZ, n)):<!wrt> strnptr(n)
 fun{}
 string_make_listlen
   {n:int}
-  (cs: list(charNZ, n), n: int(n)):<!wrt> strnptr(n)
+  (cs: !list_vt(charNZ, n), n: int(n)):<!wrt> strnptr(n)
 
 #atscode_separator()
 
 fun{}
 string_make_rlist
   {n:int}
-  (cs: list(charNZ, n)):<!wrt> strnptr(n)
+  (cs: !list_vt(charNZ, n)):<!wrt> strnptr(n)
 // end of [string_make_rlist]
 
 fun{}
 string_make_rlistlen
   {n:int}
-  (cs: list(charNZ, n), n: int(n)):<!wrt> strnptr(n)
+  (cs: !list_vt(charNZ, n), n: int(n)):<!wrt> strnptr(n)
 // end of [string_make_rlistlen]
 
 #atscode_separator()
@@ -320,9 +317,6 @@ string_make_rlistlen_vt
 //
 #atscode_separator()
 //
-fun{}
-string_make_stream
-  (cs: stream(charNZ)):<!wrt> Strptr1
 fun{}
 string_make_stream_vt
   (cs: stream_vt(charNZ)):<!wrt> Strptr1
@@ -443,10 +437,13 @@ string1_copy
 // This can be done by calling
 // [string_copy] and then [strptr_set_at]
 //
+// HX-2026-10:
+// the updated copy is linear (no GC)
+//
 fun{}
 string_fset_at_size
   {n:int}{i:nat | i < n}
-  (NSH(string(n)), i: size_t(i), c: charNZ):<!wrt> string(n)
+  (NSH(string(n)), i: size_t(i), c: charNZ):<!wrt> strnptr(n)
 //
 (*
 fun{tk:tk}
@@ -521,18 +518,18 @@ overload string_append with string0_append6 of 0
 fun{}
 stringarr_concat{n:int}
 (
-xs: arrayref(string, n), n: size_t(n)
+xs: &(@[string][n]), n: size_t(n)
 ) :<!wrt> Strptr1 // end of [stringarr]
 //
 fun{}
-stringlst_concat(List(string)):<!wrt> Strptr1
+stringlst_concat(!List_vt(string)):<!wrt> Strptr1
 //
 #atscode_separator()
 //
 fun{}
 string_implode
   {n:int}
-  (cs: list(charNZ, n)):<!wrt> strnptr(n)
+  (cs: !list_vt(charNZ, n)):<!wrt> strnptr(n)
 //
 fun{}
 string_explode
@@ -698,6 +695,6 @@ overload fprint with fprint_stropt of 0
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "string_atxt.txt")
 %}\

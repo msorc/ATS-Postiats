@@ -57,7 +57,8 @@ PATSVERSION=$1
 ######
 
 GIT=$(which git)
-ATSCC=$(which atscc)
+# atsdoc (ATS2; the generator of the packaging scripts): built here by
+# `make -f Makefile_devl bin_atsdoc` (bin/atsdoc); no ATS1 is needed
 
 ######
 
@@ -69,13 +70,6 @@ check_git() {
 }
 
 ######
-
-check_atscc() {
-    if [ -x "$ATSCC" ] ;
-    then echo "$ATSCC found.";
-    else echo "$ATSCC not found." && exit 1;
-    fi
-}
 
 ######
 
@@ -135,16 +129,20 @@ checkout_build() {
     )
 }
 
+# The compiler (src/) is written in ATS2: the stage-0 patsopt is bin/patsopt (an
+# earlier build) or PATSOPT=... STAGE0HOME=... (an installed ATS2), see src/README.
+# `make -C src CBOOT` generates the bootstrap C bundle (src/CBOOT) of the release for
+# both integer kinds. atsdoc (ATS2, `make -f Makefile_devl bin_atsdoc`) generates the
+# packaging scripts (atspackaging).
+#
 build_release_int() {
     ( cd "$PATSHOME" && \
       make -f Makefile_devl C3NSTRINTKND=intknd && \
-      make -C src -f Makefile CBOOTint && \
+      make -f Makefile_devl bin_atsdoc && \
+      make -C src CBOOT && \
       (cp ./bin/*_env.sh.in ./doc/DISTRIB/ATS-Postiats/bin/.) && \
       (cd ./doc/DISTRIB/ATS-Postiats && \
         sh ./autogen.sh && ./configure) && \
-      make -C src/CBOOT/libc -f Makefile && \
-      make -C src/CBOOT/libats -f Makefile && \
-      make -C src/CBOOT/prelude -f Makefile && \
       make -C doc/DISTRIB -f Makefile atspackaging && \
       make -C doc/DISTRIB -f Makefile atspacktarzvcf_int
       make -C doc/DISTRIB -f Makefile_inclats tarzvcf
@@ -156,13 +154,11 @@ build_release_int() {
 build_release_gmp() {
     ( cd "$PATSHOME" && \
       make -f Makefile_devl C3NSTRINTKND=gmpknd && \
-      make -C src -f Makefile CBOOTgmp && \
+      make -f Makefile_devl bin_atsdoc && \
+      make -C src CBOOT && \
       (cp ./bin/*_env.sh.in ./doc/DISTRIB/ATS-Postiats/bin/.) && \
       (cd ./doc/DISTRIB/ATS-Postiats && \
         sh ./autogen.sh && ./configure) && \
-      make -C src/CBOOT/libc -f Makefile && \
-      make -C src/CBOOT/libats -f Makefile && \
-      make -C src/CBOOT/prelude -f Makefile && \
       make -C doc/DISTRIB -f Makefile atspackaging && \
       make -C doc/DISTRIB -f Makefile atspacktarzvcf_gmp
       make -C doc/DISTRIB -f Makefile_inclats tarzvcf
@@ -208,7 +204,6 @@ main() {
     [ -z "$1" ] && _usage "Please specify build VERSION"
 
     check_git
-    check_atscc
     export_pats
     clone_Postiats
     check_version

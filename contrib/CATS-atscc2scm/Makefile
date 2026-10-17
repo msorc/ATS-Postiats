@@ -46,8 +46,8 @@ $(SOURCES_DATS); \
 $(PATSCC) -verbose \
   -Wint-conversion \
   -Wno-implicit-function-declaration \
-  -DATS_MEMALLOC_GCBDW -O2 -o bin/atscc2scm \
-  $(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS) -lgc
+  -DATS_MEMALLOC_LIBC -O2 -o bin/atscc2scm \
+  $(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS)
 #
 ######
 #

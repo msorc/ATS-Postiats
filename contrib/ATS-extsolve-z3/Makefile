@@ -65,7 +65,6 @@ LDFLAGS += \
 $(shell pkg-config --libs json-c)
 #
 LDFLAGS +=-lz3
-LDFLAGS +=-lgc
 #
 ######
 
@@ -93,7 +92,6 @@ $(PATSOLVE)/CATS/patsolve_parsing_dats.c \
 
 SOURCES_DATS :=
 SOURCES_DATS += patsolve_z3_main.dats
-SOURCES_DATS += patsolve_z3_mylib.dats
 SOURCES_DATS += patsolve_z3_commarg.dats
 SOURCES_DATS += patsolve_z3_solving.dats
 

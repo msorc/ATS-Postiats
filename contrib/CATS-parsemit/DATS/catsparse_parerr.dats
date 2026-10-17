@@ -19,6 +19,8 @@ staload UN = $UNSAFE
 
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 staload "./../SATS/catsparse_parsing.sats"
 
@@ -26,7 +28,7 @@ staload "./../SATS/catsparse_parsing.sats"
 //
 implement
 parerr_make (loc, node) =
-  '{ parerr_loc= loc, parerr_node= node }
+  parerr_PARERR(loc, node)
 //
 (* ****** ****** *)
 //
@@ -61,7 +63,7 @@ synent_needed
 , x: parerr, name: string
 ) : void = () where {
 //
-val () = fprint (out, x.parerr_loc)
+val () = fprint (out, x.parerr_loc())
 val () =
   fprintln! (out, ": error(parsing): the syntactic entity [", name, "] is needed.")
 //
@@ -75,7 +77,7 @@ keyword_needed
   out: FILEref
 , x: parerr, name: string
 ) : void = () where {
-  val () = fprint (out, x.parerr_loc)
+  val () = fprint (out, x.parerr_loc())
   val () = fprintln! (out, ": error(parsing): the keyword [", name, "] is needed.")
 } (* end of [keyword_needed] *)
 
@@ -95,7 +97,7 @@ keyword_needed (out, ,(x), ,(name))
 in
 //
 case+
-x.parerr_node of
+x.parerr_node() of
 //
 | PARERR_EOF () => KN (x, "EOF")
 //
@@ -151,9 +153,9 @@ fprint_parerrlst
   (out, xs) =
 (
 //
-case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) =>
+case+ glist_view(xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs) =>
   {
     val () = fprint_parerr (out, x)
     val () = fprint_parerrlst (out, xs)
@@ -177,7 +179,18 @@ the_parerrlst_print_free
   if nerr > 0 then
   {
     val () = fprint (stderr_ref, "ParsingErrors:\n")
-    val () = fprint_parerrlst (stderr_ref, $UN.list_vt2t(xs))
+    fun
+    prlst{n:int}
+    (
+      xs: !list_vt(parerr, n)
+    ) : void =
+    (
+      case+ xs of
+      | list_vt_nil() => ()
+      | list_vt_cons(x, xs1) =>
+          (fprint_parerr(stderr_ref, x); prlst(xs1))
+    ) (* end of [prlst] *)
+    val () = prlst(xs)
   } (* end of [if] *)
   val ((*freed*)) = list_vt_free (xs)
 //

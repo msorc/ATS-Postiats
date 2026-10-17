@@ -20,11 +20,6 @@ PATSOLVE_Z3_SOLVING
 UN =
 "prelude/SATS/unsafe.sats"
 //
-#staload
-"libats/ML/SATS/atspre.sats"
-#staload _ =
-"libats/ML/DATS/atspre.dats"
-//
 #staload "./patsolve_z3_solving_ctx.dats"
 //
 (* ****** ****** *)
@@ -898,75 +893,63 @@ prval ((*void*)) = fpf(ctx)
 
 implement
 formula_error_s2cst
-  (s2c0) = res where
+  (ar, s2c0) = res where
 {
 //
 val () =
-prerrln!
-  ("formula_error: s2c0 = ", s2c0)
+prerr("formula_error: s2c0 = ")
+val () =
+fprint_s2cst(ar, stderr_ref, s2c0)
+val () = prerr_newline()
 //
 val () = assertloc(false)
-val res = formula_error_s2cst(s2c0)
+val res = formula_error_s2cst(ar, s2c0)
 //
 } (* end of [formula_error_s2cst] *)
 
 implement
 formula_error_s2exp
-  (s2e0) = res where
+  (ar, s2e0) = res where
 {
 //
 val () =
-prerrln!
-  ("formula_error: s2e0 = ", s2e0)
+prerr("formula_error: s2e0 = ")
+val () =
+fprint_s2exp(ar, stderr_ref, s2e0)
+val () = prerr_newline()
 //
 val () = assertloc(false)
-val res = formula_error_s2exp(s2e0)
+val res = formula_error_s2exp(ar, s2e0)
 //
 } (* end of [formula_error_s2exp] *)
 
 (* ****** ****** *)
 //
-extern
-fun
-Z3_mk_s2cst_symbol
-  (ctx: !Z3_context, s2c: s2cst): Z3_symbol
+// HX: [name(stamp)]
 //
 extern
 fun
-Z3_mk_s2var_symbol
-  (ctx: !Z3_context, s2v: s2var): Z3_symbol
+Z3_mk_name_stamp_symbol
+(
+  ctx: !Z3_context, name: string, stamp: stamp
+) : Z3_symbol // end-of-function
 //
-(* ****** ****** *)
-
 implement
-Z3_mk_s2cst_symbol
-  (ctx, s2c0) = sym0 where
+Z3_mk_name_stamp_symbol
+  (ctx, name, stamp) = sym0 where
 {
 //
-val name = s2c0.name()
-val name = symbol_get_name(name)
-val name = string0_copy(name)
-//
 val stamp =
-  stamp_get_int(s2c0.stamp())
-//
-val stamp = g0int2string(stamp)
+  g0int2string(stamp_get_int(stamp))
 //
 var
 strarr =
 @[string](
-  $UN.strptr2string(name)
-, "(", $UN.strptr2string(stamp), ")"
+  name, "(", $UN.strptr2string(stamp), ")"
 ) (* var *)
 //
-val
-name2 =
-stringarr_concat
-(
-  $UN.cast{arrayref(string,4)}(addr@strarr), i2sz(4)
-) (* stringarr_concat *)
+val name2 = stringarr_concat(strarr, i2sz(4))
 //
-val () = strptr_free(name)
 val () = strptr_free(stamp)
 //
 val sym0 =
@@ -974,85 +957,75 @@ val sym0 =
 //
 val ((*freed*)) = strptr_free(name2)
 //
-} (* end of [Z3_mk_s2cst_symbol] *)
-
-(* ****** ****** *)
-
+} (* end of [Z3_mk_name_stamp_symbol] *)
+//
+extern
+fun
+Z3_mk_s2cst_symbol{l:addr}
+  (ar: !arena(l), ctx: !Z3_context, s2c: s2cst(l)): Z3_symbol
+extern
+fun
+Z3_mk_s2var_symbol{l:addr}
+  (ar: !arena(l), ctx: !Z3_context, s2v: s2var(l)): Z3_symbol
+//
+implement
+Z3_mk_s2cst_symbol
+  (ar, ctx, s2c0) =
+Z3_mk_name_stamp_symbol
+(
+  ctx
+, $UN.cast{string}(symbol_get_name(ar, s2cst_get_name(ar, s2c0)))
+, s2cst_get_stamp(ar, s2c0)
+) (* end of [Z3_mk_s2cst_symbol] *)
+//
 implement
 Z3_mk_s2var_symbol
-  (ctx, s2v0) = sym0 where
-{
-//
-val name = s2v0.name()
-val name = symbol_get_name(name)
-val name = string0_copy(name)
-//
-val stamp =
-  stamp_get_int(s2v0.stamp())
-//
-val stamp = g0int2string(stamp)
-//
-var
-strarr =
-@[string](
-  $UN.strptr2string(name)
-, "(", $UN.strptr2string(stamp), ")"
-) (* var *)
-//
-val
-name2 =
-stringarr_concat
+  (ar, ctx, s2v0) =
+Z3_mk_name_stamp_symbol
 (
-  $UN.cast{arrayref(string,4)}(addr@strarr), i2sz(4)
-) (* stringarr_concat *)
+  ctx
+, $UN.cast{string}(symbol_get_name(ar, s2var_get_name(ar, s2v0)))
+, s2var_get_stamp(ar, s2v0)
+) (* end of [Z3_mk_s2var_symbol] *)
 //
-val () = strptr_free(name)
-val () = strptr_free(stamp)
-//
-val sym0 =
-  Z3_mk_string_symbol(ctx, $UN.strptr2string(name2))
-//
-val ((*freed*)) = strptr_free(name2)
-//
-} (* end of [Z3_mk_s2var_symbol] *)
-
 (* ****** ****** *)
 
 implement
 formula_make_s2cst
-  (env, s2c0) = let
+  (ar, env, s2c0) = let
 //
-val s2ci = s2cst_get_s2cinterp(s2c0)
+val s2ci = s2cst_get_s2cinterp(ar, s2c0)
 //
 in
 //
-case+ s2ci of
-//
-| S2CINTnone() => let
+case+
+s2cinterp_view(ar, s2ci)
+of // case+
+| ~S2CINTnone() => let
     val s2e = 
-    formula_make_s2cst_fresh(env, s2c0)
+    formula_make_s2cst_fresh(ar, env, s2c0)
     val s2e_ = formula_incref(s2e)
-    val s2e =
-    S2CINTsome($UN.castvwtp0{ptr}(s2e))
+    val s2ci =
+    s2cinterp_S2CINTsome
+      (ar, $UN.castvwtp0{ptr}(s2e))
     val ((*void*)) =
-      s2cst_set_payload(s2c0, $UN.cast{ptr}(s2e))
+      s2cst_set_payload(ar, s2c0, $UN.cast{ptr}(s2ci))
     // end of [val]
   in
     s2e_
   end // end of [S2CINTnone]
-//
-| S2CINTsome(ptr) => let
+| ~S2CINTsome(ptr) => let
     val s2e =
       $UN.castvwtp0{form}(ptr)
+    // end of [val]
     val s2e_ = formula_incref(s2e)
     prval () = $UN.cast2void(s2e)
   in
     s2e_
   end // end of [S2CINTsome]
-//
-| S2CINTbuiltin_0(f) => f((*void*))
-//
-| _(*rest-of-S2CINT*) => formula_error(s2c0)
+| ~S2CINTbuiltin_0(f) => f((*void*))
+| v0(*rest-of-S2CINT*) =>
+    (s2cinterp_view_free(v0); formula_error(ar, s2c0))
 //
 end // end of [formula_make_s2cst]
 
@@ -1060,19 +1033,21 @@ end // end of [formula_make_s2cst]
 
 implement
 formula_make_s2cst_fresh
-  (env, s2c0) = ast0 where
+  (ar, env, s2c0) = ast0 where
 {
 //
 val ty0 =
-  sort_make_s2rt(s2c0.srt())
+sort_make_s2rt
+  (ar, s2cst_get_srt(ar, s2c0))
 val ty0 =
   $UN.castvwtp0{Z3_sort}(ty0)
 //
 val
 (fpf|ctx) =
   the_Z3_context_vget((*void*))
+//
 val name =
-  Z3_mk_s2cst_symbol(ctx, s2c0)
+  Z3_mk_s2cst_symbol(ar, ctx, s2c0)
 //
 val ast0 = Z3_mk_const(ctx, name, ty0)
 //
@@ -1086,31 +1061,18 @@ prval ((*returned*)) = fpf(ctx)
 
 implement
 formula_make_s2var
-  (env, s2v0) = let
-//
-(*
-val () =
-println!
-(
- "formula_make_s2var: s2v0 = ", s2v0
-) (* end of [val] *)
-val () =
-println!
-(
- "formula_make_s2var: s2v0.stamp = ", s2v0.stamp()
-) (* end of [val] *)
-*)
+  (ar, env, s2v0) = let
 //
 val
 ptr =
-s2var_get_payload(s2v0)
+s2var_get_payload(ar, s2v0)
 //
 in
 //
 if
 ptr > 0
-then s2var_top_payload(s2v0)
-else formula_make_s2var_fresh(env, s2v0)
+then s2var_top_payload(ar, s2v0)
+else formula_make_s2var_fresh(ar, env, s2v0)
 //
 end // end of [formula_make_s2var]
 
@@ -1118,11 +1080,12 @@ end // end of [formula_make_s2var]
 
 implement
 formula_make_s2var_fresh
-  (env, s2v0) = ast0 where
+  (ar, env, s2v0) = ast0 where
 {
 //
 val ty0 =
-  sort_make_s2rt(s2v0.srt())
+sort_make_s2rt
+  (ar, s2var_get_srt(ar, s2v0))
 val ty0 =
   $UN.castvwtp0{Z3_sort}(ty0)
 //
@@ -1131,7 +1094,7 @@ val
   the_Z3_context_vget((*void*))
 //
 val name =
-  Z3_mk_s2var_symbol(ctx, s2v0)
+  Z3_mk_s2var_symbol(ar, ctx, s2v0)
 //
 val ast0 = Z3_mk_const(ctx, name, ty0)
 //
@@ -1145,12 +1108,11 @@ prval ((*returned*)) = fpf(ctx)
 
 implement
 formula_make_s2Var_fresh
-  (env, s2V0, s2t0) = ast where
+  (ar, env, s2V0, s2t0) = ast where
 {
 //
 val stamp =
-  stamp_get_int(s2V0.stamp())
-//
+  stamp_get_int(s2Var_get_stamp(ar, s2V0))
 val stamp = g0int2string(stamp)
 //
 val
@@ -1160,7 +1122,7 @@ string0_append
 //
 val () = strptr_free(stamp)
 //
-val ty = sort_make_s2rt(s2t0)
+val ty = sort_make_s2rt(ar, s2t0)
 val ty = $UN.castvwtp0{Z3_sort}(ty)
 //
 val (fpf | ctx) =
@@ -1172,11 +1134,6 @@ Z3_mk_string_symbol
   (ctx, $UN.strptr2string(name2))
 //
 val ast = Z3_mk_const(ctx, sym, ty)
-//
-prval ((*void*)) = fpf(ctx)
-//
-val (fpf | ctx) =
-  the_Z3_context_vget()
 //
 val ((*freed*)) = Z3_sort_dec_ref(ctx, ty)
 //
@@ -1190,333 +1147,189 @@ val () = strptr_free(name2)
 
 implement
 s2cfun_initize_s2cinterp
-  (s2c0) = let
-//
-val name = s2c0.name()
-val name = symbol_get_name(name)
-//
-val s2t0 = s2c0.srt()
-val-S2RTfun(s2ts_arg, s2t_res) = s2t0
-(*
-val arity = list_length(s2ts_arg)
-*)
-//
-val
-fopr = lam
+  (ar, s2c0) =
 (
-  xs: formlst
-) : form =<cloref1> let
+  s2cst_set_payload
+    (ar, s2c0, $UN.cast{ptr}(s2cinterp_S2CINTbuiltin_list(ar)))
+  // s2cst_set_payload
+) (* end of [s2cfun_initize_s2cinterp] *)
+
+(* ****** ****** *)
 //
-val range = sort_make_s2rt(s2t_res)
+// HX-2026-10:
+// applying an uninterpreted function
+// (whose declaration is made from the sort of [s2c0])
 //
-val domain =
-  list_map_fun<s2rt><sort>(s2ts_arg, sort_make_s2rt)
-// end of [val]
+extern
+fun
+formula_s2cfun_app{l:addr}
+(
+  ar: !arena(l), s2c0: s2cst(l), xs: formlst
+) : form // end-of-function
 //
-val fd0 = func_decl_list(name, domain, range)
+implement
+formula_s2cfun_app
+  {l}(ar, s2c0, xs) = let
+//
+val name =
+  symbol_get_name(ar, s2cst_get_name(ar, s2c0))
+//
+fun
+auxlst
+(
+  ar: !arena(l), s2ts: s2rtlst(l)
+) : sortlst =
+(
+if
+alist_is_cons(s2ts)
+then let
+  val s2t = sort_make_s2rt(ar, alist_head(ar, s2ts))
+in
+  list_vt_cons(s2t, auxlst(ar, alist_tail(ar, s2ts)))
+end // end of [then]
+else list_vt_nil()
+) (* end of [auxlst] *)
 //
 in
-  formula_fdapp_list(fd0, xs)
-end // end of [fopr]
 //
-in
-  s2cst_set_payload(s2c0, $UN.cast{ptr}(S2CINTbuiltin_list(fopr)))
-end // end of [s2cfun_initize_s2cinterp]
+case+
+s2rt_view(ar, s2cst_get_srt(ar, s2c0))
+of // case+
+| ~S2RTfun(s2ts_arg, s2t_res) => let
+    val range = sort_make_s2rt(ar, s2t_res)
+    val domain = auxlst(ar, s2ts_arg)
+    val fd0 =
+    func_decl_list
+      ($UN.cast{string}(name), domain, range)
+    // end of [val]
+  in
+    formula_fdapp_list(fd0, xs)
+  end // end of [S2RTfun]
+| v0(*non-S2RTfun*) => let
+    val () = s2rt_view_free(v0)
+    val () = formula_decref(formula_conj_list(xs))
+  in
+    formula_error(ar, s2c0)
+  end // end of [non-S2RTfun]
+//
+end // end of [formula_s2cfun_app]
 
 (* ****** ****** *)
 
 local
 
 fun
-aux_S2Ecst
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val-S2Ecst(s2c) = s2e0.s2exp_node
-//
-in
-  formula_make_s2cst(env, s2c)
-end // end of [aux_S2Ecst]
-
-(* ****** ****** *)
-
-fun
-aux_S2Evar
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val-S2Evar(s2v) = s2e0.s2exp_node
-//
-in
-  formula_make_s2var(env, s2v)
-end // end of [aux_S2Evar]
-
-(* ****** ****** *)
-
-fun
-aux_S2EVar
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val s2t = s2e0.s2exp_srt
-val-S2EVar(s2V) = s2e0.s2exp_node
-//
-in
-  formula_make_s2Var_fresh(env, s2V, s2t)
-end // end of [aux_S2EVar]
-
-(* ****** ****** *)
-
-fun
-aux_S2Eeqeq
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val-
-S2Eeqeq(s2e1, s2e2) = s2e0.s2exp_node
-//
-val s2e1 = formula_make_s2exp(env, s2e1)
-and s2e2 = formula_make_s2exp(env, s2e2)
-in
-  formula_eqeq (s2e1, s2e2)
-end // end of [aux_S2Eeqeq]
-
-(* ****** ****** *)
-
-fun
 aux_S2Eapp
+  {l:addr}
 (
-  env: !smtenv, s2e0: s2exp
+  ar: !arena(l)
+, env: !smtenv(l)
+, s2e0: s2exp(l)
+, s2e_fun: s2exp(l), s2es_arg: s2explst(l)
+) : form =
+(
+case+
+s2exp_node_view
+  (ar, s2exp_get_node(ar, s2e_fun))
+of // case+
+| ~S2Ecst(s2c) =>
+    aux_S2Eapp_cst(ar, env, s2e0, s2c, s2es_arg)
+| v0(*non-S2Ecst*) =>
+    (s2exp_node_view_free(v0); formula_error(ar, s2e0))
+) (* end of [aux_S2Eapp] *)
+
+and
+aux_S2Eapp_cst
+  {l:addr}
+(
+  ar: !arena(l)
+, env: !smtenv(l)
+, s2e0: s2exp(l)
+, s2c: s2cst(l), s2es_arg: s2explst(l)
 ) : form = let
 //
-val-S2Eapp
-  (s2e_fun, s2es_arg) = s2e0.s2exp_node
+val s2ci = s2cst_get_s2cinterp(ar, s2c)
 //
 in
 //
 case+
-s2e_fun.s2exp_node
+s2cinterp_view(ar, s2ci)
 of // case+
-| S2Ecst(s2c) => let
-    val s2ci =
-      s2cst_get_s2cinterp(s2c)
+| ~S2CINTbuiltin_0(f) => f()
+| ~S2CINTbuiltin_1(f) => let
+    val s2e1 = alist_head(ar, s2es_arg)
+    val s2e1 = formula_make_s2exp(ar, env, s2e1)
+  in
+    f(s2e1)
+  end // end of [S2CINTbuiltin_1]
+| ~S2CINTbuiltin_2(f) => let
+    val s2e1 = alist_head(ar, s2es_arg)
+    val s2e2 = alist_head(ar, alist_tail(ar, s2es_arg))
+    val s2e1 = formula_make_s2exp(ar, env, s2e1)
+    val s2e2 = formula_make_s2exp(ar, env, s2e2)
+  in
+    f(s2e1, s2e2)
+  end // end of [S2CINTbuiltin_2]
+| ~S2CINTbuiltin_list() =>
+    formula_s2cfun_app
+      (ar, s2c, formulas_make_s2explst(ar, env, s2es_arg))
+    // formula_s2cfun_app
+| ~S2CINTsome _ => formula_error(ar, s2e0)
+| ~S2CINTnone() => let
+    val () =
+      s2cfun_initize_s2cinterp(ar, s2c)
     // end of [val]
   in
-    case+ s2ci of
-    | S2CINTbuiltin_0(f) => f()
-    | S2CINTbuiltin_1(f) => let
-        val-
-        list_cons
-          (s2e1, s2es_arg) = s2es_arg
-        // end of [val]
-        val s2e1 = formula_make_s2exp(env, s2e1)
-      in
-        f(s2e1)
-      end // end of [S2CINTbuiltin_1]
-    | S2CINTbuiltin_2(f) => let
-        val-
-        list_cons
-          (s2e1, s2es_arg) = s2es_arg
-        // end of [val]
-        val-
-        list_cons
-          (s2e2, s2es_arg) = s2es_arg
-        // end of [val]
-        val s2e1 = formula_make_s2exp(env, s2e1)
-        val s2e2 = formula_make_s2exp(env, s2e2)
-      in
-        f(s2e1, s2e2)
-      end // end of [S2CINTbuiltin_2]
+    aux_S2Eapp_cst(ar, env, s2e0, s2c, s2es_arg)
+  end // end of [S2CINTnone]
 //
-    | S2CINTbuiltin_list(f) =>
-        f(formulas_make_s2explst(env, s2es_arg))
-      // end of [S2CINTbuiltin_list]
-//
-    | S2CINTsome _ => formula_error(s2e0)
-//
-    | S2CINTnone() =>
-        aux_S2Eapp(env, s2e0) where
-      {
-        val ((*void*)) = s2cfun_initize_s2cinterp(s2c)
-      } (* [S2CINTnone] *)
-//
-  end // end of [S2Ecst]
-| _(*non-S2Ecst*) => formula_error(s2e0)
-//
-end // end of [aux_S2Eapp]
+end // end of [aux_S2Eapp_cst]
 
 (* ****** ****** *)
 
 fun
 aux_S2Emetdec
+  {l:addr}
 (
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val-
-S2Emetdec
-  (s2es_met, s2es_bnd) = s2e0.s2exp_node
-//
-(*
-val () =
-println!
-  ("aux_S2Emetdec: s2es_met = ", s2es_met)
-//
-val () =
-println!
-  ("aux_S2Emetdec: s2es_bnd = ", s2es_bnd)
-*)
-//
-fun
-auxlst
-(
-  env: !smtenv
-, s2es10: s2explst
-, s2es20: s2explst
+  ar: !arena(l)
+, env: !smtenv(l)
+, s2es10: s2explst(l)
+, s2es20: s2explst(l)
 ) : form =
 (
-case+ s2es10 of
-| list_nil
-    ((*void*)) => formula_false()
-| list_cons
-    (s2e1, s2es1) => let
-    val-
-    list_cons
-      (s2e2, s2es2) = s2es20
-    // end of [val]
-    val s2e1 =
-      formula_make_s2exp (env, s2e1)
-    val s2e2 =
-      formula_make_s2exp (env, s2e2)
-  in
-    case+ s2es1 of
-    | list_nil _ => formula_ilt(s2e1, s2e2)
-    | list_cons _ => let
-        val s2e1_ = formula_incref (s2e1)
-        val s2e2_ = formula_incref (s2e2)
-        val s2e_ilt = formula_ilt(s2e1, s2e2) 
-        val s2e_ilte = formula_ilte(s2e1_, s2e2_)
-      in
-        formula_disj(s2e_ilt, formula_conj(s2e_ilte, auxlst(env, s2es1, s2es2)))
-      end // end of [list_cons]
-  end // end of [list_cons]
-)
+if
+alist_is_nil(s2es10)
+then formula_false()
+else let
 //
-in
-  auxlst(env, s2es_met, s2es_bnd)
-end // end of [aux_S2Emetdec]
-
-(* ****** ****** *)
-
-fun
-aux_S2Etop
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
+val s2es1 = alist_tail(ar, s2es10)
+val s2es2 = alist_tail(ar, s2es20)
 //
-val-
-S2Etop(_, s2e) = s2e0.s2exp_node
-//
-in
-  formula_make_s2exp(env, s2e)
-end // end of [aux_S2Etop]
-
-(* ****** ****** *)
-
-fun
-aux_S2Einvar
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val-
-S2Einvar(s2e) = s2e0.s2exp_node
-//
-in
-  formula_make_s2exp(env, s2e)
-end // end of [aux_S2Einvar]
-
-(* ****** ****** *)
-
-fun
-aux_S2Esizeof
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val-
-S2Esizeof(s2e) = s2e0.s2exp_node
-//
-val s2e = formula_make_s2exp(env, s2e)
-//
-in
-  formula_sizeof_t0ype(s2e)
-end // end of [aux_S2Esizeof]
-
-(* ****** ****** *)
-
-fun
-aux_S2Efun
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val
-s2t0 = s2e0.s2exp_srt
-//
-val-
-S2Efun
-(npf, s2es, s2e_res) = s2e0.s2exp_node
+val s2e1 =
+  formula_make_s2exp(ar, env, alist_head(ar, s2es10))
+val s2e2 =
+  formula_make_s2exp(ar, env, alist_head(ar, s2es20))
 //
 in
 //
-case+ s2t0 of
-//
-| S2RTprop() => let
-    val s2es = formulas_make_s2explst(env, s2es)
-    val s2e_res = formula_make_s2exp(env, s2e_res)
-  in
-    formula_impl_list1 (s2es, s2e_res)
-  end // end of [S2Efun]
-//
-| _(*non-prop*) => formula_error_s2exp(s2e0)
-//
-end // end of [aux_S2Efun]
-
-(* ****** ****** *)
-
-fun
-aux_S2Etyrec
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val
-s2t0 = s2e0.s2exp_srt
-//
-val-
-S2Etyrec
-(knd, npf, ls2es) = s2e0.s2exp_node
-//
+if
+alist_is_nil(s2es1)
+then formula_ilt(s2e1, s2e2)
+else let
+  val s2e1_ = formula_incref (s2e1)
+  val s2e2_ = formula_incref (s2e2)
+  val s2e_ilt = formula_ilt(s2e1, s2e2) 
+  val s2e_ilte = formula_ilte(s2e1_, s2e2_)
 in
+  formula_disj
+  (
+    s2e_ilt
+  , formula_conj(s2e_ilte, aux_S2Emetdec(ar, env, s2es1, s2es2))
+  ) (* formula_disj *)
+end // end of [else]
 //
-case+ s2t0 of
-//
-| S2RTprop() => let
-    val s2es =
-      formulas_make_labs2explst(env, ls2es)
-    // end of [val]
-  in
-    formula_conj_list(s2es)
-  end // end of [S2RTprop]
-//
-| _(*non-prop*) => formula_error_s2exp(s2e0)
-//
-end // end of [aux_S2Etyrec]
+end // end of [else]
+) (* end of [aux_S2Emetdec] *)
 
 (* ****** ****** *)
 
@@ -1536,8 +1349,6 @@ formula_quant
 , s2ts: Z3_sortlst
 , s2ps: formlst, s2e_body: form
 ) : form // end-of-function
-
-(* ****** ****** *)
 
 implement
 formula_quant
@@ -1640,172 +1451,126 @@ end // end of [formula_quant]
 
 fun
 aux_quant
+  {l:addr}
 (
   knd: int
-, env: !smtenv
-, s2vs: s2varlst, s2ps: s2explst, s2e_body: s2exp
+, ar: !arena(l)
+, env: !smtenv(l)
+, s2vs: s2varlst(l)
+, s2ps: s2explst(l), s2e_body: s2exp(l)
 ) : form =
 (
-case+ s2vs of
-//
-| list_nil() => let
-    val s2ps = formulas_make_s2explst (env, s2ps)
-    val s2e_body = formula_make_s2exp (env, s2e_body)
-  in
-    if knd > 0
-      then formula_impl_list1(s2ps, s2e_body)
-      else formula_conj_list1(s2ps, s2e_body)
-    // end of [if]
-  end // end of [list_nil()]
-//
-| list_cons _ => aux_quant2(knd, env, s2vs, s2ps, s2e_body)
+if
+alist_is_nil(s2vs)
+then let
+  val s2ps =
+    formulas_make_s2explst(ar, env, s2ps)
+  val s2e_body =
+    formula_make_s2exp(ar, env, s2e_body)
+in
+  if knd > 0
+    then formula_impl_list1(s2ps, s2e_body)
+    else formula_conj_list1(s2ps, s2e_body)
+  // end of [if]
+end // end of [then]
+else aux_quant2(knd, ar, env, s2vs, s2ps, s2e_body)
 ) (* end of [aux_quant] *)
 
 and
 aux_quant2
+  {l:addr}
 (
   knd: int
-, env: !smtenv
-, s2vs: s2varlst, s2ps: s2explst, s2e_body: s2exp
+, ar: !arena(l)
+, env: !smtenv(l)
+, s2vs: s2varlst(l)
+, s2ps: s2explst(l), s2e_body: s2exp(l)
 ) : form = let
 //
 fun
 auxlst1
 (
-  ctx: !Z3_context, s2vs: s2varlst
-) : Z3_symlst = (
-//
-case+ s2vs of
-| list_nil
-    ((*void*)) => list_vt_nil()
-  // end of [list_nil]
-| list_cons
-    (s2v, s2vs) => let
-    val sym =
-      Z3_mk_s2var_symbol(ctx, s2v)
-    // end of [val]
-  in
-    list_vt_cons(sym, auxlst1(ctx, s2vs))
-  end // end of [list_vt_cons]
-//
+  ar: !arena(l)
+, ctx: !Z3_context, s2vs: s2varlst(l)
+) : Z3_symlst =
+(
+if
+alist_is_cons(s2vs)
+then let
+  val sym =
+    Z3_mk_s2var_symbol(ar, ctx, alist_head(ar, s2vs))
+  // end of [val]
+in
+  list_vt_cons(sym, auxlst1(ar, ctx, alist_tail(ar, s2vs)))
+end // end of [then]
+else list_vt_nil()
 ) (* end of [auxlst1] *)
 //
 fun
 auxlst2
 (
-  ctx: !Z3_context
-, s2vs: s2varlst, index: intGte(0)
-) : Z3_sortlst = (
-//
-case+ s2vs of
-| list_nil() => list_vt_nil()
-| list_cons
-    (s2v, s2vs) => let
-    val s2t =
-      sort_make_s2rt(s2v.srt())
-    // end of [val]
-    val s2t =
-      $UN.castvwtp0{Z3_sort}(s2t)
-    // end of [val]
-    val x0 = Z3_mk_bound(ctx, index, s2t)
-    val () = s2var_push_payload(s2v, $UN.castvwtp0{form}(x0))
-  in
-    list_vt_cons(s2t, auxlst2(ctx, s2vs, index+1))
-  end // end of [list_vt_cons]
-//
+  ar: !arena(l)
+, ctx: !Z3_context
+, s2vs: s2varlst(l), index: intGte(0)
+) : Z3_sortlst =
+(
+if
+alist_is_cons(s2vs)
+then let
+  val s2v = alist_head(ar, s2vs)
+  val s2t =
+    sort_make_s2rt(ar, s2var_get_srt(ar, s2v))
+  // end of [val]
+  val s2t =
+    $UN.castvwtp0{Z3_sort}(s2t)
+  // end of [val]
+  val x0 = Z3_mk_bound(ctx, index, s2t)
+  val () =
+    s2var_push_payload(ar, s2v, $UN.castvwtp0{form}(x0))
+  // end of [val]
+in
+  list_vt_cons(s2t, auxlst2(ar, ctx, alist_tail(ar, s2vs), index+1))
+end // end of [then]
+else list_vt_nil()
 ) (* end of [auxlst2] *)
+//
+fun
+auxlst3
+(
+  ar: !arena(l), s2vs: s2varlst(l)
+) : void =
+(
+if
+alist_is_cons(s2vs)
+then
+(
+  formula_decref(s2var_pop_payload(ar, alist_head(ar, s2vs)));
+  auxlst3(ar, alist_tail(ar, s2vs))
+) (* end of [then] *)
+) (* end of [auxlst3] *)
 //
 val (fpf | ctx) =
   the_Z3_context_vget()
 //
-val syms = auxlst1 (ctx, s2vs)
-val s2ts = auxlst2 (ctx, s2vs, 0(*index*))
+val syms = auxlst1 (ar, ctx, s2vs)
+val s2ts = auxlst2 (ar, ctx, s2vs, 0(*index*))
 //
 prval ((*void*)) = fpf(ctx)
 //
-val s2ps = formulas_make_s2explst (env, s2ps)
-val s2e_body = formula_make_s2exp (env, s2e_body)
+val s2ps = formulas_make_s2explst (ar, env, s2ps)
+val s2e_body = formula_make_s2exp (ar, env, s2e_body)
 //
-val ((*void*)) =
-list_foreach_fun<s2var>
-(
-  s2vs
-, lam s2v =<fun1> formula_decref(s2var_pop_payload(s2v))
-) (* end of [val] *)
+val ((*void*)) = auxlst3(ar, s2vs)
 //
 in
   formula_quant(knd, syms, s2ts, s2ps, s2e_body)
 end // end of [aux_quant2]
 
-fun
-aux_S2Euni
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val
-s2t0 = s2e0.s2exp_srt
-//
-(*
-val () =
-println!
-  ("aux_S2Euni: s2t0 = ", s2t0)
-*)
-//
-val-
-S2Euni
-(s2vs, s2ps, s2e) = s2e0.s2exp_node
-//
-in
-//
-case+ s2t0 of
-//
-| S2RTprop() =>
-    aux_quant(1(*uni*), env, s2vs, s2ps, s2e)
-  // end of [S2RTprop]
-//
-| _(*non-prop*) => formula_error_s2exp(s2e0)
-//
-end // end of [aux_S2Euni]
-
-fun
-aux_S2Eexi
-(
-  env: !smtenv, s2e0: s2exp
-) : form = let
-//
-val
-s2t0 = s2e0.s2exp_srt
-//
-(*
-val () =
-println!
-  ("aux_S2Eexi: s2t0 = ", s2t0)
-*)
-//
-val-
-S2Eexi
-(s2vs, s2ps, s2e) = s2e0.s2exp_node
-//
-in
-//
-case+ s2t0 of
-//
-| S2RTprop() =>
-    aux_quant(0(*knd*), env, s2vs, s2ps, s2e)
-  // end of [S2RTprop]
-//
-| _(*non-prop*) => formula_error_s2exp(s2e0)
-//
-end // end of [aux_S2Eexi]
-
-(* ****** ****** *)
-
 in (* in-of-local *)
 
 implement
 formula_make_s2exp
-  (env, s2e0) = let
+  (ar, env, s2e0) = let
 //
 (*
 val () =
@@ -1813,40 +1578,87 @@ println!
   ("formula_make_s2exp: s2e0 = ", s2e0)
 *)
 //
+val s2t0 = s2exp_get_srt(ar, s2e0)
+//
 in
 //
 case+
-s2e0.s2exp_node
+s2exp_node_view
+  (ar, s2exp_get_node(ar, s2e0))
 of // case+
 //
-| S2Eint(i) => formula_int(i)
-| S2Eintinf(rep) => formula_intrep(rep)
+| ~S2Eint(i) => formula_int(i)
+| ~S2Eintinf(rep) =>
+    formula_intrep($UN.cast{string}(rep))
 //
-| S2Ecst _ => aux_S2Ecst(env, s2e0)
-| S2Evar _ => aux_S2Evar(env, s2e0)
+| ~S2Ecst(s2c) =>
+    formula_make_s2cst(ar, env, s2c)
+| ~S2Evar(s2v) =>
+    formula_make_s2var(ar, env, s2v)
+| ~S2EVar(s2V) =>
+    formula_make_s2Var_fresh(ar, env, s2V, s2t0)
 //
-| S2EVar _ => aux_S2EVar(env, s2e0)
+| ~S2Eeqeq(s2e1, s2e2) => let
+    val s2e1 = formula_make_s2exp(ar, env, s2e1)
+    val s2e2 = formula_make_s2exp(ar, env, s2e2)
+  in
+    formula_eqeq (s2e1, s2e2)
+  end // end of [S2Eeqeq]
 //
-| S2Eeqeq _ => aux_S2Eeqeq(env, s2e0)
+| ~S2Eapp(s2e_fun, s2es_arg) =>
+    aux_S2Eapp(ar, env, s2e0, s2e_fun, s2es_arg)
 //
-| S2Eapp _ => aux_S2Eapp (env, s2e0)
+| ~S2Emetdec(s2es_met, s2es_bnd) =>
+    aux_S2Emetdec(ar, env, s2es_met, s2es_bnd)
 //
-| S2Emetdec _ => aux_S2Emetdec (env, s2e0)
+| ~S2Etop(_, s2e) => formula_make_s2exp(ar, env, s2e)
+| ~S2Einvar(s2e) => formula_make_s2exp(ar, env, s2e)
 //
-| S2Etop _=> aux_S2Etop (env, s2e0)
+| ~S2Esizeof(s2e) =>
+    formula_sizeof_t0ype(formula_make_s2exp(ar, env, s2e))
 //
-| S2Einvar _ => aux_S2Einvar (env, s2e0)
+| ~S2Efun(npf, s2es, s2e_res) =>
+  (
+    if
+    s2rt_is_S2RTprop(ar, s2t0)
+    then let
+      val s2es =
+        formulas_make_s2explst(ar, env, s2es)
+      val s2e_res =
+        formula_make_s2exp(ar, env, s2e_res)
+    in
+      formula_impl_list1 (s2es, s2e_res)
+    end // end of [then]
+    else formula_error_s2exp(ar, s2e0)
+  ) (* end of [S2Efun] *)
 //
-| S2Esizeof _ => aux_S2Esizeof (env, s2e0)
+| ~S2Euni(s2vs, s2ps, s2e) =>
+  (
+    if
+    s2rt_is_S2RTprop(ar, s2t0)
+    then aux_quant(1(*uni*), ar, env, s2vs, s2ps, s2e)
+    else formula_error_s2exp(ar, s2e0)
+  ) (* end of [S2Euni] *)
+| ~S2Eexi(s2vs, s2ps, s2e) =>
+  (
+    if
+    s2rt_is_S2RTprop(ar, s2t0)
+    then aux_quant(0(*exi*), ar, env, s2vs, s2ps, s2e)
+    else formula_error_s2exp(ar, s2e0)
+  ) (* end of [S2Eexi] *)
 //
-| S2Efun _ => aux_S2Efun (env, s2e0)
+| ~S2Etyrec(knd, npf, ls2es) =>
+  (
+    if
+    s2rt_is_S2RTprop(ar, s2t0)
+    then
+    formula_conj_list
+      (formulas_make_labs2explst(ar, env, ls2es))
+    else formula_error_s2exp(ar, s2e0)
+  ) (* end of [S2Etyrec] *)
 //
-| S2Euni _ => aux_S2Euni (env, s2e0)
-| S2Eexi _ => aux_S2Eexi (env, s2e0)
-//
-| S2Etyrec _ => aux_S2Etyrec (env, s2e0)
-//
-| _ (*unrecognized*) => formula_error(s2e0)
+| v0 (*unrecognized*) =>
+    (s2exp_node_view_free(v0); formula_error(ar, s2e0))
 //
 end // end of [formula_make_s2exp]
 
@@ -1856,40 +1668,40 @@ end // end of [local]
 
 implement
 formulas_make_s2explst
-  (env, s2es) = (
-//
-case+ s2es of
-| list_nil
-    ((*void*)) => list_vt_nil()
-| list_cons
-    (s2e, s2es) => let
-    val s2e = formula_make_s2exp(env, s2e)
-    val s2es = formulas_make_s2explst(env, s2es)
-  in
-    list_vt_cons(s2e, s2es)
-  end // end of [list_cons]
-//
+  (ar, env, s2es) =
+(
+if
+alist_is_cons(s2es)
+then let
+  val s2e =
+    formula_make_s2exp(ar, env, alist_head(ar, s2es))
+  val s2es =
+    formulas_make_s2explst(ar, env, alist_tail(ar, s2es))
+in
+  list_vt_cons(s2e, s2es)
+end // end of [then]
+else list_vt_nil()
 ) (* end of [formulas_make_s2explst] *)
 
 (* ****** ****** *)
 
 implement
 formulas_make_labs2explst
-  (env, ls2es) = (
-//
-case+ ls2es of
-| list_nil
-    ((*void*)) => list_vt_nil()
-| list_cons
-    (ls2e, ls2es) => let
-    val+SLABELED(l, s2e) = ls2e
-    val s2e = formula_make_s2exp(env, s2e)
-    val s2es = formulas_make_labs2explst(env, ls2es)
-  in
-    list_vt_cons(s2e, s2es)
-  end // end of [list_cons]
-//
-) (* end of [formulas_make_s2explst] *)
+  (ar, env, ls2es) =
+(
+if
+alist_is_cons(ls2es)
+then let
+  val ls2e = alist_head(ar, ls2es)
+  val s2e =
+    formula_make_s2exp(ar, env, labs2exp_get_exp(ar, ls2e))
+  val s2es =
+    formulas_make_labs2explst(ar, env, alist_tail(ar, ls2es))
+in
+  list_vt_cons(s2e, s2es)
+end // end of [then]
+else list_vt_nil()
+) (* end of [formulas_make_labs2explst] *)
 
 (* ****** ****** *)
 

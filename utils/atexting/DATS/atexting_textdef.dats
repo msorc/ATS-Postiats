@@ -37,8 +37,6 @@
 "share/atspre_define.hats"
 #include
 "share/atspre_staload.hats"
-#include
-"share/HATS/atspre_staload_libats_ML.hats"
 //
 (* ****** ****** *)
 
@@ -48,6 +46,9 @@ staload UN = $UNSAFE
 //
 staload "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
 implement
@@ -56,42 +57,42 @@ atext_eval
 (
 //
 case+
-x0.atext_node
+atext_node_view(x0.atext_node())
 of // case+
-| TEXTnil() => x0
+| ~TEXTnil() => x0
 //
-| TEXTtoken _ => x0
+| ~TEXTtoken _ => x0
 //
 (*
 | TEXTchar of (char)
 *)
 //
-| TEXTstring _ => x0
+| ~TEXTstring _ => x0
 //
-| TEXTerrmsg _ => x0
+| ~TEXTerrmsg _ => x0
 //
-| TEXTlist(xs) => let
-    val loc = x0.atext_loc
+| ~TEXTlist(xs) => let
+    val loc = x0.atext_loc()
   in
     atext_make_list(loc, atextlst_eval(xs))
   end // end of [TEXTlist]
 //
-| TEXTsquote(xs) => let
-    val loc = x0.atext_loc
+| ~TEXTsquote(xs) => let
+    val loc = x0.atext_loc()
   in
     atext_make_squote(loc, atextlst_eval(xs))
   end // end of [TEXTsquote]
-| TEXTdquote(tok, xs) => let
-    val loc = x0.atext_loc
+| ~TEXTdquote(tok, xs) => let
+    val loc = x0.atext_loc()
   in
     atext_make_dquote(loc, tok, atextlst_eval(xs))
   end // end of [TEXTsquote]
 //
-| TEXTextcode _ => x0
+| ~TEXTextcode _ => x0
 //
-| TEXTdefname _ => atext_defname_eval(x0)
+| ~TEXTdefname _ => atext_defname_eval(x0)
 //
-| TEXTfuncall _ => atext_funcall_eval(x0)
+| ~TEXTfuncall _ => atext_funcall_eval(x0)
 //
 ) (* end of [atext_eval] *)
 
@@ -101,26 +102,37 @@ implement
 atextlst_eval
   (xs) = let
 //
-val xs = g1ofg0(xs)
+fun
+aux(xs: atextlst): atextlst =
+(
+case+ glist_view(xs) of
+| ~GLnil() => glist_nil()
+| ~GLcons(x, xs) => glist_cons<atext>(atext_eval(x), aux(xs))
+)
 //
 in
-//
-list0_of_list_vt
-  (list_map_fun<atext><atext>(xs, atext_eval))
+  aux(xs)
 //
 end // end of [atextlst_eval]
   
 (* ****** ****** *)
 
+// HX-2026-10: a string in the global arena
+fn
+string0_append3_g
+(
+  x1: string, x2: string, x3: string
+) : string = strptr2gstring(string0_append3(x1, x2, x3))
+//
 implement
 atext_defname_eval
   (x0) = let
 //
-val loc = x0.atext_loc
+val loc = x0.atext_loc()
 //
 val-
-TEXTdefname
-  (tok0, tok1) = x0.atext_node
+~TEXTdefname
+  (tok0, tok1) = atext_node_view(x0.atext_node())
 //
 val
 name = token_strngfy(tok1)
@@ -133,22 +145,27 @@ def0 = the_atextdef_search2(name)
 //
 in
 //
-case+
-def0
-of // case+
+case+ atextdef_view(def0) of // case+
 //
-| TEXTDEFval(txt) => txt
+| ~TEXTDEFval(txt) => txt
 //
-| TEXTDEFnil() => let
+| ~TEXTDEFnil() => let
     val errmsg =
-      string_append3("##undefined(", name, ")")
+      string0_append3_g("##undefined(", name, ")")
     // end of [val]
   in
     atext_make_errmsg(loc, errmsg)
   end // end of [TEXTDEFnil]
-| TEXTDEFfun _ => let
+| ~TEXTDEFfstr _ => let
     val errmsg =
-      string_append3("##ill-defined(", name, ")")
+      string0_append3_g("##ill-defined(", name, ")")
+    // end of [val]
+  in
+    atext_make_errmsg(loc, errmsg)
+  end // end of [TEXTDEFfstr]
+| ~TEXTDEFfun _ => let
+    val errmsg =
+      string0_append3_g("##ill-defined(", name, ")")
     // end of [val]
   in
     atext_make_errmsg(loc, errmsg)
@@ -162,11 +179,11 @@ implement
 atext_funcall_eval
   (x0) = let
 //
-val loc = x0.atext_loc
+val loc = x0.atext_loc()
 //
 val-
-TEXTfuncall
-  (tok0, tok1, args) = x0.atext_node
+~TEXTfuncall
+  (tok0, tok1, args) = atext_node_view(x0.atext_node())
 //
 val
 name = token_strngfy(tok1)
@@ -176,23 +193,24 @@ def0 = the_atextdef_search(name)
 //
 in
 //
-case+
-def0
-of // case+
-| TEXTDEFfun
+case+ atextdef_view(def0) of // case+
+| ~TEXTDEFfun
     (ftxt) => ftxt(loc, args)
   // TEXTDEFfun
+| ~TEXTDEFfstr
+    (fstr) => atext_make_string(loc, fstr(args))
+  // TEXTDEFfstr
 //
-| TEXTDEFnil() => let
+| ~TEXTDEFnil() => let
     val errmsg =
-      string_append3("##undefined(", name, ")")
+      string0_append3_g("##undefined(", name, ")")
     // end of [val]
   in
     atext_make_errmsg(loc, errmsg)
   end // end of [TEXTDEFnil]
-| TEXTDEFval _ => let
+| ~TEXTDEFval _ => let
     val errmsg =
-      string_append3("##ill-defined(", name, ")")
+      string0_append3_g("##ill-defined(", name, ")")
     // end of [val]
   in
     atext_make_errmsg(loc, errmsg)

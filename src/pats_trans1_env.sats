@@ -32,6 +32,15 @@
 // Start Time: April, 2011
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_trans1_env.sats).
+// The proofs of the push/pop/save/restore (dummy views in ATS1) are dropped.
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
 
 staload
 FIX = "./pats_fixity.sats"
@@ -42,6 +51,12 @@ typedef fxty = $FIX.fxty
 staload
 SYM = "./pats_symbol.sats"
 typedef symbol = $SYM.symbol
+
+(* ****** ****** *)
+
+staload
+FIL = "./pats_filename.sats"
+typedef filename = $FIL.filename
 
 (* ****** ****** *)
 
@@ -58,12 +73,11 @@ fun the_e1xpenv_find (k: symbol): Option_vt (e1xp)
 
 (* ****** ******* *)
 //
-absview e1xpenv_push_v
+// HX: the dummy proof of ATS1 ([absview e1xpenv_push_v]) is dropped
 //
-fun the_e1xpenv_pop
-  (pf: e1xpenv_push_v | (*none*)): symmap (e1xp)
-fun the_e1xpenv_push_nil (): (e1xpenv_push_v | void)
-//
+fun the_e1xpenv_pop ((*none*)): symmap (e1xp)
+fun the_e1xpenv_push_nil ((*none*)): void
+
 (* ****** ******* *)
 
 fun the_EXTERN_PREFIX_get (): Stropt
@@ -75,10 +89,8 @@ fun the_EXTERN_PREFIX_set_none (): void
 fun the_fxtyenv_add (key: symbol, itm: fxty): void
 fun the_fxtyenv_find (key: symbol): Option_vt (fxty)
 
-absview fxtyenv_push_v
-fun the_fxtyenv_pop
-  (pf: fxtyenv_push_v | (*none*)): symmap (fxty)
-fun the_fxtyenv_push_nil (): (fxtyenv_push_v | void)
+fun the_fxtyenv_pop ((*none*)): symmap (fxty)
+fun the_fxtyenv_push_nil ((*none*)): void
 
 fun the_fxtyenv_pervasive_joinwth (map: symmap (fxty)): void
 
@@ -88,57 +100,36 @@ fun fprint_the_fxtyenv (out: FILEref): void // mostly for debugging
 
 (* ****** ****** *)
 
-(*
-//
-// HX-2014-07:
-// these function are no longer in use
-//
-absview
-trans1_level_v // for avoiding negative levels
-fun the_trans1_level_get (): int
-fun the_trans1_level_dec (pf: trans1_level_v | (*none*)): void
-fun the_trans1_level_inc (): (trans1_level_v | void)
-*)
-
-(* ****** ****** *)
-
-absview trans1_env_push_v
-
-fun the_trans1_env_pop
-  (pf: trans1_env_push_v | (*none*)): void
-fun the_trans1_env_push (): (trans1_env_push_v | void)
+fun the_trans1_env_pop ((*none*)): void
+fun the_trans1_env_push ((*none*)): void
 
 (*
 ** HX: for handling <local ... in ... end>
 *)
-fun the_trans1_env_localjoin (
-  pf1: trans1_env_push_v, pf2: trans1_env_push_v | (*none*)
-) : void // end of [trans1_env_localjoin]
+fun the_trans1_env_localjoin ((*none*)): void
 
 (* ****** ******* *)
 
-absview trans1_env_save_v
-fun the_trans1_env_save ((*none*)): (trans1_env_save_v | void)
-fun the_trans1_env_restore (pf: trans1_env_save_v | (*none*)): void
+fun the_trans1_env_save ((*none*)): void
+fun the_trans1_env_restore ((*none*)): void
 
 (* ****** ****** *)
 
 fun
 staload_file_search
-  (fil: filename): Option_vt@(int(*ldflg*), d1eclist)
+  (fil: filename): Option_vt(@(int(*ldflg*), d1eclist))
 fun
 staload_file_insert
   (fil: filename, loadflag: int, d1cs: d1eclist): void
 
 (* ****** ******* *)
 //
-datatype
-atsrelocitm =
-  | ATSRELOCITM of (d0ecl, string(*given*))
-  | ATSRELOCITM2 of (d0ecl, string(*source*), string(*target*))
-// end of [atsrelocitm]
+// HX: an ATSRELOCITM of ATS1 is a (d0ecl, string) or a (d0ecl, string, string)
+// (HX-2026-10: the constructors are in [pats_trans1_env.spec] (arenagen))
 //
-typedef atsrelocitmlst = List (atsrelocitm)
+#include "./pats_trans1_env_gen.hats"
+//
+typedef atsrelocitmlst = glist(atsrelocitm)
 //
 fun
 fprint_atsrelocitm (out: FILEref, x: atsrelocitm): void

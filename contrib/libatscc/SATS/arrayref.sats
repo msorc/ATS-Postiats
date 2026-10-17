@@ -40,35 +40,35 @@ overload [] with arrayref_set_at of 100
 (* ****** ****** *)
 //
 fun
-arrayref_exists_cloref
+arrayref_exists_cloptr
   {a:vt0p}{n:int}
 ( A0: arrayref(a, n)
-, asz: int(n), ftest: natLt(n) -<cloref1> bool
+, asz: int(n), ftest: natLt(n) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-fun
 //
 fun
-arrayref_forall_cloref
+arrayref_forall_cloptr
   {a:vt0p}{n:int}
 ( A0: arrayref(a, n)
-, asz: int(n), ftest: natLt(n) -<cloref1> bool
+, asz: int(n), ftest: natLt(n) -<cloptr1> bool
 ) : bool = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
 
 fun
-arrayref_foreach_cloref
+arrayref_foreach_cloptr
   {a:vt0p}{n:int}
 ( A0: arrayref(a, n)
-, asz: int(n), fwork: natLt(n) -<cloref1> void
+, asz: int(n), fwork: natLt(n) -<cloptr1> void
 ) : void = "mac#%" // end-of-fun
 
 (* ****** ****** *)
 //
 fun
-arrayref_tabulate_cloref
+arrayref_tabulate_cloptr
   {a:vt0p}{n:int}
 (
-  asz: int(n), fopr: (natLt(n)) -<cloref1> (a)
+  asz: int(n), fopr: (natLt(n)) -<cloptr1> (a)
 ) : arrayref(a, n) = "mac#%" // end-of-fun
 //
 (* ****** ****** *)
@@ -130,42 +130,35 @@ overload [] with arrszref_set_at of 100
 (* ****** ****** *)
 //
 fun
-arrszref_exists_cloref
+arrszref_exists_cloptr
   {a:vt0p}
 (
-A0: arrszref(a), pred: intGte(0) -<cloref1> bool
-) : bool = "mac#%" // arrszref_exists_cloref
+A0: arrszref(a), pred: intGte(0) -<cloptr1> bool
+) : bool = "mac#%" // arrszref_exists_cloptr
 fun
-arrszref_forall_cloref
+arrszref_forall_cloptr
   {a:vt0p}
 (
-A0: arrszref(a), pred: intGte(0) -<cloref1> bool
-) : bool = "mac#%" // arrszref_forall_cloref
+A0: arrszref(a), pred: intGte(0) -<cloptr1> bool
+) : bool = "mac#%" // arrszref_forall_cloptr
 //
 (* ****** ****** *)
 //
 fun
-arrszref_foreach_cloref
+arrszref_foreach_cloptr
   {a:vt0p}
 (
-A0: arrszref(a), fwork: intGte(0) -<cloref1> void
-) : void = "mac#%" // arrszref_foreach_cloref
-fun
-arrszref_foreach_method
-  {a:vt0p}
-  (A: arrszref(a))
-  (fwork: intGte(0) -<cloref1> void): void = "mac#%"
+A0: arrszref(a), fwork: intGte(0) -<cloptr1> void
+) : void = "mac#%" // arrszref_foreach_cloptr
 //
-overload
-.foreach with arrszref_foreach_method of 100
 //
 (* ****** ****** *)
 //
 fun
-arrszref_tabulate_cloref
+arrszref_tabulate_cloptr
   {a:vt0p}{n:int}
 ( asz: int(n)
-, fopr: natLt(n) -<cloref1> a): arrszref(a) = "mac#%"
+, fopr: natLt(n) -<cloptr1> a): arrszref(a) = "mac#%"
 //
 (* ****** ****** *)
 

@@ -50,17 +50,17 @@ linset_make_list
 //
 fun loop
 (
-  xs: List (a), res: &set(a) >> _
+  xs: !List_vt(a), res: &set(a) >> _
 ) : void = 
 (
 case+ xs of
-| list_cons
+| list_vt_cons
     (x, xs) => let
     val _(*exi*) =
       linset_insert (res, x) in loop (xs, res)
     // end of [val]
-  end // end of [list_cons]
-| list_nil () => ()
+  end // end of [list_vt_cons]
+| list_vt_nil () => ()
 )
 //
 var res: set(a) = linset_nil ()

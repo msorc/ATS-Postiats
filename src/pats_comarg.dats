@@ -32,17 +32,31 @@
 // Start Time: April, 2011
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_comarg.dats)
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
 
 staload
 UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload "libc/SATS/string.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "libats/libc/SATS/string.sats"
 
 (* ****** ****** *)
 
 staload ERR = "./pats_error.sats"
+staload _(*ERR*) = "./pats_error.dats"
 staload GLOB = "./pats_global.sats"
 
 staload LOC = "./pats_location.sats"
@@ -50,10 +64,13 @@ staload FIL = "./pats_filename.sats"
 
 staload SYM = "./pats_symbol.sats"
 staload SYN = "./pats_syntax.sats"
+staload _(*SYN*) = "./pats_syntax.dats"
 
 (* ****** ****** *)
 
 staload PAR = "./pats_parsing.sats"
+staload _(*PAR*) = "./pats_parsing_util.dats"
+staload _(*PAR*) = "./pats_parsing.dats"
 
 (* ****** ****** *)
 
@@ -83,30 +100,35 @@ implement
 fprint_comarg(out, x) =
 (
 case+ x of
-| COMARG(i, k) =>
-  fprint!(out, "COMARG(", i, ", ", k, ")")
+| @(i, k) =>
+  (
+    fprint_string(out, "COMARG(");
+    fprint_int(out, i);
+    fprint_string(out, ", ");
+    fprint_string(out, k);
+    fprint_string(out, ")")
+  )
 )
 //
 (* ****** ****** *)
 
 implement
 comarg_parse
-  (str) = let
+  (str) = $effmask_all(let
 //
 fun
 loop
-{n,i:nat|i <= n} .<n-i>.
 (
-  str: string n, n: int n, i: int i
-) :<> comarg = 
-(
-  if i < n
+  p: ptr, i: int
+) : comarg = let
+  val c = $UN.ptr0_get<char> (p)
+in
+  if c != '\000'
     then (
-    if (str[i] <> '-')
-      then COMARG (i, str) else loop (str, n, i+1)
-    ) else COMARG (n, str)
-) (* end of [if] *)  
-// end of [loop]
+    if (c <> '-')
+      then @(i, str) else loop (ptr0_succ<char> (p), i+1)
+    ) else @(i, str)
+end // end of [loop]
 //
 in
 //
@@ -114,65 +136,45 @@ if
 (str="-")
 then
 (
-  COMARG(0, str)
+  @(0, str)
 )
 else
 (
-  loop(str, len, 0)
-) where
-{
-val str =
-  string1_of_string str
+  loop($UN.cast{ptr}(str), 0)
+)
 //
-val len = string_length (str)
-val len = int1_of_size1 (len)
-}
-//
-end // end of [comarg_parse]
+end) // end of [comarg_parse]
 
 (* ****** ****** *)
 
 implement
 comarglst_parse
-  {n}(argc, argv) = let
+  {n}(argc, argv) = $effmask_all(let
 //
-vtypedef
-arglst(n:int) = list_vt(comarg, n)
+// HX: built from the back, so the order and the length are kept
 //
 fun
 loop
-{i:nat | i <= n}{l:addr} .<n-i>.
+{i:nat | i <= n}
 (
-  pf0: arglst(0) @ l
-| argv: &(@[string][n]), i: int i, p: ptr l
-) :<cloref> (arglst (n-i) @ l | void) =
+  argv: &(@[string][n]), i: int i, acc: list_vt(comarg, n-i)
+) : list_vt(comarg, n) =
 (
 //
 if
-i < argc
+i > 0
 then let
-  val+~list_vt_nil () = !p
-  val x = comarg_parse (argv.[i])
-  val () =
-    !p := list_vt_cons (x, list_vt_nil ())
-  val+list_vt_cons (_, !lst) = !p
-  val (pf | ()) =
-    loop (view@ (!lst) | argv, i+1, lst) // tail-call
-  // end of [val]
+  val x = comarg_parse (argv[i-1])
 in
-  fold@(!p); (pf0 | ())
+  loop (argv, i-1, list_vt_cons (x, acc))
 end // end of [then]
-else (pf0 | ()) // end of [else]
+else acc // end of [else]
 //
 ) (* end of [loop] *)
 //
-var lst0 = list_vt_nil{comarg}()
-val (pf | ()) = loop (view@ lst0 | argv, 0, &lst0)
-prval ((*void*)) = view@ lst0 := pf
-//
 in
-  lst0
-end // end of [comarglst_parse]
+  loop (argv, argc, list_vt_nil ())
+end) // end of [comarglst_parse]
 
 (* ****** ****** *)
 
@@ -180,10 +182,10 @@ implement
 comarg_warning
   (str) = {
 //
-val () = prerr ("warning(ATS)")
-val () = prerr (": unrecognized command line argument [")
-val () = prerr (str)
-val () = prerr ("] is ignored.")
+val () = prerr_string ("warning(ATS)")
+val () = prerr_string (": unrecognized command line argument [")
+val () = prerr_string (str)
+val () = prerr_string ("] is ignored.")
 val () = prerr_newline ((*void*))
 //
 } (* end of [comarg_warning] *)
@@ -192,12 +194,12 @@ val () = prerr_newline ((*void*))
 
 implement
 is_DATS_flag (flag) = 
-  if strncmp (flag, "-DATS", 5) = 0 then true else false
+  if strncmp (flag, "-DATS", i2sz(5)) = 0 then true else false
 // end of [is_DATS_flag]
 
 implement
 is_IATS_flag (flag) = 
-  if strncmp (flag, "-IATS", 5) = 0 then true else false
+  if strncmp (flag, "-IATS", i2sz(5)) = 0 then true else false
 // end of [is_IATS_flag]
 
 (* ****** ****** *)
@@ -207,25 +209,22 @@ local
 fun
 string_extract
 (
-  s: string, k: size_t
+  s: string
 ) : Stropt = let
-  val s =
-    string1_of_string(s)
-  // end of [val]
-  val k = size1_of_size(k)
-  val n = string1_length(s)
+  val k = 5 // HX: the length of -DATS and -IATS
+  val n = $UN.cast{int}(string_length(s))
 in
 //
 if n > k
   then let
-    val
-    sub =
-    string_make_substring(s,k,n-k)
-    val sub = string_of_strbuf(sub)
+    // HX: the substring is kept (never freed)
+    val sub =
+      the_garena_strdup
+        ($UN.cast{string}(ptr0_add_guint<char>($UN.cast{ptr}(s), i2sz(5))))
   in
     stropt_some (sub)
   end // end of [then]
-  else stropt_none (*void*)
+  else stropt_none ((*void*))
 //
 end // [string_extract]
 
@@ -233,11 +232,11 @@ in (* in-of-local *)
 //
 implement
 DATS_extract
-  (str: string) = string_extract(str, 5)
+  (str: string) = string_extract(str)
 //
 implement
 IATS_extract
-  (str: string) = string_extract(str, 5)
+  (str: string) = string_extract(str)
 //
 end // end of [local]
 
@@ -247,38 +246,31 @@ implement
 process_DATS_def
   (def) = let
 //
-val def = string1_of_string(def)
-//
-(*
-val () =
-  println! ("process_DATS_def: def = ", def)
-*)
-//
 val opt =
-  $PAR.parse_from_string_parser(def, $PAR.p_datsdef)
+  $PAR.parse_from_string_parser<$SYN.datsdef>(def, $PAR.p_datsdef)
 //
 in
 //
 case+ opt of
-| ~Some_vt(def) => let
-    val+$SYN.DATSDEF(key, opt) = def
+| ~Some_vt(dd) => let
+    val key = dd.datsdef_sym()
     val e1xp = (
-      case+ opt of
-      | Some v => $TRANS1.e0xp_tr (v)
-      | None _ => e1xp_none ($LOC.location_dummy)
+      case+ gopt_view(dd.datsdef_opt()) of
+      | ~GOsome v => $TRANS1.e0xp_tr (v)
+      | ~GOnone () => e1xp_none ($LOC.location_dummy)
     ) : e1xp // end of [val]
   in
     $TRENV1.the_e1xpenv_addperv (key, e1xp)
   end // end of [Some_vt]
 | ~None_vt((*void*)) => let
     val () =
-    prerr ("patsopt: error(0)")
-    val () =
-    prerrln! (
-      ": the command-line argument [", def, "] cannot be properly parsed."
-    ) (* end of [prerrln!] *)
+    prerr_string ("patsopt: error(0)")
+    val () = prerr_string (": the command-line argument [")
+    val () = prerr_string (def)
+    val () = prerr_string ("] cannot be properly parsed.")
+    val () = prerr_newline ((*void*))
   in
-    $ERR.abort ((*reachable*))
+    $ERR.abort<void> ((*reachable*))
   end // end of [None_vt]
 //
 end // end of [process_DATS_def]
@@ -294,12 +286,6 @@ process_IATS_dir
 val () = $FIL.the_pathlst_ppush(dir)
 val () = $GLOB.the_IATS_dirlst_ppush(dir)
 //
-(*
-// HX-2017-01-31: push from the back!
-val () = $FIL.the_pathlst_ppushb(dir)
-val () = $GLOB.the_IATS_dirlst_ppushb(dir)
-*)
-//
 in
   // nothing
 end (* end of [process_IATS_dir] *)
@@ -313,7 +299,7 @@ fun
 getenv
 (
   name: string
-) : Stropt = "ext#getenv"
+) : Stropt = "mac#getenv"
 //
 in (* in-of-local *)
 
@@ -361,22 +347,17 @@ if issome
 ) : string // end of [val]
 val
 PATSRELOCROOT =
-  sprintf("/tmp/.PATSRELOCROOT-%s", @(user))
+  string0_append("/tmp/.PATSRELOCROOT-", user)
 // end of [val]
 //
+val res = the_garena_strdup($UN.strptr2string(PATSRELOCROOT))
+val ((*freed*)) = strptr_free(PATSRELOCROOT) // HX: copied into the arena
+//
 in
-  string_of_strptr(PATSRELOCROOT)
+  res
 end // end of [else]
 //
 ) : string // end of [val]
-//
-(*
-val () =
-println!
-(
-  "process_PATSRELOCROOT: def = ", def
-) (* end of [val] *)
-*)
 //
 val key =
   $SYM.symbol_PATSRELOCROOT

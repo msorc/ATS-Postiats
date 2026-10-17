@@ -33,13 +33,16 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+#include "share/atspre_staload.hats"
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -51,22 +54,26 @@ staload _(*anon*) = "./pats_utils.dats"
 staload "./pats_intinf.sats"
 
 (* ****** ****** *)
-
-datatype
-intinf = INTINF of (llint)
+//
+// HX: an intinf is a [llint] stored in the global arena
+//
+assume intinf_type = ptr
 
 (* ****** ****** *)
 //
-fun un .<>.
+fn
+INTINF (i: llint):<> intinf = $effmask_all let
+  val p = the_garena_alloc (sizeof<llint>)
+  val () = arena_store<llint> (p, i)
+in
+  $UN.cast{intinf}(p)
+end // end of [INTINF]
+//
+fn un
 (
   intinf: intinf
-) :<> llint =
-  let val+INTINF(i) = intinf in i end
+) :<> llint = $effmask_all (arena_load<llint> ($UN.cast{ptr}(intinf)))
 //
-(* ****** ****** *)
-
-assume intinf_type = intinf
-
 (* ****** ****** *)
 
 implement
@@ -88,8 +95,10 @@ end // end of [intinf_make_string]
 
 local
 
-staload
-STDLIB = "libc/SATS/stdlib.sats"
+extern
+fun
+strtoll_c
+  (nptr: string, endptr: ptr, base: int): llint = "mac#strtoll"
 
 in (* in-of-local *)
 
@@ -97,17 +106,10 @@ implement
 intinf_make_base_string_ofs
   (base, rep, ofs) = let
 //
-  val rep =
-    __cast (rep) where {
-    extern castfn __cast (x: string): ptr
-  }
   val rep_ofs =
-    __cast (rep + ofs) where {
-    extern castfn __cast (x: ptr): string
-  }
+    $UN.cast{string}(ptr0_add_guint<char>($UN.cast{ptr}(rep), i2sz(ofs)))
 //
-val x =
-  $STDLIB.strtoll_errnul (rep_ofs, base)
+val x = strtoll_c (rep_ofs, the_null_ptr, base)
 //
 in
   INTINF (x)
@@ -122,7 +124,7 @@ fprint_intinf (out, x) = fprint_llint (out, un(x))
 
 (* ****** ****** *)
 
-implement intinf_get_int (x) = $UN.cast2int (un(x))
+implement intinf_get_int (x) = $UN.cast{int}(un(x))
 
 (* ****** ****** *)
 
@@ -159,14 +161,14 @@ implement
 compare_intinf_int
   (x1, x2) = let
   val i1 = un (x1)
-  val i2 = llint_of_int (x2)
+  val i2 = g0int2int_int_llint (x2)
 in
-  compare_llint_llint (i1, i2)
+  compare (i1, i2)
 end // end of [compare_intinf_int]
 //
 implement
 compare_intinf_intinf
-  (x1, x2) = compare_llint_llint (un(x1), un(x2))
+  (x1, x2) = compare (un(x1), un(x2))
 //
 (* ****** ****** *)
 //
@@ -176,10 +178,10 @@ implement neg_intinf (x) = INTINF (~(un(x)))
 //
 implement
 add_intinf_int
-  (x1, x2) = INTINF (un(x1) + llint_of_int (x2))
+  (x1, x2) = INTINF (un(x1) + g0int2int_int_llint (x2))
 implement
 add_int_intinf
-  (x1, x2) = INTINF (llint_of_int (x1) + un(x2))
+  (x1, x2) = INTINF (g0int2int_int_llint (x1) + un(x2))
 //
 implement
 add_intinf_intinf (x1, x2) = INTINF (un(x1) + un(x2))
@@ -193,10 +195,10 @@ sub_intinf_intinf (x1, x2) = INTINF (un(x1) - un(x2))
 //
 implement
 mul_intinf_int
-  (x1, x2) = INTINF (un(x1) * llint_of_int (x2))
+  (x1, x2) = INTINF (un(x1) * g0int2int_int_llint (x2))
 implement
 mul_int_intinf
-  (x1, x2) = INTINF (llint_of_int (x1) * un(x2))
+  (x1, x2) = INTINF (g0int2int_int_llint (x1) * un(x2))
 //
 implement
 mul_intinf_intinf (x1, x2) = INTINF (un(x1) * un(x2))
@@ -205,38 +207,51 @@ mul_intinf_intinf (x1, x2) = INTINF (un(x1) * un(x2))
 
 local
 //
-staload
-"libats/SATS/funset_listord.sats"
-staload _(*anon*) =
-"libats/DATS/funset_listord.dats"
+// HX: an intinfset is a list in DESCENDING order (and duplicate-free), like [funset_listord] of ATS1:
+// [intinfset_listize] (and [fprint_intinfset]) give the largest element first
 //
-fn cmp (
-  x1: intinf, x2: intinf
-) :<cloref> int =
-  compare_intinf_intinf (x1, x2)
-//
-assume intinfset_type = set (intinf)
+assume intinfset_type = glist(intinf)
 //
 in (*in-of-local*)
 
 implement
-intinfset_sing (x) = funset_make_sing (x)
+intinfset_sing (x) = glist_sing (x)
 
 implement
 intinfset_is_member
-  (xs, x) = funset_is_member (xs, x, cmp)
-// end of [val]
+  (xs, x) = (
+//
+case+ glist_view(xs) of
+| ~GLnil () => false
+| ~GLcons (x1, xs1) => let
+    val sgn = compare_intinf_intinf (x1, x)
+  in
+    if sgn > 0
+      then intinfset_is_member (xs1, x) else (sgn = 0)
+    // end of [if]
+  end (* end of [GLcons] *)
+//
+) (* end of [intinfset_is_member] *)
 
 implement
 intinfset_add
-  (xs, x) = xs where
-{
-  var xs = xs
-  val _(*exist*) = funset_insert (xs, x, cmp)
-} (* end of [val] *)
+  (xs, x) = (
+//
+case+ glist_view(xs) of
+| ~GLnil () => glist_sing (x)
+| ~GLcons (x1, xs1) => let
+    val sgn = compare_intinf_intinf (x1, x)
+  in
+    if sgn > 0
+      then glist_cons (x1, intinfset_add (xs1, x))
+      else (if sgn = 0 then xs else glist_cons (x, xs))
+    // end of [if]
+  end (* end of [GLcons] *)
+//
+) (* end of [intinfset_add] *)
 
 implement
-intinfset_listize (xs) = funset_listize (xs)
+intinfset_listize (xs) = glist_listize (xs)
 
 end // end of [local]
 
@@ -244,12 +259,9 @@ end // end of [local]
 
 implement
 fprint_intinfset
-  (out, xs) = {
-  val xs = intinfset_listize (xs)
-  val () = $UT.fprintlst
-    (out, $UN.castvwtp1{intinflst}(xs), ", ", fprint_intinf)
-  val () = list_vt_free (xs)
-} (* end of [fprint_intinfset] *)
+  (out, xs) = $UT.fprintlst<intinf>
+  (out, $UN.cast{glist(intinf)}(xs), ", ", fprint_intinf)
+// end of [fprint_intinfset]
 
 (* ****** ****** *)
 

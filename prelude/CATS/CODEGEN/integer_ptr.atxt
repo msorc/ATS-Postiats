@@ -101,5 +101,5 @@ atspre_g1uint2uint_ulint_uintptr atspre_g0uint2uint_ulint_uintptr
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "integer_ptr_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "integer_ptr_atxt.txt")
 %}\

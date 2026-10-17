@@ -63,9 +63,6 @@ abstype CLJfilr(*fileref*)
 //
 (* ****** ****** *)
 //
-fun
-lazy2cloref
-  {a:t0p}(lazy(a)): ((*void*)) -<cloref1> (a) = "mac#%"
 //
 (* ****** ****** *)
 //

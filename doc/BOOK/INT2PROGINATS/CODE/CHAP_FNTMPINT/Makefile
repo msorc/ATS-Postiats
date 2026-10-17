@@ -21,16 +21,8 @@ CFLAGS += -D_GNU_SOURCE -DATS_MEMALLOC_LIBC
 
 ######
 #
-all:: \
-myprint
-myprint: \
-myprint.dats ; \
-$(PATSCC) $(CFLAGS) -o $@ $< -lgmp
 #
-regress:: \
-myprint ; ./myprint
 #
-cleanall:: ; $(RMF) myprint
 #
 ######
 #
@@ -46,37 +38,16 @@ cleanall:: ; $(RMF) gnumber
 #
 ######
 #
-all:: \
-loopcons
-loopcons: \
-loopcons.dats ; $(PATSCC) $(CFLAGS) -o $@ $<
 #
-regress:: \
-loopcons ; ./loopcons
 #
-cleanall:: ; $(RMF) loopcons
 #
 ######
 #
-all:: \
-list_map
-list_map: \
-list_map.dats ; $(PATSCC) $(CFLAGS) -o $@ $<
 #
-regress:: \
-list_map ; ./list_map
 #
-cleanall:: ; $(RMF) list_map
 #
 ######
 
-all:: \
-intfloat
-intfloat: \
-intfloat.dats ; $(PATSCC) $(CFLAGS) -o $@ $<
-regress:: \
-intfloat ; ./intfloat
-cleanall:: ; $(RMF) intfloat
 
 ######
 

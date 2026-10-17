@@ -33,13 +33,25 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_scst.dats, see PORTING.md, "Type-checking environment (trans3_env)")
 //
+
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
@@ -49,6 +61,7 @@ implement prerr_FILENAME<> () = prerr "pats_trans3_env_scst"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 
@@ -58,45 +71,36 @@ staload "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
+#include "./pats_trans3_env.hats"
+
+(* ****** ****** *)
+
 local
 
-assume s2cstbindlst_push_v = unit_v
-
-viewtypedef s2cstlstlst_vt = List_vt (s2cstlst_vt)
-val the_s2cstlst = ref_make_elt<s2cstlst_vt> (list_vt_nil)
-val the_s2cstlstlst = ref_make_elt<s2cstlstlst_vt> (list_vt_nil)
+typedef s2cstlst = glist (s2cst)
+val the_s2cstlst = gcell_make<s2cstlst> (glist_nil ())
+val the_s2cstlstlst = gcell_make<glist(s2cstlst)> (glist_nil ())
 
 in // in of [local]
 
 implement
 the_s2cstbindlst_add (s2c) = let
-(*
-val () = begin
-  print "the_s2cstbindlst_add: s2c = "; print_s2cst (s2c); print_newline ()
-end // end of [val]
-*)
 //
-val (vbox pf | p) = ref_get_view_ptr (the_s2cstlst)
+val xs = gcell_get<s2cstlst> (the_s2cstlst)
 //
 in
-  !p := list_vt_cons (s2c, !p)
+  gcell_set<s2cstlst> (the_s2cstlst, glist_cons (s2c, xs))
 end // end of [the_s2cstbindlst_add]
 
 (* ****** ****** *)
 
 implement
 the_s2cstbindlst_addlst (s2cs) = let
-(*
-val () = begin
-  print "the_s2cstbindlst_add: s2cs = ";
-  print_s2cstlst ($UN.castvwtp1{s2cstlst}(s2cs)); print_newline ()
-end // end of [val]
-*)
 //
-val (vbox pf | p) = ref_get_view_ptr (the_s2cstlst)
+val xs = gcell_get<s2cstlst> (the_s2cstlst)
 //
 in
-  !p := list_vt_append (s2cs, !p) // HX: not [reverse_append]!
+  gcell_set<s2cstlst> (the_s2cstlst, glist_append (l2l(s2cs), xs)) // HX: not [reverse_append]!
 end // end of [the_s2cstbindlst_add]
 
 (* ****** ****** *)
@@ -107,34 +111,27 @@ the_s2cstbindlst_bind_and_add
 //
 val s2e = s2hnf2exp(s2f)
 //
-(*
-  val () = begin
-    println! ("the_s2cstbindlst_bind_and_add: s2c = ", s2c);
-    println! ("the_s2cstbindlst_bind_and_add: s2e = ", s2e);
-  end // end of [val]
-*)
-//
 val
 isasp = s2cst_get_isasp(s2c)
 //
 val () =
 (
-case+ isasp of
-| None _ => ()
-| Some _ => () where
+case+ gopt_view (isasp) of
+| ~GOnone () => ()
+| ~GOsome _ => () where
   {
     val () =
     prerr_warning3_loc(loc0)
     val () =
-    prerrln!
     (
-      ": the static constant [", s2c, "] is not abstract at this point."
+      prerr ": the static constant ["; prerr_s2cst (s2c);
+      prerr "] is not abstract at this point."; prerr_newline ()
     ) (* prerrln! *)
   } (* end of [if] // end of [val] *)
 ) (* end of [val] *)
 //
-val () = s2cst_set_def(s2c, Some(s2e))
-val () = s2cst_set_isasp(s2c, Some(s2e))
+val () = s2cst_set_def(s2c, gopt_some(s2e))
+val () = s2cst_set_isasp(s2c, gopt_some(s2e))
 //
 in
   the_s2cstbindlst_add(s2c)
@@ -144,41 +141,35 @@ end // end of [the_s2cstbindlst_bind_and_add]
 
 implement
 the_s2cstbindlst_pop
-  (pf | (*none*)) = let
-//
-prval() = unit_v_elim(pf)
+  ((*none*)) = let
 //
   val
   s2cs2 = let
-    val
-    (vbox pf | pp) =
-    ref_get_view_ptr(the_s2cstlstlst)
+    val xss = gcell_get<glist(s2cstlst)> (the_s2cstlstlst)
   in
-    case+ !pp of
-    |  list_vt_nil() =>
-       (fold@ (!pp); list_vt_nil())
-    | ~list_vt_cons(xs, xss) => (!pp := xss; xs)
-  end : s2cstlst_vt // end of [val]
-//
-  val (vbox pf | p) = ref_get_view_ptr(the_s2cstlst)
+    case+ glist_view (xss) of
+    |  ~GLnil() => glist_nil ()
+    | ~GLcons(xs, xss) => let
+        val () = gcell_set<glist(s2cstlst)> (the_s2cstlstlst, xss) in xs
+      end
+  end : s2cstlst // end of [val]
 //
 in
 //
 // HX:
 // It is originally stored in the_s2cstlst
 //
-  let val s2cs1 = !p; val () = !p := s2cs2 in s2cs1 end
+  let
+    val s2cs1 = gcell_get<s2cstlst> (the_s2cstlst)
+    val () = gcell_set<s2cstlst> (the_s2cstlst, s2cs2)
+  in glist_listize (s2cs1) end
 //
 end // end of [the_s2cstbindlst_pop]
 
 (* ****** ****** *)
 
-implement
-the_s2cstbindlst_pop_and_unbind
-  (pf | (*none*)) = let
-//
 fun
-loop
+pop_and_unbind_loop
 (
   s2cs: s2cstlst_vt
 ) : void = begin
@@ -187,24 +178,18 @@ loop
       ((*void*)) => ()
   | ~list_vt_cons
       (s2c, s2cs) => let
-(*
       val () =
-      (
-        print "the_s2cstbindlst_pop_and_unbind: ";
-        print "loop: s2c = "; print_s2cst (s2c); print_newline()
-      ) (* end of [val] *)
-*)
-      val () =
-        s2cst_set_def(s2c, None())
+        s2cst_set_def(s2c, gopt_none())
       // end of [val]
     in
-      loop(s2cs)
+      pop_and_unbind_loop(s2cs)
     end // end of [S2CSTLSTcons]
 end // end of [loop]
-//
-in
-  loop(the_s2cstbindlst_pop(pf | (*none*)))
-end // end of [the_s2cstbindlst_pop_and_unbind]
+
+implement
+the_s2cstbindlst_pop_and_unbind
+  ((*none*)) = pop_and_unbind_loop (the_s2cstbindlst_pop ())
+// end of [the_s2cstbindlst_pop_and_unbind]
 
 (* ****** ****** *)
 
@@ -213,20 +198,14 @@ the_s2cstbindlst_push
   ((*void*)) = let
   val
   s2cs = let
-    val
-    (vbox pf | p) =
-    ref_get_view_ptr (the_s2cstlst)
-    val s2cs = !p
-    val () = !p := list_vt_nil ()
+    val s2cs = gcell_get<s2cstlst> (the_s2cstlst)
+    val () = gcell_set<s2cstlst> (the_s2cstlst, glist_nil ())
   in
     s2cs
   end // end of [val]
-  val (vbox pf | pp) =
-    ref_get_view_ptr (the_s2cstlstlst)
-  // end of [val]
-  val () = !pp := list_vt_cons (s2cs, !pp)
+  val xss = gcell_get<glist(s2cstlst)> (the_s2cstlstlst)
 in
-  (unit_v | ())
+  gcell_set<glist(s2cstlst)> (the_s2cstlstlst, glist_cons (s2cs, xss))
 end // end of [the_s2cstbindlst_push]
 
 (* ****** ****** *)

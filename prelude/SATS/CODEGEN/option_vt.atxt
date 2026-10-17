@@ -115,6 +115,6 @@ overload isneqz with option_vt_is_some
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "option_vt_atxt.txt")
 %}\

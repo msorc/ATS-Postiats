@@ -48,15 +48,11 @@ staload "./../SATS/chanlst_t.sats"
 //
 (* ****** ****** *)
 //
-datatype
-chanlst =
-{
-l1,l2:agz
-} CHANLST of
-(
-  ptr // List0_vt(a)
-, mutex(l1), condvar(l2)
-) (* end of [chanlst] *)
+//
+// HX-2026-10: no GC
+// a chanlst is a handle to a [chanlst_vt] cell
+// that is never freed (just like a ref)
+//
 datavtype
 chanlst_vt =
 {
@@ -70,7 +66,7 @@ l1,l2:agz
 (* ****** ****** *)
 //
 assume
-chanlst_type(a:vt0p) = chanlst
+chanlst_type(a:vt0p) = ptr
 //
 (* ****** ****** *)
 
@@ -87,7 +83,7 @@ val xs0 = list_vt_nil{a}()
 val xs0 = $UN.castvwtp0{ptr}(xs0)
 //
 in
-  CHANLST(xs0, mut, CVisnil)
+  $UN.castvwtp0{ptr}(CHANLST_vt(xs0, mut, CVisnil))
 end // end of [chanlst_create_exn]
 
 (* ****** ****** *)

@@ -33,9 +33,23 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_effect.dats, see PORTING.md, "Type-checking environment (trans3_env)")
+// The stack of effects is a [glist] of items in a cell (see [pats_trans3_env_effect.spec]); a mark is an item.
 //
+
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -49,53 +63,48 @@ implement prerr_FILENAME<> () = prerr "pats_trans3_env_effect"
 (* ****** ****** *)
 
 staload "./pats_effect.sats"
-overload print with print_effset
-overload prerr with prerr_effset
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 
 (* ****** ****** *)
 
+staload "./pats_dynexp2.sats"
+staload "./pats_dynexp3.sats"
 staload "./pats_trans3.sats"
 staload "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
-datatype
-effenvitm =
-  (* effenv item *)
-  | EFFENVITMeff of effset // disallwed effects
-  | EFFENVITMeffmask of s2eff // allowed effects
-// end of [effenvitm]
+#include "./pats_trans3_env.hats"
 
-dataviewtype
-effenvitmlst =
-  | EFILSTcons of (effenvitm, effenvitmlst)
-  | EFILSTmark of (int(*knd*), effenvitmlst) // knd=0/1:soft/hard
-  | EFILSTnil of ()
-// end of [effenvitmlst]
+(* ****** ****** *)
+
+staload "./pats_trans3_env_effect.sats"
+#include "./pats_trans3_env_effect_gen_dats.hats"
+
+(* ****** ****** *)
+
+typedef effenvitmlst = glist (effenvitm)
 
 (* ****** ****** *)
 
 fun
-efilst_mark (
-  xs: effenvitmlst
-) :<1,~ref> effenvitmlst = EFILSTmark (0(*soft*), xs)
-// end of [efilst_mark]
-
-fun
 efilst_unmark (
   xs: effenvitmlst
-) :<1,~ref> effenvitmlst =
-  case+ xs of
-  | ~EFILSTcons
-      (_, xs) => efilst_unmark (xs)
-  | ~EFILSTmark (_(*knd*), xs) => xs
-  | ~EFILSTnil () => EFILSTnil ()
+) : effenvitmlst =
+  case+ glist_view (xs) of
+  | ~GLcons (efi, xs) => (
+    case+ effenvitm_view (efi) of
+    | ~EFFENVITMeff _ => efilst_unmark (xs)
+    | ~EFFENVITMeffmask _ => efilst_unmark (xs)
+    | ~EFFENVITMmark (_(*knd*)) => xs
+    )
+  | ~GLnil () => glist_nil ()
 // end of [efilst_unmark]
 
 (* ****** ****** *)
@@ -106,10 +115,10 @@ fun effset_diff_s2eff
 implement
 effset_diff_s2eff
   (efs0, s2fe) = (
-  case+ s2fe of
-  | S2EFFset (efs) => effset_diff (efs0, efs)
-  | S2EFFexp (exp) => efs0 (* conservative estimation *)
-  | S2EFFadd (s2fe1, s2fe2) => (
+  case+ s2eff_view (s2fe) of
+  | ~S2EFFset (efs) => effset_diff (efs0, efs)
+  | ~S2EFFexp (exp) => efs0 (* conservative estimation *)
+  | ~S2EFFadd (s2fe1, s2fe2) => (
       effset_diff_s2eff (effset_diff_s2eff (efs0, s2fe1), s2fe2)
     ) // end of [S2EFFadd]
 ) // end of [effset_diff_s2eff]
@@ -120,10 +129,10 @@ fun effset_union_s2eff
 implement
 effset_union_s2eff
   (efs0, s2fe) = (
-  case+ s2fe of
-  | S2EFFset (efs) => effset_union (efs0, efs)
-  | S2EFFexp (exp) => efs0 (* conservative estimation *)
-  | S2EFFadd (s2fe1, s2fe2) => (
+  case+ s2eff_view (s2fe) of
+  | ~S2EFFset (efs) => effset_union (efs0, efs)
+  | ~S2EFFexp (exp) => efs0 (* conservative estimation *)
+  | ~S2EFFadd (s2fe1, s2fe2) => (
       effset_union_s2eff (effset_union_s2eff (efs0, s2fe1), s2fe2)
     ) // end of [S2EFFadd]
 ) // end of [effset_union_s2eff]
@@ -132,66 +141,52 @@ effset_union_s2eff
 
 local
 
-assume effenv_push_v = unit_v
-val the_efis = ref<effenvitmlst> (EFILSTnil ())
+val the_efis = gcell_make<effenvitmlst> (glist_nil ())
+
+fn
+efis_get (): effenvitmlst = gcell_get<effenvitmlst> (the_efis)
+fn
+efis_set (xs: effenvitmlst): void = gcell_set<effenvitmlst> (the_efis, xs)
 
 in (* in of [local] *)
 
 implement
 the_effenv_add_eff
   (eff) = let
-  val (vbox pf | p) = ref_get_view_ptr (the_efis)
   val efs = effset_sing (eff)
-  val efi = EFFENVITMeff (efs)
+  val efi = effenvitm_EFFENVITMeff (efs)
 in
-  !p := EFILSTcons (efi, !p)
+  efis_set (glist_cons (efi, efis_get ()))
 end // end of [the_effenv_add_eff]
 
 (* ****** ****** *)
 
 implement
 the_effenv_pop
-  (pf | (*none*)) = let
-  prval () = unit_v_elim (pf)
-  val (vbox pf | p) = ref_get_view_ptr (the_efis)
-in
-  !p := efilst_unmark (!p)
-end // end of [the_effenv_pop]
+  ((*none*)) = efis_set (efilst_unmark (efis_get ()))
+// end of [the_effenv_pop]
 
 implement
 the_effenv_pop_if
-  (pfopt | test) =
-  if test then let
-    prval Some_v
-      (pf) = pfopt in the_effenv_pop (pf | (*void*))
-  end else let
-    prval None_v () = pfopt in ()
-  end // end of [if]
+  (test) = if test then the_effenv_pop () else ()
 // end of [the_effenv_pop_if]
 
 (* ****** ****** *)
 
 implement
-the_effenv_push () = let
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_efis)
-  // end of [val]
-  val () = !p := EFILSTmark (0(*soft*), !p)
-in
-  (unit_v () | ())
-end // end of [the_effenv_push]
+the_effenv_push () =
+  efis_set (glist_cons (effenvitm_EFFENVITMmark (0(*soft*)), efis_get ()))
+// end of [the_effenv_push]
 
 implement
 the_effenv_push_lam
   (s2fe) = let
 //
-val efi = EFFENVITMeffmask (s2fe)
-val (vbox pf | p) = ref_get_view_ptr (the_efis)
-val efis = EFILSTmark (1(*hard*), !p)
-val () = !p := EFILSTcons (efi, efis)
+val efi = effenvitm_EFFENVITMeffmask (s2fe)
+val efis = glist_cons (effenvitm_EFFENVITMmark (1(*hard*)), efis_get ())
 //
 in
-  (unit_v () | ())
+  efis_set (glist_cons (efi, efis))
 end // end of [the_effenv_push_lam]
 
 (* ****** ****** *)
@@ -199,114 +194,98 @@ end // end of [the_effenv_push_lam]
 implement
 the_effenv_push_set (efs) = let
 //
-val efi = EFFENVITMeff (efs)
-val (vbox pf | p) = ref_get_view_ptr (the_efis)
-val efis = EFILSTmark (0(*soft*), !p)
-val () = !p := EFILSTcons (efi, efis)
+val efi = effenvitm_EFFENVITMeff (efs)
+val efis = glist_cons (effenvitm_EFFENVITMmark (0(*soft*)), efis_get ())
 //
 in
-  (unit_v () | ())
+  efis_set (glist_cons (efi, efis))
 end // end of [the_effenv_push_set]
 
 implement
 the_effenv_push_set_if
-  (test, efs) = (
-  if test then let
-    val (pf | ()) =
-      the_effenv_push_set (efs) in (Some_v (pf) | ())
-    // end of [val]
-  end else (None_v () | ())
-) // end of [the_effenv_push_set_if]
+  (test, efs) = if test then the_effenv_push_set (efs) else ()
+// end of [the_effenv_push_set_if]
 
 (* ****** ****** *)
 
 implement
 the_effenv_push_effmask (s2fe) = let
 //
-val efi = EFFENVITMeffmask (s2fe)
-val (vbox pf | p) = ref_get_view_ptr (the_efis)
-val efis = EFILSTmark (0(*soft*), !p)
-val () = !p := EFILSTcons (efi, efis)
+val efi = effenvitm_EFFENVITMeffmask (s2fe)
+val efis = glist_cons (effenvitm_EFFENVITMmark (0(*soft*)), efis_get ())
 //
 in
-  (unit_v () | ())
+  efis_set (glist_cons (efi, efis))
 end // end of [the_effenv_push_effmask]
 
 (* ****** ****** *)
 
-implement
-the_effenv_check_set
-  (loc0, efs0) = let
-(*
-val () =
-  println! ("the_effenv_check_set: efs0 = ", efs0)
-// end of [val]
-*)
-fun auxerr
-(
-  efs: effset
-) :<cloref1> void = let
+fun
+check_set_auxerr (
+  loc0: loc_t, efs0: effset, efs: effset
+) : void = let
   val () = prerr_error3_loc (loc0)
   val () = filprerr_ifdebug "the_effenv_check_set"
-  val () = prerrln! (": some disallowed effects may be incurred: ", efs)
+  val () = (prerr ": some disallowed effects may be incurred: "; prerr_effset (efs); prerr_newline ())
 in
-  the_trans3errlst_add (T3E_effenv_check_set (loc0, efs0))
-end (* end of [auxerr] *)
-//  
-fun auxcheck
+  the_trans3errlst_add (trans3err_T3E_effenv_check_set (loc0, efs0))
+end (* end of [check_set_auxerr] *)
+
+fun
+check_set_auxcheck
 (
-  efis: !effenvitmlst, efs0: effset(*isnotnil*)
-) :<cloref1> int =
-  case+ efis of
-  | EFILSTcons
-      (efi, !p_efis) => (
-    case+ efi of
-    | EFFENVITMeff (efs) => let
+  loc0: loc_t, efs00: effset
+, efis: effenvitmlst, efs0: effset(*isnotnil*)
+) : int =
+  case+ glist_view (efis) of
+  | ~GLcons (efi, efis) => (
+    case+ effenvitm_view (efi) of
+    | ~EFFENVITMeff (efs) => let
         val efs =
           effset_inter (efs0, efs)
         // end of [val]
         val isnil = effset_isnil (efs)
         val ans = (
-          if isnil then auxcheck (!p_efis, efs0) else 1(*fail*)
+          if isnil then check_set_auxcheck (loc0, efs00, efis, efs0) else 1(*fail*)
         ) : int // end of [val]
-        val () = if ans > 0 then auxerr (efs)
+        val () = if ans > 0 then check_set_auxerr (loc0, efs00, efs)
       in
-        fold@ (efis); ans
+        ans
       end // end of [EFFENVITEMeff]
-    | EFFENVITMeffmask (s2fe) => let
+    | ~EFFENVITMeffmask (s2fe) => let
         val efs0 =
           effset_diff_s2eff (efs0, s2fe) // conservative
         val isnil = effset_isnil (efs0)
         val ans = (
-          if isnil then 0(*succ*) else auxcheck (!p_efis, efs0)
+          if isnil then 0(*succ*) else check_set_auxcheck (loc0, efs00, efis, efs0)
         ) : int // end of [val]
       in
-        fold@ (efis); ans
+        ans
       end // end of [EFFENVITEMeffmask]
+    | ~EFFENVITMmark (knd) => let
+        val ans = ( // HX: note that [efs0] is not nil
+          if knd > 0 then 1(*fail*) else check_set_auxcheck (loc0, efs00, efis, efs0)
+        ) : int // end of [val]
+        val () = if knd > 0 then (if ans > 0 then check_set_auxerr (loc0, efs00, efs0))
+      in
+        ans
+      end // end of [EFILSTmark]
     ) // end of [EFILSTcons]
-  | EFILSTmark (knd, !p_efis) => let
-      val ans = ( // HX: note that [efs0] is not nil
-        if knd > 0 then 1(*fail*) else auxcheck (!p_efis, efs0)
-      ) : int // end of [val]
-      val () = if knd > 0 then (if ans > 0 then auxerr (efs0))
-    in
-      fold@ (efis); ans
-    end // end of [EFILSTmark]
 //
 // HX: effects are all considered to be masked at the end
 //
-  | EFILSTnil () => (fold@ (efis); 0)
-// end of [aux]
+  | ~GLnil () => 0
+// end of [check_set_auxcheck]
+
+implement
+the_effenv_check_set
+  (loc0, efs0) = let
 //
 val isnil = effset_isnil (efs0)
 //
 in
 //
-if isnil then 0 else let
-  val (vbox pf | p) = ref_get_view_ptr (the_efis)
-in
-  $effmask_ref (auxcheck (!p, efs0))
-end // end of [if]
+if isnil then 0 else check_set_auxcheck (loc0, efs0, efis_get (), efs0)
 //
 end // end of [the_effenv_check_set]
 
@@ -350,99 +329,87 @@ the_effenv_caskind_check_exn
 
 (* ****** ****** *)
 
-implement
-the_effenv_check_sexp
-  (loc0, s2e0) = let
-(*
-val () =
-  println! ("the_effenv_check_sexp: s2e0 = ", s2e0)
-// end of [val]
-*)
-fun auxerr (
-  s2e0: s2exp
-) :<cloref1> void = let
+fun
+check_sexp_auxerr (
+  loc0: loc_t, s2e0: s2exp
+) : void = let
   val () = prerr_error3_loc (loc0)
   val () = filprerr_ifdebug "the_effenv_check_sexp"
-  val () = prerrln! (": some disallowed effects may be incurred: ", s2e0)
+  val () = (prerr ": some disallowed effects may be incurred: "; prerr_s2exp (s2e0); prerr_newline ())
 in
-  the_trans3errlst_add (T3E_effenv_check_sexp (loc0, s2e0))
-end (* end of [auxerr] *)
+  the_trans3errlst_add (trans3err_T3E_effenv_check_sexp (loc0, s2e0))
+end (* end of [check_sexp_auxerr] *)
 //
-fun auxcheck (
-  efis: !effenvitmlst, mefs: effset, s2e0: s2exp
-) :<cloref1> int =
-  case+ efis of
-  | EFILSTcons (efi, !p_efis) => (
-    case+ efi of
-    | EFFENVITMeff efs => let
+fun
+check_sexp_auxcheck (
+  loc0: loc_t, efis: effenvitmlst, mefs: effset, s2e0: s2exp
+) : int =
+  case+ glist_view (efis) of
+  | ~GLcons (efi, efis) => (
+    case+ effenvitm_view (efi) of
+    | ~EFFENVITMeff efs => let
         val issup = effset_supset (mefs, efs)
         val ans = (if issup then 0 else 1): int
-        val () = if ans > 0 then auxerr (s2e0)
+        val () = if ans > 0 then check_sexp_auxerr (loc0, s2e0)
       in
-        fold@ (efis); ans
+        ans
       end // end of [EFFENVITMeff]
-    | EFFENVITMeffmask s2fe => let
+    | ~EFFENVITMeffmask s2fe => let
         val isnil = s2eff_contain_exp (s2fe, s2e0) // conservative
         val ans = (
           if isnil then 0(*succ*) else let
             val mefs = effset_union_s2eff (mefs, s2fe) // conservative
           in
-            auxcheck (!p_efis, mefs, s2e0)
+            check_sexp_auxcheck (loc0, efis, mefs, s2e0)
           end (* end of [if] *)
         ) : int // end of [val]
       in
-        fold@ (efis); ans
+        ans
       end // end of [EFFENVITEMeffmask]
+    | ~EFFENVITMmark (knd) => let
+        val ans = ( // HX: assuming [s2e0] is not nil
+          if knd > 0 then 1(*fail*) else check_sexp_auxcheck (loc0, efis, mefs, s2e0)
+        ) : int // end of [val]
+        val () = if ans > 0 then check_sexp_auxerr (loc0, s2e0)
+      in
+        ans
+      end // end of [EFILSTmark]
     ) // end of [EFILSTcons]
-  | EFILSTmark (knd, !p_efis) => let
-      val ans = ( // HX: assuming [s2e0] is not nil
-        if knd > 0 then 1(*fail*) else auxcheck (!p_efis, mefs, s2e0)
-      ) : int // end of [val]
-      val () = if ans > 0 then auxerr (s2e0)
-    in
-      fold@ (efis); ans
-    end // end of [EFILSTmark]
-  | EFILSTnil () => (fold@ (efis); 0(*succ*))
-// end of [aux]
-//
-val (vbox pf | p) = ref_get_view_ptr (the_efis)
-//
-in
-  $effmask_ref (auxcheck (!p, effset_nil, s2e0))
-end // end of [the_effenv_check_sexp]
+  | ~GLnil () => 0(*succ*)
+// end of [check_sexp_auxcheck]
+
+implement
+the_effenv_check_sexp
+  (loc0, s2e0) =
+  check_sexp_auxcheck (loc0, efis_get (), effset_nil, s2e0)
+// end of [the_effenv_check_sexp]
 
 (* ****** ****** *)
 
 implement
 the_effenv_check_s2eff
   (loc0, s2fe0) = let
-(*
-val () =
-  println! ("the_effenv_check_s2eff: s2fe0 = ", s2fe0)
-// end of [val]
-*)
+//
 val s2fe0 = s2eff_hnfize (s2fe0)
 //
 in
 //
-case+ s2fe0 of
-| S2EFFset (efs0) =>
+case+ s2eff_view (s2fe0) of
+| ~S2EFFset (efs0) =>
     the_effenv_check_set (loc0, efs0)
-| S2EFFexp (s2e) => let
+| ~S2EFFexp (s2e) => let
     val s2f = s2exp2hnf (s2e)
     val s2e = s2hnf2exp (s2f)
   in
     the_effenv_check_sexp (loc0, s2e)
   end // end of [S2EFFexp]
-| S2EFFadd (s2fe1, s2fe2) => let
+| ~S2EFFadd (s2fe1, s2fe2) => let
     val ans = the_effenv_check_s2eff (loc0, s2fe1)
   in
     if ans > 0 then 1 else the_effenv_check_s2eff (loc0, s2fe2)
   end // end of [S2EFFadd]
 //
 end // end of [the_effenv_check_s2eff]
-
-(* ****** ****** *)
 
 end // end of [local]
 

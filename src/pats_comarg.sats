@@ -32,9 +32,14 @@
 // Start Time: April, 2011
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_comarg.sats)
+// [COMARG (i, s)] of ATS1 is the flat tuple [@(i, s)]: a pattern
+// [COMARG(1, key)] is written [@(1, key)]
+//
+(* ****** ****** *)
 
-datatype
-comarg = COMARG of (int, string)
+typedef comarg = @(int, string)
 
 vtypedef
 comarglst(n:int) = list_vt(comarg, n)

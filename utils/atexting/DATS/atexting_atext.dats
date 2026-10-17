@@ -36,9 +36,6 @@
 #include
 "share\
 /atspre_staload.hats"
-#include
-"share\
-/atspre_staload_libats_ML.hats"
 //
 (* ****** ****** *)
 
@@ -49,15 +46,16 @@ staload UN = $UNSAFE
 staload
 "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 implement
 atext_make
 (
   loc, node
-) = $rec{
-  atext_loc= loc, atext_node= node
-} (* $rec *)
+) = atext_ATEXT(loc, node) (* $rec *)
 //
 (* ****** ****** *)
 //
@@ -65,16 +63,16 @@ implement
 atext_make_nil
 (
   loc
-) = atext_make(loc, TEXTnil())
+) = atext_make(loc, atext_node_TEXTnil())
 //
 (* ****** ****** *)
 //
 implement
 atext_make_token
   (tok) = let
-  val loc = tok.token_loc
+  val loc = tok.token_loc()
 in
-  atext_make(loc, TEXTtoken(tok))
+  atext_make(loc, atext_node_TEXTtoken(tok))
 end // end of [atext_make_token]
 //
 (* ****** ****** *)
@@ -82,30 +80,30 @@ end // end of [atext_make_token]
 implement
 atext_make_list
   (loc, txts) =
-  atext_make(loc, TEXTlist(txts))
+  atext_make(loc, atext_node_TEXTlist(txts))
 //
 (* ****** ****** *)
 //
 implement
 atext_make_string
   (loc, str) =
-  atext_make(loc, TEXTstring(str))
+  atext_make(loc, atext_node_TEXTstring(str))
 //
 implement
 atext_make_errmsg
   (loc, msg) =
-  atext_make(loc, TEXTerrmsg(msg))
+  atext_make(loc, atext_node_TEXTerrmsg(msg))
 //
 (* ****** ****** *)
 //
 implement
 atext_make_squote
   (loc, txts) =
-  atext_make(loc, TEXTsquote(txts))
+  atext_make(loc, atext_node_TEXTsquote(txts))
 implement
 atext_make_dquote
   (loc, tok, txts) =
-  atext_make(loc, TEXTdquote(tok, txts))
+  atext_make(loc, atext_node_TEXTdquote(tok, txts))
 //
 (* ****** ****** *)
 //
@@ -113,18 +111,18 @@ implement
 atext_tuple_2
   (loc, x0, x1) =
   atext_make
-  (loc, TEXTlist(list0_tuple(x0, x1)))
+  (loc, atext_node_TEXTlist(glist_cons<atext>(x0, glist_cons<atext>(x1, glist_nil()))))
 implement
 atext_tuple_3
   (loc, x0, x1, x2) =
   atext_make
-  (loc, TEXTlist(list0_tuple(x0, x1, x2)))
+  (loc, atext_node_TEXTlist(glist_cons<atext>(x0, glist_cons<atext>(x1, glist_cons<atext>(x2, glist_nil())))))
 //
 implement
 atext_tuple_4
   (loc, x0, x1, x2, x3) =
   atext_make
-  (loc, TEXTlist(list0_tuple(x0, x1, x2, x3)))
+  (loc, atext_node_TEXTlist(glist_cons<atext>(x0, glist_cons<atext>(x1, glist_cons<atext>(x2, glist_cons<atext>(x3, glist_nil()))))))
 //
 implement
 atext_tuple_5
@@ -132,7 +130,7 @@ atext_tuple_5
 (
   atext_make
   ( loc
-  , TEXTlist(list0_tuple(x0, x1, x2, x3, x4)))
+  , atext_node_TEXTlist(glist_cons<atext>(x0, glist_cons<atext>(x1, glist_cons<atext>(x2, glist_cons<atext>(x3, glist_cons<atext>(x4, glist_nil())))))))
 )
 //
 implement
@@ -141,7 +139,7 @@ atext_tuple_6
 (
   atext_make
   ( loc
-  , TEXTlist(list0_tuple(x0, x1, x2, x3, x4, x5)))
+  , atext_node_TEXTlist(glist_cons<atext>(x0, glist_cons<atext>(x1, glist_cons<atext>(x2, glist_cons<atext>(x3, glist_cons<atext>(x4, glist_cons<atext>(x5, glist_nil()))))))))
 )
 //
 (* ****** ****** *)
@@ -174,12 +172,12 @@ fprint_val<atextlst> = fprint_atextlst
 //
 implement
 fprint_atext(out, x0) =
-  fprint_atext_node_<>(out, x0.atext_node)
+  fprint_atext_node_<>(out, x0.atext_node())
 //
 implement
 fprint_atextlst
   (out, xs) =
-  fprint_list_sep<atext>(out, $UN.cast{List0(atext)}(xs), ", ")
+  fprint_glist_sep<atext>(out, xs, ", ")
 //
 #endif // #ifdef
 

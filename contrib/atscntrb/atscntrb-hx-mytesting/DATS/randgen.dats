@@ -98,10 +98,6 @@ randgen_ref(x0) =
 //
 (* ****** ****** *)
 //
-implement
-{a}(*tmp*)
-randgen_list(n) =
-  list_vt2t(randgen_list_vt<a>(n))
 //
 (* ****** ****** *)
 //
@@ -159,22 +155,6 @@ prval () = arrayptr_addback (pf | A)
 
 (* ****** ****** *)
 
-implement
-{a}(*tmp*)
-randgen_arrayref(n) =
-  arrayptr_refize{a}(randgen_arrayptr<a>(n))
-// end of [randgen_arrayref]
-
-implement
-{a}(*tmp*)
-randgen_arrszref(n) =
-let
-//
-val n = g1ofg0_uint(n) in
-//
-arrszref_make_arrayref{a}(randgen_arrayref<a>(n), n)
-//
-end // end of [randgen_arrszref]
 
 (* ****** ****** *)
 
@@ -213,32 +193,6 @@ prval () = arrayptr_addback{a}(pf | A0)
 in
   $UN.castvwtp0{matrixptr(a,m,n)}(A0)
 end // end of [randgen_matrixptr]
-
-(* ****** ****** *)
-
-implement{a}
-randgen_matrixref
-  (m, n) =
-(
-//
-matrixptr_refize{a}(randgen_matrixptr<a>(m, n))
-//
-) // end of [randgen_matrixref]
-
-(* ****** ****** *)
-
-implement{a}
-randgen_mtrxszref
-  (m, n) = let
-//
-val m = g1ofg0_uint (m)
-and n = g1ofg0_uint (n)
-//
-in
-//
-mtrxszref_make_matrixref{a}(randgen_matrixref<a>(m, n), m, n)
-//
-end // end of [randgen_mtrxszref]
 
 (* ****** ****** *)
 

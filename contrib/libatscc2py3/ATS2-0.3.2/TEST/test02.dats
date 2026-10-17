@@ -18,19 +18,39 @@ ATS_DYNLOADNAME "test02_dynload"
 //
 (* ****** ****** *)
 
-#define :: list_cons
+#define :: list_vt_cons
 
 (* ****** ****** *)
-
-val xs =
+//
+// HX-2026-10: no GC (linear lists)
+//
+fun
+mklist
 (
-  0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: nil()
-) : List0 (int)
-
+// argless
+) : List0_vt(int) =
+(
+  0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: 9 :: list_vt_nil()
+)
+//
 (* ****** ****** *)
-
-val () = println! ("xs = ", xs)
-val () = println! ("xs + xs = ", xs + xs)
+//
+implement
+gprint_string<>(x) = print_string(x)
+implement
+gprint_newline<>() = print_newline()
+//
+val xs = mklist()
+val () = print("xs = ")
+val () = gprint_list<int>(xs)
+val () = gprint_newline()
+//
+val xs = xs + mklist()
+val () = print("xs + xs = ")
+val () = gprint_list<int>(xs)
+val () = gprint_newline()
+val () = list_vt_free(xs)
+//
 
 (* ****** ****** *)
 

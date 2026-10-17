@@ -21,125 +21,44 @@ all::
 
 ######
 #
-all:: \
-Amicable_pairs
-Amicable_pairs: \
-Amicable_pairs.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Amicable_pairs; ./$<
-cleanall:: ; $(RMF) Amicable_pairs
 #
 ######
 #
-all:: \
-Best_shuffle
-Best_shuffle: \
-Best_shuffle.dats ; \
-$(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Best_shuffle; ./$<
-cleanall:: ; $(RMF) Best_shuffle
 #
 ######
 #
-# all:: \
-# Lucas-Lehmer_test
-Lucas-Lehmer_test: \
-Lucas-Lehmer_test.dats ; \
-$(PATSCC) -O2 \
--I./PATSRELOCROOT -DATS_MEMALLOC_LIBC -o $@ $< -lgmp
 #
-# regress:: \
-# Lucas-Lehmer_test; ./$<
 #
-cleanall:: ; $(RMF) Lucas-Lehmer_test
 #
 ######
 #
-all:: \
-Lucas-Lehmer_test2
-Lucas-Lehmer_test2: \
-Lucas-Lehmer_test2.dats ; \
-$(PATSCC) -O2 -I"$(ATSCNTRB)" -DATS_MEMALLOC_LIBC -o $@ $< -lgmp
 #
-regress:: \
-Lucas-Lehmer_test2; ./$<
-cleanall:: ; $(RMF) Lucas-Lehmer_test2
 #
 ######
 #
-all:: \
-Middle_three_digits
-Middle_three_digits: \
-Middle_three_digits.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Middle_three_digits; ./$<
-cleanall:: ; $(RMF) Middle_three_digits
 #
 ######
 #
-all:: \
-Nested_function
-Nested_function: \
-Nested_function.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Nested_function; ./$<
-cleanall:: ; $(RMF) Nested_function
 #
 ######
 #
-all:: \
-Pangram_checker
-Pangram_checker: \
-Pangram_checker.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Pangram_checker; ./$<
-cleanall:: ; $(RMF) Pangram_checker
 #
 ######
 #
-all:: \
-Penneys_game
-Penneys_game: \
-Penneys_game.dats ; \
-$(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Penneys_game; ./$< HHH TTT
-cleanall:: ; $(RMF) Penneys_game
 #
 ######
 #
-all:: \
-Playing_cards
-Playing_cards: \
-Playing_cards.dats ; \
-$(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
 #
-regress:: \
-Playing_cards; ./$<
-cleanall:: ; $(RMF) Playing_cards
 #
 ######
 #
-all:: \
-Primality_by_trial_division
-Primality_by_trial_division: \
-Primality_by_trial_division.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< -lm
 #
-regress:: \
-Primality_by_trial_division; ./$<
-cleanall:: ; $(RMF) Primality_by_trial_division
 #
 ######
 #

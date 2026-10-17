@@ -11,25 +11,20 @@ staload "./../SATS/intrange.sats"
 
 (* ****** ****** *)
 //
-implement
-int_repeat_lazy
-  (n0, fwork) =
-(
-//
-int_repeat_cloref(n0, lazy2cloref(fwork))
-//
-) (* end of [int_repeat_lazy] *)
+// HX-2026-10: no GC
+// The closures are linear: they are borrowed by
+// the loops and freed once the loops are done.
 //
 (* ****** ****** *)
-//
+
 implement
-int_repeat_cloref
+int_repeat_cloptr
   (n0, fwork) = let
 //
 fun
 loop
 (
-  n: int, fwork: cfun0(void)
+  n: int, fwork: !cfun0(void)
 ) : void = (
 //
 if n > 0
@@ -37,197 +32,90 @@ if n > 0
 //
 ) (* end of [loop] *)
 //
+val () = loop (n0, fwork)
+//
 in
-  loop (n0, fwork)
-end // end of [int_repeat_cloref]
-//
-implement
-int_repeat_method
-  (n0) =
-  lam(fwork) => int_repeat_cloref(n0, fwork)
-//
+  cfun_free(fwork)
+end // end of [int_repeat_cloptr]
+
 (* ****** ****** *)
 //
 implement
-int_exists_cloref
+int_exists_cloptr
   (n0, pred) =
 (
-  intrange_exists_cloref(0, n0, pred)
+  intrange_exists_cloptr(0, n0, pred)
 )
 implement
-int_forall_cloref
+int_forall_cloptr
   (n0, pred) =
 (
-  intrange_forall_cloref (0, n0, pred)
-)
-//
-implement
-int_exists_method
-  (n0) = lam(f) => int_exists_cloref(n0, f)
-implement
-int_forall_method
-  (n0) = lam(f) => int_forall_cloref(n0, f)
-//
-(* ****** ****** *)
-//
-implement
-int_foreach_cloref
-  (n0, pred) =
-(
-  intrange_foreach_cloref(0, n0, pred)
-)
-implement
-int_rforeach_cloref
-  (n0, pred) =
-(
-  intrange_rforeach_cloref(0, n0, pred)
+  intrange_forall_cloptr(0, n0, pred)
 )
 //
 (* ****** ****** *)
 //
 implement
-int_foreach_method
-  (n0) = lam(f) => int_foreach_cloref(n0, f)
+int_foreach_cloptr
+  (n0, fwork) =
+(
+  intrange_foreach_cloptr(0, n0, fwork)
+)
+implement
+int_rforeach_cloptr
+  (n0, fwork) =
+(
+  intrange_rforeach_cloptr(0, n0, fwork)
+)
 //
 (* ****** ****** *)
 //
 implement
-int_foldleft_cloref
+int_foldleft_cloptr
   {res}
   (n0, ini, fopr) =
 (
-  intrange_foldleft_cloref{res}(0, n0, ini, fopr)
+  intrange_foldleft_cloptr{res}(0, n0, ini, fopr)
 )
-//
 implement
-int_foldleft_method
-  {res}
-  ( n0, _(*TYPE*) ) =
-(
-lam(ini, fopr) => int_foldleft_cloref{res}(n0, ini, fopr)
-) (* int_foldleft_method *)
-//
-(* ****** ****** *)
-//
-implement
-int_foldright_cloref
+int_foldright_cloptr
   {res}
   (n0, fopr, snk) =
 (
-  intrange_foldright_cloref{res}(0, n0, fopr, snk)
+  intrange_foldright_cloptr{res}(0, n0, fopr, snk)
 )
 //
-implement
-int_foldright_method
-  {res}
-  ( n0, _(*TYPE*) ) =
-(
-lam(fopr, snk) => int_foldright_cloref{res}(n0, fopr, snk)
-) (* int_foldright_method *)
-//
 (* ****** ****** *)
-//
+
 implement
-int_list_map_cloref
+int_list_vt_map_cloptr
   {a}{n}(n0, fopr) = let
 //
 fun
 aux
 { i:nat
 | i <= n
-} (i: int(i)): list(a, n-i) = (
-//
+}
+(
+  i: int(i), fopr: !cfun1(int, a)
+) : list_vt(a, n-i) =
+(
 if
 (i < n0)
-then list_cons(fopr(i), aux(i+1))
-else list_nil()
+then let
+  val x = fopr(i)
+in
+  list_vt_cons(x, aux(i+1, fopr))
+end // end of [then]
+else list_vt_nil()
 // end of [if]
 )
 //
-in
-  aux(0)
-end // end of [int_list_map_cloref]
-//
-implement
-int_list_map_method
-  {a}{n}(n0, tres) =
-(
-//
-lam(fopr) =>
-  int_list_map_cloref{a}{n}(n0, fopr)
-//
-) (* end of [int_list_map_method] *)
-//
-(* ****** ****** *)
-//
-implement
-int_list0_map_cloref
-  {a}(n0, fopr) = let
-//
-val n0 = g1ofg0(n0)
+val res = aux(0, fopr)
 //
 in
-//
-if
-(n0 >= 0)
-then
-g0ofg1
-(
-  int_list_map_cloref(n0, fopr)
-) (* g0ofg1 *)
-else list0_nil(*void*)
-//
-end // end of [int_list0_map_cloref]
-//
-implement
-int_list0_map_method
-  {a}(n0, tres) =
-(
-//
-lam(fopr) =>
-  int_list0_map_cloref{a}(n0, fopr)
-//
-) (* end of [int_list0_map_method] *)
-//
-(* ****** ****** *)
-
-#if
-defined(ATSCC_STREAM)
-//
-implement
-int_stream_map_cloref
-  {a}(n0, fopr) = let
-//
-fun
-aux
-{i:nat}
-(
-  i: int(i)
-) : stream(a) = $delay(
-//
-if
-(i < n0)
-then (
-  stream_cons(fopr(i), aux(i+1))
-) else stream_nil()
-// end of [if]
-)
-//
-in
-  aux(0)
-end // end of [aux]
-//
-implement
-int_stream_map_method
-  {a}(n0, tres) =
-(
-//
-lam(fopr) =>
-  int_stream_map_cloref{a}(n0, fopr)
-//
-) (* end of [int_stream_map_method] *)
-//
-#endif // ATSCC_STREAM
+  cfun_free(fopr); res
+end // end of [int_list_vt_map_cloptr]
 
 (* ****** ****** *)
 
@@ -235,96 +123,72 @@ lam(fopr) =>
 defined(ATSCC_STREAM_VT)
 //
 implement
-int_stream_vt_map_cloref
-  {a}(n0, fopr) = let
+int_stream_vt_map_cloptr
+  {a}{n}(n0, fopr) = let
 //
 fun
 aux
 {i:nat}
 (
-  i: int(i)
+  i: int(i), fopr: cfun1(int, a)
 ) : stream_vt(a) = $ldelay
 (
-//
+(
 if
 (i < n0)
-then (
-  stream_vt_cons(fopr(i), aux(i+1))
-) else stream_vt_nil((*void*))
-// end of [if]
-) : stream_vt_con(a) // [aux]
+then let
+  val x = fopr(i)
+in
+  stream_vt_cons(x, aux(i+1, fopr))
+end // end of [then]
+else let
+  val () = cfun_free(fopr) in stream_vt_nil((*void*))
+end // end of [else]
+) : stream_vt_con(a)
+//
+, cfun_free(fopr) // HX: the stream is freed
+//
+) (* $ldelay *) // [aux]
 //
 in
-  aux(0)
-end // end of [aux]
-//
-implement
-int_stream_vt_map_method
-  {a}(n0, tres) =
-(
-//
-llam(fopr) =>
-  int_stream_vt_map_cloref{a}(n0, fopr)
-//
-) (* end of [int_stream_vt_map_method] *)
+  aux(0, fopr)
+end // end of [int_stream_vt_map_cloptr]
 //
 #endif // ATSCC_STREAM_VT
 
 (* ****** ****** *)
 //
 implement
-int2_exists_cloref
+int2_exists_cloptr
   (n1, n2, pred) =
 (
-intrange2_exists_cloref (0, n1, 0, n2, pred)
-)
-implement
-int2_forall_cloref
-  (n1, n2, pred) =
-(
-intrange2_forall_cloref (0, n1, 0, n2, pred)
+intrange2_exists_cloptr (0, n1, 0, n2, pred)
 )
 //
 implement
-int2_foreach_cloref
+int2_forall_cloptr
+  (n1, n2, pred) =
+(
+intrange2_forall_cloptr (0, n1, 0, n2, pred)
+)
+//
+implement
+int2_foreach_cloptr
   (n1, n2, fwork) =
 (
-intrange2_foreach_cloref (0, n1, 0, n2, fwork)
+intrange2_foreach_cloptr (0, n1, 0, n2, fwork)
 )
-//
-(* ****** ****** *)
-//
-implement
-int_cross_exists_method
-  (n1, n2) =
-(
-lam(pred) => int2_exists_cloref(n1, n2, pred)
-) (* int_cross_exists_method *)
-//
-implement
-int_cross_forall_method
-  (n1, n2) =
-(
-lam(pred) => int2_forall_cloref(n1, n2, pred)
-) (* int_cross_forall_method *)
-//
-implement
-int_cross_foreach_method
-  (n1, n2) =
-(
-lam(fwork) => int2_foreach_cloref(n1, n2, fwork)
-) (* int_cross_foreach_method *)
 //
 (* ****** ****** *)
 
 implement
-intrange_exists_cloref
+intrange_exists_cloptr
   (l, r, pred) = let
 //
 fun
 loop
 (
-  l: int, r: int, pred: cfun1(int, bool)
+  l: int, r: int, pred: !cfun1(int, bool)
 ) : bool = (
 //
 if l < r
@@ -334,27 +198,22 @@ if l < r
 //
 ) (* end of [loop] *)
 //
+val ans = loop (l, r, pred)
+//
 in
-  loop (l, r, pred)
-end // end of [intrange_exists_cloref]
-//
-implement
-intrange_exists_method(lr) =
-(
-lam(pred) =>
-  intrange_exists_cloref(lr.0, lr.1, pred)
-) (* intrange_exists_method *)
-//
+  cfun_free(pred); ans
+end // end of [intrange_exists_cloptr]
+
 (* ****** ****** *)
 
 implement
-intrange_forall_cloref
+intrange_forall_cloptr
   (l, r, pred) = let
 //
 fun
 loop
 (
-  l: int, r: int, pred: cfun1(int, bool)
+  l: int, r: int, pred: !cfun1(int, bool)
 ) : bool = (
 //
 if l < r
@@ -364,26 +223,21 @@ if l < r
 //
 ) (* end of [loop] *)
 //
+val ans = loop (l, r, pred)
+//
 in
-  loop (l, r, pred)
-end // end of [intrange_forall_cloref]
-//
-implement
-intrange_forall_method(lr) =
-(
-lam(pred) =>
-  intrange_forall_cloref(lr.0, lr.1, pred)
-) (* intrange_forall_method *)
-//
+  cfun_free(pred); ans
+end // end of [intrange_forall_cloptr]
+
 (* ****** ****** *)
-//
+
 implement
-intrange_foreach_cloref
+intrange_foreach_cloptr
   (l, r, fwork) = let
 //
 fun
 loop (
-  l: int, r: int, fwork: cfun1(int, void)
+  l: int, r: int, fwork: !cfun1(int, void)
 ) : void = (
 //
 if (l < r)
@@ -394,26 +248,21 @@ else ((*void*)) // else
 //
 ) (* end of [loop] *)
 //
+val () = loop(l, r, fwork)
+//
 in
-  loop(l, r, fwork)
-end // end of [intrange_foreach_cloref]
-//
-implement
-intrange_foreach_method(lr) =
-(
-lam(fwork) =>
-  intrange_foreach_cloref(lr.0, lr.1, fwork)
-) (* intrange_foreach_method *)
-//
+  cfun_free(fwork)
+end // end of [intrange_foreach_cloptr]
+
 (* ****** ****** *)
-//
+
 implement
-intrange_rforeach_cloref
+intrange_rforeach_cloptr
   (l, r, fwork) = let
 //
 fun
 loop (
-  l: int, r: int, fwork: cfun1(int, void)
+  l: int, r: int, fwork: !cfun1(int, void)
 ) : void = (
 //
 if (l < r)
@@ -424,235 +273,179 @@ else ((*void*)) // else
 //
 ) (* end of [loop] *)
 //
+val () = loop(l, r, fwork)
+//
 in
-  loop(l, r, fwork)
-end // end of [intrange_rforeach_cloref]
-//
-implement
-intrange_rforeach_method(lr) =
-(
-lam(fwork) =>
-  intrange_rforeach_cloref(lr.0, lr.1, fwork)
-) (* intrange_rforeach_method *)
-//
+  cfun_free(fwork)
+end // end of [intrange_rforeach_cloptr]
+
 (* ****** ****** *)
-//
+
 implement
-intrange_foldleft_cloref
+intrange_foldleft_cloptr
   {res}
 (
   l, r, ini, fopr
-) = loop(l, r, ini) where
-{
+) = let
 //
 fun
 loop
 (
-  l: int, r: int, ini: res
+  l: int, r: int, ini: res, fopr: !cfun2(res, int, res)
 ) : res =
 (
-//
 if (l < r)
-  then loop(l+1, r, fopr(ini, l)) else ini
+  then loop(l+1, r, fopr(ini, l), fopr) else ini
 // end of [if]
-//
 ) (* end of [loop] *)
 //
-} (* end of [intrange_foldleft_cloref] *)
+val res = loop(l, r, ini, fopr)
 //
-implement
-intrange_foldleft_method
-  {res}
-( $tup(l, r), _(*TYPE*) ) =
-(
-  lam(ini, fopr) =>
-    intrange_foldleft_cloref{res}(l, r, ini, fopr)
-  // end of [lam]
-)
-//
+in
+  cfun_free(fopr); res
+end (* end of [intrange_foldleft_cloptr] *)
+
 (* ****** ****** *)
 
 implement
-intrange_foldright_cloref
+intrange_foldright_cloptr
   {res}
 (
   l, r, fopr, snk
-) = loop(l, r, snk) where
-{
+) = let
 //
 fun
 loop
 (
-  l: int, r: int, snk: res
+  l: int, r: int, fopr: !cfun2(int, res, res), snk: res
 ) : res =
 (
-//
 if (l < r)
-  then loop(l, r-1, fopr(r-1, snk)) else snk
-//
+  then loop(l, r-1, fopr, fopr(r-1, snk)) else snk
+// end of [if]
 ) (* end of [loop] *)
 //
-} (* end of [intrange_foldright_cloref] *)
+val res = loop(l, r, fopr, snk)
+//
+in
+  cfun_free(fopr); res
+end (* end of [intrange_foldright_cloptr] *)
 
 (* ****** ****** *)
-//
+
 implement
-intrange_foldright_method
-  {res}
-( $tup(l, r), _(*TYPE*) ) =
+intrange2_exists_cloptr
 (
-  lam(fopr, snk) =>
-    intrange_foldright_cloref{res}(l, r, fopr, snk)
-  // end of [lam]
+  l1, r1, l2, r2, pred
+) = let
+//
+fun
+loop1
+(
+  i: int, pred: !cfun2(int, int, bool)
+) : bool =
+(
+if i < r1
+  then (
+    if loop2(i, l2, pred) then true else loop1(i+1, pred)
+  ) else false
+// end of [if]
 )
 //
-(* ****** ****** *)
-
-implement
-intrange2_exists_cloref
-  (l1_, r1_, l2_, r2_, pred) = let
-//
-// HX-2016-07-26:
-// loop1 and loop2 need to have
-// the same number of arguments
-// in order to support atscc2clj
-//
-fnx
-loop1
-(
-  l1: int, r1: int
-, l2: int, r2: int
-, f: cfun2 (int, int, bool)
-) : bool = (
-//
-if l1 < r1
-  then loop2(l1, r1, l2, r2, pred) else false
-//
-) (* end of [loop1] *)
-//
 and
 loop2
 (
-  l1: int, r1: int
-, l2: int, r2: int
-, pred: cfun2 (int, int, bool)
-) : bool = (
-//
-if (
-l2 < r2
-) then (
-//
-if (
-pred(l1, l2)
-) then true
-  else loop2(l1, r1, l2+1, r2, pred)
+  i: int, j: int, pred: !cfun2(int, int, bool)
+) : bool =
+(
+if j < r2
+  then (
+    if pred(i, j) then true else loop2(i, j+1, pred)
+  ) else false
 // end of [if]
-) else loop1(l1+1, r1, l2_, r2_, pred)
+)
 //
-) (* end of [loop2] *)
+val ans = loop1(l1, pred)
 //
 in
-  loop1(l1_, r1_, l2_, r2_, pred)
-end // end of [intrange2_exists_cloref]
+  cfun_free(pred); ans
+end // end of [intrange2_exists_cloptr]
 
 (* ****** ****** *)
 
 implement
-intrange2_forall_cloref
-  (l1_, r1_, l2_, r2_, pred) = let
+intrange2_forall_cloptr
+(
+  l1, r1, l2, r2, pred
+) = let
 //
-// HX-2016-07-26:
-// loop1 and loop2 need to have
-// the same number of arguments
-// in order to support atscc2clj
-//
-fnx
+fun
 loop1
 (
-  l1: int, r1: int
-, l2: int, r2: int
-, pred: cfun2 (int, int, bool)
-) : bool = (
-//
-if l1 < r1
-  then loop2 (l1, r1, l2, r2, pred) else true
-//
-) (* end of [loop1] *)
-//
-and
-loop2
+  i: int, pred: !cfun2(int, int, bool)
+) : bool =
 (
-  l1: int, r1: int
-, l2: int, r2: int
-, pred: cfun2 (int, int, bool)
-) : bool = (
-//
-if (
-l2 < r2
-) then
-(
-if (
-pred(l1, l2)
-) then loop2(l1, r1, l2+1, r2, pred)
-  else false
+if i < r1
+  then (
+    if loop2(i, l2, pred) then loop1(i+1, pred) else false
+  ) else true
 // end of [if]
-) else loop1(l1+1, r1, l2_, r2_, pred)
-//
-) (* end of [loop2] *)
-//
-in
-  loop1 (l1_, r1_, l2_, r2_, pred)
-end // end of [intrange2_forall_cloref]
-
-(* ****** ****** *)
-
-implement
-intrange2_foreach_cloref
-  (l1_, r1_, l2_, r2_, fwork) = let
-//
-// HX-2016-07-26:
-// loop1 and loop2 need to have
-// the same number of arguments
-// in order to support atscc2clj
-//
-fnx
-loop1
-(
-  l1: int, r1: int
-, l2: int, r2: int
-, fwork: cfun2 (int, int, void)
-) : void = (
-//
-if l1 < r1
-  then loop2(l1, r1, l2, r2, fwork)
-  else ((*void*))
-//
-) (* end of [loop1] *)
+)
 //
 and
 loop2
 (
-  l1: int, r1: int
-, l2: int, r2: int
-, fwork: cfun2 (int, int, void)
-) : void = (
+  i: int, j: int, pred: !cfun2(int, int, bool)
+) : bool =
+(
+if j < r2
+  then (
+    if pred(i, j) then loop2(i, j+1, pred) else false
+  ) else true
+// end of [if]
+)
 //
-if (
-l2 < r2
-) then (
-//
-fwork(l1, l2);
-loop2(l1, r1, l2+1, r2, fwork)
-//
-) else (
-  loop1(succ(l1), r1, l2_, r2_, fwork)
-) (* end of [else] *)
-//
-) (* end of [loop2] *)
+val ans = loop1(l1, pred)
 //
 in
-  loop1 (l1_, r1_, l2_, r2_, fwork)
-end // end of [intrange2_foreach_cloref]
+  cfun_free(pred); ans
+end // end of [intrange2_forall_cloptr]
+
+(* ****** ****** *)
+
+implement
+intrange2_foreach_cloptr
+(
+  l1, r1, l2, r2, fwork
+) = let
+//
+fun
+loop1
+(
+  i: int, fwork: !cfun2(int, int, void)
+) : void =
+(
+if i < r1
+  then (loop2(i, l2, fwork); loop1(i+1, fwork)) else ()
+// end of [if]
+)
+//
+and
+loop2
+(
+  i: int, j: int, fwork: !cfun2(int, int, void)
+) : void =
+(
+if j < r2
+  then (fwork(i, j); loop2(i, j+1, fwork)) else ()
+// end of [if]
+)
+//
+val () = loop1(l1, fwork)
+//
+in
+  cfun_free(fwork)
+end // end of [intrange2_foreach_cloptr]
 
 (* ****** ****** *)
 

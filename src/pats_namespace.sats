@@ -25,12 +25,22 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: May, 2011
 //
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_namespace.sats)
+// The closure of [the_namespace_search] is an (env, function) pair (PORTING.md, T1-1).
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
 (* ****** ****** *)
 
 staload
@@ -42,9 +52,16 @@ typedef filenv = $S2EXP.filenv
 fun
 the_namespace_add (x: filenv): void
 //
-fun
-the_namespace_search{a:type}
-  (fsearch: !filenv -<cloptr1> Option_vt(a)): Option_vt(a)
+// HX: [fsearch] is called with [env] and each of the file environments
+//
+// HX: the two lists that the template [the_namespace_search] reads (internal)
+//
+fun the_namespace_get_fenvlst (): glist (filenv)
+fun the_namespace_get_fenvlstlst (): glist (glist (filenv))
+//
+fun{a:type}
+the_namespace_search
+  (env: ptr, fsearch: (ptr, filenv) -> Option_vt(a)): Option_vt(a)
 // end of [the_namespace_search]
 //
 (* ****** ****** *)

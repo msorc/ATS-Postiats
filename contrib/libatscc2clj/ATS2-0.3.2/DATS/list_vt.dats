@@ -40,7 +40,6 @@ staload "./../SATS/integer.sats"
 //
 (* ****** ****** *)
 //
-staload "./../SATS/list.sats"
 staload "./../SATS/list_vt.sats"
 //
 (* ****** ****** *)

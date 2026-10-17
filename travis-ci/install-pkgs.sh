@@ -20,7 +20,6 @@ then
 # export GCC=gcc-4.8
 #
   brew install gmp
-  brew install bdw-gc
   brew install pcre
   brew install glib
   brew install cairo
@@ -49,7 +48,6 @@ then
   echo "is_linux = ${is_linux}"
 #
 # sudo apt-get -qq -y update
-# sudo apt-get -qq -y install libgc-dev
 # sudo apt-get -qq -y install libgmp-dev
 # For contrib/GTK/
 # sudo apt-get -qq -y install libgtk-3-dev

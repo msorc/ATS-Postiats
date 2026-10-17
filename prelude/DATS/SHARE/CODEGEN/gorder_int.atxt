@@ -41,6 +41,6 @@ gcompare_val_val<ssize_t> = g0int_compare_ssize
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_int_atxt.txt")
 %}\

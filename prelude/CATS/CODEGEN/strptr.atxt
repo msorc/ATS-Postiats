@@ -88,5 +88,5 @@ atspre_compare_strptr_strptr
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "strptr_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "strptr_atxt.txt")
 %}\

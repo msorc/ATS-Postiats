@@ -1,18 +1,17 @@
 #
-#
 # This Makefile is automatically generated
 # from executing the following command-line:
 #
 # make -f Makefile.gen
 #
-#
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSOPT=$(ATSHOMEQ)/bin/atsopt
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+
+######
+
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 
@@ -25,8 +24,11 @@ SHAREDOCU=$(PATSHOMEQ)/share/DOCUGEN
 ######
 
 INCLUDE:=-I $(PATSHOMEQ)/src
-INCLATS:=-IATS $(SHAREDOCU) -IATS $(PATSHOMEQ) -IATS $(ATSHOMEQ)
+INCLATS:=-IATS $(SHAREDOCU) -IATS $(PATSHOMEQ)
 
+######
+PATSCCFLAGS=-DATS_MEMALLOC_LIBC
+#
 ######
 
 CAT=cat
@@ -38,24 +40,18 @@ all:: all_html
 ######
 
 DECLATEXT= \
-  declatext_sats.o \
   declatext_dats.o \
 
-declatext_sats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/declatext.sats
 declatext_dats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/declatext.dats
+  $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -c $(SHAREDOCU)/declatext.dats
 
 ######
 
 HTMLGENDECL= \
-  htmlgendecl_sats.o \
   htmlgendecl_dats.o \
 
-htmlgendecl_sats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/htmlgendecl.sats
 htmlgendecl_dats.o: ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -c $(ATSCCFLAGS) $(SHAREDOCU)/htmlgendecl.dats
+  $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -c $(SHAREDOCU)/htmlgendecl.dats
 
 htmlgendecl_atxt.dats: ; \
   $(ATSDOC) --outcode $@ -i $(SHAREDOCU)/htmlgendecl.atxt > htmlgendecl_atxt.txt
@@ -67,7 +63,7 @@ all_html::
 all_html:: HTML/unicode.html
 HTML/unicode.html:   unicode_atxt.exe ; ./$< > $@
 unicode_atxt.txt: unicode.atxt ; $(CAT) $< |   $(ATSDOC) --prefix __datatok --outcode htmlgendecl_data_atxt.dats > $@
-unicode_atxt.exe: htmlgendecl_atxt.dats   unicode_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ;   $(ATSCC) $(INCLUDE) $(INCLATS) $(ATSGCFLAG) -o $@ $<     $(DECLATEXT) $(HTMLGENDECL) $(PATSHOME)/libatsynmark/libatsynmark.a -latsdoc
+unicode_atxt.exe: htmlgendecl_atxt.dats   unicode_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ;   $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -o $@ $<     $(DECLATEXT) $(HTMLGENDECL) -latsynmark -latsdoc -latslib -latsopt -lgmp
 upload_unicode:: ;   scp HTML/unicode.html ats-hwxi,ats-lang@web.sourceforge.net:htdocs/LIBRARY/contrib/libatslex
 clean:: ; $(RMF) unicode_atxt.exe
 cleanall:: ; $(RMF) HTML/unicode.html

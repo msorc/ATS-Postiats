@@ -56,44 +56,47 @@ end // end of [fib2]
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC
+// the lists are linear: [xs] is consumed and its
+// cells are freed as new ones are allocated
+//
 fun
 {a:t@ype}
 list_append
   {m,n:nat} (
-  xs: list (a, m), ys: list (a, n)
-) : list (a, m+n) =
+  xs: list_vt (a, m), ys: list_vt (a, n)
+) : list_vt (a, m+n) =
 (
 case+ xs of
-| list_cons
-    (x, xs) => list_cons (x, list_append (xs, ys))
-| list_nil ((*void*)) => ys
+| ~list_vt_cons
+    (x, xs) => list_vt_cons (x, list_append (xs, ys))
+| ~list_vt_nil ((*void*)) => ys
 ) // end of [list_append]
-
-(* ****** ****** *)
 
 fun
 {a:t@ype}
 list_append2
   {m,n:nat} (
-  xs: list (a, m), ys: list (a, n)
-) : list (a, m+n) = let
+  xs: list_vt (a, m), ys: list_vt (a, n)
+) : list_vt (a, m+n) = let
 //
 fun loop{m:nat}
 (
-  xs: list (a, m), ys: list (a, n), res: &ptr? >> list (a, m+n)
+  xs: list_vt (a, m), ys: list_vt (a, n), res: &ptr? >> list_vt (a, m+n)
 ) : void =
 (
 case+ xs of
-| list_cons
+| ~list_vt_cons
     (x, xs) => let
     val () =
-    res := list_cons{a}{0}(x, _)
-    val+list_cons (_, res1) = res
+    res := list_vt_cons{a}{0}(x, _)
+    val+list_vt_cons (_, res1) = res
     val () = loop (xs, ys, res1)
   in
     fold@ (res)
-  end // end of [list_cons]
-| list_nil ((*void*)) => res := ys
+  end // end of [list_vt_cons]
+| ~list_vt_nil ((*void*)) => res := ys
 )
 //
 var res: ptr
@@ -102,8 +105,6 @@ val () = loop (xs, ys, res)
 in
   res
 end // end of [list_append2]
-
-(* ****** ****** *)
 
 fun isevn (n: int): bool =
   if n > 0 then isodd (n-1) else true

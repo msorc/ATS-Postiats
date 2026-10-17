@@ -18,11 +18,13 @@ _(*anon*) = "prelude/DATS/unsafe.dats"
 
 (* ****** ****** *)
 
-staload TIME = "libc/SATS/time.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 
 (* ****** ****** *)
 
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 
 (* ****** ****** *)
 

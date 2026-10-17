@@ -33,14 +33,25 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-"./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_dmacro2_eval0.dats, see PORTING.md, "Macros (dmacro2)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload UT = "./pats_utils.sats"
 
 (* ****** ****** *)
 //
@@ -55,8 +66,11 @@ prerr_FILENAME<>() = prerr "pats_dmacro2_eval0"
 ** for T_* constructors
 *)
 staload LEX = "./pats_lexing.sats"
+staload "./pats_lexing.sats"
 
 (* ****** ****** *)
+//
+staload LOC = "./pats_location.sats"
 //
 staload SYM = "./pats_symbol.sats"
 //
@@ -81,12 +95,14 @@ macdef symbol_ISCONS = $SYM.symbol_ISCONS
 macdef symbol_ISLIST = $SYM.symbol_ISLIST
 //
 overload = with $SYM.eq_symbol_symbol
-overload print with $SYM.print_symbol
 //
 staload SYN = "./pats_syntax.sats"
+staload "./pats_syntax.sats"
 //
 (* ****** ****** *)
 
+staload "./pats_basics.sats"
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 
@@ -99,16 +115,38 @@ staload "./pats_trans3.sats"
 staload "./pats_dmacro2.sats"
 
 (* ****** ****** *)
+
+#include "./pats_syntax_token.hats"
+
+(* ****** ****** *)
+
+typedef loc_t = $LOC.location
+
+(* ****** ****** *)
 //
 // HX: not qualified dynamic symbol
 //
-fun
-d2sym_is_nonqua .<>.
+fn
+d2sym_is_nonqua
   (d2s: d2sym): bool = let
-  val q = d2s.d2sym_qua in
-  case+ q.d0ynq_node of $SYN.D0YNQnone () => true | _ => false
+  val q = d2s.d2sym_qua () in
+  case+ $SYN.d0ynq_node_view (q.d0ynq_node ()) of
+  | ~$SYN.D0YNQnone () => true
+  | v => ($SYN.d0ynq_node_view_free (v); false)
 end // end of [d2sym_is_nonqua]
 
+(* ****** ****** *)
+//
+// the accessor of the macro values (the caller has tested the tag)
+//
+fn
+m2val_int_get (x: m2val): int =
+(
+  case+ m2val_view (x) of
+  | ~M2Vint (i) => i
+  | v => (m2val_view_free (v); 0)
+)
+//
 (* ****** ****** *)
 //
 // HX-2012-08:
@@ -133,66 +171,51 @@ local
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_app_add
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
 ) : m2val = let
-(*
-val () =
-println! ("eval0_app_add")
-*)
 in
 //
-case+ m2v1 of
-| M2Vint (i1) =>
-  (
-  case+ m2v2 of
-  | M2Vint(i2) => M2Vint(i1+i2) | _ => M2Verr()
-  ) // end of [M2Vint]
-| _ (*non-M2Vint*) => M2Verr(*void*)
+if m2val_is_M2Vint (m2v1) then
+(
+  if m2val_is_M2Vint (m2v2)
+    then m2val_M2Vint (m2val_int_get (m2v1) + m2val_int_get (m2v2))
+    else m2val_M2Verr ()
+) else m2val_M2Verr ((*void*))
 //
 end // end of [eval0_app_add]
 
-fun
+fn
 eval0_app_sub
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
 ) : m2val = let
-(*
-val () =
-println! ("eval0_app_sub")
-*)
 in
 //
-case+ m2v1 of
-| M2Vint(i1) =>
-  (
-  case+ m2v2 of
-  | M2Vint(i2) => M2Vint(i1-i2) | _ => M2Verr()
-  ) // end of [M2Vint]
-| _ (*non-M2Vint*) => M2Verr(*void*)
+if m2val_is_M2Vint (m2v1) then
+(
+  if m2val_is_M2Vint (m2v2)
+    then m2val_M2Vint (m2val_int_get (m2v1) - m2val_int_get (m2v2))
+    else m2val_M2Verr ()
+) else m2val_M2Verr ((*void*))
 //
 end // end of [eval0_app_sub]
 
-fun
+fn
 eval0_app_mul
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
 ) : m2val = let
-(*
-val () =
-println! ("eval0_app_mul")
-*)
 in
 //
-case+ m2v1 of
-| M2Vint(i1) =>
-  (
-  case+ m2v2 of
-  | M2Vint(i2) => M2Vint(i1*i2) | _ => M2Verr()
-  ) // end of [M2Vint]
-| _ (*non-M2Vint*) => M2Verr(*void*)
+if m2val_is_M2Vint (m2v1) then
+(
+  if m2val_is_M2Vint (m2v2)
+    then m2val_M2Vint (m2val_int_get (m2v1) * m2val_int_get (m2v2))
+    else m2val_M2Verr ()
+) else m2val_M2Verr ((*void*))
 //
 end // end of [eval0_app_mul]
 
@@ -202,46 +225,43 @@ fn
 eval0_app_cmp_int
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
-) : Sgn = let
+) : int(*Sgn*) = let
 //
-fun
+fn
 auxerr
 (
   loc0: loc_t
 , m2v1: m2val, m2v2: m2val
-) : Sgn = let
+) : int = let
   val () =
   prerr_errmac_loc(loc0)
   val () =
-  prerrln!
   (
-    ": values are compared that do not support comparison."
+    prerr ": values are compared that do not support comparison.";
+    prerr_newline ()
   )
   val () =
-  the_trans3errlst_add(T3E_dmacro_eval0_cmp(loc0, m2v1, m2v2))
+  the_trans3errlst_add(trans3err_T3E_dmacro_eval0_cmp(loc0, m2v1, m2v2))
 in
   0(*meaningless*)
 end // end of [auxerr]
 //
 in
 //
-case+ m2v1 of
-| M2Vint(i1) =>
-  (
-  case+ m2v2 of
-  | M2Vint(i2) =>
-      compare_int_int(i1, i2)
-  | _ (*non-M2Vint*) =>
-      auxerr(loc0, m2v1, m2v2)
-    // end of [_]
-  ) // end of [M2Vint]
-| _(*non-M2Vint*) => auxerr(loc0, m2v1, m2v2)
+if m2val_is_M2Vint (m2v1) then
+(
+  if m2val_is_M2Vint (m2v2) then let
+    val i1 = m2val_int_get (m2v1) and i2 = m2val_int_get (m2v2)
+  in
+    if i1 < i2 then ~1 else (if i1 > i2 then 1 else 0)
+  end else auxerr(loc0, m2v1, m2v2)
+) else auxerr(loc0, m2v1, m2v2)
 //
 end // end of [eval0_app_cmp_int]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_app_lt
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
@@ -253,7 +273,7 @@ in
   if sgn < 0 then m2val_true else m2val_false
 end // end of [eval0_exp_app_lt]
 
-fun
+fn
 eval0_app_lte
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
@@ -267,7 +287,7 @@ end // end of [eval0_exp_app_lte]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_app_gt
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
@@ -279,7 +299,7 @@ in
   if sgn > 0 then m2val_true else m2val_false
 end // end of [eval0_exp_app_gt]
 
-fun
+fn
 eval0_app_gte
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
@@ -293,7 +313,7 @@ end // end of [eval0_exp_app_gte]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_app_eq
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
@@ -306,7 +326,7 @@ in
   if sgn = 0 then m2val_true else m2val_false
 end // end of [eval0_exp_app_eq]
 
-fun
+fn
 eval0_app_neq
 (
   loc0: loc_t, m2v1: m2val, m2v2: m2val
@@ -320,25 +340,21 @@ end // end of [eval0_exp_app_neq]
 
 (* ****** ****** *)
 
-fun
+fn
 d2exparg_get_d2explst
   (d2a: d2exparg): d2explst = let
-(*
-val () =
-println! ("d2exparg_get_d2explst")
-*)
 in
-  case+ d2a of
-  | D2EXPARGdyn
+  case+ d2exparg_view (d2a) of
+  | ~D2EXPARGdyn
     (
-      _(*loc*), _(*npf*), d2es
+      _(*npf*), _(*loc*), d2es
     ) => d2es
-  | D2EXPARGsta _ => list_nil((*void*))
+  | ~D2EXPARGsta (_, _) => glist_nil((*void*))
 end // end of [d2exparg_get_d2explst]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_d2exparg_1
 (
   loc: loc_t
@@ -351,11 +367,11 @@ d2es = d2exparg_get_d2explst(d2a)
 //
 in
 //
-case+ d2es of
-| list_nil
-    () => M2Verr()
+case+ glist_view (d2es) of
+| ~GLnil
+    () => m2val_M2Verr()
   // list_nil
-| list_cons
+| ~GLcons
     (d2e, _) =>
   (
     eval0_d2exp(loc, ctx, env, d2e)
@@ -363,7 +379,7 @@ case+ d2es of
 //
 end // end of [eval0_d2exparg_1]
 
-fun
+fn
 eval0_d2exparglst_1
 (
   loc: loc_t
@@ -371,11 +387,11 @@ eval0_d2exparglst_1
 , env: &alphenv, d2as: d2exparglst
 ) : m2val = (
 //
-case+ d2as of
-| list_nil
-    () => M2Verr()
+case+ glist_view (d2as) of
+| ~GLnil
+    () => m2val_M2Verr()
   // list_nil
-| list_cons
+| ~GLcons
     (d2a, _) =>
   (
     eval0_d2exparg_1(loc, ctx, env, d2a)
@@ -389,7 +405,7 @@ typedef m2val2 = @(m2val, m2val)
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_d2exparg_2
 (
   loc: loc_t
@@ -399,27 +415,27 @@ eval0_d2exparg_2
   val d2es = d2exparg_get_d2explst(d2a)
 in
 //
-case+ d2es of
-| list_nil
-    () => (M2Verr(), M2Verr())
+case+ glist_view (d2es) of
+| ~GLnil
+    () => @(m2val_M2Verr(), m2val_M2Verr())
   // list_nil
-| list_cons
+| ~GLcons
     (d2e1, d2es) => let
     val m2v1 = eval0_d2exp(loc, ctx, env, d2e1)
   in
-    case+ d2es of
-    | list_nil() =>
-      (m2v1, M2Verr())
-    | list_cons(d2e2, _) => let
+    case+ glist_view (d2es) of
+    | ~GLnil() =>
+      @(m2v1, m2val_M2Verr())
+    | ~GLcons(d2e2, _) => let
         val m2v2 = eval0_d2exp(loc, ctx, env, d2e2)
       in
-        (m2v1, m2v2)
+        @(m2v1, m2v2)
       end // end of [list_cons]
   end // end of [list_cons]
 //
 end // end of [eval0_d2exparg_2]
 
-fun
+fn
 eval0_d2exparglst_2
 (
   loc: loc_t
@@ -428,9 +444,9 @@ eval0_d2exparglst_2
 ) : m2val2 = let
 in
 //
-case+ d2as of
-| list_nil() => (M2Verr(), M2Verr())
-| list_cons(d2a, _) =>
+case+ glist_view (d2as) of
+| ~GLnil() => @(m2val_M2Verr(), m2val_M2Verr())
+| ~GLcons(d2a, _) =>
     eval0_d2exparg_2(loc, ctx, env, d2a)
   // end of [list_cons]
 //
@@ -445,35 +461,26 @@ eval0_app_sym
 (
   loc0, sym, ctx, env, d2as
 ) = let
-(*
-//
-val () =
-println!
-("eval0_app_sym: sym = ", sym)
-//
-*)
 in
 //
-case+ 0 of
-//
-| _ when
-    sym = symbol_ADD => let
+if
+  sym = symbol_ADD then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
   in
     eval0_app_add(loc0, m2v1, m2v2)
   end
-| _ when
-    sym = symbol_SUB => let
+else if
+    sym = symbol_SUB then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
   in
     eval0_app_sub(loc0, m2v1, m2v2)
   end
-| _ when
-    sym = symbol_MUL => let
+else if
+    sym = symbol_MUL then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
@@ -481,16 +488,16 @@ case+ 0 of
     eval0_app_mul(loc0, m2v1, m2v2)
   end
 //
-| _ when
-    sym = symbol_LT => let
+else if
+    sym = symbol_LT then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
   in
     eval0_app_lt (loc0, m2v1, m2v2)
   end
-| _ when
-    sym = symbol_LTEQ => let
+else if
+    sym = symbol_LTEQ then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
@@ -498,16 +505,16 @@ case+ 0 of
     eval0_app_lte(loc0, m2v1, m2v2)
   end
 //
-| _ when
-    sym = symbol_GT => let
+else if
+    sym = symbol_GT then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
   in
     eval0_app_gt (loc0, m2v1, m2v2)
   end
-| _ when
-    sym = symbol_GTEQ => let
+else if
+    sym = symbol_GTEQ then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
@@ -515,24 +522,24 @@ case+ 0 of
     eval0_app_gte(loc0, m2v1, m2v2)
   end
 //
-| _ when
-    sym = symbol_EQ => let
+else if
+    sym = symbol_EQ then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
   in
     eval0_app_eq (loc0, m2v1, m2v2)
   end
-| _ when
-    sym = symbol_LTGT => let
+else if
+    sym = symbol_LTGT then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
   in
     eval0_app_neq(loc0, m2v1, m2v2)
   end
-| _ when
-    sym = symbol_BANGEQ => let
+else if
+    sym = symbol_BANGEQ then let
     val (m2v1, m2v2) =
       eval0_d2exparglst_2(loc0, ctx, env, d2as)
     // end of [val]
@@ -540,7 +547,7 @@ case+ 0 of
     eval0_app_neq(loc0, m2v1, m2v2)
   end
 //
-| _ (*unrecognized-operator*) => M2Verr((*void*))
+else (*unrecognized-operator*) m2val_M2Verr((*void*))
 //
 end // end of [eval0_app_sym]
 
@@ -548,30 +555,31 @@ end // end of [local]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_app_eval
 (
   loc0: loc_t, m2v: m2val
 ) : m2val = let
 //
-fun
+fn
 auxerr
 (
   loc0: loc_t, m2v: m2val
-) : m2val = M2Verr() where
+) : m2val = m2val_M2Verr() where
 {
   val () =
   prerr_errmac_loc(loc0)
   val () =
-  prerrln! (
-    ": evaluation is performed on a value not representing code."
+  (
+    prerr ": evaluation is performed on a value not representing code.";
+    prerr_newline ()
   ) (* println! *)
 } (* end of [auxerr] *)
 //
 in
 //
-case+ m2v of
-| M2Vdcode(d2e) => let
+case+ m2val_view (m2v) of
+| ~M2Vdcode(d2e) => let
     var ctx = evalctx_nil()
     var env = alphenv_nil()
     val m2v_res = eval0_d2exp(loc0, ctx, env, d2e)
@@ -580,120 +588,119 @@ case+ m2v of
   in
     m2v_res
   end // end of [V2ALcode]
-| _(*M2Vdcode*) => auxerr(loc0, m2v)
+| v (*M2Vdcode*) => let
+    val () = m2val_view_free (v) in auxerr(loc0, m2v)
+  end
 //
 end // end of [eval0_app_eval]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_app_lift
 (
   loc0: loc_t, m2v: m2val
 ) : m2val = let
-  val d2e = liftval2dexp(loc0, m2v) in M2Vdcode(d2e)
+  val d2e = liftval2dexp(loc0, m2v) in m2val_M2Vdcode(d2e)
 end // end of [eval0_app_lift]
 
 (* ****** ****** *)
 
-fun eval0_car
+fn eval0_car
   (m2vs: m2valist): m2val =
-  case+ m2vs of
-  | list_cons(m2v, _) =>
+  case+ glist_view (m2vs) of
+  | ~GLcons(m2v, _) =>
     (
-    case+ m2v of
-    | M2Vlist (m2vs) =>
+    case+ m2val_view (m2v) of
+    | ~M2Vlist (m2vs) =>
       (
-      case m2vs of
-      | list_cons(m2v, _) => m2v | _ => M2Verr()
+      case+ glist_view (m2vs) of
+      | ~GLcons(m2v, _) => m2v | ~GLnil() => m2val_M2Verr()
       )
-    | _(*non-M2Vlist*) => M2Verr()
+    | v (*non-M2Vlist*) => (m2val_view_free (v); m2val_M2Verr())
     )
-  | list_nil((*void*)) => M2Verr() // argumentless
+  | ~GLnil((*void*)) => m2val_M2Verr() // argumentless
 // end of [eval0_car]
 
-fun eval0_cdr
+fn eval0_cdr
   (m2vs: m2valist): m2val =
-  case+ m2vs of
-  | list_cons(m2v, _) =>
+  case+ glist_view (m2vs) of
+  | ~GLcons(m2v, _) =>
     (
-    case+ m2v of
-    | M2Vlist(m2vs) =>
+    case+ m2val_view (m2v) of
+    | ~M2Vlist(m2vs) =>
       (
-      case m2vs of
-      | list_cons
-          (_, m2vs) => M2Vlist(m2vs) | _ => M2Verr()
+      case+ glist_view (m2vs) of
+      | ~GLcons
+          (_, m2vs) => m2val_M2Vlist(m2vs) | ~GLnil() => m2val_M2Verr()
         // list_cons
       )
-    | _(*non-M2Vlist*) => M2Verr()
+    | v (*non-M2Vlist*) => (m2val_view_free (v); m2val_M2Verr())
     )
-  | list_nil((*void*)) => M2Verr() // argumentless
+  | ~GLnil((*void*)) => m2val_M2Verr() // argumentless
 // end of [eval0_cdr]
 
 (* ****** ****** *)
 
-fun
+fn
 eval0_islist
   (m2vs: m2valist): m2val =
 (
-  case+ m2vs of
-  | list_cons(m2v, _) =>
+  case+ glist_view (m2vs) of
+  | ~GLcons(m2v, _) =>
     (
-    case+ m2v of
-    | M2Vlist _ => M2Vbool(true)
-    | _(*non-M2Vlist*) => M2Vbool(false)
+    if m2val_is_M2Vlist (m2v)
+      then m2val_M2Vbool(true) else m2val_M2Vbool(false)
     )
-  | list_nil((*void*)) => M2Verr() // argumentless
+  | ~GLnil((*void*)) => m2val_M2Verr() // argumentless
 ) // end of [eval0_islist]
 
 (* ****** ****** *)
 //
-fun
+fn
 eval0_isnil
   (m2vs: m2valist): m2val =
 (
-  case+ m2vs of
-  | list_cons(m2v, _) =>
+  case+ glist_view (m2vs) of
+  | ~GLcons(m2v, _) =>
     (
-    case+ m2v of
-    | M2Vlist(m2vs) =>
+    case+ m2val_view (m2v) of
+    | ~M2Vlist(m2vs) =>
       (
-      case+ m2vs of
-      | list_cons _ => M2Vbool(false) | _ => M2Vbool(true)
+      if glist_is_cons (m2vs) then m2val_M2Vbool(false) else m2val_M2Vbool(true)
       )
-    | _(*M2Vlist*) => M2Verr()
+    | v (*M2Vlist*) => (m2val_view_free (v); m2val_M2Verr())
     )
-  | list_nil((*void*)) => M2Verr () // argumentless
+  | ~GLnil((*void*)) => m2val_M2Verr () // argumentless
 ) // end of [eval0_isnil]
 //
-fun
+fn
 eval0_iscons
   (m2vs: m2valist): m2val =
 (
-  case+ m2vs of
-  | list_cons(m2v, _) =>
+  case+ glist_view (m2vs) of
+  | ~GLcons(m2v, _) =>
     (
-    case+ m2v of
-    | M2Vlist(m2vs) =>
+    case+ m2val_view (m2v) of
+    | ~M2Vlist(m2vs) =>
       (
-      case m2vs of
-      | list_cons _ => M2Vbool(true) | _ => M2Vbool(false)
+      if glist_is_cons (m2vs) then m2val_M2Vbool(true) else m2val_M2Vbool(false)
       )
-    | _(*M2Vlist*) => M2Verr()
+    | v (*M2Vlist*) => (m2val_view_free (v); m2val_M2Verr())
     )
-  | list_nil((*void*)) => M2Verr() // argumentless
+  | ~GLnil((*void*)) => m2val_M2Verr() // argumentless
 ) // end of [eval0_iscons]
 //
 (* ****** ****** *)
 
-fun
+fn
 eval0_d2var
 (
   loc: loc_t
 , ctx: !evalctx, d2v: d2var
 ) : m2val = let
 //
-fun
+fn
 auxerr
 (
   loc: loc_t, d2v: d2var
@@ -707,7 +714,7 @@ auxerr
   ) (* end of [val] *)
   val () = prerr_newline()
 in
-  M2Verr((*void*))
+  m2val_M2Verr((*void*))
 end (* end of [auxerr] *)
 //
 val opt = evalctx_dfind(ctx, d2v)
@@ -732,19 +739,16 @@ eval0_d2explst
 implement
 eval0_d2explst
   (loc, ctx, env, d2es) = let
-(*
-val () = println! ("eval0_d2explst")
-*)
 in
-  case+ d2es of
-  | list_cons
+  case+ glist_view (d2es) of
+  | ~GLcons
       (d2e, d2es) => let
       val m2v = eval0_d2exp(loc, ctx, env, d2e)
       val m2vs = eval0_d2explst(loc, ctx, env, d2es)
     in
-      list_cons(m2v, m2vs)
+      glist_cons<m2val>(m2v, m2vs)
     end // end of [list_cons]
-  | list_nil((*void*)) => list_nil()
+  | ~GLnil((*void*)) => glist_nil()
 end // end of [eval0_d2explst]
 //
 (* ****** ****** *)
@@ -760,9 +764,9 @@ implement
 eval0_d2expopt
   (loc, ctx, env, opt) = let
 in
-  case+ opt of
-  | None() => M2Vunit()
-  | Some(d2e) => eval0_d2exp(loc, ctx, env, d2e)
+  case+ gopt_view (opt) of
+  | ~GOnone() => m2val_M2Vunit()
+  | ~GOsome(d2e) => eval0_d2exp(loc, ctx, env, d2e)
 end // end of [eval0_d2expopt]
 //
 (* ****** ****** *)
@@ -770,11 +774,6 @@ end // end of [eval0_d2expopt]
 implement
 eval0_d2exp
   (loc, ctx, env, d2e0) = let
-(*
-val () = (
-  println! ("eval0_d2exp: d2e0 = ", d2e0)
-) // end of [val]
-*)
 //
 macdef
 eval0dexp(x) = eval0_d2exp(loc, ctx, env, ,(x))
@@ -786,88 +785,89 @@ eval0dexpopt(x) = eval0_d2expopt(loc, ctx, env, ,(x))
 in
 //
 case+
-d2e0.d2exp_node
+d2exp_node_view (d2e0.d2exp_node ())
 of // case+
 //
-| D2Evar(d2v) =>
+| ~D2Evar(d2v) =>
     m2v where {
     val m2v = eval0_d2var(loc, ctx, d2v)
   } (* end of [D2Evar] *)
 //
-| D2Eint(i) => M2Vint(i)
-| D2Echar(c) => M2Vchar(c)
-| D2Efloat(rep) => M2Vfloat(rep)
-| D2Estring(str) => M2Vstring(str)
+| ~D2Eint(i) => m2val_M2Vint(i)
+| ~D2Echar(c) => m2val_M2Vchar(c)
+| ~D2Efloat(rep) => m2val_M2Vfloat(rep)
+| ~D2Estring(str) => m2val_M2Vstring(str)
 //
-| D2Ei0nt(x) => let
-    val-$LEX.T_INT
-      (base, rep, sfx) = x.token_node
-    // end of [val]
+| ~D2Ei0nt(x) => let
+    val rep = token_int_rep (x)
   in
-    M2Vint(int_of_llint($UT.llint_make_string(rep)))
+    m2val_M2Vint($UN.cast{int}($UT.llint_make_string(rep)))
   end // end of [D2Ei0nt]
-| D2Ec0har(x) => let
-    val-$LEX.T_CHAR(c) = x.token_node in M2Vchar(c)
+| ~D2Ec0har(x) => let
+    val c = token_char_get (x) in m2val_M2Vchar(c)
     // end of [val]
   end // end of [D2Ec0har]
-| D2Ef0loat(x) => let
-    val-$LEX.T_FLOAT
-      (bas, rep, sfx) = x.token_node in M2Vfloat(rep)
+| ~D2Ef0loat(x) => let
+    val rep = token_float_rep (x) in m2val_M2Vfloat(rep)
     // end of [val]
   end // end of [D2Ef0loat]
-| D2Es0tring(x) => let
-    val-$LEX.T_STRING(s) = x.token_node in M2Vstring(s)
+| ~D2Es0tring(x) => let
+    val s = token_string_get (x) in m2val_M2Vstring(s)
   end // end of [D2Es0tring]
 //
-| D2Esing(d2e) => eval0dexp(d2e)
+| ~D2Esing(d2e) => eval0dexp(d2e)
 //
-| D2Eapplst
-    (d2e, d2as) =>
-  (
+| ~D2Eapplst
+    (d2e, d2as) => let
+    fn auxerr (loc: loc_t, d2e: d2exp): m2val = let
+      val () = prerr_errmac_loc(loc)
+      val () = prerr ": the dynamic expression at ("
+      val () = $LOC.prerr_location(d2e.d2exp_loc ())
+      val () = prerr ") should be a macro but it is not."
+      val () = prerr_newline((*void*))
+    in
+      m2val_M2Verr((*void*))
+    end // end of [auxerr]
+  in
   case+
-  d2e.d2exp_node
+  d2exp_node_view (d2e.d2exp_node ())
   of // case+
-  | D2Emac(d2m) =>
+  | ~D2Emac(d2m) =>
     (
       // expanding a macro in long form
       eval0_app_mac_long (loc, d2m, ctx, env, d2as)
     ) // end of [D2Emac]
-  | D2Esym(d2s)
-      when d2sym_is_nonqua d2s => (
+  | ~D2Esym(d2s) =>
+    (
+    if d2sym_is_nonqua d2s then
+    (
       // evaluating a predefined function (e.g., +, -, etc.)
-      eval0_app_sym (loc, d2s.d2sym_sym, ctx, env, d2as)
+      eval0_app_sym (loc, d2s.d2sym_sym (), ctx, env, d2as)
+    ) else auxerr (loc, d2e)
     ) // end of [D2Esym]
-  | _ => let
-      val () = prerr_errmac_loc(loc)
-      val () = prerr ": the dynamic expression at ("
-      val () = $LOC.prerr_location(d2e.d2exp_loc)
-      val () = prerr ") should be a macro but it is not."
-      val () = prerr_newline((*void*))
-    in
-      M2Verr((*void*))
-    end // end of [_]
-  ) // end of [D2Eapplst]
+  | v => (d2exp_node_view_free (v); auxerr (loc, d2e))
+  end // end of [D2Eapplst]
 //
-| D2Eifhead
+| ~D2Eifhead
   (
     i2nv, test, _then, _else
   ) => let
     val test = eval0dexp (test)
   in
-    case+ test of
-    | M2Vbool (b) => 
+    case+ m2val_view (test) of
+    | ~M2Vbool (b) =>
         if b then eval0dexp (_then) else eval0dexpopt (_else)
       // end of [M2Vbool]
-    | _ => M2Verr ()
+    | v => (m2val_view_free (v); m2val_M2Verr ())
   end // end of [D2Eifhead]
 //
-| D2Emac(d2m) => let
-    val d2as = list_nil() // argumentless
+| ~D2Emac(d2m) => let
+    val d2as = glist_nil() // argumentless
   in
     eval0_app_mac_long(loc, d2m, ctx, env, d2as)
   end // end of [D2Emac]
 //
-| D2Emacsyn(knd, d2e) =>
+| ~D2Emacsyn(knd, d2e) =>
   (
   case+ knd of
   | $SYN.MSKencode() => let
@@ -875,7 +875,7 @@ of // case+
         eval1_d2exp(loc, ctx, env, d2e)
       // end of [val]
     in
-      M2Vdcode (d2e)
+      m2val_M2Vdcode (d2e)
     end // end of [MSKencode]
   | $SYN.MSKdecode() =>
       eval0_app_eval(loc, eval0dexp(d2e))
@@ -885,23 +885,23 @@ of // case+
         eval0_app_eval(loc, eval0dexp(d2e))
       // end of [val]
     in
-      M2Vdcode(liftval2dexp (loc, m2v_res))
+      m2val_M2Vdcode(liftval2dexp (loc, m2v_res))
     end // end of [MSKxstage]
   ) // end of [D2Emacsyn]
 //
-| D2Emacfun(name, d2es) => let
+| ~D2Emacfun(name, d2es) => let
     val m2vs = eval0dexplst(d2es)
   in
-    case+ 0 of
-    | _ when name = symbol_CAR => eval0_car (m2vs)
-    | _ when name = symbol_CDR => eval0_cdr (m2vs)
-    | _ when name = symbol_ISNIL => eval0_isnil (m2vs)
-    | _ when name = symbol_ISCONS => eval0_iscons (m2vs)
-    | _ when name = symbol_ISLIST => eval0_islist (m2vs)
-    | _ => M2Verr ()
+    if name = symbol_CAR then eval0_car (m2vs)
+    else if name = symbol_CDR then eval0_cdr (m2vs)
+    else if name = symbol_ISNIL then eval0_isnil (m2vs)
+    else if name = symbol_ISCONS then eval0_iscons (m2vs)
+    else if name = symbol_ISLIST then eval0_islist (m2vs)
+    else m2val_M2Verr ()
   end // end of [D2Emacfun]
 //
-| _ (*rest-of-d2exp*) => let
+| v (*rest-of-d2exp*) => let
+    val () = d2exp_node_view_free (v)
     val () =
     prerr_errmac_loc(loc)
     val () = prerr ": the form of dynamic expression ["
@@ -909,10 +909,10 @@ of // case+
     val () = prerr "] is unsupported for macro expansion."
     val () = prerr_newline((*void*))
     val () =
-      the_trans3errlst_add (T3E_dmacro_eval0_d2exp (loc, d2e0))
+      the_trans3errlst_add (trans3err_T3E_dmacro_eval0_d2exp (loc, d2e0))
     // end of [val]
   in
-    M2Verr((*void*))
+    m2val_M2Verr((*void*))
   end // end of [rest-of-d2exp]
 //
 end // end of [eval0_d2exp]
@@ -981,7 +981,7 @@ evalctx_extend_sarg
   loc, d2m, knd, ctx, env, s2vs, s2es, res
 ) = let
 //
-fun
+fn
 auxerr
 (
   loc: loc_t, d2m: d2mac, sgn: int
@@ -996,35 +996,35 @@ auxerr
   if sgn > 0 then prerr "] is expected to contain fewer arguments."
   val () = prerr_newline((*void*))
 in
-  the_trans3errlst_add(T3E_dmacro_evalctx_extend(loc, d2m))
+  the_trans3errlst_add(trans3err_T3E_dmacro_evalctx_extend(loc, d2m))
 end // end of [auxerr]
 //
 in
 //
-case+ s2vs of
-| list_cons
+case+ glist_view (s2vs) of
+| ~GLcons
     (s2v, s2vs) =>
   (
-  case+ s2es of
-  | list_cons
+  case+ glist_view (s2es) of
+  | ~GLcons
       (s2e, s2es) => let
       val res =
-        evalctx_sadd(res, s2v, M2Vscode(s2e))
+        evalctx_sadd(res, s2v, m2val_M2Vscode(s2e))
       // end of [val]
     in
       evalctx_extend_sarg
         (loc, d2m, knd, ctx, env, s2vs, s2es, res)
       // evalctx_extend_sarg
     end // end of [list_cons]
-  | list_nil((*void*))=>
+  | ~GLnil((*void*))=>
     let val () = auxerr(loc, d2m, 1) in res end
   )
-| list_nil((*void*)) =>
+| ~GLnil((*void*)) =>
   (
-  case+ s2es of
-  | list_cons _ =>
+  case+ glist_view (s2es) of
+  | ~GLcons (_, _) =>
     let val () = auxerr(loc, d2m, ~1) in res end
-  | list_nil((*void*)) => res
+  | ~GLnil((*void*)) => res
   )
 //
 end // end of [evalctx_extend_sarg]
@@ -1038,7 +1038,7 @@ evalctx_extend_darg
 , ctx, env, d2vs, d2es, res
 ) = let
 //
-fun
+fn
 auxerr
 (
   loc: loc_t, d2m: d2mac, sgn: int
@@ -1051,10 +1051,10 @@ auxerr
   val () = if sgn > 0 then prerr "] is expected to contain fewer arguments."
   val () = prerr_newline((*void*))
 in
-  the_trans3errlst_add(T3E_dmacro_evalctx_extend(loc, d2m))
+  the_trans3errlst_add(trans3err_T3E_dmacro_evalctx_extend(loc, d2m))
 end // end of [auxerr]
 //
-fun
+fn
 auxexp
 (
   loc: loc_t, knd: int
@@ -1066,7 +1066,7 @@ if knd >= 1 then
   eval0_d2exp(loc, ctx, env, d2e)
 else let // short form
   val d2e =
-    eval1_d2exp(loc, ctx, env, d2e) in M2Vdcode(d2e)
+    eval1_d2exp(loc, ctx, env, d2e) in m2val_M2Vdcode(d2e)
   // end of [val]
 end // end of [if]
 //
@@ -1080,45 +1080,55 @@ auxexplst
 ) : m2valist = let
 in
 //
-case+ d2es of
-| list_cons
+case+ glist_view (d2es) of
+| ~GLcons
     (d2e, d2es) => let
     val m2v = auxexp(loc, knd, ctx, env, d2e)
     val m2vs = auxexplst(loc, knd, ctx, env, d2es)
   in
-    list_cons(m2v, m2vs)
+    glist_cons<m2val>(m2v, m2vs)
   end // end of [list_cons]
-| list_nil((*void*)) => list_nil((*void*))
+| ~GLnil((*void*)) => glist_nil((*void*))
 //
 end // end of [auxexplst]
 //
 in
 //
-case+ d2vs of
-| list_cons
-    (d2v, list_nil()) => (
-  case+ d2es of
-  | list_cons
-      (d2e, list_nil()) => let
+case+ glist_view (d2vs) of
+| ~GLcons
+    (d2v, d2vs1) =>
+  (
+  if glist_is_nil (d2vs1) then (
+  case+ glist_view (d2es) of
+  | ~GLcons
+      (d2e, d2es1) =>
+    (
+    if glist_is_nil (d2es1) then let
       val m2v =
         auxexp(loc, knd, ctx, env, d2e)
       // end of [val]
     in
       evalctx_dadd(res, d2v, m2v)
     end // end of [list_sing]
-  | _ => let
+    else let
       val m2vs =
-        auxexplst(loc, knd, ctx, env, d2es)
+        auxexplst(loc, knd, ctx, env, glist_cons<d2exp>(d2e, d2es1))
       // end of [val]
     in
-      evalctx_dadd(res, d2v, M2Vlist (m2vs))
+      evalctx_dadd(res, d2v, m2val_M2Vlist (m2vs))
+    end // end of [_]
+    )
+  | ~GLnil () => let
+      val m2vs =
+        auxexplst(loc, knd, ctx, env, glist_nil())
+      // end of [val]
+    in
+      evalctx_dadd(res, d2v, m2val_M2Vlist (m2vs))
     end // end of [_]
   ) // end of [list_sing]
-| list_cons
-    (d2v, d2vs) =>
-  (
-  case+ d2es of
-  | list_cons
+  else (
+  case+ glist_view (d2es) of
+  | ~GLcons
       (d2e, d2es) => let
       val m2v =
         auxexp(loc, knd, ctx, env, d2e)
@@ -1126,20 +1136,21 @@ case+ d2vs of
       val res = evalctx_dadd(res, d2v, m2v)
     in
       evalctx_extend_darg
-        (loc, d2m, knd, ctx, env, d2vs, d2es, res)
+        (loc, d2m, knd, ctx, env, d2vs1, d2es, res)
       // evalctx_extend_darg
     end // end of [list_cons]
-  | list_nil((*void*)) => let
+  | ~GLnil((*void*)) => let
       val () = auxerr(loc, d2m, 1) in res
     end // end of [_]
   )
-| list_nil((*void*)) =>
+  ) (* end of [GLcons] *)
+| ~GLnil((*void*)) =>
   (
-  case+ d2es of
-  | list_cons _ => let
+  case+ glist_view (d2es) of
+  | ~GLcons (_, _) => let
       val () = auxerr(loc, d2m, ~1) in res
     end // end of [list_cons]
-  | list_nil((*void*)) => res
+  | ~GLnil((*void*)) => res
   )
 //
 end // end of [evalctx_extend_darg]
@@ -1150,43 +1161,44 @@ fun
 s2exparglst_join
   (s2as: s2exparglst): s2explst = let
 //
-fun
-auxwarn(loc: loc_t) =
+fn
+auxwarn(loc: loc_t): void =
 {
   val () =
   prerr_warning2_loc(loc)
   val () =
-  prerrln! (": the static macro argument is ignored.")
+  (
+    prerr (": the static macro argument is ignored."); prerr_newline ()
+  )
 } // end of [auxwarn]
 //
 in
 //
-case+ s2as of
-| list_cons
+case+ glist_view (s2as) of
+| ~GLcons
     (s2a, s2as) => (
   case+
-    s2a.s2exparg_node of
-  | S2EXPARGseq (s2es) => (
-    case+ s2as of
-    | list_cons _ => let
+    s2exparg_node_view (s2a.s2exparg_node ()) of
+  | ~S2EXPARGseq (s2es) => (
+    if glist_is_cons (s2as) then let
         val s2es2 =
-          s2exparglst_join (s2as) in list_append (s2es, s2es2)
+          s2exparglst_join (s2as) in glist_append<s2exp> (s2es, s2es2)
         // end of [val]
       end // end of [list_cons]
-    | list_nil () => s2es // HX: this is most likely by far!
+    else s2es // HX: this is most likely by far!
     )
-  | S2EXPARGone () => let
+  | ~S2EXPARGone () => let
       val () =
-        auxwarn (s2a.s2exparg_loc) in s2exparglst_join (s2as)
+        auxwarn (s2a.s2exparg_loc ()) in s2exparglst_join (s2as)
       // end of [val]
     end // end of [S2EXPARGone]
-  | S2EXPARGall () => let
+  | ~S2EXPARGall () => let
       val () =
-        auxwarn (s2a.s2exparg_loc) in s2exparglst_join (s2as)
+        auxwarn (s2a.s2exparg_loc ()) in s2exparglst_join (s2as)
       // end of [val]
     end // end of [S2EXPARGall]
   ) // end of [list_cons]
-| list_nil () => list_nil ()
+| ~GLnil () => glist_nil ()
 //
 end // end of [s2exparglst_join]
 
@@ -1199,7 +1211,7 @@ evalctx_extend_arg
 , ctx, env, arg, d2a, res
 ) = let
 //
-fun
+fn
 auxerr
 (
   loc: loc_t
@@ -1217,37 +1229,37 @@ auxerr
   if (stadyn > 0) then prerr ") is expected to be dynamic."
   val () = prerr_newline((*void*))
 in
-  the_trans3errlst_add(T3E_dmacro_evalctx_extend(loc, d2m))
+  the_trans3errlst_add(trans3err_T3E_dmacro_evalctx_extend(loc, d2m))
 end // end of [auxerr_dyn]
 //
 in
 //
-case+ arg of
-| M2ACARGsta(s2vs) =>
+case+ m2acarg_view (arg) of
+| ~M2ACARGsta(s2vs) =>
   (
-  case+ d2a of
-  | D2EXPARGsta(loca, s2as) => let
+  case+ d2exparg_view (d2a) of
+  | ~D2EXPARGsta(loca, s2as) => let
       val s2es = s2exparglst_join(s2as)
     in
       evalctx_extend_sarg
         (loc, d2m, knd, ctx, env, s2vs, s2es, res)
       // evalctx_extend_sarg
     end // end of [D2EXPARGsta]
-  | D2EXPARGdyn(npf, loca, _) => let
+  | ~D2EXPARGdyn(npf, loca, _) => let
       val () = auxerr (loc, loca, d2m, 0(*sta*)) in res
     end // end of [D2EXPARGdyn]
   )
-| M2ACARGdyn(d2vs) =>
+| ~M2ACARGdyn(d2vs) =>
   (
-  case+ d2a of
-  | D2EXPARGdyn
-      (loca, npf, d2es) =>
+  case+ d2exparg_view (d2a) of
+  | ~D2EXPARGdyn
+      (npf, loca, d2es) =>
     (
       evalctx_extend_darg
         (loc, d2m, knd, ctx, env, d2vs, d2es, res)
       // evalctx_extend_darg
     )
-  | D2EXPARGsta(loca, s2es) => let
+  | ~D2EXPARGsta(loca, s2es) => let
       val () = auxerr(loc, loca, d2m, 1(*dyn*)) in res
     end // end of [D2EXPARGsta]
   )
@@ -1263,13 +1275,16 @@ evalctx_extend_arglst
 , ctx, env, args, d2as, res) = let
 in
 //
-case+ args of
-| list_nil
+case+ glist_view (args) of
+| ~GLnil
     ((*void*)) => res
   // list_nil
-| list_cons
+| ~GLcons
     (arg, args) => let
-    val-list_cons(d2a, d2as) = d2as
+    // HX: [val-list_cons(d2a, d2as) = d2as] (MatchError)
+    val () = assertloc (glist_is_cons (d2as))
+    val d2a = glist_head<d2exparg> (d2as)
+    val d2as = glist_tail<d2exparg> (d2as)
     val res =
       evalctx_extend_arg(loc, d2m, knd, ctx, env, arg, d2a, res)
     // end of [val]
@@ -1281,6 +1296,34 @@ end // end of [evalctx_extend_arglst]
 
 (* ****** ****** *)
 //
+// HX: the first [n] elements and the others (list_split_at)
+//
+fun
+d2exparglst_take
+  (xs: d2exparglst, n: int): d2exparglst =
+(
+  if n <= 0 then glist_nil() else
+  (
+    case+ glist_view (xs) of
+    | ~GLcons (x, xs) => glist_cons<d2exparg> (x, d2exparglst_take (xs, n-1))
+    | ~GLnil () => glist_nil()
+  )
+)
+//
+fun
+d2exparglst_drop
+  (xs: d2exparglst, n: int): d2exparglst =
+(
+  if n <= 0 then xs else
+  (
+    case+ glist_view (xs) of
+    | ~GLcons (_, xs) => d2exparglst_drop (xs, n-1)
+    | ~GLnil () => glist_nil()
+  )
+)
+//
+(* ****** ****** *)
+//
 // HX: expanding macros in long form
 //
 implement
@@ -1290,13 +1333,9 @@ eval0_app_mac_long
 ) = m2v where
 {
 //
-(*
-  val () = println! ("eval0_app_mac_long: d2m = ", d2m)
-*)
-//
-val n0 = list_length(d2as)
+val n0 = glist_length(d2as)
 val args = d2mac_get_arglst(d2m)
-val narg = list_length(args)
+val narg = glist_length(args)
 //
 val () = (
 if
@@ -1315,7 +1354,7 @@ then let
   val () = prerr_newline((*void*))
 in
   the_trans3errlst_add
-    (T3E_dmacro_eval0_app_mac_arity(loc, d2m, d2as))
+    (trans3err_T3E_dmacro_eval0_app_mac_arity(loc, d2m, d2as))
   // the_trans3errlst_add
 end // end of [if]
 ) : void // end of [val]
@@ -1329,11 +1368,6 @@ evalctx_extend_arglst
 (
   loc, d2m, 1(*long*), ctx, env, args, d2as, ctx_new
 ) (* end of [val] *)
-(*
-val () = begin
-  print "eval0_app_mac_long: ctx_new =\n"; print ctx_new
-end // end of [val]
-*)
 //
 val d2e =
   d2mac_get_def(d2m)
@@ -1352,22 +1386,9 @@ implement
 eval0_app_mac_short
   (loc, d2m, ctx, env, d2as) = let
 //
-(*
-val () = (
-  println! ("eval0_app_mac_short: d2m = ", d2m)
-) (* end of [val] *)
-*)
-//
-val n0 = list_length(d2as)
+val n0 = glist_length(d2as)
 val args = d2mac_get_arglst(d2m)
-val narg = list_length(args)
-//
-(*
-val () = (
-  println! ("eval0_app_mac_short: n = ", n);
-  println! ("eval0_app_mac_short: narg = ", narg);
-) // end of [val]
-*)
+val narg = glist_length(args)
 //
 val () =
 (
@@ -1383,31 +1404,22 @@ then let
   val () = prerr_newline((*void*))
 in
   the_trans3errlst_add
-    (T3E_dmacro_eval0_app_mac_arity(loc, d2m, d2as))
+    (trans3err_T3E_dmacro_eval0_app_mac_arity(loc, d2m, d2as))
   // the_trans3errlst_add
 end // end of [let] // end of [if]
 //
 ) : void // end of [val]
 //
-var d2as1
-  : d2exparglst = list_nil()
+val d2as1 =
+(
+if (n0 >= narg)
+  then d2exparglst_take (d2as, narg) else d2as
+) : d2exparglst
 //
 val d2as2 =
 (
-//
-if
-(n0 >= narg)
-then xs2 where
-{
-  val (xs1, xs2) =
-    list_split_at(d2as, narg)
-  val ((*void*)) =
-    (d2as1 := list_of_list_vt(xs1))
-} (* end of [then] *)
-else let
-  val () = d2as1 := d2as in list_nil()
-end // end of [else]
-//
+if (n0 >= narg)
+  then d2exparglst_drop (d2as, narg) else glist_nil()
 ) : d2exparglst // end of [val]
 //
 val
@@ -1416,11 +1428,6 @@ evalctx_extend_arglst
 (
   loc, d2m, 0(*short*), ctx, env, args, d2as1, evalctx_nil()
 ) // end of [evalctx_extend_arglst]
-(*
-val () = (
-  print "eval0_app_mac_short: ctx_new =\n"; print_evalctx (ctx_new)
-) // end of [val]
-*)
 //
 val d2e =
 eval1_d2exp
@@ -1432,23 +1439,20 @@ val ((*freed*)) = evalctx_free(ctx_new)
 //
 in
 //
-case+ d2as2 of
-| list_nil
-    () => (d2e)
-  // list_nil()
-| list_cons _ =>
-  (
+if glist_is_nil (d2as2) then (d2e) else
+(
   case+
-  d2e.d2exp_node
+  d2exp_node_view (d2e.d2exp_node ())
   of (* case+ *)
-  | D2Eapplst
+  | ~D2Eapplst
      (d2e_fun, d2as1) =>
    (
      d2exp_applst
-       (loc, d2e_fun, list_append(d2as1, d2as2))
+       (loc, d2e_fun, glist_append<d2exparg> (d2as1, d2as2))
    ) // end of [D2Eapplst]
-  | _ (*non-D2Eapplst*) => d2exp_applst(loc, d2e, d2as2)
-  ) (* end of [list_cons] *)
+  | v (*non-D2Eapplst*) =>
+    (d2exp_node_view_free (v); d2exp_applst(loc, d2e, d2as2))
+) (* end of [list_cons] *)
 //
 end // end of [eval0_app_mac_short]
 

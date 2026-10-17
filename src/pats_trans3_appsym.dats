@@ -33,20 +33,26 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-"./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_appsym.dats, see PORTING.md,
+// "Level 3 translation, group 2 (dynexp_dn/appsym/caseof/patcon)")
 //
 (* ****** ****** *)
 
-staload
-"./pats_basics.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
 
 (* ****** ****** *)
 
-staload
-UN =
-"prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 //
@@ -63,6 +69,10 @@ prerr_FILENAME<>
 //
 (* ****** ****** *)
 
+staload LOC = "./pats_location.sats"
+
+(* ****** ****** *)
+
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_dynexp2.sats"
@@ -75,7 +85,12 @@ staload "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
+staload "./pats_trans3_appsym.sats"
+#include "./pats_trans3_appsym_gen_dats.hats"
+
+(* ****** ****** *)
+
+#define l2l glist_make_list_vt
 
 (* ****** ****** *)
 
@@ -94,24 +109,25 @@ fun loop
 ) : bool = let
   val s2e = s2exp_hnfize (s2e)
 in
-  case+ s2e.s2exp_node of
-  | S2Efun
+  case+ s2exp_node_view(s2e.s2exp_node()) of
+  | ~S2Efun
     (
       _(*fc*), _(*lin*), _(*eff*), npf1, s2es_arg, s2e_res
     ) =>
       if (npf = npf1) then let
+        // HX: [list_length_compare (d2es, s2es_arg)] of ATS1
         val sgn =
-          list_length_compare (d2es, s2es_arg) in
+          glist_length (d2es) = glist_length (s2es_arg) in
         // end of [val]
-        if sgn = 0
+        if sgn
           then aritest_d2exparglst_s2exp (d2as, s2e_res) else false
         // end of [if]
       end else false // end of [if]
     // end of [S2Efun]
-  | S2Eexi (_(*s2vs*), _(*s2ps*), s2e) => loop (d2as, s2e, npf, d2es)
-  | S2Euni (_(*s2vs*), _(*s2ps*), s2e) => loop (d2as, s2e, npf, d2es)
-  | S2Emetfun (_(*opt*), _(*met*), s2e) => loop (d2as, s2e, npf, d2es)
-  | _ => false // end of [_]
+  | ~S2Eexi (_(*s2vs*), _(*s2ps*), s2e) => loop (d2as, s2e, npf, d2es)
+  | ~S2Euni (_(*s2vs*), _(*s2ps*), s2e) => loop (d2as, s2e, npf, d2es)
+  | ~S2Emetfun (_(*opt*), _(*met*), s2e) => loop (d2as, s2e, npf, d2es)
+  | v => (s2exp_node_view_free (v); false) // end of [_]
 end // end of [loop]
 //
 in // in of [local]
@@ -120,17 +136,17 @@ implement
 aritest_d2exparglst_s2exp
   (d2as, s2e) = let
 in
-  case+ d2as of
-  | list_cons
+  case+ glist_view(d2as) of
+  | ~GLcons
       (d2a, d2as) => (
-    case+ d2a of
-    | D2EXPARGdyn (
+    case+ d2exparg_view(d2a) of
+    | ~D2EXPARGdyn (
         npf, _(*loc*), d2es
       ) => loop (d2as, s2e, npf, d2es)
-    | D2EXPARGsta _ =>
+    | ~D2EXPARGsta _ =>
         aritest_d2exparglst_s2exp (d2as, s2e)
     ) // end of [list_cons]
-  | list_nil ((*void*)) => true
+  | ~GLnil ((*void*)) => true
 end // end of [aritest_d2exparglst_s2exp]
 
 end // end of [local]
@@ -140,18 +156,12 @@ end // end of [local]
 fun
 d2exp_trup_item
 (
-  loc0: loc_t, d2i: d2itm, t2mas: t2mpmarglst
+  loc0: $LOC.location, d2i: d2itm, t2mas: t2mpmarglst
 ) : d3exp = let
-(*
-  val () = (
-    print "d2exp_trup_item: d2i = ";
-    fprint_d2itm (stdout_ref, d2i); print_newline ()
-  ) // end [val]
-*)
 in
 //
-case+ d2i of
-| D2ITMcst d2c => let
+case+ d2itm_view(d2i) of
+| ~D2ITMcst d2c => let
     val s2qs =
       d2cst_get_decarg (d2c)
     // end of [val]
@@ -160,19 +170,20 @@ case+ d2i of
   in
     d3exp_item (loc0, s2e, d2i, t2mas)
   end
-| D2ITMvar d2v => let
+| ~D2ITMvar d2v => let
     val s2qs = d2var_get_decarg (d2v)
-    val-Some (s2e) = d2var_get_type (d2v)
+    val-~GOsome (s2e) = gopt_view(d2var_get_type (d2v))
     val s2e = s2exp_unis (s2qs, s2e)
   in
     d3exp_item (loc0, s2e, d2i, t2mas)
   end
-| _ => let
+| v => let
+    val () = d2itm_view_free (v)
     val () = prerr_error3_loc (loc0)
     val () = filprerr_ifdebug "d2exp_trup_item"
-    val () = prerr ": a dynamic constant or variable is expected."
+    val () = prerr_string ": a dynamic constant or variable is expected."
     val () = prerr_newline ()
-    val () =  the_trans3errlst_add (T3E_d2exp_trup_item (loc0, d2i))
+    val () =  the_trans3errlst_add (trans3err_T3E_d2exp_trup_item (loc0, d2i))
   in
     d3exp_errexp (loc0)
   end // end of [_]
@@ -184,28 +195,29 @@ end // end of [d2exp_trup_item]
 fun d3exp_trup_item
   (d3e0: d3exp): d3exp = let
 //
-val loc0 = d3e0.d3exp_loc
-val-D3Eitem (d2i, t2mas) = d3e0.d3exp_node
-val isnil = list_is_nil (t2mas)
+val loc0 = d3e0.d3exp_loc()
+val-~D3Eitem (d2i, t2mas) = d3exp_node_view(d3e0.d3exp_node())
+val isnil = glist_is_nil (t2mas)
 //
 in
 //
-case+ d2i of
-| D2ITMcst d2c => (
+case+ d2itm_view(d2i) of
+| ~D2ITMcst d2c => (
     if isnil then
       d2exp_trup_cst (loc0, d2c)
     else
       d2exp_trup_tmpcst (loc0, d2c, t2mas)
     // end of [if]
   ) // end of [D2ITMcst]
-| D2ITMvar d2v => (
+| ~D2ITMvar d2v => (
     if isnil then
       d2exp_trup_var (loc0, d2v)
     else
       d2exp_trup_tmpvar (loc0, d2v, t2mas)
     // end of [if]
   ) // end of [D2ITMvar]
-| _ => let
+| v => let
+    val () = d2itm_view_free (v)
     val () = assertloc (false) in d3exp_errexp (loc0)
   end // end of [_]
 //
@@ -213,53 +225,46 @@ end // end of [d3exp_trup_item]
 
 (* ****** ****** *)
 //
-datatype
-d3pitm = D3PITM of (int, d3exp)
+// HX-2026-10: [d3pitm] is the record of pats_trans3_appsym.spec
 //
-typedef d3pitmlst = List(d3pitm)
-vtypedef d3pitmlst_vt = List_vt(d3pitm)
-//
-(* ****** ****** *)
-
 fun
 d3pitm_make
 (
   pval: int, d3e: d3exp
-) : d3pitm = D3PITM(pval, d3e)
+) : d3pitm = d3pitm_new(pval, d3e)
 // end of [d3pitm_make]
 
 fun
 d3pitm_get_dexp
 (
   d3pi: d3pitm
-) : d3exp = let
-  val D3PITM(pval, d3e) = d3pi in d3e
-end // end of [d3pitm_get_dexp]
+) : d3exp = d3pitm_dexp(d3pi)
+// end of [d3pitm_get_dexp]
 
 fun
 d3pitm_get_type
 (
   d3pi: d3pitm
 ) : s2exp = let
-  val D3PITM(pval, d3e) = d3pi in d3e.d3exp_type
+  val d3e = d3pitm_dexp(d3pi) in d3e.d3exp_type()
 end // end of [d3pitm_get_type]
 
 fun
 d3pitm_get_pval
 (
   d3pi: d3pitm
-) : int = let
-  val D3PITM(pval, d3e) = d3pi in pval
-end // end of [d3pitm_get_pval]
+) : int = d3pitm_pval(d3pi)
+// end of [d3pitm_get_pval]
 
 fun
 fprint_d3pitm
 (
   out: FILEref, x: d3pitm
 ) : void = let
-  val D3PITM (pval, d3e) = x
-  val-D3Eitem
-    (d2i, t2mas) = d3e.d3exp_node
+  val pval = d3pitm_pval(x)
+  val d3e = d3pitm_dexp(x)
+  val-~D3Eitem
+    (d2i, t2mas) = d3exp_node_view(d3e.d3exp_node())
   val () = fprint_d2itm (out, d2i)
   val () = fprint_string (out, " of ")
   val () = fprint_int (out, pval)
@@ -267,20 +272,6 @@ in
   // nothing
 end // end of [fprint_d3pitm]
 
-(* ****** ****** *)
-//
-datatype
-d3exparg = 
-| D3EXPARGsta of
-    (loc_t(*arg*), s2exparglst)
-  // end of [D3EXPARGsta]
-| D3EXPARGdyn of // HX: notice the argument list [d3es]
-    (int(*npf*), loc_t(*arg*), d3explst) // are not opened
-  // end of [D3EXPARGdyn]
-//
-typedef d3exparglst = List(d3exparg)
-vtypedef d3exparglst_vt = List_vt(d3exparg)
-//
 (* ****** ****** *)
 
 extern
@@ -292,24 +283,19 @@ d3exp_trup_applst
 implement
 d3exp_trup_applst
   (d2e0, d3e_fun, d3as) = let
-(*
-  val () = (
-    print "d3exp_trup_applst: ..."; print_newline ()
-  ) // end of [val]
-*)
-  val loc0 = d2e0.d2exp_loc
+  val loc0 = d2e0.d2exp_loc()
 in
 //
-case+ d3as of
+case+ glist_view(d3as) of
 //
-| list_cons (d3a, d3as) => (
-  case+ d3a of
-  | D3EXPARGsta
+| ~GLcons (d3a, d3as) => (
+  case+ d3exparg_view(d3a) of
+  | ~D3EXPARGsta
       (locarg, s2as) => let
-      val loc_fun = d3e_fun.d3exp_loc
-      val s2e_fun = d3e_fun.d3exp_type
+      val loc_fun = d3e_fun.d3exp_loc()
+      val s2e_fun = d3e_fun.d3exp_type()
       var err: int = 0
-      val (s2e_fun, s2ps) =
+      val @(s2e_fun, s2ps) =
         s2exp_uni_instantiate_sexparglst (s2e_fun, s2as, err)
       // end of [val]
       val () = trans3_env_add_proplst_vt (loc_fun, s2ps)
@@ -317,27 +303,27 @@ case+ d3as of
     in
       d3exp_trup_applst (d2e0, d3e_fun, d3as)
     end // end of [D3EXPARGsta]
-  | D3EXPARGdyn
+  | ~D3EXPARGdyn
       (npf, locarg, d3es_arg) => let
-      val loc_fun = d3e_fun.d3exp_loc
-      val s2e_fun = d3e_fun.d3exp_type
+      val loc_fun = d3e_fun.d3exp_loc()
+      val s2e_fun = d3e_fun.d3exp_type()
       val () = d3explst_open_and_add (d3es_arg)
       var err: int = 0
-      val (s2e_fun, s2ps) =
+      val @(s2e_fun, s2ps) =
         s2exp_unimet_instantiate_all (s2e_fun, locarg, err)
       // HX: [err] is not used
       val () = trans3_env_add_proplst_vt (loc_fun, s2ps)
       val d3e_fun = d3exp_app_unista (loc0, s2e_fun, d3e_fun)
-      val-S2Efun (
+      val-~S2Efun (
         fc, _(*lin*), s2fe_fun, _(*npf*), s2es_fun_arg, s2e_fun_res
-      ) = s2e_fun.s2exp_node // end of[val]
+      ) = s2exp_node_view(s2e_fun.s2exp_node()) // end of[val]
 //
       val loc_app = $LOC.location_combine (loc_fun, locarg)
       val s2es_fun_arg = 
         s2fun_opninv_and_add (locarg, s2es_fun_arg, s2e_fun_res)
       val d3es_arg = d3explst_trdn_arg (d3es_arg, s2es_fun_arg)
 //
-      val (
+      val @(
         iswth, s2e_res, wths2es
       ) = un_s2exp_wthtype (loc_app, s2e_fun_res)
 //
@@ -353,7 +339,7 @@ case+ d3as of
       val err = the_effenv_check_s2eff (loc_app, s2fe_fun)
       val (
       ) = if (err > 0) then (
-        the_trans3errlst_add (T3E_d3exp_trup_applst_eff (loc_app, s2fe_fun))
+        the_trans3errlst_add (trans3err_T3E_d3exp_trup_applst_eff (loc_app, s2fe_fun))
       ) // end of [if] // end of [val]
 //
       val d3e_fun = d3exp_app_dyn (loc0, s2e_res, d3e_fun, npf, d3es_arg)
@@ -362,7 +348,7 @@ case+ d3as of
     end // end of [D3EXPARGdyn]
   ) (* end of [list_cons] *)
 //
-| list_nil ((*void*)) => d3e_fun // end of [list_nil]
+| ~GLnil ((*void*)) => d3e_fun // end of [list_nil]
 //
 end // end of [d3exp_trup_applst]
 
@@ -372,23 +358,23 @@ local
 
 (* ****** ****** *)
 
-typedef XY = (d3pitm, s2kexp)
+typedef XY = @(d3pitm, s2kexp)
 
 (* ****** ****** *)
 
 fun
 auxsel_arity
 (
-  locsym: loc_t
+  locsym: $LOC.location
 , d2pis: d2pitmlst
-, d2piss: List_vt(d2pitmlst)
+, d2piss: List0_vt(d2pitmlst)
 , t2mas: t2mpmarglst
 , d2args: d2exparglst
 ) : d3pitmlst_vt = let
 in
 //
-case+ d2pis of
-| list_nil
+case+ glist_view(d2pis) of
+| ~GLnil
     ((*void*)) =>
   (
   case+ d2piss of
@@ -397,20 +383,21 @@ case+ d2pis of
       auxsel_arity (locsym, d2pis, d2piss, t2mas, d2args)
     // end of [list_cons]
   ) (* end of [list_nil] *)
-| list_cons
+| ~GLcons
     (d2pi, d2pis) => let
-    val D2PITM (pval, d2i) = d2pi
+    val ~D2PITM (pval, d2i) = d2pitm_view(d2pi)
   in
-    case+ d2i of
-    | D2ITMsymdef
+    case+ d2itm_view(d2i) of
+    | ~D2ITMsymdef
         (_(*sym*), d2pis_new) => let
         val d2piss = list_vt_cons (d2pis, d2piss)
       in
         auxsel_arity (locsym, d2pis_new, d2piss, t2mas, d2args)
       end // end of [D2ITMsymdef]
-    | _ => let
+    | v => let
+        val () = d2itm_view_free (v)
         val d3e = d2exp_trup_item(locsym, d2i, t2mas)
-        val test = aritest_d2exparglst_s2exp(d2args, d3e.d3exp_type)
+        val test = aritest_d2exparglst_s2exp(d2args, d3e.d3exp_type())
         val d3pis = auxsel_arity(locsym, d2pis, d2piss, t2mas, d2args)
       in
         if test then let
@@ -424,16 +411,9 @@ end // end of [auxsel_arity]
 fun
 auxsel_skexplst
 (
-  xys:List_vt(XY)
+  xys: List0_vt(XY)
 , s2kes: s2kexplst
-) : List_vt(XY) = let
-(*
-val () =
-(
-  print "auxsel_skexplst: s2kes = ";
-  fprint_s2kexplst (stdout_ref, s2kes); print_newline ()
-) // end of [val]
-*)
+) : List0_vt(XY) = let
 in
 //
 case+ xys of
@@ -442,118 +422,154 @@ case+ xys of
   // list_vt_nil
 | ~list_vt_cons(xy, xys) =>
   (
-  case+ xy.1 of
-  | S2KEfun
+  case+ s2kexp_view(xy.1) of
+  | ~S2KEfun
     (
       s2kes_arg, s2ke_res
     ) => let
-(*
-//
-      val
-      out = stdout_ref
-//
-      val () =
-      (
-        print "auxsel_skexplst: s2kes_arg = ";
-        fprint_s2kexplst(out, s2kes_arg); print_newline()
-      ) (* end of [val] *)
-*)
       val ismat =
         s2kexplst_ismat(s2kes, s2kes_arg)
       // end of [val]
-(*
-      val () = println! ("auxsel_skexplst: ismat = ", ismat)
-*)
-      val x = (xy.0, s2ke_res)
+      val x = @(xy.0, s2ke_res)
       val xs = auxsel_skexplst(xys, s2kes)
     in
       if ismat then list_vt_cons (x, xs) else xs
     end // end of [list_vt_cons]
-  | _ (*non-S2KEfun*) => auxsel_skexplst(xys, s2kes)
+  | v (*non-S2KEfun*) =>
+      (s2kexp_view_free(v); auxsel_skexplst(xys, s2kes))
   ) (* end of [list_vt_cons] *)
 //
 end // end of [auxsel_skexplst]
 
 fun
-auxsel_arglst
+auxmap_loop
 (
-  xys: List_vt(XY)
-, d2as: d2exparglst, d3as: d3exparglst_vt
-) :
-( d3pitmlst
-, d3exparglst
-, d2exparglst ) = let
-//
-fun
-auxmap
-(xys: List_vt(XY)): d3pitmlst =
+  xys: List0_vt(XY), res: List0_vt(d3pitm)
+) : List0_vt(d3pitm) =
 (
 case+ xys of
 | ~list_vt_nil
-    ((*void*)) => list_nil()
+    ((*void*)) => list_vt_reverse(res)
 | ~list_vt_cons
-    (xy, xys) => list_cons(xy.0, auxmap(xys))
-) (* end of [auxmap] *)
+    (xy, xys) => auxmap_loop(xys, list_vt_cons(xy.0, res))
+) (* end of [auxmap_loop] *)
+
+// HX: [auxmap] of ATS1 (the order of the list is kept)
+fun
+auxmap
+(xys: List0_vt(XY)): d3pitmlst =
+  l2l(auxmap_loop(xys, list_vt_nil()))
+
+// HX: [list_map_fun<d3exp><s2kexp>(d3es, lam d3e => s2kexp_make_s2exp(d3e.d3exp_type))]
+fun
+auxmap_s2kexp
+(
+  d3es: d3explst, res: List0_vt(s2kexp)
+) : s2kexplst =
+(
+case+ glist_view(d3es) of
+| ~GLnil((*void*)) => l2l(list_vt_reverse(res))
+| ~GLcons(d3e, d3es) => let
+    val s2ke = s2kexp_make_s2exp(d3e.d3exp_type())
+  in
+    auxmap_s2kexp(d3es, list_vt_cons(s2ke, res))
+  end // end of [GLcons]
+) (* end of [auxmap_s2kexp] *)
+
+fun
+auxsel_arglst
+(
+  xys: List0_vt(XY)
+, d2as: d2exparglst, d3as: d3exparglst_vt
+) : @( d3pitmlst, d3exparglst, d2exparglst ) = let
 //
 in
 //
-case+ d2as of
-| list_nil() => let
+case+ glist_view(d2as) of
+| ~GLnil() => let
     val d3as =
       list_vt_reverse(d3as)
     // end of [val]
   in
-    (auxmap(xys), (l2l)d3as, d2as)
+    @(auxmap(xys), l2l(d3as), glist_nil())
   end // end of [list_nil]
-| list_cons(_, _) => (
+| ~GLcons(d2a, d2as1) => let
+    // HX: [d2as] is the whole list (shared), [d2as1] its tail
+  in
   case+ xys of
-  | list_vt_nil
+  | ~list_vt_nil
       ((*void*)) => let
-      val () = free@{XY}(xys)
       val d3as =
         list_vt_reverse (d3as)
       // end of [val]
     in
-      (list_nil(), (l2l)d3as, d2as)
+      @(glist_nil(), l2l(d3as), d2as)
     end // end of [list_vt_nil]
-  | list_vt_cons
-      (xy, !p_xys1) => (
-    case+ !p_xys1 of
+  | ~list_vt_cons
+      (xy, xys1) => (
+    case+ xys1 of
     | ~list_vt_nil () => let
-        val () = free@{XY}{0}(xys)
         val d3as = list_vt_reverse(d3as)
       in
-        (list_sing(xy.0), (l2l)d3as, d2as)
+        @(glist_sing(xy.0), l2l(d3as), d2as)
       end
-    | _ => let
-        val () = fold@(xys)
-        val+list_cons (d2a, d2as) = d2as
+    | xys1 => let
+        val xys = list_vt_cons(xy, xys1)
       in
-        case+ d2a of
-        | D2EXPARGsta
+        case+ d2exparg_view(d2a) of
+        | ~D2EXPARGsta
             (locarg, s2as) => let
-            val d3a = D3EXPARGsta(locarg, s2as)
+            val d3a = d3exparg_D3EXPARGsta(locarg, s2as)
           in
-            auxsel_arglst(xys, d2as, list_vt_cons(d3a, d3as))
+            auxsel_arglst(xys, d2as1, list_vt_cons(d3a, d3as))
           end (* D2EXPARGsta *)
-        | D2EXPARGdyn
+        | ~D2EXPARGdyn
             (npf, locarg, d2es) => let
             val d3es = d2explst_trup (d2es)
-            val s2kes = list_map_fun<d3exp><s2kexp>
-              (d3es, lam d3e =<1> s2kexp_make_s2exp(d3e.d3exp_type))
-            val xs = auxsel_skexplst(xys, $UN.castvwtp1{s2kexplst}(s2kes))
-            val () = list_vt_free (s2kes)
-            val d3a = D3EXPARGdyn (npf, locarg, d3es)
+            val s2kes = auxmap_s2kexp (d3es, list_vt_nil())
+            val xs = auxsel_skexplst(xys, s2kes)
+            val d3a = d3exparg_D3EXPARGdyn (npf, locarg, d3es)
           in
-            auxsel_arglst (xs, d2as, list_vt_cons (d3a, d3as))
+            auxsel_arglst (xs, d2as1, list_vt_cons (d3a, d3as))
           end (* D2EXPARGdyn *)
       end // end of [_]
     ) // end of [list_vt_cons]
-  ) // end of [list_cons]
+  end // end of [list_cons]
 //
 end // end of [auxsel_arglst]
 
 #define ITMPVALMIN ~1000000
+
+fun
+auxselmax_max
+(
+xs: d3pitmlst, mpval: int
+) : int =
+(
+case+ glist_view(xs) of
+| ~GLnil() => mpval
+| ~GLcons(x, xs) => let
+    val pval = d3pitm_get_pval(x)
+  in
+    auxselmax_max(xs, (if mpval < pval then pval else mpval))
+  end
+) (* end of [auxselmax_max] *)
+
+// HX: [list_filter_cloptr] of ATS1 (head first, the order is kept)
+fun
+auxselmax_filter
+(
+xs: d3pitmlst, mpval: int, res: List0_vt(d3pitm)
+) : List0_vt(d3pitm) =
+(
+case+ glist_view(xs) of
+| ~GLnil() => list_vt_reverse(res)
+| ~GLcons(x, xs) =>
+    if d3pitm_get_pval(x) = mpval
+      then auxselmax_filter(xs, mpval, list_vt_cons(x, res))
+      else auxselmax_filter(xs, mpval, res)
+    // end of [if]
+) (* end of [auxselmax_filter] *)
 
 fun
 auxselmax
@@ -561,32 +577,14 @@ auxselmax
   d3pis: d3pitmlst
 ) : d3pitmlst = let
 //
-fun
-loop
-(
-xs: d3pitmlst, mpval: int
-) : int =
-(
-case+ xs of
-| list_nil() => mpval
-| list_cons(x, xs) => let
-    val pval = d3pitm_get_pval(x)
-  in
-    loop(xs, max_int_int(mpval, pval))
-  end
-) (* end of [loop] *)
-//
 val
-mpval = loop(d3pis, ITMPVALMIN)
+mpval = auxselmax_max(d3pis, ITMPVALMIN)
 val
 d3pis =
-list_filter_cloptr<d3pitm>
-( d3pis
-, lam (x) =<1> d3pitm_get_pval(x) = mpval
-) (* end of [val] *)
+auxselmax_filter(d3pis, mpval, list_vt_nil())
 //
 in
-  list_of_list_vt(d3pis)
+  l2l(d3pis)
 end // end of [auxselmax]
 
 fun
@@ -596,18 +594,20 @@ auxeq_d2itm
 , d2i2: d2itm
 ) : bool =
 (
-case+ d2i1 of
-| D2ITMcst(d2c1) =>
+case+ d2itm_view(d2i1) of
+| ~D2ITMcst(d2c1) =>
   (
-  case+ d2i2 of
-  | D2ITMcst(d2c2) => (d2c1 = d2c2) | _ => false
+  case+ d2itm_view(d2i2) of
+  | ~D2ITMcst(d2c2) => (d2c1 = d2c2)
+  | v => (d2itm_view_free(v); false)
   )
-| D2ITMvar(d2v1) =>
+| ~D2ITMvar(d2v1) =>
   (
-  case+ d2i2 of
-  | D2ITMvar(d2v2) => (d2v1 = d2v2) | _ => false
+  case+ d2itm_view(d2i2) of
+  | ~D2ITMvar(d2v2) => (d2v1 = d2v2)
+  | v => (d2itm_view_free(v); false)
   )
-| _(* rest-of-d2itm *) => false
+| v (* rest-of-d2itm *) => (d2itm_view_free(v); false)
 ) (* end of [auxeq_d2itm] *)
 
 
@@ -624,18 +624,35 @@ val d3e2 = d3pitm_get_dexp(d3pi2)
 in
 //
 case+
-d3e1.d3exp_node
+d3exp_node_view(d3e1.d3exp_node())
 of (* case+ *)
-| D3Eitem(d2i1, _) =>
+| ~D3Eitem(d2i1, _) =>
   (
   case+
-  d3e2.d3exp_node
+  d3exp_node_view(d3e2.d3exp_node())
   of (* case+ *)
-  | D3Eitem(d2i2, _) => auxeq_d2itm(d2i1, d2i2) | _ => false
+  | ~D3Eitem(d2i2, _) => auxeq_d2itm(d2i1, d2i2)
+  | v => (d3exp_node_view_free(v); false)
   )
-| _ (*non-D3Eitem*) => false
+| v (*non-D3Eitem*) => (d3exp_node_view_free(v); false)
 //
 end // end of [auxeq_d3pitm]
+
+// HX: [list_filter_cloptr (d3pis, lam(x) => ~auxeq_d3pitm(d3pi0, x))]
+fun
+auxeq_d3pitm_filter
+(
+  d3pi0: d3pitm, xs: d3pitmlst, res: List0_vt(d3pitm)
+) : List0_vt(d3pitm) =
+(
+case+ glist_view(xs) of
+| ~GLnil() => list_vt_reverse(res)
+| ~GLcons(x, xs) =>
+    if ~auxeq_d3pitm(d3pi0, x)
+      then auxeq_d3pitm_filter(d3pi0, xs, list_vt_cons(x, res))
+      else auxeq_d3pitm_filter(d3pi0, xs, res)
+    // end of [if]
+) (* end of [auxeq_d3pitm_filter] *)
 
 fun
 auxeq_d3pitm_remdup
@@ -643,19 +660,36 @@ auxeq_d3pitm_remdup
   d3pis: d3pitmlst
 ) : d3pitmlst =
 (
-case+ d3pis of
-| list_nil() => list_nil()
-| list_cons(d3pi0, d3pis) => let
+case+ glist_view(d3pis) of
+| ~GLnil() => glist_nil()
+| ~GLcons(d3pi0, d3pis) => let
     val 
     d3pis =
-    list_filter_cloptr<d3pitm>
-    ( d3pis
-    , lam(x) =<1> ~auxeq_d3pitm(d3pi0, x)
-    ) (* end of [val] *)
+    auxeq_d3pitm_filter(d3pi0, d3pis, list_vt_nil())
+    // end of [val]
   in
-    list_cons(d3pi0, list_of_list_vt(d3pis))
+    glist_cons(d3pi0, l2l(d3pis))
   end
 ) (* end of [auxeq_d3pitm_remdup] *)
+
+// HX: [fopr] of ATS1 mapped over [d3pis] (head first)
+fun
+auxmap_xy
+(
+  d3pis: d3pitmlst, res: List0_vt(XY)
+) : List0_vt(XY) =
+(
+case+ glist_view(d3pis) of
+| ~GLnil() => list_vt_reverse(res)
+| ~GLcons(d3pi, d3pis) => let
+    val s2e =
+      d3pitm_get_type(d3pi)
+    // end of [val]
+    val xy = @(d3pi, s2kexp_make_s2exp(s2e))
+  in
+    auxmap_xy(d3pis, list_vt_cons(xy, res))
+  end // end of [GLcons]
+) (* end of [auxmap_xy] *)
 
 in (* in of [local] *)
 
@@ -663,7 +697,7 @@ implement
 d2exp_trup_applst_sym
   (d2e0, d2s, d2as) = let
 //
-val t2mas = list_nil(*void*)
+val t2mas = glist_nil((*void*))
 //
 in
   d2exp_trup_applst_tmpsym(d2e0, d2s, t2mas, d2as)
@@ -672,49 +706,24 @@ end // end of [d2exp_trup_applst_sym]
 implement
 d2exp_trup_applst_tmpsym
   (d2e0, d2s, t2mas, d2as) = let
-(*
-val () =
-(
-  print "d2exp_trup_applst_sym: d2s = ";
-  fprint_d2sym (stdout_ref, d2s); print_newline ();
-  print "d2exp_trup_applst_sym: d2as = ";
-  fprint_d2exparglst (stdout_ref, d2as); print_newline ();
-) (* end of [val] *)
-*)
 val
-loc0 = d2e0.d2exp_loc
+loc0 = d2e0.d2exp_loc()
 val
-locsym = d2s.d2sym_loc
+locsym = d2s.d2sym_loc()
 //
 val
-d2pis = d2s.d2sym_pitmlst
+d2pis = d2s.d2sym_pitmlst()
 val
 d3pis =
 auxsel_arity
   (locsym, d2pis, list_vt_nil, t2mas, d2as)
 //
-val xys = let
-  fun
-  fopr
-  (
-    d3pi: d3pitm
-  ) : XY = let
-    val s2e =
-      d3pitm_get_type(d3pi)
-    // end of [val]
-  in
-    (d3pi, s2kexp_make_s2exp(s2e))
-  end // end of [fopr]
-in
-  list_map_fun<d3pitm>
-    ($UN.castvwtp1{d3pitmlst}(d3pis), fopr)
-  // end of [list_map_fun]
-end // end of [val]
-val ((*freed*)) = list_vt_free(d3pis)
+// HX: the items of [d3pis] are shared (arena records)
+val d3pis = l2l(d3pis)
+val xys = auxmap_xy (d3pis, list_vt_nil())
 //
-val xyz = auxsel_arglst(xys, d2as, list_vt_nil)
+val @(d3pis, d3as, d2as_rest) = auxsel_arglst(xys, d2as, list_vt_nil)
 //
-val d3pis = xyz.0
 val d3pis = auxselmax(d3pis)
 //
 // HX-2017-02-12:
@@ -724,56 +733,54 @@ val d3pis = auxeq_d3pitm_remdup(d3pis)
 //
 in
 //
-case+ d3pis of
+case+ glist_view(d3pis) of
 //
-| list_nil
+| ~GLnil
   (
     (*void*)
   ) => let
     val () =
       prerr_error3_loc (loc0)
     // end of [val]
-    val () = prerr ": the symbol [";
+    val () = prerr_string ": the symbol [";
     val () = fprint_d2sym(stderr_ref, d2s)
-    val () = prerr "] cannot be resolved as no match is found."
+    val () = prerr_string "] cannot be resolved as no match is found."
     val () = prerr_newline((*void*))
     val () =
     the_trans3errlst_add
-      (T3E_d2exp_trup_applst_sym_nil(d2e0, d2s))
+      (trans3err_T3E_d2exp_trup_applst_sym_nil(d2e0, d2s))
     // end of [val]
   in
     d3exp_errexp(loc0)
   end // end of [list_nil]
 //
-| list_cons
+| ~GLcons (d3pi, d3pis_rest) =>
   (
-    d3pi, list_nil()
-  ) => let
-    val d3e_fun = d3pitm_get_dexp(d3pi)
-    val d3e_fun = d3exp_trup_item(d3e_fun)
-    val d3e_fun = d3exp_trup_applst(d2e0, d3e_fun, xyz.1)
-  in
-    d23exp_trup_applst(d2e0, d3e_fun, xyz.2)
-  end // end of [list_sing]
-//
-| list_cons
-  (
-    d3pi1, list_cons(d3pi2, _)
-  ) => let
-    val () = prerr_error3_loc(loc0)
-    val () = prerr ": the symbol [";
-    val () = fprint_d2sym(stderr_ref, d2s)
-    val () = prerr "] cannot be resolved due to too many matches:\n"
-    val () = fprint_d3pitm(stderr_ref, d3pi1)
-    val () = prerr_newline()
-    val () = fprint_d3pitm(stderr_ref, d3pi2)
-    val () = prerr_newline()
-    val () =
-      the_trans3errlst_add (T3E_d2exp_trup_applst_sym_cons2(d2e0, d2s))
-    // end of [val]
-  in
-    d3exp_errexp (loc0)
-  end // end of [list_cons2]
+  case+ glist_view(d3pis_rest) of
+  | ~GLnil() => let
+      val d3e_fun = d3pitm_get_dexp(d3pi)
+      val d3e_fun = d3exp_trup_item(d3e_fun)
+      val d3e_fun = d3exp_trup_applst(d2e0, d3e_fun, d3as)
+    in
+      d23exp_trup_applst(d2e0, d3e_fun, d2as_rest)
+    end // end of [list_sing]
+  | ~GLcons(d3pi2, _) => let
+      val d3pi1 = d3pi
+      val () = prerr_error3_loc(loc0)
+      val () = prerr_string ": the symbol [";
+      val () = fprint_d2sym(stderr_ref, d2s)
+      val () = prerr_string "] cannot be resolved due to too many matches:\n"
+      val () = fprint_d3pitm(stderr_ref, d3pi1)
+      val () = prerr_newline()
+      val () = fprint_d3pitm(stderr_ref, d3pi2)
+      val () = prerr_newline()
+      val () =
+        the_trans3errlst_add (trans3err_T3E_d2exp_trup_applst_sym_cons2(d2e0, d2s))
+      // end of [val]
+    in
+      d3exp_errexp (loc0)
+    end // end of [list_cons2]
+  ) (* end of [GLcons] *)
 //
 end // end of [d2exp_trup_applst_tmpsym]
 //
@@ -792,11 +799,13 @@ auxins
 (
 if npf > 0
   then let
-    val-list_cons (d2e, d2es) = d2es
+    val () = assertloc (glist_is_cons (d2es)) // HX: val-list_cons (d2e, d2es) = d2es
+    val d2e = glist_head (d2es)
+    val d2es = glist_tail (d2es)
   in
-    list_cons (d2e, auxins (npf-1, d2e_rt, d2es))
+    glist_cons (d2e, auxins (npf-1, d2e_rt, d2es))
   end // end of [then]
-  else list_cons (d2e_rt, d2es)
+  else glist_cons (d2e_rt, d2es)
 // end of [if]
 )
 
@@ -807,27 +816,27 @@ auxins2
 , d2e_rt: d2exp, d2as: d2exparglst
 ) : d2exparglst =
 (
-case+ d2as of
+case+ glist_view(d2as) of
 //
-| list_nil() => let
+| ~GLnil() => let
     val d2a =
-      D2EXPARGdyn(~1(*npf*), d2e0.d2exp_loc, list_sing(d2e_rt))
+      d2exparg_D2EXPARGdyn(~1(*npf*), d2e0.d2exp_loc(), glist_sing(d2e_rt))
     // end of [val]
   in
-    list_sing (d2a)
+    glist_sing (d2a)
   end // end of [list_nil]
 //
-| list_cons(d2a, d2as) =>
+| ~GLcons(d2a, d2as) =>
   (
-    case+ d2a of
-    | D2EXPARGsta _ =>
-        list_cons(d2a, auxins2 (d2e0, d2e_rt, d2as))
-    | D2EXPARGdyn(npf, loc_arg, d2es) => let
+    case+ d2exparg_view(d2a) of
+    | ~D2EXPARGsta _ =>
+        glist_cons(d2a, auxins2 (d2e0, d2e_rt, d2as))
+    | ~D2EXPARGdyn(npf, loc_arg, d2es) => let
         val d2a =
-          D2EXPARGdyn(npf, loc_arg, auxins (npf, d2e_rt, d2es))
+          d2exparg_D2EXPARGdyn(npf, loc_arg, auxins (npf, d2e_rt, d2es))
         // end of [val]
       in
-        list_cons(d2a, d2as)
+        glist_cons(d2a, d2as)
       end // end of [D2EXPARGdyn]
   ) (* end of [list_cons] *)  
 //
@@ -853,4 +862,4 @@ end // end of [local]
 
 (* ****** ****** *)
 
-(* end of [pats_trans3_funsel.dats] *)
+(* end of [pats_trans3_appsym.dats] *)

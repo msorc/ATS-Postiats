@@ -33,9 +33,26 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans1_env.dats).
+// The environments are never freed symenvs kept as pointers.
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+#include "./mylibies.hats"
+
 (* ****** ****** *)
 
 staload "./pats_errmsg.sats"
@@ -56,12 +73,19 @@ staload SYM = "./pats_symbol.sats"
 
 (* ****** ****** *)
 
-staload "./pats_symmap.sats"
-staload "./pats_symenv.sats"
+staload LM = "libats/SATS/linmap_avltree.sats"
+staload _(*anon*) = "libats/DATS/linmap_avltree.dats"
 
 (* ****** ****** *)
 
-staload SYN = "./pats_syntax.sats"
+staload "./pats_symmap.sats"
+staload _(*anon*) = "./pats_symmap.dats"
+staload "./pats_symenv.sats"
+staload _(*anon*) = "./pats_symenv.dats"
+
+(* ****** ****** *)
+
+staload "./pats_syntax.sats"
 
 (* ****** ****** *)
 
@@ -71,106 +95,99 @@ staload "./pats_trans1_env.sats"
 
 (* ****** ****** *)
 
-overload print with $LOC.print_location
+#include "./pats_trans1_env_gen_dats.hats"
 
 (* ****** ****** *)
-
-local
 //
 vtypedef e1xpenv = symenv (e1xp)
 //
-val [l0:addr] (pf | p0) = symenv_make_nil ()
-val (pf0 | ()) = vbox_make_view_ptr{e1xpenv}(pf | p0)
+// HX: the (never freed) environment, kept as a pointer
 //
-assume e1xpenv_push_v = unit_v // HX: it is just a dummy
+val the_e1xpenv_ptr = let
+  val (pf | p) = symenv_make_nil<e1xp> ()
+  prval () = $UN.castview0{void}(pf)
+in
+  p
+end // end of [val]
 //
-in (* in of [local] *)
+(* ****** ****** *)
 
 implement
 the_e1xpenv_add
   (k, i) = () where
 {
-  prval vbox (pf) = pf0
-  val () = symenv_insert (!p0, k, i)
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val () = symenv_insert<e1xp> (!p0, k, i)
+  prval () = fpf (pf)
 } // end of [the_e1xpenv_add]
 
 implement
 the_e1xpenv_addperv
   (k, i) = () where
 {
-  prval vbox (pf) = pf0
-  val () = symenv_pervasive_insert (!p0, k, i)
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val () = symenv_pervasive_insert<e1xp> (!p0, k, i)
+  prval () = fpf (pf)
 } // end of [the_e1xpenv_addperv]
 
 implement
-the_e1xpenv_find (k) = let
-//
-  prval vbox (pf) = pf0
-//
-  val ans = symenv_search (!p0, k)
-//
-in
-  case+ ans of
-  | Some_vt _ => (fold@ ans; ans)
-  | ~None_vt () => symenv_pervasive_search (!p0, k)
-end // end of [the_e1xpenv_find]
+the_e1xpenv_find (k) = ans where
+{
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val ans = symenv_search<e1xp> (!p0, k)
+  val ans = (
+    case+ ans of
+    | ~Some_vt (e) => Some_vt (e)
+    | ~None_vt () => symenv_pervasive_search<e1xp> (!p0, k)
+  ) : Option_vt (e1xp)
+  prval () = fpf (pf)
+} // end of [the_e1xpenv_find]
 
 implement
 the_e1xpenv_pop
-(
-  pfenv | (*none*)
-) = map where {
-  prval vbox (pf) = pf0
-  prval unit_v () = pfenv
-  val map = symenv_pop (!p0)
-} // end of [the_e1xpenv_pop_free]
+  ((*none*)) = map where
+{
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val map = symenv_pop<e1xp> (!p0)
+  prval () = fpf (pf)
+} // end of [the_e1xpenv_pop]
 
 implement
 the_e1xpenv_push_nil
-  () = (pfenv | ()) where
+  ((*none*)) = () where
 {
-  prval vbox (pf) = pf0
-  val () = symenv_push_nil (!p0)
-  prval pfenv = unit_v ()
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val () = symenv_push_nil<e1xp> (!p0)
+  prval () = fpf (pf)
 } // end of [the_e1xpenv_push_nil]
 
 fun
 the_e1xpenv_localjoin
-(
-  pfenv1: e1xpenv_push_v
-, pfenv2: e1xpenv_push_v
-| (*none*)
-) = () where {
-  prval vbox (pf) = pf0
-  prval unit_v () = pfenv1
-  prval unit_v () = pfenv2
-  val () = symenv_localjoin (!p0)
+  ((*none*)): void = () where
+{
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val () = symenv_localjoin<e1xp> (!p0)
+  prval () = fpf (pf)
 } // end of [the_e1xpenv_localjoin]
 
-viewdef
-e1xpenv_save_v = unit_v
 fun
-the_e1xpenv_save () = let
-  prval vbox (pf) = pf0
-  prval pfsave = unit_v ()
-  val () = symenv_savecur (!p0)
-in
-  (pfsave | ())
-end // end of [the_e1xpenv_save]
+the_e1xpenv_save
+  ((*none*)): void = () where
+{
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val () = symenv_savecur<e1xp> (!p0)
+  prval () = fpf (pf)
+} // end of [the_e1xpenv_save]
 
 fun
 the_e1xpenv_restore
-(
-  pfsave: e1xpenv_save_v | (*none*)
-) : void = () where
+  ((*none*)): void = () where
 {
-  prval vbox (pf) = pf0
-  prval unit_v () = pfsave
-  val map = symenv_restore (!p0)
-  val () = symmap_free (map)
+  val (pf, fpf | p0) = $UN.ptr0_vtake{e1xpenv}(the_e1xpenv_ptr)
+  val map = symenv_restore<e1xp> (!p0)
+  val () = symmap_free<e1xp> (map)
+  prval () = fpf (pf)
 } // end of [the_e1xpenv_restore]
-
-end // end of [local]
 
 (* ****** ****** *)
 
@@ -186,20 +203,25 @@ val opt = the_e1xpenv_find (EXTPRFX)
 in
 //
 case+ opt of
-| ~Some_vt (e) => (
-  case+ e.e1xp_node of
-  | E1XPnone () => stropt_none
-  | E1XPstring (x) => stropt_some (x)
-  | _ => let
-      val () = prerr_warning1_loc (e.e1xp_loc)
-      val () = prerr ": a string definition is required for [ATS_EXTERN_PREFIX]."
-      val () = prerr_newline ()
-    in
-      stropt_none
-    end // end of [_]
-  ) // end of [Some_vt]
+| ~Some_vt (e) => let
+    val nd = e.e1xp_node ()
+  in
+    if e1xp_node_is_E1XPnone (nd) then stropt_none ()
+    else (
+      case+ e1xp_node_view (nd) of
+      | ~E1XPstring (x) => stropt_some (x)
+      | v => let
+          val () = e1xp_node_view_free (v)
+          val () = prerr_warning1_loc (e.e1xp_loc ())
+          val () = prerr ": a string definition is required for [ATS_EXTERN_PREFIX]."
+          val () = prerr_newline ()
+        in
+          stropt_none ()
+        end // end of [_]
+    ) (* end of [else] *)
+  end // end of [Some_vt]
 | ~None_vt () =>
-    stropt_none // HX: [%] is kept to indicate a likely error
+    stropt_none () // HX: [%] is kept to indicate a likely error
   // end of [None_vt]
 //
 end // end of [the_EXTERN_PREFIX_get]
@@ -222,73 +244,68 @@ end // end of [the_EXTERN_PREFIX_set_none]
 
 (* ****** ****** *)
 
-local
-
-vtypedef fxtyenv = symenv (fxty)
-val [l0:addr] (pf | p0) = symenv_make_nil ()
-val (pf0 | ()) = vbox_make_view_ptr{fxtyenv} (pf | p0)
-
-assume fxtyenv_push_v = unit_v // HX: it is just a dummy
-
-in (* in of [local] *)
+vtypedef fxtyenv = symenv ($FIX.fxty)
+val the_fxtyenv_ptr = let
+  val (pf | p) = symenv_make_nil<$FIX.fxty> ()
+  prval () = $UN.castview0{void}(pf)
+in
+  p
+end // end of [val]
 
 implement
 the_fxtyenv_add
   (k, i) = () where {
-  prval vbox (pf) = pf0
-  val () = symenv_insert (!p0, k, i)
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val () = symenv_insert<$FIX.fxty> (!p0, k, i)
+  prval () = fpf (pf)
 } // end of [the_fxtyenv_add]
 
 implement
-the_fxtyenv_find (k) = let
-  prval vbox (pf) = pf0
-  val ans = symenv_search (!p0, k)
-in
-  case+ ans of
-  | Some_vt _ => (fold@ ans; ans)
-  | ~None_vt () => symenv_pervasive_search (!p0, k)
-end // end of [the_fxtyenv_find]
+the_fxtyenv_find (k) = ans where {
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val ans = symenv_search<$FIX.fxty> (!p0, k)
+  val ans = (
+    case+ ans of
+    | ~Some_vt (e) => Some_vt (e)
+    | ~None_vt () => symenv_pervasive_search<$FIX.fxty> (!p0, k)
+  ) : Option_vt ($FIX.fxty)
+  prval () = fpf (pf)
+} // end of [the_fxtyenv_find]
 
 (* ****** ****** *)
 
 implement
-fprint_the_fxtyenv (out) = let
-  prval vbox (pf) = pf0 in // HX: ref-effect is not allowed
-  $effmask_ref (fprint_symenv_map (out, !p0, $FIX.fprint_fxty))
-end // end of [fprint_the_fxtyenv]
+fprint_the_fxtyenv (out) = {
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val () = fprint_symenv_map<$FIX.fxty> (out, !p0, $FIX.fprint_fxty)
+  prval () = fpf (pf)
+} // end of [fprint_the_fxtyenv]
 
 (* ****** ****** *)
 
 implement
 the_fxtyenv_pop
-(
-  pfenv | (*none*)
-) = map where {
-  prval vbox (pf) = pf0
-  prval unit_v () = pfenv
-  val map = symenv_pop (!p0)
-} // end of [the_fxtyenv_pop_free]
+  ((*none*)) = map where {
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val map = symenv_pop<$FIX.fxty> (!p0)
+  prval () = fpf (pf)
+} // end of [the_fxtyenv_pop]
 
 implement
 the_fxtyenv_push_nil
-  () = (pfenv | ()) where
+  ((*none*)) = () where
 {
-  prval vbox (pf) = pf0
-  val () = symenv_push_nil (!p0)
-  prval pfenv = unit_v ()
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val () = symenv_push_nil<$FIX.fxty> (!p0)
+  prval () = fpf (pf)
 } // end of [the_fxtyenv_push_nil]
 
 fun
 the_fxtyenv_localjoin
-(
-  pfenv1: fxtyenv_push_v
-, pfenv2: fxtyenv_push_v
-| (*none*)
-) = () where {
-  prval vbox (pf) = pf0
-  prval unit_v () = pfenv1
-  prval unit_v () = pfenv2
-  val () = symenv_localjoin (!p0)
+  ((*none*)): void = () where {
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val () = symenv_localjoin<$FIX.fxty> (!p0)
+  prval () = fpf (pf)
 } // end of [the_fxtyenv_localjoin]
 
 (* ****** ****** *)
@@ -296,162 +313,89 @@ the_fxtyenv_localjoin
 implement
 the_fxtyenv_pervasive_joinwth (map) =
 {
-  prval vbox (pf) = pf0
-  val () = symenv_pervasive_joinwth0 (!p0, map)
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val () = symenv_pervasive_joinwth0<$FIX.fxty> (!p0, map)
+  prval () = fpf (pf)
 } // end of [the_fxtyenv_pervasive_joinwth]
 
 (* ****** ****** *)
 
-viewdef
-fxtyenv_save_v = unit_v
 fun
-the_fxtyenv_save () = let
-  prval vbox (pf) = pf0
-  prval pfsave = unit_v ()
-  val ((*void*)) = symenv_savecur (!p0)
-in
-  (pfsave | ())
-end // end of [the_fxtyenv_save]
+the_fxtyenv_save
+  ((*none*)): void = () where
+{
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val () = symenv_savecur<$FIX.fxty> (!p0)
+  prval () = fpf (pf)
+} // end of [the_fxtyenv_save]
 
 fun the_fxtyenv_restore
-(
-  pfsave: fxtyenv_save_v | (*none*)
-) : void = {
-  prval vbox (pf) = pf0
-  prval unit_v () = pfsave
-  val map = symenv_restore (!p0)
-  val ((*void*)) = symmap_free (map)
+  ((*none*)): void = {
+  val (pf, fpf | p0) = $UN.ptr0_vtake{fxtyenv}(the_fxtyenv_ptr)
+  val map = symenv_restore<$FIX.fxty> (!p0)
+  val () = symmap_free<$FIX.fxty> (map)
+  prval () = fpf (pf)
 } // end of [the_fxtyenv_restore]
 
-end // end of [local]
-
 (* ****** ****** *)
-
-(*
-//
-// HX-2014-07:
-// these function are no longer in use
-//
-local
-
-var the_level: int = 0
-val p_the_level = &the_level
-val (
-  pf_the_level | ((*void*))
-) = vbox_make_view_ptr{int} (view@the_level | p_the_level)
-
-assume trans1_level_v = unit_v // HX: it is just a dummy
-
-in (* in of [local] *)
-
-implement
-the_trans1_level_get () = let
-  prval vbox (pf) = pf_the_level in !p_the_level
-end // end of [the_trans1_level_get]
-
-implement
-the_trans1_level_inc () = let
-  prval pflev = unit_v ()
-  prval vbox (pf) = pf_the_level
-  val () = !p_the_level := !p_the_level + 1
-in
-  (pflev | ())
-end // end of [the_trans1_level_inc]
-
-implement
-the_trans1_level_dec
-  (pflev | (*none*)) =
-{
-  prval unit_v () = pflev
-  prval vbox (pf) = pf_the_level
-  val () = !p_the_level := !p_the_level - 1
-} // end of [the_trans1_level_dec]
-
-end // end of [local]
-*)
-
-(* ****** ****** *)
-
-local
-
-assume
-trans1_env_push_v = (e1xpenv_push_v, fxtyenv_push_v)
-
-in (* in of [local] *)
 
 implement
 the_trans1_env_pop
-  (pfenv | (*none*)) = () where {
-  prval (pf1env, pf2env) = pfenv
-  val map = the_e1xpenv_pop (pf1env | (*none*))
-  val () = symmap_free (map)
-  val map = the_fxtyenv_pop (pf2env | (*none*))
-  val () = symmap_free (map)
+  ((*none*)) = () where {
+  val map = the_e1xpenv_pop ((*none*))
+  val () = symmap_free<e1xp> (map)
+  val map = the_fxtyenv_pop ((*none*))
+  val () = symmap_free<$FIX.fxty> (map)
 } // end of [the_trans1_env_pop]
 
 implement
 the_trans1_env_push
-  () = (pfenv | ()) where {
-  val (pf1env | ()) = the_e1xpenv_push_nil ()
-  val (pf2env | ()) = the_fxtyenv_push_nil ()
-  prval pfenv = (pf1env, pf2env)
+  ((*none*)) = () where {
+  val () = the_e1xpenv_push_nil ()
+  val () = the_fxtyenv_push_nil ()
 } // end of [the_trans1_env_pop]
 
 implement
 the_trans1_env_localjoin
-  (pfenv1, pfenv2 | (*none*)) = () where {
-  prval (pf1env1, pf2env1) = pfenv1
-  prval (pf1env2, pf2env2) = pfenv2
-  val () = the_e1xpenv_localjoin (pf1env1, pf1env2 | (*none*))
-  val () = the_fxtyenv_localjoin (pf2env1, pf2env2 | (*none*))
+  ((*none*)) = () where {
+  val () = the_e1xpenv_localjoin ((*none*))
+  val () = the_fxtyenv_localjoin ((*none*))
 } // end of [the_trans1_env_localjoin]
-
-end // end of [local]
 
 (* ****** ****** *)
 
-local
-
-assume
-trans1_env_save_v = (e1xpenv_save_v, fxtyenv_save_v)
-
-in (* in of [local] *)
-
 implement
-the_trans1_env_save () = let
-  val (pf1save | ()) = the_e1xpenv_save ()
-  val (pf2save | ()) = the_fxtyenv_save ()
-  prval pfsave = (pf1save, pf2save)
-in
-  (pfsave | ())
-end // end of [the_trans1_env_save]
+the_trans1_env_save
+  ((*none*)) = () where {
+  val () = the_e1xpenv_save ()
+  val () = the_fxtyenv_save ()
+} // end of [the_trans1_env_save]
 
 implement
 the_trans1_env_restore
-  (pfsave | (*none*)) = {
-  val () = the_e1xpenv_restore (pfsave.0 | (*none*))
-  val () = the_fxtyenv_restore (pfsave.1 | (*none*))  
+  ((*none*)) = () where {
+  val () = the_e1xpenv_restore ()
+  val () = the_fxtyenv_restore ()
 } // end of [the_trans1_env_restore]
-
-end // end of [local]
 
 (* ****** ****** *)
 
 local
-//
-staload UN = "prelude/SATS/unsafe.sats"
-staload LM = "libats/SATS/linmap_avltree.sats"
-staload _(*anon*) = "libats/DATS/linmap_avltree.dats"
 //
 typedef key = uint
 typedef itm = @(int, d1eclist)
 vtypedef map = $LM.map (key, itm)
 //
-val theStaloadMap = ref<map> ($LM.linmap_make_nil ())
+// HX: the (never freed) table of the staloaded files, kept as a pointer
 //
-val cmp0 = $UN.cast {$LM.cmp(key)} (null)
-implement $LM.compare_key_key<key> (x1, x2, _) = compare (x1, x2)
-
+val theStaloadMap = let
+  val map = $LM.linmap_make_nil<> ()
+  val p = the_garena_alloc (sizeof<ptr>)
+  val () = $UN.ptr0_set<ptr> (p, $UN.castvwtp0{ptr}(map))
+in
+  p
+end // end of [val]
+//
 in (* in of [local] *)
 
 implement
@@ -463,35 +407,18 @@ val fname =
 //
 val k0 = $SYM.symbol_get_stamp(fname)
 //
-val
-(
-vbox(pf)|p
-) = ref_get_view_ptr{map}(theStaloadMap)
+val (pf, fpf | p) = $UN.ptr0_vtake{map}(theStaloadMap)
 //
-var res: itm?  
+val res = $LM.linmap_search_opt<key,itm>(!p, k0)
 //
-val found =
-  $LM.linmap_search<key,itm>(!p, k0, cmp0, res)
+prval () = fpf (pf)
 //
 in
-//
-if
-found
-then let
-  prval () = opt_unsome{itm}(res) in Some_vt(res)
-end // end of [then]
-else let
-  prval () = opt_unnone{itm}(res) in None_vt(*void*)
-end (* end of [else] *)
-//
+  res
 end // end of [staload_file_search]
 
 (* ****** ****** *)
 
-(*
-** HX-2014-06-06:
-** [ldflag] is no longer in use
-*)
 implement
 staload_file_insert
   (fil, ldflag, d1cs) = {
@@ -501,13 +428,15 @@ val fname =
 //
 val k0 = $SYM.symbol_get_stamp (fname)
 //
-var x0: itm = (ldflag, d1cs) // HX: local var
+val x0: itm = @(ldflag, d1cs)
 //
-val (vbox(pf) | p) = ref_get_view_ptr{map}(theStaloadMap)
+val (pf, fpf | p) = $UN.ptr0_vtake{map}(theStaloadMap)
 //
 var res: itm?
-val _(*isexi*) = $LM.linmap_insert<key,itm> (!p, k0, x0, cmp0, res)
+val _(*isexi*) = $LM.linmap_insert<key,itm> (!p, k0, x0, res)
 prval () = opt_clear {itm} (res)
+//
+prval () = fpf (pf)
 //
 } // end of [staload_file_insert]
 
@@ -526,23 +455,21 @@ fprint_string(out, ,(s))
 fun
 auxpr
 (
-  out: FILEref, d0c: $SYN.d0ecl
-) : void =
-(
-case+
-d0c.d0ecl_node
-of (* case+ *)
-| $SYN.D0Cinclude _ => fprint (out, "include")
-| $SYN.D0Cstaload _ => fprint (out, "staload")
-| $SYN.D0Crequire _ => fprint (out, "require")
-| $SYN.D0Cdynload _ => fprint (out, "dynload")
-| _ (*rest/deadcode*) => fprint (out, "*ERROR*")
-)
+  out: FILEref, d0c: d0ecl
+) : void = let
+  val nd = d0c.d0ecl_node ()
+in
+  if d0ecl_node_is_D0Cinclude nd then fprint_string (out, "include")
+  else if d0ecl_node_is_D0Cstaload nd then fprint_string (out, "staload")
+  else if d0ecl_node_is_D0Crequire nd then fprint_string (out, "require")
+  else if d0ecl_node_is_D0Cdynload nd then fprint_string (out, "dynload")
+  else fprint_string (out, "*ERROR*")
+end // end of [auxpr]
 //
 in
 //
-case+ itm of
-| ATSRELOCITM
+case+ atsrelocitm_view (itm) of
+| ~ATSRELOCITM
     (d0c, given) =>
   {
     val () = prstr "{\n"
@@ -557,7 +484,7 @@ case+ itm of
     val () = prstr "\""
     val () = prstr "\n}\n"
   }
-| ATSRELOCITM2
+| ~ATSRELOCITM2
     (d0c, source, target) =>
   {
     val () = prstr "{\n"
@@ -585,29 +512,31 @@ fprint_atsrelocitmlst
   (out, xs) = let
 in
 //
-case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) => (
+case+ glist_view (xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs) => (
     fprint_atsrelocitm (out, x); fprint_atsrelocitmlst (out, xs)
-  ) (* end of [list_cons] *)
+  ) (* end of [GLcons] *)
 //
 end // end of [fprint_atsrelocitmlst]
 
 (* ****** ****** *)
 
-local
-//
-val the_itmlst =
-  ref<atsrelocitmlst> (list_nil)
-//
-in (* in-of-local *)
+(* HX: the list of the items is kept (reversed) in a cell of the global arena *)
+
+val the_itmlst = let
+  val p = the_garena_alloc (sizeof<atsrelocitmlst>)
+  val () = $UN.ptr0_set<atsrelocitmlst> (p, glist_nil ())
+in
+  p
+end // end of [val]
 
 implement
 the_atsrelocitmlst_get () = let
-  val xs = !the_itmlst
-  val () = !the_itmlst := list_nil
+  val xs = $UN.ptr0_get<atsrelocitmlst> (the_itmlst)
+  val () = $UN.ptr0_set<atsrelocitmlst> (the_itmlst, glist_nil ())
 in
-  list_of_list_vt (list_reverse (xs))
+  glist_reverse (xs)
 end // end of [the_itmlst_get]
 
 (* ****** ******* *)
@@ -617,19 +546,12 @@ the_atsreloc_insert
   (d0c0, given) = let
 //
 val
-loc0 = d0c0.d0ecl_loc
-//
-(*
-val () =
-println! ("the_atsreloc_insert: loc0 = ", loc0)
-val () =
-println! ("the_atsreloc_insert: given = ", given)
-*)
+loc0 = d0c0.d0ecl_loc ()
 //
 val itm =
-ATSRELOCITM(d0c0, given)
+atsrelocitm_ATSRELOCITM(d0c0, given)
 val ((*void*)) =
-!the_itmlst := list_cons(itm, !the_itmlst)
+$UN.ptr0_set<atsrelocitmlst> (the_itmlst, glist_cons (itm, $UN.ptr0_get<atsrelocitmlst> (the_itmlst)))
 //
 in
   // nothing
@@ -640,54 +562,28 @@ the_atsreloc_insert2
   (d0c0, given_s, given_t) = let
 //
 val
-loc0 = d0c0.d0ecl_loc
-//
-(*
-val (
-) = print
-  ("the_atsreloc_insert: d0c0 = ")
-val () = $SYN.fprint_d0ecl (stdout_ref, d0c0)
-val () = fprint_newline (stdout_ref)
-*)
-(*
-val () =
-println! ("the_atsreloc_insert2: ", loc0)
-val () =
-println! ("the_atsreloc_insert2: sourceloc= ", given_s)
-val () =
-println! ("the_atsreloc_insert2: targetloc= ", given_t)
-*)
+loc0 = d0c0.d0ecl_loc ()
 //
 val itm =
-ATSRELOCITM2(d0c0, given_s, given_t)
+atsrelocitm_ATSRELOCITM2(d0c0, given_s, given_t)
 //
 val () =
-!the_itmlst := list_cons(itm, !the_itmlst)
+$UN.ptr0_set<atsrelocitmlst> (the_itmlst, glist_cons (itm, $UN.ptr0_get<atsrelocitmlst> (the_itmlst)))
 //
 in
   // nothing
 end // end of [the_atsreloc_insert2]
 
-end // end of [local]
-
 (* ****** ****** *)
-
-local
 
 %{^
 //
 extern
-ats_ptr_type patsopt_PATSHOME_get() ;
+atstype_ptr patsopt_PATSHOME_get() ;
 extern
-ats_ptr_type patsopt_PATSCONTRIB_get() ;
-/*
-extern
-ats_ptr_type patsopt_PATSHOMELOCS_get() ;
-*/
+atstype_ptr patsopt_PATSCONTRIB_get() ;
 //
 %} // end of [%{^]
-
-in (* in of [local] *)
 
 implement
 the_trans1_env_initialize
@@ -727,8 +623,6 @@ in
 end // end of [if] // end of [val]
 //
 } (* end of [the_trans1_env_initialize] *)
-
-end // end of [local]
 
 (* ****** ****** *)
 

@@ -1,14 +1,11 @@
 #
-#
 # This Makefile is automatically generated
 # from executing the following command-line:
 #
 # make -f Makefile.gen
 #
-#
 
 ######
-#
 CC=gcc
 CCOMP=$(CC)
 #
@@ -24,15 +21,9 @@ ATSOPT=$(ATSHOME)/bin/atsopt
 CFLAGS=-O2
 
 ######
-#
-GCFLAG=
-#
-# GCFLAG=-D_ATS_NGC
-# GCFLAG=-D_ATS_GCBDW
-# GCFLAG=-D_ATS_GCATS
+GCFLAG=-D_ATS_NGC
 #
 ######
-#
 # Bootstrapping:
 #
 # [gmpknd] for CBOOT
@@ -42,7 +33,6 @@ C3NSTRINTKND=gmpknd
 #C3NSTRINTKND=intknd
 #
 ######
-#
 DATSCC=-DATS \
 C3NSTRINTKND=$(C3NSTRINTKND)
 #
@@ -51,7 +41,6 @@ C3NSTRINTKND=$(C3NSTRINTKND)
 LIBATS=-lats
 
 ######
-#
 # HX: no [gmp] 
 ifeq ($(C3NSTRINTKND),intknd)
 LIBGMP=
@@ -812,7 +801,6 @@ OBJECTS := \
 
 
 ######
-#
 libatsopt:: $(TARGETS)
 libatsopt:: $(OBJECTS) \
 pats_main_none_dats.o; $(ARR) libatsopt.a $^
@@ -820,7 +808,6 @@ pats_main_none_dats.o; $(ARR) libatsopt.a $^
 libatsopt:: ; $(CPF) ./libatsopt.a ./../libatsopt.a
 #
 ######
-#
 pats_error_sats.c: pats_error.sats; $(ATSCC) $(DATSCC) -cc $<
 pats_error_sats.o: pats_error_sats.c; $(ATSCC) $(CFLAGS) -c $<
 
@@ -1536,7 +1523,6 @@ pats_ccomp_main_dats.c: pats_ccomp_main.dats; $(ATSCC) $(DATSCC) -cc $<
 pats_ccomp_main_dats.o: pats_ccomp_main_dats.c; $(ATSCC) $(CFLAGS) -c $<
 
 ######
-#
 pats_main_dats.c: \
   pats_main.dats; $(ATSOPT) $(DATSCC) -o $@ -d $<
 pats_main_none_dats.c: \

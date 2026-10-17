@@ -37,17 +37,17 @@ implement{}
 fprint_atext_node_
   (out, arg0) =
 (
-case+ arg0 of
-| TEXTnil _ => fprint_atext_node_$TEXTnil<>(out, arg0)
-| TEXTtoken _ => fprint_atext_node_$TEXTtoken<>(out, arg0)
-| TEXTstring _ => fprint_atext_node_$TEXTstring<>(out, arg0)
-| TEXTerrmsg _ => fprint_atext_node_$TEXTerrmsg<>(out, arg0)
-| TEXTlist _ => fprint_atext_node_$TEXTlist<>(out, arg0)
-| TEXTsquote _ => fprint_atext_node_$TEXTsquote<>(out, arg0)
-| TEXTdquote _ => fprint_atext_node_$TEXTdquote<>(out, arg0)
-| TEXTextcode _ => fprint_atext_node_$TEXTextcode<>(out, arg0)
-| TEXTdefname _ => fprint_atext_node_$TEXTdefname<>(out, arg0)
-| TEXTfuncall _ => fprint_atext_node_$TEXTfuncall<>(out, arg0)
+case+ atext_node_view(arg0) of
+| ~TEXTnil _ => fprint_atext_node_$TEXTnil<>(out, arg0)
+| ~TEXTtoken _ => fprint_atext_node_$TEXTtoken<>(out, arg0)
+| ~TEXTstring _ => fprint_atext_node_$TEXTstring<>(out, arg0)
+| ~TEXTerrmsg _ => fprint_atext_node_$TEXTerrmsg<>(out, arg0)
+| ~TEXTlist _ => fprint_atext_node_$TEXTlist<>(out, arg0)
+| ~TEXTsquote _ => fprint_atext_node_$TEXTsquote<>(out, arg0)
+| ~TEXTdquote _ => fprint_atext_node_$TEXTdquote<>(out, arg0)
+| ~TEXTextcode _ => fprint_atext_node_$TEXTextcode<>(out, arg0)
+| ~TEXTdefname _ => fprint_atext_node_$TEXTdefname<>(out, arg0)
+| ~TEXTfuncall _ => fprint_atext_node_$TEXTfuncall<>(out, arg0)
 )
 //
 (* ****** ****** *)
@@ -135,7 +135,7 @@ implement{}
 fprint_atext_node_$TEXTtoken$rpar(out, _) = fprint_atext_node_$rpar(out)
 implement{}
 fprint_atext_node_$TEXTtoken$arg1(out, arg0) =
-  let val-TEXTtoken(arg1) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTtoken(arg1) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -168,7 +168,7 @@ implement{}
 fprint_atext_node_$TEXTstring$rpar(out, _) = fprint_atext_node_$rpar(out)
 implement{}
 fprint_atext_node_$TEXTstring$arg1(out, arg0) =
-  let val-TEXTstring(arg1) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTstring(arg1) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -201,7 +201,7 @@ implement{}
 fprint_atext_node_$TEXTerrmsg$rpar(out, _) = fprint_atext_node_$rpar(out)
 implement{}
 fprint_atext_node_$TEXTerrmsg$arg1(out, arg0) =
-  let val-TEXTerrmsg(arg1) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTerrmsg(arg1) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -234,7 +234,7 @@ implement{}
 fprint_atext_node_$TEXTlist$rpar(out, _) = fprint_atext_node_$rpar(out)
 implement{}
 fprint_atext_node_$TEXTlist$arg1(out, arg0) =
-  let val-TEXTlist(arg1) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTlist(arg1) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -267,7 +267,7 @@ implement{}
 fprint_atext_node_$TEXTsquote$rpar(out, _) = fprint_atext_node_$rpar(out)
 implement{}
 fprint_atext_node_$TEXTsquote$arg1(out, arg0) =
-  let val-TEXTsquote(arg1) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTsquote(arg1) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -310,10 +310,10 @@ implement{}
 fprint_atext_node_$TEXTdquote$sep1(out, _) = fprint_atext_node_$sep<>(out)
 implement{}
 fprint_atext_node_$TEXTdquote$arg1(out, arg0) =
-  let val-TEXTdquote(arg1, _) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTdquote(arg1, _) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 implement{}
 fprint_atext_node_$TEXTdquote$arg2(out, arg0) =
-  let val-TEXTdquote(_, arg2) = arg0 in fprint_atext_node_$carg(out, arg2) end
+  let val-~TEXTdquote(_, arg2) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg2) end
 //
 extern
 fun{}
@@ -366,13 +366,13 @@ implement{}
 fprint_atext_node_$TEXTextcode$sep2(out, _) = fprint_atext_node_$sep<>(out)
 implement{}
 fprint_atext_node_$TEXTextcode$arg1(out, arg0) =
-  let val-TEXTextcode(arg1, _, _) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTextcode(arg1, _, _) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 implement{}
 fprint_atext_node_$TEXTextcode$arg2(out, arg0) =
-  let val-TEXTextcode(_, arg2, _) = arg0 in fprint_atext_node_$carg(out, arg2) end
+  let val-~TEXTextcode(_, arg2, _) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg2) end
 implement{}
 fprint_atext_node_$TEXTextcode$arg3(out, arg0) =
-  let val-TEXTextcode(_, _, arg3) = arg0 in fprint_atext_node_$carg(out, arg3) end
+  let val-~TEXTextcode(_, _, arg3) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg3) end
 //
 extern
 fun{}
@@ -415,10 +415,10 @@ implement{}
 fprint_atext_node_$TEXTdefname$sep1(out, _) = fprint_atext_node_$sep<>(out)
 implement{}
 fprint_atext_node_$TEXTdefname$arg1(out, arg0) =
-  let val-TEXTdefname(arg1, _) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTdefname(arg1, _) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 implement{}
 fprint_atext_node_$TEXTdefname$arg2(out, arg0) =
-  let val-TEXTdefname(_, arg2) = arg0 in fprint_atext_node_$carg(out, arg2) end
+  let val-~TEXTdefname(_, arg2) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg2) end
 //
 extern
 fun{}
@@ -471,12 +471,12 @@ implement{}
 fprint_atext_node_$TEXTfuncall$sep2(out, _) = fprint_atext_node_$sep<>(out)
 implement{}
 fprint_atext_node_$TEXTfuncall$arg1(out, arg0) =
-  let val-TEXTfuncall(arg1, _, _) = arg0 in fprint_atext_node_$carg(out, arg1) end
+  let val-~TEXTfuncall(arg1, _, _) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg1) end
 implement{}
 fprint_atext_node_$TEXTfuncall$arg2(out, arg0) =
-  let val-TEXTfuncall(_, arg2, _) = arg0 in fprint_atext_node_$carg(out, arg2) end
+  let val-~TEXTfuncall(_, arg2, _) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg2) end
 implement{}
 fprint_atext_node_$TEXTfuncall$arg3(out, arg0) =
-  let val-TEXTfuncall(_, _, arg3) = arg0 in fprint_atext_node_$carg(out, arg3) end
+  let val-~TEXTfuncall(_, _, arg3) = atext_node_view(arg0) in fprint_atext_node_$carg(out, arg3) end
 //
 (* ****** ****** *)

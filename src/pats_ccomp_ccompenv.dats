@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -33,13 +33,21 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_ccompenv.dats, see PORTING.md,
+// "ccomp group C1 (ccompenv/environ/caseof/looping/trywith/lazyeval)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -56,6 +64,7 @@ staload FIL = "./pats_filename.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_dynexp2.sats"
+staload _(*anon*) = "./pats_dynexp2_dvar.dats"
 //
 (* ****** ****** *)
 //
@@ -67,78 +76,65 @@ staload "./pats_hidynexp.sats"
 staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
+//
+// HX-2026-10: the state of the module lives in cells of the global arena
+// (never freed); a stack of declarations is an immutable [glist] that the
+// cell replaces (the newest first, as the linear lists of ATS1).
+//
+fn
+cell_make (x: ptr): ptr = let
+  val p = the_garena_alloc (sizeof<ptr>)
+  val () = $UN.ptr0_set<ptr> (p, x)
+in
+  p
+end // end of [cell_make]
+//
+fn cell_get (p: ptr): ptr = $UN.ptr0_get<ptr> (p)
+fn cell_set (p: ptr, x: ptr): void = $UN.ptr0_set<ptr> (p, x)
+//
+(* ****** ****** *)
 
 local
 //
-vtypedef
-exndeclst_vt = List_vt(hidecl)
-vtypedef
-saspdeclst_vt = List_vt(hidecl)
-//
 val
 the_exndeclst =
-ref_make_elt<exndeclst_vt>(list_vt_nil())
+  cell_make (the_null_ptr)
 val
 the_saspdeclst =
-ref_make_elt<saspdeclst_vt>(list_vt_nil())
-// end of [val]
+  cell_make (the_null_ptr)
 //
 in (* in of [local] *)
 
 implement
 the_exndeclst_add(x) = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_exndeclst)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_exndeclst))
 in
-  !p0 := list_vt_cons (x, !p0)
+  cell_set(the_exndeclst, $UN.cast{ptr}(glist_cons<hidecl>(x, xs)))
 end // end of [the_exndeclst_add]
 
 implement
 the_exndeclst_get() = let
-//
-val (
-  vbox pf | p0
-) = ref_get_view_ptr (the_exndeclst)
-val xs = !p0
-val () = !p0 := list_vt_nil()
-val xs = list_vt_reverse<hidecl>(xs)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_exndeclst))
+  val () = cell_set(the_exndeclst, the_null_ptr)
 in
-  list_of_list_vt(xs)
+  glist_reverse<hidecl>(xs)
 end // end of [the_exndeclst_get]
 
 (* ****** ****** *)
 
 implement
 the_saspdeclst_add(x) = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_saspdeclst)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_saspdeclst))
 in
-  !p0 := list_vt_cons (x, !p0)
+  cell_set(the_saspdeclst, $UN.cast{ptr}(glist_cons<hidecl>(x, xs)))
 end // end of [the_saspdeclst_add]
 
 implement
 the_saspdeclst_get() = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_saspdeclst)
-//
-val xs = !p0
-val () = !p0 := list_vt_nil()
-val xs = list_vt_reverse<hidecl>(xs)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_saspdeclst))
+  val () = cell_set(the_saspdeclst, the_null_ptr)
 in
-  list_of_list_vt(xs)
+  glist_reverse<hidecl>(xs)
 end // end of [the_saspdeclst_get]
 
 end // end of [local]
@@ -147,41 +143,25 @@ end // end of [local]
 
 local
 //
-vtypedef
-extypelst_vt = List_vt(hidecl)
-//
 val
 the_extypelst =
-ref_make_elt<extypelst_vt>(list_vt_nil())
-// end of [val]
+  cell_make (the_null_ptr)
 //
 in (* in of [local] *)
 
 implement
 the_extypelst_add(x) = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr (the_extypelst)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_extypelst))
 in
-  !p0 := list_vt_cons (x, !p0)
+  cell_set(the_extypelst, $UN.cast{ptr}(glist_cons<hidecl>(x, xs)))
 end // end of [the_extypelst_add]
 
 implement
 the_extypelst_get () = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr (the_extypelst)
-val xs = !p0
-val () = !p0 := list_vt_nil()
-val xs = list_vt_reverse<hidecl>(xs)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_extypelst))
+  val () = cell_set(the_extypelst, the_null_ptr)
 in
-  list_of_list_vt(xs)
+  glist_reverse<hidecl>(xs)
 end // end of [the_extypelst_get]
 
 end // end of [local]
@@ -190,54 +170,84 @@ end // end of [local]
 
 local
 //
-vtypedef
-extcodelst_vt = List_vt(hidecl)
-//
 val
 the_extcodelst =
-ref_make_elt<extcodelst_vt>(list_vt_nil())
-// end of [val]
+  cell_make (the_null_ptr)
+//
+fn
+extcode_pos
+  (x: hidecl): int = let
+  val-~HIDextcode(_, pos, _) =
+    hidecl_node_view(x.hidecl_node())
+in
+  pos
+end // end of [extcode_pos]
+//
+// HX: a stable merge sort (the comparison of ATS1 is [pos1 - pos2])
+//
+fun
+extcode_merge
+(
+  xs: hideclist, ys: hideclist
+) : hideclist =
+(
+case+ glist_view(xs) of
+| ~GLnil() => ys
+| ~GLcons(x, xs1) =>
+  (
+  case+ glist_view(ys) of
+  | ~GLnil() => glist_cons<hidecl>(x, xs1)
+  | ~GLcons(y, ys1) =>
+    if extcode_pos(x) - extcode_pos(y) <= 0
+      then glist_cons<hidecl>(x, extcode_merge(xs1, glist_cons<hidecl>(y, ys1)))
+      else glist_cons<hidecl>(y, extcode_merge(glist_cons<hidecl>(x, xs1), ys1))
+    // end of [if]
+  ) (* end of [GLcons] *)
+) (* end of [extcode_merge] *)
+//
+fun
+extcode_split
+(
+  xs: hideclist, n: int, res: &hideclist? >> hideclist
+) : hideclist =
+  if n > 0 then let
+    val-~GLcons(x, xs1) = glist_view(xs)
+    val rest = extcode_split(xs1, n-1, res)
+  in
+    glist_cons<hidecl>(x, rest)
+  end else let
+    val () = res := xs in glist_nil()
+  end // end of [if]
+//
+fun
+extcode_sort
+  (xs: hideclist, n: int): hideclist =
+  if n >= 2 then let
+    val n1 = n / 2
+    var rest: hideclist
+    val ys1 = extcode_split(xs, n1, rest)
+    val ys1 = extcode_sort(ys1, n1)
+    val ys2 = extcode_sort(rest, n - n1)
+  in
+    extcode_merge(ys1, ys2)
+  end else xs // end of [if]
 //
 in (* in of [local] *)
 
 implement
 the_extcodelst_add(x) = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_extcodelst)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_extcodelst))
 in
-  !p0 := list_vt_cons(x, !p0)
+  cell_set(the_extcodelst, $UN.cast{ptr}(glist_cons<hidecl>(x, xs)))
 end // end of [the_extcodelst_add]
 
 implement
 the_extcodelst_get() = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_extcodelst)
-//
-val xs = !p0
-val () = !p0 := list_vt_nil()
-//
-var !p_cmp = @lam
-(
-  x1: &hidecl, x2: &hidecl
-) : int =<clo>
-  (pos1 - pos2) where
-{
-  val-HIDextcode(knd1, pos1, _) = x1.hidecl_node
-  val-HIDextcode(knd2, pos2, _) = x2.hidecl_node
-} (* end of [where] // end of [@lam] *)
-//
-val xs = list_vt_reverse(xs)
-val xs = list_vt_mergesort<hidecl>(xs, !p_cmp) // HX: stable-sorting
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_extcodelst))
+  val () = cell_set(the_extcodelst, the_null_ptr)
+  val xs = glist_reverse<hidecl>(xs)
 in
-  list_of_list_vt (xs)
+  extcode_sort(xs, glist_length<hidecl>(xs)) // HX: stable-sorting
 end // end of [the_extcodelst_get]
 
 end // end of [local]
@@ -246,75 +256,45 @@ end // end of [local]
 
 local
 //
-vtypedef
-staloadlst_vt = List_vt(hidecl)
-vtypedef
-dynloadlst_vt = List_vt(hidecl)
-//
 val
 the_staloadlst =
-ref_make_elt<staloadlst_vt>(list_vt_nil())
+  cell_make (the_null_ptr)
 val
 the_dynloadlst =
-ref_make_elt<dynloadlst_vt>(list_vt_nil())
+  cell_make (the_null_ptr)
 //
 in (* in of [local] *)
 
 implement
 the_staloadlst_add(x) = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_staloadlst)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_staloadlst))
 in
-  !p0 := list_vt_cons(x, !p0)
+  cell_set(the_staloadlst, $UN.cast{ptr}(glist_cons<hidecl>(x, xs)))
 end // end of [the_staloadlst_add]
 
 implement
 the_staloadlst_get() = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_staloadlst)
-val xs = !p0
-val () = !p0 := list_vt_nil()
-val xs = list_vt_reverse<hidecl>(xs)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_staloadlst))
+  val () = cell_set(the_staloadlst, the_null_ptr)
 in
-  list_of_list_vt(xs)
+  glist_reverse<hidecl>(xs)
 end // end of [the_staloadlst_get]
 
 (* ****** ****** *)
 
 implement
 the_dynloadlst_add(x) = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr (the_dynloadlst)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_dynloadlst))
 in
-  !p0 := list_vt_cons (x, !p0)
+  cell_set(the_dynloadlst, $UN.cast{ptr}(glist_cons<hidecl>(x, xs)))
 end // end of [the_dynloadlst_add]
 
 implement
 the_dynloadlst_get() = let
-//
-val
-(
-  vbox pf | p0
-) = ref_get_view_ptr(the_dynloadlst)
-//
-val xs = !p0
-val () = !p0 := list_vt_nil()
-val xs = list_vt_reverse<hidecl>(xs)
-//
+  val xs = $UN.cast{hideclist}(cell_get(the_dynloadlst))
+  val () = cell_set(the_dynloadlst, the_null_ptr)
 in
-  list_of_list_vt(xs)
+  glist_reverse<hidecl>(xs)
 end // end of [the_dynloadlst_get]
 
 end // end of [local]
@@ -325,17 +305,17 @@ local
 //
 val
 the_dyncstset =
-ref_make_elt<d2cstset>(d2cstset_nil())
+  cell_make ($UN.cast{ptr}(d2cstset_nil()))
 val
 the_dyncstlst =
-ref_make_elt<d2cstlst_vt>(list_vt_nil())
+  cell_make (the_null_ptr)
 //
 in (* in of [local] *)
 
 implement
 the_dyncstlst_add
   (d2c) = let
-  val d2cs = !the_dyncstset
+  val d2cs = $UN.cast{d2cstset}(cell_get(the_dyncstset))
   val found = d2cstset_ismem(d2cs, d2c)
 in
 //
@@ -343,14 +323,12 @@ if
 ~(found)
 then let
   val () = let
-    val
-    (vbox pf | p) =
-    ref_get_view_ptr(the_dyncstlst)
+    val xs = $UN.cast{d2cstlst}(cell_get(the_dyncstlst))
   in
-    !p := list_vt_cons{d2cst}(d2c, !p)
+    cell_set(the_dyncstlst, $UN.cast{ptr}(glist_cons<d2cst>(d2c, xs)))
   end // end of [val]
 in
-  !the_dyncstset := d2cstset_add(d2cs, d2c)
+  cell_set(the_dyncstset, $UN.cast{ptr}(d2cstset_add(d2cs, d2c)))
 end (* end of [if] *)
 //
 end // end of [the_dyncstlst_add]
@@ -358,19 +336,10 @@ end // end of [the_dyncstlst_add]
 implement
 the_dyncstlst_get
   ((*void*)) = let
-//
-val d2cs = let
-  val
-  (vbox pf | p) =
-  ref_get_view_ptr(the_dyncstlst)
-  val d2cs = !p
-  val ((*void*)) = !p := list_vt_nil()
+  val d2cs = $UN.cast{d2cstlst}(cell_get(the_dyncstlst))
+  val () = cell_set(the_dyncstlst, the_null_ptr)
 in
-  list_vt_reverse<d2cst>(d2cs)
-end // end of [val]
-//
-in
-  list_of_list_vt{d2cst}(d2cs)
+  glist_reverse<d2cst>(d2cs)
 end // end of [the_dyncstlst_get]
 
 end // end of [local]
@@ -381,17 +350,17 @@ local
 //
 val
 the_dynconset =
-ref_make_elt<d2conset>(d2conset_nil())
+  cell_make ($UN.cast{ptr}(d2conset_nil()))
 val
 the_dynconlst =
-ref_make_elt<d2conlst_vt>(list_vt_nil())
+  cell_make (the_null_ptr)
 //
 in (* in of [local] *)
 
 implement
 the_dynconlst_add
   (d2c) = let
-  val d2cs = !the_dynconset
+  val d2cs = $UN.cast{d2conset}(cell_get(the_dynconset))
   val found = d2conset_ismem(d2cs, d2c)
 in
 //
@@ -399,14 +368,12 @@ if
 ~(found)
 then let
   val () = let
-    val
-    (vbox pf | p) =
-    ref_get_view_ptr(the_dynconlst)
+    val xs = $UN.cast{d2conlst}(cell_get(the_dynconlst))
   in
-    !p := list_vt_cons{d2con}(d2c, !p)
+    cell_set(the_dynconlst, $UN.cast{ptr}(glist_cons<d2con>(d2c, xs)))
   end // end of [val]
 in
-  !the_dynconset := d2conset_add(d2cs, d2c)
+  cell_set(the_dynconset, $UN.cast{ptr}(d2conset_add(d2cs, d2c)))
 end (* end of [if] *)
 //
 end // end of [the_dynconlst_add]
@@ -414,19 +381,10 @@ end // end of [the_dynconlst_add]
 implement
 the_dynconlst_get
   ((*void*)) = let
-//
-val d2cs = let
-  val
-  (vbox pf | p) =
-  ref_get_view_ptr(the_dynconlst)
-  val d2cs = !p
-  val ((*void*)) = !p := list_vt_nil()
+  val d2cs = $UN.cast{d2conlst}(cell_get(the_dynconlst))
+  val () = cell_set(the_dynconlst, the_null_ptr)
 in
-  list_vt_reverse<d2con>(d2cs)
-end // end of [val]
-//
-in
-  list_of_list_vt{d2con}(d2cs)
+  glist_reverse<d2con>(d2cs)
 end // end of [the_dynconlst_get]
 
 end // end of [local]
@@ -434,31 +392,34 @@ end // end of [local]
 (* ****** ****** *)
 
 local
-
-vtypedef
-funlablst_vt = List_vt(funlab)
-
+//
 val
 the_funlablst =
-ref_make_elt<funlablst_vt>(list_vt_nil())
-// end of [the_funlablst]
-
+  cell_make (the_null_ptr)
+//
+fun
+addlst
+  (fls: funlablst): void =
+(
+case+ glist_view(fls) of
+| ~GLnil() => ()
+| ~GLcons(fl, fls1) => let
+    val () = the_funlablst_add(fl) in addlst(fls1)
+  end // end of [GLcons]
+) (* end of [addlst] *)
+//
 in (* in of [local] *)
 
 implement
 the_funlablst_add(fl) = let
-//
-val
-(vbox pf | p) =
-ref_get_view_ptr(the_funlablst)
-//
+  val xs = $UN.cast{funlablst}(cell_get(the_funlablst))
 in
-  !p := list_vt_cons(fl, !p)
+  cell_set(the_funlablst, $UN.cast{ptr}(glist_cons<funlab>(fl, xs)))
 end // end of [the_funlablst_add]
 
 implement
 the_funlablst_addlst
-  (fls) = list_app_fun(fls, the_funlablst_add)
+  (fls) = addlst(fls)
 // end of [the_funlablst_addlst]
 
 (* ****** ****** *)
@@ -466,24 +427,10 @@ the_funlablst_addlst
 implement
 the_funlablst_get
   ((*void*)) = let
-//
-val fls = fls where
-{
-//
-val
-(vbox pf | p) =
-ref_get_view_ptr(the_funlablst)
-//
-val fls = !p
-val ((*void*)) = !p := list_vt_nil()
-//
-} (* end of [val] *)
-//
-val
-fls = list_vt_reverse(fls)
-//
+  val fls = $UN.cast{funlablst}(cell_get(the_funlablst))
+  val () = cell_set(the_funlablst, the_null_ptr)
 in
-  list_of_list_vt{funlab}(fls)
+  glist_reverse<funlab>(fls)
 end // end of [the_funlablst_get]
 
 end // end of [local]
@@ -507,8 +454,8 @@ markenvlst_vt =
 //
   | MARKENVLSTcons_tmpsub of (tmpsub, markenvlst_vt)
 //
-  | MARKENVLSTcons_tmpcstmat of (tmpcstmat, markenvlst_vt) 
-  | MARKENVLSTcons_tmpvarmat of (tmpvarmat, markenvlst_vt) 
+  | MARKENVLSTcons_tmpcstmat of (tmpcstmat, markenvlst_vt)
+  | MARKENVLSTcons_tmpvarmat of (tmpvarmat, markenvlst_vt)
 //
   | MARKENVLSTcons_tempenver of (d2varlst, markenvlst_vt)
 //
@@ -554,162 +501,138 @@ in
 //
 case+ xs of
 //
-| MARKENVLSTnil() => fold@ (xs)
+| MARKENVLSTnil() => ()
 //
-| MARKENVLSTmark (!p_xs) => let
+| MARKENVLSTmark (xs1) => let
     val () =
     (
       if i > 0 then fprint_string (out, ", ")
     )
     val () =
       fprint_string (out, "||")
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTmark]
 | MARKENVLSTcons_var
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     (
       if i > 0 then fprint_string (out, ", ")
     )
     val () =
-      fprint_d2var (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+      fprint_d2var (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_var]
 //
 | MARKENVLSTcons_fundec
-    (!p_x, !p_xs) => let
+    (hfd, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
-    val hfd = !p_x
-    val d2v = hfd.hifundec_var
+    val d2v = hfd.hifundec_var()
     val () =
       fprint_d2var (out, d2v)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_fundec]
 | MARKENVLSTcons_fundec2
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
     val () =
-      fprint_hifundec2 (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+      fprint_hifundec2 (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_fundec2]
 //
 | MARKENVLSTcons_impdec
-    (!p_x, !p_xs) => let
+    (imp, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
-    val imp = !p_x
-    val d2c = imp.hiimpdec_cst
-    val () =
-      fprint! (out, "HIIMPDEC(", d2c, ")")
-    // end of [val]
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+    val d2c = imp.hiimpdec_cst()
+    val () = fprint_string (out, "HIIMPDEC(")
+    val () = fprint_d2cst (out, d2c)
+    val () = fprint_string (out, ")")
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_impdec]
 | MARKENVLSTcons_impdec2
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
-    val () = fprint_hiimpdec2 (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+    val () = fprint_hiimpdec2 (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_impdec2]
 //
 | MARKENVLSTcons_staload
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [if]
-    val fname = filenv_get_name (!p_x)
+    val fname = filenv_get_name (x)
     val () =
       $FIL.fprint_filename_full (out, fname)
     // end of [val]
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_staload]
 //
 | MARKENVLSTcons_tmpsub
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
     val () =
-      fprint_tmpsub (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+      fprint_tmpsub (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_tmpsub]
 //
 | MARKENVLSTcons_tmpcstmat
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [if]
     val () =
-      fprint_tmpcstmat (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+      fprint_tmpcstmat (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_tmpcstmat]
 //
 | MARKENVLSTcons_tmpvarmat
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
     val () =
-      fprint_tmpvarmat (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+      fprint_tmpvarmat (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_tmpvarmat]
 //
 | MARKENVLSTcons_tempenver
-    (!p_x, !p_xs) => let
+    (x, xs1) => let
     val () =
     if i > 0
       then fprint_string (out, ", ")
     // end of [val]
     val () =
-      fprint_d2varlst (out, !p_x)
-    val () = loop (out, !p_xs, i+1)
-    prval ((*void*)) = fold@ (xs)
+      fprint_d2varlst (out, x)
   in
-    // nothing
+    loop (out, xs1, i+1)
   end // end of [MARKENVLSTcons_tempenver]
 //
 end // end of [loop]
@@ -721,7 +644,7 @@ end // end of [fprint_markenvlst]
 (* ****** ****** *)
 
 vtypedef
-freeconenv = List_vt(primvalist_vt)
+freeconenv = List0_vt(primvalist_vt)
 
 extern
 fun
@@ -745,32 +668,17 @@ case+ xs of
 end // end of [freeconenv_free]
 
 (* ****** ****** *)
-
-datavtype
+//
+// HX-2026-10: [looptmplab3] is the flat triple (init, fini, cont)
+//
+typedef
 looptmplab3 =
-LOOPTMPLAB3 of
-(
+@(
   tmplab(*init*), tmplab(*fini*), tmplab(*cont*)
 ) // end of [looptmplab3]
 
 vtypedef
-loopexnenv = List_vt (looptmplab3)
-
-extern
-fun loopexnenv_free (xs: loopexnenv): void
-
-implement
-loopexnenv_free (xs) = let
-in
-//
-case+ xs of
-| ~list_vt_cons
-    (x, xs) => let
-    val+~LOOPTMPLAB3 (_, _, _) = x in loopexnenv_free (xs)
-  end // end of [list_vt_cons]
-| ~list_vt_nil () => ()
-//
-end // end of [loopexnenv_free]
+loopexnenv = List0_vt (looptmplab3)
 
 (* ****** ****** *)
 //
@@ -781,7 +689,7 @@ tlcalitm =
 // end of [tlcalitm]
 //
 vtypedef
-tailcalenv = List_vt (tlcalitm)
+tailcalenv = List0_vt (tlcalitm)
 //
 (* ****** ****** *)
 //
@@ -824,7 +732,7 @@ end // end of [tailcalenv_free]
 (* ****** ****** *)
 
 vtypedef
-flabsetenv = List_vt (funlabset_vt)
+flabsetenv = List0_vt (funlabset_vt)
 
 extern
 fun flabsetenv_free (xs: flabsetenv): void
@@ -843,7 +751,7 @@ case+ xs of
 (* ****** ****** *)
 
 vtypedef
-dvarsetenv = List_vt (d2envset_vt)
+dvarsetenv = List0_vt (d2envset_vt)
 
 (* ****** ****** *)
 
@@ -864,7 +772,7 @@ case+ xs of
 
 (* ****** ****** *)
 //
-vtypedef vbindmapenv = List_vt (vbindmap)
+vtypedef vbindmapenv = List0_vt (vbindmap)
 //
 (* ****** ****** *)
 //
@@ -884,7 +792,7 @@ end // end of [vbindmapenv_free]
 //
 (* ****** ****** *)
 
-viewtypedef
+vtypedef
 ccompenv_struct =
 @{
   ccompenv_tmplevel= int
@@ -919,7 +827,7 @@ ccompenv_struct_uninitize (x) = let
   (* end of [val] *)
 //
   val () = freeconenv_free (x.ccompenv_freeconenv)
-  val () = loopexnenv_free (x.ccompenv_loopexnenv)
+  val () = list_vt_free (x.ccompenv_loopexnenv)
 //
   val () = tailcalenv_free (x.ccompenv_tailcalenv)
 //
@@ -927,7 +835,7 @@ ccompenv_struct_uninitize (x) = let
   val () = dvarsetenv_free (x.ccompenv_dvarsetenv)
   val () = vbindmapenv_free (x.ccompenv_vbindmapenv)
 //
-  val () = d2varmaplst_vt_free (x.ccompenv_vbindmapall)
+  val () = d2varmaplst_vt_free<primval> (x.ccompenv_vbindmapall)
 //
 in
   // end of [ccompenv_struct_uninitize]
@@ -948,26 +856,20 @@ implement
 ccompenv_make
   () = env where
 {
-val env = CCOMPENV(?)
-val CCOMPENV(!p) = env
+var p: ccompenv_struct = @{
+  ccompenv_tmplevel= 0
+, ccompenv_tmprecdepth= 0
+, ccompenv_freeconenv= list_vt_nil()
+, ccompenv_loopexnenv= list_vt_nil()
+, ccompenv_tailcalenv= list_vt_nil()
+, ccompenv_flabsetenv= list_vt_nil()
+, ccompenv_dvarsetenv= list_vt_nil()
+, ccompenv_vbindmapenv= list_vt_nil()
+, ccompenv_markenvlst= MARKENVLSTnil()
+, ccompenv_vbindmapall= d2varmaplst_vt_nil<primval>()
+}
 //
-val () = p->ccompenv_tmplevel := 0
-val () = p->ccompenv_tmprecdepth := 0
-//
-val () = p->ccompenv_freeconenv := list_vt_nil()
-val () = p->ccompenv_loopexnenv := list_vt_nil()
-//
-val () = p->ccompenv_tailcalenv := list_vt_nil()
-//
-val () = p->ccompenv_flabsetenv := list_vt_nil()
-val () = p->ccompenv_dvarsetenv := list_vt_nil()
-val () = p->ccompenv_vbindmapenv := list_vt_nil()
-//
-val () = p->ccompenv_markenvlst := MARKENVLSTnil()
-//
-val () = p->ccompenv_vbindmapall := d2varmaplst_vt_nil()
-//
-val () = fold@ (env)
+val env = CCOMPENV(p)
 //
 val () = ccompenv_inc_flabsetenv(env) // toplevel flabs
 val () = ccompenv_inc_dvarsetenv(env) // toplevel d2vars
@@ -984,17 +886,11 @@ ccompenv_free(env) = let
 val () = println! ("ccompenv_free")
 *)
 //
+val+ @CCOMPENV (p_env) = env
+val () = ccompenv_struct_uninitize(p_env)
+//
 in
-//
-case+ env of
-| CCOMPENV
-  (
-    !p_env
-  ) => free@ (env) where
-  {
-    val () = ccompenv_struct_uninitize(!p_env)
-  } // end of [CCOMPENV]
-//
+  free@ (env)
 end // end of [ccompenv_free]
 
 (* ****** ****** *)
@@ -1010,11 +906,11 @@ val () = println! ("fprint_ccompenv")
 in
 //
 case+ env of
-| CCOMPENV(!p_env) =>
+| @CCOMPENV(p_env) =>
   {
 //
     val () = fprint_string(out, "ccompenv_markenvlst: ")
-    val () = fprint_markenvlst(out, p_env->ccompenv_markenvlst)
+    val () = fprint_markenvlst(out, p_env.ccompenv_markenvlst)
     val () = fprint_newline(out)
 //
     prval ((*folded*)) = fold@ (env)
@@ -1030,9 +926,9 @@ ccompenv_get_tmplevel
   (env) = level where
 {
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val level = p->ccompenv_tmplevel
+val level = p.ccompenv_tmplevel
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1042,10 +938,10 @@ implement
 ccompenv_inc_tmplevel
   (env) = let
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
-val level = p->ccompenv_tmplevel
-val ((*void*)) = (p->ccompenv_tmplevel := level + 1)
+val level = p.ccompenv_tmplevel
+val ((*void*)) = (p.ccompenv_tmplevel := level + 1)
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1057,10 +953,10 @@ implement
 ccompenv_dec_tmplevel
   (env) = let
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
-val level = p->ccompenv_tmplevel
-val ((*void*)) = (p->ccompenv_tmplevel := level - 1)
+val level = p.ccompenv_tmplevel
+val ((*void*)) = (p.ccompenv_tmplevel := level - 1)
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1074,9 +970,9 @@ implement
 ccompenv_get_tmprecdepth
   (env) = depth where
 {
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
-val depth = p->ccompenv_tmprecdepth
+val depth = p.ccompenv_tmprecdepth
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1086,10 +982,10 @@ implement
 ccompenv_inc_tmprecdepth
   (env) = let
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
-val depth = p->ccompenv_tmprecdepth
-val ((*void*)) = p->ccompenv_tmprecdepth := depth+1
+val depth = p.ccompenv_tmprecdepth
+val ((*void*)) = p.ccompenv_tmprecdepth := depth+1
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1101,10 +997,10 @@ implement
 ccompenv_dec_tmprecdepth
   (env) = let
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
-val depth = p->ccompenv_tmprecdepth
-val ((*void*)) = p->ccompenv_tmprecdepth := depth-1
+val depth = p.ccompenv_tmprecdepth
+val ((*void*)) = p.ccompenv_tmprecdepth := depth-1
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1118,12 +1014,12 @@ implement
 ccompenv_inc_freeconenv
   (env) = let
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
 val pmvs = list_vt_nil{primval}()
-val pmvss = p->ccompenv_freeconenv
+val pmvss = p.ccompenv_freeconenv
 val ((*void*)) =
-  p->ccompenv_freeconenv := list_vt_cons(pmvs, pmvss)
+  p.ccompenv_freeconenv := list_vt_cons(pmvs, pmvss)
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1136,12 +1032,12 @@ ccompenv_getdec_freeconenv
   (env) = pmvs where
 {
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
 val-
 ~list_vt_cons
- (pmvs, pmvss) = p->ccompenv_freeconenv
-val ((*void*)) = p->ccompenv_freeconenv := pmvss
+ (pmvs, pmvss) = p.ccompenv_freeconenv
+val ((*void*)) = p.ccompenv_freeconenv := pmvss
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1153,16 +1049,16 @@ implement
 ccompenv_add_freeconenv
   (env, pmv) = let
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
 val-
-list_vt_cons
-(!p_pmvs, _) = p->ccompenv_freeconenv
+@list_vt_cons
+  (pmvs, _) = p.ccompenv_freeconenv
 //
 val ((*void*)) =
-!p_pmvs := list_vt_cons(pmv, !p_pmvs)
+  pmvs := list_vt_cons(pmv, pmvs)
 //
-prval ((*folded*)) = fold@ (p->ccompenv_freeconenv)
+prval ((*folded*)) = fold@ (p.ccompenv_freeconenv)
 //
 prval ((*folded*)) = fold@ (env)
 //
@@ -1216,9 +1112,9 @@ end // end of [ccompenv_add_freeconenv_if]
 implement
 ccompenv_inc_loopexnenv
   (env, tl1, tl2, tl3) = let
-  val tlll = LOOPTMPLAB3 (tl1, tl2, tl3)
-  val CCOMPENV (!p) = env
-  val () = (p->ccompenv_loopexnenv := list_vt_cons (tlll, p->ccompenv_loopexnenv))
+  val tlll = @(tl1, tl2, tl3)
+  val+ @CCOMPENV (p) = env
+  val () = (p.ccompenv_loopexnenv := list_vt_cons (tlll, p.ccompenv_loopexnenv))
   prval () = fold@ (env)
 in
   // nothing
@@ -1227,10 +1123,9 @@ end // end of [ccompenv_inc_loopexnenv]
 implement
 ccompenv_dec_loopexnenv
   (env) = let
-  val CCOMPENV (!p) = env
-  val-~list_vt_cons (x, xs) = p->ccompenv_loopexnenv
-  val+~LOOPTMPLAB3 (_, _, _) = x
-  val () = (p->ccompenv_loopexnenv := xs)
+  val+ @CCOMPENV (p) = env
+  val-~list_vt_cons (x, xs) = p.ccompenv_loopexnenv
+  val () = (p.ccompenv_loopexnenv := xs)
   prval () = fold@ (env)
 in
   // nothing
@@ -1238,29 +1133,25 @@ end // end of [ccompenv_dec_loopexnenv]
 
 implement
 ccompenv_get_loopfini
-  (env) = let
-  val CCOMPENV (!p) = env
-  val-list_vt_cons (!px, _) = p->ccompenv_loopexnenv
-  val+LOOPTMPLAB3 (_, tl_fini, _) = !px
-  prval () = fold@ (!px)
-  prval () = fold@ (p->ccompenv_loopexnenv)
+  (env) = tl_fini where
+{
+  val+ @CCOMPENV (p) = env
+  val-@list_vt_cons (x, _) = p.ccompenv_loopexnenv
+  val tl_fini = x.1
+  prval () = fold@ (p.ccompenv_loopexnenv)
   prval () = fold@ (env)
-in
-  tl_fini
-end // end of [ccompenv_get_loopfini]
+} // end of [ccompenv_get_loopfini]
 
 implement
 ccompenv_get_loopcont
-  (env) = let
-  val CCOMPENV (!p) = env
-  val-list_vt_cons (!px, _) = p->ccompenv_loopexnenv
-  val+LOOPTMPLAB3 (_, _, tl_cont) = !px
-  prval () = fold@ (!px)
-  prval () = fold@ (p->ccompenv_loopexnenv)
+  (env) = tl_cont where
+{
+  val+ @CCOMPENV (p) = env
+  val-@list_vt_cons (x, _) = p.ccompenv_loopexnenv
+  val tl_cont = x.2
+  prval () = fold@ (p.ccompenv_loopexnenv)
   prval () = fold@ (env)
-in
-  tl_cont
-end // end of [ccompenv_get_loopcont]
+} // end of [ccompenv_get_loopcont]
 
 (* ****** ****** *)
 
@@ -1272,11 +1163,11 @@ ccompenv_inc_tailcalenv
 val (
 ) = println! ("ccompenv_inc_tailcalenv: fl = ", fl)
 *)
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 val tci = TCIfun (fl)
-val tcis = p->ccompenv_tailcalenv
+val tcis = p.ccompenv_tailcalenv
 val ((*void*)) =
-  p->ccompenv_tailcalenv := list_vt_cons (tci, tcis)
+  p.ccompenv_tailcalenv := list_vt_cons (tci, tcis)
 prval () = fold@ (env)
 //
 } // end of [ccompenv_inc_tailcalenv]
@@ -1286,11 +1177,11 @@ ccompenv_inc_tailcalenv_fnx
   (env, fls) = () where
 {
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 val tci = TCIfnx (fls)
-val tcis = p->ccompenv_tailcalenv
+val tcis = p.ccompenv_tailcalenv
 val ((*void*)) =
-  p->ccompenv_tailcalenv := list_vt_cons (tci, tcis)
+  p.ccompenv_tailcalenv := list_vt_cons (tci, tcis)
 prval () = fold@ (env)
 //
 } // end of [ccompenv_inc_tailcalenv_fnx]
@@ -1300,11 +1191,11 @@ ccompenv_dec_tailcalenv
   (env) = () where
 {
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 val-~list_vt_cons
-  (tci, tcis) = p->ccompenv_tailcalenv
+  (tci, tcis) = p.ccompenv_tailcalenv
 val () = tlcalitm_free (tci)
-val () = p->ccompenv_tailcalenv := tcis
+val () = p.ccompenv_tailcalenv := tcis
 prval () = fold@ (env)
 //
 } // end of [ccompenv_dec_tailcalenv]
@@ -1314,6 +1205,27 @@ prval () = fold@ (env)
 local
 
 (* ****** ****** *)
+
+fun
+auxfind_lst
+(
+  s0: stamp, fls: !funlablst_vt, i: int
+) : int = let
+in
+//
+case+ fls of
+//
+| list_vt_nil() => ~1
+//
+| list_vt_cons
+    (fl, fls1) => let
+    val s = funlab_get_stamp(fl)
+    val iseq = $STMP.eq_stamp_stamp(s0, s)
+  in
+    if iseq then i else auxfind_lst(s0, fls1, i+1)
+  end // end of [list_cons]
+//
+end // end of [auxfind_lst]
 
 fun
 auxfind
@@ -1326,39 +1238,12 @@ case+ tci of
 | TCIfun (fl) => let
     val s = funlab_get_stamp (fl)
     val iseq = $STMP.eq_stamp_stamp (s0, s)
-    prval () = fold@ (tci)
   in
     if iseq then 0 else ~1
   end // end of [TCIfun]
-| TCIfnx (!p_fls) => let
-    val res = auxfind_lst (s0, $UN.linlst2lst(!p_fls), 1)
-    prval () = fold@ (tci)
-  in
-    res
-  end // end of [TCIfnx]
+| TCIfnx (fls) => auxfind_lst (s0, fls, 1)
 //
 end // end of [auxfind]
-
-and
-auxfind_lst
-(
-  s0: stamp, fls: List(funlab), i: int
-) : int = let
-in
-//
-case+ fls of
-//
-| list_nil() => ~1
-//
-| list_cons
-    (fl, fls) => let
-    val s = funlab_get_stamp(fl)
-    val iseq = $STMP.eq_stamp_stamp(s0, s)
-  in
-    if iseq then i else auxfind_lst(s0, fls, i+1)
-  end // end of [list_cons]
-//
-end // end of [auxfind_lst]
 
 (* ****** ****** *)
 
@@ -1380,23 +1265,57 @@ case+ tci of
     val opt =
       funlab_get_d2copt (fl)
     // end of [val]
-    prval ((*void*)) = fold@ (tci)
   in
-    case+ opt of
-    | Some(d2c) => let
+    case+ gopt_view(opt) of
+    | ~GOsome(d2c) => let
         val
         iseq = eq_d2cst_d2cst(d2c0, d2c)
       in
         if iseq then Some_vt(fl) else None_vt()
       end // end of [Some]
-    | None((*void*)) => None_vt((*void*))
+    | ~GOnone((*void*)) => None_vt((*void*))
   end // end of [TCIfun]
 //
-| TCIfnx _ => (fold@(tci); None_vt ()) // TCIfnx
+| TCIfnx _ => None_vt () // TCIfnx
 //
 end // end of [auxfind2]
 
 (* ****** ****** *)
+
+fun
+auxfind3_lst
+(
+  d2v0: d2var, fls: !funlablst_vt, ntl: &int
+) : funlabopt_vt = let
+in
+//
+case+ fls of
+//
+| list_vt_cons
+    (fl, fls1) => let
+    val opt =
+      funlab_get_d2vopt (fl)
+    // end of [val]
+  in
+    case+ gopt_view(opt) of
+    | ~GOsome(d2v) => let
+        val iseq =
+          eq_d2var_d2var (d2v0, d2v)
+        // end of [val]
+      in
+        if iseq
+          then Some_vt(fl)
+          else let
+            val () = ntl := ntl + 1 in auxfind3_lst(d2v0, fls1, ntl)
+          end // end of [else]
+        // end of [if]
+      end // end of [Some]
+    | ~GOnone((*void*)) => None_vt()
+  end // end of [list_cons]
+//
+| list_vt_nil((*void*)) => None_vt()
+//
+end // end of [auxfind3_lst]
 
 fun
 auxfind3
@@ -1415,64 +1334,24 @@ case+ tci of
     val opt =
       funlab_get_d2vopt(fl)
     // end of [val]
-    prval ((*void*)) = fold@(tci)
   in
-    case+ opt of
-    | Some(d2v) => let
+    case+ gopt_view(opt) of
+    | ~GOsome(d2v) => let
         val
         iseq = eq_d2var_d2var(d2v0, d2v)
       in
         if iseq then Some_vt(fl) else None_vt()
       end // end of [Some]
-    | None((*void*)) => None_vt()
+    | ~GOnone((*void*)) => None_vt()
   end // end of [TCIfun]
 //
-| TCIfnx(!p_fls) => let
+| TCIfnx(fls) => let
     val () = ntl := 1
-    val res =
-      auxfind3_lst (d2v0, $UN.linlst2lst(!p_fls), ntl)
-    // end of [val]
-    prval () = fold@ (tci)
   in
-    res
+    auxfind3_lst (d2v0, fls, ntl)
   end // end of [TCIfnx]
 //
 end // end of [auxfind3]
-
-and
-auxfind3_lst
-(
-  d2v0: d2var, fls: List(funlab), ntl: &int
-) : funlabopt_vt = let
-in
-//
-case+ fls of
-//
-| list_cons
-    (fl, fls) => let
-    val opt =
-      funlab_get_d2vopt (fl)
-    // end of [val]
-  in
-    case+ opt of
-    | Some(d2v) => let
-        val iseq =
-          eq_d2var_d2var (d2v0, d2v)
-        // end of [val]
-      in
-        if iseq
-          then Some_vt(fl)
-          else let
-            val () = ntl := ntl + 1 in auxfind3_lst(d2v0, fls, ntl)
-          end // end of [else]
-        // end of [if]
-      end // end of [Some]
-    | None((*void*)) => None_vt()
-  end // end of [list_cons]
-//
-| list_nil((*void*)) => None_vt()
-//
-end // end of [auxfind3_lst]
 
 in (* in of [local] *)
 
@@ -1482,11 +1361,11 @@ ccompenv_find_tailcalenv
 //
 val s0 = funlab_get_stamp (fl0)
 //
-val CCOMPENV (!p) = env
-val-list_vt_cons
-  (!p_tci, _) = p->ccompenv_tailcalenv
-val ans = auxfind (s0, !p_tci)
-prval () = fold@ (p->ccompenv_tailcalenv)
+val+ @CCOMPENV (p) = env
+val-@list_vt_cons
+  (tci, _) = p.ccompenv_tailcalenv
+val ans = auxfind (s0, tci)
+prval () = fold@ (p.ccompenv_tailcalenv)
 prval () = fold@ (env)
 //
 in
@@ -1497,14 +1376,14 @@ implement
 ccompenv_find_tailcalenv_cst
   (env, d2c0) = let
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val-list_vt_cons
-  (!p_tci, _) = p->ccompenv_tailcalenv
+val-@list_vt_cons
+  (tci, _) = p.ccompenv_tailcalenv
 //
-val ans = auxfind2 (d2c0, !p_tci)
+val ans = auxfind2 (d2c0, tci)
 //
-prval () = fold@ (p->ccompenv_tailcalenv)
+prval () = fold@ (p.ccompenv_tailcalenv)
 prval () = fold@ (env)
 //
 in
@@ -1515,14 +1394,14 @@ implement
 ccompenv_find_tailcalenv_var
   (env, d2v0, ntl) = let
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val-list_vt_cons
-  (!p_tci, _) = p->ccompenv_tailcalenv
+val-@list_vt_cons
+  (tci, _) = p.ccompenv_tailcalenv
 //
-val ans = auxfind3 (d2v0, !p_tci, ntl)
+val ans = auxfind3 (d2v0, tci, ntl)
 //
-prval () = fold@ (p->ccompenv_tailcalenv)
+prval () = fold@ (p.ccompenv_tailcalenv)
 prval () = fold@ (env)
 //
 in
@@ -1530,20 +1409,6 @@ in
 end // end of [ccompenv_find_tailcalenv_var]
 
 end // end of [local]
-
-(* ****** ****** *)
-
-(*
-//
-implement
-ccompenv_find_tailcalenv_tmpcst
-  (env, d2c0, t2mas) = ccompenv_find_tailcalenv_cst (env, d2c0)
-//
-implement
-ccompenv_find_tailcalenv_tmpvar
-  (env, d2v0, t2mas, ntl) = ccompenv_find_tailcalenv_var (env, d2v0, ntl)
-//
-*)
 
 (* ****** ****** *)
 
@@ -1562,12 +1427,6 @@ case+ opt of
     val ans =
       funlab_tmparg_match (fl0, t2mas)
     // end of [val]
-(*
-    val () =
-      println! ("ccompenv_find_tailcalenv_tmpcst: fl0 = ", fl0)
-    val () =
-      println! ("ccompenv_find_tailcalenv_tmpcst: ans = ", ans)
-*)
   in
     if ans then Some_vt (fl0) else None_vt ()
   end // end [Some_vt]
@@ -1593,12 +1452,6 @@ case+ opt of
     val ans =
       funlab_tmparg_match (fl0, t2mas)
     // end of [val]
-(*
-    val () =
-      println! ("ccompenv_find_tailcalenv_tmpcst: fl0 = ", fl0)
-    val () =
-      println! ("ccompenv_find_tailcalenv_tmpcst: ans = ", ans)
-*)
   in
     if ans then Some_vt (fl0) else None_vt ()
   end // end [Some_vt]
@@ -1609,30 +1462,14 @@ end // end of [ccompenv_find_tailcalenv_tmpvar]
 
 (* ****** ****** *)
 
-(*
-implement
-ccompenv_get_funlevel
-  (env) = n where
-{
-//
-val
-CCOMPENV (!p) = env
-val n = list_vt_length (p->ccompenv_flabsetenv)
-prval () = fold@ (env)
-//
-} // end of [ccompenv_get_funlevel]
-*)
-
-(* ****** ****** *)
-
 implement
 ccompenv_inc_dvarsetenv
   (env) = let
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 val d2es = d2envset_vt_nil ()
-val d2ess = p->ccompenv_dvarsetenv
-val () = (p->ccompenv_dvarsetenv := list_vt_cons (d2es, d2ess))
+val d2ess = p.ccompenv_dvarsetenv
+val () = (p.ccompenv_dvarsetenv := list_vt_cons (d2es, d2ess))
 prval () = fold@ (env)
 //
 in
@@ -1645,11 +1482,11 @@ ccompenv_incwth_dvarsetenv
 //
 val d2es = d2envlst2set (d2es)
 //
-val CCOMPENV (!p) = env
-val d2ess = p->ccompenv_dvarsetenv
+val+ @CCOMPENV (p) = env
+val d2ess = p.ccompenv_dvarsetenv
 val () =
 (
-  p->ccompenv_dvarsetenv := list_vt_cons (d2es, d2ess)
+  p.ccompenv_dvarsetenv := list_vt_cons (d2es, d2ess)
 ) (* end of [val] *)
 prval () = fold@ (env)
 //
@@ -1664,9 +1501,9 @@ ccompenv_getdec_dvarsetenv
   (env) = (d2vs) where
 {
 //
-val CCOMPENV (!p) = env
-val-~list_vt_cons (d2vs, d2vss) = p->ccompenv_dvarsetenv
-val () = p->ccompenv_dvarsetenv := d2vss
+val+ @CCOMPENV (p) = env
+val-~list_vt_cons (d2vs, d2vss) = p.ccompenv_dvarsetenv
+val () = p.ccompenv_dvarsetenv := d2vss
 prval () = fold@ (env)
 //
 } (* end of [ccompenv_getdec_dvarsetenv] *)
@@ -1683,14 +1520,14 @@ val lvl = d2var_get_level (d2v)
 val () =
 if (lvl > 0) then
 {
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
 val d2e = d2var2env (d2v)
 //
-val-list_vt_cons
-  (!p_d2es, _) = p->ccompenv_dvarsetenv
-val () = !p_d2es := d2envset_vt_add (!p_d2es, d2e)
-prval () = fold@ (p->ccompenv_dvarsetenv)
+val-@list_vt_cons
+  (d2es, _) = p.ccompenv_dvarsetenv
+val () = d2es := d2envset_vt_add (d2es, d2e)
+prval () = fold@ (p.ccompenv_dvarsetenv)
 //
 prval () = fold@ (env)
 } (* end of [if] *)
@@ -1708,12 +1545,12 @@ val lvl = d2var_get_level (d2v)
 val () =
 if (lvl > 0) then
 {
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val-list_vt_cons
-  (!p_d2es, _) = p->ccompenv_dvarsetenv
-val () = !p_d2es := d2envset_vt_add (!p_d2es, d2e)
-prval () = fold@ (p->ccompenv_dvarsetenv)
+val-@list_vt_cons
+  (d2es, _) = p.ccompenv_dvarsetenv
+val () = d2es := d2envset_vt_add (d2es, d2e)
+prval () = fold@ (p.ccompenv_dvarsetenv)
 //
 prval () = fold@ (env)
 } (* end of [if] *)
@@ -1728,10 +1565,10 @@ ccompenv_inc_flabsetenv
 (*
 val () = println! ("ccompenv_inc_flabsetenv")
 *)
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 val flset = funlabset_vt_nil ()
 val () = (
-  p->ccompenv_flabsetenv := list_vt_cons (flset, p->ccompenv_flabsetenv)
+  p.ccompenv_flabsetenv := list_vt_cons (flset, p.ccompenv_flabsetenv)
 ) (* end of [val] *)
 prval () = fold@ (env)
 //
@@ -1744,9 +1581,9 @@ ccompenv_getdec_flabsetenv
   (env) = (fls) where
 {
 //
-val CCOMPENV (!p) = env
-val-~list_vt_cons (fls, flss) = p->ccompenv_flabsetenv
-val () = p->ccompenv_flabsetenv := flss
+val+ @CCOMPENV (p) = env
+val-~list_vt_cons (fls, flss) = p.ccompenv_flabsetenv
+val () = p.ccompenv_flabsetenv := flss
 prval () = fold@ (env)
 (*
 val () = fprintln! (stdout_ref, "ccompenv_getdec_flabsetenv: fls = ", fls)
@@ -1764,12 +1601,12 @@ val () =
 println! ("ccompenv_add_flabsetenv: fl = ", fl)
 *)
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val-list_vt_cons
-  (!p_fls, _) = p->ccompenv_flabsetenv
-val () = !p_fls := funlabset_vt_add (!p_fls, fl)
-prval () = fold@ (p->ccompenv_flabsetenv)
+val-@list_vt_cons
+  (fls, _) = p.ccompenv_flabsetenv
+val () = fls := funlabset_vt_add (fls, fl)
+prval () = fold@ (p.ccompenv_flabsetenv)
 prval () = fold@ (env)
 //
 } // end of [ccompenv_add_flabsetenv]
@@ -1787,19 +1624,19 @@ fun addlst_if
 ) : void = let
 in
 //
-case+ d2es of
-| list_cons
+case+ glist_view(d2es) of
+| ~GLcons
     (d2e, d2es) => let
     val d2v = d2env_get_var (d2e)
     val lvl = d2var_get_level (d2v)
-    val () = 
+    val () =
     ( // HX: no need for handling siblings (=lvl0)
       if lvl <= flvl0 then ccompenv_add_dvarsetenv_env (env, d2e)
     ) : void // end of [val]
   in
     addlst_if (env, flvl0, d2es)
   end (* end of [list_cons] *)
-| list_nil ((*void*)) => ()
+| ~GLnil ((*void*)) => ()
 //
 end // end of [addlst_if]
 //
@@ -1822,11 +1659,11 @@ fun auxenv
 ) : void = let
 in
 //
-case+ d2es of
-| list_cons
+case+ glist_view(d2es) of
+| ~GLcons
     (d2e, d2es) => let
     val d2v = d2env_get_var (d2e)
-    val opt = d2varmap_search (vbmap, d2v)
+    val opt = d2varmap_search<primval> (vbmap, d2v)
     val () =
     (
       case+ opt of
@@ -1836,7 +1673,7 @@ case+ d2es of
   in
     auxenv (env, vbmap, d2es)
   end (* end of [list_cons] *)
-| list_nil () => ()
+| ~GLnil () => ()
 //
 end (* end of [auxenv] *)
 //
@@ -1853,7 +1690,7 @@ case+ fls of
     val flvl = funlab_get_level (fl)
   in
     if flvl > flvl0 then let
-      val-Some(fent) = funlab_get_funent (fl)
+      val-~GOsome(fent) = gopt_view(funlab_get_funent (fl))
       val () = auxenv (env, vbmap, funent_get_d2envlst (fent))
     in
       addlst_if (env, flvl0, vbmap, fls)
@@ -1880,10 +1717,10 @@ implement
 ccompenv_inc_vbindmapenv
   (env) = let
 //
-val CCOMPENV (!p) = env
-val vbm = d2varmap_nil ()
-val vbms = p->ccompenv_vbindmapenv
-val () = (p->ccompenv_vbindmapenv := list_vt_cons (vbm, vbms))
+val+ @CCOMPENV (p) = env
+val vbm = d2varmap_nil<primval> ()
+val vbms = p.ccompenv_vbindmapenv
+val () = (p.ccompenv_vbindmapenv := list_vt_cons (vbm, vbms))
 prval () = fold@ (env)
 //
 in
@@ -1895,11 +1732,11 @@ ccompenv_getdec_vbindmapenv
   (env) = vbm where
 {
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
 val-~list_vt_cons
-  (vbm, vbms) = p->ccompenv_vbindmapenv
-val () = p->ccompenv_vbindmapenv := vbms
+  (vbm, vbms) = p.ccompenv_vbindmapenv
+val () = p.ccompenv_vbindmapenv := vbms
 //
 prval () = fold@ (env)
 //
@@ -1911,12 +1748,12 @@ implement
 ccompenv_add_vbindmapenv
   (env, d2v, pmv) = let
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val-list_vt_cons
-  (!p_vbm, _) = p->ccompenv_vbindmapenv
-val _(*replaced*) = d2varmap_insert (!p_vbm, d2v, pmv)
-prval () = fold@ (p->ccompenv_vbindmapenv)
+val-@list_vt_cons
+  (vbm, _) = p.ccompenv_vbindmapenv
+val _(*replaced*) = d2varmap_insert<primval> (vbm, d2v, pmv)
+prval () = fold@ (p.ccompenv_vbindmapenv)
 //
 prval () = fold@ (env)
 //
@@ -1929,13 +1766,12 @@ ccompenv_find_vbindmapenv
   (env, d2v) = opt where
 {
 //
-val
-CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val-list_vt_cons
-  (!p_vbm, _) = p->ccompenv_vbindmapenv
-val opt = d2varmap_search (!p_vbm, d2v)
-prval () = fold@ (p->ccompenv_vbindmapenv)
+val-@list_vt_cons
+  (vbm, _) = p.ccompenv_vbindmapenv
+val opt = d2varmap_search<primval> (vbm, d2v)
+prval () = fold@ (p.ccompenv_vbindmapenv)
 //
 prval () = fold@ (env)
 //
@@ -1960,12 +1796,11 @@ in
 //
 case+ xs of
 //
-| MARKENVLSTnil () =>
-  let prval () = fold@ (xs) in xs end
+| MARKENVLSTnil () => xs
 //
 | ~MARKENVLSTmark (xs) => xs
 | ~MARKENVLSTcons_var (d2v, xs) => let
-    val _(*removed*) = d2varmaplst_vt_remove (map, d2v)
+    val _(*removed*) = d2varmaplst_vt_remove<primval> (map, d2v)
   in
     auxpop (map, xs)
   end // end of [MENVLSTcons_var]
@@ -1983,64 +1818,6 @@ end // end of [auxpop]
 
 (* ****** ****** *)
 
-(*
-fun auxjoin
-(
-  map: &d2varmaplst_vt (primval), xs: &markenvlst_vt
-) : void = let
-in
-//
-case+ xs of
-//
-| MARKENVLSTnil () => let
-    prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTnil]
-//
-| MARKENVLSTcons_var (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_var]
-//
-| MARKENVLSTcons_fundec (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_fundec]
-| MARKENVLSTcons_fundec2 (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_fundec2]
-//
-| MARKENVLSTcons_impdec (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_impdec]
-| MARKENVLSTcons_impdec2 (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_impdec2]
-//
-| MARKENVLSTcons_staload (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_staload]
-//
-| MARKENVLSTcons_tmpsub (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_tmpsub]
-//
-| MARKENVLSTcons_tmpcstmat (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_tmpcstmat]
-//
-| MARKENVLSTcons_tmpvarmat (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_tmpvarmat]
-//
-| MARKENVLSTcons_tempenver (_, !p_xs) => let
-    val () = auxjoin (map, !p_xs); prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTcons_tempenver]
-//
-| ~MARKENVLSTmark (xs1) => (xs := auxpop (map, xs1))
-//
-end // end of [auxjoin]
-*)
-
-(* ****** ****** *)
-
 fun
 auxpop2
   (xs: &markenvlst_vt): void = let
@@ -2048,20 +1825,19 @@ in
 //
 case+ xs of
 //
-| MARKENVLSTnil () =>
-  let prval () = fold@ (xs) in (*nothing*) end
+| MARKENVLSTnil () => (*nothing*) ()
 //
-| MARKENVLSTcons_var
-     (_, !p_xs) => let
-     val () = auxpop2 (!p_xs); prval () = fold@(xs) in (*nothing*)
+| @MARKENVLSTcons_var
+     (_, xs1) => let
+     val () = auxpop2 (xs1); prval () = fold@(xs) in (*nothing*)
    end // end of [MENVLSTcons_var]
-| MARKENVLSTcons_fundec
-     (_, !p_xs) => let
-     val () = auxpop2 (!p_xs); prval () = fold@(xs) in (*nothing*)
+| @MARKENVLSTcons_fundec
+     (_, xs1) => let
+     val () = auxpop2 (xs1); prval () = fold@(xs) in (*nothing*)
    end // end of [MENVLSTcons_fundec]
-| MARKENVLSTcons_fundec2
-     (_, !p_xs) => let
-     val () = auxpop2 (!p_xs); prval () = fold@(xs) in (*nothing*)
+| @MARKENVLSTcons_fundec2
+     (_, xs1) => let
+     val () = auxpop2 (xs1); prval () = fold@(xs) in (*nothing*)
    end // end of [MENVLSTcons_fundec2]
 //
 | ~MARKENVLSTmark (xs1) => xs := xs1
@@ -2086,46 +1862,44 @@ in
 //
 case+ xs of
 //
-| MARKENVLSTnil () => let
-    prval () = fold@ (xs) in (*nothing*)
-  end // end of [MENVLSTnil]
+| MARKENVLSTnil () => (*nothing*) ()
 //
-| MARKENVLSTcons_var (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_var (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_var]
 //
-| MARKENVLSTcons_fundec (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_fundec (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_fundec]
-| MARKENVLSTcons_fundec2 (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_fundec2 (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_fundec2]
 //
-| MARKENVLSTcons_impdec (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_impdec (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_impdec]
-| MARKENVLSTcons_impdec2 (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_impdec2 (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_impdec2]
 //
-| MARKENVLSTcons_staload (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_staload (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_staload]
 //
-| MARKENVLSTcons_tmpsub (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_tmpsub (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_tmpsub]
 //
-| MARKENVLSTcons_tmpcstmat (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_tmpcstmat (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_tmpcstmat]
 //
-| MARKENVLSTcons_tmpvarmat (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_tmpvarmat (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_tmpvarmat]
 //
-| MARKENVLSTcons_tempenver (_, !p_xs) => let
-    val () = auxjoin2 (!p_xs); prval () = fold@ (xs) in (*nothing*)
+| @MARKENVLSTcons_tempenver (_, xs1) => let
+    val () = auxjoin2 (xs1); prval () = fold@ (xs) in (*nothing*)
   end // end of [MENVLSTcons_tempenver]
 //
 | ~MARKENVLSTmark (xs1) => (xs := xs1; auxpop2 (xs))
@@ -2137,15 +1911,15 @@ in (* in of [local] *)
 implement
 ccompenv_push (env) = let
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
 val xs =
-  p->ccompenv_markenvlst
+  p.ccompenv_markenvlst
 //
 val xs = MARKENVLSTmark (xs)
 //
 val () =
-  p->ccompenv_markenvlst := xs
+  p.ccompenv_markenvlst := xs
 //
   prval () = fold@ (env)
 //
@@ -2159,42 +1933,19 @@ ccompenv_pop
 //
 prval unit_v () = pfpush
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
 val xs =
-  p->ccompenv_markenvlst
+  p.ccompenv_markenvlst
 val () =
-  p->ccompenv_markenvlst :=
-  auxpop (p->ccompenv_vbindmapall, xs)
+  p.ccompenv_markenvlst :=
+  auxpop (p.ccompenv_vbindmapall, xs)
 //
 prval((*folded*)) = fold@ (env)
 //
 in
   // nothing
 end // end of [ccompenv_pop]
-
-(*
-implement
-ccompenv_localjoin
-(
-  pfpush, pfpush2 | env
-) = let
-//
-prval unit_v () = pfpush
-prval unit_v () = pfpush2
-//
-val CCOMPENV (!p) = env
-//
-val map = p->ccompenv_vbindmapall
-val ((*void*)) =
-  auxjoin (map, p->ccompenv_markenvlst)
-//
-prval ((*folded*)) = fold@ (env)
-//
-in
-  // nothing
-end // end of [ccompenv_localjoin]
-*)
 
 implement
 ccompenv_localjoin
@@ -2203,9 +1954,9 @@ ccompenv_localjoin
   prval unit_v () = pfpush
   prval unit_v () = pfpush2
 //
-  val CCOMPENV (!p) = env
+  val+ @CCOMPENV (p) = env
 //
-  val () = auxjoin2 (p->ccompenv_markenvlst)
+  val () = auxjoin2 (p.ccompenv_markenvlst)
 //
   prval () = fold@ (env)
 //
@@ -2228,11 +1979,11 @@ val () = (
 ) : void // end of [val]
 *)
 //
-val CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val xs = p->ccompenv_markenvlst
-val () = p->ccompenv_markenvlst := MARKENVLSTcons_var (d2v, xs)
-val _(*replaced*) = d2varmaplst_vt_insert (p->ccompenv_vbindmapall, d2v, pmv)
+val xs = p.ccompenv_markenvlst
+val () = p.ccompenv_markenvlst := MARKENVLSTcons_var (d2v, xs)
+val _(*replaced*) = d2varmaplst_vt_insert<primval> (p.ccompenv_vbindmapall, d2v, pmv)
 //
 prval () = fold@ (env)
 //
@@ -2245,8 +1996,8 @@ ccompenv_find_vbindmapall
   (env, d2v) = opt where
 {
 //
-  val CCOMPENV (!p) = env
-  val opt = d2varmaplst_vt_search (p->ccompenv_vbindmapall, d2v)
+  val+ @CCOMPENV (p) = env
+  val opt = d2varmaplst_vt_search<primval> (p.ccompenv_vbindmapall, d2v)
   prval () = fold@ (env)
 //
 } // end of [ccompenv_add_vbindmapall]
@@ -2268,9 +2019,9 @@ implement
 ccompenv_add_fundec
   (env, hfd) = let
 //
-  val CCOMPENV (!p) = env
-  val xs = p->ccompenv_markenvlst
-  val () = p->ccompenv_markenvlst := MARKENVLSTcons_fundec (hfd, xs)
+  val+ @CCOMPENV (p) = env
+  val xs = p.ccompenv_markenvlst
+  val () = p.ccompenv_markenvlst := MARKENVLSTcons_fundec (hfd, xs)
   prval () = fold@ (env)
 //
 in
@@ -2281,9 +2032,9 @@ implement
 ccompenv_add_fundec2
   (env, hfd2) = let
 //
-val CCOMPENV (!p) = env
-val xs = p->ccompenv_markenvlst
-val () = p->ccompenv_markenvlst := MARKENVLSTcons_fundec2 (hfd2, xs)
+val+ @CCOMPENV (p) = env
+val xs = p.ccompenv_markenvlst
+val () = p.ccompenv_markenvlst := MARKENVLSTcons_fundec2 (hfd2, xs)
 //
 prval () = fold@ (env)
 //
@@ -2297,9 +2048,9 @@ implement
 ccompenv_add_impdec
   (env, imp) = let
 //
-  val CCOMPENV (!p) = env
-  val xs = p->ccompenv_markenvlst
-  val () = p->ccompenv_markenvlst := MARKENVLSTcons_impdec (imp, xs)
+  val+ @CCOMPENV (p) = env
+  val xs = p.ccompenv_markenvlst
+  val () = p.ccompenv_markenvlst := MARKENVLSTcons_impdec (imp, xs)
   prval () = fold@ (env)
 //
 in
@@ -2310,9 +2061,9 @@ implement
 ccompenv_add_impdec2
   (env, imp2) = let
 //
-val CCOMPENV (!p) = env
-val xs = p->ccompenv_markenvlst
-val () = p->ccompenv_markenvlst := MARKENVLSTcons_impdec2 (imp2, xs)
+val+ @CCOMPENV (p) = env
+val xs = p.ccompenv_markenvlst
+val () = p.ccompenv_markenvlst := MARKENVLSTcons_impdec2 (imp2, xs)
 //
 prval () = fold@ (env)
 //
@@ -2326,9 +2077,9 @@ implement
 ccompenv_add_staload
   (env, fenv) = let
 //
-  val CCOMPENV (!p) = env
-  val xs = p->ccompenv_markenvlst
-  val () = p->ccompenv_markenvlst := MARKENVLSTcons_staload (fenv, xs)
+  val+ @CCOMPENV (p) = env
+  val xs = p.ccompenv_markenvlst
+  val () = p.ccompenv_markenvlst := MARKENVLSTcons_staload (fenv, xs)
 //
   prval () = fold@ (env)
 //
@@ -2342,10 +2093,9 @@ implement
 ccompenv_add_tmpsub
   (env, tsub) = let
 //
-val
-CCOMPENV(!p) = env
-val xs = p->ccompenv_markenvlst
-val () = p->ccompenv_markenvlst := MARKENVLSTcons_tmpsub (tsub, xs)
+val+ @CCOMPENV (p) = env
+val xs = p.ccompenv_markenvlst
+val () = p.ccompenv_markenvlst := MARKENVLSTcons_tmpsub (tsub, xs)
 prval () = fold@ (env)
 //
 in
@@ -2373,75 +2123,42 @@ in
 //
 case+ xs of
 //
-| MARKENVLSTnil () => let
-    prval () = fold@ (xs) in None_vt()
-  end // end of [MARKENVLSTnil]
+| MARKENVLSTnil () => None_vt()
 //
 | MARKENVLSTcons_tmpsub
-    (tsub, !p_xs) => let
-    prval () = fold@ (xs) in Some_vt (tsub)
-  end // end of [MARKENVLSTcons_tmpsub]
+    (tsub, xs1) => Some_vt (tsub)
 //
-| MARKENVLSTmark (!p_xs) => let
-    val res = loop (!p_xs); prval () = fold@ (xs) in res
-  end // end of [MARKENVLSTcons_mark]
+| MARKENVLSTmark (xs1) => loop (xs1)
 //
 | MARKENVLSTcons_var
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_var]
+    (_, xs1) => loop (xs1)
 //
 | MARKENVLSTcons_fundec
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_fundec]
+    (_, xs1) => loop (xs1)
 | MARKENVLSTcons_fundec2
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_fundec2]
+    (_, xs1) => loop (xs1)
 //
 | MARKENVLSTcons_impdec
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_impdec]
+    (_, xs1) => loop (xs1)
 | MARKENVLSTcons_impdec2
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_impdec2]
+    (_, xs1) => loop (xs1)
 //
 | MARKENVLSTcons_staload
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_staload]
+    (_, xs1) => loop (xs1)
 //
 | MARKENVLSTcons_tmpcstmat
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_tmpcstmat]
+    (_, xs1) => loop (xs1)
 //
 | MARKENVLSTcons_tmpvarmat
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_tmpvarmat]
+    (_, xs1) => loop (xs1)
 //
 | MARKENVLSTcons_tempenver
-    (_, !p_xs) => res where
-  {
-    val res = loop (!p_xs); prval () = fold@ (xs)
-  } // end of [MARKENVLSTcons_tempenver]
+    (_, xs1) => loop (xs1)
 //
 end // end of [loop]
 //
-val CCOMPENV (!p) = env
-val res = loop (p->ccompenv_markenvlst)
+val+ @CCOMPENV (p) = env
+val res = loop (p.ccompenv_markenvlst)
 prval ((*void*)) = fold@ (env)
 //
 in
@@ -2461,10 +2178,10 @@ in
 case+ opt of
 | ~Some_vt(tsub) => let
     val tmparg =
-      s2explstlst_subst (sub, imp.hiimpdec_tmparg)
+      s2explstlst_subst (sub, imp.hiimpdec_tmparg())
     // end of [val]
   in
-    ccompenv_add_impdec2 (env, HIIMPDEC2(imp, tsub, tmparg))
+    ccompenv_add_impdec2 (env, hiimpdec2_new(imp, tsub, tmparg))
   end // end of [Some_vt]
 | ~None_vt((*void*)) => () // HX: this should never be reached!
 //
@@ -2481,13 +2198,13 @@ auxlst
 ) : void = let
 in
 //
-case+ hfds of
-| list_nil
+case+ glist_view(hfds) of
+| ~GLnil
     ((*void*)) => ()
-| list_cons
+| ~GLcons
     (hfd, hfds) => let
     val () =
-      ccompenv_add_fundec2 (env, HIFUNDEC2 (hfd, tsub))
+      ccompenv_add_fundec2 (env, hifundec2_new (hfd, tsub))
     // end of [val]
   in
     auxlst (env, tsub, hfds)
@@ -2502,13 +2219,13 @@ ccompenv_add_fundecsloc
   (env, sub, knd, decarg, hfds) = let
 in
 //
-case+ decarg of
-| list_nil _ => ()
-| list_cons _ => let
+case+ glist_view(decarg) of
+| ~GLnil _ => ()
+| ~GLcons _ => let
     val opt = ccompenv_find_tmpsub (env)
   in
     case+ opt of
-    | ~Some_vt(tsub) => auxlst (env, tsub, hfds) 
+    | ~Some_vt(tsub) => auxlst (env, tsub, hfds)
     | ~None_vt((*void*)) => () // HX: this should never be reached!
   end // end of [list_cons]
 //
@@ -2522,9 +2239,9 @@ implement
 ccompenv_add_tmpcstmat
   (env, tmpmat) = let
 //
-  val CCOMPENV (!p) = env
-  val xs = p->ccompenv_markenvlst
-  val () = p->ccompenv_markenvlst := MARKENVLSTcons_tmpcstmat (tmpmat, xs)
+  val+ @CCOMPENV (p) = env
+  val xs = p.ccompenv_markenvlst
+  val () = p.ccompenv_markenvlst := MARKENVLSTcons_tmpcstmat (tmpmat, xs)
 //
   prval () = fold@ (env)
 //
@@ -2536,9 +2253,9 @@ implement
 ccompenv_add_tmpvarmat
   (env, tmpmat) = let
 //
-  val CCOMPENV (!p) = env
-  val xs = p->ccompenv_markenvlst
-  val () = p->ccompenv_markenvlst := MARKENVLSTcons_tmpvarmat (tmpmat, xs)
+  val+ @CCOMPENV (p) = env
+  val xs = p.ccompenv_markenvlst
+  val () = p.ccompenv_markenvlst := MARKENVLSTcons_tmpvarmat (tmpmat, xs)
 //
   prval () = fold@ (env)
 //
@@ -2561,87 +2278,65 @@ in
 //
 case+ xs of
 //
-| MARKENVLSTnil () => let
-    prval () = fold@ (xs) in TMPCSTMATnone ()
-  end // end of [MARKENVLSTnil]
+| MARKENVLSTnil () => tmpcstmat_TMPCSTMATnone ()
 //
-| MARKENVLSTmark (!p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTmark] *)
+| MARKENVLSTmark (xs1) => auxlst (xs1, d2c0, t2mas)
 //
-| MARKENVLSTcons_var (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_var] *)
+| MARKENVLSTcons_var (_, xs1) => auxlst (xs1, d2c0, t2mas)
 //
-| MARKENVLSTcons_fundec (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_fundec] *)
-| MARKENVLSTcons_fundec2 (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_fundec2] *)
+| MARKENVLSTcons_fundec (_, xs1) => auxlst (xs1, d2c0, t2mas)
+| MARKENVLSTcons_fundec2 (_, xs1) => auxlst (xs1, d2c0, t2mas)
 //
 | MARKENVLSTcons_impdec
-    (imp, !p_xs) => res where
+    (imp, xs1) => res where
   {
     val res =
     hiimpdec_tmpcst_match
       (imp, d2c0, t2mas, 0(*local*))
     // end of [val]
-    val res = auxcont (res, !p_xs, d2c0, t2mas)
-    prval () = fold@ (xs)
+    val res = auxcont (res, xs1, d2c0, t2mas)
   } (* end of [MARKENVLSTcons_impdec] *)
 | MARKENVLSTcons_impdec2
-    (imp2, !p_xs) => res where
+    (imp2, xs1) => res where
   {
     val res =
     hiimpdec2_tmpcst_match
       (imp2, d2c0, t2mas, 0(*local*))
     // end of [val]
-    val res = auxcont (res, !p_xs, d2c0, t2mas)
-    prval () = fold@ (xs)
+    val res = auxcont (res, xs1, d2c0, t2mas)
   } (* end of [MARKENVLSTcons_impdec2] *)
 //
 | MARKENVLSTcons_staload
-    (fenv, !p_xs) => let
+    (fenv, xs1) => let
     val opt = filenv_get_tmpcstimpmapopt (fenv)
   in
-    case+ opt of
-    | Some (map) => let
+    case+ gopt_view(opt) of
+    | ~GOsome (map) => let
         val implst = tmpcstimpmap_find (map, d2c0)
         val tmpmat =
         hiimpdeclst_tmpcst_match (implst, d2c0, t2mas, 1(*staload*))
-        val tmpmat = auxcont (tmpmat, !p_xs, d2c0, t2mas)
       in
-        fold@ (xs); tmpmat
+        auxcont (tmpmat, xs1, d2c0, t2mas)
       end // end of [Some]
 //
 // HX-2013-10-08: pervasive SATS
 //
-    | None ((*void*)) => let
-        val tmpmat = auxlst (!p_xs, d2c0, t2mas)
-      in
-        fold@ (xs); tmpmat
-      end // end of [None]
+    | ~GOnone ((*void*)) => auxlst (xs1, d2c0, t2mas)
   end (* end of [MARKENVLSTcons_staload] *)
 //
-| MARKENVLSTcons_tmpsub (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_tmpsub] *)
+| MARKENVLSTcons_tmpsub (_, xs1) => auxlst (xs1, d2c0, t2mas)
 //
 | MARKENVLSTcons_tmpcstmat
-    (tmpmat, !p_xs) => let
+    (tmpmat, xs1) => let
     val res =
     tmpcstmat_tmpcst_match(tmpmat, d2c0, t2mas)
-    val res2 = auxcont (res, !p_xs, d2c0, t2mas) in fold@ (xs); res2
+  in
+    auxcont (res, xs1, d2c0, t2mas)
   end // end of [MARKENVLSTcons_tmpcstmat]
 //
-| MARKENVLSTcons_tmpvarmat (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_tmpvarmat] *)
+| MARKENVLSTcons_tmpvarmat (_, xs1) => auxlst (xs1, d2c0, t2mas)
 //
-| MARKENVLSTcons_tempenver (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2c0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_tempenver] *)
+| MARKENVLSTcons_tempenver (_, xs1) => auxlst (xs1, d2c0, t2mas)
 //
 end (* end of [auxlst] *)
 
@@ -2661,12 +2356,9 @@ println!("ccompenv_tmpcst_match: auxcont")
 //
 in
 //
-case+ opt of
-//
-| TMPCSTMATsome _ => opt
-| TMPCSTMATsome2 _ => opt
-//
-| TMPCSTMATnone((*void*)) => auxlst(xs, d2c0, t2mas)
+if tmpcstmat_is_TMPCSTMATnone(opt)
+  then auxlst(xs, d2c0, t2mas) else opt
+// end of [if]
 //
 end // end of [auxcont]
 
@@ -2676,10 +2368,9 @@ implement
 ccompenv_tmpcst_match
   (env, d2c0, t2mas) = let
 //
-val
-CCOMPENV (!p) = env
+val+ @CCOMPENV (p) = env
 //
-val opt = auxlst (p->ccompenv_markenvlst, d2c0, t2mas)
+val opt = auxlst (p.ccompenv_markenvlst, d2c0, t2mas)
 prval () = fold@ (env)
 //
 in
@@ -2701,71 +2392,53 @@ fun auxlst
 in
 //
 case+ xs of
-| MARKENVLSTnil () => let
-    prval () = fold@ (xs) in TMPVARMATnone ()
-  end // end of [MARKENVLSTnil]
+| MARKENVLSTnil () => tmpvarmat_TMPVARMATnone ()
 //
-| MARKENVLSTmark (!p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end // end of [MARKENVLSTmark]
+| MARKENVLSTmark (xs1) => auxlst (xs1, d2v0, t2mas)
 //
-| MARKENVLSTcons_var (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_var] *)
+| MARKENVLSTcons_var (_, xs1) => auxlst (xs1, d2v0, t2mas)
 //
 | MARKENVLSTcons_fundec
-    (hfd, !p_xs) => res where
+    (hfd, xs1) => res where
   {
     val res =
     hifundec_tmpvar_match (hfd, d2v0, t2mas)
-    val res = auxcont (res, !p_xs, d2v0, t2mas)
-    prval () = fold@ (xs)
+    val res = auxcont (res, xs1, d2v0, t2mas)
   } (* end of [MARKENVLSTcons_fundec] *)
 | MARKENVLSTcons_fundec2
-    (hfd2, !p_xs) => res where
+    (hfd2, xs1) => res where
   {
     val res =
     hifundec2_tmpvar_match (hfd2, d2v0, t2mas)
-    val res = auxcont (res, !p_xs, d2v0, t2mas)
-    prval () = fold@ (xs)
+    val res = auxcont (res, xs1, d2v0, t2mas)
   } (* end of [MARKENVLSTcons_fundec2] *)
 //
-| MARKENVLSTcons_impdec (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_impdec] *)
-| MARKENVLSTcons_impdec2 (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_impdec2] *)
+| MARKENVLSTcons_impdec (_, xs1) => auxlst (xs1, d2v0, t2mas)
+| MARKENVLSTcons_impdec2 (_, xs1) => auxlst (xs1, d2v0, t2mas)
 //
 | MARKENVLSTcons_staload
-    (fenv, !p_xs) => tmpmat where
+    (fenv, xs1) => tmpmat where
   {
-    val-Some (map) =
-      filenv_get_tmpvardecmapopt (fenv)
+    val-~GOsome (map) =
+      gopt_view(filenv_get_tmpvardecmapopt (fenv))
     val hfdopt = tmpvardecmap_find (map, d2v0)
     val tmpmat = hifundecopt2tmpvarmat (hfdopt, t2mas)
-    val tmpmat = auxcont (tmpmat, !p_xs, d2v0, t2mas)
-    prval () = fold@ (xs)
+    val tmpmat = auxcont (tmpmat, xs1, d2v0, t2mas)
   } (* end of [MARKENVLSTcons_staload] *)
 //
-| MARKENVLSTcons_tmpsub (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_tmpsub] *)
+| MARKENVLSTcons_tmpsub (_, xs1) => auxlst (xs1, d2v0, t2mas)
 //
-| MARKENVLSTcons_tmpcstmat (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_tmpcstmat] *)
+| MARKENVLSTcons_tmpcstmat (_, xs1) => auxlst (xs1, d2v0, t2mas)
 //
 | MARKENVLSTcons_tmpvarmat
-    (tmpmat, !p_xs) => let
+    (tmpmat, xs1) => let
     val res =
     tmpvarmat_tmpvar_match(tmpmat, d2v0, t2mas)
-    val res2 = auxcont (res, !p_xs, d2v0, t2mas) in fold@ (xs); res2
+  in
+    auxcont (res, xs1, d2v0, t2mas)
   end (* end of [MARKENVLSTcons_tmpvarmat] *)
 //
-| MARKENVLSTcons_tempenver (_, !p_xs) => let
-    val res = auxlst (!p_xs, d2v0, t2mas) in fold@ (xs); res
-  end (* end of [MARKENVLSTcons_tempenver] *)
+| MARKENVLSTcons_tempenver (_, xs1) => auxlst (xs1, d2v0, t2mas)
 //
 end // end of [auxlst]
 
@@ -2778,10 +2451,9 @@ and auxcont
 ) : tmpvarmat = let
 in
 //
-case+ opt of
-| TMPVARMATsome _ => opt
-| TMPVARMATsome2 _ => opt
-| TMPVARMATnone _ => auxlst (xs, d2v0, t2mas)
+if tmpvarmat_is_TMPVARMATnone(opt)
+  then auxlst (xs, d2v0, t2mas) else opt
+// end of [if]
 //
 end // end of [auxcont]
 
@@ -2791,8 +2463,8 @@ implement
 ccompenv_tmpvar_match
   (env, d2v0, t2mas) = let
 //
-val CCOMPENV (!p) = env
-val opt = auxlst (p->ccompenv_markenvlst, d2v0, t2mas)
+val+ @CCOMPENV (p) = env
+val opt = auxlst (p.ccompenv_markenvlst, d2v0, t2mas)
 prval () = fold@ (env)
 //
 in
@@ -2806,21 +2478,19 @@ end // end of [local]
 local
 //
 val
-the_tmplst =
-ref<tmpvarlst>(list_nil)
+the_tmplst = cell_make (the_null_ptr)
 val
-the_pmdlst =
-ref<primdeclst>(list_nil)
+the_pmdlst = cell_make (the_null_ptr)
 //
 in (* in-of-local *)
 //
 implement
 the_toplevel_getref_tmpvarlst
-  ((*void*)) = $UN.cast2Ptr1 (the_tmplst)
+  ((*void*)) = $UN.cast{Ptr1}(the_tmplst)
 //
 implement
 the_toplevel_getref_primdeclst
-  ((*void*)) = $UN.cast2Ptr1 (the_pmdlst)
+  ((*void*)) = $UN.cast{Ptr1}(the_pmdlst)
 //
 end // end of [local]
 
@@ -2836,11 +2506,11 @@ revapp
   d2vs: d2varlst, res: d2varlst_vt
 ) : d2varlst_vt =
 (
-case+ d2vs of
-| list_nil
+case+ glist_view(d2vs) of
+| ~GLnil
     ((*void*)) => res
   // list_nil
-| list_cons
+| ~GLcons
     (d2v, d2vs) =>
     revapp(d2vs, list_vt_cons(d2v, res))
   // end of [list_cons]
@@ -2855,65 +2525,46 @@ auxlst
 case+ xs of
 //
 | MARKENVLSTnil
-    ((*void*)) => (fold@(xs); res)
+    ((*void*)) => res
   // MARKENVLSTnil
 //
 | MARKENVLSTcons_tempenver
-    (!p_x, !p_xs) => let
-    val res = revapp (!p_x, res)
-    val res = auxlst (!p_xs, res) in fold@(xs); res
+    (x, xs1) => let
+    val res = revapp (x, res)
+  in
+    auxlst (xs1, res)
   end // end of [MARKENVLSTcons_tempenver]
 //
-| MARKENVLSTmark(!p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTmark]
+| MARKENVLSTmark(xs1) => auxlst (xs1, res)
 //
 | MARKENVLSTcons_var
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_var]
+    (_, xs1) => auxlst (xs1, res)
 //
 | MARKENVLSTcons_fundec
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_fundec]
+    (_, xs1) => auxlst (xs1, res)
 | MARKENVLSTcons_fundec2
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_fundec2]
+    (_, xs1) => auxlst (xs1, res)
 //
 | MARKENVLSTcons_impdec
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_impdec]
+    (_, xs1) => auxlst (xs1, res)
 | MARKENVLSTcons_impdec2
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_impdec2]
+    (_, xs1) => auxlst (xs1, res)
 //
 | MARKENVLSTcons_staload
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_staload]
+    (_, xs1) => auxlst (xs1, res)
 //
 | MARKENVLSTcons_tmpsub
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_tmpsub]
+    (_, xs1) => auxlst (xs1, res)
 //
 | MARKENVLSTcons_tmpcstmat
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_tmpcstmat]
+    (_, xs1) => auxlst (xs1, res)
 | MARKENVLSTcons_tmpvarmat
-    (_, !p_xs) => let
-    val res = auxlst (!p_xs, res) in fold@(xs); res
-  end // end of [MARKENVLSTcons_tmpvarmat]
+    (_, xs1) => auxlst (xs1, res)
 //
 ) (* end of [auxlst] *)
 //
-val CCOMPENV (!p) = env
-val d2vs = auxlst (p->ccompenv_markenvlst, list_vt_nil)
+val+ @CCOMPENV (p) = env
+val d2vs = auxlst (p.ccompenv_markenvlst, list_vt_nil)
 prval ((*void*)) = fold@ (env)
 //
 in
@@ -2925,13 +2576,13 @@ end // end of [ccompenv_get_tempenver]
 local
 
 val
-theFlag = ref<bool> (false)
+theFlag = cell_make ($UN.cast{ptr}(0))
 fun
-theFlag_get () = !theFlag
+theFlag_get () = ($UN.cast{int}(cell_get(theFlag)) != 0)
 fun
-theFlag_set () = !theFlag := true
+theFlag_set () = cell_set(theFlag, $UN.cast{ptr}(1))
 fun
-theFlag_unset () = !theFlag := false
+theFlag_unset () = cell_set(theFlag, $UN.cast{ptr}(0))
 
 in (* in-of-local *)
 
@@ -2947,11 +2598,11 @@ fprintln!
 //
 val () = theFlag_set()
 //
-val CCOMPENV(!p) = env
+val+ @CCOMPENV (p) = env
 //
-val xs = p->ccompenv_markenvlst
+val xs = p.ccompenv_markenvlst
 val () =
-  p->ccompenv_markenvlst := MARKENVLSTcons_tempenver(d2vs, xs)
+  p.ccompenv_markenvlst := MARKENVLSTcons_tempenver(d2vs, xs)
 //
 prval ((*void*)) = fold@ (env)
 //
@@ -3012,12 +2663,6 @@ case+ d2vs of
 ) (* end of [auxlst] *)
 //
 val d2vs = ccompenv_get2_tempenver(env)
-//
-(*
-val d2vs2 = $UN.list_vt2t{d2var}(d2vs)
-val ((*void*)) =
-fprintln! (stdout_ref, "ccompenv_dvarsetenv_add_tempenver: d2vs = ", d2vs2)
-*)
 //
 in
   auxlst(d2es, d2vs)

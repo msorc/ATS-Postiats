@@ -33,8 +33,12 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+#include "share/atspre_staload.hats"
+//
+staload UN = "prelude/SATS/unsafe.sats"
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -43,7 +47,10 @@ staload "./pats_counter.sats"
 (* ****** ****** *)
 
 assume count_t0ype = int
-assume counter_type = ref (count)
+//
+// HX: a counter is a cell in the global arena (never freed)
+//
+assume counter_type = ptr
 
 (* ****** ****** *)
 
@@ -52,22 +59,23 @@ implement count_get_int (x) = x
 (* ****** ****** *)
 
 implement
-lt_count_count (x1, x2) = lt_int_int (x1, x2)
+lt_count_count (x1, x2) = g0int_lt_int (x1, x2)
 implement
-lte_count_count (x1, x2) = lte_int_int (x1, x2)
+lte_count_count (x1, x2) = g0int_lte_int (x1, x2)
 
 implement
-gt_count_count (x1, x2) = gt_int_int (x1, x2)
+gt_count_count (x1, x2) = g0int_gt_int (x1, x2)
 implement
-gte_count_count (x1, x2) = gte_int_int (x1, x2)
+gte_count_count (x1, x2) = g0int_gte_int (x1, x2)
 
 implement
-eq_count_count (x1, x2) = eq_int_int (x1, x2)
+eq_count_count (x1, x2) = g0int_eq_int (x1, x2)
 implement
-neq_count_count (x1, x2) = neq_int_int (x1, x2)
+neq_count_count (x1, x2) = g0int_neq_int (x1, x2)
 
 implement
-compare_count_count (x1, x2) = compare_int_int (x1, x2)
+compare_count_count (x1, x2) =
+  if g0int_lt_int (x1, x2) then ~1 else (if g0int_gt_int (x1, x2) then 1 else 0)
 
 (* ****** ****** *)
 
@@ -76,37 +84,62 @@ fprint_count (out, x) = fprint_int (out, x)
 
 (* ****** ****** *)
 
+local
+
+fn
+strptr2gstring
+  (str: Strptr1): string = let
+  val res = the_garena_strdup ($UN.castvwtp1{string}(str))
+  val ((*freed*)) = strptr_free (str)
+in
+  res
+end // end of [strptr2gstring]
+
+in (* in-of-local *)
+
 implement
-tostring_count (cnt) = let
-  val str = sprintf ("%i", @(cnt)) in string_of_strptr (str)
-end // end of [tostring_count]
+tostring_count (cnt) = strptr2gstring (tostrptr_int (cnt))
 
 implement
 tostring_prefix_count (pre, cnt) = let
-  val str = sprintf ("%s%i", @(pre,cnt)) in string_of_strptr (str)
+  val str = tostrptr_int (cnt)
+  val res =
+    string0_append (pre, $UN.castvwtp1{string}(str))
+  val ((*freed*)) = strptr_free (str)
+in
+  strptr2gstring (res)
 end // end of [tostring_prefix_count]
+
+end // end of [local]
 
 (* ****** ****** *)
 //
 implement
-counter_make () = ref_make_elt<count> (0)
+counter_make () = let
+  val p = the_garena_alloc (sizeof<count>)
+  val () = $UN.ptr0_set<count> (p, 0)
+in
+  $UN.cast{counter}(p)
+end // end of [counter_make]
 //
 implement
-counter_inc (cntr) = !cntr := !cntr + 1
-implement counter_get (cntr) = !cntr
-implement counter_set (cntr, cnt) = !cntr := cnt
-implement counter_reset (cntr) = !cntr := 0
+counter_inc (cntr) = let
+  val p = $UN.cast{ptr}(cntr) in $UN.ptr0_set<count> (p, $UN.ptr0_get<count> (p) + 1)
+end // end of [counter_inc]
+implement counter_get (cntr) = $UN.ptr0_get<count> ($UN.cast{ptr}(cntr))
+implement counter_set (cntr, cnt) = $UN.ptr0_set<count> ($UN.cast{ptr}(cntr), cnt)
+implement counter_reset (cntr) = $UN.ptr0_set<count> ($UN.cast{ptr}(cntr), 0)
 //
 implement
 counter_getinc
   (cntr) = n where {
-  val n = !cntr ; val () = !cntr := n + 1
+  val n = counter_get (cntr) ; val () = counter_set (cntr, n + 1)
 } // end of [counter_getinc]
 //
 implement
 counter_incget
   (cntr) = n1 where {
-  val n1 = !cntr + 1; val () = !cntr := n1
+  val n1 = counter_get (cntr) + 1; val () = counter_set (cntr, n1)
 } // end of [counter_incget]
 //
 (* ****** ****** *)

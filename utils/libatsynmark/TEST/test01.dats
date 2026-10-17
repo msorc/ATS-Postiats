@@ -4,27 +4,34 @@
 ** Author: Hongwei Xi (gmhwxi AT gmail DOT com)
 ** Start Time: June 5, 2012
 *)
-
 (* ****** ****** *)
 //
 // HX: printing out all the tokens from the STDIN
 //
+// HX-2026-10: no GC (ATS2 port of the ATS1 version of this file)
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 //
 staload
 "./../SATS/libatsynmark.sats"
 //
 (* ****** ****** *)
-
-dynload "./../dynloadall.dats"
-
+//
+extern
+fun
+libatsynmark_dynloadall(): void = "ext#libatsynmark_dynloadall"
+//
 (* ****** ****** *)
 
 fun
 fileref_get_tokenlst
   (inp: FILEref): tokenlst_vt = let
 //
-val cs = char_list_vt_make_file (inp)
+val cs = libatsynmark_char_list_vt_make_file (inp)
 //
 val lbf = lexbufobj_make_charlst_vt (cs)
 //
@@ -39,7 +46,9 @@ end // end of [fileref_get_tokenlst]
 (* ****** ****** *)
 
 implement
-main() = let
+main0() = let
+//
+val () = libatsynmark_dynloadall ()
 //
 fun loop (
   xs: tokenlst_vt
@@ -63,7 +72,7 @@ val toks = fileref_get_tokenlst (stdin_ref)
 //
 in
   loop (toks)
-end // end of [main]
+end // end of [main0]
 
 (* ****** ****** *)
 

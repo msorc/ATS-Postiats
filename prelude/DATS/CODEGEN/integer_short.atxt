@@ -70,6 +70,6 @@ g0uint2uint<usintknd,uintknd> = g0uint2uint_usint_uint
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_short_atxt.txt")
 %}\

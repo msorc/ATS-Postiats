@@ -76,17 +76,17 @@ implement
 theTrigger_onclick_
   (chn, arg1, arg2) = let
 //
+// HX-2026-10: no GC (the arguments form a JSarray)
 val
-args =
-cons(arg1, cons(arg2, nil))
+args = JSarray_pair{string}(arg1, arg2)
 //
-typedef stringlst = List0(string)
+typedef stringarr = JSarray(string)
 //
 in
 //
-$CHANNEL.rpc_client<stringlst><int>
+$CHANNEL.rpc_client<stringarr><int>
 (
-  chn, args, lam(res) => alert(arg1 + " + " + arg2 + " = " + String(res))
+  chn, args, llam(res) => alert(arg1 + " + " + arg2 + " = " + String(res))
 )
 //
 end // end of [theTrigger_onclick_]

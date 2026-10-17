@@ -1560,7 +1560,7 @@ listize_g0uint_rep
 %{
 //
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_atxt.txt")
 //
 %}\

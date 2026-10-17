@@ -50,9 +50,10 @@ PHParref_make_elt{a:t0p}
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (the list is borrowed)
 fun
-PHParref_make_list
-  {a:t0p}(xs: List(INV(a))): PHParref(a) = "mac#%"
+PHParref_make_list_vt
+  {a:t0p}(xs: !List_vt(INV(a))): PHParref(a) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -110,11 +111,11 @@ PHParref2array
 (* ****** ****** *)
 //
 fun
-PHParref2list
-  {a:t0p}(A: PHParref(a)): List0(a) = "mac#%"
+PHParref2list_vt
+  {a:t0p}(A: PHParref(a)): List0_vt(a) = "mac#%"
 fun
-PHParref2list_rev
-  {a:t0p}(A: PHParref(a)): List0(a) = "mac#%"
+PHParref2list_vt_rev
+  {a:t0p}(A: PHParref(a)): List0_vt(a) = "mac#%"
 //
 (* ****** ****** *)
 //

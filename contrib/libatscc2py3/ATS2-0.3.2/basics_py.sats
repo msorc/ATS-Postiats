@@ -73,12 +73,6 @@ abstype PYdict (a:t@ype)
 //
 (* ****** ****** *)
 //
-fun
-lazy2cloref
-  {a:t0p}
-(
-  lazyval: lazy(a)
-) : ((*void*)) -<cloref1> (a) = "mac#%"
 //
 (* ****** ****** *)
 //

@@ -1,0 +1,2 @@
+5f283798aca6b000121b747cb2ca2570 080309b4ebe49f4d3aeee86094c16ef4  stdout/stderr of the ATS1-built m2dump1 (11321/3697 lines), M2SEED=1 M2SCALE=1; regenerated from the ATS1 output with the real util2/util3/solve/stacst2 (no stubs)
+5a3ddfbaddc55f83b8494c180f89f0bc  summary of the 7 scenarios that end the process (m2exit.sh ref), ATS1

@@ -9,91 +9,77 @@
 //
 (* ****** ****** *)
 
-local
 //
-typedef
-key = string and itm = int
+// HX-2026-10: no GC
+// the hashtable is linear (libats/hashtbl_chain)
 //
-in (* in-of-local *)
-
-#include "libats/ML/HATS/myhashtblref.hats"
-
-end // end of [local]
-
-(* ****** ****** *)
+staload "libats/SATS/hashtbl_chain.sats"
 //
-val mymap = myhashtbl_make_nil(1000)
+staload _(*anon*) = "libats/DATS/hashfun.dats"
+staload _(*anon*) = "libats/DATS/linmap_list.dats"
+staload _(*anon*) = "libats/DATS/qlist.dats"
+staload _(*anon*) = "libats/DATS/hashtbl_chain.dats"
+//
+typedef key = string and itm = int
+//
+val mymap = hashtbl_make_nil<key,itm>(i2sz(1000))
 //
 val () =
-fprintln! (stdout_ref, "mymap.size = ", mymap.size())
+fprintln! (stdout_ref, "mymap.size = ", hashtbl_get_size(mymap))
 val () =
-fprintln! (stdout_ref, "mymap.capacity = ", mymap.capacity())
+fprintln! (stdout_ref, "mymap.capacity = ", hashtbl_get_capacity(mymap))
 //
-(* ****** ****** *)
+val-~None_vt() = hashtbl_insert_opt(mymap, "a", 0)
+val-~Some_vt(0) = hashtbl_insert_opt(mymap, "a", 1)
 //
-val-~None_vt() = mymap.insert("a", 0)
-val-~Some_vt(0) = mymap.insert("a", 1)
+val-~None_vt() = hashtbl_insert_opt(mymap, "b", 1)
+val-~Some_vt(1) = hashtbl_insert_opt(mymap, "b", 2)
 //
-val-~None_vt() = mymap.insert("b", 1)
-val-~Some_vt(1) = mymap.insert("b", 2)
+val-~None_vt() = hashtbl_insert_opt(mymap, "c", 2)
+val-~Some_vt(2) = hashtbl_insert_opt(mymap, "c", 3)
 //
-val-~None_vt() = mymap.insert("c", 2)
-val-~Some_vt(2) = mymap.insert("c", 3)
-//
-(* ****** ****** *)
-//
-val () = assertloc (mymap.size() = 3)
+val () = assertloc (hashtbl_get_size(mymap) = 3)
 val () = fprintln! (stdout_ref, "mymap = ", mymap)
 //
-(* ****** ****** *)
-
-val-~None_vt() = mymap.search("")
-val-~Some_vt(1) = mymap.search("a")
-
-(* ****** ****** *)
+val-~None_vt() = hashtbl_search_opt(mymap, "")
+val-~Some_vt(1) = hashtbl_search_opt(mymap, "a")
 //
-val-true = mymap.remove("a")
-val-false = mymap.remove("a")
+val-true = hashtbl_remove(mymap, "a")
+val-false = hashtbl_remove(mymap, "a")
 //
-val-~Some_vt(2) = mymap.takeout("b")
-val-~Some_vt(3) = mymap.takeout("c")
+val-~Some_vt(2) = hashtbl_takeout_opt(mymap, "b")
+val-~Some_vt(3) = hashtbl_takeout_opt(mymap, "c")
 //
-(* ****** ****** *)
+val () = assertloc (hashtbl_get_size(mymap) = 0)
 //
-val () = assertloc (mymap.size() = 0)
-//
-(* ****** ****** *)
-//
-val () = mymap.insert_any("a", 0)
-val () = mymap.insert_any("b", 1)
-val () = mymap.insert_any("c", 2)
-val kxs = mymap.listize1((*void*))
+val () = hashtbl_insert_any(mymap, "a", 0)
+val () = hashtbl_insert_any(mymap, "b", 1)
+val () = hashtbl_insert_any(mymap, "c", 2)
+val kxs = hashtbl_listize1(mymap)
 val ((*void*)) = fprintln! (stdout_ref, "kxs = ", kxs)
-val kxs = mymap.takeout_all((*void*))
+val ((*void*)) = list_vt_free<(key,itm)>(kxs)
+val kxs = hashtbl_takeout_all(mymap)
 val ((*void*)) = fprintln! (stdout_ref, "kxs = ", kxs)
+val ((*void*)) = list_vt_free<(key,itm)>(kxs)
 //
-val () = assertloc (mymap.size() = 0)
+val () = assertloc (hashtbl_get_size(mymap) = 0)
 //
-(* ****** ****** *)
+val () = hashtbl_insert_any(mymap, "a", 0)
+val () = hashtbl_insert_any(mymap, "b", 1)
+val () = hashtbl_insert_any(mymap, "c", 2)
 //
-val () = mymap.insert_any("a", 0)
-val () = mymap.insert_any("b", 1)
-val () = mymap.insert_any("c", 2)
+val () = let
 //
-val () =
-myhashtbl_foreach_cloref
-(
-  mymap
-, lam (k, x) =>
-  fprintln! (stdout_ref, "k=", k, " and ", "x=", x)
-) (* myhashtbl_foreach_cloref *)
+implement
+hashtbl_foreach$fwork<key,itm><void>
+  (k, x, env) = fprintln! (stdout_ref, "k=", k, " and ", "x=", x)
 //
-val () =
-mymap.foreach()
-  (lam(k, x) => println! ("k=", k, " and ", "x=", x))
+in
+  hashtbl_foreach<key,itm> (mymap)
+end // end of [val]
 //
-(* ****** ****** *)
-
+val () = hashtbl_free (mymap)
+//
 implement main0 () = {}
 
 (* ****** ****** *)

@@ -34,6 +34,7 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 
+staload "./../../basics_js.sats" // HX-2026-10: for cfun_free
 staload "./../SATS/channel.sats"
 staload "./../SATS/channel_session.sats"
 
@@ -47,6 +48,15 @@ extern
 castfn
 chanpos1_session_decode{ss:type}
   : chanpos_session(ss) -<fun0> chanpos_nullify(ss)
+//
+// HX-2026-10: no GC
+// a session is a (target) function made from a closure
+extern
+fun
+chanpos1_session_make{ss:type}
+(
+  f: (chanpos(ss), chpcont0_nil) -<cloptr1> void
+) : chanpos_session(ss) = "mac#ats2jspre_cloref2fun2"
 //
 (* ****** ****** *)
 
@@ -62,9 +72,9 @@ val () =
 *)
 in
 //
-chanpos1_session_encode(
+chanpos1_session_make(
 //
-lam(chp, k0) => chanpos1_send(chp, fwork((*void*)), k0)
+lam(chp, k0) =<cloptr1> chanpos1_send(chp, fwork((*void*)), k0)
 //
 ) (* chanpos1_session_encode *)
 //
@@ -84,12 +94,12 @@ val () =
 *)
 in
 //
-chanpos1_session_encode(
+chanpos1_session_make(
 //
-lam(chp, k0) =>
+lam(chp, k0) =<cloptr1>
   chanpos1_recv
   ( chp
-  , lam(chp, msg) => let val () = fwork(chmsg_parse<a>(msg)) in k0(chp) end
+  , llam(chp, msg) => let val () = fwork(chmsg_parse<a>(msg)) in k0(chp); cfun_free(k0) end
   ) (* chanpos1_recv *)
 //
 ) (* chanpos1_session_encode *)
@@ -109,10 +119,10 @@ chanpos1_session_decode(ssp)
 //
 in
 //
-chanpos1_session_encode
+chanpos1_session_make
 (
 //
-lam(chp, k0) => let
+lam(chp, k0) =<cloptr1> let
   val () = fwork((*bef*)) in fnullify(chp, k0)
 end // end of [let]
 //
@@ -133,11 +143,11 @@ chanpos1_session_decode(ssp)
 //
 in
 //
-chanpos1_session_encode
+chanpos1_session_make
 (
 //
-lam(chp, k0) =>
-  fnullify(chp, lam(chp) => let val () = fwork() in k0(chp) end)
+lam(chp, k0) =<cloptr1>
+  fnullify(chp, llam(chp) => let val () = fwork() in k0(chp); cfun_free(k0) end)
 //
 ) (* chanpos1_session_encode *)
 //
@@ -147,7 +157,7 @@ end // end of [channpos1_session_finalize]
 //
 implement
 chanpos1_session_nil() =
-  chanpos1_session_encode(lam(chp, k0) => k0(chp))
+  chanpos1_session_make(lam(chp, k0) =<cloptr1> (k0(chp); cfun_free(k0)))
 //
 (* ****** ****** *)
 //
@@ -167,7 +177,7 @@ val ss1 = chanpos1_session_decode(ss1)
 val ss2 = chanpos1_session_decode(ss2)
 //
 in
-  chanpos1_session_encode(lam(chp, k0) => chanpos1_append(chp, k0, ss1, ss2))
+  chanpos1_session_make(lam(chp, k0) =<cloptr1> chanpos1_append(chp, k0, ss1, ss2))
 end // end of [channel1_session_append]
 
 (* ****** ****** *)
@@ -180,7 +190,7 @@ chanpos1_session_option_conj
 val ss0 = chanpos1_session_decode(ss0)
 //
 in
-  chanpos1_session_encode(lam(chp, k0) => chanpos1_option_conj(chp, k0, ss0))
+  chanpos1_session_make(lam(chp, k0) =<cloptr1> chanpos1_option_conj(chp, k0, ss0))
 end // end of [chanpos1_session_option_conj]
 
 (* ****** ****** *)
@@ -193,7 +203,7 @@ chanpos1_session_option_disj
 val ss0 = chanpos1_session_decode(ss0)
 //
 in
-  chanpos1_session_encode(lam(chp, k0) => chanpos1_option_disj(chp, k0, ss0))
+  chanpos1_session_make(lam(chp, k0) =<cloptr1> chanpos1_option_disj(chp, k0, ss0))
 end // end of [chanpos1_session_option_disj]
 
 (* ****** ****** *)
@@ -206,7 +216,7 @@ chanpos1_session_repeat_conj
 val ss0 = chanpos1_session_decode(ss0)
 //
 in
-  chanpos1_session_encode(lam(chp, k0) => chanpos1_repeat_conj(chp, k0, ss0))
+  chanpos1_session_make(lam(chp, k0) =<cloptr1> chanpos1_repeat_conj(chp, k0, ss0))
 end // end of [chanpos1_session_repeat_conj]
 
 (* ****** ****** *)
@@ -219,7 +229,7 @@ chanpos1_session_repeat_disj
 val ss0 = chanpos1_session_decode(ss0)
 //
 in
-  chanpos1_session_encode(lam(chp, k0) => chanpos1_repeat_disj(chp, k0, ss0))
+  chanpos1_session_make(lam(chp, k0) =<cloptr1> chanpos1_repeat_disj(chp, k0, ss0))
 end // end of [chanpos1_session_repeat_disj]
 
 (* ****** ****** *)
@@ -243,7 +253,7 @@ chanpos1_session_run_close
   (ss0, chp) =
 (
 //
-chanpos1_session_run(ss0, chp, lam(chp) => chanpos1_close(chp))
+chanpos1_session_run(ss0, chp, llam(chp) => chanpos1_close(chp))
 //
 ) // end of [chanpos1_session_run_close]
 

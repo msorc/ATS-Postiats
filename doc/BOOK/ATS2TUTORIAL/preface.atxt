@@ -42,5 +42,5 @@ effective use in the construction of high-quality programs.\
 #comment(" end of [preface.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "preface_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "preface_atxt.txt")
 %}

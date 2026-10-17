@@ -50,9 +50,9 @@ bin_atscc2erl
 bin_atscc2erl: \
 $(SOURCES_DATS); \
 $(PATSCC) \
--DATS_MEMALLOC_GCBDW \
+-DATS_MEMALLOC_LIBC \
 -O2 -o bin/atscc2erl \
-$(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS) -lgc
+$(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS)
 #
 ######
 #

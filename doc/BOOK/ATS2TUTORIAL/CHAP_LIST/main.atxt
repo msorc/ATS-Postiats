@@ -319,9 +319,9 @@ code used in this chapter plus some testing code.\
 
 %{
 //
-staload STDIO = "libc/SATS/stdio.sats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 //
-implement main () = {
+implement main0 () = {
 //
 val filr =
   $STDIO.fopen_ref_exn ("../TEMP/chap_list.dats", file_mode_w)

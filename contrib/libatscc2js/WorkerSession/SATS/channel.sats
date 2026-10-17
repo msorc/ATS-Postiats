@@ -52,12 +52,20 @@ LIBATSCC2JS_targetloc
 //
 (* ****** ****** *)
 //
-typedef
-cfun0(res: vt0p) = () -<cloref1> res
-typedef
-cfun1(a: vt0p, res: vt0p) = (a) -<cloref1> res
-typedef
-cfun2(a1: vt0p, a2: vt0p, res: vt0p) = (a1, a2) -<cloref1> res
+//
+// HX-2026-10: no GC
+// A continuation is called exactly once: it is a linear
+// closure (built with llam) that may hold linear values.
+// The functions that may be called many times (servers
+// and sessions) are (nonlinear) target functions, which
+// can be built from closures (e.g., chanpos_nullify_make).
+//
+vtypedef
+cfun0(res: vt0p) = () -<lincloptr1> res
+vtypedef
+cfun1(a: vt0p, res: vt0p) = (a) -<lincloptr1> res
+vtypedef
+cfun2(a1: vt0p, a2: vt0p, res: vt0p) = (a1, a2) -<lincloptr1> res
 //
 (* ****** ****** *)
 //
@@ -74,16 +82,16 @@ abstype channeg((*void*))
 //
 (* ****** ****** *)
 //
-typedef
+vtypedef
 chpcont0() = cfun1(chanpos(), void)
-typedef
+vtypedef
 chpcont1(a:t0p) = cfun2(chanpos(), a, void)
 //
 (* ****** ****** *)
 //
-typedef
+vtypedef
 chncont0() = cfun1(channeg(), void)
-typedef
+vtypedef
 chncont1(a:t0p) = cfun2(channeg(), a, void)
 //
 (* ****** ****** *)
@@ -143,13 +151,13 @@ fun
 {a:t0p}
 {b:t0p}
 rpc_server
-  (chanpos(), fopr: (a) -<cloref1> b): void = "mac#%"
+  (chanpos(), fopr: (a) -> b): void = "mac#%"
 //
 fun
 {a:t0p}
 {b:t0p}
 rpc_server_cont
-  (chanpos(), fopr: (a) -<cloref1> b): void = "mac#%"
+  (chanpos(), fopr: (a) -> b): void = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -157,7 +165,7 @@ fun
 {a:t0p}
 {b:t0p}
 rpc_client
-  (channeg(), a, (b) -<cloref1> void): void = "mac#%"
+  (channeg(), a, (b) -<lincloptr1> void): void = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -227,20 +235,20 @@ absvtype channeg(ss:type)
 
 (* ****** ****** *)
 //
-typedef
+vtypedef
 chpcont0(ss:type) = cfun1(chanpos(ss), void)
-typedef
+vtypedef
 chpcont1(ss:type, a:t0p) = cfun2(chanpos(ss), a, void)
 //
-typedef
+vtypedef
 chncont0(ss:type) = cfun1(channeg(ss), void)
-typedef
+vtypedef
 chncont1(ss:type, a:t0p) = cfun2(channeg(ss), a, void)
 //
 (* ****** ****** *)
 
-typedef chpcont0_nil = chpcont0(chnil)
-typedef chncont0_nil = chncont0(chnil)
+vtypedef chpcont0_nil = chpcont0(chnil)
+vtypedef chncont0_nil = chncont0(chnil)
 
 (* ****** ****** *)
 //
@@ -301,10 +309,23 @@ overload channel1_close with channeg1_close
 //
 typedef
 chanpos_nullify(ss:type) =
-  (chanpos(ss), chpcont0_nil) -<cloref1> void
+  (chanpos(ss), chpcont0_nil) -> void
 typedef
 channeg_nullify(ss:type) =
-  (channeg(ss), chncont0_nil) -<cloref1> void
+  (channeg(ss), chncont0_nil) -> void
+//
+// HX-2026-10: turning a closure into a nullify-function
+//
+fun
+chanpos_nullify_make{ss:type}
+(
+  f: (chanpos(ss), chpcont0_nil) -<cloptr1> void
+) : chanpos_nullify(ss) = "mac#ats2jspre_cloref2fun2"
+fun
+channeg_nullify_make{ss:type}
+(
+  f: (channeg(ss), chncont0_nil) -<cloptr1> void
+) : channeg_nullify(ss) = "mac#ats2jspre_cloref2fun2"
 //
 (* ****** ****** *)
 //

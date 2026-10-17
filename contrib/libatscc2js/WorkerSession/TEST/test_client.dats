@@ -145,13 +145,13 @@ in
 //
 $CHANNEL.channeg1_recv
 ( chn, 0
-, lam(chn) =>
+, llam(chn) =>
   $CHANNEL.channeg1_send
   ( chn
-  , lam(chn, a1) =>
+  , llam(chn, a1) =>
     $CHANNEL.channeg1_send
     ( chn
-    , lam(chn, a2) =>
+    , llam(chn, a2) =>
       ReplyIt(chn, $CHANNEL.chmsg_parse(a1), $CHANNEL.chmsg_parse(a2))
     )
   )
@@ -181,10 +181,10 @@ in
 //
 $CHANNEL.channeg1_recv
 ( chn, res
-, lam(chn) =>
+, llam(chn) =>
   $CHANNEL.channeg1_send
   ( chn
-  , lam(chn, yn) => PostRep(chn, $CHANNEL.chmsg_parse(yn))
+  , llam(chn, yn) => PostRep(chn, $CHANNEL.chmsg_parse(yn))
   )
 )
 //

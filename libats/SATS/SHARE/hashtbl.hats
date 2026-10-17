@@ -215,15 +215,6 @@ hashtbl_foreach$fwork(k: key, x: &itm >> _, &env >> _): void
 //
 (* ****** ****** *)
 //
-fun
-{key:t0p
-;itm:vt0p}
-hashtbl_foreach_cloref
-(
-  tbl: !hashtbl(key, INV(itm)), fwork: (key, &itm >> _) -<cloref1> void
-) : void // end-of-function
-//
-(* ****** ****** *)
 
 fun
 {key:t0p

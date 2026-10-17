@@ -22,12 +22,12 @@ implement{}
 fprint_commarg_
   (out, arg0) =
 (
-case+ arg0 of
-| CAhelp _ => fprint_commarg_$CAhelp<>(out, arg0)
-| CAgitem _ => fprint_commarg_$CAgitem<>(out, arg0)
-| CAnsharp _ => fprint_commarg_$CAnsharp<>(out, arg0)
-| CAinpfil _ => fprint_commarg_$CAinpfil<>(out, arg0)
-| CAoutfil _ => fprint_commarg_$CAoutfil<>(out, arg0)
+case+ commarg_view(arg0) of
+| ~CAhelp _ => fprint_commarg_$CAhelp<>(out, arg0)
+| ~CAgitem _ => fprint_commarg_$CAgitem<>(out, arg0)
+| ~CAnsharp _ => fprint_commarg_$CAnsharp<>(out, arg0)
+| ~CAinpfil _ => fprint_commarg_$CAinpfil<>(out, arg0)
+| ~CAoutfil _ => fprint_commarg_$CAoutfil<>(out, arg0)
 )
 //
 (* ****** ****** *)
@@ -89,7 +89,7 @@ implement{}
 fprint_commarg_$CAhelp$rpar(out, _) = fprint_commarg_$rpar(out)
 implement{}
 fprint_commarg_$CAhelp$arg1(out, arg0) =
-  let val-CAhelp(arg1) = arg0 in fprint_commarg_$carg(out, arg1) end
+  let val-~CAhelp(arg1) = commarg_view(arg0) in fprint_commarg_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -122,7 +122,7 @@ implement{}
 fprint_commarg_$CAgitem$rpar(out, _) = fprint_commarg_$rpar(out)
 implement{}
 fprint_commarg_$CAgitem$arg1(out, arg0) =
-  let val-CAgitem(arg1) = arg0 in fprint_commarg_$carg(out, arg1) end
+  let val-~CAgitem(arg1) = commarg_view(arg0) in fprint_commarg_$carg(out, arg1) end
 //
 extern
 fun{}
@@ -165,10 +165,10 @@ implement{}
 fprint_commarg_$CAnsharp$sep1(out, _) = fprint_commarg_$sep<>(out)
 implement{}
 fprint_commarg_$CAnsharp$arg1(out, arg0) =
-  let val-CAnsharp(arg1, _) = arg0 in fprint_commarg_$carg(out, arg1) end
+  let val-~CAnsharp(arg1, _) = commarg_view(arg0) in fprint_commarg_$carg(out, arg1) end
 implement{}
 fprint_commarg_$CAnsharp$arg2(out, arg0) =
-  let val-CAnsharp(_, arg2) = arg0 in fprint_commarg_$carg(out, arg2) end
+  let val-~CAnsharp(_, arg2) = commarg_view(arg0) in fprint_commarg_$carg(out, arg2) end
 //
 extern
 fun{}
@@ -211,10 +211,10 @@ implement{}
 fprint_commarg_$CAinpfil$sep1(out, _) = fprint_commarg_$sep<>(out)
 implement{}
 fprint_commarg_$CAinpfil$arg1(out, arg0) =
-  let val-CAinpfil(arg1, _) = arg0 in fprint_commarg_$carg(out, arg1) end
+  let val-~CAinpfil(arg1, _) = commarg_view(arg0) in fprint_commarg_$carg(out, arg1) end
 implement{}
 fprint_commarg_$CAinpfil$arg2(out, arg0) =
-  let val-CAinpfil(_, arg2) = arg0 in fprint_commarg_$carg(out, arg2) end
+  let val-~CAinpfil(_, arg2) = commarg_view(arg0) in fprint_commarg_$carg(out, arg2) end
 //
 extern
 fun{}
@@ -257,9 +257,9 @@ implement{}
 fprint_commarg_$CAoutfil$sep1(out, _) = fprint_commarg_$sep<>(out)
 implement{}
 fprint_commarg_$CAoutfil$arg1(out, arg0) =
-  let val-CAoutfil(arg1, _) = arg0 in fprint_commarg_$carg(out, arg1) end
+  let val-~CAoutfil(arg1, _) = commarg_view(arg0) in fprint_commarg_$carg(out, arg1) end
 implement{}
 fprint_commarg_$CAoutfil$arg2(out, arg0) =
-  let val-CAoutfil(_, arg2) = arg0 in fprint_commarg_$carg(out, arg2) end
+  let val-~CAoutfil(_, arg2) = commarg_view(arg0) in fprint_commarg_$carg(out, arg2) end
 //
 (* ****** ****** *)

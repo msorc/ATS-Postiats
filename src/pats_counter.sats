@@ -40,7 +40,7 @@ staload "./pats_basics.sats"
 abst@ype
 count_t0ype = int
 typedef count = count_t0ype
-abstype counter_type // ref (count_t)
+abstype counter_type = ptr // ref (count_t)
 typedef counter = counter_type
 
 (* ****** ****** *)

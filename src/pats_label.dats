@@ -33,10 +33,21 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
 staload
 SYM = "./pats_symbol.sats"
-overload
-compare with $SYM.compare_symbol_symbol
 
 (* ****** ****** *)
 
@@ -44,46 +55,42 @@ staload "./pats_label.sats"
 
 (* ****** ****** *)
 
-datatype
-label = LABint of int | LABsym of symbol
-assume label_type = label
+#include "./pats_label_gen_dats.hats"
 
 (* ****** ****** *)
 
 implement
-label_make_int (int) = LABint (int)
+label_make_int (int) = label_LABint (int)
 implement
-label_make_sym (sym) = LABsym (sym)
+label_make_sym (sym) = label_LABsym (sym)
 
 (* ****** ****** *)
 
 implement
 label_make_string (str) = let
-  val sym = $SYM.symbol_make_string (str) in LABsym (sym)
+  val sym = $SYM.symbol_make_string (str) in label_LABsym (sym)
 end // end of [label_make_string]
 
 (* ****** ****** *)
 
 implement
-label_is_int (l) = 
-  case+ l of LABint _ => true | LABsym _ => false
+label_is_int (l) = label_is_LABint (l)
 // end of [label_is_int]
 
 implement
 label_get_int (l) =
-  case+ l of LABint (x) => Some_vt (x) | _ => None_vt ()
+  case+ label_view (l) of ~LABint (x) => Some_vt (x) | ~LABsym _ => None_vt ()
 // end of [label_get_int]
 
 (* ****** ****** *)
 
 implement
-label_is_sym (l) = 
-  case+ l of LABint _ => false | LABsym _ => true
+label_is_sym (l) = label_is_LABsym (l)
 // end of [label_is_sym]
 
 implement
 label_get_sym (l) =
-  case+ l of LABsym (x) => Some_vt (x) | _ => None_vt ()
+  case+ label_view (l) of ~LABsym (x) => Some_vt (x) | ~LABint _ => None_vt ()
 // end of [label_get_sym]
 
 (* ****** ****** *)
@@ -92,14 +99,27 @@ implement
 label_dotize
   (l) = let
 //
+fun
+dotname_make
+  (name: string): string = let
+  val dn = string0_append (".", name)
+  val res = the_garena_strdup ($UN.strptr2string (dn))
+  val ((*freed*)) = strptr_free (dn)
+in
+  res
+end // end of [dotname_make]
+//
 val dotname = (
 //
-case+ l of
-| LABint (int) =>
-    string_of_strptr (sprintf (".%i", @(int)))
-  // end of [LABint]
-| LABsym (sym) =>
-    string_of_strptr (sprintf (".%s", @($SYM.symbol_get_name (sym))))
+case+ label_view (l) of
+| ~LABint (int) => let
+    val str = tostrptr_int (int)
+    val res = dotname_make ($UN.strptr2string (str))
+    val ((*freed*)) = strptr_free (str)
+  in
+    res
+  end // end of [LABint]
+| ~LABsym (sym) => dotname_make ($SYM.symbol_get_name (sym))
   // end of [LABsym]
 //
 ) : string // end of [val]
@@ -123,7 +143,7 @@ neq_label_label
 
 implement
 compare_label_label
-  (l1, l2) = let
+  (l1, l2) = $effmask_all let
 (*
 val () =
 println!
@@ -134,16 +154,18 @@ println!
 *)
 in
 //
-case+
-(l1, l2)
-of // case+
-//
-| (LABint i1, LABint i2) => compare(i1, i2)
-| (LABsym s1, LABsym s2) => compare(s1, s2)
-//
-| (LABint _, LABsym _) => ~1
-//
-| (LABsym _, LABint _) =>  1
+case+ label_view (l1) of
+| ~LABint i1 => (
+    case+ label_view (l2) of
+    | ~LABint i2 =>
+        (if i1 < i2 then ~1 else (if i1 > i2 then 1 else 0))
+    | ~LABsym _ => ~1
+  )
+| ~LABsym s1 => (
+    case+ label_view (l2) of
+    | ~LABint _ => 1
+    | ~LABsym s2 => $SYM.compare_symbol_symbol (s1, s2)
+  )
 //
 end // end of [compare_label_label]
 
@@ -154,11 +176,15 @@ tostring_label
   (l) = let
 in
 //
-case+ l of
-| LABint(int) =>
-    string_of_strptr(tostrptr_int(int))
-  // end of [LABint]
-| LABsym(sym) => $SYM.symbol_get_name(sym)
+case+ label_view (l) of
+| ~LABint(int) => let
+    val str = tostrptr_int(int)
+    val res = the_garena_strdup ($UN.strptr2string (str))
+    val ((*freed*)) = strptr_free (str)
+  in
+    res
+  end // end of [LABint]
+| ~LABsym(sym) => $SYM.symbol_get_name(sym)
 //
 end // end of [tostring_label]
 
@@ -172,9 +198,9 @@ prerr_label(x) = fprint_label(stderr_ref, x)
 implement
 fprint_label (out, x) =
 (
-  case+ x of
-  | LABint(int) => fprint_int(out, int)
-  | LABsym(sym) => $SYM.fprint_symbol(out, sym)
+  case+ label_view (x) of
+  | ~LABint(int) => fprint_int(out, int)
+  | ~LABsym(sym) => $SYM.fprint_symbol(out, sym)
 ) (* end of [fprint_label] *)
 //
 (* ****** ****** *)

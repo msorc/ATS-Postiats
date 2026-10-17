@@ -42,6 +42,7 @@
 
 -define(ATSSELcon(P, I), element(I+1, P)).
 -define(ATSSELboxrec(P, I), element(I+1, P)).
+-define(ATSSELfltrec(P, I), element(I+1, P)). %% HX-2026-10: flat records
 
 %% ****** ****** %%
 
@@ -71,8 +72,20 @@ ats2erlpre_atom2string(S) -> atom_to_list(S).
 
 %% ****** ****** %%
 %%
+%% HX-2026-10:
+%% linear lazy values: a thunk is called with true
+%% to evaluate it and with false to free it
+-define(ATSPMVllazyval_eval(LV), ?ATSfunclo_clo(LV)(LV, true)).
 %%fun%%
-atspre_lazy2cloref(Arg) -> exit('atspre_lazy2cloref').
+atspre_lazy_vt_free(LV) -> ?ATSfunclo_clo(LV)(LV, false).
+%%
+%% HX-2026-10:
+%% for building options (Option_vt) in the runtime
+%% (they used to be implemented in [option.dats])
+%%fun%%
+ats2erlpre_option_some(X) -> {X}.
+%%fun%%
+ats2erlpre_option_none() -> atscc2erl_null.
 %%
 %% ****** ****** %%
 

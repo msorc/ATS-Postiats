@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -153,11 +155,8 @@ The ATSLIB/prelude library\
 
 (* ****** ****** *)
 
-#packfilename("CATS/list.cats")
-#packfilename("CATS/option.cats")
 #packfilename("CATS/array.cats")
 #packfilename("CATS/arrayptr.cats")
-#packfilename("CATS/arrayref.cats")
 #packfilename("CATS/matrix.cats")
 #packfilename("CATS/matrixptr.cats")
 
@@ -211,18 +210,13 @@ The ATSLIB/prelude library\
 
 (* ****** ****** *)
 
-#packfilename("SATS/list.sats")
 #packfilename("SATS/list_vt.sats")
-#packfilename("SATS/option.sats")
 #packfilename("SATS/option_vt.sats")
 #packfilename("SATS/array.sats")
 #packfilename("SATS/array_prf.sats")
 #packfilename("SATS/arrayptr.sats")
-#packfilename("SATS/arrayref.sats")
 #packfilename("SATS/matrix.sats")
 #packfilename("SATS/matrixptr.sats")
-#packfilename("SATS/matrixref.sats")
-#packfilename("SATS/stream.sats")
 #packfilename("SATS/stream_vt.sats")
 
 #packfilename("SATS/gprint.sats")
@@ -301,16 +295,13 @@ The ATSLIB/prelude library\
 
 (* ****** ****** *)
 
-#packfilename("DATS/list.dats")
 
 #packfilename("DATS/list_vt.dats")
 #packfilename("DATS/SHARE/list_vt_mergesort.dats")
 #packfilename("DATS/SHARE/list_vt_quicksort.dats")
 
-#packfilename("DATS/option.dats")
 #packfilename("DATS/option_vt.dats")
 
-#packfilename("DATS/stream.dats")
 #packfilename("DATS/stream_vt.dats")
 
 #packfilename("DATS/array.dats")
@@ -319,13 +310,10 @@ The ATSLIB/prelude library\
 #packfilename("DATS/SHARE/array_quicksort.dats")
 
 #packfilename("DATS/arrayptr.dats")
-#packfilename("DATS/arrayref.dats")
 
 #packfilename("DATS/matrix.dats")
 #packfilename("DATS/matrixptr.dats")
-#packfilename("DATS/matrixref.dats")
 
-#packfilename("DATS/stream.dats")
 #packfilename("DATS/stream_vt.dats")
 
 #packfilename("DATS/gprint.dats")
@@ -344,7 +332,7 @@ The ATSLIB/prelude library\
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

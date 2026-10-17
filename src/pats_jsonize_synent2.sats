@@ -6,7 +6,7 @@
 
 (*
 ** ATS/Postiats - Unleashing the Potential of Types!
-** Copyright (C) 2011-2014 Hongwei Xi, ATS Trustful Software, Inc.
+** Copyright (C) 2011-2013 Hongwei Xi, ATS Trustful Software, Inc.
 ** All rights reserved
 **
 ** ATS is free software;  you can  redistribute it and/or modify it under
@@ -41,7 +41,11 @@
 //
 // HX-2014-12-09: Reorganizing
 //
+// HX-2026-10: no GC (ATS2 port of src/pats_jsonize_synent2.sats, see PORTING.md, "Level-2 jsonize")
+//
 (* ****** ****** *)
+//
+staload "libats/SATS/arena.sats"
 //
 staload
 JSON = "./pats_jsonize.sats"
@@ -79,7 +83,7 @@ fun jsonize_d2con (d2c: d2con): jsonval
 fun jsonize_d2con_long (d2c: d2con): jsonval
 fun jsonize_d2conlst (d2cs: d2conlst): jsonval
 //
-fun jsonize_tyreckind : tyreckind -> jsonval
+fun jsonize_tyreckind (knd: tyreckind): jsonval
 //
 fun jsonize_s2exp (flag: int, s2e: s2exp): jsonval
 fun jsonize_s2explst (flag: int, s2es: s2explst): jsonval

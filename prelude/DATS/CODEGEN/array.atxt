@@ -376,21 +376,21 @@ implement
 array_copy_from_list
   (A, xs) = let
 //
-prval() = lemma_list_param(xs)
+prval() = lemma_list_vt_param(xs)
 //
 fun loop
   {l:addr}{n:nat} .<n>.
 (
   pf: !array_v (a?, l, n) >> array_v (a, l, n)
-| p0: ptr l, xs: list (a, n)
+| p0: ptr l, xs: !list_vt(a, n)
 ) :<!wrt> void = (
   case+ xs of
-  | list_nil() => let
+  | list_vt_nil() => let
       prval () = (pf := array_v_unnil_nil(pf))
     in
       // nothing
-    end // end of [list_nil]
-  | list_cons(x, xs) => let
+    end // end of [list_vt_nil]
+  | list_vt_cons(x, xs) => let
       prval
       (pf1, pf2) = array_v_uncons(pf)
       val () = !p0 := x
@@ -398,7 +398,7 @@ fun loop
       prval () = (pf := array_v_cons(pf1, pf2))
     in
       // nothing
-    end // end of [list_cons]
+    end // end of [list_vt_cons]
 ) (* end of [loop] *)
 //
 in
@@ -902,46 +902,23 @@ implement
 array_initize_list
   {n} (A, asz, xs) = let
 //
-typedef list0 = listGte (a, 0)
-typedef list1 = listGte (a, 1)
-//
 fun loop
 (
-  p0: ptr, p1: ptr, xs: list0
-) : void = let
+  p0: ptr, xs: !List0_vt(a)
+) : void =
+(
+case+ xs of
+| list_vt_nil() => ()
+| list_vt_cons(x, xs1) => let
+    val () = $UN.ptr0_set<a>(p0, x)
+  in
+    loop(ptr_succ<a>(p0), xs1)
+  end // end of [list_vt_cons]
+) (* end of [loop] *)
 //
-(*
+prval() = lemma_list_vt_param(xs)
 //
-val () =
-println!
-  ("array_initize_list: loop")
-//
-*)
-//
-in
-//
-if (
-p0 < p1
-) then let
-  val xs =
-    $UN.cast{list1}(xs)
-  // end of [val]
-  val+list_cons(x, xs) = xs
-  val () =
-    $UN.ptr0_set<a>(p0, x)
-  // end of [val]
-  val p0 = ptr_succ<a>(p0)
-in
-  loop(p0, p1, xs)
-end else () // end of [if]
-//
-end // end of [loop]
-//
-prval() = lemma_list_param(xs)
-//
-val p0 = addr@(A)
-val p1 = ptr_add<a>(p0, asz)
-val () = $effmask_all(loop(p0, p1, xs))
+val () = $effmask_all(loop(addr@(A), xs))
 //
 prval() =
 __assert(A) where
@@ -964,49 +941,34 @@ implement
 array_initize_rlist
   {n} (A, asz, xs) = let
 //
-typedef list0 = listGte (a, 0)
-typedef list1 = listGte (a, 1)
-//
 fun loop
 (
-  pz: ptr, p0: ptr, xs: list0
-) : void = let
+  pz: ptr, xs: !List0_vt(a)
+) : void =
+(
+case+ xs of
+| list_vt_nil() => ()
+| list_vt_cons(x, xs1) => let
+    val pz = ptr_pred<a>(pz)
+    val () = $UN.ptr0_set<a>(pz, x)
+  in
+    loop(pz, xs1)
+  end // end of [list_vt_cons]
+) (* end of [loop] *)
 //
-(*
+prval() = lemma_list_vt_param(xs)
 //
-val () =
-println!
-  ("array_initize_rlist: loop")
-//
-*)
-//
-in
-//
-if pz > p0 then let
-  val xs =
-    $UN.cast{list1}(xs)
-  // end of [val]
-  val+list_cons(x, xs) = xs
-  val pz = ptr_pred<a>(pz)
-  val () = $UN.ptr0_set<a>(pz, x)
-in
-  loop(pz, p0, xs)
-end else () // end of [if]
-//
-end // end of [loop]
-//
-prval() = lemma_list_param(xs)
-//
-val p0 = addr@(A)
-val pz = ptr_add<a>(p0, asz)
-val () = $effmask_all(loop(pz, p0, xs))
+val pz = ptr_add<a>(addr@(A), asz)
+val () = $effmask_all(loop(pz, xs))
 //
 prval() =
 __assert(A) where
 {
+//
 extern
 praxi
 __assert (A: &array(a?, n) >> array(a, n)): void
+//
 } (* end of [prval] *)
 //
 in
@@ -1321,6 +1283,6 @@ end // end of [array_permute]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "array_atxt.txt")
 %}\

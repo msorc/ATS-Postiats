@@ -1,0 +1,71 @@
+(* the test doubles of the driver of the test of the level-3 translation, group 3 (t3g3_gen.py), generated from t3g3env.tmpl (see t3hand.tmpl):
+   the functions of pats_trans3.sats that the modules of group 3 call and that belong to the other groups. Each call is recorded ("G3 ..." on stdout). *)
+(* ****** ****** *)
+2|fun g3_vartype (d2v: d2var): s2exp = (
+2|  case+ gopt_view (d2var_get_type (d2v)) of ~GOsome (e) => e | ~GOnone () => s2exp_t0ype_err ()
+2|)
+1|fun g3_vartype (d2v: d2var): s2exp = (
+1|  case+ d2var_get_type (d2v) of Some (e) => e | None () => s2exp_t0ype_err ()
+1|)
+2|fun g3_p2loc (p: p2at): location = p.p2at_loc ()
+1|fun g3_p2loc (p: p2at): location = p.p2at_loc
+fun g3_note (name: string): void = (dd_ps "G3 "; dd_ps name; dd_ps " ")
+fun g3_dl (d3ls: d3lablst): void = dd_d3lablst d3ls
+2|implement d2exp_trup (d2e) = let
+2|  val loc = d2e.d2exp_loc ()
+2|  val () = (g3_note "d2exp_trup"; fprint_d2exp (dd_out, d2e); dd_nl ())
+2|in
+2|  case+ d2exp_node_view (d2e.d2exp_node ()) of
+2|  | ~D2Eint (i) => d3exp_int (loc, s2exp_g1int_kind_index_t0ype (g3_kint (), s2exp_int (i)), i)
+2|  | ~D2Evar (d2v) => d3exp_var (loc, g3_vartype (d2v), d2v)
+2|  | v => (d2exp_node_view_free (v); d3exp_errexp (loc))
+2|end
+1|implement d2exp_trup (d2e) = let
+1|  val loc = d2e.d2exp_loc
+1|  val () = (g3_note "d2exp_trup"; fprint_d2exp (dd_out, d2e); dd_nl ())
+1|in
+1|  case+ d2e.d2exp_node of
+1|  | D2Eint (i) => d3exp_int (loc, s2exp_g1int_kind_index_t0ype (g3_kint (), s2exp_int (i)), i)
+1|  | D2Evar (d2v) => d3exp_var (loc, g3_vartype (d2v), d2v)
+1|  | _ => d3exp_errexp (loc)
+1|end
+2|implement d2explst_trup (d2es) = let
+2|  fun loop (d2es: d2explst): d3explst =
+2|    case+ glist_view (d2es) of
+2|    | ~GLnil () => glist_nil ()
+2|    | ~GLcons (d2e, d2es) => let val d3e = d2exp_trup (d2e) in glist_cons (d3e, loop (d2es)) end
+2|in loop (d2es) end
+1|implement d2explst_trup (d2es) = let
+1|  fun loop (d2es: d2explst): d3explst =
+1|    case+ d2es of
+1|    | list_nil () => list_nil ()
+1|    | list_cons (d2e, d2es) => let val d3e = d2exp_trup (d2e) in list_cons (d3e, loop (d2es)) end
+1|in loop (d2es) end
+implement d2exp_trup_var_nonmut (loc, d2v) = let
+  val () = (g3_note "d2exp_trup_var_nonmut"; dd_d2var d2v; dd_nl ())
+in
+  d3exp_var (loc, g3_vartype (d2v), d2v)
+end
+implement d2exp_trup_deref (loc0, d2s, d2e, d2ls) = let
+  val () = (g3_note "d2exp_trup_deref"; fprint_d2exp (dd_out, d2e); dd_ps " "; fprint_d2lablst (dd_out, d2ls); dd_nl ())
+in
+  d3exp_errexp (loc0)
+end
+implement s2addr_deref (loc0, s2l, d3ls, s2rt) = let
+  val () = (g3_note "s2addr_deref"; dd_s2exp s2l; dd_ps " "; g3_dl d3ls; dd_nl ())
+  val () = s2rt := s2l
+in
+  s2exp_int (77)
+end
+implement s2addr_set_viewat (loc0, s2l, d3ls, s2at_new) =
+  (g3_note "s2addr_set_viewat"; dd_s2exp s2l; dd_ps " "; g3_dl d3ls; dd_ps " "; dd_s2exp s2at_new; dd_nl ())
+implement p2at_trdn_con (p2t, s2f) = let
+  val () = (g3_note "p2at_trdn_con"; dd_p2at p2t; dd_ps " "; dd_s2exp (s2hnf2exp (s2f)); dd_nl ())
+in
+  p3at_errpat (g3_p2loc (p2t), s2hnf2exp (s2f))
+end
+implement intrep_syn_type (loc0, rep) = s2exp_int_t0ype ()
+implement intrep_syn_type_ind (loc0, rep) = s2exp_g1int_kind_index_t0ype (g3_kint (), s2exp_int ($UN.cast{int} (string_length (rep))))
+implement i0nt_syn_type (x) = s2exp_int_t0ype ()
+implement i0nt_syn_type_ind (x) = s2exp_g1int_kind_index_t0ype (g3_kint (), s2exp_int (7))
+implement f0loat_syn_type (x) = s2exp_double_t0ype ()

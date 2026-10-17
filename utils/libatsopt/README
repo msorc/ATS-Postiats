@@ -12,7 +12,8 @@
 #
 ######
 
-Assume that ATS1 is already installed.
+ATS1 is not needed: the compiler (src/) is written in ATS2, see src/README
+for the stage-0 compiler (PATSOPT=..., STAGE0HOME=...).
 Assume that ATS2-github is checked out, which is
 the version of ATS2 stored in the following directory:
 

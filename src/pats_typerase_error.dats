@@ -24,7 +24,6 @@
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
 ** 02110-1301, USA.
 *)
-
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -33,46 +32,73 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_typerase_error.dats, see PORTING.md, "Type erasure (typerase)")
+// The errors are kept in a cell of the global arena as a [glist].
 //
 (* ****** ****** *)
 
-staload ERR = "./pats_error.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload ERR = "./pats_error.sats"
+staload _(*ERR*) = "./pats_error.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+staload "./pats_avlmap.sats"
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
+staload "./pats_dynexp3.sats"
+staload "./pats_histaexp.sats"
+staload "./pats_hidynexp.sats"
 staload "./pats_typerase.sats"
 
 (* ****** ****** *)
 
-viewtypedef
-trans4errlst_vt = List_vt (trans4err)
+#include "./pats_typerase_gen_dats.hats"
+
+(* ****** ****** *)
+
+typedef
+trans4errlst = glist (trans4err)
 
 (* ****** ****** *)
 
 local
-//
-val
-the_trans4errlst =
-  ref<trans4errlst_vt> (list_vt_nil)
-//
+
+val the_trans4errlst = let
+  val p = the_garena_alloc (sizeof<trans4errlst>)
+  val () = $UN.ptr0_set<trans4errlst> (p, glist_nil ())
+in
+  p
+end // end of [val]
+
 fun
 the_trans4errlst_get
-  (): trans4errlst_vt = let
-  val (vbox pf | p) = ref_get_view_ptr (the_trans4errlst)
-  val xs = !p
-  val () = !p := list_vt_nil ()
+  (): trans4errlst = let
+  val xs = $UN.ptr0_get<trans4errlst> (the_trans4errlst)
+  val () = $UN.ptr0_set<trans4errlst> (the_trans4errlst, glist_nil ())
 in
   xs
 end // end of [the_trans4errlst_get]
-//
+
 in (* in of [local] *)
 
 implement
 the_trans4errlst_add (x) = () where {
-  val (vbox pf | p) = ref_get_view_ptr (the_trans4errlst)
-  val () = !p := list_vt_cons (x, !p)
+  val xs = $UN.ptr0_get<trans4errlst> (the_trans4errlst)
+  val () = $UN.ptr0_set<trans4errlst> (the_trans4errlst, glist_cons (x, xs))
 } // end of [the_trans4errlst_add]
 
 implement
@@ -81,16 +107,14 @@ the_trans4errlst_finalize
   val xs =
     the_trans4errlst_get ()
   // end of [val]
-  val nxs = list_vt_length (xs)
-  val ((*freed*)) = list_vt_free (xs)
+  val nxs = glist_length (xs)
 // (*
   val () =
   if nxs > 0 then {
-    val () =
-    fprintf (
-      stderr_ref
-    , "patsopt(TYPERASE): there are [%i] errors in total.\n", @(nxs)
-    ) (* end of [fprintf] *)
+    val err = stderr_ref
+    val () = fprint_string (err, "patsopt(TYPERASE): there are [")
+    val () = fprint_int (err, nxs)
+    val () = fprint_string (err, "] errors in total.\n")
   } (* end of [if] *) // end of [val]
 // *)
   val () =

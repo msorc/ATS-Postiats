@@ -1,8 +1,5 @@
 %{
 //
-dynload
-"libatsdoc/dynloadall.dats"
-//
 #include "./../proginatsatxt.dats"
 //
 %}\
@@ -955,7 +952,7 @@ the first half. As an example, the function template
 implement{a}
 rat_make_numer_denom (p, q) = let
   fun make (p: a, q: a): rat a = let
-    val r = intgcd (p, q) in (p \intdiv r, q \intdiv r)
+    val r = intgcd (p, q) in (p \\\intdiv r, q \\\intdiv r)
   end // end of [make]
 in
   if intgtz (q)
@@ -966,7 +963,7 @@ end // end of [rat_make_numer_denom]
 
 Note that the backslash symbol (#code("\\\\")) temporarily assigns the
 infix status to the identifier immediately following it.  For instance, the
-syntax #code("p \intdiv r") simply stands for the function application
+syntax #code("p \\\intdiv r") simply stands for the function application
 #code("intdiv(p, r)").
 ")#comment("para")
 
@@ -1011,5 +1008,5 @@ that have already been implemented generically.
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

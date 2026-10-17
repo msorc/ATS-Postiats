@@ -21,12 +21,6 @@ include $(PATSHOME)/share/atsmake-post.mk
 
 ######
 
-all:: \
-mergesort_sllist
-mergesort_sllist: \
-  mergesort_sllist.dats ; $(PATSCC2) -DATS_MEMALLOC_LIBC -o $@ $^
-regress:: mergesort_sllist ; ./$<
-cleanall:: ; $(RMF) mergesort_sllist
 
 ######
 
@@ -39,12 +33,6 @@ cleanall:: ; $(RMF) mergesort_list_vt
 
 ######
 
-all:: \
-quicksort_sllist
-quicksort_sllist: \
-  quicksort_sllist.dats ; $(PATSCC2) -DATS_MEMALLOC_LIBC -o $@ $^
-regress:: quicksort_sllist ; ./$<
-cleanall:: ; $(RMF) quicksort_sllist
 
 ######
 
@@ -65,15 +53,15 @@ $(PATSHOMEQ)/bin/pats2xhtml
 #
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSHOMEQ="$(PATSHOME)"
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 
 INPATH :=
 INPATH += -I$(PATSHOME)/src
-INPATH += -IATS $(PATSHOME) -IATS $(ATSHOME)
+INPATH += -IATS $(PATSHOME)
 
 LDPATH :=
 LDPATH += -L$(PATSHOME)/ccomp/atslib/lib
@@ -81,14 +69,14 @@ LDPATH += -L$(PATSHOME)/ccomp/atslib/lib
 #LDPATH += -L$(PATSHOME)/utils/libatsynmark
 
 LIBRARY :=
-LIBRARY := -latsynmark -latsdoc -latsopt -lats -lgmp
+LIBRARY := -latsynmark -latsdoc -latslib -latsopt -lgmp
 
 ######
 #
 main.exe: \
 main_atxt.dats ; \
-$(ATSCC) \
-  -D_ATS_GCATS \
+$(PATSCC) \
+  -DATS_MEMALLOC_LIBC \
   $(INPATH) -o $@ $< $(LDPATH) $(LIBRARY)
 #
 main_atxt.dats: main.atxt; \

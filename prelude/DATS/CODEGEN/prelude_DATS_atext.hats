@@ -11,8 +11,6 @@
 (* ****** ****** *)
 //
 staload
-_(*anon*) = "prelude/DATS/list.dats"
-staload
 _(*anon*) = "prelude/DATS/list_vt.dats"
 //
 (* ****** ****** *)
@@ -27,7 +25,7 @@ g0int_implist
 fun
 fopr (
   opr: string
-) :<cloref1> atext = let
+) : atext = let
 //
 val x = sprintf
 ("\
@@ -43,7 +41,7 @@ end // end of [fopr]
 fun
 fprnt (
 // argless
-) :<cloref1> atext = let
+) : atext = let
 //
 val x = sprintf
 ("\
@@ -59,50 +57,50 @@ in
 end // end of [fprnt]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr"neg", res)
-val () = res := list_cons(fopr"abs", res)
+val () = res := glist_cons(fopr"neg", res)
+val () = res := glist_cons(fopr"abs", res)
 //
-val () = res := list_cons(fopr"succ", res)
-val () = res := list_cons(fopr"pred", res)
+val () = res := glist_cons(fopr"succ", res)
+val () = res := glist_cons(fopr"pred", res)
 //
-val () = res := list_cons(fopr"half", res)
+val () = res := glist_cons(fopr"half", res)
 //
-val () = res := list_cons(fopr"add", res)
-val () = res := list_cons(fopr"sub", res)
-val () = res := list_cons(fopr"mul", res)
-val () = res := list_cons(fopr"div", res)
-val () = res := list_cons(fopr"mod", res)
+val () = res := glist_cons(fopr"add", res)
+val () = res := glist_cons(fopr"sub", res)
+val () = res := glist_cons(fopr"mul", res)
+val () = res := glist_cons(fopr"div", res)
+val () = res := glist_cons(fopr"mod", res)
 //
-val () = res := list_cons(fopr"asl", res)
-val () = res := list_cons(fopr"asr", res)
+val () = res := glist_cons(fopr"asl", res)
+val () = res := glist_cons(fopr"asr", res)
 //
-val () = res := list_cons(fopr"isltz", res)
-val () = res := list_cons(fopr"isltez", res)
-val () = res := list_cons(fopr"isgtz", res)
-val () = res := list_cons(fopr"isgtez", res)
-val () = res := list_cons(fopr"iseqz", res)
-val () = res := list_cons(fopr"isneqz", res)
+val () = res := glist_cons(fopr"isltz", res)
+val () = res := glist_cons(fopr"isltez", res)
+val () = res := glist_cons(fopr"isgtz", res)
+val () = res := glist_cons(fopr"isgtez", res)
+val () = res := glist_cons(fopr"iseqz", res)
+val () = res := glist_cons(fopr"isneqz", res)
 //
-val () = res := list_cons(fopr"lt", res)
-val () = res := list_cons(fopr"lte", res)
-val () = res := list_cons(fopr"gt", res)
-val () = res := list_cons(fopr"gte", res)
-val () = res := list_cons(fopr"eq", res)
-val () = res := list_cons(fopr"neq", res)
+val () = res := glist_cons(fopr"lt", res)
+val () = res := glist_cons(fopr"lte", res)
+val () = res := glist_cons(fopr"gt", res)
+val () = res := glist_cons(fopr"gte", res)
+val () = res := glist_cons(fopr"eq", res)
+val () = res := glist_cons(fopr"neq", res)
 //
-val () = res := list_cons(fopr"compare", res)
+val () = res := glist_cons(fopr"compare", res)
 //
-val () = res := list_cons(fopr"max", res)
-val () = res := list_cons(fopr"min", res)
+val () = res := glist_cons(fopr"max", res)
+val () = res := glist_cons(fopr"min", res)
 //
-val () = res := list_cons(atext_strcst("//\n"), res)
+val () = res := glist_cons(atext_strcst("//\n"), res)
 //
-val () = res := list_cons(fprnt((*void*)), res)
+val () = res := glist_cons(fprnt((*void*)), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0int_implist]
 //
 fun
@@ -125,7 +123,7 @@ fun
 fopr
 (
   opr: string
-) :<cloref1> atext = let
+) : atext = let
 //
 val x = sprintf
 ("\
@@ -139,46 +137,46 @@ in
 end // end of [fopr]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr"neg", res)
-val () = res := list_cons(fopr"abs", res)
+val () = res := glist_cons(fopr"neg", res)
+val () = res := glist_cons(fopr"abs", res)
 //
-val () = res := list_cons(fopr"succ", res)
-val () = res := list_cons(fopr"pred", res)
+val () = res := glist_cons(fopr"succ", res)
+val () = res := glist_cons(fopr"pred", res)
 //
-val () = res := list_cons(fopr"half", res)
+val () = res := glist_cons(fopr"half", res)
 //
-val () = res := list_cons(fopr"add", res)
-val () = res := list_cons(fopr"sub", res)
-val () = res := list_cons(fopr"mul", res)
-val () = res := list_cons(fopr"div", res)
+val () = res := glist_cons(fopr"add", res)
+val () = res := glist_cons(fopr"sub", res)
+val () = res := glist_cons(fopr"mul", res)
+val () = res := glist_cons(fopr"div", res)
 (*
-val () = res := list_cons(fopr"mod", res) // HX: skipped
+val () = res := glist_cons(fopr"mod", res) // HX: skipped
 *)
-val () = res := list_cons(fopr"nmod", res)
+val () = res := glist_cons(fopr"nmod", res)
 //
-val () = res := list_cons(fopr"isltz", res)
-val () = res := list_cons(fopr"isltez", res)
-val () = res := list_cons(fopr"isgtz", res)
-val () = res := list_cons(fopr"isgtez", res)
-val () = res := list_cons(fopr"iseqz", res)
-val () = res := list_cons(fopr"isneqz", res)
+val () = res := glist_cons(fopr"isltz", res)
+val () = res := glist_cons(fopr"isltez", res)
+val () = res := glist_cons(fopr"isgtz", res)
+val () = res := glist_cons(fopr"isgtez", res)
+val () = res := glist_cons(fopr"iseqz", res)
+val () = res := glist_cons(fopr"isneqz", res)
 //
-val () = res := list_cons(fopr"lt", res)
-val () = res := list_cons(fopr"lte", res)
-val () = res := list_cons(fopr"gt", res)
-val () = res := list_cons(fopr"gte", res)
-val () = res := list_cons(fopr"eq", res)
-val () = res := list_cons(fopr"neq", res)
+val () = res := glist_cons(fopr"lt", res)
+val () = res := glist_cons(fopr"lte", res)
+val () = res := glist_cons(fopr"gt", res)
+val () = res := glist_cons(fopr"gte", res)
+val () = res := glist_cons(fopr"eq", res)
+val () = res := glist_cons(fopr"neq", res)
 //
-val () = res := list_cons(fopr"compare", res)
+val () = res := glist_cons(fopr"compare", res)
 //
-val () = res := list_cons(fopr"max", res)
-val () = res := list_cons(fopr"min", res)
+val () = res := glist_cons(fopr"max", res)
+val () = res := glist_cons(fopr"min", res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g1int_implist]
 //
 (* ****** ****** *)
@@ -194,7 +192,7 @@ fun
 fopr
 (
   opr: string
-) :<cloref1> atext = let
+) : atext = let
 //
 val x = sprintf
 ("\
@@ -210,7 +208,7 @@ end // end of [f]
 fun
 fprnt (
 // argless
-):<cloref1> atext = let
+): atext = let
 //
 val x = sprintf
 ("\
@@ -227,49 +225,49 @@ in
 end // end of [fpr]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr"succ", res)
-val () = res := list_cons(fopr"pred", res)
+val () = res := glist_cons(fopr"succ", res)
+val () = res := glist_cons(fopr"pred", res)
 //
-val () = res := list_cons(fopr"half", res)
+val () = res := glist_cons(fopr"half", res)
 //
-val () = res := list_cons(fopr"add", res)
-val () = res := list_cons(fopr"sub", res)
-val () = res := list_cons(fopr"mul", res)
-val () = res := list_cons(fopr"div", res)
-val () = res := list_cons(fopr"mod", res)
+val () = res := glist_cons(fopr"add", res)
+val () = res := glist_cons(fopr"sub", res)
+val () = res := glist_cons(fopr"mul", res)
+val () = res := glist_cons(fopr"div", res)
+val () = res := glist_cons(fopr"mod", res)
 //
-val () = res := list_cons(fopr"lsl", res)
-val () = res := list_cons(fopr"lsr", res)
+val () = res := glist_cons(fopr"lsl", res)
+val () = res := glist_cons(fopr"lsr", res)
 //
-val () = res := list_cons(fopr"lnot", res)
-val () = res := list_cons(fopr"lor", res)
-val () = res := list_cons(fopr"lxor", res)
-val () = res := list_cons(fopr"land", res)
+val () = res := glist_cons(fopr"lnot", res)
+val () = res := glist_cons(fopr"lor", res)
+val () = res := glist_cons(fopr"lxor", res)
+val () = res := glist_cons(fopr"land", res)
 //
-val () = res := list_cons(fopr"isgtz", res)
-val () = res := list_cons(fopr"iseqz", res)
-val () = res := list_cons(fopr"isneqz", res)
+val () = res := glist_cons(fopr"isgtz", res)
+val () = res := glist_cons(fopr"iseqz", res)
+val () = res := glist_cons(fopr"isneqz", res)
 //
-val () = res := list_cons(fopr"lt", res)
-val () = res := list_cons(fopr"lte", res)
-val () = res := list_cons(fopr"gt", res)
-val () = res := list_cons(fopr"gte", res)
-val () = res := list_cons(fopr"eq", res)
-val () = res := list_cons(fopr"neq", res)
+val () = res := glist_cons(fopr"lt", res)
+val () = res := glist_cons(fopr"lte", res)
+val () = res := glist_cons(fopr"gt", res)
+val () = res := glist_cons(fopr"gte", res)
+val () = res := glist_cons(fopr"eq", res)
+val () = res := glist_cons(fopr"neq", res)
 //
-val () = res := list_cons(fopr"compare", res)
+val () = res := glist_cons(fopr"compare", res)
 //
-val () = res := list_cons(fopr"max", res)
-val () = res := list_cons(fopr"min", res)
+val () = res := glist_cons(fopr"max", res)
+val () = res := glist_cons(fopr"min", res)
 //
-val () = res := list_cons(atext_strcst("//\n"), res)
+val () = res := glist_cons(atext_strcst("//\n"), res)
 //
-val () = res := list_cons(fprnt((*void*)), res)
+val () = res := glist_cons(fprnt((*void*)), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0uint_implist]
 //
 (* ****** ****** *)
@@ -284,7 +282,7 @@ g1uint_implist
 fun
 fopr (
   opr: string
-) :<cloref1> atext = let
+) : atext = let
 //
 val
 res =
@@ -300,41 +298,41 @@ in
 end // end of [fopr]
 //
 var
-res: atextlst = list_nil((*void*))
+res: atextlst = glist_nil((*void*))
 //
-val () = res := list_cons(fopr"succ", res)
-val () = res := list_cons(fopr"pred", res)
+val () = res := glist_cons(fopr"succ", res)
+val () = res := glist_cons(fopr"pred", res)
 //
-val () = res := list_cons(fopr"half", res)
+val () = res := glist_cons(fopr"half", res)
 //
-val () = res := list_cons(fopr"add", res)
-val () = res := list_cons(fopr"sub", res)
-val () = res := list_cons(fopr"mul", res)
-val () = res := list_cons(fopr"div", res)
-val () = res := list_cons(fopr"mod", res)
+val () = res := glist_cons(fopr"add", res)
+val () = res := glist_cons(fopr"sub", res)
+val () = res := glist_cons(fopr"mul", res)
+val () = res := glist_cons(fopr"div", res)
+val () = res := glist_cons(fopr"mod", res)
 //
 (*
-val () = res := list_cons(fopr"mod", res) // HX: skipped
+val () = res := glist_cons(fopr"mod", res) // HX: skipped
 *)
 //
-val () = res := list_cons(fopr"isgtz", res)
-val () = res := list_cons(fopr"iseqz", res)
-val () = res := list_cons(fopr"isneqz", res)
+val () = res := glist_cons(fopr"isgtz", res)
+val () = res := glist_cons(fopr"iseqz", res)
+val () = res := glist_cons(fopr"isneqz", res)
 //
-val () = res := list_cons(fopr"lt", res)
-val () = res := list_cons(fopr"lte", res)
-val () = res := list_cons(fopr"gt", res)
-val () = res := list_cons(fopr"gte", res)
-val () = res := list_cons(fopr"eq", res)
-val () = res := list_cons(fopr"neq", res)
+val () = res := glist_cons(fopr"lt", res)
+val () = res := glist_cons(fopr"lte", res)
+val () = res := glist_cons(fopr"gt", res)
+val () = res := glist_cons(fopr"gte", res)
+val () = res := glist_cons(fopr"eq", res)
+val () = res := glist_cons(fopr"neq", res)
 //
-val () = res := list_cons(fopr"compare", res)
+val () = res := glist_cons(fopr"compare", res)
 //
-val () = res := list_cons(fopr"max", res)
-val () = res := list_cons(fopr"min", res)
+val () = res := glist_cons(fopr"max", res)
+val () = res := glist_cons(fopr"min", res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g1uint_implist]
 //
 fun

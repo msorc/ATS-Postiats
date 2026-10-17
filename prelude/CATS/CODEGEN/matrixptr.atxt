@@ -49,6 +49,6 @@ atspre_matrixptr_free
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "matrixptr_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "matrixptr_atxt.txt")
 %}\
 

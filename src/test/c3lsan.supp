@@ -1,0 +1,2 @@
+# the words of the data file that the driver passes to the symbol table (c3drv.c: c3_str) are kept by ATS1 and never freed
+leak:c3_str

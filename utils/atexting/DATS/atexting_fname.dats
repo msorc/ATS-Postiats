@@ -42,39 +42,37 @@
 staload
 "./../SATS/atexting.sats"
 //
-(* ****** ****** *)
-//
-datatype
-filename = FNAME of (string)
-//
-assume filename_type = filename
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
-
-implement
-filename_dummy = FNAME ("")
-implement
-filename_stdin = FNAME ("__STDIN__")
-implement
-filename_string = FNAME ("__STRING__")
-
+//
+// HX-2026-10: no GC
+// a filename is a string (kept in the global arena)
+//
+assume filename_type = string
+//
 (* ****** ****** *)
-
 implement
-filename_make(path) = FNAME(path)
-
+filename_dummy = ""
+implement
+filename_stdin = "__STDIN__"
+implement
+filename_string = "__STRING__"
 (* ****** ****** *)
-
+implement
+filename_make(path) = the_garena_strdup(path)
+(* ****** ****** *)
 implement
 fprint_filename
-  (out, fil) = let
-//
-val+FNAME (fname) = fil
-//
-in
-  fprint_string (out, fname)
-end // end of [fprint_filename]
-
+  (out, fil) = fprint_string(out, fil)
 (* ****** ****** *)
-
+implement
+strptr2gstring(x) = let
+  val str =
+  the_garena_strdup($UNSAFE.strptr2string(x))
+in
+  strptr_free(x); str
+end // end of [strptr2gstring]
+(* ****** ****** *)
 (* end of [atexting_fname.dats] *)

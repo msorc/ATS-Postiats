@@ -1,0 +1,43 @@
+######
+#
+# Atsdoc: the text processor for .atxt files
+#
+######
+
+An .atxt file is a text with placeholders, #name(args) (or #name{text}, or #name),
+and blocks of ATS code between a line that starts with %{ and a line that starts with
+%} (also %{^ ... as in ATS1). atsdoc translates it into an ATS2 program (--outcode)
+and the text (stdout, or --outdata) where each placeholder is replaced by #__tokN$
+(the program binds __tokN to the value of the call and puts it in theAtextMap). The
+program is linked with libatsdoc (../../libatsdoc) and prints the text with the
+placeholders replaced by the values.
+
+    usage: atsdoc <command> ... <command>
+      -i filenames | --input filenames     the input files (stdin if there is none)
+      -oc filename | --outcode filename    where the program goes (stdout)
+      -od filename | --outdata filename    where the text goes (stdout)
+      --prefix string                      the prefix of the names __tokN
+      -h | --help                          the usage
+
+The file names are printed as they are given in the messages (position and error).
+The options and their quirks are those of the ATS1 version of atsdoc (a file name
+after -i that starts with a hyphen is an option once a file was given, -h counts as an
+input, ...); the messages and the exit status are the same.
+
+atsdoc is written in ATS2 without GC (the modules of ../../src for the lexical buffer,
+the positions and the file names, linked from libatsopt.a); ATS1 is not needed.
+HATS/ holds the helper files that the .atxt files include (postiatsatxt.hats,
+xhtmlatxt.hats, docbookatxt.hats, pats2xhtmlatxt.hats, pats2dbookatxt.hats), ported to ATS2.
+The differences from the ATS1 version are listed in src/PORTING.md ("atsdoc and libatsdoc").
+
+######
+
+Building:
+
+  make                  # BUILD/atsdoc, copied to $(PATSHOME)/bin/atsdoc; libatsdoc.a, copied
+                        # to $(PATSHOME)/ccomp/atslib/lib (libatsopt.a is built if it is missing)
+  make check            # typechecks the files
+  make test             # TEST/: the md5 suite (python3; see TEST/Makefile)
+  make -f ../../Makefile_devl bin_atsdoc    # the same, from the root (not part of [all])
+
+######

@@ -17,9 +17,6 @@ LIBATSREC_targetloc
 //
 #include
 "share/atspre_staload.hats"
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
 //
 (* ****** ****** *)
 //
@@ -38,6 +35,8 @@ LIBATSREC_targetloc
 "{$ATEXTING}/mylibies_link.hats"
 //
 #staload $ATEXTING // opening it
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -62,7 +61,15 @@ ifcase
 )
 //
 in
-string_foreach(cs, lam(c) => charpr(c))
+loop(string2ptr(cs)) where
+{
+  fun
+  loop(p: ptr): void = let
+    val c = $UNSAFE.ptr0_get<char>(p)
+  in
+    if c != '\000' then (charpr(c); loop(ptr_succ<char>(p)))
+  end // end of [loop]
+} (* end of [where] *)
 end // end of [html_print]
 
 (* ****** ****** *)
@@ -87,26 +94,28 @@ end // end of [local]
 //
 (* ****** ****** *)
 //
-abstype
-myentry_type = ptr
-local
-assume
-myentry_type = gvhashtbl
-in (*nothing*) end
 //
-(* ****** ****** *)
-
+// HX-2026-10: no GC
+// an entry is a list of (key, value) pairs in the
+// global arena; the DB is a linear hashtable that is
+// kept as a pointer (it lives until the program exits)
+//
 typedef
-myentry = myentry_type
-
-(* ****** ****** *)
+myentry = glist(@(string, string))
 //
-extern
 fun
-theDB_size
+myentry_get
 (
-// argless
-) : intGte(0) // endfun
+  ent: myentry, key: string
+) : string =
+(
+case+ glist_view(ent) of
+| ~GLnil() => ""
+| ~GLcons(kv, ent) =>
+    if kv.0 = key then kv.1 else myentry_get(ent, key)
+)
+//
+(* ****** ****** *)
 //
 extern
 fun
@@ -125,34 +134,43 @@ theDB_insert
 extern fun theDB_initize(): void
 //
 (* ****** ****** *)
-//
+
 local
 //
 typedef
 key = string and itm = myentry
 //
-implement
-fprint_val<myentry>
-(out, x0) =
-fprint_string(out, "<myentry>")
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/hashtbl_chain.sats"
+staload _ = "libats/DATS/qlist.dats"
+staload _ = "libats/DATS/hashfun.dats"
+staload _ = "libats/DATS/linmap_list.dats"
+staload _ = "libats/DATS/hashtbl_chain.dats"
 //
-#include
-"libats/ML/HATS/myhashtblref.hats"
+vtypedef map = hashtbl(key, itm)
 //
+var
+theDB_var: ptr =
+  $UN.castvwtp0{ptr}(hashtbl_make_nil<key,itm>(i2sz(1024)))
 val
-theDB = myhashtbl_make_nil(1024)
+theDB =
+  ref_make_viewptr{ptr}(view@theDB_var | addr@theDB_var)
 //
 in
 //
 implement
-theDB_size() = theDB.size()
-//
-implement
-theDB_search(k) = theDB.search(k)
+theDB_search(k) = opt where
+{
+  val tbl = $UN.castvwtp0{map}(theDB[])
+  val opt = hashtbl_search_opt<key,itm>(tbl, k)
+  val _ = $UN.castvwtp0{ptr}(tbl)
+}
 implement
 theDB_insert(k, x) =
 {
-  val-~None_vt() = theDB.insert(k, x)
+  val tbl = $UN.castvwtp0{map}(theDB[])
+  val () = hashtbl_insert_any<key,itm>(tbl, k, x)
+  val _ = $UN.castvwtp0{ptr}(tbl)
 } (* end of [theDB_insert] *)
 //
 (* ****** ****** *)
@@ -166,43 +184,45 @@ fileref_open_opt
 val-
 ~Some_vt(inp) = opt
 //
-val xs =
-$LIBATSREC.streamize_fileref_gvhashtbl(inp, 8)
-//
-in
-//
-let
-reassume myentry_type
+// a record turned into an entry (its strings are
+// copied into the global arena and then freed)
 //
 fun
-fwork
-(x0: myentry): void = let
+entry_make
+(
+  kvs: $LIBATSREC.atsrec
+) : myentry =
+(
+case+ kvs of
+| ~list_vt_nil() => glist_nil()
+| ~list_vt_cons(kv, kvs) => let
+    val @(k, v) = kv
+    val kv2 = @(strptr2gstring(k), strptr2gstring(v))
+  in
+    glist_cons<@(string,string)>(kv2, entry_make(kvs))
+  end // end of [list_vt_cons]
+)
 //
-val gv = x0["name"]
-//
-val () = 
-fprintln!
-(stderr_ref, "fwork: gv = ", gv)
-//
-in
-case+ gv of
-| GVstring(key) =>
-  (
-    theDB_insert(key, x0)
-  )
-| _(*non-GVstring*) => () where
-  {
-(*
+fun
+loop
+(
+  xs: stream_vt($LIBATSREC.atsrec)
+) : void =
+(
+case+ !xs of
+| ~stream_vt_nil() => ()
+| ~stream_vt_cons(x0, xs) => let
+    val ent = entry_make(x0)
+    val name = myentry_get(ent, "name")
     val () =
-    fprintln! (stderr_ref, "fwork: x0 = ", x0)
-*)
-  }
-end // end of [fwork]
+    if name != "" then theDB_insert(name, ent)
+  in
+    loop(xs)
+  end // end of [stream_vt_cons]
+)
 //
 in
-  stream_vt_foreach_cloptr(xs, lam(x) => fwork(x))
-end // end of [let]
-//
+  loop($LIBATSREC.streamize_fileref_atsrec(inp))
 end // end of [theDB_initize]
 
 (* ****** ****** *)
@@ -213,12 +233,7 @@ end // end of [local]
 
 local
 //
-macdef
-uns(x) =
-GVstring_uncons(,(x))
-//
-reassume myentry_type
-//
+
 (* ****** ****** *)
 
 fun
@@ -231,7 +246,7 @@ xs: atextlst
 {
 //
 val-
-cons0(x0, _) = xs
+~GLcons(x0, _) = glist_view(xs)
 //
 val x0 = atext_strngfy(x0)
 val-
@@ -240,7 +255,7 @@ val-
 val () =
 print!("extern\n")
 val () =
-print!(uns(ent["interface"]))
+print!(myentry_get(ent, "interface"))
 //
 val res = atext_make_nil(l0)
 //
@@ -256,14 +271,14 @@ xs: atextlst
 {
 //
 val-
-cons0(x0, _) = xs
+~GLcons(x0, _) = glist_view(xs)
 //
 val x0 = atext_strngfy(x0)
 val-
 ~Some_vt(ent) = theDB_search(x0)
 //
 val () =
-print!(uns(ent["implement"]))
+print!(myentry_get(ent, "implement"))
 //
 val res = atext_make_nil(l0)
 //
@@ -281,7 +296,7 @@ xs: atextlst
 {
 //
 val-
-cons0(x0, _) = xs
+~GLcons(x0, _) = glist_view(xs)
 //
 val x0 = atext_strngfy(x0)
 val-
@@ -306,7 +321,7 @@ print!("\
 val () =
 print!("<sats2xhtml>")
 val () =
-html_print(uns(ent["interface"]))
+html_print(myentry_get(ent, "interface"))
 val () = println!("</sats2xhtml>")
 //
 val () =
@@ -315,7 +330,7 @@ print!("\
 val () =
 print!("<dats2xhtml>")
 val () =
-html_print(uns(ent["implement"]))
+html_print(myentry_get(ent, "implement"))
 val () = println!("</dats2xhtml>")
 //
 val () =
@@ -324,7 +339,7 @@ print!("\
 val () =
 print!("<description>")
 val () =
-println!(uns(ent["description"]))
+println!(myentry_get(ent, "description"))
 val () = println!("</description>")
 //
 val () = println!("</div>")
@@ -346,7 +361,7 @@ the_atextmap_insert
 (
 "interface"
 ,
-TEXTDEFfun(lam(loc, xs) => __interface__(loc, xs))
+atextdef_TEXTDEFfun(lam(loc, xs) => __interface__(loc, xs))
 ) (* the_atextmap_insert *)
 
 val () =
@@ -354,7 +369,7 @@ the_atextmap_insert
 (
 "implement"
 ,
-TEXTDEFfun(lam(loc, xs) => __implement__(loc, xs))
+atextdef_TEXTDEFfun(lam(loc, xs) => __implement__(loc, xs))
 ) (* the_atextmap_insert *)
 
 (* ****** ****** *)
@@ -364,7 +379,7 @@ the_atextmap_insert
 (
 "html_dynfun"
 ,
-TEXTDEFfun(lam(loc, xs) => __html_dynfun__(loc, xs))
+atextdef_TEXTDEFfun(lam(loc, xs) => __html_dynfun__(loc, xs))
 ) (* the_atextmap_insert *)
 
 (* ****** ****** *)
@@ -373,15 +388,6 @@ end // end of [local]
 
 (* ****** ****** *)
 //
-fun
-myentry_make_nil
-(
-// argmentless
-) : myentry = let
-  reassume myentry_type
-in
-  gvhashtbl_make_nil(10)
-end // end of [myentry_make_nil]
 //
 (* ****** ****** *)
 //

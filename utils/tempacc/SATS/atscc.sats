@@ -33,7 +33,13 @@
 
 (* ****** ****** *)
 
-datatype commarg =
+//
+// HX-2026-10: no GC
+// command-line arguments are kept in linear lists;
+// the strings stored in [commarg] values are taken
+// from [argv] and are never freed
+//
+datavtype commarg =
 //
   | CAhats of () // -hats: patsopt --help
   | CAvats of () // -vats: patsopt --version 
@@ -62,36 +68,50 @@ datatype commarg =
 
 (* ****** ****** *)
 //
-typedef
-commarglst = List0(commarg)
 vtypedef
-commarglst_vt = List0_vt(commarg)
+commarglst = List0_vt(commarg)
+//
+fun
+commarg_copy(ca: !commarg): commarg
+fun
+commarg_free(ca: commarg): void
+fun
+commarglst_free(cas: commarglst): void
+//
+(* ****** ****** *)
+//
+// HX-2026-10:
+// each argument of a command-line is owned
+//
+vtypedef arglst = List0_vt(Strptr1)
+//
+fun arglst_free(args: arglst): void
 //
 (* ****** ****** *)
 //
 fun
-fprint_commarg(out: FILEref, ca: commarg): void
+fprint_commarg(out: FILEref, ca: !commarg): void
 fun
-fprint_commarglst(out: FILEref, cas: commarglst): void
+fprint_commarglst{n:int}(out: FILEref, cas: !list_vt(commarg, n)): void
 //
 overload fprint with fprint_commarg of 0
 overload fprint with fprint_commarglst of 10
 //
 (* ****** ****** *)
 //
-fun{} atsopt_get(): string
+fun{} atsopt_get(): Strptr1
 fun{} atsopt_print_usage(): void
 //
 (* ****** ****** *)
 //
-fun{} atsccomp_get(): string
-fun{} atsccomp_get2(cas: commarglst): string
+fun{} atsccomp_get(): Strptr1
+fun{} atsccomp_get2{n:int}(cas: !list_vt(commarg, n)): Strptr1
 //
 (* ****** ****** *)
 //
 // HX: flag=0/1:static/dynamic
 //
-fun atscc_outname(flag: int, path: string): string
+fun atscc_outname(flag: int, path: string): Strptr1
 //
 (* ****** ****** *)
 
@@ -100,61 +120,61 @@ fun atsccproc_commline{n:int}(int n, !argv(n)): commarglst
 (* ****** ****** *)
 //
 fun
-fprint_atsoptline
+fprint_atsoptline{n:int}
 (
-  out: FILEref, cas: commarglst, ca0: commarg
+  out: FILEref, cas: !list_vt(commarg, n), ca0: !commarg
 ) : void // end of [fprint_atsoptline]
 //
 fun
-fprint_atsoptline_all(FILEref, commarglst): void
+fprint_atsoptline_all{n:int}(FILEref, !list_vt(commarg, n)): void
 //
 (* ****** ****** *)
 
 fun
-fprint_atsccompline(out: FILEref, cas: commarglst): void
+fprint_atsccompline{n:int}(out: FILEref, cas: !list_vt(commarg, n)): void
 
 (* ****** ****** *)
 //
 fun
-atsoptline_make
-  (cas: !RD(commarglst), ca0: commarg): stringlst_vt
+atsoptline_make{n:int}
+  (cas: !list_vt(commarg, n), ca0: !commarg): arglst
 //
 fun
-atsoptline_make_all(cas: commarglst): List0_vt(stringlst_vt)
+atsoptline_make_all{n:int}(cas: !list_vt(commarg, n)): List0_vt(arglst)
 //
 (* ****** ****** *)
 
-fun atsccompline_make(cas: commarglst): stringlst_vt
+fun atsccompline_make{n:int}(cas: !list_vt(commarg, n)): arglst
 
 (* ****** ****** *)
 //
 fun
 atsoptline_exec
 ( flag: int
-, atsopt: string, args: stringlst_vt): int(*status*)
+, atsopt: string, args: arglst): int(*status*)
 fun
 atsoptline_exec_all
 ( flag: int
-, atsopt: string, args: List_vt (stringlst_vt)): int(*status*)
+, atsopt: string, args: List0_vt(arglst)): int(*status*)
 //
 (* ****** ****** *)
 //
 fun
-atsccomp_cont(cas: commarglst): bool
+atsccomp_cont{n:int}(cas: !list_vt(commarg, n)): bool
 //
 fun
 atsccompline_exec
-  (flag: int, atsccomp: string, args: stringlst_vt): int(*status*)
+  (flag: int, atsccomp: string, args: arglst): int(*status*)
 //
 (* ****** ****** *)
 
-fun atscc_is_help(cas: commarglst): bool
-fun atscc_is_verbose(cas: commarglst): bool
+fun atscc_is_help{n:int}(cas: !list_vt(commarg, n)): bool
+fun atscc_is_verbose{n:int}(cas: !list_vt(commarg, n)): bool
 
 (* ****** ****** *)
 
-fun atscc_cleanaft_cont(cas: commarglst): bool
-fun atscc_cleanaft_exec(flag: int, cas: commarglst): void
+fun atscc_cleanaft_cont{n:int}(cas: !list_vt(commarg, n)): bool
+fun atscc_cleanaft_exec{n:int}(flag: int, cas: !list_vt(commarg, n)): void
 
 (* ****** ****** *)
 

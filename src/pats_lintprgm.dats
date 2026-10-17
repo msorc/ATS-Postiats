@@ -33,10 +33,16 @@
 //
 (* ****** ****** *)
 //
-staload
-UN =
-"prelude/SATS/unsafe.sats"
+// HX-2026-10: no GC (ATS2 port of src/pats_lintprgm.dats, see PORTING.md
+// "Constraint solver (lintprgm)")
 //
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+//
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
 (* ****** ****** *)
 
 staload "./pats_utils.sats"
@@ -80,12 +86,22 @@ implement{a}
 myintvec_get_at
   (iv, i) = x where {
   val (pf | p) = myintvec_takeout (iv)
-  val i = size1_of_int1 (i)
-  val (pfat, fpf | p_i) = array_ptr_takeout (pf | p, i)
+  val (pfat, fpf | p_i) = array_ptr_takeout<myint(a)> (pf | p, i2sz(i))
   val x = myint_copy (!p_i)
   prval () = pf := fpf (pfat)
   prval () = myintvecout_addback (pf | iv)
 } // end of [myintvec_get_at]
+
+implement{a}
+myintvec_set_at
+  (iv, i, x) = () where {
+  val (pf | p) = myintvec_takeout (iv)
+  val (pfat, fpf | p_i) = array_ptr_takeout<myint(a)> (pf | p, i2sz(i))
+  val () = myint_free (!p_i)
+  val () = !p_i := x
+  prval () = pf := fpf (pfat)
+  prval () = myintvecout_addback (pf | iv)
+} // end of [myintvec_set_at]
 
 (* ****** ****** *)
 
@@ -93,8 +109,7 @@ implement{a}
 myintvec_compare_at
   (iv, i, x) = sgn where {
   val (pf | p) = myintvec_takeout (iv)
-  val i = size1_of_int1 (i)
-  val (pfat, fpf | p_i) = array_ptr_takeout (pf | p, i)
+  val (pfat, fpf | p_i) = array_ptr_takeout<myint(a)> (pf | p, i2sz(i))
   val sgn = compare_myint_int (!p_i, x)
   prval () = pf := fpf (pfat)
   prval () = myintvecout_addback (pf | iv)
@@ -124,19 +139,35 @@ myintvec0_free
   val (pfgc, pf | p) = __cast (xs) where {
     extern castfn __cast
       (x: myintvec0 (a, n))
-      :<> [l:addr] (free_gc_v (vt?, n, l), array_v(vt?, n, l) | ptr l)
+      :<> [l:addr] (mfree_gc_v (l), array_v(vt?, l, n) | ptr l)
   } // end of [val]
 in
-  array_ptr_free (pfgc, pf | p)
+  $effmask_wrt (array_ptr_free (pf, pfgc | p))
 end // end of [myintvec0_free]
 
 implement{a}
 myintvec_free (iv, n) = let
   vtypedef x = myint(a)
+//
+  fun loop
+    {n:nat}{l:addr} .<n>.
+  (
+    pf: !array_v (x, l, n) >> array_v (x?, l, n) | p: ptr l, n: int n
+  ) : void =
+    if n > 0 then let
+      prval (pf1, pf2) = array_v_uncons {x} (pf)
+      val () = myint_free<a> (!p)
+      val () = loop (pf2 | ptr_succ<x> (p), n-1)
+      prval () = pf := array_v_cons {x?} (pf1, pf2)
+    in
+      // nothing
+    end else let
+      prval () = array_v_unnil (pf) in pf := array_v_nil {x?} ()
+    end // end of [if]
+//
   prval () = lemma_myintvec_params (iv)
   val (pfarr | p) = myintvec_takeout (iv)
-  val asz = size1_of_int1 (n)
-  val () = array_ptr_clear_fun<x> (!p, asz, lam (x) =<0> myint_free<a> (x))
+  val () = loop (pfarr | p, n)
   prval () = myintvecout0_addback {a} (pfarr | iv)
 in
   myintvec0_free (iv, n)
@@ -147,33 +178,37 @@ end // end of [myintvec_free]
 implement{a}
 icnstr_copy (ic, n) =
   case+ ic of
-  | ICvec (knd, !p_iv) => let
-      val iv_new = myintvec_copy<a> (!p_iv, n)
+  | @ICvec (knd, iv) => let
+      val iv_new = myintvec_copy<a> (iv, n)
+      val knd1 = knd
     in
-      fold@ (ic); ICvec (knd, iv_new)
+      fold@ (ic); ICvec (knd1, iv_new)
     end // end of [ICvec]
-  | ICveclst (knd, !p_ics) => let
-      val ics_new = icnstrlst_copy (!p_ics, n)
+  | @ICveclst (knd, ics) => let
+      val ics_new = icnstrlst_copy<a> (ics, n)
+      val knd1 = knd
     in
-      fold@ (ic); ICveclst (knd, ics_new)
+      fold@ (ic); ICveclst (knd1, ics_new)
     end // end of [ICveclst]
-  | ICerr (loc, s3e) => (fold@ (ic); ICerr (loc, s3e))
+  | @ICerr (loc, s3e) => let
+      val loc1 = loc and s3e1 = s3e
+    in
+      fold@ (ic); ICerr (loc1, s3e1)
+    end // end of [ICerr]
 // end of [icnstr_copy]
 
 implement{a}
 icnstrlst_copy (ics, n) =
   case+ ics of
-  | list_vt_cons
-      (!p_ic, !p_ics1) => let
-      val ic = icnstr_copy<a> (!p_ic, n)
-      val ics1 = icnstrlst_copy<a> (!p_ics1, n)
+  | @list_vt_cons
+      (ic, ics1) => let
+      val ic_new = icnstr_copy<a> (ic, n)
+      val ics1_new = icnstrlst_copy<a> (ics1, n)
       prval () = fold@ (ics)
     in
-      list_vt_cons (ic, ics1)
+      list_vt_cons (ic_new, ics1_new)
     end // end of [list_vt_cons]
-  | list_vt_nil () => let
-      prval () = fold@ (ics) in list_vt_nil ()
-    end // end of [list_vt_nil]
+  | list_vt_nil () => list_vt_nil ()
 // end of [icnstrlst_copy]
 
 (* ****** ****** *)
@@ -181,25 +216,28 @@ icnstrlst_copy (ics, n) =
 implement{a}
 icnstr_negate (ic) =
   case+ ic of
-  | ICvec (!p_knd, _) => (
-      !p_knd := ~(!p_knd); fold@ (ic); ic
+  | @ICvec (knd, _) => (
+      knd := ~(knd); fold@ (ic); ic
     ) // end of [ICvec]
-  | ICveclst (!p_knd, !p_ics) => (
-      !p_knd := 1-(!p_knd); !p_ics := icnstrlst_negate (!p_ics); fold@ ic; ic
-    ) // end of [ICveclst]
-  | ICerr _ => (fold@ (ic); ic)
+  | @ICveclst (knd, ics) => let
+      val () = knd := 1-knd
+      val () = ics := icnstrlst_negate<a> (ics)
+    in
+      fold@ (ic); ic
+    end // end of [ICveclst]
+  | @ICerr _ => (fold@ (ic); ic)
 // end of [icnstr_negate]
 
 implement{a}
 icnstrlst_negate (ics) =
   case+ ics of
-  | list_vt_cons (!p_ic, !p_ics) => let
-      val () = !p_ic := icnstr_negate (!p_ic)
-      val () = !p_ics := icnstrlst_negate (!p_ics)
+  | @list_vt_cons (ic, ics1) => let
+      val () = ic := icnstr_negate<a> (ic)
+      val () = ics1 := icnstrlst_negate<a> (ics1)
     in
       fold@ (ics); ics
     end // end of [list_vt_cons]
-  | list_vt_nil () => (fold@ (ics); ics)
+  | list_vt_nil () => ics
 // end of [icnstrlst_negate]
 
 (* ****** ****** *)
@@ -208,7 +246,7 @@ implement{a}
 myintveclst_free (ivs, n) =
   case+ ivs of
   | ~list_vt_cons (iv, ivs) =>
-      (myintvec_free (iv, n); myintveclst_free (ivs, n))
+      (myintvec_free<a> (iv, n); myintveclst_free<a> (ivs, n))
   | ~list_vt_nil () => ()
 // end of [myintveclst_free]
 
@@ -257,14 +295,14 @@ loop
 {n:nat}
 {l:addr} .<n>.
 (
-  pf: !array_v (vt, n, l) | p: ptr l, n: int n
+  pf: !array_v (vt, l, n) | p: ptr l, n: int n
 ) : bool(*cffs=0*) = let
 in
   if n > 0 then let
     prval (pf1, pf2) = array_v_uncons {vt} (pf)
   in
     if !p = 0 then let
-      val ans = loop (pf2 | p + sizeof<vt>, n-1)
+      val ans = loop (pf2 | ptr_succ<vt> (p), n-1)
       prval () = pf := array_v_cons {vt} (pf1, pf2)
     in
       ans
@@ -278,25 +316,24 @@ end // end of [loop]
 //
 val (pf | p) = myintvec_takeout (iv)
 prval (pf1, pf2) = array_v_uncons {vt} (pf)
-val cffsZero = loop (pf2 | p+sizeof<vt>, n-1)
+val cffsZero = loop (pf2 | ptr_succ<vt> (p), n-1)
 var ans3: Ans3 = UNDECIDED
 val () = (
 //
 if cffsZero then (
-  case+ knd of
-  |  2 => (
-      if !p >= 0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
-    ) // end of [gte]
-  | ~2 => (
-      if !p  <  0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
-    ) // end of [gte]
-  |  1 => (
-      if !p  =  0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
-    ) // end of [eq]
-  | ~1 => (
-      if !p != 0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
-    ) // end of [eq]
-  |  _ => () // HX: this should not happen
+  if knd = 2 then (
+    // gte
+    if !p >= 0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
+  ) else if knd = ~2 then (
+    // lt
+    if !p  <  0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
+  ) else if knd = 1 then (
+    // eq
+    if !p  =  0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
+  ) else if knd = ~1 then (
+    // neq
+    if !p != 0 then ans3 := TAUTOLOGY else ans3 := CONTRADICTION
+  ) else () // HX: this should not happen
 ) // end of [if]
 //
 ) : void // end of [val]
@@ -311,28 +348,28 @@ end // end of [myintvec_inspect]
 
 implement{a}
 myintvec_inspect_lt
-  (iv, n) = myintvec_inspect (~2(*lt*), iv, n)
+  (iv, n) = myintvec_inspect<a> (~2(*lt*), iv, n)
 // end of [myintvec_inspect_gte]
 
 implement{a}
 myintvec_inspect_gte
-  (iv, n) = myintvec_inspect (2(*gte*), iv, n)
+  (iv, n) = myintvec_inspect<a> (2(*gte*), iv, n)
 // end of [myintvec_inspect_gte]
 
 implement{a}
 myintvec_inspect_eq
   (iv, n) = let
   val knd = 1(*eq*)
-  val ans2 = myintvec_inspect (knd, iv, n)
+  val ans2 = myintvec_inspect<a> (knd, iv, n)
 in
   if ans2 = 0 then
-    myintvec_normalize (knd, iv, n) else ans2
+    myintvec_normalize<a> (knd, iv, n) else ans2
   // end of [if]
 end // end of [myintvec_inspect_eq]
 
 implement{a}
 myintvec_inspect_neq
-  (iv, n) = myintvec_inspect (~1(*neq*), iv, n)
+  (iv, n) = myintvec_inspect<a> (~1(*neq*), iv, n)
 // end of [myintvec_inspect_neq]
 
 (* ****** ****** *)
@@ -346,195 +383,87 @@ vtypedef vt = myintvec (a,n)
 in
 //
 case+ ivs of
-| list_vt_cons
-    (!p_iv, !p_ivs) => let
+| @list_vt_cons
+    (iv, ivs1) => let
     val ans3 =
-      myintvec_inspect_gte (!p_iv, n)
+      myintvec_inspect_gte<a> (iv, n)
     // end of [val]
   in
     if ans3 != 0 then let
-      val ivs1 = !p_ivs
-      val () = myintvec_free<a> (!p_iv, n)
+      val ivs1_ = ivs1
+      val () = myintvec_free<a> (iv, n)
       val () = free@ {vt}{0} (ivs)
-      val () = ivs := ivs1
+      val () = ivs := ivs1_
     in
       if ans3 > 0 then // TAUTOLOGY
-        myintveclst_inspect_gte (ivs, n) else ~1(*CONTRADICTION*)
+        myintveclst_inspect_gte<a> (ivs, n) else ~1(*CONTRADICTION*)
       // end of [if]
     end else let
       val ans =
-        myintveclst_inspect_gte (!p_ivs, n)
+        myintveclst_inspect_gte<a> (ivs1, n)
       prval () = fold@ (ivs)
     in
       ans // the final answers
     end // end of [if]
   end (* end of [list_vt_cons] *)
-| list_vt_nil () => let
-    prval () = fold@ (ivs) in 0(*UNDECIDED*)
-  end // end of [list_vt_nil]
+| list_vt_nil () => 0(*UNDECIDED*)
 //
 end // end of [myintveclst_inspect_gte]
 
 (* ****** ****** *)
 
-local
-
-exception Finished
-
-fun
-{a:t0p}
-myintvec_cffgcd_main
-  {n:pos}
-  {l:addr} (
-  pf: !myint(a) @ l
-| iv: !myintvec (a, n), n: int n, p_res: ptr l
-) : void = let
-//
-macdef
-gcd = gcd01_myint_myint
-//
-(*
-//
-stadef v = myint(a) @ l
-//
-var
-!p_clo =
-@lam (
-  pf: !v | x: &myint(a)
-) : void =<1>
-  if x != 0 then (
-    if x != 1 then (
-      !p_res := gcd (!p_res, x)
-    ) else let
-      val () = myint_free (!p_res)
-      val () = !p_res := myint_make_int<a> (1)
-    in
-      $raise (Finished)
-    end // end of [if]
-  ) // end of [if]
-// end of [var]
-//
-val n1 = size1_of_int1(n-1)
-//
-val (pfarr | p_arr) = myintvec_takeout (iv)
-prval (pf1at, pf2arr) = array_v_uncons {myint(a)} (pfarr)
-val p2_arr = p_arr + sizeof<myint(a)>
-val () = array_ptr_foreach_vclo {v} (pf | !p2_arr, !p_clo, n1)
-prval () = pfarr := array_v_cons {myint(a)} (pf1at, pf2arr)
-prval () = myintvecout_addback (pfarr | iv)
-*)
-//
-fun
-loop
-(
-  pf: !myint(a) @ l | p: ptr, i: int
-) :<cloref1> void =
-(
-if
-i < n
-then let
-  val x = $UN.ptr0_get<myint(a)>(p)
-  extern praxi __vfree(x: myint(a)): void
-in
-//
-if
-x != 0
-then (
-//
-if x != 1
-  then let
-    val () =
-      !p_res := gcd (!p_res, x)
-    // end of [val]
-    prval ((*void*)) = __vfree(x)
-  in
-    loop (pf | p+sizeof<myint(a)>, i+1)
-  end // end of [then]
-  else let
-    val () = myint_free (!p_res)
-    val () = !p_res := myint_make_int<a> (1)
-    prval ((*void*)) = __vfree(x)
-  in
-    // nothing
-  end // end of [else]
-//
-) (* end of [then] *)
-else let
-  prval ((*void*)) = __vfree(x)
-in
-  loop (pf | p+sizeof<myint(a)>, i+1)
-end // end of [else]
-//
-end // end of [then]
-//
-) (* end of [loop] *)
-//
-val
-(pfarr | p_arr) = myintvec_takeout (iv)
-val () = loop (pf | p_arr+sizeof<myint(a)>, 1)
-prval ((*void*)) = myintvecout_addback (pfarr | iv)
-//
-in
-  // nothing
-end // end of [myintvec_cffgcd_main]
-
-in (* in of [local] *)
-
 implement{a}
 myintvec_cffgcd
   {n}(iv, n) = let
 //
-var res
-  : myint(a) = myint_make_int<a> (0)
-val p_res = &res
+vtypedef vt = myint(a)
 //
-(*
+// HX: [res] is the gcd found so far; the loop is stopped as soon as the
+// gcd is known to be 1
 //
-// HX-2015-01-27:
-// fixing a bug in (clang-3.5 -O2)
-// HX-2015-01-28:
-// this is no longer needed due to
-// there being no longer use of exception
-val ((*void*)) = ptr_as_volatile(p_res)
-//
-*)
-//
-val ivp =
-__cast (iv) where {
-  extern castfn __cast (iv: !myintvec(a, n)): ptr
-} (* end of [val] *)
-//
-viewdef v = myint(a)@res
-//
-// HX-2012-02-25:
-// this is so awkward! should try* be introduced?
-//
-val () = try let
-  val iv =
-  __cast (ivp) where {
-    extern castfn __cast (p: ptr): myintvec (a, n)
-  } (* end of [val] *)
-  prval
-  (pf, fpf) =
-  __assert () where {
-    extern praxi __assert (): (v, v -<lin,prf> void)
-  } (* end of [prval] *)
-  val () = myintvec_cffgcd_main (pf | iv, n, &res)
-  prval () = fpf (pf)
-  prval () =
-  __free (iv) where {
-    extern praxi __free (iv: myintvec (a, n)): void
-  } (* end of [prval] *)
+fun
+loop
+  {n:nat}
+  {l:addr} .<n>.
+(
+  pf: !array_v (vt, l, n) | p: ptr l, n: int n, res: &vt
+) : void = (
+if
+n > 0
+then let
+  prval (pf1, pf2) = array_v_uncons {vt} (pf)
+  val () = (
+    if !p != 0 then (
+      if !p != 1 then let
+        val () = res := gcd01_myint_myint<a> (res, !p)
+      in
+        loop (pf2 | ptr_succ<vt> (p), n-1, res)
+      end else let
+        val () = myint_free<a> (res)
+        val () = res := myint_make_int<a> (1)
+      in
+        // nothing
+      end // end of [if]
+    ) else (
+      loop (pf2 | ptr_succ<vt> (p), n-1, res)
+    ) // end of [if]
+  ) : void
+  prval () = pf := array_v_cons {vt} (pf1, pf2)
 in
   // nothing
-end with
-  | ~Finished () => ()
-// end of [try]
+end else () // end of [if]
+) (* end of [loop] *)
+//
+var res: myint(a) = myint_make_int<a> (0)
+val (pfarr | p_arr) = myintvec_takeout (iv)
+prval (pf1, pf2) = array_v_uncons {vt} (pfarr)
+val () = loop (pf2 | ptr_succ<vt> (p_arr), n-1, res)
+prval () = pfarr := array_v_cons {vt} (pf1, pf2)
+prval () = myintvecout_addback (pfarr | iv)
+//
 in
   res
-end // end of [myintvec_gcd]
-
-end // end of [local]
+end // end of [myintvec_cffgcd]
 
 (* ****** ****** *)
 
@@ -544,31 +473,27 @@ myintvec_normalize
 //
 vtypedef vt = myint (a)
 //
-macdef sub = sub01_myint_myint
-macdef div = div01_myint_myint
-macdef ediv = ediv01_myint_myint
-//
 fun
 loop
   {n:nat}
   {l:addr} .<n>.
 (
-  pf: !array_v (vt, n, l) | gcd: !vt, p: ptr l, n: int n
-) :<> void =
+  pf: !array_v (vt, l, n) | gcd: !vt, p: ptr l, n: int n
+
+) : void =
   if n > 0 then let
     prval
     (pf1, pf2) =
       array_v_uncons {vt} (pf)
     // end of [prval]
-    val () = !p := (!p \ediv gcd)
-    val tsz = sizeof<vt>
-    val () = loop (pf2 | gcd, p+tsz, n-1)
+    val () = !p := ediv01_myint_myint<a> (!p, gcd)
+    val () = loop (pf2 | gcd, ptr_succ<vt> (p), n-1)
     prval () = pf := array_v_cons {vt} (pf1, pf2)
   in
     // nothing
   end // end of [if]
 //
-val gcd = myintvec_cffgcd (iv, n)
+val gcd = myintvec_cffgcd<a> (iv, n)
 //
 in
 //
@@ -576,38 +501,35 @@ if gcd > 1 then let
   val (pf | p) = myintvec_takeout {a} (iv)
   prval (pf1, pf2) = array_v_uncons {vt} (pf)
   var ans2: Ans2 = 0
-  val () = loop (pf2 | gcd, p+sizeof<vt>, n-1)
+  val () = loop (pf2 | gcd, ptr_succ<vt> (p), n-1)
   val () = (
-    case+ 0 of
-    | _ when knd = 2 => (
+    if knd = 2 then (
         if !p >= 0 then
-          !p := (!p \div gcd)
+          !p := div01_myint_myint<a> (!p, gcd)
         else let // !p < 0
-          val () = !p := (!p \sub gcd)
-          val () = !p := add_myint_int (!p, 1)
+          val () = !p := sub01_myint_myint<a> (!p, gcd)
+          val () = !p := add_myint_int<a> (!p, 1)
         in
-          !p := (!p \div gcd)
+          !p := div01_myint_myint<a> (!p, gcd)
         end // end of [if]
-      ) // end of [knd=2/gte]
-    | _ when knd = 1 => let
-        val rmd = mod11_myint_myint (!p, gcd)
+    ) (* end of [knd=2/gte] *) else if knd = 1 then let
+        val rmd = mod11_myint_myint<a> (!p, gcd)
         val () = // HX: a contradiction may be reached
-          if rmd = 0 then (!p := (!p \ediv gcd)) else (ans2 := ~1)
-        val () = myint_free (rmd)
+          if rmd = 0 then (!p := ediv01_myint_myint<a> (!p, gcd)) else (ans2 := ~1)
+        val () = myint_free<a> (rmd)
       in
         (*nothing*)
-      end // end of [knd=1/eq]
-    | _ => let
+      end (* end of [knd=1/eq] *) else let
         val () = assertloc (false) in ans2 := ~1
       end // end of [_]
   ) : void // end of [val]
-  val ((*freed*)) = myint_free (gcd)
+  val ((*freed*)) = myint_free<a> (gcd)
   prval pf = array_v_cons {vt} (pf1, pf2)
   prval () = myintvecout_addback {a} (pf | iv)
 in
   ans2
 end else let
-  val ((*freed*)) = myint_free (gcd) in 0(*normal*)
+  val ((*freed*)) = myint_free<a> (gcd) in 0(*normal*)
 end // end of [if]
 //
 end // end of [myintvec_normalize]
@@ -627,14 +549,14 @@ vtypedef vt = myintvec (a,n)
 in
 //
 case+ ivs of
-| list_vt_cons
-    (!p_iv, !p_ivs) => let
-    val () = myintvec_normalize_gte (!p_iv, n)
-    val () = myintveclst_normalize_gte (!p_ivs, n)
+| @list_vt_cons
+    (iv, ivs1) => let
+    val () = myintvec_normalize_gte<a> (iv, n)
+    val () = myintveclst_normalize_gte<a> (ivs1, n)
   in
     fold@ (ivs)
   end // end of [list_vt_cons]
-| list_vt_nil () => fold@ (ivs)
+| list_vt_nil () => ()
 //
 end // end of [myintveclst_normalize_gte]
 
@@ -643,8 +565,8 @@ end // end of [myintveclst_normalize_gte]
 implement{a}
 myintvec0_make
   {n} (n) = let
-  val n = size1_of_int1 (n)
-  val (pfgc, pfarr | p) = array_ptr_alloc<myint(a)> (n)
+  val n = g1ofg0(i2sz(n))
+  val (pfarr, pfgc | p) = $effmask_wrt (array_ptr_alloc<myint(a)> (n))
 in
   __cast (pfgc, pfarr | p) where {
     extern castfn
@@ -665,15 +587,16 @@ loop
   {n:nat}
   {l:addr} .<n>.
 (
-  pf: !array_v (x?, n, l) >> array_v (x, n, l) | p: ptr l, n: int n
-) :<> void =
+  pf: !array_v (x?, l, n) >> array_v (x, l, n) | p: ptr l, n: int n
+
+) : void =
   if n > 0 then let
     prval
     (pf1, pf2) =
       array_v_uncons{x?}(pf)
     // end of [prval]
     val () = !p := myint_make_int<a> (0)
-    val () = loop (pf2 | p+sizeof<x>, n-1)
+    val () = loop (pf2 | ptr_succ<x> (p), n-1)
     prval () = pf := array_v_cons{x}(pf1, pf2)
   in
     // nothing
@@ -703,16 +626,16 @@ prval () = lemma_myintvec_params (iv1)
 //
 fun loop
   {n:nat} {l1,l2:addr} .<n>. (
-  pf1: !array_v (vt, n, l1)
-, pf2: !array_v (vt?, n, l2) >> array_v (vt, n, l2)
+  pf1: !array_v (vt, l1, n)
+, pf2: !array_v (vt?, l2, n) >> array_v (vt, l2, n)
 | p1: ptr l1, p2: ptr l2, n: int n
-) :<> void =
+
+) : void =
   if n > 0 then let
     prval (pf11, pf12) = array_v_uncons {vt} (pf1)
     prval (pf21, pf22) = array_v_uncons {vt?} (pf2)
-    val () = !p2 := myint_copy (!p1)
-    val tsz = sizeof<vt>
-    val () = loop (pf12, pf22 | p1+tsz, p2+tsz, n-1)
+    val () = !p2 := myint_copy<a> (!p1)
+    val () = loop (pf12, pf22 | ptr_succ<vt> (p1), ptr_succ<vt> (p2), n-1)
     prval () = pf1 := array_v_cons {vt} (pf11, pf12)
     prval () = pf2 := array_v_cons {vt} (pf21, pf22)
   in
@@ -720,7 +643,7 @@ fun loop
   end else let
     prval () = array_v_unnil (pf2) in pf2 := array_v_nil {vt} ()
   end // end of [if]
-val iv2 = myintvec0_make (n)
+val iv2 = myintvec0_make<a> (n)
 val (pf1 | p1) = myintvec_takeout {a} (iv1)
 val (pf2 | p2) = myintvec0_takeout {a} (iv2)
 val () = loop (pf1, pf2 | p1, p2, n)
@@ -737,25 +660,22 @@ implement{a}
 myintvec_copy_cff
   {n} (cff, iv1, n) = let
 //
-macdef
-mul = mul11_myint_myint
-//
 vtypedef vt = myint (a)
 //
 prval () = lemma_myintvec_params (iv1)
 //
 fun loop
   {n:nat} {l1,l2:addr} .<n>. (
-  pf1: !array_v (vt, n, l1)
-, pf2: !array_v (vt?, n, l2) >> array_v (vt, n, l2)
+  pf1: !array_v (vt, l1, n)
+, pf2: !array_v (vt?, l2, n) >> array_v (vt, l2, n)
 | cff: !vt, p1: ptr l1, p2: ptr l2, n: int n
-) :<> void =
+
+) : void =
   if n > 0 then let
     prval (pf11, pf12) = array_v_uncons {vt} (pf1)
     prval (pf21, pf22) = array_v_uncons {vt?} (pf2)
-    val () = !p2 := (cff \mul !p1)
-    val tsz = sizeof<vt>
-    val () = loop (pf12, pf22 | cff, p1+tsz, p2+tsz, n-1)
+    val () = !p2 := mul11_myint_myint<a> (cff, !p1)
+    val () = loop (pf12, pf22 | cff, ptr_succ<vt> (p1), ptr_succ<vt> (p2), n-1)
     prval () = pf1 := array_v_cons {vt} (pf11, pf12)
     prval () = pf2 := array_v_cons {vt} (pf21, pf22)
   in
@@ -763,7 +683,7 @@ fun loop
   end else let
     prval () = array_v_unnil (pf2) in pf2 := array_v_nil {vt} ()
   end // end of [if]
-val iv2 = myintvec0_make (n)
+val iv2 = myintvec0_make<a> (n)
 val (pf1 | p1) = myintvec_takeout {a} (iv1)
 val (pf2 | p2) = myintvec0_takeout {a} (iv2)
 val () = loop (pf1, pf2 | cff, p1, p2, n)
@@ -780,8 +700,6 @@ implement{a}
 myintvec_negate
   {n} (iv, n) = let
 //
-macdef neg = neg_myint
-//
 vtypedef vt = myint (a)
 //
 prval () = lemma_myintvec_params (iv)
@@ -791,13 +709,13 @@ loop
   {n:nat}
   {l:addr} .<n>.
 (
-  pf: !array_v (vt, n, l) | p: ptr l, n: int n
-) :<> void =
+  pf: !array_v (vt, l, n) | p: ptr l, n: int n
+
+) : void =
   if n > 0 then let
     prval (pf1, pf2) = array_v_uncons {vt} (pf)
-    val () = !p := neg (!p)
-    val tsz = sizeof<vt>
-    val () = loop (pf2 | p+tsz, n-1)
+    val () = !p := neg_myint<a> (!p)
+    val () = loop (pf2 | ptr_succ<vt> (p), n-1)
     prval () = pf := array_v_cons {vt} (pf1, pf2)
   in
     // nothing
@@ -821,23 +739,20 @@ implement{a}
 myintvec_scale
   {n} (cff, iv, n) = let
 //
-macdef
-mul = mul10_myint_myint
-//
 vtypedef vt = myint (a)
 //
 prval () = lemma_myintvec_params (iv)
 //
 fun loop
   {n:nat} {l:addr} .<n>. (
-  pf: !array_v (vt, n, l)
+  pf: !array_v (vt, l, n)
 | cff: !myint(a), p: ptr l, n: int n
-) :<> void =
+
+) : void =
   if n > 0 then let
     prval (pf1, pf2) = array_v_uncons {vt} (pf)
-    val () = !p := (cff \mul !p)
-    val tsz = sizeof<vt>
-    val () = loop (pf2 | cff, p+tsz, n-1)
+    val () = !p := mul10_myint_myint<a> (cff, !p)
+    val () = loop (pf2 | cff, ptr_succ<vt> (p), n-1)
     prval () = pf := array_v_cons {vt} (pf1, pf2)
   in
     // nothing
@@ -856,25 +771,22 @@ implement{a}
 myintvec_addby
   {n} (iv1, iv2, n) = let
 //
-macdef
-add = add01_myint_myint
-//
 vtypedef vt = myint (a)
 //
 prval () = lemma_myintvec_params (iv1)
 //
 fun loop
   {n:nat} {l1,l2:addr} .<n>. (
-  pf1: !array_v (vt, n, l1)
-, pf2: !array_v (vt, n, l2)
+  pf1: !array_v (vt, l1, n)
+, pf2: !array_v (vt, l2, n)
 | p1: ptr l1, p2: ptr l2, n: int n
-) :<> void =
+
+) : void =
   if n > 0 then let
     prval (pf11, pf12) = array_v_uncons {vt} (pf1)
     prval (pf21, pf22) = array_v_uncons {vt} (pf2)
-    val () = !p1 := (!p1 \add !p2)
-    val tsz = sizeof<vt>
-    val () = loop (pf12, pf22 | p1+tsz, p2+tsz, n-1)
+    val () = !p1 := add01_myint_myint<a> (!p1, !p2)
+    val () = loop (pf12, pf22 | ptr_succ<vt> (p1), ptr_succ<vt> (p2), n-1)
     prval () = pf1 := array_v_cons {vt} (pf11, pf12)
     prval () = pf2 := array_v_cons {vt} (pf21, pf22)
   in
@@ -896,25 +808,22 @@ implement{a}
 myintvec_subby
   {n} (iv1, iv2, n) = let
 //
-macdef
-sub = sub01_myint_myint
-//
 vtypedef vt = myint (a)
 //
 prval () = lemma_myintvec_params (iv1)
 //
 fun loop
   {n:nat} {l1,l2:addr} .<n>. (
-  pf1: !array_v (vt, n, l1)
-, pf2: !array_v (vt, n, l2)
+  pf1: !array_v (vt, l1, n)
+, pf2: !array_v (vt, l2, n)
 | p1: ptr l1, p2: ptr l2, n: int n
-) :<> void =
+
+) : void =
   if n > 0 then let
     prval (pf11, pf12) = array_v_uncons {vt} (pf1)
     prval (pf21, pf22) = array_v_uncons {vt} (pf2)
-    val () = !p1 := (!p1 \sub !p2)
-    val tsz = sizeof<vt>
-    val () = loop (pf12, pf22 | p1+tsz, p2+tsz, n-1)
+    val () = !p1 := sub01_myint_myint<a> (!p1, !p2)
+    val () = loop (pf12, pf22 | ptr_succ<vt> (p1), ptr_succ<vt> (p2), n-1)
     prval () = pf1 := array_v_cons {vt} (pf11, pf12)
     prval () = pf2 := array_v_cons {vt} (pf21, pf22)
   in
@@ -936,29 +845,24 @@ implement{a}
 myintvec_addby_cff
   {n} (iv1, cff, iv2, n) = let
 //
-macdef
-add = add01_myint_myint
-macdef
-mul = mul11_myint_myint
-//
 vtypedef vt = myint (a)
 //
 prval () = lemma_myintvec_params (iv1)
 //
 fun loop
   {n:nat} {l1,l2:addr} .<n>. (
-  pf1: !array_v (vt, n, l1)
-, pf2: !array_v (vt, n, l2)
+  pf1: !array_v (vt, l1, n)
+, pf2: !array_v (vt, l2, n)
 | p1: ptr l1, cff: !vt, p2: ptr l2, n: int n
-) :<> void =
+
+) : void =
   if n > 0 then let
     prval (pf11, pf12) = array_v_uncons {vt} (pf1)
     prval (pf21, pf22) = array_v_uncons {vt} (pf2)
-    val cx2 = cff \mul !p2
-    val () = !p1 := (!p1 \add cx2)
-    val () = myint_free (cx2)
-    val tsz = sizeof<vt>
-    val () = loop (pf12, pf22 | p1+tsz, cff, p2+tsz, n-1)
+    val cx2 = mul11_myint_myint<a> (cff, !p2)
+    val () = !p1 := add01_myint_myint<a> (!p1, cx2)
+    val () = myint_free<a> (cx2)
+    val () = loop (pf12, pf22 | ptr_succ<vt> (p1), cff, ptr_succ<vt> (p2), n-1)
     prval () = pf1 := array_v_cons {vt} (pf11, pf12)
     prval () = pf2 := array_v_cons {vt} (pf21, pf22)
   in
@@ -972,7 +876,7 @@ prval () = myintvecout_addback {a} (pf2 | iv2)
 //
 in
   // nothing
-end // end of [myintvec_addby]
+end // end of [myintvec_addby_cff]
 
 (* ****** ****** *)
 

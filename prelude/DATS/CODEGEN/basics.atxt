@@ -74,9 +74,6 @@ primplmnt eqbool_make_bool (x) = EQBOOL ()
 
 implement
 {a}(*tmp*)
-lazy_force (lazyval) = !lazyval
-implement
-{a}(*tmp*)
 lazy_vt_force (lazyval) = !lazyval
 
 #atscode_separator()
@@ -239,25 +236,6 @@ gequal_ref_ref<a>
 //
 #atscode_separator()
 //
-implement
-{a}(*tmp*)
-tostring_val(x) = let
-//
-val str =
-  $effmask_wrt(tostrptr_val<a>(x))
-in
-  strptr2string(str)
-end // end of [tostring_val]
-//
-implement
-{a}(*tmp*)
-tostring_ref(x) = let
-//
-val str =
-  $effmask_wrt(tostrptr_ref<a>(x))
-in
-  strptr2string(str)
-end // end of [tostring_ref]
 //
 #atscode_separator()
 
@@ -320,6 +298,6 @@ fprint_stamped_t(out, x) = fprint_val<a>(out, unstamp_t(x))
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "basics_atxt.txt")
 %}\

@@ -10,8 +10,7 @@ default options to [tempacc]
 Here is the "logic":
 //
 If -DATS_MEMALLOC-* is missing:
--DATS_MEMALLOC_LIBC is chosen if -lgc is missing
--DATS_MEMALLOC_GCBDW is chosen if -lgc is present
+-DATS_MEMALLOC_LIBC is chosen
 //
 If -dry or --dryrun is present:
 the generated command-line is printed out but not executed
@@ -82,7 +81,6 @@ case+ xs of
 local
 //
 val r_out = ref<int>(0)
-val r_lgc = ref<int>(0)
 val r_dry = ref<int>(0)
 //
 val r_ccats = ref<int>(0)
@@ -91,7 +89,6 @@ val r_tcats = ref<int>(0)
 val r_DATS_MEMALLOC = ref<int>(0)
 val r_DATS_MEMALLOC_USER = ref<int>(0)
 val r_DATS_MEMALLOC_LIBC = ref<int>(0)
-val r_DATS_MEMALLOC_GCBDW = ref<int>(0)
 //
 in (* in-of-local *)
 
@@ -103,13 +100,6 @@ out_set
 if
 flag1_exists
 (args, "-o") then r_out[] := 1 else ()
-
-fun
-lgc_set
-(args: stringlst): void =
-if
-flag1_exists
-(args, "-lgc") then r_lgc[] := 1 else ()
 
 (* ****** ****** *)
 
@@ -150,8 +140,6 @@ DATS_MEMALLOC_set() =
  r_DATS_MEMALLOC_USER[]
  +
  r_DATS_MEMALLOC_LIBC[]
- +
- r_DATS_MEMALLOC_GCBDW[]
 )
 
 (* ****** ****** *)
@@ -188,22 +176,6 @@ flag2_exists
 then r_DATS_MEMALLOC_LIBC[] := 1 else ()
 )
 
-fun
-DATS_MEMALLOC_GCBDW_set
-(args: stringlst): void =
-if
-flag1_exists
-(args, "-DATS_MEMALLOC_GCBDW")
-then
-r_DATS_MEMALLOC_GCBDW[] := 1
-else
-(
-if
-flag2_exists
-(args, "-D", "ATS_MEMALLOC_GCBDW")
-then r_DATS_MEMALLOC_GCBDW[] := 1 else ()
-)
-
 (* ****** ****** *)
 
 fun
@@ -224,7 +196,6 @@ helper0
 {
 //
 val () = out_set(args)
-val () = lgc_set(args)
 //
 val () = dry_set(args)
 //
@@ -240,8 +211,6 @@ val () =
 DATS_MEMALLOC_USER_set(args)
 val () =
 DATS_MEMALLOC_LIBC_set(args)
-val () =
-DATS_MEMALLOC_GCBDW_set(args)
 }
 //
 } (* end of [helper0] *)
@@ -258,16 +227,8 @@ if
 (r_DATS_MEMALLOC[] > 0)
 then args
 else
-(
-if
-(r_lgc[] = 0)
-then
 list0_cons
 ("-DATS_MEMALLOC_LIBC", args)
-else
-list0_cons
-("-DATS_MEMALLOC_GCBDW", args)
-)
 ) : stringlst
 } (* end of [helper1] *)
 

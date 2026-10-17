@@ -31,10 +31,21 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: April, 2011
 //
+
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (see PORTING.md, section "Parser")
+//
 (* ****** ****** *)
 
-staload
-STDIO = "libc/SATS/stdio.sats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 
 (* ****** ****** *)
 
@@ -42,6 +53,8 @@ staload
 ERR = "./pats_error.sats"
 staload
 FIL = "./pats_filename.sats"
+staload
+LOC = "./pats_location.sats"
 staload
 SYM = "./pats_symbol.sats"
 
@@ -55,9 +68,14 @@ staload "./pats_syntax.sats"
 
 staload "./pats_parsing.sats"
 
+staload _(*templates*) = "./pats_error.dats"
+staload _(*templates*) = "./pats_syntax.dats"
+staload _(*templates*) = "./pats_parsing_util.dats"
+
 (* ****** ****** *)
 
 implement
+{a}(*tmp*)
 parse_from_string_parser
   (inp, f) = let
   var buf: tokbuf
@@ -91,7 +109,7 @@ val d0cs =
 val nerr1 = fprint_the_lexerrlst (stderr_ref)
 val nerr2 = fprint_the_parerrlst (stderr_ref)
 //
-val () = if (nerr1 + nerr2) > 0 then $ERR.abort {void} ()
+val () = if (nerr1 + nerr2) > 0 then $ERR.abort<void> ()
 //
 in
   d0cs
@@ -131,7 +149,7 @@ var buf: tokbuf
 //
 val () =
 tokbuf_initize_getc
-  (buf, lam () =<cloptr1> $STDIO.fgetc0_err(inp))
+  (buf, llam () => $STDIO.fgetc0(inp))
 //
 val d0cs = parse_from_tokbuf_toplevel (stadyn, buf)
 val () = tokbuf_uninitize (buf)
@@ -145,7 +163,6 @@ parse_from_filename_toplevel
   (stadyn, fil) = let
 //
 var buf: tokbuf
-prval pfmod = file_mode_lte_r_r
 //
 val
 fname =
@@ -154,11 +171,11 @@ $FIL.filename_get_fullname(fil)
 val
 fname = $SYM.symbol_get_name(fname)
 //
-val (pf|fp) =
-  $STDIO.fopen_exn(fname, file_mode_r)
+val fp =
+  fileref_open_exn(fname, file_mode_r)
 //
 val ((*void*)) =
-  tokbuf_initize_filp(pfmod, pf | buf, fp)
+  tokbuf_initize_filp(buf, fp)
 // end of [val]
 //
 val (pf|()) =
@@ -192,7 +209,7 @@ in
 if
 isnot
 then parse_from_filename_toplevel(stadyn, fil)
-else list_nil(*void*)
+else glist_nil((*void*))
 //
 end // end of [parse_from_filename_toplevel2]
 
@@ -229,19 +246,16 @@ case+ filopt of
 *)
 //
     val () =
-    prerr("patsopt: error(0)")
-    val () =
-    prerrln!
-    (
-      ": the given file [", given, "] cannot be accessed."
-    ) (* end of [prerrln!] *)
+    prerr_string("patsopt: error(0)")
+    val () = prerr_string(": the given file [")
+    val () = prerr_string(given)
+    val () = prerr_string("] cannot be accessed.")
+    val () = prerr_newline()
 //
 // HX: this is treated as a meta-level failure:
 //
-    val ((*exit*)) = $raise($ERR.PATSOPT_FILENONE_EXN(given))
-//
   in
-    list_nil(*deadcode*)
+    $raise($ERR.PATSOPT_FILENONE_EXN(given)) (*exit*)
   end // end of [None_vt]
 //
 end // end of [parse_from_givename_toplevel]
@@ -270,13 +284,13 @@ case+ filopt of
 | ~None_vt((*void*)) => let
 //
     val () =
-    prerr("patsopt: error(0)")
-    val () =
-    prerrln! (
-    ": the given file [", given, "] cannot be accessed."
-    ) (* end of [prerrln!] *)
+    prerr_string("patsopt: error(0)")
+    val () = prerr_string(": the given file [")
+    val () = prerr_string(given)
+    val () = prerr_string("] cannot be accessed.")
+    val () = prerr_newline()
 //
-    val () = filref := $FIL.filename_dummy in list_nil()
+    val () = filref := $FIL.filename_dummy in glist_nil()
   end // end of [None_vt]
 //
 end // end of [parse_from_givename_toplevel2]
@@ -293,41 +307,42 @@ fun
 auxlst
 (
   stadyn: int
-, givens: List(string)
+, givens: glist(string)
 , filref: &filename >> filename
 ) : d0eclist =
 (
 //
-case+ givens of
-| list_nil
-    () => list_nil()
-  // list_nil
-| list_cons
-    (given1, givens) =>
-    list_cons(d0c1, d0cs) where
-  {
+case+ glist_view(givens) of
+| ~GLnil
+    () => glist_nil()
+  // GLnil
+| ~GLcons
+    (given1, givens) => let
 //
+    var fil1: filename // HX: [filref] is initialized here
     val d0cs =
     parse_from_givename_toplevel2
-      (stadyn, given1, filref)
+      (stadyn, given1, fil1)
+    val () = filref := fil1
     val d0c1 =
-      d0ecl_toplocal(filref, d0cs)
+      d0ecl_toplocal
+        (fil1, d0cs)
     // end of [val]
     val d0cs =
       auxlst(stadyn, givens, filref)
     // end of [val]
 //
-  } (* end of [list_cons] *)
+  in
+    glist_cons(d0c1, d0cs)
+  end (* end of [GLcons] *)
 //
 ) (* end of [auxlst] *)
 //
 in
 //
-case+ givens of
-| list_cons
-    (given0, givens) =>
-    list_cons(d0c0, d0cs) where
-  {
+case+ glist_view(givens) of
+| ~GLcons
+    (given0, givens) => let
 //
     val d0cs =
     parse_from_givename_toplevel2
@@ -336,11 +351,13 @@ case+ givens of
     val d0c0 = d0ecl_list(filref, d0cs)
     val d0cs = auxlst(stadyn, givens, filref)
 //
-  } (* end of [list_cons] *)
-| list_nil((*void*)) => let
+  in
+    glist_cons(d0c0, d0cs)
+  end (* end of [GLcons] *)
+| ~GLnil((*void*)) => let
     val () =
-    filref := $FIL.filename_dummy in list_nil()
-  end // end of [list_nil]
+    filref := $FIL.filename_dummy in glist_nil()
+  end // end of [GLnil]
 //
 end // end of [parse_from_givenames_toplocal2]
 

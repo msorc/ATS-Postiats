@@ -78,6 +78,8 @@ LIBATSHWXI_targetloc
 //
 #staload $JSONATS // opening the NS!
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+//
 (* ****** ****** *)
 //
 extern
@@ -86,7 +88,7 @@ wget_params
 (
   source: string
 , target: string
-) : (int, string) // end-of-function
+) : (int, Strptr1) // end-of-function
 //
 (* ****** ****** *)
 
@@ -179,7 +181,7 @@ val cut_dirs = aux1 (string2ptr(source), n1 - n12, 0)
 val dir_prefix = string_make_substring (target, i2sz(0), n2-n12)
 //
 in
-  (cut_dirs, strnptr2string(dir_prefix))
+  (cut_dirs, $UN.castvwtp0{Strptr1}(dir_prefix))
 end // end of [wget_params]
 
 end // end of [local]
@@ -229,11 +231,12 @@ val () =
   , " ", "$(WGET)"
   , " ", "$(WGETFLAGS)"
   , " ", "--cut-dirs=", cut_dirs
-  , " ", "--directory-prefix=\"", dir_prefix, "\""
+  , " ", "--directory-prefix=\"", $UN.strptr2string(dir_prefix), "\""
   , " ", "\"", source, "\""
   ) (* end of [fprint!] *) // end of [val]
 //
 val ((*void*)) = fprint_newline (out)
+val ((*freed*)) = strptr_free (dir_prefix)
 //
 } (* end of [auxmain] *)
 //
@@ -249,8 +252,8 @@ case+ opt1 of
   (
     case+ opt2 of
     | ~Some_vt (jsv_t) => let
-        val-JSONstring (source) = jsv_s
-        val-JSONstring (target) = jsv_t
+        val-~JSONstring (source) = jsonval_view (jsv_s)
+        val-~JSONstring (target) = jsonval_view (jsv_t)
       in
         auxmain (source, target)
       end // end of [Some_vt]
@@ -266,11 +269,19 @@ implement
 atsreloc_jsonvalist
   (out, jsvs) = let
 //
-implement(env)
-list_foreach$fwork<jsonval><env> (x, env) = atsreloc_jsonval (out, x)
+fun
+loop
+(
+  xs: jsonvalist
+) : void =
+(
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) => (atsreloc_jsonval (out, x); loop (xs))
+)
 //
 in
-  list_foreach<jsonval> (jsvs)
+  loop (jsvs)
 end // end of [atsreloc_jsonvalist]
 
 (* ****** ****** *)
@@ -313,9 +324,14 @@ end // end of [atsreloc_fileref]
 
 (* ****** ****** *)
 
-datatype OUTCHAN =
-  | OUTCHANref of (FILEref) | OUTCHANptr of (FILEref)
-// end of [OUTCHAN]
+//
+// HX-2026-10: no GC
+// a flat pair: (0: a borrowed ref; 1: an opened file)
+//
+typedef OUTCHAN = @(int, FILEref)
+//
+macdef OUTCHANref(x) = @(0, ,(x))
+macdef OUTCHANptr(x) = @(1, ,(x))
 
 (* ****** ****** *)
 
@@ -323,9 +339,7 @@ fun
 outchan_close
   (x: OUTCHAN): void =
 (
-  case+ x of
-  | OUTCHANref _ => ((*void*))
-  | OUTCHANptr (out) => fileref_close (out)
+  if x.0 > 0 then fileref_close (x.1)
 ) // end of [outchan_close]
   
 (* ****** ****** *)
@@ -334,8 +348,7 @@ fun
 outchan_get_fileref
   (x: OUTCHAN): FILEref =
 (
-  case+ x of
-  | OUTCHANref (filr) => filr | OUTCHANptr (filp) => filp
+  x.1
 ) // end of [outchan_get_fileref]
 
 (* ****** ****** *)

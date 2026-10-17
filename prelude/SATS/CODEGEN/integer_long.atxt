@@ -216,6 +216,6 @@ g1uint2uint_type(uintknd, ullintknd) = "mac\#%"
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_long_atxt.txt")
 %}\

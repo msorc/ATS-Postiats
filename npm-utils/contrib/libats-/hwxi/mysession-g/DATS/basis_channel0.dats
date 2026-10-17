@@ -160,7 +160,7 @@ lam@
 } (* end of [fwork] *)
 //
 val () =
-  intset2_foreach_cloref(G0, G1, $UN.cast(addr@fwork))
+  intset2_foreach_clo(G0, G1, fwork)
 //
 in
   (CHANNEL0(nrole, G0, chmat0), CHANNEL0(nrole, G1, chmat1))
@@ -348,7 +348,7 @@ val ((*freed*)) = uchan_unref<a>(ch1_ji)
 //
 } (* end of [fwork] *)
 //
-val () = intset2_foreach_cloref(G0, G1, $UN.cast(addr@fwork))
+val () = intset2_foreach_clo(G0, G1, fwork)
 //
 } (* end of [auxlink] *)
 

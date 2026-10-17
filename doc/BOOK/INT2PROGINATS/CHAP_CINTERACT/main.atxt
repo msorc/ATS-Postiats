@@ -264,13 +264,13 @@ fun fact2 (n: int, res: int): int = "ext\#fact2_in_c"
 //
 implement fact (n) = fact2 (n, 1)
 //
-\%{
+\\\%{
 int
 fact2_in_c (int n, int res)
 {
   while (n > 0) { res *= n ; n -= 1 ; } ; return res ;
 }
-\%}
+\\\%}
 //
 ')#comment("atscode")
 
@@ -811,5 +811,5 @@ Please find the entire code for this example
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

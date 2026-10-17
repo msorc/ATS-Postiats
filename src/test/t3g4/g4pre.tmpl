@@ -1,0 +1,72 @@
+(* the declarations that the chunks of the group 4 test share with the driver (g4_gen.py, g4pre.tmpl): the state of the doubles (g4state.c), the wrappers *)
+(* ****** ****** *)
+//
+// the state of the doubles: knobs (integers) and handles (pointers), shared by ATS1 and ATS2 through a few lines of C
+//
+%{^
+#include "g4state.h"
+%}
+extern fun g4_getk (i: int): int = "mac#g4_getk_c"
+extern fun g4_setk (i: int, v: int): void = "mac#g4_setk_c"
+extern fun g4_getp (i: int): ptr = "mac#g4_getp_c"
+extern fun g4_setp (i: int, p: ptr): void = "mac#g4_setp_c"
+extern fun g4_isnull (p: ptr): int = "mac#g4_isnull_c"
+extern fun g4_fenv_cell (i: int): ptr = "mac#g4_fenv_cell_c"
+extern fun g4_fenv_clear (): void = "mac#g4_fenv_clear_c"
+//
+// the handle number [i] as a static expression (or [dflt] if it is not set)
+//
+fun g4_s2e (i: int, dflt: s2exp): s2exp = let
+  val p = g4_getp (i)
+in
+  if g4_isnull (p) = 0 then $UN.cast{s2exp} (p) else dflt
+end // end of [g4_s2e]
+fun g4_sets2e (i: int, s2e: s2exp): void = g4_setp (i, $UN.cast{ptr} (s2e))
+//
+// the accessors of the trees that differ in ATS1 and ATS2
+//
+2|fun g4_d2loc (e: d2exp): location = e.d2exp_loc ()
+1|fun g4_d2loc (e: d2exp): location = e.d2exp_loc
+2|fun g4_p2loc (p: p2at): location = p.p2at_loc ()
+1|fun g4_p2loc (p: p2at): location = p.p2at_loc
+2|fun g4_d3ty (e: d3exp): s2exp = d3exp_get_type (e)
+1|fun g4_d3ty (e: d3exp): s2exp = d3exp_get_type (e)
+//
+
+(* the wrappers of the group 4 test (g4_gen.py): the functions with an uninitialized [&s2exp? >> s2exp] argument, the address of a variable *)
+(* ****** ****** *)
+2|fun g4_unopt (o: s2expopt, dflt: s2exp): s2exp = (case+ gopt_view (o) of ~GOsome (x) => x | ~GOnone () => dflt)
+1|fun g4_unopt (o: s2expopt, dflt: s2exp): s2exp = (case+ o of Some (x) => x | None () => dflt)
+fun g4_addr (d2v: d2var): s2exp = g4_unopt (d2var_get_addr (d2v), s2exp_t0ype_err ())
+//
+fun g4_s2addr_deref (loc: location, s2l: s2exp, d3ls: d3lablst): void = let
+  var s2rt: s2exp
+  val s2e = s2addr_deref (loc, s2l, d3ls, s2rt)
+in
+  dd_ps "s2addr_deref sel="; dd_s2exp s2e; dd_ps " rt="; dd_s2exp s2rt; dd_nl ()
+end // end of [g4_s2addr_deref]
+fun g4_s2addr_assgn_deref (loc: location, s2l: s2exp, d3ls: d3lablst, d3e_r: d3exp): void = let
+  var s2rt: s2exp
+  val d3e = s2addr_assgn_deref (loc, s2l, d3ls, d3e_r, s2rt)
+in
+  dd_ps "s2addr_assgn_deref d3e="; dd_d3exp d3e; dd_ps " rt="; dd_s2exp s2rt; dd_nl ()
+end // end of [g4_s2addr_assgn_deref]
+fun g4_s2addr_xchng_check (loc0: location, loc: location, s2l: s2exp, d3ls: d3lablst, s2f: s2hnf): void = let
+  var s2rt: s2exp
+  val s2e = s2addr_xchng_check (loc0, loc, s2l, d3ls, s2f, s2rt)
+in
+  dd_ps "s2addr_xchng_check sel="; dd_s2exp s2e; dd_ps " rt="; dd_s2exp s2rt; dd_nl ()
+end // end of [g4_s2addr_xchng_check]
+fun g4_s2addr_xchng_deref (loc0: location, s2l: s2exp, d3ls: d3lablst, d2e_r: d2exp): void = let
+  var s2rt: s2exp
+  val d3e = s2addr_xchng_deref (loc0, s2l, d3ls, d2e_r, s2rt)
+in
+  dd_ps "s2addr_xchng_deref d3e="; dd_d3exp d3e; dd_ps " rt="; dd_s2exp s2rt; dd_nl ()
+end // end of [g4_s2addr_xchng_deref]
+//
+2|fun g4_errck (d2cs: d2eclist): void = (
+2|  try (dd_d3eclist (d2eclist_tr_errck (d2cs)); dd_nl ()) with | ~$ERR.PATSOPT_TRANS3_EXN () => dd_ps "[trans3 errors]\n"
+2|)
+1|fun g4_errck (d2cs: d2eclist): void = (
+1|  try (dd_d3eclist (d2eclist_tr_errck (d2cs)); dd_nl ()) with ~($ERR.PATSOPT_TRANS3_EXN ()) => dd_ps "[trans3 errors]\n"
+1|)

@@ -36,7 +36,7 @@ support in ATS for turning tail-recursive calls into local jumps.\
 %{
 //
 implement
-main ((*void*)) =
+main0 ((*void*)) =
 {
 //
 val () = fprint_filsub (stdout_ref, "main_atxt.txt")

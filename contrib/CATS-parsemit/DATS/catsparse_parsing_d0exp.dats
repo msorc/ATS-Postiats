@@ -13,6 +13,8 @@
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 //
 staload "./../SATS/catsparse_syntax.sats"
@@ -34,30 +36,31 @@ var ent: synent?
 //
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| _ when
+| v0 when
     ptest_fun
     (
       buf, parse_i0dex, ent
     ) => let
+    val () = token_node_view_free(v0)
     val bt = 0
     val id = synent_decode2{i0de}(ent)
     val opt = parse_d0expargopt (buf, bt, err)
   in
-    case+ opt of
-    | None () => d0exp_ide (id)
-    | Some (d0e) => d0exp_appid (id, d0e)
+    case+ gopt_view(opt) of
+    | ~GOnone () => d0exp_ide (id)
+    | ~GOsome (d0e) => d0exp_appid (id, d0e)
   end // end of [_ when ...]
 //
-| T_KWORD(ATSPMVint()) => let
+| ~T_KWORD(ATSPMVint()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -70,7 +73,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVint]
 //
-| T_KWORD(ATSPMVintrep()) => let
+| ~T_KWORD(ATSPMVintrep()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -83,7 +86,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVintrep]
 //
-| T_KWORD(ATSPMVbool_true()) => let
+| ~T_KWORD(ATSPMVbool_true()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -94,7 +97,7 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
   end // end of [ATSPMVbool_true]
-| T_KWORD(ATSPMVbool_false()) => let
+| ~T_KWORD(ATSPMVbool_false()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -106,7 +109,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVbool_false]
 //
-| T_KWORD(ATSPMVfloat()) => let
+| ~T_KWORD(ATSPMVfloat()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -119,7 +122,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVfloat]
 //
-| T_KWORD(ATSPMVstring()) => let
+| ~T_KWORD(ATSPMVstring()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -132,7 +135,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVstring]
 //
-| T_KWORD(ATSPMVi0nt()) => let
+| ~T_KWORD(ATSPMVi0nt()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -145,7 +148,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVi0nt]
 //
-| T_KWORD(ATSPMVf0loat()) => let
+| ~T_KWORD(ATSPMVf0loat()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -159,7 +162,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVf0loat]
 //
-| T_KWORD(ATSPMVempty()) => let
+| ~T_KWORD(ATSPMVempty()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -171,7 +174,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVempty]
 //
-| T_KWORD(ATSPMVextval()) => let
+| ~T_KWORD(ATSPMVextval()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -183,7 +186,7 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
   end // end of [ATSPMVextval]
 //
-| T_KWORD(ATSPMVrefarg0()) => let
+| ~T_KWORD(ATSPMVrefarg0()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -197,7 +200,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVrefarg0]
 //
-| T_KWORD(ATSPMVrefarg1()) => let
+| ~T_KWORD(ATSPMVrefarg1()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -211,7 +214,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVrefarg1]
 //
-| T_KWORD(ATSPMVfunlab()) => let
+| ~T_KWORD(ATSPMVfunlab()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -225,7 +228,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVfunlab]
 //
-| T_KWORD(ATSPMVcfunlab()) => let
+| ~T_KWORD(ATSPMVcfunlab()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -243,7 +246,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSPMVcfunlab]
 //
-| T_KWORD(ATSPMVcastfn()) => let
+| ~T_KWORD(ATSPMVcastfn()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -260,7 +263,7 @@ tok.token_node of
       ) else tokbuf_set_ntok_null (buf, n0)
   end // end of [ATSPMVcastfn]
 //
-| T_KWORD(ATSCSTSPmyloc()) => let
+| ~T_KWORD(ATSCSTSPmyloc()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -273,7 +276,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCSTSPmyloc]
 //
-| T_KWORD(ATSCKiseqz()) => let
+| ~T_KWORD(ATSCKiseqz()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -287,7 +290,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKiseqz]
 //
-| T_KWORD(ATSCKisneqz()) => let
+| ~T_KWORD(ATSCKisneqz()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -301,7 +304,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKisneqz]
 //
-| T_KWORD(ATSCKptriscons()) => let
+| ~T_KWORD(ATSCKptriscons()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -315,7 +318,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKptriscons]
 //
-| T_KWORD(ATSCKptrisnull()) => let
+| ~T_KWORD(ATSCKptrisnull()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -329,7 +332,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKptrisnull]
 //
-| T_KWORD(ATSCKpat_int()) => let
+| ~T_KWORD(ATSCKpat_int()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -345,7 +348,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKpat_int]
 //
-| T_KWORD(ATSCKpat_bool()) => let
+| ~T_KWORD(ATSCKpat_bool()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -361,7 +364,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKpat_bool]
 //
-| T_KWORD(ATSCKpat_string()) => let
+| ~T_KWORD(ATSCKpat_string()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -377,7 +380,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKpat_string]
 //
-| T_KWORD(ATSCKpat_con0()) => let
+| ~T_KWORD(ATSCKpat_con0()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -393,7 +396,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKpat_con0]
 //
-| T_KWORD(ATSCKpat_con1()) => let
+| ~T_KWORD(ATSCKpat_con1()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -409,7 +412,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSCKpat_con1]
 //
-| T_KWORD(ATSSELcon()) => let
+| ~T_KWORD(ATSSELcon()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -426,7 +429,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSSELcon]
 //
-| T_KWORD(ATSSELrecsin()) => let
+| ~T_KWORD(ATSSELrecsin()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -443,7 +446,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSSELrecsin]
 //
-| T_KWORD(ATSSELboxrec()) => let
+| ~T_KWORD(ATSSELboxrec()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -460,7 +463,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSSELboxrec]
 //
-| T_KWORD(ATSSELfltrec()) => let
+| ~T_KWORD(ATSSELfltrec()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -477,7 +480,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSSELfltrec]
 //
-| T_KWORD(ATSextfcall()) => let
+| ~T_KWORD(ATSextfcall()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -491,7 +494,7 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
   end // end of [ATSextfcall]
 //
-| T_KWORD(ATSextmcall()) => let
+| ~T_KWORD(ATSextmcall()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -507,7 +510,7 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
   end // end of [ATSextmcall]
 //
-| T_KWORD(ATSfunclo_fun()) => let
+| ~T_KWORD(ATSfunclo_fun()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -525,7 +528,7 @@ tok.token_node of
     // end of [if]
   end // end of [ATSfunclo_fun]
 //
-| T_KWORD(ATSfunclo_clo()) => let
+| ~T_KWORD(ATSfunclo_clo()) => let
     val bt = 0
     val () = incby1 ()
     val ent1 = p_LPAREN (buf, bt, err)
@@ -543,12 +546,12 @@ tok.token_node of
     // end of [if]
   end // end of [ATSfunclo_clo]
 //
-| _ (*rest-of-token*) => let
+| v0 (*rest-of-token*) => (token_node_view_free(v0); let
     val () = err := err + 1
     val () = the_parerrlst_add_ifnbt (bt, loc, PARERR_d0exp)
   in
     synent_null ()
-  end (* end of [_] *)
+  end (* end of [_] *))
 //
 end // end of [parse_d0exp]
 
@@ -561,7 +564,7 @@ parse_d0expseq : parser (d0explst)
 implement
 parse_d0expseq
   (buf, bt, err) =
-  list_vt2t(pstar_fun0_COMMA (buf, bt, parse_d0exp))
+  glist_make_list_vt(pstar_fun0_COMMA (buf, bt, parse_d0exp))
 // end of [parse_d0expseq]
 //
 (* ****** ****** *)
@@ -579,16 +582,16 @@ parse_d0exparg
 val err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_LPAREN () => let
+| ~T_LPAREN () => let
     val bt = 0
     val () = incby1 ()
     val d0es = parse_d0expseq (buf, bt, err)
@@ -596,14 +599,14 @@ tok.token_node of
   in
     if err = err0
       then (
-        d0exp_list (loc ++ tok2.token_loc, d0es)
+        d0exp_list (loc ++ tok2.token_loc(), d0es)
       ) else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
   end
 //
-| _ (*error*) => let
+| v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [parse_d0exparg]
 
@@ -619,7 +622,7 @@ val d0arg = parse_d0exparg (buf, bt, err)
 in
 //
 if err0 = err
-  then Some(d0arg) else (err := err0; None())
+  then gopt_some(d0arg) else (err := err0; gopt_none())
 //
 end // end of [parse_d0expargopt]
 

@@ -152,30 +152,9 @@ cleanall:: ; $(RMF) listmap_dats.js
 #
 ######
 #
-all:: \
-twice_dats.js
-twice_dats.js: twice.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2JS) -o $@
-#
-regress:: test_twice
-test_twice:: twice_dats.js ; $(NODEJS) twice_dats.js
-cleanall:: ; $(RMF) twice_dats.js
 #
 ######
 #
-all:: \
-queens_comb_dats.js
-#
-queens_comb_dats.js: \
-queens_comb.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2JS) -o $@
-#
-regress:: \
-test_queens_comb
-test_queens_comb:: \
-queens_comb_dats.js ; $(NODEJS) $<
-#
-cleanall:: ; $(RMF) queens_comb_dats.js
 #
 ######
 #
@@ -206,14 +185,6 @@ cleanall:: ; $(RMF) mergesort_dats.js
 #
 ######
 #
-all:: \
-sieve_lazy_dats.js
-sieve_lazy_dats.js: sieve_lazy.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2JS) -o $@
-#
-regress:: test_sieve_lazy
-test_sieve_lazy:: sieve_lazy_dats.js ; $(NODEJS) $<
-cleanall:: ; $(RMF) sieve_lazy_dats.js
 #
 ######
 #
@@ -254,19 +225,6 @@ cleanall:: ; $(RMF) process_test_dats.js
 ######
 
 #
-all:: \
-QueenPuzzle_sol_dats.js
-#
-QueenPuzzle_sol_dats.js: \
-QueenPuzzle_sol.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2JS) -o $@
-#
-regress:: \
-test_QueenPuzzle_sol
-test_QueenPuzzle_sol:: \
-QueenPuzzle_sol_dats.js ; $(NODEJS) $<
-#
-cleanall:: ; $(RMF) QueenPuzzle_sol_dats.js
 #
 ######
 

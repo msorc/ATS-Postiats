@@ -305,6 +305,6 @@ praxi exp_expmul
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "arith_prf_atxt.txt")
 %}\

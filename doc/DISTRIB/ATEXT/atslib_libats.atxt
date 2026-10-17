@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -178,30 +180,21 @@ The ATSLIB/libats library\
 
 (* ****** ****** *)
 
-#packfilename("SATS/funset_avltree.sats")
-#packfilename("SATS/funset_listord.sats")
 
 (* ****** ****** *)
 
-#packfilename("SATS/funmap_list.sats")
-#packfilename("SATS/funmap_avltree.sats")
-#packfilename("SATS/funmap_rbtree.sats")
 
 (* ****** ****** *)
 
-#packfilename("SATS/funmset_listord.sats")
 
 (* ****** ****** *)
 
-#packfilename("SATS/funarray.sats")
 
 (* ****** ****** *)
 
-#packfilename("SATS/fundeque_fngtree.sats")
 
 (* ****** ****** *)
 
-#packfilename("SATS/funralist_nested.sats")
 
 (* ****** ****** *)
 
@@ -246,14 +239,9 @@ The ATSLIB/libats library\
 
 (* ****** ****** *)
 
-#packfilename("SATS/SHARE/funset.hats")
-#packfilename("SATS/SHARE/funmap.hats")
-#packfilename("SATS/SHARE/funmset.hats")
 
 (* ****** ****** *)
 
-#packfilename("SATS/SHARE/fundeque.hats")
-#packfilename("SATS/SHARE/funralist.hats")
 
 (* ****** ****** *)
 
@@ -321,7 +309,6 @@ The ATSLIB/libats library\
 (* ****** ****** *)
 
 #packfilename("DATS/ilist_prf.dats")
-#packfilename("DATS/gflist.dats")
 #packfilename("DATS/gflist_vt.dats")
 #packfilename("DATS/gfarray.dats")
 
@@ -332,30 +319,21 @@ The ATSLIB/libats library\
 
 (* ****** ****** *)
 
-#packfilename("DATS/funset_listord.dats")
-#packfilename("DATS/funset_avltree.dats")
 
 (* ****** ****** *)
 
-#packfilename("DATS/funmap_list.dats")
-#packfilename("DATS/funmap_avltree.dats")
-#packfilename("DATS/funmap_rbtree.dats")
 
 (* ****** ****** *)
 
-#packfilename("DATS/funmset_listord.dats")
 
 (* ****** ****** *)
 
-#packfilename("DATS/funarray_braunt.dats")
 
 (* ****** ****** *)
 
-#packfilename("DATS/fundeque_fngtree.dats")
 
 (* ****** ****** *)
 
-#packfilename("DATS/funralist_nested.dats")
 
 (* ****** ****** *)
 
@@ -397,14 +375,9 @@ The ATSLIB/libats library\
 
 (* ****** ****** *)
 
-#packfilename("DATS/SHARE/funset.hats")
-#packfilename("DATS/SHARE/funmap.hats")
-#packfilename("DATS/SHARE/funmset.hats")
 
 (* ****** ****** *)
 
-#packfilename("DATS/SHARE/fundeque.hats")
-#packfilename("DATS/SHARE/funralist.hats")
 
 (* ****** ****** *)
 
@@ -430,7 +403,7 @@ The ATSLIB/libats library\
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

@@ -33,17 +33,24 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_util.dats, see PORTING.md, "ccomp core modules")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
-staload "pats_basics.sats"
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
@@ -52,7 +59,12 @@ staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
 
+staload "./pats_dynexp2.sats"
+
+(* ****** ****** *)
+
 staload "./pats_histaexp.sats"
+staload "./pats_hidynexp.sats"
 
 (* ****** ****** *)
 
@@ -69,15 +81,15 @@ tmpvar_is_void (tmp) =
 
 implement
 primval_is_void
-  (pmv) = hisexp_is_void (pmv.primval_type)
+  (pmv) = hisexp_is_void (pmv.primval_type())
 // end of [primval_is_void]
 
 (* ****** ****** *)
 
 implement
-primval_is_top (pmv) = (
-  case+ pmv.primval_node of PMVtop () => true | _ => false
-) // end of [primval_is_top]
+primval_is_top (pmv) =
+  primval_node_is_PMVtop (pmv.primval_node())
+// end of [primval_is_top]
 
 (* ****** ****** *)
 //
@@ -91,21 +103,21 @@ primval_is_nshared
 in
 //
 case+
-  pmv.primval_node of
-| PMVtmpref _ => true // left-value
-| PMVargref _ => true // left-value
+  primval_node_view (pmv.primval_node()) of
+| ~PMVtmpref _ => true // left-value
+| ~PMVargref _ => true // left-value
 //
-| PMVselcon _ => true // field-selection
-| PMVselect _ => true // field-selection
-| PMVselect2 _ => true // field-selection
+| ~PMVselcon _ => true // field-selection
+| ~PMVselect _ => true // field-selection
+| ~PMVselect2 _ => true // field-selection
 //
-| PMVselptr _ => true // left-value
+| ~PMVselptr _ => true // left-value
 //
-| PMVlamfix _ => true // lamfix-value
+| ~PMVlamfix _ => true // lamfix-value
 //
-| PMVcastfn (d2c, pmv) => primval_is_nshared (pmv)
+| ~PMVcastfn (d2c, pmv) => primval_is_nshared (pmv)
 //
-| _ => false
+| v => (primval_node_view_free (v); false)
 //
 end // end of [primval_is_nshared]
 
@@ -122,7 +134,8 @@ in
 //
 case+ funclo of
 | FUNCLOfun () => primval_funlab (loc, hse, fl)
-| FUNCLOclo (knd) => primval_cfunlab (loc, hse, knd, fl)
+| _ (*FUNCLOclo*) =>
+    primval_cfunlab (loc, hse, funclo_get_clokind (funclo), fl)
 //
 end // end of [primval_make_funlab]
 
@@ -139,7 +152,8 @@ in
 //
 case+ funclo of
 | FUNCLOfun() => primval_funlab(loc, hse0, fl)
-| FUNCLOclo(knd) => primval_cfunlab(loc, hse0, knd, fl)
+| _ (*FUNCLOclo*) =>
+    primval_cfunlab(loc, hse0, funclo_get_clokind (funclo), fl)
 //
 end // end of [primval_make2_funlab]
 
@@ -155,7 +169,7 @@ end // end of [primval_make_d2vfunlab]
 
 implement
 patckont_is_none(fail) =
-  case+ fail of PTCKNTnone() => true | _ => false
+  patckont_is_PTCKNTnone (fail)
 // end of [patckont_is_none]
 
 (* ****** ****** *)
@@ -164,15 +178,15 @@ implement
 tmpsub2stasub (tsub) = let
 //
 fun loop
-  (sub: &stasub, tsub: tmpsub): void = let
+  (sub: &stasub >> _, tsub: tmpsub): void = let
 in
 //
-case+ tsub of
-| TMPSUBcons
+case+ tmpsub_view (tsub) of
+| ~TMPSUBcons
     (s2v, s2e, tsub) => let
     val () = stasub_add (sub, s2v, s2e) in loop (sub, tsub)
   end // end of [TMPSUBcons]
-| TMPSUBnil () => ()
+| ~TMPSUBnil () => ()
 //
 end // end of [loop]
 //
@@ -190,61 +204,11 @@ implement
 tmpsub_append
   (xs1, xs2) = let
 in
-  case+ xs1 of
-  | TMPSUBcons (s2v, s2f, xs1) =>
-      TMPSUBcons (s2v, s2f, tmpsub_append (xs1, xs2))
-  | TMPSUBnil () => xs2
+  case+ tmpsub_view (xs1) of
+  | ~TMPSUBcons (s2v, s2f, xs1) =>
+      tmpsub_TMPSUBcons (s2v, s2f, tmpsub_append (xs1, xs2))
+  | ~TMPSUBnil () => xs2
 end // end of [tmpsub_append]
-
-(* ****** ****** *)
-
-#if(0)
-
-extern
-fun
-tailcalck
-(
-  env: !ccompenv
-, tmpret: tmpvar, pmv: primval, ntl0: &int? >> int
-) : funlabopt_vt // end of [tailcalck]
-
-implement
-tailcalck
-  (env, tmpret, pmv, ntl0) = let
-//
-val () = ntl0 := ~1
-val isret = tmpvar_isret (tmpret)
-//
-in
-//
-if isret then
-(
-case+
-pmv.primval_node
-of (* case+ *)
-| PMVcst (d2c) => let
-    val () = ntl0 := 0
-  in
-    ccompenv_find_tailcalenv_cst (env, d2c)
-  end // end of [PMVcst]
-| PMVfunlab (fl) => let
-    val ntl = ccompenv_find_tailcalenv (env, fl)
-    val () = ntl0 := ntl
-  in
-    if ntl >= 0 then Some_vt (fl) else None_vt ()
-  end // end of [PMVfunlab]
-| PMVcfunlab (knd, fl) => let
-    val ntl = ccompenv_find_tailcalenv (env, fl)
-    val () = ntl0 := ntl
-  in
-    if ntl >= 0 then Some_vt (fl) else None_vt ()
-  end // end of [PMVcfunlab]
-| _ => None_vt ()
-) else None_vt () // end of [if]
-//
-end // end of [tailcalck]
-
-#endif // #if(0)
 
 (* ****** ****** *)
 
@@ -252,7 +216,7 @@ local
 
 fun aux
 (
-  res: &tmpvarset_vt, x: instr
+  res: &tmpvarset_vt >> _, x: instr
 ) : void = let
 //
 macdef tmpadd (tmp) =
@@ -260,31 +224,31 @@ macdef tmpadd (tmp) =
 //
 in
 //
-case+ x.instr_node of
+case+ instr_node_view (x.instr_node()) of
 //
-| INSfunlab _ => ()
-| INStmplab _ => ()
+| ~INSfunlab _ => ()
+| ~INStmplab _ => ()
 //
-| INScomment _ => ()
+| ~INScomment _ => ()
 //
-| INSmove_val
+| ~INSmove_val
     (tmp, _) => tmpadd (tmp)
-| INSpmove_val
+| ~INSpmove_val
     (tmp, _) => tmpadd (tmp)
 //
-| INSmove_arg_val _ => ()
+| ~INSmove_arg_val _ => ()
 //
-| INSfcall
+| ~INSfcall
     (tmp, _, _, _) => tmpadd (tmp)
-| INSfcall2
+| ~INSfcall2
     (tmp, _, _, _, _) => tmpadd (tmp)
 //
-| INSextfcall
+| ~INSextfcall
     (tmp, _fun, _arg) => tmpadd (tmp)
-| INSextmcall
+| ~INSextmcall
     (tmp, _obj, _mtd, _arg) => tmpadd (tmp)
 //    
-| INScond
+| ~INScond
   (
     _, _then, _else
   ) => () where
@@ -293,9 +257,9 @@ case+ x.instr_node of
     and ((*void*)) = auxlst(res, _else)
   } // end of [INScond]
 //
-| INSfreecon _ => ()
+| ~INSfreecon _ => ()
 //
-| INSloop
+| ~INSloop
   (
     _, _, _
   , _init, _, _test, _post, _body
@@ -307,167 +271,152 @@ case+ x.instr_node of
     and ((*void*)) = auxlst(res, _body)
   } // end of [INSloop]
 //
-| INSloopexn(knd, tlab) => () // HX: knd=0/1: break/continue
+| ~INSloopexn(knd, tlab) => () // HX: knd=0/1: break/continue
 //
-| INScaseof (ibrs) => auxibrlst (res, ibrs)
+| ~INScaseof (ibrs) => auxibrlst (res, ibrs)
 //
-| INSletpop() => ()
-| INSletpush(pmds) => auxpmdlst(res, pmds)
+| ~INSletpop() => ()
+| ~INSletpush(pmds) => auxpmdlst(res, pmds)
 //
-| INSmove_con
+| ~INSmove_con
     (tmp, _, _, _) => tmpadd(tmp)
   // INSmove_con
 //
-| INSmove_ref(tmp, _) => tmpadd (tmp)
+| ~INSmove_ref(tmp, _) => tmpadd (tmp)
 //
-| INSmove_boxrec(tmp, _, _) => tmpadd(tmp)
-| INSmove_fltrec(tmp, _, _) => tmpadd(tmp)
+| ~INSmove_boxrec(tmp, _, _) => tmpadd(tmp)
+| ~INSmove_fltrec(tmp, _, _) => tmpadd(tmp)
 //
-| INSpatck _ => ()
+| ~INSpatck _ => ()
 //
-| INSmove_ptrofsel(tmp, _, _, _) => tmpadd(tmp)
+| ~INSmove_ptrofsel(tmp, _, _, _) => tmpadd(tmp)
 //
-(*
-| INSload_ptrofs (tmp, _, _, _) => tmpadd (tmp)
-*)
-| INSstore_ptrofs _ => ()
-| INSxstore_ptrofs
-    (tmp, _, _, _, _) => tmpadd (tmp)
+| ~INSstore_ptrofs _ => ()
+| ~INSxstore_ptrofs
+    (tmp, _, _, _, _) => tmpadd(tmp)
 //
-| INSmove_delay
+| ~INSmove_delay
     (tmp, _, _, _) => tmpadd (tmp)
-| INSmove_lazyeval
+| ~INSmove_lazyeval
     (tmp, _, _, _) => tmpadd (tmp)
 //
-| INSraise _ => ()
-| INStrywith
+| ~INSraise _ => ()
+| ~INStrywith
     (tmp, _try, _with) =>
   (
     tmpadd (tmp);
     auxlst (res, _try); auxibrlst (res, _with)
   )
 //
-| INSmove_list_nil
+| ~INSmove_list_nil
     (tmp) => tmpadd (tmp)
-| INSpmove_list_nil
+| ~INSpmove_list_nil
     (tmp) => tmpadd (tmp)
-| INSpmove_list_cons
+| ~INSpmove_list_cons
     (tmp, _) => tmpadd (tmp)
 //
-| INSmove_list_phead
+| ~INSmove_list_phead
    (tmp_hd, tmp_tl, _) => tmpadd (tmp_hd)
-| INSmove_list_ptail
+| ~INSmove_list_ptail
     (tmp1_tl, tmp2_tl, _) => tmpadd (tmp1_tl)
 //
-| INSmove_arrpsz_ptr (tmp, _) => tmpadd (tmp)
+| ~INSmove_arrpsz_ptr (tmp, _) => tmpadd (tmp)
 //
-| INSstore_arrpsz_asz (tmp, _) => tmpadd (tmp)
-| INSstore_arrpsz_ptr (tmp, _, _) => tmpadd (tmp)
+| ~INSstore_arrpsz_asz (tmp, _) => tmpadd (tmp)
+| ~INSstore_arrpsz_ptr (tmp, _, _) => tmpadd (tmp)
 //
-| INSupdate_ptrinc (tmp(*ptr*), _(*type*)) => ()
-| INSupdate_ptrdec (tmp(*ptr*), _(*type*)) => ()
+| ~INSupdate_ptrinc (tmp(*ptr*), _(*type*)) => ()
+| ~INSupdate_ptrdec (tmp(*ptr*), _(*type*)) => ()
 //
-| INSclosure_initize _ => ()
+| ~INSclosure_initize _ => ()
 //
-| INStmpdec(tmp) => tmpadd(tmp)
+| ~INStmpdec(tmp) => tmpadd(tmp)
 //
-| INSextvar(d2c, pmv) => ((*void*))
-| INSdcstdef(d2c, pmv) => ((*void*))
+| ~INSextvar(d2c, pmv) => ((*void*))
+| ~INSdcstdef(d2c, pmv) => ((*void*))
 //
-| INStempenver(_(*d2vs*)) => ((*void*))
+| ~INStempenver(_(*d2vs*)) => ((*void*))
 //
 end // end of [aux]
 
 and auxlst
 (
-  res: &tmpvarset_vt, xs: instrlst
+  res: &tmpvarset_vt >> _, xs: instrlst
 ) : void = let
 in
 //
-case+ xs of
-| list_cons
-    (x, xs) => let
-    val () = aux (res, x) in auxlst (res, xs)
-  end // end of [list_cons]
-| list_nil () => ()
+if glist_is_cons (xs) then let
+  val () = aux (res, glist_head (xs)) in auxlst (res, glist_tail (xs))
+end else ()
 //
 end // end of [auxlst]
 
 and auxibr
 (
-  res: &tmpvarset_vt, ibr: ibranch
+  res: &tmpvarset_vt >> _, ibr: ibranch
 ) : void = let
 in
-  auxlst (res, ibr.ibranch_inslst)
+  auxlst (res, ibr.ibranch_inslst())
 end // end of [auxibr]
 
 and auxibrlst
 (
-  res: &tmpvarset_vt, ibrs: ibranchlst
+  res: &tmpvarset_vt >> _, ibrs: ibranchlst
 ) : void = let
 in
 //
-case+ ibrs of
-| list_cons
-    (ibr, ibrs) => let
-    val () = auxibr (res, ibr) in auxibrlst (res, ibrs)
-  end // end of [list_cons]
-| list_nil () => ((*empty*))
+if glist_is_cons (ibrs) then let
+  val () = auxibr (res, glist_head (ibrs)) in auxibrlst (res, glist_tail (ibrs))
+end else ((*empty*))
 //
 end // end of [auxibrlst]
 
 and auxpmd
 (
-  res: &tmpvarset_vt, pmd: primdec
+  res: &tmpvarset_vt >> _, pmd: primdec
 ) : void = let
 in
 //
-case+ pmd.primdec_node of
-| PMDnone () => ()
+case+ primdec_node_view (pmd.primdec_node()) of
+| ~PMDnone () => ()
 //
-| PMDlist (pmds) => auxpmdlst (res, pmds)
+| ~PMDlist (pmds) => auxpmdlst (res, pmds)
 //
-| PMDsaspdec _ => ()
+| ~PMDsaspdec _ => ()
 //
-| PMDextvar
-    (name, inss) => let
-    val inss = $UN.cast{instrlst}(inss) in auxlst (res, inss)
-  end // end of [PMDextvar]
+| ~PMDextvar
+    (name, inss) => auxlst (res, inss)
+  // end of [PMDextvar]
 //
-| PMDdatdecs _ => ((*void*))
-| PMDexndecs _ => ((*void*))
+| ~PMDdatdecs _ => ((*void*))
+| ~PMDexndecs _ => ((*void*))
 //
-| PMDimpdec (impdec) => let
+| ~PMDimpdec (impdec) => let
     val opt = hiimpdec_get_instrlstopt (impdec)
   in
-    case+ opt of
-    | None () => () | Some (inss) => auxlst (res, inss)
+    if gopt_is_some (opt) then auxlst (res, gopt_unsome (opt)) else ()
   end // end of [PMDimpdec]
 //
-| PMDfundecs _ => ((*void*))
+| ~PMDfundecs _ => ((*void*))
 //
-| PMDvaldecs
-    (_, _, inss) => let
-    val inss = $UN.cast{instrlst}(inss) in auxlst (res, inss)
-  end // end of [PMDvaldecs]
-| PMDvaldecs_rec
-    (_, _, inss) => let
-    val inss = $UN.cast{instrlst}(inss) in auxlst (res, inss)
-  end // end of [PMDvaldecs_rec]
+| ~PMDvaldecs
+    (_, _, inss) => auxlst (res, inss)
+  // end of [PMDvaldecs]
+| ~PMDvaldecs_rec
+    (_, _, inss) => auxlst (res, inss)
+  // end of [PMDvaldecs_rec]
 //
-| PMDvardecs (_, inss) => let
-    val inss = $UN.cast{instrlst}(inss) in auxlst (res, inss)
-  end // end of [PMDvardecs]
+| ~PMDvardecs (_, inss) => auxlst (res, inss)
 //
-| PMDinclude (knd, pmds) => auxpmdlst (res, pmds)
+| ~PMDinclude (knd, pmds) => auxpmdlst (res, pmds)
 //
-| PMDstaload _ => ()
+| ~PMDstaload _ => ()
 //
-| PMDstaloadloc (pfil, nspace, pmds) => auxpmdlst (res, pmds)
+| ~PMDstaloadloc (pfil, nspace, pmds) => auxpmdlst (res, pmds)
 //
-| PMDdynload _ => ()
+| ~PMDdynload _ => ()
 //
-| PMDlocal (
+| ~PMDlocal (
     pmds_head, pmds_body
   ) => {
     val () = auxpmdlst (res, pmds_head)
@@ -477,16 +426,13 @@ case+ pmd.primdec_node of
 end // end of [auxpmd]
 
 and auxpmdlst (
-  res: &tmpvarset_vt, pmds: primdeclst
+  res: &tmpvarset_vt >> _, pmds: primdeclst
 ) : void = let
 in
 //
-case+ pmds of
-| list_cons
-    (pmd, pmds) => let
-    val () = auxpmd (res, pmd) in auxpmdlst (res, pmds)
-  end // end of [list_cons]
-| list_nil () => ()
+if glist_is_cons (pmds) then let
+  val () = auxpmd (res, glist_head (pmds)) in auxpmdlst (res, glist_tail (pmds))
+end else ()
 //
 end // end of [auxpmdlst]
 

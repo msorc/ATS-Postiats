@@ -718,5 +718,15 @@ in
 end // end of [hashtbl_flistize]
 
 (* ****** ****** *)
+//
+// HX-2026-10: no GC
+// [hashtbl_listize] frees the chains and the array
+//
+implement
+{key,itm}
+hashtbl_free (tbl) =
+  list_vt_free<(key,itm)> (hashtbl_listize<key,itm> (tbl))
+//
+(* ****** ****** *)
 
 (* end of [hashtbl_chain.dats] *)

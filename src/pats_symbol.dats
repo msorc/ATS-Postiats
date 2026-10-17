@@ -33,150 +33,114 @@
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
 staload "./pats_symbol.sats"
 
 (* ****** ****** *)
+//
+// HX: a symbol is a cell [name, stamp] in the global arena
+//
+assume symbol_type = ptr
+
+(* ****** ****** *)
+
+fn
+symbol_new
+  (name: string, stamp: uint): symbol = let
+  val p = the_garena_alloc (i2sz(16))
+  val () = $UN.ptr0_set<string> (p, name)
+  val () = $UN.ptr0_set<uint> (ptr0_add_guint<byte> (p, i2sz(8)), stamp)
+in
+  $UN.cast{symbol}(p)
+end // end of [symbol_new]
+
+implement
+symbol_get_name (x) = $effmask_all ($UN.ptr0_get<string> ($UN.cast{ptr}(x)))
+implement
+symbol_get_stamp (x) =
+  $effmask_all ($UN.ptr0_get<uint> (ptr0_add_guint<byte> ($UN.cast{ptr}(x), i2sz(8))))
+
+(* ****** ****** *)
 
 local
 //
-%{^
-typedef ats_ptr_type string ;
-typedef ats_ptr_type symbol ;
-%} (* end of [%{^] *)
-//
 staload
-"libats/SATS/hashtable_linprb.sats"
+"libats/SATS/hashtbl_linprb.sats"
 staload _(*anon*) =
-"libats/DATS/hashtable_linprb.dats"
+"libats/DATS/hashtbl_linprb.dats"
+staload "libats/SATS/hashfun.sats"
+staload _(*anon*) =
+"libats/DATS/hashfun.dats"
 //
 #define HASHTBLSZ 1024
 //
-symintr encode decode
-//
-abstype string_t = $extype"string"
-//
-extern
-castfn
-string_encode (x: string):<> string_t
-extern
-castfn
-string_decode (x: string_t):<> string
-overload encode with string_encode
-overload decode with string_decode
-//
-abstype symbol_t = $extype"symbol"
-//
-extern
-castfn
-symbol_encode (x: symbol):<> symbol_t
-extern
-castfn
-symbol_decode (x: symbol_t):<> symbol
-overload encode with symbol_encode
-overload decode with symbol_decode
-//
-typedef key = string_t
-typedef itm = symbol_t
-typedef keyitm = (key, itm)
+typedef key = string
+typedef itm = symbol
 //
 implement
-keyitem_nullify<keyitm>
-  (x) = () where {
-  extern prfun __assert (x: &keyitm? >> keyitm): void
-  prval () = __assert (x)
-  val () = x.0 := $UN.cast{key} (null)
-  prval () = Opt_some (x)
-} (* end of [keyitem_nullify] *)
-//
-implement
-keyitem_isnot_null<keyitm>
-  (x) = b where {
-  extern prfun __assert1 (x: &Opt(keyitm) >> keyitm): void
-  prval () = __assert1 (x)
-  val b = $UN.cast{ptr} (x.0) <> null
-  val [b:bool] b = bool1_of_bool (b)
-  extern prfun __assert2 (x: &keyitm >> opt (keyitm, b)): void
-  prval () = __assert2 (x)
-} (* end of [keyitem_isnot_null] *)
-//
-implement
-hash_key<key> (x, _) = string_hash_33 (decode(x))
+hash_key<key> (x) =
+  string_hash_multiplier (33UL, 5381UL, x)
 implement
 equal_key_key<key>
-  (x1, x2, _) = compare (decode(x1), decode(x2)) = 0
+  (x1, x2) = (compare (x1, x2) = 0)
 // end of [equal_key_key]
-val hash0 = $UN.cast{hash(key)} (null)
-val eqfn0 = $UN.cast{eqfn(key)} (null)
-val [l:addr] ptbl = hashtbl_make_hint<key,itm> (hash0, eqfn0, HASHTBLSZ)
 //
-val rtbl = HASHTBLref_make_ptr {key,itm} (ptbl)
+// HX: the symbol table lives forever (it is never freed)
+//
+val the_symtbl =
+  $UN.castvwtp0{ptr}(hashtbl_make_nil<key,itm> (i2sz(HASHTBLSZ)))
 //
 in // in of [local]
 //
-val symbol_null = $UN.cast{symbol} (null) // HX: a hack!
+val symbol_null = $UN.cast{symbol} (the_null_ptr) // HX: a hack!
 //
 fun symbol_insert (
   k: string, i: symbol
 ) : void = () where {
-  val k = encode (k); val i = encode (i)
-  val (fptbl | ptbl) = HASHTBLref_takeout_ptr (rtbl)
-  var res: symbol_t
-  val _keyisused = hashtbl_insert<key,itm> (ptbl, k, i, res)
-  prval () = fptbl (ptbl)
-  prval () = opt_clear (res)
-(*
-  val () = assertloc (not(_keyisused)) // HX: no replacement
-*)
+  val tbl = $UN.castvwtp0{hashtbl(key,itm)}(the_symtbl)
+  val opt = hashtbl_insert_opt<key,itm> (tbl, k, i)
+  val () = (case+ opt of ~Some_vt _ => () | ~None_vt () => ())
+  val _ = $UN.castvwtp0{ptr}(tbl)
 } // end of [symbol_insert]
 
 fun symbol_search
   (k: string): symbol = let
-  val (fptbl | ptbl) = HASHTBLref_takeout_ptr (rtbl)
-  var res: itm?
-  val b = hashtbl_search<key,itm> (ptbl, encode(k), res)
-  prval () = fptbl (ptbl)
+  val tbl = $UN.castvwtp0{hashtbl(key,itm)}(the_symtbl)
+  val opt = hashtbl_search_opt<key,itm> (tbl, k)
+  val _ = $UN.castvwtp0{ptr}(tbl)
 in
-  if b then let
-    prval () = opt_unsome {itm} (res) in decode (res)
-  end else let
-    prval () = opt_unnone {itm} (res) in symbol_null
-  end // end of [if]
+  case+ opt of
+  | ~Some_vt (x) => x
+  | ~None_vt ((*void*)) => symbol_null
 end // end of [symbol_search]
 
 end // end of [local]
 
 (* ****** ****** *)
 
-assume
-symbol_type = '{
-  name= string, stamp= uint
-} // end of [symbol_type]
-
-(* ****** ****** *)
-
-implement
-symbol_get_name (x) = x.name
-implement
-symbol_get_stamp (x) = x.stamp
-
-(* ****** ****** *)
-
 local
 //
 var the_symbol_stamp: uint = 0u
-val (pf_the_symbol_stamp | ()) =
-  vbox_make_view_ptr {uint} (view@ the_symbol_stamp | &the_symbol_stamp)
-// end of [val]
+val the_symbol_stamp_ref =
+  ref_make_viewptr{uint}(view@ the_symbol_stamp | addr@ the_symbol_stamp)
+//
 fun stamp_getinc
   (): uint = n where {
-  prval vbox(pf) = pf_the_symbol_stamp
-  val n = the_symbol_stamp
-  val () = the_symbol_stamp := n + 1u
+  val n = ref_get_elt (the_symbol_stamp_ref)
+  val () = ref_set_elt (the_symbol_stamp_ref, n + 1u)
 } // end of [stamp_getinc]
 //
 in // in of [local]
@@ -185,27 +149,22 @@ implement
 symbol_make_string
   (name) = let
 //
-  extern fun symbol_is_null (x: symbol):<> bool = "atspre_ptr_is_null"
+  fn symbol_is_null (x: symbol):<> bool = ptr_is_null ($UN.cast{ptr}(x))
 //
   val x = symbol_search (name)
 in
 //
-case+ 0 of
-| _ when
-    symbol_is_null (x) => let
-    val stamp = stamp_getinc ()
-    val x = '{
-      name= name, stamp= stamp
-    } // end of [val]
-(*
-    val () = println! ("symbol_make_string: name = ", name)
-    val () = println! ("symbol_make_string: stamp = ", stamp)
-*)
-    val () = symbol_insert (name, x)
-  in
-    x // newly created symbol
-  end // end of [_ when ...]
-| _ => x // HX: symbol of the given name is found
+if
+symbol_is_null (x)
+then let
+  val stamp = stamp_getinc ()
+  val name = the_garena_strdup (name) // HX: the name is kept
+  val x = symbol_new (name, stamp)
+  val () = symbol_insert (name, x)
+in
+  x // newly created symbol
+end // end of [then]
+else x // HX: symbol of the given name is found
 //
 end // [symbol_make_string]
 
@@ -220,7 +179,7 @@ symbol_empty = x where {
 // HX-2011-03-20:
 // make sure that this is the first created symbol
 //
-  val () = assertloc (x.stamp = 0u)
+  val () = assertloc (symbol_get_stamp (x) = 0u)
 } // end of [symbol_empty]
 
 (* ****** ****** *)
@@ -393,14 +352,18 @@ symbol_ATS_STATIC_PREFIX = symbol_make_string "ATS_STATIC_PREFIX"
 (* ****** ****** *)
 
 implement
-eq_symbol_symbol (x1, x2) = x1.stamp = x2.stamp
+eq_symbol_symbol (x1, x2) = symbol_get_stamp (x1) = symbol_get_stamp (x2)
 implement
-neq_symbol_symbol (x1, x2) = x1.stamp != x2.stamp
+neq_symbol_symbol (x1, x2) = symbol_get_stamp (x1) != symbol_get_stamp (x2)
 
 (* ****** ****** *)
 
 implement
-compare_symbol_symbol (x1, x2) = compare (x1.stamp, x2.stamp)
+compare_symbol_symbol (x1, x2) = let
+  val n1 = symbol_get_stamp (x1) and n2 = symbol_get_stamp (x2)
+in
+  if n1 < n2 then ~1 else (if n1 > n2 then 1 else 0)
+end // end of [compare_symbol_symbol]
 
 (* ****** ****** *)
 
@@ -413,21 +376,21 @@ prerr_symbol (x) = fprint_symbol (stderr_ref, x)
 //
 implement
 fprint_symbol
-  (out, x) = fprint_string (out, x.name)
+  (out, x) = fprint_string (out, symbol_get_name (x))
 //
 implement
 fprint_symbolopt
   (out, opt) = let
 in
 //
-case+ opt of
-| Some (x) => {
+case+ gopt_view(opt) of
+| ~GOsome (x) => {
     val () =
       fprint_string (out, "Some(")
     val () = fprint_symbol (out, x)
     val () = fprint_string (out, ")")
   } (* end of [Some] *)
-| None () => fprint_string (out, "None()")
+| ~GOnone () => fprint_string (out, "None()")
 //
 end (* end of [fprint_symbolopt] *)
 //

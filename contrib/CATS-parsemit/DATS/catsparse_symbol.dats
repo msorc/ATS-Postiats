@@ -13,39 +13,32 @@
 //
 (* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
 //
-datatype
-symbol =
-SYMBOL of (string(*name*), int(*stamp*))
 //
-(* ****** ****** *)
-
-assume symbol_type = symbol
-
-(* ****** ****** *)
+// HX-2026-10: no GC
+// a symbol is a pair @(name, stamp) in the global arena
+//
+typedef symrec = @(string, int)
+//
+assume symbol_type = ptr
 //
 implement
-symbol_get_name (sym) =
-  let val+SYMBOL (name, _) = sym in name end
+symbol_get_name
+  (sym) = $effmask_all((arena_load<symrec>(sym)).0)
 //
-(* ****** ****** *)
-
 implement
 eq_symbol_symbol
-  (x1, x2) = let
-  val+SYMBOL (_, n1) = x1
-  val+SYMBOL (_, n2) = x2
-in
-  if n1 = n2 then true else false
-end // end of [eq_symbol_symbol]
-
+  (x1, x2) = ($UNSAFE.cast{intptr}(x1) = $UNSAFE.cast{intptr}(x2))
+//
 (* ****** ****** *)
 
 local
-
+//
 staload SYMCNT =
 {
 //
@@ -104,7 +97,10 @@ if isneqz(pt)
   then $UNSAFE.p2tr_get<symbol> (pt)
   else let
     val n = $SYMCNT.getinc ()
-    val sym = SYMBOL (name, n)
+    val name = the_garena_strdup(name)
+    val p = the_garena_alloc(sizeof<symrec>)
+    val () = arena_store<symrec>(p, @(name, n))
+    val sym = $UNSAFE.cast{symbol}(p)
     val-~None_vt() = $SYMBOL.insert_opt (name, sym)
   in
     sym
@@ -119,7 +115,9 @@ end // end of [local]
 implement
 fprint_symbol
   (out, x) = let
-  val+SYMBOL (name, n) = x in fprint! (out, name, "(", n, ")")
+  val sr = arena_load<symrec>(x)
+in
+  fprint! (out, sr.0, "(", sr.1, ")")
 end // end of [fprint_symbol]
 
 (* ****** ****** *)

@@ -5,37 +5,54 @@
 //
 (* ****** ****** *)
 
-staload "libats/ML/SATS/basis.sats"
-staload "libats/ML/SATS/list0.sats"
-staload _ = "libats/ML/DATS/list0.dats"
-
 (* ****** ****** *)
-
+//
+// HX-2026-10: no GC
+// a list of lists is printed with the separator
+// for the inner lists and the one for the outer list
+//
+fun
+fprint_intlst
+(
+  out: FILEref, xs: !List0_vt(int)
+) : void = let
+//
 implement
-{x}{env}
-list_iforeach_env
-  (xs, env) = let
-//
-prval () = lemma_list_param (xs)
-//
-fun loop
-  {n:nat}
-  {i:nat} .<n>. (
-  i: int i, xs: list (x, n), env: &env
-) : intBtwe(i,n+i) =
-  case+ xs of
-  | list_cons
-      (x, xs) => let
-      val () = list_iforeach$fwork<x><env> (i, x, env)
-    in
-      loop (succ(i), xs, env)
-    end // end of [list_cons]
-  | list_nil () => (i) // number of processed elements
-// end of [loop]
+fprint_list_vt$sep<> (out) = fprint_string (out, ", ")
 //
 in
-  loop (0, xs, env)
-end // end of [list_iforeach_env]
+  fprint_list_vt<int> (out, xs)
+end // end of [fprint_intlst]
+
+fun
+fprint_intlstlst
+(
+  out: FILEref, xss: !List0_vt(List0_vt(int)), i: int
+) : void =
+(
+case+ xss of
+| list_vt_nil () => ()
+| @list_vt_cons (xs, xss1) => let
+    val () = if i > 0 then fprint_string (out, "; ")
+    val () = fprint_intlst (out, xs)
+    val () = fprint_intlstlst (out, xss1, i+1)
+  in
+    fold@ (xss)
+  end // end of [list_vt_cons]
+) (* end of [fprint_intlstlst] *)
+
+fun
+intlstlst_free
+(
+  xss: List0_vt(List0_vt(int))
+) : void =
+(
+case+ xss of
+| ~list_vt_nil () => ()
+| ~list_vt_cons (xs, xss) =>
+    (list_vt_free<int> (xs); intlstlst_free (xss))
+  // end of [list_vt_cons]
+) (* end of [intlstlst_free] *)
 
 (* ****** ****** *)
 
@@ -44,23 +61,14 @@ val () =
 //
 val out = stdout_ref
 //
-val xs1 = g0ofg1($list{int}(0,1,2,3,4))
-val xs2 = g0ofg1($list{int}(5,6,7,8,9))
-val xss = cons0{list0(int)}(xs1, cons0{list0(int)}(xs2, nil0()))
+val xs1 = $list_vt{int}(0,1,2,3,4)
+val xs2 = $list_vt{int}(5,6,7,8,9)
+val xss = $list_vt{List0_vt(int)}(xs1, xs2)
 //
-(*
-implement
-fprint_val<list0(int)> (out, xs) = ()
-*)
-local
-implement
-fprint_val<list0(int)>
-  (out, xs) = fprint_list0_sep<int> (out, xs, ", ")
-in(*in-of-local*)
-val () = fprint_list0_sep<list0(int)> (out, xss, "; ")
-end // end of [local]
-//
+val () = fprint_intlstlst (out, xss, 0)
 val ((*void*)) = fprint_newline (out)
+//
+val () = intlstlst_free (xss)
 //
 } (* end of [val] *)
 

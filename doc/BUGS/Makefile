@@ -31,15 +31,6 @@ all::
 ######
 
 all:: \
-bug-2013-10-07
-bug-2013-10-07: \
-bug-2013-10-07.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-cleanall:: ; $(RMF) bug-2013-10-07
-
-######
-
-all:: \
 bug-2013-10-09
 bug-2013-10-09: \
 bug-2013-10-09.dats ; \
@@ -106,15 +97,6 @@ bug-2013-11-29
 bug-2013-11-29: \
 bug-2013-11-29.dats ; $(PATSCC) -tcats $<
 cleanall:: ; $(RMF) bug-2013-11-29
-
-######
-
-all:: \
-bug-2013-12-04
-bug-2013-12-04: \
-bug-2013-12-04.dats ; \
-$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-cleanall:: ; $(RMF) bug-2013-12-04
 
 ######
 #
@@ -199,22 +181,6 @@ cleanall:: ; $(RMF) bug-2015-04-15_dats.c
 ######
 
 all:: \
-bug-2015-04-21
-bug-2015-04-21: \
-bug-2015-04-21.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-cleanall:: ; $(RMF) bug-2015-04-21
-
-######
-
-all:: \
-bug-2015-05-13
-bug-2015-05-13: \
-bug-2015-05-13.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-cleanall:: ; $(RMF) bug-2015-05-13
-
-######
-
-all:: \
 bug-2015-08-04
 bug-2015-08-04: \
 bug-2015-08-04.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
@@ -226,34 +192,6 @@ all:: \
 bug-2016-05-13
 bug-2016-05-13: bug-2016-05-13.dats; $(PATSCC) -o $@ $<
 cleanall:: ; $(RMF) bug-2016-05-13
-
-######
-
-all:: \
-bug-2016-06-26
-bug-2016-06-26: \
-bug-2016-06-26.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-cleanall:: ; $(RMF) bug-2016-06-26
-
-######
-
-all:: \
-bug-2016-10-08
-bug-2016-10-08: \
-bug-2016-10-08.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-cleanall:: ; $(RMF) bug-2016-10-08
-
-######
-
-all:: \
-bug-2017-04-16
-bug-2017-04-16: \
-bug-2017-04-16.dats; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-#
-# regress: \
-# valgrind ./bug-2017-04-16
-#
-cleanall:: ; $(RMF) bug-2017-04-16
 
 ######
 

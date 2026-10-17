@@ -65,8 +65,6 @@ randgen_ref (x: &(a?) >> a): void // for randval initialization
 
 (* ****** ****** *)
 
-fun{a:t0p}
-randgen_list {n:nat} (n: int n): list (a, n)
 fun{a:vt0p}
 randgen_list_vt {n:nat} (n: int n): list_vt (a, n)
 
@@ -75,11 +73,6 @@ randgen_list_vt {n:nat} (n: int n): list_vt (a, n)
 fun{a:vt0p}
 randgen_arrayptr
   {n:int} (n: size_t(n)): arrayptr (a, n)
-fun{a:vt0p}
-randgen_arrayref
-  {n:int} (n: size_t(n)): arrayref (a, n)
-fun{a:vt0p}
-randgen_arrszref (n: size_t): arrszref (a)
 //
 (* ****** ****** *)
 
@@ -94,12 +87,6 @@ fun{a:vt0p}
 randgen_matrixptr
   {m,n:int}
   (size_t (m), size_t (n)): matrixptr (a, m, n)
-fun{a:vt0p}
-randgen_matrixref
-  {m,n:int}
-  (m: size_t (m), n: size_t (n)): matrixref (a, m, n)
-fun{a:vt0p}
-randgen_mtrxszref (m: size_t, n: size_t): mtrxszref (a)
 //
 (* ****** ****** *)
 

@@ -13,144 +13,97 @@
 *)
 
 (* ****** ****** *)
-//
-extern
-fun
-parse_c3nstrkind (jsonval): c3nstrkind
-//
+
+macdef
+JAG(x0, i) = jsonval_array_get(,(x0), ,(i))
+
 (* ****** ****** *)
 //
 extern
 fun
-parse_c3nstr_node (jsonval): c3nstr_node
+parse_c3nstrkind{l:addr}
+  (ar: !arena(l), tbls: ptables(l), jsnv: jsonval): c3nstrkind(l)
+//
+extern
+fun
+parse_c3nstr_node{l:addr}
+  (ar: !arena(l), tbls: ptables(l), jsnv: jsonval): c3nstr_node(l)
 //
 (* ****** ****** *)
 
 implement
 parse_c3nstr
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-(*
-val () =
-println!
+val loc =
+parse_location
 (
-  "parse_c3nstr: jsnv0 = ", jsnv0
-) (* end of [val] *)
-*)
-//
-val-JSONobject(lxs) = jsnv0
-val () = assertloc(length(lxs) >= 3)
-//
-val+list_cons(lx, lxs) = lxs
-val loc = parse_location (lx.1)
-//
-val+list_cons(lx, lxs) = lxs
-val c3tk = parse_c3nstrkind (lx.1)
-//
-val+list_cons(lx, lxs) = lxs
-val node = parse_c3nstr_node (lx.1)
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "c3nstr_loc")
+)
+val c3tk =
+parse_c3nstrkind
+(
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "c3nstr_kind")
+)
+val node =
+parse_c3nstr_node
+(
+  ar, tbls
+, jsonval_get_field_exn(jsnv0, "c3nstr_node")
+)
 //
 in
-//
-  c3nstr_make_node (loc, c3tk, node)
-//
+  c3nstr_make_node(ar, loc, c3tk, node)
 end // end of [parse_c3nstr]
 
 (* ****** ****** *)
 
 implement
 parse_c3nstrkind
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-JSONobject(lxs) = jsnv0
-//
-val-list_cons (lx, lxs) = lxs
-val name = lx.0 and jsnv2 = lx.1
+val name = jsonval_get_name(jsnv0)
+val jsnv2 = jsonval_get_value(jsnv0)
 //
 in
 //
 case+ name of
-| "C3TKmain" => C3TKmain()
-//
-| "C3TKtermet_isnat" => C3TKtermet_isnat()
-| "C3TKtermet_isdec" => C3TKtermet_isdec()
-//
-| "C3TKsolver" => C3TKsolver(parse_int(jsnv2))
-//
-| _(*rest-of-c3nstrkind*) => C3TKignored((*void*))
+| "C3TKmain" => c3nstrkind_C3TKmain(ar)
+| "C3TKtermet_isnat" => c3nstrkind_C3TKtermet_isnat(ar)
+| "C3TKtermet_isdec" => c3nstrkind_C3TKtermet_isdec(ar)
+| "C3TKsolver" =>
+    c3nstrkind_C3TKsolver(ar, parse_int(jsnv2))
+| _(*rest-of-c3nstrkind*) => c3nstrkind_C3TKignored(ar)
 //
 end // end of [parse_c3nstrkind]
 
 (* ****** ****** *)
 
-local
-
-fun
-aux_C3NSTRprop
-(
-  x0: jsonval
-) : c3nstr_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  C3NSTRprop(parse_s2exp(x))
-end (* aux_C3NSTRprop *)
-
-fun
-aux_C3NSTRitmlst
-(
-  x0: jsonval
-) : c3nstr_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  C3NSTRitmlst(parse_s3itmlst(x))
-end (* aux_C3NSTRitmlst *)
-
-fun
-aux_C3NSTRsolverify
-(
-  x0: jsonval
-) : c3nstr_node = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  C3NSTRsolverify(parse_s2exp(x))
-end (* aux_C3NSTRsolverify *)
-
-in (* in-of-local *)
-
 implement
 parse_c3nstr_node
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-JSONobject(lxs) = jsnv0
-//
-val-list_cons (lx, lxs) = lxs
-val name = lx.0 and jsnv2 = lx.1
+val name = jsonval_get_name(jsnv0)
+val x0 = jsonval_get_value(jsnv0)
 //
 in
 //
 case+ name of
-//
-| "C3NSTRprop" => aux_C3NSTRprop(jsnv2)
-//
-| "C3NSTRitmlst" => aux_C3NSTRitmlst(jsnv2)
-//
-| "C3NSTRsolverify" => aux_C3NSTRsolverify(jsnv2)
-//
+| "C3NSTRprop" =>
+    c3nstr_node_C3NSTRprop
+      (ar, parse_s2exp(ar, tbls, JAG(x0, 0)))
+| "C3NSTRitmlst" =>
+    c3nstr_node_C3NSTRitmlst
+      (ar, parse_s3itmlst(ar, tbls, JAG(x0, 0)))
+| "C3NSTRsolverify" =>
+    c3nstr_node_C3NSTRsolverify
+      (ar, parse_s2exp(ar, tbls, JAG(x0, 0)))
 | _(*unrecognized*) =>
    let val () = assertloc(false) in exit(1) end
 //
 end // end of [parse_c3nstr_node]
-
-end // end of [local]
 
 (* ****** ****** *)
 

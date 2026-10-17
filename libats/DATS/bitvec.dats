@@ -770,13 +770,13 @@ fprint_val<uintptr> (out, x) = fprint_bitvec$word<> (out, x)
 //
 implement fprint_array$sep<> (out) = ()
 //
+val (pf, fpf | p) =
+  $UN.ptr_vtake{@[uintptr][n]}(addr@vec)
+val () = fprint_array (out, !p, i2sz(asz))
+prval ((*returned*)) = fpf (pf)
+//
 in
-//
-fprint_arrayref
-(
-  out, $UN.castvwtp1{arrayref(uintptr,n)}(addr@vec), i2sz(asz)
-) (* fprint_arrayref *)
-//
+  // nothing
 end // end of [fprint_bitvec]
 
 (* ****** ****** *)

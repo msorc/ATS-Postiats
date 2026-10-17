@@ -33,6 +33,8 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
 staload "./pats_stamp.sats"
 
 (* ****** ****** *)
@@ -261,37 +263,34 @@ staload
 LS = "libats/SATS/linset_avltree.sats"
 staload _ = "libats/DATS/linset_avltree.dats"
 //
-val
-cmp = lam
-(
-  x1: stamp, x2: stamp
-) : int =<cloref> compare_stamp_stamp (x1, x2)
-//
 assume stampset_viewtype = $LS.set (stamp)
+//
+implement
+$LS.compare_elt_elt<stamp> (x1, x2) = compare_stamp_stamp (x1, x2)
 //
 in (* in-of-local *)
 
 implement
-stampset_vt_nil () = $LS.linset_make_nil ()
+stampset_vt_nil () = $effmask_wrt ($LS.linset_make_nil ())
 
 implement
-stampset_vt_is_nil (xs) = $LS.linset_is_empty (xs)
+stampset_vt_is_nil (xs) = $LS.linset_is_nil (xs)
 implement
-stampset_vt_isnot_nil (xs) = $LS.linset_isnot_empty (xs)
+stampset_vt_isnot_nil (xs) = $LS.linset_isnot_nil (xs)
 
 implement
 stampset_vt_is_member
-  (xs, x) = $LS.linset_is_member (xs, x, cmp)
+  (xs, x) = $LS.linset_is_member (xs, x)
 
 implement
 stampset_vt_add
   (xs, x) = xs where {
   var xs = xs
-  val _(*replaced*) = $LS.linset_insert (xs, x, cmp)
+  val _(*replaced*) = $effmask_wrt ($LS.linset_insert (xs, x))
 } // end of [stampset_vt_add]
 
 implement
-stampset_vt_free (xs) = $LS.linset_free (xs)
+stampset_vt_free (xs) = $effmask_wrt ($LS.linset_free (xs))
 
 end // end of [local]
 

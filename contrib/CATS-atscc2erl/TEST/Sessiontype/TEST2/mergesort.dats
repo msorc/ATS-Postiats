@@ -60,7 +60,7 @@ sslist_take
 {a:t@ype}
 (
   !channeg(sslist(a)) >> _, n: intGte(0)
-) : List0(a)
+) : List0_vt(a) // HX-2026-10: no GC
 //
 implement
 sslist_take{a}(chn, n) = let
@@ -68,8 +68,8 @@ sslist_take{a}(chn, n) = let
 fun
 loop
 (
-  chn: !channeg(sslist(a)) >> _, n: int, res: List0(a)
-) : List0(a) =
+  chn: !channeg(sslist(a)) >> _, n: int, res: List0_vt(a)
+) : List0_vt(a) =
 (
 //
 if
@@ -81,14 +81,14 @@ then let
   ) = channeg_list(chn)
   val x0 = channel_recv(chn) 
 in
-  loop (chn, n-1, list_cons(x0, res))
+  loop (chn, n-1, list_vt_cons(x0, res))
 end // end of [then]
 else res // end of [else]
 //
 ) (* end of [loop] *)
 //
 in
-  list_reverse(loop(chn, n, list_nil((*void*))))
+  list_vt_reverse(loop(chn, n, list_vt_nil((*void*))))
 end // end of [sslist_take]
 
 (* ****** ****** *)
@@ -100,8 +100,7 @@ sslist_split
 (
   n: intGte(2), channeg(sslist(a))
 ) :
-$tup
-( channeg(chsnd(int)::sslist(a))
+@( channeg(chsnd(int)::sslist(a))
 , channeg(chsnd(int)::sslist(a))
 ) (* end of [sslist_split] *)
 //
@@ -132,14 +131,14 @@ val chn = chn
 val chn1 =
 channeg_create
 (
-  llam (chp) => (channel_send(chp, n1); chanposneg_link(chp, list2sslist(xs1)))
+  llam (chp) => (channel_send(chp, n1); chanposneg_link(chp, list2sslist_vt(xs1)))
 ) (* end of [val] *)
 //
 val chn2 =
 channeg_create(llam (chp) => (channel_send(chp, n1); chanposneg_link(chp, chn)))
 //
 in
-  $tup(chn1, chn2)
+  @(chn1, chn2)
 end // end of [sslist_split]
 
 (* ****** ****** *)
@@ -308,8 +307,7 @@ then chn
 else let
 //
 val
-$tup
-(
+@(
 chn1
 ,
 chn2
@@ -332,7 +330,7 @@ end // end of [sslist_msort]
 extern
 fun
 {a:t@ype}
-mergesort(xs: List(a)): List(a)
+mergesort(xs: List0_vt(a)): List0_vt(a)
 //
 (* ****** ****** *)
 
@@ -340,42 +338,47 @@ implement
 {a}(*tmp*)
 mergesort(xs) = let
 //
-val n = length(xs)
-val chn = list2sslist(xs)
+val n = list_vt_length(xs)
+val chn = list2sslist_vt{a}(xs)
 val chn = sslist_msort(n, chn)
 //
 in
-  sslist2list(chn)
+  sslist2list_vt{a}(chn)
 end // end of [mergesort]
 
 (* ****** ****** *)
 
+extern
+fun
+{a:t@ype}
+print_list_vt(xs: !List0_vt(a)): void
+//
 implement
 {a}(*tmp*)
-print_list(xs) = let
+print_list_vt(xs) = let
 //
 val sep = ", "
 //
 fun
 loop
 (
-  i: int, xs: List(a)
+  i: int, xs: !List0_vt(a)
 ) : void =
 (
 case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) => let
+| list_vt_nil() => ()
+| list_vt_cons(x, xs1) => let
     val () =
     if i > 0 then print(sep)
     val () = print_val<a> (x)
   in
-    loop (i+1, xs)
-  end // end of [list_cons]
+    loop (i+1, xs1)
+  end // end of [list_vt_cons]
 )
 //
 in
   loop (0, xs)
-end // end of [print_list]
+end // end of [print_list_vt]
 
 (* ****** ****** *)
 
@@ -390,9 +393,9 @@ implement
 main0_erl () =
 {
 //
-#define nil list_nil
-#define :: list_cons
-#define cons list_cons
+#define nil list_vt_nil
+#define :: list_vt_cons
+#define cons list_vt_cons
 //
 typedef T = int
 //
@@ -403,15 +406,16 @@ val xs =
 //
 val () =
 print! ("xs(bef) =\n")
-val () = print_list<T> (xs)
+val () = print_list_vt<T> (xs)
 val () = print_newline()
 //
 val xs = mergesort<T> (xs)
 //
 val () =
 print! ("xs(aft) =\n")
-val () = print_list<T> (xs)
+val () = print_list_vt<T> (xs)
 val () = print_newline()
+val () = list_vt_free(xs)
 //
 typedef T = double
 //
@@ -422,15 +426,16 @@ val xs =
 //
 val () =
 print! ("xs(bef) =\n")
-val () = print_list<T> (xs)
+val () = print_list_vt<T> (xs)
 val () = print_newline()
 //
 val xs = mergesort<T> (xs)
 //
 val () =
 print! ("xs(aft) =\n")
-val () = print_list<T> (xs)
+val () = print_list_vt<T> (xs)
 val () = print_newline()
+val () = list_vt_free(xs)
 //
 } (* end of [main0] *)
 

@@ -33,25 +33,39 @@
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: port of src/pats_symmap_htlinprb.hats (a disabled experiment:
+// like in ATS1 nothing includes it; src/pats_symmap.dats includes the
+// avltree version). It is ported against libats/hashtbl_linprb of ATS2
+// and typechecks when included (see src/symmap_htlinprb_check.dats).
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
 staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload "libats/SATS/hashtable_linprb.sats"
-staload _(*anon*) = "libats/DATS/hashtable_linprb.dats"
+staload SYM = "./pats_symbol.sats"
 
 (* ****** ****** *)
 
-staload "pats_symmap.sats"
+staload "libats/SATS/hashtbl_linprb.sats"
+staload _(*anon*) = "libats/DATS/hashtbl_linprb.dats"
+
+(* ****** ****** *)
+
+staload "./pats_symmap.sats"
 
 (* ****** ****** *)
 
 %{^
-ATSinline()
-ats_ulint_type
-hashint_jenkin32 (
-  ats_uint_type x
-) {
+static inline
+atstype_ulint
+patsopt_hashint_jenkin32 (atstype_uint x) {
   uint32_t a = x ;
   a = (a+0x7ed55d16) + (a<<12);
   a = (a^0xc761c23c) ^ (a>>19);
@@ -64,108 +78,79 @@ hashint_jenkin32 (
 %}
 extern
 fun hashint_jenkin32
-  (x: uint):<> ulint = "mac#hashint_jenkin32"
+  (x: uint):<> ulint = "mac#patsopt_hashint_jenkin32"
 (* end of [hashint_jenkin32] *)
 
 (* ****** ****** *)
 //
 typedef key = uint
 typedef itm = ptr
-typedef keyitm = @(key, itm)
+//
 assume
-symmap_vtype (itm:type) = HASHTBLptr1 (key, ptr)
-//
-val hash0 = $UN.cast{hash(key)} (null)
-val eqfn0 = $UN.cast{eqfn(key)} (null)
+symmap_vtype (itm:type) = hashtbl (key, itm)
 //
 implement
-hash_key<key> (x, _) = hashint_jenkin32 (x)
+hash_key<key> (x) = hashint_jenkin32 (x)
 implement
-equal_key_key<key> (x1, x2, _) = (x1 = x2)
+equal_key_key<key> (x1, x2) = (x1 = x2)
 //
-implement
-keyitem_nullify<keyitm>
-  (ki) = () where {
-  viewtypedef keyitm = (key, itm)
-  extern prfun __assert (ki: &keyitm? >> keyitm): void
-  prval () = __assert (ki)
-  val () = ki.0 := 0u
-  prval () = Opt_some (ki)
-} (* end of [keyitem_nullify] *)
+// HX: a stamp is positive, so key 0 marks an empty slot (nullize of
+// hashtbl_linprb zeroes the slot)
 //
-implement
-keyitem_isnot_null<keyitm> (ki) = let
-  prval () = __assert (ki) where {
-    extern prfun __assert (x: &(Opt keyitm) >> keyitm):<> void
-  } // end of [prval]
-  val res = (ki.0 > 0u)
-  val [b:bool] res = bool1_of_bool (res)
-  prval () = __assert (ki) where {
-    extern prfun __assert (x: &keyitm >> opt (keyitm, b)):<> void
-  } // end of [prval]
-in
-  res
-end // end of [keyitem_isnot_null]
+implement(itm)
+hashtbl_linprb_keyitm_is_null<key,itm> (ki) = (ki.0 = 0u)
 //
 (* ****** ****** *)
 
 #define HASHTBLSZ 97
 
-implement
+implement{itm}
 symmap_make_nil () =
-  hashtbl_make_hint<key,itm> (hash0, eqfn0, HASHTBLSZ)
+  $effmask_all (hashtbl_make_nil<key,itm> (i2sz(HASHTBLSZ)))
 // end of [symmap_make_nil]
 
-implement
-symmap_free (map) = hashtbl_free (map)
+implement{itm}
+symmap_free (map) = $effmask_all (hashtbl_free<key,itm> (map))
 
 (* ****** ****** *)
 
-implement
+implement{itm}
 symmap_search
-  {a} (map, sym) = let
+  (map, sym) = $effmask_all let
   val k = $SYM.symbol_get_stamp (sym)
-  var res: itm?
-  val found = hashtbl_search (map, k, res)
 in
-  if found then let
-    prval () = opt_unsome {itm} (res)
-    val res = $UN.cast{a} (res) in Some_vt (res)
-  end else let
-    prval () = opt_unnone {itm} (res) in None_vt ()
-  end (* end of [if] *)
+  hashtbl_search_opt<key,itm> (map, k)
 end // end of [symmap_search]
 
-implement
+implement{itm}
 symmap_insert
-  {a} (map, sym, i) = {
+  (map, sym, i) = $effmask_all {
   val k = $SYM.symbol_get_stamp (sym)
-  val i: itm = $UN.cast{itm} (i)
-  var res: itm
-  val _exist = hashtbl_insert (map, k, i, res)
+  var res: itm?
+  val _exist = hashtbl_insert<key,itm> (map, k, i, res)
   prval () = opt_clear (res)
 } // end of [symmap_insert]
 
 (* ****** ****** *)
 
-implement
+implement{itm}
 symmap_joinwth
-  {a} (map1, map2) = let
+  (map1, map2) = $effmask_all let
+//
+typedef keyitm = (key, itm)
 //
 fun loop
-  {n:nat} .<n>.
 (
-  map: !symmap (a), kis: list_vt (keyitm, n)
-) :<> void = let
+  map: !symmap (itm), kis: List0_vt (keyitm)
+) : void = let
 in
 //
 case+ kis of
-| list_vt_cons
-    (!p_ki, kis1) => let
-    var res: itm
-    val _exist = hashtbl_insert (map, p_ki->0, p_ki->1, res)
+| ~list_vt_cons
+    (ki, kis1) => let
+    var res: itm?
+    val _exist = hashtbl_insert<key,itm> (map, ki.0, ki.1, res)
     prval () = opt_clear (res)
-    val () = free@ {keyitm} {0} (kis)
   in
     loop (map, kis1)
   end // end of [list_vt_cons]
@@ -173,7 +158,7 @@ case+ kis of
 //
 end // end of [loop]
 //
-val kis = hashtbl_listize<key,itm> (map2)
+val kis = hashtbl_listize1<key,itm> (map2)
 //
 in
   loop (map1, kis)
@@ -181,19 +166,31 @@ end // end of [symmap_joinwth]
 
 (* ****** ****** *)
 
+local
+//
+typedef fenv (itm:type) = @(FILEref, (FILEref, itm) -> void)
+//
+in (* in-of-local *)
+
+implement{itm}
+fprint_symmap (out, map, f) = let
+//
 implement
-fprint_symmap{a}
-  (out, map, f) = let
-  var !p_clo = @lam (
-    pf: !unit_v | k: key, i: &itm
-  ) : void =<clo>
-    $effmask_all (fprint (out, k); fprint (out, " -> "); f (out, $UN.cast{a}(i)); fprint_newline (out))
-  prval pfu = unit_v ()
-  val () = hashtbl_foreach_vclo (pfu | map, !p_clo)
-  prval unit_v () = pfu
+hashtbl_foreach$fwork<key,itm><fenv(itm)>
+  (k, i, env) = {
+  val () = fprint (env.0, k)
+  val () = fprint (env.0, " -> ")
+  val () = env.1 (env.0, i)
+  val () = fprint_newline (env.0)
+} (* end of [hashtbl_foreach$fwork] *)
+//
+var env: fenv(itm) = @(out, f)
+//
 in
-  // nothing
+  hashtbl_foreach_env<key,itm><fenv(itm)> (map, env)
 end // end of [fprint_symmap]
+
+end // end of [local]
 
 (* ****** ****** *)
 

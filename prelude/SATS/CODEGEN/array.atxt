@@ -343,7 +343,7 @@ fun
 {a:t0p}
 array_copy_from_list{n:int}
 (
-  A: &(@[a?][n]) >> @[a][n], xs: list (INV(a), n)
+  A: &(@[a?][n]) >> @[a][n], xs: !list_vt (INV(a), n)
 ) :<!wrt> void // end of [array_copy_from_list]
 //
 fun
@@ -537,12 +537,12 @@ array_initize_elt{n:int}
 fun{a:t0p}
 array_initize_list{n:int}
 (
-  A: &(@[a?][n]) >> @[a][n], asz: int n, xs: list(INV(a), n)
+  A: &(@[a?][n]) >> @[a][n], asz: int n, xs: !list_vt(INV(a), n)
 ) :<!wrt> void // end of [array_initize_list]
 fun{a:t0p}
 array_initize_rlist{n:int}
 (
-  A: &(@[a?][n]) >> @[a][n], asz: int n, xs: list(INV(a), n)
+  A: &(@[a?][n]) >> @[a][n], asz: int n, xs: !list_vt(INV(a), n)
 ) :<!wrt> void // end of [array_initize_rlist]
 
 #atscode_separator()
@@ -682,7 +682,7 @@ array_permute$randint{n:int | n > 0}(size_t(n)): sizeLt(n)
 %{
 //
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "array_atxt.txt")
 //
 %}\

@@ -6,7 +6,7 @@
 
 (*
 ** ATS/Postiats - Unleashing the Potential of Types!
-** Copyright (C) 2011-2014 Hongwei Xi, ATS Trustful Software, Inc.
+** Copyright (C) 2011-2013 Hongwei Xi, ATS Trustful Software, Inc.
 ** All rights reserved
 **
 ** ATS is free software;  you can  redistribute it and/or modify it under
@@ -33,10 +33,12 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-  "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_dynexp2_mapgen.dats, see PORTING.md)
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 //
 staload
@@ -45,11 +47,18 @@ UN =
 //
 (* ****** ****** *)
 
-staload "./pats_jsonize.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2.dats" // [synentlst_app]
 
 (* ****** ****** *)
 
@@ -60,15 +69,15 @@ staload "./pats_dynexp2.sats"
 local
 //
 extern
-fun s2cst_app : synent_app (s2cst)
-and s2var_app : synent_app (s2var)
-and s2Var_app : synent_app (s2Var)
-and d2con_app : synent_app (d2con)
+fun s2cst_app (x: s2cst, env: !appenv): void
+and s2var_app (x: s2var, env: !appenv): void
+and s2Var_app (x: s2Var, env: !appenv): void
+and d2con_app (x: d2con, env: !appenv): void
 //
 extern
-fun d2cst_app : synent_app (d2cst)
-and d2var_app : synent_app (d2var)
-and d2sym_app : synent_app (d2sym)
+fun d2cst_app (x: d2cst, env: !appenv): void
+and d2var_app (x: d2var, env: !appenv): void
+and d2sym_app (x: d2sym, env: !appenv): void
 //  
 #include "./pats_staexp2_appenv.hats"
 #include "./pats_dynexp2_appenv.hats"
@@ -92,11 +101,11 @@ s2cst_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV
-  (!p_s2cs, _, _, _, _, _) = env2
-val ((*void*)) = !p_s2cs := s2cstset_vt_add(!p_s2cs, s2c)
+val+@MYENV
+  (s2cs, _, _, _, _, _) = env2
+val ((*void*)) = s2cs := s2cstset_vt_add(s2cs, s2c)
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -108,11 +117,11 @@ s2var_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV
-  (_, !p_s2vs, _, _, _, _) = env2
-val ((*void*)) = !p_s2vs := s2varset_vt_add(!p_s2vs, s2v)
+val+@MYENV
+  (_, s2vs, _, _, _, _) = env2
+val ((*void*)) = s2vs := s2varset_vt_add(s2vs, s2v)
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -124,11 +133,11 @@ s2Var_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV
-  (_, _, !p_s2Vs, _, _, _) = env2
-val ((*void*)) = !p_s2Vs := s2Varset_vt_add(!p_s2Vs, s2V)
+val+@MYENV
+  (_, _, s2Vs, _, _, _) = env2
+val ((*void*)) = s2Vs := s2Varset_vt_add(s2Vs, s2V)
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -145,11 +154,11 @@ val ((*void*)) =
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV
-  (_, _, _, !p_d2cs, _, _) = env2
-val ((*void*)) = !p_d2cs := d2conset_vt_add(!p_d2cs, d2c)
+val+@MYENV
+  (_, _, _, d2cs, _, _) = env2
+val ((*void*)) = d2cs := d2conset_vt_add(d2cs, d2c)
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -166,14 +175,14 @@ val ((*void*)) =
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV
-  (_, _, _, _, !p_d2cs, _) = env2
+val+@MYENV
+  (_, _, _, _, d2cs, _) = env2
 //
 val ((*void*)) =
-  !p_d2cs := d2cstset_vt_add(!p_d2cs, d2c)
+  d2cs := d2cstset_vt_add(d2cs, d2c)
 //
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -185,14 +194,14 @@ d2var_app
 //
 val env2 =
   $UN.castvwtp1{myenv}(env)
-val+MYENV
-  (_, _, _, _, _, !p_d2vs) = env2
+val+@MYENV
+  (_, _, _, _, _, d2vs) = env2
 //
 val ((*void*)) =
-  !p_d2vs := d2varset_vt_add(!p_d2vs, d2v)
+  d2vs := d2varset_vt_add(d2vs, d2v)
 //
 prval ((*void*)) = fold@ (env2)
-prval ((*void*)) = $UN.castvwtp0{void}(env2)
+val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
   // nothing
@@ -223,7 +232,7 @@ val+~MYENV(s2cs, s2vs, s2Vs, d2cons, d2csts, d2vars) = $UN.castvwtp0{myenv}(appe
 //
 in
 //
-(
+@(
   s2cs
 , s2vs
 , s2Vs

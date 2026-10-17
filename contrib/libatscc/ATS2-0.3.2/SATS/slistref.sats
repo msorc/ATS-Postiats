@@ -1,7 +1,7 @@
+(* ****** ****** *)
 (*
 ** libatscc-common
 *)
-
 (* ****** ****** *)
 
 (*
@@ -49,14 +49,14 @@ fun
 slistref_foldleft
   {res:vt0p}{a:t0p}
 (
-  slistref(a), init: res, fopr: (res, a) -<cloref1> res
+  slistref(a), init: res, fopr: (res, a) -<cloptr1> res
 ) : res = "mac#" // end of [slistref_foldleft]
 //
 fun
 slistref_foldright
   {a:t0p}{res:vt0p}
 (
-  slistref(a), fopr: (a, res) -<cloref1> res, sink: res
+  slistref(a), fopr: (a, res) -<cloptr1> res, sink: res
 ) : res = "mac#" // end of [slistref_foldright]
 //
 (* ****** ****** *)

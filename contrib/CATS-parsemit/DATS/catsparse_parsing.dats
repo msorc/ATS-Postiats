@@ -19,6 +19,8 @@ staload UN = $UNSAFE
 
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 //
 staload "./../SATS/catsparse_syntax.sats"
@@ -67,10 +69,10 @@ val () = println! ("ptoken_fun: tok = ", tok)
 *)
 //
 in
-  if f (tok.token_node) then let
+  if f (tok.token_node()) then let
     val () = tokbuf_incby1 (buf) in tok
   end else let
-    val loc = tok.token_loc
+    val loc = tok.token_loc()
     val () = err := err + 1
     val () = the_parerrlst_add_ifnbt (bt, loc, enode)
   in
@@ -87,7 +89,7 @@ ptoken_test_fun
   val tok = tokbuf_get_token (buf)
 in
 //
-if f(tok.token_node)
+if f(tok.token_node())
   then let
     val () = tokbuf_incby1 (buf) in true
   end // end of [then]
@@ -114,8 +116,8 @@ println! ("ptest_SRPif0: tok = ", tok)
 in
 //
 case+
-tok.token_node of
-| T_KWORD(SRPif()) =>
+token_node_view(tok.token_node()) of
+| ~T_KWORD(SRPif()) =>
     test where
   {
     val () = incby1 ()
@@ -130,7 +132,7 @@ tok.token_node of
     ) : bool // end of [val]
     val () = if not(test) then tokbuf_set_ntok (buf, n0)
   } (* end of [SRPif] *)
-| _ (*non-SRPif*) => false
+| v0 (*non-SRPif*) => (token_node_view_free(v0); false)
 //
 end // end of [ptest_SRPif0]
 
@@ -155,11 +157,11 @@ case+ 0 of
       println! ("pskip_SRPif0: tok = ", tok)
 *)
   in
-    case+ tok.token_node of
-    | T_EOF () => ()
-    | T_KWORD(SRPendif()) =>
+    case+ token_node_view(tok.token_node()) of
+    | ~T_EOF () => ()
+    | ~T_KWORD(SRPendif()) =>
         if level >= 2 then pskip_SRPif0 (buf, level-1) else ()
-    | _ (* non-SRPendif *) => pskip_SRPif0 (buf, level)
+    | v0 (* non-SRPendif *) => (token_node_view_free(v0); pskip_SRPif0 (buf, level))
   end // end of [non-SRPif0]
 //
 end // end of [pskip_SRPif0]
@@ -167,8 +169,8 @@ end // end of [pskip_SRPif0]
 (* ****** ****** *)
 //
 implement
-is_EOF (x) = case+ x of
-  | T_EOF () => true | _ => false
+is_EOF (x) = case+ token_node_view(x) of
+  | ~T_EOF () => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_EOF (buf, bt, err) =
@@ -177,8 +179,8 @@ p_EOF (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_COMMA (x) = case+ x of
-  | T_COMMA () => true | _ => false
+is_COMMA (x) = case+ token_node_view(x) of
+  | ~T_COMMA () => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_COMMA (buf, bt, err) =
@@ -190,8 +192,8 @@ p_COMMA_test (buf) = ptoken_test_fun (buf, is_COMMA)
 (* ****** ****** *)
 //
 implement
-is_COLON (x) = case+ x of
-  | T_COLON () => true | _ => false
+is_COLON (x) = case+ token_node_view(x) of
+  | ~T_COLON () => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_COLON (buf, bt, err) =
@@ -203,8 +205,8 @@ p_COLON_test (buf) = ptoken_test_fun (buf, is_COLON)
 (* ****** ****** *)
 //
 implement
-is_SEMICOLON (x) = case+ x of
-  | T_SEMICOLON () => true | _ => false
+is_SEMICOLON (x) = case+ token_node_view(x) of
+  | ~T_SEMICOLON () => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_SEMICOLON (buf, bt, err) =
@@ -216,8 +218,8 @@ p_SEMICOLON_test (buf) = ptoken_test_fun (buf, is_SEMICOLON)
 (* ****** ****** *)
 //
 implement
-is_LPAREN (x) = case+ x of
-  | T_LPAREN () => true | _ => false
+is_LPAREN (x) = case+ token_node_view(x) of
+  | ~T_LPAREN () => true | v0 => (token_node_view_free(v0); false)
 implement
 p_LPAREN (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_LPAREN, PARERR_LPAREN)
@@ -225,8 +227,8 @@ implement
 p_LPAREN_test (buf) = ptoken_test_fun (buf, is_LPAREN)
 //
 implement
-is_RPAREN (x) = case+ x of
-  | T_RPAREN () => true | _ => false
+is_RPAREN (x) = case+ token_node_view(x) of
+  | ~T_RPAREN () => true | v0 => (token_node_view_free(v0); false)
 implement
 p_RPAREN (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_RPAREN, PARERR_RPAREN)
@@ -236,8 +238,8 @@ p_RPAREN_test (buf) = ptoken_test_fun (buf, is_RPAREN)
 (* ****** ****** *)
 //
 implement
-is_LBRACE (x) = case+ x of
-  | T_LBRACE () => true | _ => false
+is_LBRACE (x) = case+ token_node_view(x) of
+  | ~T_LBRACE () => true | v0 => (token_node_view_free(v0); false)
 implement
 p_LBRACE (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_LBRACE, PARERR_LBRACE)
@@ -245,8 +247,8 @@ p_LBRACE (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_RBRACE (x) = case+ x of
-  | T_RBRACE () => true | _ => false
+is_RBRACE (x) = case+ token_node_view(x) of
+  | ~T_RBRACE () => true | v0 => (token_node_view_free(v0); false)
 implement
 p_RBRACE (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_RBRACE, PARERR_RBRACE)
@@ -254,8 +256,8 @@ p_RBRACE (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_INT (x) = case+ x of
-  | T_INT _ => true | _ => false
+is_INT (x) = case+ token_node_view(x) of
+  | ~T_INT _ => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_INT (buf, bt, err) =
@@ -264,8 +266,8 @@ p_INT (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_INT10 (x) = case+ x of
-  | T_INT (10, _) => true | _ => false
+is_INT10 (x) = case+ token_node_view(x) of
+  | ~T_INT (10, _) => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_INT10 (buf, bt, err) =
@@ -274,8 +276,8 @@ p_INT10 (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ZERO (x) = case+ x of
-  | T_INT (_, "0") => true | _ => false
+is_ZERO (x) = case+ token_node_view(x) of
+  | ~T_INT (_, "0") => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_ZERO (buf, bt, err) =
@@ -287,8 +289,8 @@ p_ZERO_test (buf) = ptoken_test_fun (buf, is_ZERO)
 (* ****** ****** *)
 //
 implement
-is_FLOAT (x) = case+ x of
-  | T_FLOAT _ => true | _ => false
+is_FLOAT (x) = case+ token_node_view(x) of
+  | ~T_FLOAT _ => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_FLOAT (buf, bt, err) =
@@ -297,8 +299,8 @@ p_FLOAT (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_STRING (x) = case+ x of
-  | T_STRING _ => true | _ => false
+is_STRING (x) = case+ token_node_view(x) of
+  | ~T_STRING _ => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_STRING (buf, bt, err) =
@@ -307,8 +309,8 @@ p_STRING (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_SRPendif (x) = case+ x of
-  | T_KWORD(SRPendif()) => true | _ => false
+is_SRPendif (x) = case+ token_node_view(x) of
+  | ~T_KWORD(SRPendif()) => true | v0 => (token_node_view_free(v0); false)
 //
 implement
 p_SRPendif (buf, bt, err) =
@@ -317,8 +319,8 @@ p_SRPendif (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ATSextcode_end (x) = case+ x of
-  | T_KWORD(ATSextcode_end()) => true | _ => false
+is_ATSextcode_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATSextcode_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATSextcode_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATSextcode_end, PARERR_ATSextcode_end)
@@ -326,8 +328,8 @@ p_ATSextcode_end (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ATSfunbody_end (x) = case+ x of
-  | T_KWORD(ATSfunbody_end()) => true | _ => false
+is_ATSfunbody_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATSfunbody_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATSfunbody_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATSfunbody_end, PARERR_ATSfunbody_end)
@@ -335,8 +337,8 @@ p_ATSfunbody_end (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ATScaseof_end (x) = case+ x of
-  | T_KWORD(ATScaseof_end()) => true | _ => false
+is_ATScaseof_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATScaseof_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATScaseof_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATScaseof_end, PARERR_ATScaseof_end)
@@ -344,8 +346,8 @@ p_ATScaseof_end (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ATSbranch_end (x) = case+ x of
-  | T_KWORD(ATSbranch_end()) => true | _ => false
+is_ATSbranch_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATSbranch_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATSbranch_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATSbranch_end, PARERR_ATSbranch_end)
@@ -353,8 +355,8 @@ p_ATSbranch_end (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ATStailcal_end (x) = case+ x of
-  | T_KWORD(ATStailcal_end()) => true | _ => false
+is_ATStailcal_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATStailcal_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATStailcal_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATStailcal_end, PARERR_ATStailcal_end)
@@ -362,22 +364,22 @@ p_ATStailcal_end (buf, bt, err) =
 (* ****** ****** *)
 //
 implement
-is_ATSINSmove_con1_end (x) = case+ x of
-  | T_KWORD(ATSINSmove_con1_end()) => true | _ => false
+is_ATSINSmove_con1_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATSINSmove_con1_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATSINSmove_con1_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATSINSmove_con1_end, PARERR_ATSINSmove_con1_end)
 //
 implement
-is_ATSINSmove_boxrec_end (x) = case+ x of
-  | T_KWORD(ATSINSmove_boxrec_end()) => true | _ => false
+is_ATSINSmove_boxrec_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATSINSmove_boxrec_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATSINSmove_boxrec_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATSINSmove_boxrec_end, PARERR_ATSINSmove_boxrec_end)
 //
 implement
-is_ATSINSmove_fltrec_end (x) = case+ x of
-  | T_KWORD(ATSINSmove_fltrec_end()) => true | _ => false
+is_ATSINSmove_fltrec_end (x) = case+ token_node_view(x) of
+  | ~T_KWORD(ATSINSmove_fltrec_end()) => true | v0 => (token_node_view_free(v0); false)
 implement
 p_ATSINSmove_fltrec_end (buf, bt, err) =
   ptoken_fun (buf, bt, err, is_ATSINSmove_fltrec_end, PARERR_ATSINSmove_fltrec_end)
@@ -554,16 +556,16 @@ macdef incby1 () = tokbuf_incby1 (buf)
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_INT (base, rep) =>
+| ~T_INT (base, rep) =>
   (
     if base = 10
       then let
         val () = incby1 ()
-        val loc = tok.token_loc
+        val loc = tok.token_loc()
       in
-        SIGNED (loc, g0string2int(rep))
+        signed_SIGNED (loc, g0string2int(rep))
       end // end of [then]
       else let
         val () = err := err + 1 in synent_null ()
@@ -571,7 +573,7 @@ tok.token_node of
     // end of [if]
   ) (* end of [T_INT] *)
 //
-| T_MINUS ((*void*)) => let
+| ~T_MINUS ((*void*)) => let
     val bt = 0
     val () = incby1 ()
     val tok2 = p_INT10 (buf, bt, err)
@@ -579,19 +581,19 @@ tok.token_node of
     if err = err0
       then let
         val loc =
-          tok.token_loc ++ tok2.token_loc
+          tok.token_loc() ++ tok2.token_loc()
         // end of [val]
-        val-T_INT(_, rep) = tok2.token_node
+        val-~T_INT(_, rep) = token_node_view(tok2.token_node())
       in
-        SIGNED (loc, ~g0string2int(rep))
+        signed_SIGNED (loc, ~g0string2int(rep))
       end // end of [then]
       else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
   end // end of [T_MINUS]
 //
-| _ (*error*) => let
+| v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [parse_signed]
 
@@ -603,25 +605,25 @@ parse_i0dex
 //
 val tok =
   tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_IDENT_alp (x) => let
+| ~T_IDENT_alp (x) => let
     val () = incby1 () in i0dex_make_string (loc, x)
   end // end of [T_IDENT_alp]
 //
-| _ (*non-IDENT_alp*) => let
+| v0 (*non-IDENT_alp*) => (token_node_view_free(v0); let
     val () = err := err + 1
     val () = the_parerrlst_add_ifnbt (bt, loc, PARERR_i0dex)
   in
     synent_null ()
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [parse_i0dex]
 
@@ -644,7 +646,7 @@ var ent: synent?
 val loc = let
   val tok = tokbuf_get_token (buf)
 in
-  tok.token_loc
+  tok.token_loc()
 end // end of [val]
 //
 macdef incby1 () = tokbuf_incby1 (buf)
@@ -662,9 +664,9 @@ case+ 0 of
     val id = synent_decode2{i0de}(ent)
     val opt = parse_s0expargopt (buf, bt, err)
   in
-    case+ opt of
-    | None () => s0exp_ide (loc, id)
-    | Some (s0e) => s0exp_appid (id, s0e)
+    case+ gopt_view(opt) of
+    | ~GOnone () => s0exp_ide (loc, id)
+    | ~GOsome (s0e) => s0exp_appid (id, s0e)
   end
 //
 | _ => let
@@ -681,7 +683,7 @@ end // end of [parse_s0exp]
 implement
 parse_s0expseq
   (buf, bt, err) =
-  list_vt2t(pstar_fun0_COMMA (buf, bt, parse_s0exp))
+  glist_make_list_vt(pstar_fun0_COMMA (buf, bt, parse_s0exp))
 // end of [parse_s0expseq]
 
 (* ****** ****** *)
@@ -699,16 +701,16 @@ parse_s0exparg
 val err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_LPAREN () => let
+| ~T_LPAREN () => let
     val bt = 0
     val () = incby1 ()
     val s0es = parse_s0expseq (buf, bt, err)
@@ -724,9 +726,9 @@ tok.token_node of
     // end of [if]
   end
 //
-| _ (*error*) => let
+| v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [parse_s0exparg]
   
@@ -742,7 +744,7 @@ val s0arg = parse_s0exparg (buf, bt, err)
 in
 //
 if err0 = err
-  then Some(s0arg) else (err := err0; None())
+  then gopt_some(s0arg) else (err := err0; gopt_none())
 //
 end // end of [parse_s0expargopt]
   
@@ -759,24 +761,25 @@ val () = println! ("parse_tyfld")
 val err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| _ when
+| v0 when
     ptest_SRPif0 (buf) => let
+    val () = token_node_view_free(v0)
     val () = incby1 ()
     val () = pskip_SRPif0 (buf, 1(*level*))
   in
     parse_tyfld (buf, bt, err)
   end // end of [#if(0)]
 //
-| _ (*rest*) => let
+| v0 (*rest*) => (token_node_view_free(v0); let
     val ent1 = parse_s0exp (buf, bt, err)
     val ent2 = pif_fun (buf, bt, err, parse_i0dex, err0)
     val ent3 = pif_fun (buf, bt, err, p_SEMICOLON, err0)
@@ -784,7 +787,7 @@ tok.token_node of
     if err = err0
       then tyfld_make (ent1, ent2) else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [parse_tyfld]
 
@@ -796,7 +799,7 @@ fun parse_tyfldseq : parser (tyfldlst)
 implement
 parse_tyfldseq
   (buf, bt, err) =
-  list_vt2t (pstar_fun (buf, bt, parse_tyfld))
+  glist_make_list_vt (pstar_fun (buf, bt, parse_tyfld))
 //
 (* ****** ****** *)
 
@@ -807,15 +810,15 @@ parse_tyrec
 val err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
-| T_KWORD
+token_node_view(tok.token_node()) of
+| ~T_KWORD
   (
     ATSstruct()
   ) => let
@@ -830,9 +833,9 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
   end
-| _ (*error*) => let
+| v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
-  end // end of [_]
+  end) // end of [_]
 //  
 end // end of [parse_tyrec]
 
@@ -845,7 +848,7 @@ parse_fkind
 val err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 (*
 val () = println! ("parse_fkind: tok = ", tok)
@@ -856,8 +859,8 @@ macdef incby1 () = tokbuf_incby1 (buf)
 in
 //
 case+
-tok.token_node of
-| T_KWORD
+token_node_view(tok.token_node()) of
+| ~T_KWORD
   (
     ATSextern()
   ) => let
@@ -871,7 +874,7 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
   end
-| T_KWORD
+| ~T_KWORD
   (
     ATSstatic()
   ) => let
@@ -885,9 +888,9 @@ tok.token_node of
       else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
   end
-| _ (*error*) => let
+| v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
-  end (* end of [_] *)
+  end (* end of [_] *))
 //
 end // end of [parse_fkind]
 
@@ -942,16 +945,16 @@ parse_f0marg
 val err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
-val loc = tok.token_loc
+val loc = tok.token_loc()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_LPAREN () => let
+| ~T_LPAREN () => let
     val bt = 0
     val () = incby1 ()
     val ent2 =
@@ -959,16 +962,16 @@ tok.token_node of
     val ent3 = p_RPAREN (buf, bt, err) // err = err0
   in
     if err = err0
-      then f0marg_make (tok, list_vt2t(ent2), ent3)
+      then f0marg_make (tok, glist_make_list_vt(ent2), ent3)
       else let
         val () = list_vt_free (ent2) in synent_null ()
       end // end of [else]
     // end of [if]
   end // end of [T_LPAREN]
 //
-| _ (*error*) => let
+| v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
-  end (* end of [_] *)
+  end (* end of [_] *))
 //
 end // end of [parse_f0marg]
 
@@ -1010,18 +1013,18 @@ val tok = tokbuf_get_token_any (buf)
 //
 in
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_EOF () => res
+| ~T_EOF () => res
 //
-| T_LPAREN () => let
+| ~T_LPAREN () => let
     val () = tokbuf_incby1 (buf)
     val res =
       list_vt_cons (tok, res) in loop (buf, level+1, res)
     // end of [val]
   end // end of [T_LPAREN]
 //
-| T_RPAREN () => let
+| ~T_RPAREN () => let
     val level1 = level - 1
   in
     if level1 > 0
@@ -1035,10 +1038,10 @@ tok.token_node of
     // end of [if]
   end // end of [T_RPAREN]
 //
-| _ (*rest*) => let
+| v0 (*rest*) => (token_node_view_free(v0); let
     val () = tokbuf_incby1 (buf)
     val res = list_vt_cons (tok, res) in loop (buf, level, res)
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [loop]
 //
@@ -1046,7 +1049,7 @@ val res =
   loop (buf, 1, list_vt_nil())
 //
 in
-  list_vt2t(list_vt_reverse(res))
+  glist_make_list_vt(list_vt_reverse(res))
 end // end of [parse_extval]
 
 (* ****** ****** *)
@@ -1073,24 +1076,24 @@ println!
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_EOF () => res
+| ~T_EOF () => res
 //
-| T_KWORD (ATSextcode_end()) => res
+| ~T_KWORD (ATSextcode_end()) => res
 //
-| _ (*rest*) => let
+| v0 (*rest*) => (token_node_view_free(v0); let
     val () = tokbuf_incby1 (buf)
   in
     loop (buf, list_vt_cons (tok, res))
-  end // end of [_]
+  end) // end of [_]
 //
 end // end of [loop]
 //
 val res = loop (buf, list_vt_nil())
 //
 in
-  list_vt2t (list_vt_reverse (res))
+  glist_make_list_vt (list_vt_reverse (res))
 end // end of [parse_extcode]
 
 (* ****** ****** *)
@@ -1111,27 +1114,27 @@ val tok = tokbuf_get_token (buf)
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_KWORD
+| ~T_KWORD
   (
     ATSclosurerize_end()
   ) =>
     let val () = tokbuf_incby1 (buf) in tok end
   // end of [ATSclosurerize_end]
 //
-| T_EOF () => let
+| ~T_EOF () => let
      val () = err := err + 1
      val () =
      the_parerrlst_add
-       (tok.token_loc, PARERR_ATSclosurerize_end)
+       (tok.token_loc(), PARERR_ATSclosurerize_end)
      // end of [val]
    in
      tok
    end // end of [T_EOF]
 //
-| _ (*rest*) =>
-    let val () = tokbuf_incby1 (buf) in loop (buf, bt, err) end
+| v0 (*rest*) => (token_node_view_free(v0);
+    let val () = tokbuf_incby1 (buf) in loop (buf, bt, err) end)
 //
 end // end of [loop]
 //
@@ -1173,7 +1176,7 @@ end // end of [loop]
 val d0cs = loop (buf, list_vt_nil)
 //
 in
-  list_vt2t(list_vt_reverse (d0cs))
+  glist_make_list_vt(list_vt_reverse (d0cs))
 end // end of [parse_toplevel]
 
 (* ****** ****** *)

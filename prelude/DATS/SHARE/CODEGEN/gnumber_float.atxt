@@ -143,6 +143,6 @@ gconjugate_val<ldouble> (x) = x
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gnumber_float_atxt.txt")
 %}\

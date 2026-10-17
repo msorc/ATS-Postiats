@@ -33,18 +33,32 @@
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (ATS2 port of src/pats_codegen2_util.dats, see PORTING.md, "Codegen2")
+// The local closures are lambda-lifted (nested [fun]s without [cloref1]); the [fprint]
+// overloads and [fprint!] of ATS1 are explicit calls; the matches on the arena trees use the views.
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+//
 staload
 LAB = "./pats_label.sats"
-overload
-fprint with $LAB.fprint_label
 //
 (* ****** ****** *)
 //
 staload
 SYM = "./pats_symbol.sats"
-//
-overload
-fprint with $SYM.fprint_symbol
 //
 (* ****** ****** *)
 //
@@ -70,15 +84,15 @@ aux_test
 ) : bool = (
 //
 case+
-x0.e1xp_node
+e1xp_node_view(x0.e1xp_node())
 of // case+
-| E1XPide(id2) =>
+| ~E1XPide(id2) =>
   (
     name = $SYM.symbol_get_name(id2)
   ) (* end of [E1XPide] *)
-| E1XPstring(name2) => (name = name2)
+| ~E1XPstring(name2) => (name = name2)
 //
-| _ (*rest-of-e1xp*) => false
+| v (*rest-of-e1xp*) => (e1xp_node_view_free(v); false)
 //
 ) (* end of [aux_test] *)
 
@@ -114,13 +128,13 @@ in
 case+ ans of
 //
 | ~Some_vt(s2i) => (
-  case+ s2i of
-  | S2ITMcst(s2cs) =>
+  case+ s2itm_view(s2i) of
+  | ~S2ITMcst(s2cs) =>
     (
-      case+ s2cs of
-      | list_cons(s2c, _) => Some_vt(s2c) | list_nil() => None_vt()
+      case+ glist_view(s2cs) of
+      | ~GLcons(s2c, _) => Some_vt(s2c) | ~GLnil() => None_vt()
     )
-  | _ (*non-S2ITMcst*) => None_vt()
+  | v (*non-S2ITMcst*) => (s2itm_view_free(v); None_vt())
   ) (* end of [Some_vt] *)
 //
 | ~None_vt((*void*)) => None_vt()
@@ -142,23 +156,12 @@ println!
 in
 //
 case+
-x0.e1xp_node
+e1xp_node_view(x0.e1xp_node())
 of // case+
 //
-| E1XPide(name) => aux_find(name)
+| ~E1XPide(name) => aux_find(name)
 //
-(*
-| E1XPstring
-    (name) => let
-    val name2 =
-      $SYM.symbol_make_string(name)
-    // end of [val]
-  in
-    aux_find(name2)
-  end // end of [E1XPstring]
-*)
-//
-| _(*rest-of-e1xp*) => None_vt((*void*))
+| v(*rest-of-e1xp*) => (e1xp_node_view_free(v); None_vt((*void*)))
 //
 end // end of [codegen2_get_s2cst]
 
@@ -175,11 +178,10 @@ val opt = codegen2_get_s2cst(x0)
 in
 //
 case+ opt of
-| Some_vt(s2c) =>
+| ~Some_vt(s2c) =>
   (
     if s2cst_is_tydef(s2c)
-      then (fold@{s2cst}(opt); opt)
-      else (free@{s2cst}(opt); None_vt())
+      then Some_vt(s2c) else None_vt()
   ) (* end of [Some_vt] *)
 //
 | ~None_vt((*void*)) => None_vt()
@@ -197,11 +199,10 @@ val opt = codegen2_get_s2cst(x0)
 in
 //
 case+ opt of
-| Some_vt(s2c) =>
+| ~Some_vt(s2c) =>
   (
     if s2cst_is_datype(s2c)
-      then (fold@{s2cst}(opt); opt)
-      else (free@{s2cst}(opt); None_vt())
+      then Some_vt(s2c) else None_vt()
   ) (* end of [Some_vt] *)
 //
 | ~None_vt((*void*)) => None_vt()
@@ -225,9 +226,9 @@ in
 case+ ans of
 //
 | ~Some_vt(d2i) => (
-  case+ d2i of
-  | D2ITMcst(d2c) => Some_vt(d2c)
-  | _ (*non-D2ITMcst*) => None_vt()
+  case+ d2itm_view(d2i) of
+  | ~D2ITMcst(d2c) => Some_vt(d2c)
+  | v (*non-D2ITMcst*) => (d2itm_view_free(v); None_vt())
   ) (* end of [Some_vt] *)
 //
 | ~None_vt((*void*)) => None_vt()
@@ -249,22 +250,12 @@ println!
 in
 //
 case+
-x0.e1xp_node
+e1xp_node_view(x0.e1xp_node())
 of // case+
 //
-| E1XPide(name) => aux_find(name)
+| ~E1XPide(name) => aux_find(name)
 //
-(*
-| E1XPstring
-    (name) => let
-    val name2 =
-      $SYM.symbol_make_string(name)
-    // end of [val]
-  in
-    aux_find(name2)
-  end // end of [E1XPstring]
-*)
-| _(*rest-of-e1xp*) => None_vt((*void*))
+| v(*rest-of-e1xp*) => (e1xp_node_view_free(v); None_vt((*void*)))
 //
 end // end of [codegen2_get_d2cst]
 
@@ -285,18 +276,20 @@ fun
 auxlst
 (
   s2vs: s2varlst
-) :<cloref1> void =
+) : void =
 (
-case+ s2vs of
-| list_nil() => ()
-| list_cons(s2v, s2vs) =>
+case+ glist_view(s2vs) of
+| ~GLnil() => ()
+| ~GLcons(s2v, s2vs) =>
   (
-    fprint(out, s2var_get_sym(s2v)); auxlst(s2vs)
+    $SYM.fprint_symbol(out, s2var_get_sym(s2v)); auxlst(s2vs)
   )
 )
 //
 in
-  fprint(out, lpar); auxlst(s2q.s2qua_svs); fprint(out, rpar)
+  fprint_string(out, lpar);
+  auxlst(s2q.s2qua_svs());
+  fprint_string(out, rpar)
 end // end of [aux_s2qua]
 
 fun
@@ -306,9 +299,9 @@ aux_s2qualst
 , lpar: string, rpar: string, s2qs: s2qualst
 ) : void =
 (
-case+ s2qs of
-| list_nil() => ()
-| list_cons
+case+ glist_view(s2qs) of
+| ~GLnil() => ()
+| ~GLcons
     (s2q, s2qs) => () where
   {
     val () = aux_s2qua(out, lpar, rpar, s2q)
@@ -354,7 +347,7 @@ fun
 aux
 (
   s2q: s2qua
-) :<cloref1> void = let
+) : void = let
 //
 fun
 fprs2t
@@ -365,9 +358,9 @@ fprs2t
 if s2rt_is_prgm(s2t) then
 {
   val () =
-  if s2rt_is_lin(s2t) then fprint(out, "vt0p")
+  if s2rt_is_lin(s2t) then fprint_string(out, "vt0p")
   val () =
-  if s2rt_is_nonlin(s2t) then fprint(out, "t0p")
+  if s2rt_is_nonlin(s2t) then fprint_string(out, "t0p")
 }
 //
 ) (* end of [fprs2t] *)
@@ -376,36 +369,36 @@ fun
 loop
 (
   s2vs: s2varlst
-) :<cloref1> void =
+) : void =
 (
-case+ s2vs of
-| list_nil() => ()
-| list_cons
+case+ glist_view(s2vs) of
+| ~GLnil() => ()
+| ~GLcons
     (s2v, s2vs) => let
     val sym = s2var_get_sym(s2v)
     val s2t = s2var_get_srt(s2v)
   in
-    fprint(out, sym);
-    fprint(out, ":");
+    $SYM.fprint_symbol(out, sym);
+    fprint_string(out, ":");
     fprs2t(out, s2t); loop(s2vs)
   end // end of [list_cons]
 )
 //
-val s2vs = s2q.s2qua_svs
+val s2vs = s2q.s2qua_svs()
 //
 in
-  fprint(out, "{"); loop(s2vs); fprint(out, "}");
+  fprint_string(out, "{"); loop(s2vs); fprint_string(out, "}");
 end // end of [aux]
 
 fun
 auxlst
 (
   s2qs: s2qualst
-) :<cloref1> void =
+) : void =
 (
-case+ s2qs of
-| list_nil() => ()
-| list_cons(s2q, s2qs) => (aux(s2q); auxlst(s2qs))
+case+ glist_view(s2qs) of
+| ~GLnil() => ()
+| ~GLcons(s2q, s2qs) => (aux(s2q); auxlst(s2qs))
 ) (* end of [auxlst] *)
 //
 in
@@ -422,42 +415,42 @@ fun
 aux_s2rt
 (
   s2t0: s2rt
-) :<cloref1> void =
+) : void =
 (
-case+ s2t0 of
-| S2RTbas
+case+ s2rt_viewof(s2t0) of
+| ~S2RTbas
     (s2tb) =>
   {
     val () = aux_s2rtbas(s2tb)
   }
-| S2RTfun
+| ~S2RTfun
   (
     s2ts_arg, s2t_res
   ) => () where
   {
-    val () = fprint(out, "(")
+    val () = fprint_string(out, "(")
     val () =
       aux_s2rtlst(s2ts_arg, 0)
     // end of [val]
-    val () = fprint(out, ") ->")
+    val () = fprint_string(out, ") ->")
     val () = aux_s2rt(s2t_res)
   }
-| _(*rest-of_s2rt*) => fprint(out, s2t0)
+| v(*rest-of_s2rt*) => (s2rt_view_free(v); fprint_s2rt(out, s2t0))
 ) (* end of [aux_s2rt] *)
 //
 and
 aux_s2rtlst
 (
   s2ts: s2rtlst, i: int
-) :<cloref1> void =
+) : void =
 (
-case+ s2ts of
-| list_nil() => ()
-| list_cons(s2t, s2ts) =>
+case+ glist_view(s2ts) of
+| ~GLnil() => ()
+| ~GLcons(s2t, s2ts) =>
   {
     val () =
     if i > 0
-      then fprint(out, ", ")
+      then fprint_string(out, ", ")
     // end of [if]
     val () = aux_s2rt(s2t)
     val () = aux_s2rtlst(s2ts, i+1)
@@ -468,17 +461,17 @@ and
 aux_s2rtbas
 (
   s2tb: s2rtbas
-) :<cloref1> void =
+) : void =
 (
-case+ s2tb of
-| S2RTBASpre
-    (sym) => fprint(out, sym)
+case+ s2rtbas_view(s2tb) of
+| ~S2RTBASpre
+    (sym) => $SYM.fprint_symbol(out, sym)
   // end of [S2RTBASpre]
-| S2RTBASimp
-    (knd, sym) => fprint(out, sym)
+| ~S2RTBASimp
+    (knd, sym) => $SYM.fprint_symbol(out, sym)
   // end of [S2RTBASimp]
-| S2RTBASdef(s2td) =>
-    fprint(out, s2rtdat_get_sym(s2td))
+| ~S2RTBASdef(s2td) =>
+    $SYM.fprint_symbol(out, s2rtdat_get_sym(s2td))
   // end of [S2RTBASdef]
 ) (* end of [aux_s2rtbas] *)
 //
@@ -492,14 +485,14 @@ implement
 codegen2_emit_s2cst
   (out, s2c0) = () where
 {
-  val () = fprint(out, s2cst_get_sym(s2c0))
+  val () = $SYM.fprint_symbol(out, s2cst_get_sym(s2c0))
 } (* codegen2_emit_s2cst *)
 
 implement
 codegen2_emit_s2var
   (out, s2v0) = () where
 {
-  val () = fprint(out, s2var_get_sym(s2v0))
+  val () = $SYM.fprint_symbol(out, s2var_get_sym(s2v0))
 } (* codegen2_emit_s2var *)
 
 (* ****** ****** *)
@@ -512,11 +505,11 @@ aux_istup
   ls2es: labs2explst
 ) : bool =
 (
-case+ ls2es of
-| list_nil() => true
-| list_cons
+case+ glist_view(ls2es) of
+| ~GLnil() => true
+| ~GLcons
     (ls2e, ls2es) => let
-    val+SLABELED(l, _, _) = ls2e
+    val l = labs2exp_lab(ls2e)
   in
     if $LAB.label_is_int(l) then aux_istup(ls2es) else false
   end // end of [list_cons]
@@ -537,28 +530,28 @@ println!
 in
 //
 case+
-s2e0.s2exp_node
+s2exp_node_view(s2e0.s2exp_node())
 of (* case+ *)
 //
-| S2Ecst(s2c) =>
+| ~S2Ecst(s2c) =>
   {
     val () = codegen2_emit_s2cst(out, s2c)
   }
 //
-| S2Evar(s2v) => () where
+| ~S2Evar(s2v) => () where
   {
     val () = codegen2_emit_s2var(out, s2v)
   }
 //
-| S2Eapp(s2e_fun, s2es_arg) =>
+| ~S2Eapp(s2e_fun, s2es_arg) =>
   {
     val () = aux_s2exp(out, s2e_fun)
-    val () = fprint(out, "(")
+    val () = fprint_string(out, "(")
     val () = aux_s2explst(out, s2es_arg, 0)
-    val () = fprint(out, ")")
+    val () = fprint_string(out, ")")
   }
 //
-| S2Etyrec
+| ~S2Etyrec
     (knd, npf, ls2es) => () where
   {
 //
@@ -575,7 +568,7 @@ of (* case+ *)
     isflted =
     tyreckind_is_flted(knd)
     val () =
-    if isflted then fprint(out, "@")
+    if isflted then fprint_string(out, "@")
 //
     val
     isboxed =
@@ -584,8 +577,8 @@ of (* case+ *)
     if isboxed then
     (
       if s2exp_is_nonlin(s2e0)
-        then fprint!(out, tuprec, "_t")
-        else fprint!(out, tuprec, "_vt")
+        then (fprint_string(out, tuprec); fprint_string(out, "_t"))
+        else (fprint_string(out, tuprec); fprint_string(out, "_vt"))
     ) (* end of [val] *)
 //
     val () =
@@ -604,7 +597,7 @@ of (* case+ *)
 //
   } (* end of [S2Etyrec] *)
 //
-| _ (*rest-of-s2exp*) => fprint_s2exp(out, s2e0)
+| v (*rest-of-s2exp*) => (s2exp_node_view_free(v); fprint_s2exp(out, s2e0))
 //
 end (* end of [aux_s2exp] *)
 
@@ -620,12 +613,12 @@ println! ("aux_labs2explst")
 *)
 in
 //
-case+ s2es of
-| list_nil() => ()
-| list_cons(s2e, s2es) =>
+case+ glist_view(s2es) of
+| ~GLnil() => ()
+| ~GLcons(s2e, s2es) =>
   {
     val () =
-    if i > 0 then fprint(out, ", ")
+    if i > 0 then fprint_string(out, ", ")
     val () = aux_s2exp(out, s2e)
     val () = aux_s2explst(out, s2es, i+1)
   } (* end of [list_cons] *)
@@ -644,18 +637,21 @@ println! ("aux_labs2explst")
 *)
 in
 //
-case+ ls2es of
-| list_nil() => ()
-| list_cons(ls2e, ls2es) =>
+case+ glist_view(ls2es) of
+| ~GLnil() => ()
+| ~GLcons(ls2e, ls2es) =>
   {
 //
     val () =
-    if i > 0 then fprint(out, ", ")
+    if i > 0 then fprint_string(out, ", ")
 //
-    val+
-    SLABELED(l, _(*name*), s2e) = ls2e
+    val l = labs2exp_lab(ls2e)
+    val s2e = labs2exp_elt(ls2e)
     val () =
-    if $LAB.label_is_sym(l) then fprint!(out, l, "=")
+    if $LAB.label_is_sym(l) then
+    (
+      $LAB.fprint_label(out, l); fprint_string(out, "=")
+    )
 //
     val () = aux_s2exp(out, s2e)
 //

@@ -252,56 +252,38 @@ string_concat with string_concat_3 of 100
 (* ****** ****** *)
 //
 fun
-string_exists_cloref
+string_exists_cloptr
 (
   string, pred: cfun(strchr, bool)
-) : bool = "mac#%" // string_exists_cloref
-fun
-string_exists_method
-(
-  string)(pred: cfun(strchr, bool)
-) : bool = "mac#%" // string_exists_method
+) : bool = "mac#%" // string_exists_cloptr
 //
-overload .exists with string_exists_method
 //
 (* ****** ****** *)
 //
 fun
-string_forall_cloref
+string_forall_cloptr
 (
   string, pred: cfun(strchr, bool)
-) : bool = "mac#%" // string_forall_cloref
-fun
-string_forall_method
-(
-  string)(pred: cfun(strchr, bool)
-) : bool = "mac#%" // string_forall_method
+) : bool = "mac#%" // string_forall_cloptr
 //
-overload .forall with string_forall_method
 //
 (* ****** ****** *)
 //
 fun
-string_foreach_cloref
+string_foreach_cloptr
 (
   string, fwork: cfun(strchr, void)
-) : void = "mac#%" // string_foreach_cloref
-fun
-string_foreach_method
-(
-  string)(fwork: cfun(strchr, void)
-) : void = "mac#%" // string_foreach_method
+) : void = "mac#%" // string_foreach_cloptr
 //
-overload .foreach with string_foreach_method
 //
 (* ****** ****** *)
 //
 fun
-string_tabulate_cloref
+string_tabulate_cloptr
   {n:nat}
 (
 n0: int(n), fopr: cfun(natLt(n), charNZ)
-) : string(n) = "mac#%" // string_tabulate_cloref
+) : string(n) = "mac#%" // string_tabulate_cloptr
 //
 (* ****** ****** *)
 //

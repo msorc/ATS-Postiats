@@ -1,0 +1,387 @@
+-	-d	a.dats	-d	b.dats
+-	-s	a.sats	-d	dyn.dats
+-	-dd	a.dats	b.dats	c.dats
+-	--dynamics	dyn.dats	a.dats
+-	-o	out.c	-d	a.dats
+-	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--output-w	out.c	-d	a.dats	-d	b.dats
+-	-o	-	-d	dyn.dats
+-	-o	/nonexistent/x.c	-d	a.dats
+-	-d	te.dats
+-	-d	te.dats	-d	a.dats
+-	-d	pe.dats	-d	a.dats
+-	-d	te2.dats	-d	ifdef.dats
+-	-DATSFOO=1	-d	ifdef.dats
+-	-DATS	FOO=1	-d	ifdef.dats
+-	-IATSinc	-d	usesinc.dats
+-	-IATS	inc	-d	usesinc.dats
+-	-d	usesinc.dats
+-	-IATS	nonexist	-d	usesinc.dats
+-	-d	nonexist.dats	-d	a.dats
+-	-s	nonexist.sats
+-	-d
+-	-o	out.c	-d	te.dats
+-	-s	a.sats	b.sats	-d	a.dats
+-	a.dats
+-	-d	a.dats	-d	a.dats
+STDIN=1	-
+STDIN=1	-d	-
+STDIN=1	-s	-
+STDIN=1	-d
+STDIN=1	
+-	--typecheck	-d	a.dats	-d	b.dats
+-	--typecheck	-s	a.sats	-d	dyn.dats
+-	--typecheck	-dd	a.dats	b.dats	c.dats
+-	--typecheck	--dynamics	dyn.dats	a.dats
+-	--typecheck	-o	out.c	-d	a.dats
+-	--typecheck	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--typecheck	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--typecheck	-o	-	-d	dyn.dats
+-	--typecheck	-o	/nonexistent/x.c	-d	a.dats
+-	--typecheck	-d	te.dats
+-	--typecheck	-d	te.dats	-d	a.dats
+-	--typecheck	-d	pe.dats	-d	a.dats
+-	--typecheck	-d	te2.dats	-d	ifdef.dats
+-	--typecheck	-DATSFOO=1	-d	ifdef.dats
+-	--typecheck	-DATS	FOO=1	-d	ifdef.dats
+-	--typecheck	-IATSinc	-d	usesinc.dats
+-	--typecheck	-IATS	inc	-d	usesinc.dats
+-	--typecheck	-d	usesinc.dats
+-	--typecheck	-IATS	nonexist	-d	usesinc.dats
+-	--typecheck	-d	nonexist.dats	-d	a.dats
+-	--typecheck	-s	nonexist.sats
+-	--typecheck	-d
+-	--typecheck	-o	out.c	-d	te.dats
+-	--typecheck	-s	a.sats	b.sats	-d	a.dats
+-	--typecheck	a.dats
+-	--typecheck	-d	a.dats	-d	a.dats
+STDIN=1	--typecheck	-
+STDIN=1	--typecheck	-d	-
+STDIN=1	--typecheck	-s	-
+STDIN=1	--typecheck	-d
+STDIN=1	--typecheck
+-	--depgen	-d	a.dats	-d	b.dats
+-	--depgen	-s	a.sats	-d	dyn.dats
+-	--depgen	-dd	a.dats	b.dats	c.dats
+-	--depgen	--dynamics	dyn.dats	a.dats
+-	--depgen	-o	out.c	-d	a.dats
+-	--depgen	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--depgen	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--depgen	-o	-	-d	dyn.dats
+-	--depgen	-o	/nonexistent/x.c	-d	a.dats
+-	--depgen	-d	te.dats
+-	--depgen	-d	te.dats	-d	a.dats
+-	--depgen	-d	pe.dats	-d	a.dats
+-	--depgen	-d	te2.dats	-d	ifdef.dats
+-	--depgen	-DATSFOO=1	-d	ifdef.dats
+-	--depgen	-DATS	FOO=1	-d	ifdef.dats
+-	--depgen	-IATSinc	-d	usesinc.dats
+-	--depgen	-IATS	inc	-d	usesinc.dats
+-	--depgen	-d	usesinc.dats
+-	--depgen	-IATS	nonexist	-d	usesinc.dats
+-	--depgen	-d	nonexist.dats	-d	a.dats
+-	--depgen	-s	nonexist.sats
+-	--depgen	-d
+-	--depgen	-o	out.c	-d	te.dats
+-	--depgen	-s	a.sats	b.sats	-d	a.dats
+-	--depgen	a.dats
+-	--depgen	-d	a.dats	-d	a.dats
+STDIN=1	--depgen	-
+STDIN=1	--depgen	-d	-
+STDIN=1	--depgen	-s	-
+STDIN=1	--depgen	-d
+STDIN=1	--depgen
+-	--taggen	-d	a.dats	-d	b.dats
+-	--taggen	-s	a.sats	-d	dyn.dats
+-	--taggen	-dd	a.dats	b.dats	c.dats
+-	--taggen	--dynamics	dyn.dats	a.dats
+-	--taggen	-o	out.c	-d	a.dats
+-	--taggen	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--taggen	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--taggen	-o	-	-d	dyn.dats
+-	--taggen	-o	/nonexistent/x.c	-d	a.dats
+-	--taggen	-d	te.dats
+-	--taggen	-d	te.dats	-d	a.dats
+-	--taggen	-d	pe.dats	-d	a.dats
+-	--taggen	-d	te2.dats	-d	ifdef.dats
+-	--taggen	-DATSFOO=1	-d	ifdef.dats
+-	--taggen	-DATS	FOO=1	-d	ifdef.dats
+-	--taggen	-IATSinc	-d	usesinc.dats
+-	--taggen	-IATS	inc	-d	usesinc.dats
+-	--taggen	-d	usesinc.dats
+-	--taggen	-IATS	nonexist	-d	usesinc.dats
+-	--taggen	-d	nonexist.dats	-d	a.dats
+-	--taggen	-s	nonexist.sats
+-	--taggen	-d
+-	--taggen	-o	out.c	-d	te.dats
+-	--taggen	-s	a.sats	b.sats	-d	a.dats
+-	--taggen	a.dats
+-	--taggen	-d	a.dats	-d	a.dats
+STDIN=1	--taggen	-
+STDIN=1	--taggen	-d	-
+STDIN=1	--taggen	-s	-
+STDIN=1	--taggen	-d
+STDIN=1	--taggen
+-	--jsonize-2	-d	a.dats	-d	b.dats
+-	--jsonize-2	-s	a.sats	-d	dyn.dats
+-	--jsonize-2	-dd	a.dats	b.dats	c.dats
+-	--jsonize-2	--dynamics	dyn.dats	a.dats
+-	--jsonize-2	-o	out.c	-d	a.dats
+-	--jsonize-2	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--jsonize-2	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--jsonize-2	-o	-	-d	dyn.dats
+-	--jsonize-2	-o	/nonexistent/x.c	-d	a.dats
+-	--jsonize-2	-d	te.dats
+-	--jsonize-2	-d	te.dats	-d	a.dats
+-	--jsonize-2	-d	pe.dats	-d	a.dats
+-	--jsonize-2	-d	te2.dats	-d	ifdef.dats
+-	--jsonize-2	-DATSFOO=1	-d	ifdef.dats
+-	--jsonize-2	-DATS	FOO=1	-d	ifdef.dats
+-	--jsonize-2	-IATSinc	-d	usesinc.dats
+-	--jsonize-2	-IATS	inc	-d	usesinc.dats
+-	--jsonize-2	-d	usesinc.dats
+-	--jsonize-2	-IATS	nonexist	-d	usesinc.dats
+-	--jsonize-2	-d	nonexist.dats	-d	a.dats
+-	--jsonize-2	-s	nonexist.sats
+-	--jsonize-2	-d
+-	--jsonize-2	-o	out.c	-d	te.dats
+-	--jsonize-2	-s	a.sats	b.sats	-d	a.dats
+-	--jsonize-2	a.dats
+-	--jsonize-2	-d	a.dats	-d	a.dats
+STDIN=1	--jsonize-2	-
+STDIN=1	--jsonize-2	-d	-
+STDIN=1	--jsonize-2	-s	-
+STDIN=1	--jsonize-2	-d
+STDIN=1	--jsonize-2
+-	--codegen-2	-d	a.dats	-d	b.dats
+-	--codegen-2	-s	a.sats	-d	dyn.dats
+-	--codegen-2	-dd	a.dats	b.dats	c.dats
+-	--codegen-2	--dynamics	dyn.dats	a.dats
+-	--codegen-2	-o	out.c	-d	a.dats
+-	--codegen-2	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--codegen-2	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--codegen-2	-o	-	-d	dyn.dats
+-	--codegen-2	-o	/nonexistent/x.c	-d	a.dats
+-	--codegen-2	-d	te.dats
+-	--codegen-2	-d	te.dats	-d	a.dats
+-	--codegen-2	-d	pe.dats	-d	a.dats
+-	--codegen-2	-d	te2.dats	-d	ifdef.dats
+-	--codegen-2	-DATSFOO=1	-d	ifdef.dats
+-	--codegen-2	-DATS	FOO=1	-d	ifdef.dats
+-	--codegen-2	-IATSinc	-d	usesinc.dats
+-	--codegen-2	-IATS	inc	-d	usesinc.dats
+-	--codegen-2	-d	usesinc.dats
+-	--codegen-2	-IATS	nonexist	-d	usesinc.dats
+-	--codegen-2	-d	nonexist.dats	-d	a.dats
+-	--codegen-2	-s	nonexist.sats
+-	--codegen-2	-d
+-	--codegen-2	-o	out.c	-d	te.dats
+-	--codegen-2	-s	a.sats	b.sats	-d	a.dats
+-	--codegen-2	a.dats
+-	--codegen-2	-d	a.dats	-d	a.dats
+STDIN=1	--codegen-2	-
+STDIN=1	--codegen-2	-d	-
+STDIN=1	--codegen-2	-s	-
+STDIN=1	--codegen-2	-d
+STDIN=1	--codegen-2
+-	--atsreloc	-d	a.dats	-d	b.dats
+-	--atsreloc	-s	a.sats	-d	dyn.dats
+-	--atsreloc	-dd	a.dats	b.dats	c.dats
+-	--atsreloc	--dynamics	dyn.dats	a.dats
+-	--atsreloc	-o	out.c	-d	a.dats
+-	--atsreloc	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--atsreloc	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--atsreloc	-o	-	-d	dyn.dats
+-	--atsreloc	-o	/nonexistent/x.c	-d	a.dats
+-	--atsreloc	-d	te.dats
+-	--atsreloc	-d	te.dats	-d	a.dats
+-	--atsreloc	-d	pe.dats	-d	a.dats
+-	--atsreloc	-d	te2.dats	-d	ifdef.dats
+-	--atsreloc	-DATSFOO=1	-d	ifdef.dats
+-	--atsreloc	-DATS	FOO=1	-d	ifdef.dats
+-	--atsreloc	-IATSinc	-d	usesinc.dats
+-	--atsreloc	-IATS	inc	-d	usesinc.dats
+-	--atsreloc	-d	usesinc.dats
+-	--atsreloc	-IATS	nonexist	-d	usesinc.dats
+-	--atsreloc	-d	nonexist.dats	-d	a.dats
+-	--atsreloc	-s	nonexist.sats
+-	--atsreloc	-d
+-	--atsreloc	-o	out.c	-d	te.dats
+-	--atsreloc	-s	a.sats	b.sats	-d	a.dats
+-	--atsreloc	a.dats
+-	--atsreloc	-d	a.dats	-d	a.dats
+STDIN=1	--atsreloc	-
+STDIN=1	--atsreloc	-d	-
+STDIN=1	--atsreloc	-s	-
+STDIN=1	--atsreloc	-d
+STDIN=1	--atsreloc
+-	--constraint-export	-d	a.dats	-d	b.dats
+-	--constraint-export	-s	a.sats	-d	dyn.dats
+-	--constraint-export	-dd	a.dats	b.dats	c.dats
+-	--constraint-export	--dynamics	dyn.dats	a.dats
+-	--constraint-export	-o	out.c	-d	a.dats
+-	--constraint-export	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--constraint-export	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--constraint-export	-o	-	-d	dyn.dats
+-	--constraint-export	-o	/nonexistent/x.c	-d	a.dats
+-	--constraint-export	-d	te.dats
+-	--constraint-export	-d	te.dats	-d	a.dats
+-	--constraint-export	-d	pe.dats	-d	a.dats
+-	--constraint-export	-d	te2.dats	-d	ifdef.dats
+-	--constraint-export	-DATSFOO=1	-d	ifdef.dats
+-	--constraint-export	-DATS	FOO=1	-d	ifdef.dats
+-	--constraint-export	-IATSinc	-d	usesinc.dats
+-	--constraint-export	-IATS	inc	-d	usesinc.dats
+-	--constraint-export	-d	usesinc.dats
+-	--constraint-export	-IATS	nonexist	-d	usesinc.dats
+-	--constraint-export	-d	nonexist.dats	-d	a.dats
+-	--constraint-export	-s	nonexist.sats
+-	--constraint-export	-d
+-	--constraint-export	-o	out.c	-d	te.dats
+-	--constraint-export	-s	a.sats	b.sats	-d	a.dats
+-	--constraint-export	a.dats
+-	--constraint-export	-d	a.dats	-d	a.dats
+STDIN=1	--constraint-export	-
+STDIN=1	--constraint-export	-d	-
+STDIN=1	--constraint-export	-s	-
+STDIN=1	--constraint-export	-d
+STDIN=1	--constraint-export
+-	--constraint-ignore	-d	a.dats	-d	b.dats
+-	--constraint-ignore	-s	a.sats	-d	dyn.dats
+-	--constraint-ignore	-dd	a.dats	b.dats	c.dats
+-	--constraint-ignore	--dynamics	dyn.dats	a.dats
+-	--constraint-ignore	-o	out.c	-d	a.dats
+-	--constraint-ignore	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--constraint-ignore	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--constraint-ignore	-o	-	-d	dyn.dats
+-	--constraint-ignore	-o	/nonexistent/x.c	-d	a.dats
+-	--constraint-ignore	-d	te.dats
+-	--constraint-ignore	-d	te.dats	-d	a.dats
+-	--constraint-ignore	-d	pe.dats	-d	a.dats
+-	--constraint-ignore	-d	te2.dats	-d	ifdef.dats
+-	--constraint-ignore	-DATSFOO=1	-d	ifdef.dats
+-	--constraint-ignore	-DATS	FOO=1	-d	ifdef.dats
+-	--constraint-ignore	-IATSinc	-d	usesinc.dats
+-	--constraint-ignore	-IATS	inc	-d	usesinc.dats
+-	--constraint-ignore	-d	usesinc.dats
+-	--constraint-ignore	-IATS	nonexist	-d	usesinc.dats
+-	--constraint-ignore	-d	nonexist.dats	-d	a.dats
+-	--constraint-ignore	-s	nonexist.sats
+-	--constraint-ignore	-d
+-	--constraint-ignore	-o	out.c	-d	te.dats
+-	--constraint-ignore	-s	a.sats	b.sats	-d	a.dats
+-	--constraint-ignore	a.dats
+-	--constraint-ignore	-d	a.dats	-d	a.dats
+STDIN=1	--constraint-ignore	-
+STDIN=1	--constraint-ignore	-d	-
+STDIN=1	--constraint-ignore	-s	-
+STDIN=1	--constraint-ignore	-d
+STDIN=1	--constraint-ignore
+-	--gline	-d	a.dats	-d	b.dats
+-	--gline	-s	a.sats	-d	dyn.dats
+-	--gline	-dd	a.dats	b.dats	c.dats
+-	--gline	--dynamics	dyn.dats	a.dats
+-	--gline	-o	out.c	-d	a.dats
+-	--gline	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--gline	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--gline	-o	-	-d	dyn.dats
+-	--gline	-o	/nonexistent/x.c	-d	a.dats
+-	--gline	-d	te.dats
+-	--gline	-d	te.dats	-d	a.dats
+-	--gline	-d	pe.dats	-d	a.dats
+-	--gline	-d	te2.dats	-d	ifdef.dats
+-	--gline	-DATSFOO=1	-d	ifdef.dats
+-	--gline	-DATS	FOO=1	-d	ifdef.dats
+-	--gline	-IATSinc	-d	usesinc.dats
+-	--gline	-IATS	inc	-d	usesinc.dats
+-	--gline	-d	usesinc.dats
+-	--gline	-IATS	nonexist	-d	usesinc.dats
+-	--gline	-d	nonexist.dats	-d	a.dats
+-	--gline	-s	nonexist.sats
+-	--gline	-d
+-	--gline	-o	out.c	-d	te.dats
+-	--gline	-s	a.sats	b.sats	-d	a.dats
+-	--gline	a.dats
+-	--gline	-d	a.dats	-d	a.dats
+STDIN=1	--gline	-
+STDIN=1	--gline	-d	-
+STDIN=1	--gline	-s	-
+STDIN=1	--gline	-d
+STDIN=1	--gline
+-	--debug	-d	a.dats	-d	b.dats
+-	--debug	-s	a.sats	-d	dyn.dats
+-	--debug	-dd	a.dats	b.dats	c.dats
+-	--debug	--dynamics	dyn.dats	a.dats
+-	--debug	-o	out.c	-d	a.dats
+-	--debug	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--debug	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--debug	-o	-	-d	dyn.dats
+-	--debug	-o	/nonexistent/x.c	-d	a.dats
+-	--debug	-d	te.dats
+-	--debug	-d	te.dats	-d	a.dats
+-	--debug	-d	pe.dats	-d	a.dats
+-	--debug	-d	te2.dats	-d	ifdef.dats
+-	--debug	-DATSFOO=1	-d	ifdef.dats
+-	--debug	-DATS	FOO=1	-d	ifdef.dats
+-	--debug	-IATSinc	-d	usesinc.dats
+-	--debug	-IATS	inc	-d	usesinc.dats
+-	--debug	-d	usesinc.dats
+-	--debug	-IATS	nonexist	-d	usesinc.dats
+-	--debug	-d	nonexist.dats	-d	a.dats
+-	--debug	-s	nonexist.sats
+-	--debug	-d
+-	--debug	-o	out.c	-d	te.dats
+-	--debug	-s	a.sats	b.sats	-d	a.dats
+-	--debug	a.dats
+-	--debug	-d	a.dats	-d	a.dats
+STDIN=1	--debug	-
+STDIN=1	--debug	-d	-
+STDIN=1	--debug	-s	-
+STDIN=1	--debug	-d
+STDIN=1	--debug
+-	--tlcalopt-disable	-d	a.dats	-d	b.dats
+-	--tlcalopt-disable	-s	a.sats	-d	dyn.dats
+-	--tlcalopt-disable	-dd	a.dats	b.dats	c.dats
+-	--tlcalopt-disable	--dynamics	dyn.dats	a.dats
+-	--tlcalopt-disable	-o	out.c	-d	a.dats
+-	--tlcalopt-disable	--output-a	out.c	-d	a.dats	-d	b.dats
+-	--tlcalopt-disable	--output-w	out.c	-d	a.dats	-d	b.dats
+-	--tlcalopt-disable	-o	-	-d	dyn.dats
+-	--tlcalopt-disable	-o	/nonexistent/x.c	-d	a.dats
+-	--tlcalopt-disable	-d	te.dats
+-	--tlcalopt-disable	-d	te.dats	-d	a.dats
+-	--tlcalopt-disable	-d	pe.dats	-d	a.dats
+-	--tlcalopt-disable	-d	te2.dats	-d	ifdef.dats
+-	--tlcalopt-disable	-DATSFOO=1	-d	ifdef.dats
+-	--tlcalopt-disable	-DATS	FOO=1	-d	ifdef.dats
+-	--tlcalopt-disable	-IATSinc	-d	usesinc.dats
+-	--tlcalopt-disable	-IATS	inc	-d	usesinc.dats
+-	--tlcalopt-disable	-d	usesinc.dats
+-	--tlcalopt-disable	-IATS	nonexist	-d	usesinc.dats
+-	--tlcalopt-disable	-d	nonexist.dats	-d	a.dats
+-	--tlcalopt-disable	-s	nonexist.sats
+-	--tlcalopt-disable	-d
+-	--tlcalopt-disable	-o	out.c	-d	te.dats
+-	--tlcalopt-disable	-s	a.sats	b.sats	-d	a.dats
+-	--tlcalopt-disable	a.dats
+-	--tlcalopt-disable	-d	a.dats	-d	a.dats
+STDIN=1	--tlcalopt-disable	-
+STDIN=1	--tlcalopt-disable	-d	-
+STDIN=1	--tlcalopt-disable	-s	-
+STDIN=1	--tlcalopt-disable	-d
+STDIN=1	--tlcalopt-disable
+-	-h
+-	--help
+-	-v
+-	--version
+-	-h	-v	--help	--version
+-	-d	a.dats	-h
+-	--zzz	-d	a.dats
+-	-zzz	-d	a.dats
+-	zzz	-d	a.dats
+-	-cc	-d	a.dats
+-	-tc	-d	a.dats
+-	-tc	-cc	-d	a.dats
+-	--compile	--typecheck	-d	a.dats
+-	-dep	-d	a.dats
+-	-tag	-d	a.dats

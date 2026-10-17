@@ -104,41 +104,6 @@ end // end of [channeg_list]
 
 implement
 {a}(*tmp*)
-list2sslist(xs) = let
-//
-fun
-fserv
-(
-  chp: chanpos(sslist(a)), xs: List(a)
-) : void =
-(
-case+ xs of
-| list_nil () => let
-    val () =
-    chanpos_list_nil(chp) in chanpos_nil_wait(chp)
-  end // end of [list_nil]
-| list_cons (x, xs) => let
-    val () =
-    chanpos_list_cons(chp) in chanpos_send(chp, x); fserv(chp, xs)
-  end // end of [list_cons]
-)
-//
-in
-//
-channeg_create_exn(llam(chp) => fserv(chp, xs))
-//
-end // end of [list2sslist]
-
-(* ****** ****** *)
-
-implement
-{a}(*tmp*)
-sslist2list(chn) = list_vt2t(sslist2list_vt(chn))
-
-(* ****** ****** *)
-
-implement
-{a}(*tmp*)
 list2sslist_vt(xs) = let
 //
 fun

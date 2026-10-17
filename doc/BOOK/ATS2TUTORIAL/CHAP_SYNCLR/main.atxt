@@ -35,7 +35,7 @@ The keywords in ATS are all colored
 <listitem>
 #para('
 The comments in ATS are all colored
-<phrase role="\\\#787878\\\; stype NORMAL">gray</phrase>.
+<phrase role="\\\\\#787878\\\; stype NORMAL">gray</phrase>.
 ')
 </listitem>
 <listitem>
@@ -47,16 +47,16 @@ The code in the statics of ATS is colored
 <listitem>
 #para('
 The code in the dynamics of ATS is colored
-<phrase role="\\\#E80000; stype NORMAL">red</phrase>
+<phrase role="\\\\\#E80000; stype NORMAL">red</phrase>
 unless it represents proofs, for which the color
-<phrase role="\\\#009000; stype NORMAL">dark green</phrase>
+<phrase role="\\\\\#009000; stype NORMAL">dark green</phrase>
 is used.
 ')
 </listitem>
 <listitem>
 #para('
 The external code (in C) is colored
-<phrase role="\\\#A52A2A; stype NORMAL">deep brown</phrase>.
+<phrase role="\\\\\#A52A2A; stype NORMAL">deep brown</phrase>.
 ')
 </listitem>
 </itemizedlist>
@@ -76,5 +76,5 @@ that involves all of the syntax-coloring mentioned above.\
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

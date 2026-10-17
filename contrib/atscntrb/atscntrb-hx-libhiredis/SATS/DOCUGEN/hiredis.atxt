@@ -115,7 +115,6 @@ This package contains an API in ATS for the <a href="https://github.com/redis/hi
 
 (* ****** ****** *)
 
-#declname2("hiredis_ML.sats", "hiredis_ML.html")
 //
 #declsynop2('\
 

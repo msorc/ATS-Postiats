@@ -34,10 +34,11 @@
 (* ****** ****** *)
 
 staload SYM = "./pats_symbol.sats"
+staload "libats/SATS/arena.sats"
 
 (* ****** ****** *)
 
-abstype filename_type
+abstype filename_type = ptr
 
 typedef
 filename = filename_type
@@ -47,7 +48,7 @@ filenameopt_vt = Option_vt (filename)
 (* ****** ****** *)
 
 fun theDirSep_get
-  (): char = "patsopt_filename_theDirSep_get"
+  ((*void*)): char = "ext#patsopt_filename_theDirSep_get"
 // end of [theDirSep_get]
 
 fun theParDir_get (): string // parent directory
@@ -102,7 +103,7 @@ fun filename_merge
 fun filename_dirbase
 (
   dir: string, givename: string
-) :<> Strptr1 = "patsopt_filename_dirbase"
+) :<> Strptr1 = "ext#patsopt_filename_dirbase"
 
 (* ****** ****** *)
 
@@ -115,15 +116,15 @@ overload compare with compare_filename_filename
 
 (* ****** ****** *)
 //
-val filename_dummy : filename (* DUMMY *)
+val filename_dummy : filename = "ext#patsopt_filename_dummy" (* DUMMY *)
 //
-val filename_stdin : filename (* STDIN *)
-val filename_string : filename (* STRING *)
+val filename_stdin : filename = "ext#patsopt_filename_stdin" (* STDIN *)
+val filename_string : filename = "ext#patsopt_filename_string" (* STRING *)
 //
 (* ****** ****** *)
 
-fun filename_is_dummy : filename -> bool
-fun filename_isnot_dummy : filename -> bool
+fun filename_is_dummy (fil: filename): bool
+fun filename_isnot_dummy (fil: filename): bool
 
 (* ****** ****** *)
 
@@ -162,7 +163,7 @@ fun fprint_the_filenamelst (out: FILEref): void
 (* ****** ****** *)
 //
 typedef path = string
-typedef pathlst = List0(path)
+typedef pathlst = glist(path)
 //
 (* ****** ****** *)
 //
@@ -172,8 +173,8 @@ fun fprint_pathlst(out: FILEref, xs: pathlst): void
 //
 (* ****** ****** *)
 //
-fun path_normalize(s0: NSHARED(path)): path
-fun path_normalize_vt(s0: NSHARED(path)): Strptr1
+fun path_normalize(s0: NSH(path)): path
+fun path_normalize_vt(s0: NSH(path)): Strptr1
 //
 (* ****** ****** *)
 //

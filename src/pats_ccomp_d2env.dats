@@ -29,26 +29,39 @@
 //
 // Author: Hongwei Xi
 // Authoremail: gmhwxi AT gmail DOT com
-// Start Time: April, 2013
+// Start Time: October, 2012
 //
 (* ****** ****** *)
 //
-staload
-UN = "prelude/SATS/unsafe.sats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_d2env.dats, see PORTING.md, "ccomp core modules")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
-staload _ (*anon*) = "./pats_utils.dats"
+staload _(*anon*) = "./pats_utils.dats"
 
 (* ****** ****** *)
 
-staload
-S2E = "./pats_staexp2.sats"
-staload
-D2E = "./pats_dynexp2.sats"
-typedef d2var = $D2E.d2var
-overload print with $D2E.print_d2var
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
 
@@ -61,50 +74,27 @@ staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
 
-local
-
-datatype
-d2env = D2ENV of (d2var, hisexp)
-assume d2env_type = d2env
-
-in (* in of [local] *)
+implement
+d2env_get_var (d2e) = $effmask_all (d2env_var (d2e))
 
 implement
-d2env_get_var (d2e) = let
-  val+D2ENV (d2v, _) = d2e in (d2v)
-end (* end of [d2env_get_var] *)
+d2env_get_type (d2e) = $effmask_all (d2env_type (d2e))
 
 implement
-d2env_get_type (d2e) = let
-  val+D2ENV (_, hse) = d2e in (hse)
-end (* end of [d2env_get_type] *)
-
-implement
-d2env_make (d2v, hse) = D2ENV (d2v, hse)
-
-end // end of [local]
+d2env_make (d2v, hse) = d2env_new (d2v, hse)
 
 (* ****** ****** *)
 
 implement
 d2var2env (d2v) = let
-(*
-val () =
-println!
-  ("d2var2env: d2v = ", d2v)
-*)
 //
 val opt = d2var_get2_hisexp (d2v)
 //
-(*
-val-Some(hse) = opt
-val ((*void*)) =
-  println! ("d2var2env: hse = ", hse)
-*)
+val () = assertloc (gopt_is_some (opt)) // HX: val-Some(hse) = opt
+val hse = gopt_unsome (opt)
 //
-val-Some(hse) = opt in d2env_make (d2v, hse)
-// end of [val]
-//
+in
+  d2env_make (d2v, hse)
 end // end of [d2var2env]
 
 (* ****** ****** *)
@@ -117,32 +107,32 @@ staload _ = "libats/DATS/linset_avltree.dats"
 
 assume d2envset_vtype = $LS.set (d2env)
 
-val cmp = lam
-(
-  d2e1: d2env, d2e2: d2env
-) : int =<cloref>
-  $D2E.compare_d2var_d2var (d2env_get_var (d2e1), d2env_get_var (d2e2))
-// end of [val]
+implement
+$LS.compare_elt_elt<d2env> (d2e1, d2e2) = let
+  val sgn = compare_d2var_d2var (d2env_get_var (d2e1), d2env_get_var (d2e2))
+in
+  $UN.cast{int}(sgn)
+end // end of [compare_elt_elt]
 
 in (* in of [local] *)
 
 implement
-d2envset_vt_nil () = $LS.linset_make_nil ()
+d2envset_vt_nil () = $effmask_all ($LS.linset_make_nil ())
 
 implement
-d2envset_vt_free (xs) = $LS.linset_free (xs)
+d2envset_vt_free (xs) = $effmask_all ($LS.linset_free (xs))
 
 implement
 d2envset_vt_add
   (xs, x) = xs where {
   var xs = xs
-  val _(*replaced*) = $LS.linset_insert (xs, x, cmp)
+  val _(*replaced*) = $effmask_wrt ($LS.linset_insert (xs, x))
 } // end of [d2envset_vt_add]
 
 implement
-d2envset_vt_listize (xs) = $LS.linset_listize (xs)
+d2envset_vt_listize (xs) = $effmask_all ($LS.linset_listize ($LS.linset_copy (xs)))
 implement
-d2envset_vt_listize_free (xs) = $LS.linset_listize_free (xs)
+d2envset_vt_listize_free (xs) = $effmask_all ($LS.linset_listize (xs))
 
 end // end of [local]
 
@@ -157,10 +147,9 @@ fun loop
 ) : d2envset_vt = let
 in
 //
-case+ d2es of
-| list_cons
-    (d2e, d2es) => loop (d2es, d2envset_vt_add (res, d2e))
-| list_nil () => res
+if glist_is_cons (d2es)
+  then loop (glist_tail (d2es), d2envset_vt_add (res, glist_head (d2es)))
+  else res
 //
 end (* end of [loop] *)
 //
@@ -177,7 +166,7 @@ fprint_d2env
 val d2v = d2env_get_var (d2e)
 val hse = d2env_get_type (d2e)
 //
-val () = $D2E.fprint_d2var (out, d2v)
+val () = fprint_d2var (out, d2v)
 val () =
 (
   fprint_string (out, "("); fprint_hisexp (out, hse); fprint_string (out, ")")
@@ -193,7 +182,7 @@ implement
 fprint_d2envlst
   (out, d2es) = let
 in
-  $UT.fprintlst (out, d2es, ", ", fprint_d2env)
+  $UT.fprintlst<d2env> (out, d2es, ", ", fprint_d2env)
 end // end of [fprint_d2envlst]
 
 (* ****** ****** *)
@@ -203,11 +192,12 @@ fprint_d2envlstopt
   (out, opt) = let
 in
 //
-case+ opt of
-| Some (d2es) =>
-    fprint! (out, "Some(", d2es, ")")
-  // end of [Some]
-| None ((*void*)) => fprint! (out, "None()")
+if gopt_is_some (opt) then let
+  val () = fprint_string (out, "Some(")
+  val () = fprint_d2envlst (out, gopt_unsome (opt))
+in
+  fprint_string (out, ")")
+end else fprint_string (out, "None()")
 //
 end // end of [fprint_d2envlstopt]
 

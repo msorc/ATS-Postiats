@@ -90,69 +90,8 @@ $ldelay
 //
 #atscode_separator()
 
-implement
-{a}(*tmp*)
-stream_t2vt(xs) = let
-//
-fun
-auxmain:
-$d2ctype
-(stream_t2vt<a>) =
-lam(xs) => $ldelay
-(
-case+ !xs of
-| stream_nil() => stream_vt_nil()
-| stream_cons(x0, xs) => stream_vt_cons(x0, auxmain(xs))
-)
-//
-in
-  auxmain(xs)
-end (* end of [stream_t2vt] *)
 
 #atscode_separator()
-//
-// HX-2014-04-07:
-// This is a wild implementation!
-//
-implement
-{a}(*tmp*)
-stream_vt2t(xs) = let
-//
-fun
-auxmain
-(
-  xs: stream_vt(a)
-) :<!laz> stream(a) = let
-//
-val xs = $UN.castvwtp0{ptr}(xs)
-//
-in
-//
-$delay
-(
-let
-  val xs =
-    $UN.castvwtp0{stream_vt(a)}(xs)
-  val xs_con = !xs
-in
-  case+ xs_con of
-  | ~stream_vt_nil
-      ((*void*)) => stream_nil(*void*)
-    // end of [stream_vt_nil]
-  | @stream_vt_cons
-      (x, xs1) => let
-      val xs1_val = xs1
-      val ((*void*)) = (xs1 := auxmain(xs1_val))
-    in
-      $UN.castvwtp0{stream_con(a)}((view@x, view@xs1 | xs_con))
-    end // end of [stream_cons]
-end
-)
-end // end of [auxmain]
-//
-in
-  auxmain(xs)
-end // end of [stream_vt2t]
 
 #atscode_separator()
 
@@ -1923,98 +1862,10 @@ end // end of [loop]
 //
 #atscode_separator()
 
-implement
-{env}{a}
-stream_vt_unfold
-(
-  st0, fopr
-) = aux(st0) where
-{
-//
-fun aux
-(
-  st: env
-) : stream_vt(a) = $ldelay
-(
-let
-  var st = st;
-  val x0 = fopr(st)
-in
-  stream_vt_cons{a}(x0, aux(st))
-end // end of [aux]
-)
-//
-} (* end of [stream_vt_unfold] *)
 
-implement
-{env}{a}
-stream_vt_unfold_opt
-(
-  st0, fopr
-) = aux(st0) where
-{
-//
-fun aux
-(
-  st: env
-) : stream_vt(a) = $ldelay
-(
-let
-  var st = st;
-  val opt = fopr(st)
-in
-  case+ opt of
-  | ~None_vt() => stream_vt_nil()
-  | ~Some_vt(x0) => stream_vt_cons{a}(x0, aux(st))
-end // end of [let]
-)
-//
-} (* end of [stream_vt_unfold_opt] *)
 
 #atscode_separator()
 
-implement
-{x,y}(*tmp*)
-cross_stream_vt_list
-  (xs0, ys0) = let
-//
-fun
-auxmain
-(
-  xs: stream_vt(x)
-) : stream_vt(@(x, y)) = $ldelay
-(
-(
-case+ !xs of
-| ~stream_vt_nil
-    () => stream_vt_nil()
-| ~stream_vt_cons
-    (x, xs) => !(auxmain2(x, xs, ys0))
-)
-,
-(~xs) // called when the stream is freed
-) (* end of [auxmain] *)
-//
-and
-auxmain2
-(
-  x0: x
-, xs: stream_vt(x), ys: List(y)
-) : stream_vt(@(x, y)) = $ldelay
-(
-(
-case+ ys of
-| list_nil() => !(auxmain(xs))
-| list_cons(y, ys) =>
-    stream_vt_cons((x0, y), auxmain2(x0, xs, ys))
-)
-,
-~(xs) // called when the stream is freed
-) (* end of [auxmain2] *)
-//
-in
-  auxmain(xs0)
-end // end of [cross_stream_vt_list]
 
 #atscode_separator()
 
@@ -2023,8 +1874,37 @@ implement
 cross_stream_vt_list_vt
   (xs0, ys0) = let
 //
+// HX-2026-10:
+// [ys0] is kept as a raw pointer that is
+// shared by all the suspended computations
+// and freed once the stream is consumed or freed
+//
 val ys0 =
   $UN.castvwtp0{ptr}(ys0)
+//
+fun
+uncons
+(
+  ys: !List_vt(y)
+) : Option_vt(@(y, ptr)) =
+(
+case+ ys of
+| list_vt_nil() => None_vt()
+| list_vt_cons(y, ys1) =>
+    Some_vt(@(y, $UN.castvwtp1{ptr}(ys1)))
+) (* end of [uncons] *)
+//
+fun
+ys_uncons
+(
+  ys: ptr
+) : Option_vt(@(y, ptr)) = let
+  val ys = $UN.castvwtp0{List_vt(y)}(ys)
+  val opt = uncons(ys)
+  prval () = $UN.cast2void(ys)
+in
+  opt
+end // end of [ys_uncons]
 //
 fun
 auxmain
@@ -2035,9 +1915,14 @@ auxmain
 (
 case+ !xs of
 | ~stream_vt_nil
-    ((*void*)) => stream_vt_nil()
+    ((*void*)) => let
+    val () =
+    list_vt_free<y>($UN.castvwtp0{List_vt(y)}(ys0))
+  in
+    stream_vt_nil()
+  end // end of [stream_vt_nil]
 | ~stream_vt_cons(x, xs) =>
-    !(auxmain2(x, xs, $UN.cast{List(y)}(ys0)))
+    !(auxmain2(x, xs, ys0))
 )
 ,
 (
@@ -2050,14 +1935,14 @@ and
 auxmain2
 (
   x0: x
-, xs: stream_vt(x), ys: List(y)
+, xs: stream_vt(x), ys: ptr
 ) : stream_vt(@(x, y)) = $ldelay
 (
 (
-case+ ys of
-| list_nil() => !(auxmain(xs))
-| list_cons(y, ys) =>
-    stream_vt_cons((x0, y), auxmain2(x0, xs, ys))
+case+ ys_uncons(ys) of
+| ~None_vt() => !(auxmain(xs))
+| ~Some_vt(yys) =>
+    stream_vt_cons((x0, yys.0), auxmain2(x0, xs, yys.1))
 )
 ,
 (~xs; list_vt_free<y>($UN.castvwtp0{List_vt(y)}(ys0)))
@@ -2239,6 +2124,6 @@ end // end of [local]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "stream_vt_atxt.txt")
 %}\

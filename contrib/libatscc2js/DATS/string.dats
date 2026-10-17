@@ -38,10 +38,8 @@ UN =
 //
 (* ****** ****** *)
 //
-#staload "./../SATS/stream.sats"
 #staload "./../SATS/stream_vt.sats"
 //
-#staload _(*STREAM*) = "./stream.dats"
 #staload _(*STREAM_VT*) = "./stream_vt.dats"
 //
 (* ****** ****** *)
@@ -69,10 +67,8 @@ end // end of [string_fset_at]
 (* ****** ****** *)
 //
 implement
-string_exists_cloref
-  (str0, pred) =
-  loop(0) where
-{
+string_exists_cloptr
+  (str0, pred) = let
 //
 val
 [n:int]
@@ -82,29 +78,28 @@ len = string_length(str)
 //
 fun
 loop
-{i:nat|i <= n}(i: int(i)): bool =
+{i:nat|i <= n}
+(
+  i: int(i), pred: !cfun(strchr, bool)
+) : bool =
 (
 if i < len
-  then (if pred(str[i]) then true else loop(i+1))
+  then (if pred(str[i]) then true else loop(i+1, pred))
   else false
 )
 //
-} (* end of [string_exists_cloref] *)
+val ans = loop(0, pred)
 //
-implement
-string_exists_method
-  (str0) =
-(
-  lam(pred) => string_exists_cloref(str0, pred)
-) (* end of [string_exists_method] *)
+in
+  cfun_free(pred); ans
+end (* end of [string_exists_cloptr] *)
+//
 //
 (* ****** ****** *)
 //
 implement
-string_forall_cloref
-  (str0, pred) =
-  loop(0) where
-{
+string_forall_cloptr
+  (str0, pred) = let
 //
 val
 [n:int]
@@ -114,29 +109,28 @@ len = string_length(str)
 //
 fun
 loop
-{i:nat|i <= n}(i: int(i)): bool =
+{i:nat|i <= n}
+(
+  i: int(i), pred: !cfun(strchr, bool)
+) : bool =
 (
 if i < len
-  then (if pred(str[i]) then loop(i+1) else false)
+  then (if pred(str[i]) then loop(i+1, pred) else false)
   else true
 )
 //
-} (* end of [string_forall_cloref] *)
+val ans = loop(0, pred)
 //
-implement
-string_forall_method
-  (str0) =
-(
-  lam(pred) => string_forall_cloref(str0, pred)
-) (* end of [string_forall_method] *)
+in
+  cfun_free(pred); ans
+end (* end of [string_forall_cloptr] *)
+//
 //
 (* ****** ****** *)
 //
 implement
-string_foreach_cloref
-  (str0, fwork) =
-  loop(0) where
-{
+string_foreach_cloptr
+  (str0, fwork) = let
 //
 val
 [n:int]
@@ -146,33 +140,34 @@ len = string_length(str)
 //
 fun
 loop
-{i:nat|i <= n}(i: int(i)): void =
+{i:nat|i <= n}
+(
+  i: int(i), fwork: !cfun(strchr, void)
+) : void =
 (
 if i < len
-  then (fwork(str[i]); loop(i+1)) else ()
+  then (fwork(str[i]); loop(i+1, fwork)) else ()
 )
 //
-} (* end of [string_foreach_cloref] *)
+val () = loop(0, fwork)
 //
-implement
-string_foreach_method
-  (str0) =
-(
-  lam(fwork) => string_foreach_cloref(str0, fwork)
-) (* end of [string_foreach_method] *)
+in
+  cfun_free(fwork)
+end (* end of [string_foreach_cloptr] *)
+//
 //
 (* ****** ****** *)
 //
 implement
-string_tabulate_cloref
+string_tabulate_cloptr
   {n}
 (
   len, fopr
-) = // string_tabulate_cloref
+) = // string_tabulate_cloptr
 $UN.cast{string(n)}
 (
-  JSarray_join_sep(JSarray_tabulate_cloref(len, fopr), "")
-) (* end of [string_tabulate_cloref] *)
+  JSarray_join_sep(JSarray_tabulate_cloptr(len, fopr), "")
+) (* end of [string_tabulate_cloptr] *)
 //
 (* ****** ****** *)
 

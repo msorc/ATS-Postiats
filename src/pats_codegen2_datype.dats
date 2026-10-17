@@ -33,11 +33,26 @@
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (ATS2 port of src/pats_codegen2_datype.dats, see PORTING.md, "Codegen2")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+//
 staload
 LOC = "./pats_location.sats"
-//
-overload
-fprint with $LOC.fprint_location
 //
 (* ****** ****** *)
 //
@@ -45,9 +60,7 @@ staload SYM = "./pats_symbol.sats"
 //
 (* ****** ****** *)
 //
-staload S1E = "./pats_staexp1.sats"
-//
-overload fprint with $S1E.fprint_e1xp
+staload "./pats_staexp1.sats"
 //
 (* ****** ****** *)
 //
@@ -68,17 +81,18 @@ auxerr_nil
   out: FILEref, d2c0: d2ecl
 ) : void =  {
 //
-val loc0 = d2c0.d2ecl_loc
+val loc0 = d2c0.d2ecl_loc()
 //
-val () = fprint! (out, "(*\n")
+val () = fprint_string (out, "(*\n")
 //
+val () = $LOC.fprint_location (out, loc0)
 val () =
-fprint! (
-  out, loc0
+fprint_string (
+  out
 , ": error(codegen2): no spec on datatype is given\n"
 ) (* end of [val] *)
 //
-val () = fprintln! (out, "*)")
+val () = (fprint_string (out, "*)"); fprint_newline (out))
 //
 } (* end of [auxerr_nil] *)
 
@@ -90,17 +104,18 @@ auxerr_cons
 ) : void =  {
 //
 val
-loc0 = d2c0.d2ecl_loc
+loc0 = d2c0.d2ecl_loc()
 //
-val () = fprint! (out, "(*\n")
+val () = fprint_string (out, "(*\n")
 //
+val () = $LOC.fprint_location (out, loc0)
 val () =
-fprint! (
-  out, loc0
+fprint_string (
+  out
 , ": error(codegen2): no datatype of the given spec\n"
 ) (* end of [val] *)
 //
-val () = fprintln! (out, "*)")
+val () = (fprint_string (out, "*)"); fprint_newline (out))
 //
 } (* end of [auxerr_cons] *)
 
@@ -115,58 +130,66 @@ fun
 auxfun0
 (
 // argless
-) :<cloref1> void = let
+) : void = let
 //
 val sym = s2cst_get_sym(s2dat)
 val name = $SYM.symbol_get_name(sym)
 //
 in
-  fprint! (out, "datcon_", name, "_")
+  fprint_string (out, "datcon_");
+  fprint_string (out, name); fprint_string (out, "_")
 end // end of [auxfun0]
 //
 fun
 auxfun1
 (
   x0: e1xp
-) :<cloref1> void =
+) : void =
 (
 case+
-x0.e1xp_node
+e1xp_node_view(x0.e1xp_node())
 of // case+
-| $S1E.E1XPide(sym) =>
+| ~E1XPide(sym) =>
     $SYM.fprint_symbol(out, sym)
   // end of [E1XPide]
-| $S1E.E1XPstring(name) => fprint(out, name)
-| _(*rest-of-e1xp*) => auxfun0((*void*))
+| ~E1XPstring(name) => fprint_string(out, name)
+| v(*rest-of-e1xp*) => (e1xp_node_view_free(v); auxfun0((*void*)))
 )
 //
 fun
 auxcon
 (
   d2c: d2con
-) :<cloref1> void = let
+) : void = let
 //
 val sym = d2con_get_sym(d2c)
 val name = $SYM.symbol_get_name(sym)
 //
 in
-  fprintln! (out, "| ", name, " _ => \"", name, "\"")
+  fprint_string (out, "| "); fprint_string (out, name);
+  fprint_string (out, " _ => \""); fprint_string (out, name);
+  fprint_string (out, "\""); fprint_newline (out)
 end // end of [auxcon]
 //
 fun
 auxconlst
 (
   d2cs: d2conlst
-) :<cloref1> void =
+) : void =
 (
-case+ d2cs of
-| list_nil() => ()
-| list_cons(d2c, d2cs) =>
+case+ glist_view(d2cs) of
+| ~GLnil() => ()
+| ~GLcons(d2c, d2cs) =>
   let val () = auxcon(d2c) in auxconlst(d2cs) end
 )
 //
 val name = s2cst_get_name(s2dat)
-val-Some(d2cs) = s2cst_get_dconlst(s2dat)
+val d2cs =
+(
+case+ gopt_view(s2cst_get_dconlst(s2dat)) of
+| ~GOsome(d2cs) => d2cs
+| ~GOnone() => (assertloc(false); glist_nil((*void*))) // HX: the MatchError of [val-Some]
+) : d2conlst
 //
 (*
 val () =
@@ -182,33 +205,32 @@ linesep =
 "(* ****** ****** *)\n"
 //
 val () =
-fprint!
-  (out, linesep, "//\n")
+(fprint_string (out, linesep); fprint_string (out, "//\n"))
 val () =
-fprint! (out, "implement\n")
+fprint_string (out, "implement\n")
 val () =
-fprint! (out, "{}(*tmp*)\n")
+fprint_string (out, "{}(*tmp*)\n")
 val () =
 (
-case+ xs of
-| list_nil() => auxfun0()
-| list_cons(x, _) => auxfun1(x)
+case+ glist_view(xs) of
+| ~GLnil() => auxfun0()
+| ~GLcons(x, _) => auxfun1(x)
 )
 val () =
-fprint! (out, "\n  ")
+fprint_string (out, "\n  ")
 val () =
-fprint! (out, "(arg0) =\n")
+fprint_string (out, "(arg0) =\n")
 //
 val () =
-fprint! (out, "(\n")
+fprint_string (out, "(\n")
 val () =
-fprint! (out, "case+ arg0 of\n")
+fprint_string (out, "case+ arg0 of\n")
 //
 val () = auxconlst (d2cs)
 //
-val () = fprint! (out, ")\n")
+val () = fprint_string (out, ")\n")
 val () =
-fprint! (out, "//\n", linesep)
+(fprint_string (out, "//\n"); fprint_string (out, linesep))
 //
 in
   // nothing
@@ -228,11 +250,11 @@ println!
 *)
 in
 //
-case+ xs of
-| list_nil() =>
+case+ glist_view(xs) of
+| ~GLnil() =>
     auxerr_nil(out, d2c0)
   // end of [list_nil]
-| list_cons(x, xs) => let
+| ~GLcons(x, xs) => let
     val opt = codegen2_get_datype(x)
   in
     case+ opt of
@@ -254,17 +276,18 @@ auxerr_nil
   out: FILEref, d2c0: d2ecl
 ) : void =  {
 //
-val loc0 = d2c0.d2ecl_loc
+val loc0 = d2c0.d2ecl_loc()
 //
-val () = fprint! (out, "(*\n")
+val () = fprint_string (out, "(*\n")
 //
+val () = $LOC.fprint_location (out, loc0)
 val () =
-fprint! (
-  out, loc0
+fprint_string (
+  out
 , ": error(codegen2): no spec on datatype is given\n"
 ) (* end of [val] *)
 //
-val () = fprint! (out, "*)\n")
+val () = fprint_string (out, "*)\n")
 //
 } (* end of [auxerr_nil] *)
 
@@ -275,17 +298,18 @@ auxerr_cons
 , d2c0: d2ecl, x: e1xp
 ) : void =  {
 //
-val loc0 = d2c0.d2ecl_loc
+val loc0 = d2c0.d2ecl_loc()
 //
-val () = fprint! (out, "(*\n")
+val () = fprint_string (out, "(*\n")
 //
+val () = $LOC.fprint_location (out, loc0)
 val () =
-fprint! (
-  out, loc0
+fprint_string (
+  out
 , ": error(codegen2): no datatype of the given spec\n"
 ) (* end of [val] *)
 //
-val () = fprint! (out, "*)\n")
+val () = fprint_string (out, "*)\n")
 //
 } (* end of [auxerr_cons] *)
 
@@ -300,59 +324,67 @@ fun
 auxfun0
 (
 // argless
-) :<cloref1> void = let
+) : void = let
 //
 val sym = s2cst_get_sym(s2dat)
 val name = $SYM.symbol_get_name(sym)
 //
 in
-  fprint! (out, "datcontag_", name, "_")
+  fprint_string (out, "datcontag_");
+  fprint_string (out, name); fprint_string (out, "_")
 end // end of [auxfun0]
 //
 fun
 auxfun1
 (
   x0: e1xp
-) :<cloref1> void =
+) : void =
 (
 case+
-x0.e1xp_node
+e1xp_node_view(x0.e1xp_node())
 of // case+
-| $S1E.E1XPide(sym) =>
+| ~E1XPide(sym) =>
     $SYM.fprint_symbol (out, sym)
   // end of [E1XPide]
-| $S1E.E1XPstring(name) => fprint (out, name)
-| _(*rest-of-e1xp*) => auxfun0((*void*))
+| ~E1XPstring(name) => fprint_string (out, name)
+| v(*rest-of-e1xp*) => (e1xp_node_view_free(v); auxfun0((*void*)))
 )
 //
 fun
 auxcon
 (
   d2c: d2con
-) :<cloref1> void = let
+) : void = let
 //
 val sym = d2con_get_sym(d2c)
 val tag = d2con_get_tag(d2c)
 val name = $SYM.symbol_get_name(sym)
 //
 in
-  fprintln! (out, "| ", name, " _ => ", tag)
+  fprint_string (out, "| "); fprint_string (out, name);
+  fprint_string (out, " _ => "); fprint_int (out, tag);
+  fprint_newline (out)
 end // end of [auxcontag]
 //
 fun
 auxconlst
 (
   d2cs: d2conlst
-) :<cloref1> void =
+) : void =
 (
-case+ d2cs of
-| list_nil() => ()
-| list_cons(d2c, d2cs) =>
+case+ glist_view(d2cs) of
+| ~GLnil() => ()
+| ~GLcons(d2c, d2cs) =>
   let val () = auxcon(d2c) in auxconlst(d2cs) end
 )
 //
 val name = s2cst_get_name(s2dat)
-val-Some(d2cs) = s2cst_get_dconlst(s2dat)
+val d2cs =
+(
+case+ gopt_view(s2cst_get_dconlst(s2dat)) of
+| ~GOsome(d2cs) => d2cs
+| ~GOnone() => (assertloc(false); glist_nil((*void*))) // HX: the MatchError of [val-Some]
+) : d2conlst
 //
 (*
 val () =
@@ -368,34 +400,33 @@ linesep =
 "(* ****** ****** *)\n"
 //
 val () =
-fprint!
-  (out, linesep, "//\n")
+(fprint_string (out, linesep); fprint_string (out, "//\n"))
 //
 val () =
-fprint! (out, "implement\n")
+fprint_string (out, "implement\n")
 val () =
-fprint! (out, "{}(*tmp*)\n")
+fprint_string (out, "{}(*tmp*)\n")
 val () =
 (
-case+ xs of
-| list_nil() => auxfun0()
-| list_cons(x, _) => auxfun1(x)
+case+ glist_view(xs) of
+| ~GLnil() => auxfun0()
+| ~GLcons(x, _) => auxfun1(x)
 )
 val () =
-fprint! (out, "\n  ")
+fprint_string (out, "\n  ")
 val () =
-fprint! (out, "(arg0) =\n")
+fprint_string (out, "(arg0) =\n")
 //
 val () =
-fprint! (out, "(\n")
+fprint_string (out, "(\n")
 val () =
-fprint! (out, "case+ arg0 of\n")
+fprint_string (out, "case+ arg0 of\n")
 //
 val () = auxconlst (d2cs)
 //
-val () = fprint! (out, ")\n")
+val () = fprint_string (out, ")\n")
 val () =
-fprint! (out, "//\n", linesep)
+(fprint_string (out, "//\n"); fprint_string (out, linesep))
 //
 in
   // nothing
@@ -415,11 +446,11 @@ println!
 *)
 in
 //
-case+ xs of
-| list_nil() =>
+case+ glist_view(xs) of
+| ~GLnil() =>
     auxerr_nil(out, d2c0)
   // end of [list_nil]
-| list_cons(x, xs) => let
+| ~GLcons(x, xs) => let
     val opt = codegen2_get_datype(x)
   in
     case+ opt of

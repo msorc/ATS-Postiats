@@ -34,9 +34,39 @@ STDIO =
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+//
 #staload "./../SATS/patsolve_commarg.sats"
 #staload "./../SATS/patsolve_cnstrnt.sats"
 #staload "./../SATS/patsolve_parsing.sats"
+//
+(* ****** ****** *)
+//
+// HX-2026-10: no GC
+// The constraints are parsed into an arena that
+// is freed once they are printed out
+//
+extern
+fun
+patsolve_fileref_pprint(inp: FILEref): void
+//
+implement
+patsolve_fileref_pprint
+  (inp) = let
+//
+val ar = arena_make_nil()
+val tbls = ptables_make_nil(ar)
+val c3t0 =
+  parse_fileref_constraints(ar, tbls, inp)
+// end of [val]
+val () =
+  fpprint_c3nstr(ar, stdout_ref, c3t0)
+// end of [val]
+val () = fprint_newline(stdout_ref)
+//
+in
+  arena_free(ar)
+end // end of [patsolve_fileref_pprint]
 //
 (* ****** ****** *)
 
@@ -234,19 +264,16 @@ in
 //
 case+ x of
 //
-| CAhelp _ => patsolve_help ()
+| ~CAhelp _ => patsolve_help ()
 //
-| CAinput _ => patsolve_input ()
+| ~CAinput _ => patsolve_input ()
 //
-| CAgitem(str) => patsolve_gitem(str)
+| ~CAgitem(str) => patsolve_gitem(str)
 //
-(*
-| CAoutput(str) => fprint! (out, "CAoutput(", str, ")")
-| CAscript(str) => fprint! (out, "CAscript(", str, ")")
-*)
-| CAargend() => patsolve_argend ()
+| ~CAargend() => patsolve_argend ()
 //
-| _ (*rest-of-CA*) => ()
+| ~CAoutput _ => ()
+| ~CAscript _ => ()
 //
 end // end of [process_arg]
 
@@ -350,21 +377,7 @@ case+ opt of
     val () = if n0 > 0 then fileref_close(f0)
     val () = !the_state.inpfil_ref := filr
 //
-    val c3t0 =
-      parse_fileref_constraints(filr)
-    // end of [val]
-//
-(*
-    val () =
-    fprint! (
-      stdout_ref, "patsolve_input_arg: c3t0 =\n"
-    ) (* end of [fprint] *)
-*)
-//
-    val () =
-      fpprint_c3nstr(stdout_ref, c3t0)
-    // end of [val]
-    val () = fprint_newline (stdout_ref)
+    val () = patsolve_fileref_pprint(filr)
 //
   } (* end of [Some_vt] *)
 //
@@ -406,14 +419,7 @@ case+ 0 of
 | _ when
     test() =>
   {
-    val inp = stdin_ref
-    val c3t0 =
-      parse_fileref_constraints(inp)
-    // end of [val]
-    val () =
-      fpprint_c3nstr(stdout_ref, c3t0)
-    // end of [val]
-    val () = fprint_newline (stdout_ref)
+    val () = patsolve_fileref_pprint(stdin_ref)
   }
 | _ (*rest*) => ((*ignored*))
 //

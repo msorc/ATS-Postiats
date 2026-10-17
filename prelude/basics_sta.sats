@@ -617,10 +617,6 @@ viewdef b0ytes_v (l:addr, n:int) = b0ytes (n) @ l
 
 (* ****** ****** *)
 //
-abstype
-cloref_t0ype_type (a:t@ype) = ptr
-stadef cloref = cloref_t0ype_type
-//
 absvtype
 cloptr_vt0ype_vtype (a:t@ype) = ptr
 stadef cloptr = cloptr_vt0ype_vtype
@@ -674,6 +670,11 @@ vbox_view_prop(v:view)
 propdef
 vbox(v:view) = vbox_view_prop(v)
 
+//
+// HX-2026-10:
+// a reference is formed from the view of memory
+// that is never freed (see [ref_make_viewptr])
+//
 abstype // invariance
 ref_vt0ype_type(a:vt@ype) = ptr
 typedef
@@ -743,16 +744,6 @@ cmpref_funenv
   (a: vt@ype, vt: vt@ype) = (&RD(a), &RD(a), !vt) -<fun> int
 //
 stadef cmpref = cmpref_fun and cmpref = cmpref_funenv
-//
-(* ****** ****** *)
-//
-// HX: [lazy(T)] :
-// suspended evaluation of type T
-//
-abstype
-lazy_t0ype_type(t@ype+) = ptr
-typedef
-lazy(a:t@ype) = lazy_t0ype_type(a)
 //
 (* ****** ****** *)
 //

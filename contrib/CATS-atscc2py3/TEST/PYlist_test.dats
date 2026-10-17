@@ -18,75 +18,30 @@ staload
 staload
 "{$LIBATSCC2PY3}/SATS/integer.sats"
 staload
-"{$LIBATSCC2PY3}/SATS/list.sats"
-staload
 "{$LIBATSCC2PY3}/SATS/PYlist.sats"
 //
 (* ****** ****** *)
 
-implement
-list_reverse{a}(xs) =
-(
-  list_reverse_append{a}(xs, list_nil(*void*))
-) (* end of [list_reverse] *)
-
-(* ****** ****** *)
-
-implement
-list_reverse_append
-  {a}(xs, ys) = let
 //
-prval () = lemma_list_param (xs)
-prval () = lemma_list_param (ys)
-//
-fun
-loop{i,j:nat}
-(
-  xs: list(a, i), ys: list(a, j)
-) : list(a, i+j) =
-(
-case+ xs of
-| list_nil () => ys
-| list_cons (x, xs) => loop (xs, list_cons (x, ys))
-) (* end of [loop] *)
-//
-in
-  loop (xs, ys)
-end // end of [list_reverse_append]
-
-(* ****** ****** *)
+// HX-2026-10: no GC
+// the conversions return linear lists (they are
+// implemented in the runtime as PYlist2list_vt[_rev])
 //
 extern
 fun
 PYlist2list
-  : {a:t0p} PYlist(a) -> List0(a) = "mac#"
+  : {a:t0p} PYlist(a) -> List0_vt(a) = "mac#"
 //
 implement
-PYlist2list{a}(xs) = let
-//
-val res =
-PYlist_reduce{List0(a)}{a}
-  (xs, nil(), lam (xs, x) => cons (x, xs))
-//
-in
-  list_reverse(res)
-end // end of [PYlist2list]
-//
-(* ****** ****** *)
+PYlist2list{a}(xs) = PYlist2list_vt{a}(xs)
 //
 extern
 fun
 PYlist2list_rev
-  : {a:t0p} PYlist(a) -> List0(a) = "mac#"
+  : {a:t0p} PYlist(a) -> List0_vt(a) = "mac#"
 //
 implement
-PYlist2list_rev{a}(xs) =
-(
-//
-PYlist_reduce{List0(a)}{a}
-  (xs, nil(), lam (xs, x) => cons (x, xs))
-//
-) (* end of [PYlist2list_rev] *)
+PYlist2list_rev{a}(xs) = PYlist2list_vt_rev{a}(xs)
 //
 (* ****** ****** *)
 //
@@ -96,7 +51,7 @@ PYlist_evnodd(PYlist(int)): void = "mac#"
 //
 implement
 PYlist_evnodd(xs) =
-  PYlist_sort_2(xs, lam(x, y) => (x%2 - y%2))
+  PYlist_sort_2(xs, lam(x, y) =<cloptr1> (x%2 - y%2))
 //
 (* ****** ****** *)
 

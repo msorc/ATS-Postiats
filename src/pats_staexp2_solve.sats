@@ -33,6 +33,15 @@
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_staexp2_solve.sats)
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+
 staload
 LOC = "./pats_location.sats"
 typedef location = $LOC.location

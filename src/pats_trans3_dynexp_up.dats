@@ -33,13 +33,22 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_dynexp_up.dats, see PORTING.md,
+// "Level 3 translation, group 1 (dynexp_up/util/syncst)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -57,11 +66,9 @@ prerr_FILENAME<> () = prerr "pats_trans3_dynexp_up"
 //
 staload LAB = "./pats_label.sats"
 staload LOC = "./pats_location.sats"
-overload + with $LOC.location_combine
-overload print with $LOC.print_location
+typedef loc_t = $LOC.location
 //
 staload SYN = "./pats_syntax.sats"
-overload print with $SYN.print_macsynkind
 //
 (* ****** ****** *)
 
@@ -101,7 +108,11 @@ staload "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
+#include "./pats_trans2.hats" // [l2l], [glist_map_fun], the [$ERR] aborts
+
+(* ****** ****** *)
+
+#include "./pats_syntax_token.hats" // [token_char_get], [token_string_get]
 
 (* ****** ****** *)
 
@@ -154,7 +165,9 @@ fun
 d2exp_trup_tempenver(d2e0: d2exp): d3exp
 
 (* ****** ****** *)
-
+//
+// HX-2026-10: the triple is a flat tuple
+//
 extern
 fun
 d2exp_trup_arg_body
@@ -162,7 +175,7 @@ d2exp_trup_arg_body
   loc0: loc_t
 , fc0: funclo
 , lin: int, npf: int, p2ts: p2atlst, d2e: d2exp
-) : (s2exp, p3atlst, d3exp)
+) : @(s2exp, p3atlst, d3exp)
 
 (* ****** ****** *)
 //
@@ -229,12 +242,98 @@ fun d2exp_trup_solverify (d2e0: d2exp): d3exp
 
 fun
 d2exp_is_sym
-  (d2e: d2exp): bool = let
+  (d2e: d2exp): bool =
+  d2exp_node_is_D2Esym (d2e.d2exp_node ())
+// end of [d2exp_is_sym]
+
+(* ****** ****** *)
+//
+// HX: [val-D2Esym(d2s) = d2e.d2exp_node] (the MatchError of ATS1 is an abort)
+//
+fn
+d2exp_get_D2Esym
+  (d2e: d2exp): d2sym = (
+//
+case+ d2exp_node_view (d2e.d2exp_node ()) of
+| ~D2Esym (d2s) => d2s
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d2sym> ((*MatchError*)))
+//
+) (* end of [d2exp_get_D2Esym] *)
+
+(* ****** ****** *)
+//
+// HX: [list_last] of ATS1 (the list is not empty)
+//
+fun
+s2exparglst_last
+  (xs: s2exparglst): s2exparg = let
+  val x = glist_head (xs)
+  val xs1 = glist_tail (xs)
 in
+  if glist_is_cons (xs1) then s2exparglst_last (xs1) else x
+end // end of [s2exparglst_last]
+
+(* ****** ****** *)
 //
-case+ d2e.d2exp_node of D2Esym _ => true | _ => false
+// HX: the arm [_(*rest-of-d0exp*)] of [D2Eapplst] in [d2exp_trup]
 //
-end // end of [d2exp_is_sym]
+fn
+d2exp_trup_applst_rest
+(
+  d2e0: d2exp, _fun: d2exp, _arg: d2exparglst
+) : d3exp = let
+  val opt = d2exp_get_seloverld(_fun)
+in
+  case+ gopt_view (opt) of
+  | ~GOnone () =>
+      d2exp_trup_applst(d2e0, _fun, _arg)
+    // end of [None]
+  | ~GOsome (d2s) =>
+      d2exp_trup_applst_seloverld(d2e0, _fun, d2s, _arg)
+    // end of [Some]
+end // end of [d2exp_trup_applst_rest]
+
+(* ****** ****** *)
+//
+// HX: the arm [D2Earrinit] of [d2exp_trup]: [d3e_asz] and the (static) size [s2i_asz]
+// ([s2i_asz] is a [var] of ATS1)
+//
+fn
+d2exp_trup_arrinit_asz
+(
+  loc0: loc_t, nxs: int, opt: d2expopt
+) : @(d3exp, s2exp) = (
+//
+case+ gopt_view (opt) of
+//
+| ~GOnone ((*void*)) => let
+    val s2i_asz = s2exp_int(nxs)
+    val s2e_asz =
+      s2exp_int_index_t0ype(s2i_asz)
+    val d3e_asz =
+      d3exp_int (loc0, s2e_asz, nxs)
+  in
+    @(d3e_asz, s2i_asz)
+  end (* end of [None] *)
+//
+| ~GOsome (d2e_asz) => let
+    val d3e_asz = d2exp_trup(d2e_asz)
+    val s2e_asz = d3exp_get_type(d3e_asz)
+    val s2i_asz = let
+      val s2f = s2exp2hnf (s2e_asz)
+      val opt =
+        un_s2exp_g1size_index_t0ype(s2f)
+      // end of [val]
+    in
+      case+ opt of
+      | ~Some_vt(s2i) => s2i
+      | ~None_vt((*void*)) => s2exp_errexp(s2rt_int)
+    end // end of [let] // end of [val]
+  in
+    @(d3e_asz, s2i_asz)
+  end (* end of [Some] *)
+//
+) (* end of [d2exp_trup_arrinit_asz] *)
 
 (* ****** ****** *)
 
@@ -242,147 +341,117 @@ implement
 d2exp_trup
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-//
-(*
-val () =
-(
-  println! ("d2exp_trup: loc0 = ", loc0);
-  println! ("d2exp_trup: d2e0 = ", d2e0);
-) (* end of [val] *)
-*)
+val loc0 = d2e0.d2exp_loc ()
 //
 val
 d3e0 = (
 case+
-d2e0.d2exp_node
+d2exp_node_view (d2e0.d2exp_node ())
 of (* case+ *)
 //
-| D2Evar(d2v) => d2exp_trup_var(loc0, d2v)
-| D2Ecst(d2c) => d2exp_trup_cst(loc0, d2c)
+| ~D2Evar(d2v) => d2exp_trup_var(loc0, d2v)
+| ~D2Ecst(d2c) => d2exp_trup_cst(loc0, d2c)
 //
-| D2Eint(int) => d2exp_trup_int(d2e0, int)
-| D2Eintrep(rep) => d2exp_trup_intrep(d2e0, rep)
+| ~D2Eint(int) => d2exp_trup_int(d2e0, int)
+| ~D2Eintrep(rep) => d2exp_trup_intrep(d2e0, rep)
 //
-| D2Ebool(bool) => d2exp_trup_bool(d2e0, bool)
-| D2Echar(char) => d2exp_trup_char(d2e0, char)
+| ~D2Ebool(bool) => d2exp_trup_bool(d2e0, bool)
+| ~D2Echar(char) => d2exp_trup_char(d2e0, char)
 //
-| D2Efloat(rep) => d2exp_trup_float(d2e0, rep)
-| D2Estring(str) => d2exp_trup_string(d2e0, str)
+| ~D2Efloat(rep) => d2exp_trup_float(d2e0, rep)
+| ~D2Estring(str) => d2exp_trup_string(d2e0, str)
 //
-| D2Ei0nt(tok) => d2exp_trup_i0nt(d2e0, tok)
+| ~D2Ei0nt(tok) => d2exp_trup_i0nt(d2e0, tok)
 //
-| D2Ec0har(tok) => let
-    val-
-    T_CHAR(c) =
-    tok.token_node in d2exp_trup_char(d2e0, c)
+| ~D2Ec0har(tok) => let
+    val c = token_char_get(tok) // [val-T_CHAR(c) = tok.token_node]
+  in
+    d2exp_trup_char(d2e0, c)
   end // end of [D2Ec0har]
-| D2Ef0loat (tok) => d2exp_trup_f0loat(d2e0, tok)
-| D2Es0tring (tok) => let
-    val-
-    T_STRING(str) =
-    tok.token_node in d2exp_trup_string(d2e0, str)
+| ~D2Ef0loat (tok) => d2exp_trup_f0loat(d2e0, tok)
+| ~D2Es0tring (tok) => let
+    val str = token_string_get(tok) // [val-T_STRING(str) = tok.token_node]
+  in
+    d2exp_trup_string(d2e0, str)
   end // end of [D2Es0tring]
 //
-| D2Ecstsp(csp) => d2exp_trup_cstsp(d2e0, csp)
+| ~D2Ecstsp(csp) => d2exp_trup_cstsp(d2e0, csp)
 //
-| D2Etyrep(s2e) => d2exp_trup_tyrep(d2e0, s2e)
+| ~D2Etyrep(s2e) => d2exp_trup_tyrep(d2e0, s2e)
 //
-| D2Eliteral(d2e) => d2exp_trup_literal(d2e0, d2e)
+| ~D2Eliteral(d2e) => d2exp_trup_literal(d2e0, d2e)
 //
 (*
 | D2Etop() => // case for analysis
 *)
-| D2Etop2(s2e) => d3exp_top(loc0, s2e)
+| ~D2Etop2(s2e) => d3exp_top(loc0, s2e)
 //
-| D2Eempty() =>
+| ~D2Eempty() =>
     d3exp_empty(loc0, s2exp_void_t0ype())
   // end of [D2Eempty]
 //
-| D2Eextval _ => d2exp_trup_extval (d2e0)
-| D2Eextfcall _ => d2exp_trup_extfcall (d2e0)
-| D2Eextmcall _ => d2exp_trup_extmcall (d2e0)
+| ~D2Eextval _ => d2exp_trup_extval (d2e0)
+| ~D2Eextfcall _ => d2exp_trup_extfcall (d2e0)
+| ~D2Eextmcall _ => d2exp_trup_extmcall (d2e0)
 //
-| D2Econ _ => d2exp_trup_con (d2e0)
+| ~D2Econ _ => d2exp_trup_con (d2e0)
 //
-| D2Esym _ => d2exp_trup_sym (d2e0)
+| ~D2Esym _ => d2exp_trup_sym (d2e0)
 //
-| D2Efoldat _ => d2exp_trup_foldat (d2e0)
-| D2Efreeat _ => d2exp_trup_freeat (d2e0)
+| ~D2Efoldat _ => d2exp_trup_foldat (d2e0)
+| ~D2Efreeat _ => d2exp_trup_freeat (d2e0)
 //
-| D2Etmpid(_, _) => d2exp_trup_tmpid (d2e0)
+| ~D2Etmpid _ => d2exp_trup_tmpid (d2e0)
 //
-| D2Elet
+| ~D2Elet
     (d2cs, d2e) => d2exp_trup_letwhere(d2e0, d2cs, d2e)
   // end of [D2Elet]
-| D2Ewhere
+| ~D2Ewhere
     (d2e, d2cs) => d2exp_trup_letwhere(d2e0, d2cs, d2e)
   // end of [D2Ewhere]
 //
-| D2Eapplst
-    (_fun, _arg) => let
-(*
-    val () = (
-      fprintln! (stdout_ref, "d2exp_trup: D2Eapplst: _fun = ", _fun);
-      fprintln! (stdout_ref, "d2exp_trup: D2Eapplst: _arg = ", _arg);
-    ) (* end of [val] *)
-*)
-  in
+| ~D2Eapplst
+    (_fun, _arg) => (
     case+
-    _fun.d2exp_node
+    d2exp_node_view (_fun.d2exp_node ())
     of // case+
 //
-    | D2Esym(d2s) =>
+    | ~D2Esym(d2s) =>
         d2exp_trup_applst_sym(d2e0, d2s, _arg)
       // end of [D2Esym]
-    | D2Etmpid
-        (d2e, t2mas) when
-        d2exp_is_sym(d2e) => let
-        val-D2Esym(d2s) = d2e.d2exp_node
-      in
-        d2exp_trup_applst_tmpsym(d2e0, d2s, t2mas, _arg)
-      end // end of [D2Etmpid when ...]
+    | ~D2Etmpid
+        (d2e, t2mas) => (
+        // [D2Etmpid (d2e, t2mas) when d2exp_is_sym(d2e)]
+        if d2exp_is_sym(d2e) then let
+          val d2s = d2exp_get_D2Esym(d2e)
+        in
+          d2exp_trup_applst_tmpsym(d2e0, d2s, t2mas, _arg)
+        end else d2exp_trup_applst_rest(d2e0, _fun, _arg)
+      ) (* end of [D2Etmpid when ...] *)
 //
-    | D2Emac(d2m) => let
-(*
-        val () = (
-          println! ("d2exp_trup: D2Eapplst: D2Emac(bef): d2e0 = ", d2e0)
-        ) (* end of [val] *)
-*)
+    | ~D2Emac(d2m) => let
         val d2e0 =
           $MAC.dmacro_eval_app_short (loc0, d2m, _arg)
         // end of [val]
-(*
-        val () = (
-          println! ("d2exp_trup: D2Eapplst: D2Emac(aft): loc0 = ", loc0);
-          println! ("d2exp_trup: D2Eapplst: D2Emac(aft): d2e0 = ", d2e0);
-        ) (* end of [val] *)
-*)
       in
         d2exp_trup(d2e0)
       end // end of [D2Emac]
 //
-    | _ (*rest-of-d0exp*) => let
-        val opt = d2exp_get_seloverld(_fun)
+    | v (*rest-of-d0exp*) => let
+        val () = d2exp_node_view_free (v)
       in
-        case+ opt of
-        | None () =>
-            d2exp_trup_applst(d2e0, _fun, _arg)
-          // end of [None]
-        | Some (d2s) =>
-            d2exp_trup_applst_seloverld(d2e0, _fun, d2s, _arg)
-          // end of [Some]
+        d2exp_trup_applst_rest(d2e0, _fun, _arg)
       end // end of [rest-of-d0exp]
-  end // end of [D2Eapplst]
+  ) (* end of [D2Eapplst] *)
 //
-| D2Eifhead
+| ~D2Eifhead
     (_, _, _, opt) => let
     val s2e_if =
     (
-      case+ opt of
-      | None _ =>
+      if gopt_is_none (opt)
+        then
         s2exp_void_t0ype()
-      | Some _ =>
+        else
         s2exp_Var_make_srt
           (loc0, s2rt_t0ype)
         // end of [Some]
@@ -391,7 +460,7 @@ of (* case+ *)
   in
     d2exp_trdn_ifhead (d2e0, s2f_if)
   end // end of [D2Eifhead]
-| D2Esifhead _ => let
+| ~D2Esifhead _ => let
     val
     s2e_sif =
     s2exp_Var_make_srt(loc0, s2rt_t0ype)
@@ -400,7 +469,7 @@ of (* case+ *)
     d2exp_trdn_sifhead (d2e0, s2f_sif)
   end // end of [D2Esifhead]
 //
-| D2Eifcasehd
+| ~D2Eifcasehd
     (knd, _, _) => let
     val
     s2e_if =
@@ -418,7 +487,7 @@ of (* case+ *)
     d2exp_trdn_ifcasehd (d2e0, s2f_if)
   end // end of [D2Eifhead]
 //
-| D2Ecasehead _ => let
+| ~D2Ecasehead _ => let
     val
     s2e_case =
     s2exp_Var_make_srt(loc0, s2rt_t0ype)
@@ -426,7 +495,7 @@ of (* case+ *)
   in
     d2exp_trdn_casehead (d2e0, s2f_case)
   end // end of [D2Ecasehead]
-| D2Escasehead _ => let
+| ~D2Escasehead _ => let
     val
     s2e_scase =
     s2exp_Var_make_srt(loc0, s2rt_t0ype)
@@ -435,58 +504,58 @@ of (* case+ *)
     d2exp_trdn_scasehead (d2e0, s2f_scase)
   end // end of [D2Escasehead]
 //
-| D2Esing (d2e) => d2exp_trup (d2e)
+| ~D2Esing (d2e) => d2exp_trup (d2e)
 //
-| D2Elist (npf, d2es) => let
+| ~D2Elist (npf, d2es) => let
     val d2e0 =
       d2exp_tup_flt (loc0, npf,d2es) in d2exp_trup (d2e0)
     // end of [val]
   end // end of [D2Elist]
 //
-| D2Elst _ => d2exp_trup_lst (d2e0)
-| D2Etup _ => d2exp_trup_tup (d2e0)
-| D2Erec _ => d2exp_trup_rec (d2e0)
-| D2Eseq _ => d2exp_trup_seq (d2e0)
+| ~D2Elst _ => d2exp_trup_lst (d2e0)
+| ~D2Etup _ => d2exp_trup_tup (d2e0)
+| ~D2Erec _ => d2exp_trup_rec (d2e0)
+| ~D2Eseq _ => d2exp_trup_seq (d2e0)
 //
-| D2Eselab
+| ~D2Eselab
     (d2e, d2ls) =>
     d2exp_trup_selab(loc0, d2e, d2ls)
   // end of [D2Eselab]
 //
-| D2Eptrof _ => d2exp_trup_ptrof (d2e0)
-| D2Eviewat _ => d2exp_trup_viewat (d2e0)
+| ~D2Eptrof _ => d2exp_trup_ptrof (d2e0)
+| ~D2Eviewat _ => d2exp_trup_viewat (d2e0)
 //
-| D2Ederef(d2s, d2e) =>
-    d2exp_trup_deref(loc0, d2s, d2e, list_nil)
+| ~D2Ederef(d2s, d2e) =>
+    d2exp_trup_deref(loc0, d2s, d2e, glist_nil{d2lab}((*void*)))
   // end of [D2Ederef]
 //
-| D2Eassgn _ => d2exp_trup_assgn (d2e0)
-| D2Exchng _ => d2exp_trup_xchng (d2e0)
+| ~D2Eassgn _ => d2exp_trup_assgn (d2e0)
+| ~D2Exchng _ => d2exp_trup_xchng (d2e0)
 //
-| D2Earrsub (
+| ~D2Earrsub (
     d2s, arr, loc_ind, ind // d2s = lrbrackets
   ) => let
-    val loc_arr = arr.d2exp_loc
-    val loc_arg = (loc_arr + loc_ind)
-    val d2es_arg = list_cons(arr, ind)
-    val d2a = D2EXPARGdyn(~1(*npf*), loc_arg, d2es_arg)
+    val loc_arr = arr.d2exp_loc ()
+    val loc_arg = $LOC.location_combine (loc_arr, loc_ind)
+    val d2es_arg = glist_cons(arr, ind)
+    val d2a = d2exparg_D2EXPARGdyn(~1(*npf*), loc_arg, d2es_arg)
 //
-    val d2as = list_sing(d2a)
+    val d2as = glist_sing(d2a)
 //
   in
     d2exp_trup_applst_sym (d2e0, d2s, d2as)
   end // end of [D2Earrsub]
-| D2Earrpsz
+| ~D2Earrpsz
     (opt, d2es) => let
     val s2e = (
-      case+ opt of
-      | Some(s2e) => s2e
-      | None((*void*)) => let
+      case+ gopt_view (opt) of
+      | ~GOsome(s2e) => s2e
+      | ~GOnone((*void*)) => let
           val
           s2t = s2rt_t0ype in s2exp_Var_make_srt(loc0, s2t)
         end // end of [None]
     ) : s2exp // end of [val]
-    val asz = list_length (d2es)
+    val asz = glist_length (d2es)
     val d3es = d2explst_trdn_elt(d2es, s2e)
     val s2e_arrpsz =
       s2exp_arrpsz_vt0ype_int_vt0ype(s2e, asz)
@@ -494,73 +563,39 @@ of (* case+ *)
   in
     d3exp_arrpsz(loc0, s2e_arrpsz, s2e, d3es, asz)
   end // end of [D2Earrpsz]
-| D2Earrinit
+| ~D2Earrinit
   (
     s2e_elt, opt, d2es
   ) => let
 //
-    var s2i_asz : s2exp
+    val nxs = glist_length (d2es)
 //
-    val nxs = list_length (d2es)
-//
-    val d3e_asz =
-    (
-      case+ opt of
-//
-      | None((*void*)) =>
-          d3e_asz where
-        {
-          val () =
-            (s2i_asz := s2exp_int(nxs))
-          val s2e_asz =
-            s2exp_int_index_t0ype(s2i_asz)
-          val d3e_asz =
-            d3exp_int (loc0, s2e_asz, nxs)
-        } (* end of [None] *)
-//
-      | Some (d2e_asz) =>
-          d3e_asz where
-        {
-          val d3e_asz = d2exp_trup(d2e_asz)
-          val s2e_asz = d3exp_get_type(d3e_asz)
-          val () = let
-            val s2f = s2exp2hnf (s2e_asz)
-            val opt =
-              un_s2exp_g1size_index_t0ype(s2f)
-            // end of [val]
-          in
-            case+ opt of
-            | ~Some_vt(s2i) => (s2i_asz := s2i)
-            | ~None_vt((*void*)) =>
-                let val s2i = s2exp_errexp(s2rt_int) in s2i_asz := s2i end
-              // end of [None_vt]
-          end // end of [let] // end of [val]
-        } (* end of [Some] *)
-//
-    ) : d3exp (* end of [val d3e_asz] *)
+    val (d3e_asz, s2i_asz) =
+      d2exp_trup_arrinit_asz (loc0, nxs, opt)
 //
     val s2e_elt =
     (
-      case+ d2es of
-      | list_cons _ => s2e_elt
-      | list_nil () => s2exp_top (0(*knd*), s2e_elt)
+      if glist_is_cons (d2es)
+        then s2e_elt
+        else s2exp_top (0(*knd*), s2e_elt)
+      // end of [if]
     ) : s2exp (* end of [val] *)
     val d3es = d2explst_trdn_elt (d2es, s2e_elt)
 //
-    val s2e_tyarr = s2exp_tyarr (s2e_elt, list_sing(s2i_asz))
+    val s2e_tyarr = s2exp_tyarr (s2e_elt, glist_sing(s2i_asz))
 //
   in
     d3exp_arrinit (loc0, s2e_tyarr, s2e_elt, d3e_asz, d3es)
   end // end of [D2Earrinit]
 //
-| D2Eraise
+| ~D2Eraise
     (d2e_exn) => let
     val err =
       the_effenv_check_exn (loc0)
     // end of [val]
     val () =
     if (err > 0) then
-      the_trans3errlst_add (T3E_d2exp_trup_exn(loc0))
+      the_trans3errlst_add (trans3err_T3E_d2exp_trup_exn(loc0))
     // end of [if] // end of [val]
     val s2e_exn = s2exp_exception_vtype ()
     val d3e_exn = d2exp_trdn (d2e_exn, s2e_exn)
@@ -569,73 +604,69 @@ of (* case+ *)
     d3exp_raise (loc0, s2e_raise, d3e_exn)
   end // end of [D2Eraise]
 //
-| D2Eeffmask _ => d2exp_trup_effmask(d2e0)
+| ~D2Eeffmask _ => d2exp_trup_effmask(d2e0)
 //
-| D2Evararg (_) => d2exp_trup_vararg(d2e0)
+| ~D2Evararg (_) => d2exp_trup_vararg(d2e0)
 //
-| D2Evcopyenv _ => d2exp_trup_vcopyenv(d2e0)
+| ~D2Evcopyenv _ => d2exp_trup_vcopyenv(d2e0)
 //
-| D2Eshowtype
+| ~D2Eshowtype
     (d2e) => d3e where
   {
     val d3e = d2exp_trup (d2e)
     val () = fshowtype_d3exp_up (d3e)
   } (* end of [D2Eshowtype] *)
 //
-| D2Etempenver _ => d2exp_trup_tempenver(d2e0)
+| ~D2Etempenver _ => d2exp_trup_tempenver(d2e0)
 //
-| D2Elam_dyn _ => d2exp_trup_lam_dyn (d2e0)
-| D2Elaminit_dyn _ => d2exp_trup_laminit_dyn (d2e0)
-| D2Elam_sta _ => d2exp_trup_lam_sta (d2e0)
-| D2Elam_met _ => d2exp_trup_lam_met (d2e0)
+| ~D2Elam_dyn _ => d2exp_trup_lam_dyn (d2e0)
+| ~D2Elaminit_dyn _ => d2exp_trup_laminit_dyn (d2e0)
+| ~D2Elam_sta _ => d2exp_trup_lam_sta (d2e0)
+| ~D2Elam_met _ => d2exp_trup_lam_met (d2e0)
 //
-| D2Efix(knd, d2v, def) => d2exp_trup_fix(d2e0)
+| ~D2Efix _ => d2exp_trup_fix(d2e0)
 //
-| D2Edelay _ => d2exp_trup_delay(d2e0)
-| D2Eldelay _ => d2exp_trup_ldelay(d2e0)
+| ~D2Edelay _ => d2exp_trup_delay(d2e0)
+| ~D2Eldelay _ => d2exp_trup_ldelay(d2e0)
 //
-| D2Efor _ => d2exp_trup_for (d2e0)
-| D2Ewhile _ => d2exp_trup_while (d2e0)
-| D2Eloopexn (knd) => d2exp_trup_loopexn (loc0, knd)
+| ~D2Efor _ => d2exp_trup_for (d2e0)
+| ~D2Ewhile _ => d2exp_trup_while (d2e0)
+| ~D2Eloopexn (knd) => d2exp_trup_loopexn (loc0, knd)
 //
-| D2Etrywith _ => d2exp_trup_trywith (d2e0)
+| ~D2Etrywith _ => d2exp_trup_trywith (d2e0)
 //
-| D2Eann_type
+| ~D2Eann_type
     (d2e, s2e_ann) => let
     val d3e = d2exp_trdn (d2e, s2e_ann)
   in
     d3exp_ann_type (loc0, d3e, s2e_ann)
   end // end of [D2Eann_type]
 //
-| D2Eann_seff
+| ~D2Eann_seff
     (d2e, _(*s2fe*)) => let
   in
     d2exp_trup (d2e) // HX: [d2e] should be a value
   end // end of [D2Eann_seff]
 //
-| D2Emac _ => d2exp_trup_mac (d2e0)
-| D2Emacsyn _ => d2exp_trup_macsyn (d2e0)
+| ~D2Emac _ => d2exp_trup_mac (d2e0)
+| ~D2Emacsyn _ => d2exp_trup_macsyn (d2e0)
 //
-| D2Esolassert _ => d2exp_trup_solassert (d2e0)
-| D2Esolverify _ => d2exp_trup_solverify (d2e0)
+| ~D2Esolassert _ => d2exp_trup_solassert (d2e0)
+| ~D2Esolverify _ => d2exp_trup_solverify (d2e0)
 //
-| D2Eerrexp((*error*)) => d3exp_errexp (loc0) // : [s2exp_t0ype_err]
+| ~D2Eerrexp((*error*)) => d3exp_errexp (loc0) // : [s2exp_t0ype_err]
 //
-| _(*unspported*) => let
+| v (*unspported*) => let
+    val () = d2exp_node_view_free (v)
     val () = prerr_interror_loc(loc0)
-    val () = prerrln! (": d2exp_trup: d2e0 = ", d2e0)
+    val () = prerr (": d2exp_trup: d2e0 = ")
+    val () = prerr_d2exp (d2e0)
+    val () = prerr_newline ()
   in
     exitloc(1)
   end // end of [_(*unsupported*)]
 //
 ) : d3exp // end of [val]
-(*
-val s2e0 = d3e0.d3exp_type
-val (
-) = (
-  print "d2exp_trup: d3e0.d3exp_type = "; pprint_s2exp (s2e0); print_newline ()
-) (* end of [val] *)
-*)
 in
 //
 d3e0 // the return value
@@ -646,7 +677,7 @@ end // end of [d2exp_trup]
 
 implement
 d2explst_trup
-  (d2es) = l2l (list_map_fun (d2es, d2exp_trup))
+  (d2es) = glist_map_fun<d2exp,d3exp> (d2es, d2exp_trup)
 // end of [d2explst_trup]
 
 (* ****** ****** *)
@@ -656,21 +687,14 @@ d2explst_trup_arg
 (
   d2es: d2explst
 ) : d23explst = let
-(*
-  val () = println! ("d2explst_trup_arg: d2es = ", d2es)
-*)
 in
 //
-case+ d2es of
+case+ glist_view (d2es) of
 //
-| list_cons
+| ~GLcons
     (d2e, d2es) => let
     val d23e = let
       val isval = d2exp_is_varlamcst (d2e)
-(*
-      val () = println! ("d2explst_trup_arg: d2e = ", d2e)
-      val () = println! ("d2explst_trup_arg: isval = ", isval)
-*)
     in
       if isval
         then D23Ed2exp d2e
@@ -684,83 +708,48 @@ case+ d2es of
     list_vt_cons (d23e, d23es)
   end // end of [cons]
 //
-| list_nil ((*void*)) => list_vt_nil ()
+| ~GLnil ((*void*)) => list_vt_nil ()
 //
 end // end of [d2explst_trup_arg]
 
 (* ****** ****** *)
 
-fun
-d23explst_open_and_add
-  {n:nat} .<n>.
-(
-  d23es: !list_vt (d23exp, n)
-) : void = let
-//
 fn
-fopr
-(
-  d23e: !d23exp
-) : void = (
+d23exp_open_and_add
+  (d23e: !d23exp): void = (
 //
   case+ d23e of
-  | D23Ed2exp d2e => let
-      prval () = fold@(d23e) in (*nothing*)
-    end // end of [D23Ed2exp]
-  | D23Ed3exp d3e => let
+  | @D23Ed2exp (d2e) => fold@(d23e)
+  | @D23Ed3exp (d3e) => let
       val () =
         d3exp_open_and_add(d3e) in fold@(d23e)
       // end of [val]
     end // end of [D23Ed3exp]
 //
-) (* end of [fopr] *)
+) (* end of [d23exp_open_and_add] *)
+
+fun
+d23explst_open_and_add
+  (d23es: !d23explst): void = (
 //
-in
   case+ d23es of
-  | list_vt_nil() => let
-      prval () = fold@(d23es) in (*nothing*)
-    end // end of [list_nil]
-  | list_vt_cons
-      (!p_d23e, !p_d23es) => let
-      val () = fopr(!p_d23e)
-      val () = d23explst_open_and_add(!p_d23es)
+  | list_vt_nil() => ()
+  | @list_vt_cons
+      (d23e, d23es1) => let
+      val () = d23exp_open_and_add(d23e)
+      val () = d23explst_open_and_add(d23es1)
       prval ((*folded*)) = fold@(d23es)
     in
       // nothing
     end // end of [cons]
-end // end of [d23explst_open_and_add]
+//
+) (* end of [d23explst_open_and_add] *)
 
 (* ****** ****** *)
 
-(*
-//
-// HX-2014-03-02: not used?
-//
-fun d23explst_trup
-  (d23es: d23explst): d3explst =
-  case+ d23es of
-  | ~list_vt_cons
-      (d23e, d23es) => let
-      val d3e = (
-        case+ d23e of
-        | ~D23Ed2exp d2e => d2exp_trup (d2e) | ~D23Ed3exp d3e => d3e
-      ) : d3exp // end of [val]
-    in
-      list_cons (d3e, d23explst_trup (d23es))
-    end // end of [cons]
-  | ~list_vt_nil () => list_nil ()
-// end of [d23explst_trup]
-*)
-
-(* ****** ****** *)
-
-fn d23explst_trdn
+fun
+d23explst_trdn_aux
 (
-  locarg: loc_t
-, d23es: d23explst, s2es: s2explst
-) : d3explst = let
-//
-fun aux (
   d23es: d23explst, s2es: s2explst, err: &int
 ) : d3explst = let
 in
@@ -768,39 +757,45 @@ in
 case+ d23es of
 | ~list_vt_nil () =>
   (
-    case+ s2es of
-    | list_nil() => list_nil()
-    | list_cons _ => let
-        val () = err := err - 1 in list_nil()
+    if glist_is_nil (s2es)
+      then glist_nil()
+      else let
+        val () = err := err - 1 in glist_nil()
       end // end of [list_cons]
   ) (* end of [list_vt_nil] *)
 | ~list_vt_cons
     (d23e, d23es) =>
   (
-    case+ s2es of
-    | list_nil() => let
+    case+ glist_view (s2es) of
+    | ~GLnil() => let
         val () = err := err + 1
         val () = d23exp_free(d23e)
         val () = d23explst_free(d23es)
       in
-        list_nil()
+        glist_nil()
       end // end of [list_nil]
-    | list_cons
+    | ~GLcons
         (s2e, s2es) => let
         val d3e = (
           case+ d23e of
           | ~D23Ed2exp(d2e) => d2exp_trdn(d2e, s2e)
           | ~D23Ed3exp(d3e) => d3exp_trdn(d3e, s2e)
         ) : d3exp // end of [val]
-        val d3es = aux(d23es, s2es, err)
+        val d3es = d23explst_trdn_aux(d23es, s2es, err)
       in
-        list_cons(d3e, d3es)
+        glist_cons(d3e, d3es)
       end // end of [list_cons]
   ) (* end of [list_vt_cons] *)
-end // end of [aux]
+end // end of [d23explst_trdn_aux]
+
+fn d23explst_trdn
+(
+  locarg: loc_t
+, d23es: d23explst, s2es: s2explst
+) : d3explst = let
 //
 var serr: int = 0
-val d3es = aux(d23es, s2es, serr)
+val d3es = d23explst_trdn_aux(d23es, s2es, serr)
 //
 val () =
 if
@@ -815,7 +810,7 @@ then let
   val () = if serr > 0 then prerr ": fewer arguments are expected."
   val () = prerr_newline ((*void*))
 in
-  the_trans3errlst_add(T3E_d23explst_trdn_arity (locarg, serr))
+  the_trans3errlst_add(trans3err_T3E_d23explst_trdn_arity (locarg, serr))
 end // end of [then]
 //
 in
@@ -841,26 +836,34 @@ fun auxerr
   val () = prerr_error3_loc (loc0)
 //
   val () =
-  if islin then
-    prerrln! (": the linear dynamic variable [", d2v, "] is no longer available.")
-  // end of [if]
+  if islin then let
+    val () = prerr (": the linear dynamic variable [")
+    val () = prerr_d2var (d2v)
+    val () = prerr ("] is no longer available.")
+  in
+    prerr_newline ()
+  end // end of [if]
 //
   val () =
-  if not(islin) then
-    prerrln! (": the (non-linear) dynamic variable [", d2v, "] is not available for external use.")
-  // end of [if]
+  if not(islin) then let
+    val () = prerr (": the (non-linear) dynamic variable [")
+    val () = prerr_d2var (d2v)
+    val () = prerr ("] is not available for external use.")
+  in
+    prerr_newline ()
+  end // end of [if]
 //
 in
-  the_trans3errlst_add (T3E_d2var_typeless (loc0, d2v))
+  the_trans3errlst_add (trans3err_T3E_d2var_typeless (loc0, d2v))
 end // end of [auxerr]
 //
 val opt = d2var_get_type (d2v)
 //
 in
 //
-case+ opt of
-| Some s2e => s2e
-| None ((*void*)) => let
+case+ gopt_view (opt) of
+| ~GOsome s2e => s2e
+| ~GOnone ((*void*)) => let
     val () = auxerr (loc0, d2v) in s2exp_t0ype_err ()
   end // end of [None]
 //
@@ -871,9 +874,9 @@ end // end of [d2var_get_type_some]
 implement
 d2exp_trup_var_mutabl
   (loc0, d2v) = let
-  val-Some (s2l) = d2var_get_addr (d2v)
+  val s2l = gopt_unsome<s2exp> (d2var_get_addr (d2v)) // [val-Some (s2l) = ..]
   var s2rt: s2exp
-  val s2e_sel = s2addr_deref (loc0, s2l, list_nil, s2rt)
+  val s2e_sel = s2addr_deref (loc0, s2l, glist_nil{d3lab}((*void*)), s2rt)
 in
   d3exp_var (loc0, s2e_sel, d2v)
 end // end of [d2exp_trup_var_mutabl]
@@ -887,12 +890,6 @@ d2exp_trup_var_nonmut
 // HX: lin >= 0; nonlin = ~1
 //
 val lin = d2var_get_linval (d2v)
-(*
-val () = (
-  println! ("d2exp_trup_var_nonmut: d2v = ", d2v);
-  println! ("d2exp_trup_var_nonmut: lin = ", lin);
-) (* end of [val] *)
-*)
 val s2qs = d2var_get_decarg (d2v)
 val s2e0 = d2var_get_type_some (loc0, d2v)
 //
@@ -910,7 +907,7 @@ isllamlocal
 then let
   val () = d2var_inc_linval (d2v)
 in
-  d2var_set_type (d2v, None) // HX: [d2v] is consumed
+  d2var_set_type (d2v, gopt_none ((*void*))) // HX: [d2v] is consumed
 end // end of [then]
 else let
   val () = prerr_error3_loc (loc0)
@@ -919,16 +916,16 @@ else let
   val () = prerr "] is expected to be local but it is not."
   val () = prerr_newline ((*void*))
 in
-  the_trans3errlst_add (T3E_d2var_trup_llamlocal (d2v))
+  the_trans3errlst_add (trans3err_T3E_d2var_trup_llamlocal (d2v))
 end // end of [else]
 //
 end // end of [if] // end of [val]
 //
 in
 //
-case+ s2qs of
-| list_nil () => d3exp_var (loc0, s2e0, d2v)
-| list_cons _ => let
+if glist_is_nil (s2qs)
+  then d3exp_var (loc0, s2e0, d2v)
+  else let
     var err: int = 0
     val locsarg =
       $LOC.location_rightmost (loc0)
@@ -960,9 +957,9 @@ d2exp_trup_cst
   val s2qs = d2cst_get_decarg (d2c)
 in
 //
-case+ s2qs of
-| list_nil () => d3exp_cst (loc0, s2e, d2c)
-| list_cons _ => let
+if glist_is_nil (s2qs)
+  then d3exp_cst (loc0, s2e, d2c)
+  else let
     var err: int = 0
     val locsarg =
       $LOC.location_rightmost (loc0)
@@ -980,18 +977,19 @@ implement
 d2exp_trup_sym
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Esym(d2s) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
+val d2s = d2exp_get_D2Esym (d2e0) // [val-D2Esym(d2s) = d2e0.d2exp_node]
 //
 val () = prerr_error3_loc (loc0)
 val () = filprerr_ifdebug "d2exp_trup_sym"
 //
-val () =
-prerrln!
-  (": the symbol [", d2s, "] cannot be resolved.")
+val () = prerr (": the symbol [")
+val () = prerr_d2sym (d2s)
+val () = prerr ("] cannot be resolved.")
+val () = prerr_newline ()
 //
 val () =
-  the_trans3errlst_add (T3E_d2exp_trup_sym (d2e0))
+  the_trans3errlst_add (trans3err_T3E_d2exp_trup_sym (d2e0))
 //
 in
   d3exp_errexp (loc0) // : [s2exp_t0ype_err]
@@ -1003,11 +1001,14 @@ implement
 d2exp_trup_extval
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Eextval(s2e, name) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_extval (loc0, s2e, name)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Eextval(s2e, name) => d3exp_extval (loc0, s2e, name)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_extval]
 
 (* ****** ****** *)
@@ -1018,13 +1019,13 @@ fun auxerr
 (
   loc0: loc_t, d3e: d3exp
 ) : void = let
-  val loc = d3e.d3exp_loc
+  val loc = d3e.d3exp_loc ()
   val () = prerr_error3_loc (loc)
   val () = filprerr_ifdebug "d2exp_trup_extfcall"
   val () = prerr ": no linear argument is allowed for the extfcall."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d3exp_extfcall_arg (loc0, d3e))
+  the_trans3errlst_add (trans3err_T3E_d3exp_extfcall_arg (loc0, d3e))
 end // end of [auxerr]
 
 fun auxcheck
@@ -1033,8 +1034,8 @@ fun auxcheck
 ) : void = let
 in
 //
-case+ d3es of
-| list_cons
+case+ glist_view (d3es) of
+| ~GLcons
     (d3e, d3es) => let
     val s2e = d3exp_get_type (d3e)
     val islin = s2exp_is_lin (s2e)
@@ -1042,7 +1043,7 @@ case+ d3es of
   in
     auxcheck (loc0, d3es)
   end // end of [list_cons]
-| list_nil ((*void*)) => ()
+| ~GLnil ((*void*)) => ()
 //
 end // end of [auxcheck]
 
@@ -1051,12 +1052,18 @@ in (* in of [local] *)
 implement
 d2exp_trup_extfcall
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Eextfcall (s2e, _fun, _arg) = d2e0.d2exp_node
-  val d3es_arg = d2explst_trup (_arg)
-  val ((*void*)) = auxcheck (loc0, d3es_arg)
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_extfcall (loc0, s2e, _fun, d3es_arg)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Eextfcall (s2e, _fun, _arg) => let
+    val d3es_arg = d2explst_trup (_arg)
+    val ((*void*)) = auxcheck (loc0, d3es_arg)
+  in
+    d3exp_extfcall (loc0, s2e, _fun, d3es_arg)
+  end // end of [D2Eextfcall]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_extfcall]
 
 end // end of [local]
@@ -1069,13 +1076,13 @@ fun auxerr
 (
   loc0: loc_t, d3e: d3exp
 ) : void = let
-  val loc = d3e.d3exp_loc
+  val loc = d3e.d3exp_loc ()
   val () = prerr_error3_loc (loc)
   val () = filprerr_ifdebug "d2exp_trup_extmcall"
   val () = prerr ": no linear argument is allowed for the extmcall."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d3exp_extmcall_arg (loc0, d3e))
+  the_trans3errlst_add (trans3err_T3E_d3exp_extmcall_arg (loc0, d3e))
 end // end of [auxerr]
 
 fun auxcheck
@@ -1084,8 +1091,8 @@ fun auxcheck
 ) : void = let
 in
 //
-case+ d3es of
-| list_cons
+case+ glist_view (d3es) of
+| ~GLcons
     (d3e, d3es) => let
     val s2e = d3exp_get_type (d3e)
     val islin = s2exp_is_lin (s2e)
@@ -1093,7 +1100,7 @@ case+ d3es of
   in
     auxcheck (loc0, d3es)
   end // end of [list_cons]
-| list_nil ((*void*)) => ()
+| ~GLnil ((*void*)) => ()
 //
 end // end of [auxcheck]
 
@@ -1102,25 +1109,33 @@ in (* in of [local] *)
 implement
 d2exp_trup_extmcall
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Eextmcall (s2e, _obj, _mtd, _arg) = d2e0.d2exp_node
-  val d3e_obj = d2exp_trup (_obj)
-  val d3es_arg = d2explst_trup (_arg)
-  val ((*void*)) = auxcheck (loc0, d3es_arg)
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_extmcall (loc0, s2e, d3e_obj, _mtd, d3es_arg)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Eextmcall (s2e, _obj, _mtd, _arg) => let
+    val d3e_obj = d2exp_trup (_obj)
+    val d3es_arg = d2explst_trup (_arg)
+    val ((*void*)) = auxcheck (loc0, d3es_arg)
+  in
+    d3exp_extmcall (loc0, s2e, d3e_obj, _mtd, d3es_arg)
+  end // end of [D2Eextmcall]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_extmcall]
 
 end // end of [local]
 
 (* ****** ****** *)
 
-implement
-d2exp_trup_con (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Econ (
-    d2c, locfun, s2as, npf, locarg, d2es_arg
-  ) = d2e0.d2exp_node
+fn
+d2exp_trup_con_main
+(
+  d2e0: d2exp
+, d2c: d2con, locfun: loc_t, s2as: s2exparglst
+, npf: int, locarg: loc_t, d2es_arg: d2explst
+) : d3exp = let
+  val loc0 = d2e0.d2exp_loc ()
   val s2e_con = d2con_get_type (d2c)
 //
   var err: int = 0
@@ -1136,7 +1151,7 @@ d2exp_trup_con (d2e0) = let
     val () = prerr_newline ()
   in
     the_trans3errlst_add (
-      T3E_s2exp_uni_instantiate_sexparglst (locfun, s2e_con, s2as)
+      trans3err_T3E_s2exp_uni_instantiate_sexparglst (locfun, s2e_con, s2as)
     ) // end of [the_trans3errlst_add]
   end // end of [val]
 //
@@ -1153,8 +1168,8 @@ d2exp_trup_con (d2e0) = let
 //
 in
 //
-case+ s2e.s2exp_node of
-| S2Efun (
+case+ s2exp_node_view (s2e.s2exp_node ()) of
+| ~S2Efun (
     _fc, _lin, _s2fe, npf_con, s2es_arg, s2e_res
   ) => let
     val err = $SOL.pfarity_equal_solve (loc0, npf_con, npf)
@@ -1163,21 +1178,36 @@ case+ s2e.s2exp_node of
       val () = filprerr_ifdebug "d2exp_trup_con"
       val () = prerr ": proof arity mismatch: the constructor ["
       val () = prerr_d2con (d2c)
-      val () = prerrf ("] requires [%i] arguments.", @(npf_con))
+      val () = prerr "] requires ["
+      val () = prerr_int (npf_con)
+      val () = prerr "] arguments."
       val () = prerr_newline ()
       val () = prerr_the_staerrlst ()
     in
-      the_trans3errlst_add (T3E_d2exp_trup_con_npf (d2e0, npf)) // nothing
+      the_trans3errlst_add (trans3err_T3E_d2exp_trup_con_npf (d2e0, npf)) // nothing
     end // end of [val]
     val d3es_arg = d23explst_trdn (locarg, d23es_arg, s2es_arg)
   in
     d3exp_con (loc0, s2e_res, d2c, npf, d3es_arg)
   end // end of [S2Efun]
-| _ => let
+| v => let
+    val () = s2exp_node_view_free (v)
     val () = d23explst_free (d23es_arg) in d3exp_errexp (loc0)
   end // end of [_]
 //
-end // end [d2exp_trup_con]
+end // end [d2exp_trup_con_main]
+
+implement
+d2exp_trup_con (d2e0) =
+(
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Econ (
+    d2c, locfun, s2as, npf, locarg, d2es_arg
+  ) => d2exp_trup_con_main (d2e0, d2c, locfun, s2as, npf, locarg, d2es_arg)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
+) (* end of [d2exp_trup_con] *)
 
 (* ****** ****** *)
 
@@ -1219,33 +1249,37 @@ implement
 d2exp_trup_tmpid
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Etmpid (d2e_id, t2mas) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
 //
 in
 //
-case+
-d2e_id.d2exp_node
-of (* case+ *)
-| D2Ecst (d2c) =>
-    d2exp_trup_tmpcst (loc0, d2c, t2mas)
-| D2Evar (d2v) =>
-    d2exp_trup_tmpvar (loc0, d2v, t2mas)
-| _ => let
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Etmpid (d2e_id, t2mas) => (
+  case+
+  d2exp_node_view (d2e_id.d2exp_node ())
+  of (* case+ *)
+  | ~D2Ecst (d2c) =>
+      d2exp_trup_tmpcst (loc0, d2c, t2mas)
+  | ~D2Evar (d2v) =>
+      d2exp_trup_tmpvar (loc0, d2v, t2mas)
+  | v => let
 //
-    val () = prerr_error3_loc (loc0)
-    val () = filprerr_ifdebug "d2exp_trup_tmpid"
+      val () = d2exp_node_view_free (v)
 //
-    val () =
-    prerrln! (
-      ": a non-template is treated as a template: ", d2e0
-    ) (* end of [val] *)
+      val () = prerr_error3_loc (loc0)
+      val () = filprerr_ifdebug "d2exp_trup_tmpid"
 //
-    val () = the_trans3errlst_add (T3E_d2exp_trup_tmpid (d2e0))
+      val () = prerr (": a non-template is treated as a template: ")
+      val () = prerr_d2exp (d2e0)
+      val () = prerr_newline ()
 //
-  in
-    d3exp_errexp (loc0)
-  end // end of [_]
+      val () = the_trans3errlst_add (trans3err_T3E_d2exp_trup_tmpid (d2e0))
+//
+    in
+      d3exp_errexp (loc0)
+    end // end of [_]
+  ) (* end of [D2Etmpid] *)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
 //
 end // end of [d2exp_trup_tmpid]
 
@@ -1269,24 +1303,19 @@ d23exp_trup_applst_sta
 , d3e_fun: d3exp
 , s2as: s2exparglst, d2as: d2exparglst
 ) : d3exp = let
-(*
-  val () = (
-    println! ("d23exp_trup_applst_sta: d2e0 = ", d2e0)
-  ) (* end of [val] *)
-*)
-  val loc_fun = d3e_fun.d3exp_loc
-  val s2e_fun = d3e_fun.d3exp_type
+  val loc_fun = d3e_fun.d3exp_loc ()
+  val s2e_fun = d3e_fun.d3exp_type ()
   val loc_app = let
     fun aux
     (
       loc: loc_t, s2as: s2exparglst
     ) : loc_t = (
-      case+ s2as of
-      | list_nil () => loc
-      | list_cons _ => let
-          val s2a = list_last<s2exparg> (s2as)
+      if glist_is_nil (s2as)
+        then loc
+        else let
+          val s2a = s2exparglst_last (s2as)
         in
-          $LOC.location_combine (loc, s2a.s2exparg_loc)
+          $LOC.location_combine (loc, s2a.s2exparg_loc ())
         end // end of [list_cons]
     ) (* end of [aux] *)
   in
@@ -1303,13 +1332,11 @@ d23exp_trup_applst_sta
     val () = prerr_error3_loc (loc_app)
     val () =
       filprerr_ifdebug "d2exp_trup_applst_sta"
-    val (
-    ) = prerrln!
-      (": static application cannot be properly typechecked.")
-    // end of [val]
+    val () = prerr (": static application cannot be properly typechecked.")
+    val () = prerr_newline ()
   in
     the_trans3errlst_add (
-      T3E_s2exp_uni_instantiate_sexparglst (loc_app, s2e_fun, s2as)
+      trans3err_T3E_s2exp_uni_instantiate_sexparglst (loc_app, s2e_fun, s2as)
     ) // end of [the_trans3errlst_add]
   end // end of [let] // end of [val]
 //
@@ -1328,42 +1355,23 @@ d23exp_trup_app23
 , npf: int, locarg: loc_t, d23es_arg: d23explst
 ) : d3exp = let
 //
-  val loc_fun = d3e_fun.d3exp_loc
-  val s2e_fun = d3e_fun.d3exp_type
+  val loc_fun = d3e_fun.d3exp_loc ()
+  val s2e_fun = d3e_fun.d3exp_type ()
 //
-(*
-  val () = (
-    print "d23exp_trup_app23: s2e_fun = ";
-    pprint_s2exp s2e_fun; print_newline ()
-  ) // end of [val]
-*)
   var err: int = 0
   val locsarg = $LOC.location_rightmost (loc_fun)
   val (s2e_fun, s2ps) = s2exp_unimet_instantiate_all (s2e_fun, locsarg, err)
   val () = trans3_env_add_proplst_vt (locsarg, s2ps)
-(*
-  val () = begin
-    print "d23exp_trup_app23: s2e_fun = "; pprint_s2exp s2e_fun; print_newline ()
-  end // end of [val]
-*)
   val d3e_fun =
     d3exp_app_unista (loc_fun, s2e_fun, d3e_fun)
   // end of [d3e_fun]
 in
 //
-case+ s2e_fun.s2exp_node of
+case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
 //
-| S2Efun (
+| ~S2Efun (
     fc, _(*lin*), s2fe_fun, npf_fun, s2es_fun_arg, s2e_fun_res
   ) => let
-(*
-    val () = begin
-      print "d23exp_trup_app: s2e_fun = "; pprint_s2exp s2e_fun; print_newline ();
-      print "d23exp_trup_app: s2fe_fun = "; pprint_s2eff s2fe_fun; print_newline ();
-      printf ("d23exp_trup_app23: npf = %i and npf_fun = %i", @(npf, npf_fun));
-      print_newline ()
-    end // end of [val]
-*)
 //
     val err =
       $SOL.pfarity_equal_solve (loc_fun, npf_fun, npf)
@@ -1374,11 +1382,13 @@ case+ s2e_fun.s2exp_node of
       val () = prerr_error3_loc (loc_fun)
       val () = filprerr_ifdebug "d23exp_trup_app23"
       val () = prerr ": proof arity mismatch"
-      val () = prerrf (": the function requires %i proof arguments.", @(npf_fun))
+      val () = prerr (": the function requires ")
+      val () = prerr_int (npf_fun)
+      val () = prerr (" proof arguments.")
       val () = prerr_newline ()
       val () = prerr_the_staerrlst ()
     in
-      the_trans3errlst_add (T3E_d23exp_trup_app23_npf (loc_fun, npf))
+      the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_npf (loc_fun, npf))
     end // end of [let] // end of [val]
 //
     val loc_app = $LOC.location_combine (loc_fun, locarg)
@@ -1403,20 +1413,20 @@ case+ s2e_fun.s2exp_node of
       the_effenv_check_s2eff (loc_app, s2fe_fun)
     // end of [val]
     val () = if (err > 0) then (
-      the_trans3errlst_add (T3E_d23exp_trup_app23_eff (loc_app, s2fe_fun))
+      the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_eff (loc_app, s2fe_fun))
     ) // end of [if] // end of [val]
   in
     d3exp_app_dyn (loc_app, s2e_res, d3e_fun, npf, d3es_arg)
   end // end of [S2Efun]
-| _ => let
+| v => let
+    val () = s2exp_node_view_free (v)
     val () = d23explst_free (d23es_arg)
     val () = prerr_error3_loc (loc_fun)
     val () = filprerr_ifdebug "d23exp_trup_app23"
-    val (
-    ) = prerrln! (
-      ": the applied dynamic expression is of non-function type: ", s2e_fun
-    ) (* end of [val] *)
-    val () = the_trans3errlst_add (T3E_d23exp_trup_app23_fun (loc_fun, s2e_fun))
+    val () = prerr (": the applied dynamic expression is of non-function type: ")
+    val () = prerr_s2exp (s2e_fun)
+    val () = prerr_newline ()
+    val () = the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_fun (loc_fun, s2e_fun))
   in
     d3exp_errexp (loc_fun)
   end // end of [_]
@@ -1431,24 +1441,22 @@ d23exp_trup_applst_dyn
 , npf: int, locarg: loc_t, d2es_arg: d2explst
 , d2as: d2exparglst
 ) : d3exp = let
-  val loc_fun = d3e_fun.d3exp_loc
+  val loc_fun = d3e_fun.d3exp_loc ()
   val loc_app = $LOC.location_combine (loc_fun, locarg)
-  val s2e_fun = d3e_fun.d3exp_type
+  val s2e_fun = d3e_fun.d3exp_type ()
   val d23es_arg = d2explst_trup_arg (d2es_arg)
   val ((*void*)) = d23explst_open_and_add (d23es_arg)
 in
 //
-case+
-  s2e_fun.s2exp_node of
-| _ => let
-    val d3e_fun =
-    d23exp_trup_app23
-    (
-      d2e0, d3e_fun, npf, locarg, d23es_arg
-    ) // end of [val]
-  in
-    d23exp_trup_applst (d2e0, d3e_fun, d2as)
-  end (* end of [_] *)
+let
+  val d3e_fun =
+  d23exp_trup_app23
+  (
+    d2e0, d3e_fun, npf, locarg, d23es_arg
+  ) // end of [val]
+in
+  d23exp_trup_applst (d2e0, d3e_fun, d2as)
+end (* end of [_] *)
 //
 end // end of [d2exp_trup_applst_dyn]
 
@@ -1460,31 +1468,24 @@ d23exp_trup_applst
   d2e0: d2exp
 , d3e_fun: d3exp, d2as: d2exparglst
 ) : d3exp = let
-(*
-  val () = (
-    fprintln!
-      (stdout_ref, "d23exp_trup_applst: d3e_fun = ", d3e_fun);
-    fprintln! (stdout_ref, "d23exp_trup_applst: d2as = ", d2as);
-  ) // end of [val]
-*)
 in
 //
-case+ d2as of
-| list_cons
+case+ glist_view (d2as) of
+| ~GLcons
     (d2a, d2as) => (
-  case+ d2a of
-  | D2EXPARGsta
+  case+ d2exparg_view (d2a) of
+  | ~D2EXPARGsta
       (locarg, s2as) =>
     (
       d23exp_trup_applst_sta (d2e0, d3e_fun, s2as, d2as)
     ) (* end of [D2EXPARGsta] *)
-  | D2EXPARGdyn
+  | ~D2EXPARGdyn
       (npf, locarg, d2es_arg) =>
     (
       d23exp_trup_applst_dyn (d2e0, d3e_fun, npf, locarg, d2es_arg, d2as)
     ) (* end of [D2EXPARGdyn] *)
   ) // end of [cons]
-| list_nil ((*void*)) => d3e_fun
+| ~GLnil ((*void*)) => d3e_fun
 //
 end // end of [d2exp_trup_applst]
 
@@ -1494,52 +1495,46 @@ implement
 d2exp_trup_lst
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Elst (lin, opt, d2es) = d2e0.d2exp_node
-(*
-val () = println! ("d2exp_trup_lst: lin = ", lin)
-*)
-val islin =
-(
-  if lin >= 0 then test_linkind (lin) else false
-) : bool // end of [val]
-val isnonlin = not(islin)
-val s2e_elt = (
-//
-case+ opt of
-| Some s2e => s2e
-| None ((*void*)) => let
-    val s2t =
-    (
-      if isnonlin then s2rt_t0ype else s2rt_vt0ype
-    ) : s2rt // end of [val]
-  in
-    s2exp_Var_make_srt (loc0, s2t)
-  end // end of [None]
-//
-) : s2exp // end of [val]
-val n = list_length (d2es)
-val d3es = d2explst_trdn_elt(d2es, s2e_elt)
-val isnonlin =
-(
-  if lin >= 0
-    then isnonlin else s2exp_is_nonlin (s2e_elt)
-  // end of [if]
-) : bool // end of [val]
-val s2e_lst =
-(
-//
-if
-isnonlin
-then
-  s2exp_list_t0ype_int_type (s2e_elt, n)
-else
-  s2exp_list_vt0ype_int_vtype (s2e_elt, n)
-//
-) : s2exp // end of [val]
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_lst(loc0, s2e_lst, lin, s2e_elt, d3es)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Elst (lin, opt, d2es) => let
+    val islin =
+    (
+      if lin >= 0 then test_linkind (lin) else false
+    ) : bool // end of [val]
+    val isnonlin = not(islin)
+    val s2e_elt = (
+    //
+    case+ gopt_view (opt) of
+    | ~GOsome s2e => s2e
+    | ~GOnone ((*void*)) => let
+        val s2t =
+        (
+          if isnonlin then s2rt_t0ype else s2rt_vt0ype
+        ) : s2rt // end of [val]
+      in
+        s2exp_Var_make_srt (loc0, s2t)
+      end // end of [None]
+    //
+    ) : s2exp // end of [val]
+    val n = glist_length (d2es)
+    val d3es = d2explst_trdn_elt(d2es, s2e_elt)
+    //
+    // HX-2026-10: no GC
+    // list literals are always linear; [$list_t]
+    // is rejected by [d3exp_linheap_check]
+    //
+    val s2e_lst =
+      s2exp_list_vt0ype_int_vtype (s2e_elt, n)
+    // end of [val]
+  in
+    d3exp_linheap_check(d3exp_lst(loc0, s2e_lst, lin, s2e_elt, d3es))
+  end // end of [D2Elst]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_lst]
 
 (* ****** ****** *)
@@ -1548,31 +1543,21 @@ implement
 d2exp_trup_tup
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Etup(knd, npf, d2es) = d2e0.d2exp_node
-//
-(*
-val () =
-(
-  fprintln! (stdout_ref, "d2exp_trup_tup: knd = ", knd);
-  fprintln! (stdout_ref, "d2exp_trup_tup: d2es = ", d2es);
-)
-*)
-//
-val d3es = d2explst_trup(d2es)
-//
-val ls2es = d3explst_get_labtype(d3es)
-val s2tup = s2exp_tyrec(knd, npf, ls2es)
-//
-(*
-val () =
-(
-  fprintln! (stdout_ref, "d2exp_trup_tup: s2e_tup = ", s2e_tup);
-)
-*)
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_tup(loc0, s2tup, knd, npf, d3es)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Etup (knd, npf, d2es) => let
+    val d3es = d2explst_trup(d2es)
+    //
+    val ls2es = d3explst_get_labtype(d3es)
+    val s2tup = s2exp_tyrec(knd, npf, ls2es)
+  in
+    d3exp_linheap_check(d3exp_tup(loc0, s2tup, knd, npf, d3es))
+  end // end of [D2Etup]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_tup]
 
 (* ****** ****** *)
@@ -1582,105 +1567,110 @@ fun
 labd3explst_get_type
 (ld3es: labd3explst): labs2explst
 //
-implement
-labd3explst_get_type(ld3es) = let
-  fn fopr (
-    ld3e: labd3exp
-  ) : labs2exp = let
-    val $SYN.DL0ABELED (l, d3e) = ld3e in
-    SLABELED (l.l0ab_lab, None, d3e.d3exp_type)
-  end // end of [f]
+fn
+labd3exp_get_type
+  (ld3e: labd3exp): labs2exp = let
+  val l = ld3e.labd3exp_lab ()
+  val d3e = ld3e.labd3exp_elt ()
 in
-  list_of_list_vt(list_map_fun(ld3es, fopr))
-end // end of [labd3explst_get_type]
+  labs2exp_new ($SYN.l0ab_lab (l), gopt_none ((*void*)), d3e.d3exp_type ())
+end // end of [labd3exp_get_type]
+//
+implement
+labd3explst_get_type(ld3es) =
+  glist_map_fun<labd3exp,labs2exp> (ld3es, labd3exp_get_type)
+// end of [labd3explst_get_type]
 //
 (* ****** ****** *)
+
+fun
+d2exp_trup_rec_aux
+(
+  ld2es: labd2explst
+) : labd3explst =
+(
+  case+ glist_view (ld2es) of
+  | ~GLnil() => glist_nil()
+  | ~GLcons(ld2e, ld2es) => let
+      val l = ld2e.labd2exp_lab ()
+      val d2e = ld2e.labd2exp_elt ()
+      val ld3e =
+        labd3exp_new (l, d2exp_trup (d2e))
+      // end of [val]
+    in
+      glist_cons (ld3e, d2exp_trup_rec_aux(ld2es))
+    end // end of [list_cons]
+) (* end of [d2exp_trup_rec_aux] *)
 
 implement
 d2exp_trup_rec
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Erec (recknd, npf, ld2es) = d2e0.d2exp_node
-//
-(*
-  val () = (
-    print "d2exp_trup_rec: ld2es = ";
-    print_labd2explst ld2es; print_newline ()
-  ) // end of [val]
-*)
-//
-  fun aux
-  (
-    ld2es: labd2explst
-  ) : labd3explst =
-  (
-    case+ ld2es of
-    | list_nil() => list_nil()
-    | list_cons(ld2e, ld2es) => let
-        val
-        $SYN.DL0ABELED(l, d2e) = ld2e
-        val ld3e =
-          $SYN.DL0ABELED(l, d2exp_trup (d2e))
-        // end of [val]
-      in
-        list_cons (ld3e, aux(ld2es))
-      end // end of [list_cons]
-  ) (* end of [aux] *)
-//
-  val ld3es = aux ld2es
-//
-  val ls2es = labd3explst_get_type(ld3es)
-  val s2e_rec = s2exp_tyrec(recknd, npf, ls2es)
-//
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_rec(loc0, s2e_rec, recknd, npf, ld3es)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Erec (recknd, npf, ld2es) => let
+    val ld3es = d2exp_trup_rec_aux ld2es
+//
+    val ls2es = labd3explst_get_type(ld3es)
+    val s2e_rec = s2exp_tyrec(recknd, npf, ls2es)
+//
+  in
+    d3exp_linheap_check(d3exp_rec(loc0, s2e_rec, recknd, npf, ld3es))
+  end // end of [D2Erec]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_rec]
 
 (* ****** ****** *)
+//
+// HX-2026-10: [s2e_res] of ATS1 ([&(s2exp?) >> s2exp]) is the second component of the result
+//
+fun
+d2exp_trup_seq_aux
+(
+  d2e: d2exp
+, d2es: d2explst
+, s2e_void: s2exp
+) : @(d3explst, s2exp) =
+  if glist_is_cons (d2es) then let
+    val d2e1 = glist_head (d2es)
+    val d2es1 = glist_tail (d2es)
+    val d3e = d2exp_trdn (d2e, s2e_void)
+    val (d3es, s2e_res) = d2exp_trup_seq_aux (d2e1, d2es1, s2e_void)
+  in
+    @(glist_cons (d3e, d3es), s2e_res)
+  end // end of [cons]
+  else let
+    val d3e = d2exp_trup (d2e)
+    val s2e_res = s2exp_hnfize (d3e.d3exp_type ())
+  in
+    @(glist_sing (d3e), s2e_res)
+  end // end of [nil]
+// end of [d2exp_trup_seq_aux]
 
 implement
 d2exp_trup_seq
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Eseq (d2es) = d2e0.d2exp_node
-//
-fun aux (
-  d2e: d2exp
-, d2es: d2explst
-, s2e_res: &(s2exp?) >> s2exp
-, s2e_void: s2exp
-) : d3explst =
-  case+ :(
-    s2e_res: s2exp
-  ) => d2es of
-  | list_cons (d2e1, d2es1) => let
-      val d3e = d2exp_trdn (d2e, s2e_void)
-      val d3es = aux (d2e1, d2es1, s2e_res, s2e_void)
-    in
-      list_cons (d3e, d3es)
-    end // end of [cons]
-  | list_nil () => let
-      val d3e = d2exp_trup (d2e)
-      val () = s2e_res := s2exp_hnfize (d3e.d3exp_type)
-    in
-      list_sing (d3e)
-    end // end of [nil]
-// end of [aux]
+val loc0 = d2e0.d2exp_loc ()
 //
 val s2e_void = s2exp_void_t0ype ()
 //
 in
 //
-case+ d2es of
-| list_cons (d2e, d2es) => let
-    var
-    s2e_res: s2exp // uninitized
-    val d3es = aux (d2e, d2es, s2e_res, s2e_void)
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Eseq (d2es) => (
+  if glist_is_cons (d2es) then let
+    val d2e = glist_head (d2es)
+    val d2es = glist_tail (d2es)
+    val (d3es, s2e_res) = d2exp_trup_seq_aux (d2e, d2es, s2e_void)
   in
     d3exp_seq (loc0, s2e_res, d3es)
   end // end of [cons]
-| list_nil () => d3exp_empty (loc0, s2e_void)
+  else d3exp_empty (loc0, s2e_void)
+  ) (* end of [D2Eseq] *)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
 //
 end // end of [d2exp_trup_seq]
 
@@ -1689,19 +1679,19 @@ end // end of [d2exp_trup_seq]
 implement
 d2exp_trup_letwhere
   (d2e0, d2cs, d2e_scope) = let
-  val loc0 = d2e0.d2exp_loc
-  val (pfpush_eff | ()) = the_effenv_push ()
-  val (pfpush_s2cst | ()) = the_s2cstbindlst_push ()
-  val (pfpush_d2var | ()) = the_d2varenv_push_let ()
+  val loc0 = d2e0.d2exp_loc ()
+  val () = the_effenv_push ()
+  val () = the_s2cstbindlst_push ()
+  val () = the_d2varenv_push_let ()
 //
   val d3cs = d2eclist_tr (d2cs)
   val d3e_scope = d2exp_trup (d2e_scope)
 //
   val () = the_d2varenv_check (loc0)
 //
-  val () = the_effenv_pop (pfpush_eff | (*none*))
-  val () = the_s2cstbindlst_pop_and_unbind (pfpush_s2cst | (*none*))
-  val () = the_d2varenv_pop (pfpush_d2var | (*none*))
+  val () = the_effenv_pop ()
+  val () = the_s2cstbindlst_pop_and_unbind ()
+  val () = the_d2varenv_pop ()
 in
   d3exp_let (loc0, d3cs, d3e_scope)
 end // end of [d2exp_trup_letwhere]
@@ -1712,14 +1702,20 @@ implement
 d2exp_trup_effmask
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Eeffmask (s2fe, d2e) = d2e0.d2exp_node
-val (pfpush | ()) = the_effenv_push_effmask (s2fe)
-val d3e = d2exp_trup (d2e)
-val () = the_effenv_pop (pfpush | (*none*))
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_effmask (loc0, s2fe, d3e)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Eeffmask (s2fe, d2e) => let
+    val () = the_effenv_push_effmask (s2fe)
+    val d3e = d2exp_trup (d2e)
+    val () = the_effenv_pop ()
+  in
+    d3exp_effmask (loc0, s2fe, d3e)
+  end // end of [D2Eeffmask]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_effmask]
 
 (* ****** ****** *)
@@ -1728,32 +1724,21 @@ implement
 d2exp_trup_vararg
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Evararg(d2es) = d2e0.d2exp_node
-//
-(*
-val () =
-(
-fprintln!
-(stdout_ref, "d2exp_trup_vararg: d2es = ", d2es);
-)
-*)
-//
-val d3es = d2explst_trup(d2es)
-//
-val s2es = d3explst_get_type(d3es)
-val s2types = s2exp_types_list(s2es)
-//
-(*
-val () =
-(
-fprintln!
-(stdout_ref, "d2exp_trup_vararg: s2e_res = ", s2e_res);
-)
-*)
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_vararg(loc0, s2types, d3es)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Evararg (d2es) => let
+    val d3es = d2explst_trup(d2es)
+    //
+    val s2es = d3explst_get_type(d3es)
+    val s2types = s2exp_types_list(s2es)
+  in
+    d3exp_vararg(loc0, s2types, d3es)
+  end // end of [D2Evararg]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_vararg]
 
 (* ****** ****** *)
@@ -1762,31 +1747,38 @@ implement
 d2exp_trup_vcopyenv
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Evcopyenv (knd, d2e) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
 //
 in
 //
-case+
-d2e.d2exp_node of
-| D2Evar (d2v) => let
-    val opt =
-      d2var_get_type (d2v)
-    // end of [val]
-    val s2f = (
-      case+ opt of
-      | Some s2e =>
-        (
-          if test_prfkind(knd)
-            then s2exp_vcopyenv_v(s2e) else s2exp_vcopyenv_vt(s2e)
-          // end of [if]
-        ) (* end of [Some] *)
-      | None () => s2exp_void_t0ype ()
-    ) : s2exp // end of [val]
-  in
-    d3exp_vcopyenv (loc0, s2f, knd, d2v)
-  end // end of [D2Evar]
-| _(*non-D2Evar*) => d2exp_trup (d2e) // HX: ignoring [$vcopyenv]
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Evcopyenv (knd, d2e) => (
+  case+
+  d2exp_node_view (d2e.d2exp_node ()) of
+  | ~D2Evar (d2v) => let
+      val opt =
+        d2var_get_type (d2v)
+      // end of [val]
+      val s2f = (
+        case+ gopt_view (opt) of
+        | ~GOsome s2e =>
+          (
+            if test_prfkind(knd)
+              then s2exp_vcopyenv_v(s2e) else s2exp_vcopyenv_vt(s2e)
+            // end of [if]
+          ) (* end of [Some] *)
+        | ~GOnone () => s2exp_void_t0ype ()
+      ) : s2exp // end of [val]
+    in
+      d3exp_vcopyenv (loc0, s2f, knd, d2v)
+    end // end of [D2Evar]
+  | v (*non-D2Evar*) => let
+      val () = d2exp_node_view_free (v)
+    in
+      d2exp_trup (d2e) // HX: ignoring [$vcopyenv]
+    end // end of [non-D2Evar]
+  ) (* end of [D2Evcopyenv] *)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
 //
 end // end of [d2exp_trup_vcopyenv]
 
@@ -1796,14 +1788,72 @@ implement
 d2exp_trup_tempenver
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Etempenver(d2vs) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_tempenver (loc0, s2exp_void_t0ype(), d2vs)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Etempenver (d2vs) =>
+    d3exp_tempenver (loc0, s2exp_void_t0ype(), d2vs)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_tempenver]
 
 (* ****** ****** *)
+//
+// HX: the (linearity) check of the patterns of the arguments of a function
+//
+fn
+funarg_patck_exhaust_linck
+(
+  p2t: p2at, p2tc: p2atcst, s2e: s2exp
+) : void =
+(
+if p2atcst_is_P2TCany(p2tc)
+  then ()
+  else let (* non-P2TCany *)
+    val
+    islin =
+    s2exp_is_lin(s2e)
+  in
+    if islin then let
+      val () =
+      prerr_error3_loc(p2t.p2at_loc ())
+      val () =
+      filprerr_ifdebug("funarg_patck_exhaust")
+      val () = prerr
+        (": the linear pattern cannot be used as a function argument.")
+      val () = prerr_newline ()
+    in
+      the_trans3errlst_add(trans3err_T3E_d2exp_trup_arg_body_linpat(p2t))
+    end // end of [_]
+  end // end of [non-P2TCany]
+// end of [if]
+) (* end of [funarg_patck_exhaust_linck] *)
+//
+// HX-2026-10: the list is an immutable [p2atcstlst] here ([p2atcstlst_vt] in ATS1,
+// borrowed as a [p2atcstlst] by [$UN.castvwtp1], PC-2)
+//
+fun
+funarg_patck_exhaust_aux
+( p2ts: p2atlst
+, s2es: s2explst
+) : p2atcstlst =
+  if glist_is_nil (p2ts) then glist_nil()
+  else if glist_is_nil (s2es) then glist_nil()
+  else let
+    val p2t = glist_head (p2ts)
+    val p2ts = glist_tail (p2ts)
+    val s2e = glist_head (s2es)
+    val s2es = glist_tail (s2es)
+    val p2tc = p2at2cst(p2t)
+    val ((*void*)) =
+      funarg_patck_exhaust_linck(p2t, p2tc, s2e)
+    // end of [val]
+  in
+    glist_cons(p2tc, funarg_patck_exhaust_aux(p2ts, s2es))
+  end // end of [list_cons]
+// end of [funarg_patck_exhaust_aux]
 
 implement
 funarg_patck_exhaust
@@ -1812,71 +1862,11 @@ funarg_patck_exhaust
 ) = () where
 {
 //
-(*
 val p2tcs =
-  list_map_fun(p2ts_arg, p2at2cst)
-*)
-val p2tcs = let
-//
-fun
-auxlst
-( p2ts: p2atlst
-, s2es: s2explst
-) : p2atcstlst_vt =
-case+ p2ts of
-| list_nil() =>
-  list_vt_nil()
-| list_cons
-    (p2t, p2ts) =>
-  (
-  case+ s2es of
-  | list_nil() =>
-    list_vt_nil()
-  | list_cons
-      (s2e, s2es) => let
-    val p2tc = p2at2cst(p2t)
-    val ((*void*)) =
-      auxlinck(p2t, p2tc, s2e)
-    // end of [val]
-  in
-    list_vt_cons(p2tc, auxlst(p2ts, s2es))
-  end // end of [list_cons]
-  )
-//
-and
-auxlinck
-(
-  p2t: p2at, p2tc: p2atcst, s2e: s2exp
-) : void =
-(
-case+ p2tc of
-| P2TCany() => ()
-| _(* non-P2TCany *) => let
-    val
-    islin =
-    s2exp_is_lin(s2e)
-  in
-    if islin then let
-      val () =
-      prerr_error3_loc(p2t.p2at_loc)
-      val () =
-      filprerr_ifdebug("funarg_patck_exhaust")
-      val () = prerrln!
-        (": the linear pattern cannot be used as a function argument.")
-      (* end of [val] *)
-    in
-      the_trans3errlst_add(T3E_d2exp_trup_arg_body_linpat(p2t))
-    end // end of [_]
-  end // end of [non-P2TCany]
-)
-//
-in
-  auxlst(p2ts_arg, s2es_arg)
-end // end of [val]
+  funarg_patck_exhaust_aux(p2ts_arg, s2es_arg)
 //
 val cp2tcss =
-  p2atcstlst_comp($UN.castvwtp1{p2atcstlst}(p2tcs))
-val ((*freed*)) = list_vt_free(p2tcs)
+  p2atcstlst_comp(p2tcs)
 val isexhaust =
 (
   if list_vt_is_nil(cp2tcss) then true else false
@@ -1902,36 +1892,20 @@ d2exp_trup_arg_body
 , fc0, lin, npf
 , p2ts_arg, d2e_body
 ) = let
-(*
-val FNAME = "d2exp_trup_arg_body"
-val () = (
-  printf ("%s: npf = ", @(FNAME));
-  print_int (npf); print_newline ()
-) // end of [val]
-val () = (
-  printf ("%s: arg = ", @(FNAME));
-  print_p2atlst (p2ts_arg); print_newline ()
-) // end of [val]
-val () = (
-  printf ("%s: body = ", @(FNAME));
-  print_d2exp (d2e_body); print_newline ()
-) // end of [val]
-*)
 val
-(pfenv | ()) = trans3_env_push()
+() = trans3_env_push()
 //
 var fc: funclo = fc0
 //
 val d2e_body =
   d2exp_funclo_of_d2exp(d2e_body, fc)
 //
-var s2fe
-  : s2eff = s2eff_nil(*void*)
+var s2fe: s2eff // HX: assigned by [d2exp_s2eff_of_d2exp] (ATS1: [= s2eff_nil])
 val d2e_body =
   d2exp_s2eff_of_d2exp(d2e_body, s2fe)
 //
 val
-(pfeff | ()) = the_effenv_push_lam(s2fe)
+() = the_effenv_push_lam(s2fe)
 //
 val s2es_arg = p2atlst_syn_type(p2ts_arg)
 //
@@ -1941,14 +1915,14 @@ funarg_patck_exhaust(loc0, p2ts_arg, s2es_arg)
 val p3ts_arg = p2atlst_trup_arg(npf, p2ts_arg)
 //
 val
-(pfd2v|()) = the_d2varenv_push_lam(lin)
+() = the_d2varenv_push_lam(lin)
 val () = the_d2varenv_add_p3atlst(p3ts_arg)
 val
-(pfman|()) = the_pfmanenv_push_lam(lin) // lin:0/1:stopping/continue
+() = the_pfmanenv_push_lam(lin) // lin:0/1:stopping/continue
 val () = the_pfmanenv_add_p3atlst(p3ts_arg)
 //
 val
-(pflamlp|()) = the_lamlpenv_push_lam(p3ts_arg)
+() = the_lamlpenv_push_lam(p3ts_arg)
 //
 val d3e_body = d2exp_trup(d2e_body)
 //
@@ -1956,14 +1930,14 @@ val () = the_d2varenv_check(loc0)
 val () =
   if lin > 0 then the_d2varenv_check_llam(loc0)
 //
-val () = the_effenv_pop(pfeff | (*none*))
-val () = the_d2varenv_pop(pfd2v | (*none*))
-val () = the_pfmanenv_pop(pfman | (*none*))
-val () = the_lamlpenv_pop(pflamlp | (*none*))
+val () = the_effenv_pop()
+val () = the_d2varenv_pop()
+val () = the_pfmanenv_pop()
+val () = the_lamlpenv_pop()
 //
-val () = trans3_env_pop_and_add_main(pfenv | loc0)
+val () = trans3_env_pop_and_add_main(loc0)
 //
-val s2e_res = d3e_body.d3exp_type
+val s2e_res = d3e_body.d3exp_type ()
 //
 val islin = (lin > 0)
 val isprf = s2exp_is_prf(s2e_res)
@@ -1978,7 +1952,7 @@ val s2e_fun = s2exp_fun_srt
 //
 in
 //
-  (s2e_fun, p3ts_arg, d3e_body)
+  @(s2e_fun, p3ts_arg, d3e_body)
 //
 end // end of [d2exp_trup_arg_body]
 
@@ -1987,17 +1961,25 @@ end // end of [d2exp_trup_arg_body]
 implement
 d2exp_trup_lam_dyn
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Elam_dyn
-    (lin, npf, p2ts_arg, d2e_body) = d2e0.d2exp_node
-  val fc0 = FUNCLOfun () // default
-  val s2ep3tsd3e =
-    d2exp_trup_arg_body (loc0, fc0, lin, npf, p2ts_arg, d2e_body)
-  val s2e_fun = s2ep3tsd3e.0
-  val p3ts_arg = s2ep3tsd3e.1
-  val d3e_body = s2ep3tsd3e.2
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_lam_dyn (loc0, s2e_fun, lin, npf, p3ts_arg, d3e_body)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Elam_dyn
+    (lin, npf, p2ts_arg, d2e_body) => let
+    val fc0 = FUNCLOfun () // default
+    val s2ep3tsd3e =
+      d2exp_trup_arg_body (loc0, fc0, lin, npf, p2ts_arg, d2e_body)
+    val s2e_fun = s2ep3tsd3e.0
+    val p3ts_arg = s2ep3tsd3e.1
+    val d3e_body = s2ep3tsd3e.2
+  in
+    d3exp_linheap_check
+      (d3exp_lam_dyn (loc0, s2e_fun, lin, npf, p3ts_arg, d3e_body))
+    // end of [d3exp_linheap_check]
+  end // end of [D2Elam_dyn]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_lam_dyn]
 
 (* ****** ****** *)
@@ -2005,40 +1987,46 @@ end // end of [d2exp_trup_lam_dyn]
 implement
 d2exp_trup_laminit_dyn
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Elaminit_dyn
-    (lin, npf, p2ts_arg, d2e_body) = d2e0.d2exp_node
-  val fc0 = FUNCLOclo (0) // default
-  val s2ep3tsd3e =
-    d2exp_trup_arg_body (loc0, fc0, lin, npf, p2ts_arg, d2e_body)
-  val s2e_fun = s2ep3tsd3e.0
-  val p3ts_arg = s2ep3tsd3e.1
-  val d3e_body = s2ep3tsd3e.2
-  val () = (
-    case+ s2e_fun.s2exp_node of
-    | S2Efun
-      (
-        fc, _, _, _, _, _
-      ) =>
-      (
-      case+ fc of
-      | FUNCLOclo(0) => () // [CLO]
-      | _ (*non-FUNCLOclo(0)*) => let
-         val () =
-         prerr_error3_loc(loc0)
-         val () =
-         filprerr_ifdebug("d2exp_trup_laminit_dyn")
-         val () = prerrln!
-           (": the initializing value is expected to be a flat closure but it is not.")
-         (* end of [val] *)
-       in
-         the_trans3errlst_add(T3E_d2exp_trup_laminit_funclo(d2e0, fc))
-       end // end of [_]
-      ) // end of [S2Efun]
-    | _ (* non-S2Efun *) => ( (*deadcode*) )
-  ) : void // end of [val]
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_laminit_dyn(loc0, s2e_fun, lin, npf, p3ts_arg, d3e_body)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Elaminit_dyn
+    (lin, npf, p2ts_arg, d2e_body) => let
+    val fc0 = FUNCLOclo (0) // default
+    val s2ep3tsd3e =
+      d2exp_trup_arg_body (loc0, fc0, lin, npf, p2ts_arg, d2e_body)
+    val s2e_fun = s2ep3tsd3e.0
+    val p3ts_arg = s2ep3tsd3e.1
+    val d3e_body = s2ep3tsd3e.2
+    val () = (
+      case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
+      | ~S2Efun
+        (
+          fc, _, _, _, _, _
+        ) =>
+        (
+        case+ fc of
+        | FUNCLOclo0 () => () // [CLO]
+        | _ (*non-FUNCLOclo(0)*) => let
+           val () =
+           prerr_error3_loc(loc0)
+           val () =
+           filprerr_ifdebug("d2exp_trup_laminit_dyn")
+           val () = prerr
+             (": the initializing value is expected to be a flat closure but it is not.")
+           val () = prerr_newline ()
+         in
+           the_trans3errlst_add(trans3err_T3E_d2exp_trup_laminit_funclo(d2e0, fc))
+         end // end of [_]
+        ) // end of [S2Efun]
+      | v (* non-S2Efun *) => ( s2exp_node_view_free (v) (*deadcode*) )
+    ) : void // end of [val]
+  in
+    d3exp_laminit_dyn(loc0, s2e_fun, lin, npf, p3ts_arg, d3e_body)
+  end // end of [D2Elaminit_dyn]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_laminit_dyn]
 
 (* ****** ****** *)
@@ -2046,21 +2034,27 @@ end // end of [d2exp_trup_laminit_dyn]
 implement
 d2exp_trup_lam_sta
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Elam_sta (s2vs, s2ps, d2e_body) = d2e0.d2exp_node
-//
-  val (pfenv | ()) = trans3_env_push ()
-  val () = trans3_env_add_svarlst (s2vs)
-  val () = trans3_env_hypadd_proplst (loc0, s2ps)
-//
-  val d3e_body = d2exp_trup (d2e_body)
-//
-  val () = trans3_env_pop_and_add_main (pfenv | loc0)
-//
-  val s2e = d3e_body.d3exp_type
-  val s2e_uni = s2exp_uni (s2vs, s2ps, s2e)
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_lam_sta (loc0, s2e_uni, s2vs, s2ps, d3e_body)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Elam_sta (s2vs, s2ps, d2e_body) => let
+//
+    val () = trans3_env_push ()
+    val () = trans3_env_add_svarlst (s2vs)
+    val () = trans3_env_hypadd_proplst (loc0, s2ps)
+//
+    val d3e_body = d2exp_trup (d2e_body)
+//
+    val () = trans3_env_pop_and_add_main (loc0)
+//
+    val s2e = d3e_body.d3exp_type ()
+    val s2e_uni = s2exp_uni (s2vs, s2ps, s2e)
+  in
+    d3exp_lam_sta (loc0, s2e_uni, s2vs, s2ps, d3e_body)
+  end // end of [D2Elam_sta]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_lam_sta]
 
 (* ****** ****** *)
@@ -2068,16 +2062,21 @@ end // end of [d2exp_trup_lam_sta]
 implement
 d2exp_trup_lam_met
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Elam_met
-    (d2vs_ref, s2es_met, d2e_body) = d2e0.d2exp_node
-  // end of [val]
-  val () = s2explst_check_termet (loc0, s2es_met)
-  val (pfmet | ()) = termetenv_push_dvarlst (!d2vs_ref, s2es_met)
-  val d3e_body = d2exp_trup (d2e_body)
-  val () = termetenv_pop (pfmet | (*none*))
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_lam_met (loc0, s2es_met, d3e_body)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Elam_met
+    (d2vs_ref, s2es_met, d2e_body) => let
+    val () = s2explst_check_termet (loc0, s2es_met)
+    val () = termetenv_push_dvarlst (d2vs_ref.d2varlstref_val (), s2es_met)
+    val d3e_body = d2exp_trup (d2e_body)
+    val () = termetenv_pop ()
+  in
+    d3exp_lam_met (loc0, s2es_met, d3e_body)
+  end // end of [D2Elam_met]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_lam_met]
 
 (* ****** ****** *)
@@ -2089,13 +2088,13 @@ s2exp_clo2fun
   (s2e0: s2exp): s2exp = let
 in
 //
-case+ s2e0.s2exp_node of
-| S2Efun
+case+ s2exp_node_view (s2e0.s2exp_node ()) of
+| ~S2Efun
   (
     fc, lin, s2fe, npf, s2es_arg, s2e_res
   ) =>
-    s2exp_fun_srt (s2e0.s2exp_srt, FUNCLOfun, lin, s2fe, npf, s2es_arg, s2e_res)
-| _(*non-S2Efun*) => s2e0
+    s2exp_fun_srt (s2e0.s2exp_srt (), FUNCLOfun, lin, s2fe, npf, s2es_arg, s2e_res)
+| v (*non-S2Efun*) => (s2exp_node_view_free (v); s2e0)
 //
 end // end of [s2exp_clo2fun]
 
@@ -2104,20 +2103,26 @@ in (* in-of-local *)
 implement
 d2exp_trup_fix (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Efix (knd, d2v, d2e_def) = d2e0.d2exp_node
-//
-val s2e_def = d2exp_syn_type (d2e_def)
-val s2e2_def = s2exp_clo2fun (s2e_def)
-//
-val s2e2opt_def = Some (s2e2_def)
-val () = d2var_set_type (d2v, s2e2opt_def)
-val () = d2var_set_mastype (d2v, s2e2opt_def)
-//
-val d3e_def = d2exp_trup (d2e_def)
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_fix (loc0, s2e_def, knd, d2v, d3e_def)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Efix (knd, d2v, d2e_def) => let
+    val s2e_def = d2exp_syn_type (d2e_def)
+    val s2e2_def = s2exp_clo2fun (s2e_def)
+//
+    val s2e2opt_def = gopt_some (s2e2_def)
+    val () = d2var_set_type (d2v, s2e2opt_def)
+    val () = d2var_set_mastype (d2v, s2e2opt_def)
+//
+    val d3e_def = d2exp_trup (d2e_def)
+//
+  in
+    d3exp_fix (loc0, s2e_def, knd, d2v, d3e_def)
+  end // end of [D2Efix]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_fix]
 
 end // end of [local]
@@ -2128,33 +2133,35 @@ implement
 d2exp_trup_delay
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Edelay (d2e_eval) = d2e0.d2exp_node
-val fc0 = FUNCLOfun () // HX: this is ignored
-val lin = 0
-val npf = ~1
-val p2ts_arg = list_nil {p2at} ()
-val s2ep3tsd3e =
-  d2exp_trup_arg_body (loc0, fc0, lin, npf, p2ts_arg, d2e_eval)
-val s2e_fun = s2ep3tsd3e.0
-val p3ts_arg = s2ep3tsd3e.1
-val d3e_eval = s2ep3tsd3e.2
-//
-val s2e_eval = d3exp_get_type (d3e_eval)
-val s2e_lazy = s2exp_lazy_t0ype_type (s2e_eval)
-//
-val islin =
-  s2exp_is_lin (s2e_eval)
-val () =
-if islin then let
-  val () = prerr_error3_loc (loc0)
-  val () = prerrln! (": it is not allowed to apply $delay to a linear value.")
-in
-  the_trans3errlst_add (T3E_d3exp_delay (loc0, d3e_eval))
-end // end of [val]
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_delay (loc0, s2e_lazy, d3e_eval)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Edelay (d2e_eval) => let
+    val fc0 = FUNCLOfun () // HX: this is ignored
+    val lin = 0
+    val npf = ~1
+    val p2ts_arg = glist_nil{p2at} ()
+    val s2ep3tsd3e =
+      d2exp_trup_arg_body (loc0, fc0, lin, npf, p2ts_arg, d2e_eval)
+    val s2e_fun = s2ep3tsd3e.0
+    val p3ts_arg = s2ep3tsd3e.1
+    val d3e_eval = s2ep3tsd3e.2
+//
+    val s2e_eval = d3exp_get_type (d3e_eval)
+//
+// HX-2026-10: no GC
+// [$delay] is always rejected by [d3exp_linheap_check];
+// the type assigned here is only for error recovery
+//
+    val s2e_lazy = s2exp_lazy_vt0ype_vtype (s2e_eval)
+//
+  in
+    d3exp_linheap_check (d3exp_delay (loc0, s2e_lazy, d3e_eval))
+  end // end of [D2Edelay]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_delay_trup]
 
 (* ****** ****** *)
@@ -2163,58 +2170,67 @@ implement
 d2exp_trup_ldelay
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Eldelay (d2e_eval, opt) = d2e0.d2exp_node
-//
-val lsbis =
-  the_d2varenv_save_lstbefitmlst ()
-var lsaft = lstaftc3nstr_initize (lsbis)
-//
-val loc_eval = d2e_eval.d2exp_loc
-val ctr = c3nstroptref_make_none (loc_eval)
-val d3e_eval = let
-  val (pfpush | ()) = trans3_env_push ()
-  val d3e_eval = d2exp_trup (d2e_eval)
-  val () = trans3_env_add_cnstr_ref (ctr)
-  val () = trans3_env_pop_and_add_main (pfpush | loc_eval)
-in
-  d3e_eval
-end // end of [val]
-val () = lstaftc3nstr_update (lsaft, ctr)
-//
-val () = lstbefitmlst_restore_type (lsbis)
-//
-val d2e_free =
-(
-case opt of Some(d2e) => d2e | None() => d2exp_empty(loc_eval)
-) : d2exp // end of [val]
-//
-val loc_free = d2e_free.d2exp_loc
-val ctr = c3nstroptref_make_none (loc_free)
-val d3e_free = let
-  val (pfpush | ()) = trans3_env_push ()
-  val s2e_void = s2exp_void_t0ype ((*void*))
-  val d3e_free = d2exp_trdn (d2e_free, s2e_void)
-  val () = trans3_env_add_cnstr_ref (ctr)
-  val () = trans3_env_pop_and_add_main (pfpush | loc_free)
-in
-  d3e_free
-end // end of [val]
-val () = lstaftc3nstr_update (lsaft, ctr)
-//
-val invres = i2nvresstate_nil
-//
-val () =
-  lstaftc3nstr_process (lsaft, invres)
-val () = lstaftc3nstr_finalize (lsaft)
-//
-val () = i2nvresstate_update (loc0, invres)
-//
-val s2e_eval = d3exp_get_type (d3e_eval)
-val s2e_lazy = s2exp_lazy_vt0ype_vtype (s2e_eval)
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_ldelay (loc0, s2e_lazy, d3e_eval, d3e_free)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Eldelay (d2e_eval, opt) => let
+//
+    val lsbis =
+      the_d2varenv_save_lstbefitmlst ()
+    val lsaft = lstaftc3nstr_initize (lsbis)
+//
+    val loc_eval = d2e_eval.d2exp_loc ()
+    val ctr = c3nstroptref_make_none (loc_eval)
+    val d3e_eval = let
+      val () = trans3_env_push ()
+      val d3e_eval = d2exp_trup (d2e_eval)
+      val () = trans3_env_add_cnstr_ref (ctr)
+      val () = trans3_env_pop_and_add_main (loc_eval)
+    in
+      d3e_eval
+    end // end of [val]
+    val () = lstaftc3nstr_update (lsaft, ctr)
+//
+    val () = lstbefitmlst_restore_type (lsbis)
+//
+    val d2e_free =
+    (
+    case+ gopt_view (opt) of
+    | ~GOsome(d2e) => d2e
+    | ~GOnone() => d2exp_empty(loc_eval)
+    ) : d2exp // end of [val]
+//
+    val loc_free = d2e_free.d2exp_loc ()
+    val ctr = c3nstroptref_make_none (loc_free)
+    val d3e_free = let
+      val () = trans3_env_push ()
+      val s2e_void = s2exp_void_t0ype ((*void*))
+      val d3e_free = d2exp_trdn (d2e_free, s2e_void)
+      val () = trans3_env_add_cnstr_ref (ctr)
+      val () = trans3_env_pop_and_add_main (loc_free)
+    in
+      d3e_free
+    end // end of [val]
+    val () = lstaftc3nstr_update (lsaft, ctr)
+//
+    val invres = i2nvresstate_nil
+//
+    val () =
+      lstaftc3nstr_process (lsaft, invres)
+    val () = lstaftc3nstr_finalize (lsaft)
+//
+    val () = i2nvresstate_update (loc0, invres)
+//
+    val s2e_eval = d3exp_get_type (d3e_eval)
+    val s2e_lazy = s2exp_lazy_vt0ype_vtype (s2e_eval)
+//
+  in
+    d3exp_ldelay (loc0, s2e_lazy, d3e_eval, d3e_free)
+  end // end of [D2Eldelay]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_ldelay]
 
 (* ****** ****** *)
@@ -2222,21 +2238,29 @@ end // end of [d2exp_trup_ldelay]
 implement
 d2exp_trup_for (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Efor (i2nv, init, test, post, body) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d2exp_trup_loop (loc0, i2nv, Some(init), test, Some(post), body)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Efor (i2nv, init, test, post, body) =>
+    d2exp_trup_loop (loc0, i2nv, gopt_some(init), test, gopt_some(post), body)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_for]
 
 implement
 d2exp_trup_while (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Ewhile (i2nv, test, body) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d2exp_trup_loop (loc0, i2nv, None(*init*), test, None(*post*), body)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Ewhile (i2nv, test, body) =>
+    d2exp_trup_loop (loc0, i2nv, gopt_none((*init*)), test, gopt_none((*post*)), body)
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_while]
 
 (* ****** ****** *)
@@ -2244,34 +2268,39 @@ end // end of [d2exp_trup_while]
 implement
 d2exp_trup_trywith
   (d2e0) = let
-  val loc0 = d2e0.d2exp_loc
-  val-D2Etrywith
-    (r2es, d2e, c2ls) = d2e0.d2exp_node
-  val d3e = d2exp_trup (d2e)
-  val s2e_res = d3exp_get_type (d3e)
-//
-  val (pfd2v | ()) = the_d2varenv_push_try ()
-  val (pfman | ()) = the_pfmanenv_push_try ()
-//
-  val s2e_pat =
-    s2exp_exception_vtype ()
-  // end of [val]
-//
-  val loc = d3e.d3exp_loc
-  val d3e_dummy = d3exp_top (loc, s2e_pat)
-  val d3es = list_sing (d3e_dummy)
-//
-  val s2es_pat = list_sing (s2e_pat)
-//
-  val c3ls = c2laulst_trdn (
-    loc0, CK_case_neg, r2es, c2ls, d3es, s2es_pat, s2e_res
-  ) // end of [val]
-//
-  val ((*void*)) = the_d2varenv_pop (pfd2v | (*none*))
-  val ((*void*)) = the_pfmanenv_pop (pfman | (*none*))
-//
+  val loc0 = d2e0.d2exp_loc ()
 in
-  d3exp_trywith (loc0, d3e, c3ls)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Etrywith (r2es, d2e, c2ls) => let
+    val d3e = d2exp_trup (d2e)
+    val s2e_res = d3exp_get_type (d3e)
+//
+    val () = the_d2varenv_push_try ()
+    val () = the_pfmanenv_push_try ()
+//
+    val s2e_pat =
+      s2exp_exception_vtype ()
+    // end of [val]
+//
+    val loc = d3e.d3exp_loc ()
+    val d3e_dummy = d3exp_top (loc, s2e_pat)
+    val d3es = glist_sing (d3e_dummy)
+//
+    val s2es_pat = glist_sing (s2e_pat)
+//
+    val c3ls = c2laulst_trdn (
+      loc0, CK_case_neg, r2es, c2ls, d3es, s2es_pat, s2e_res
+    ) // end of [val]
+//
+    val ((*void*)) = the_d2varenv_pop ()
+    val ((*void*)) = the_pfmanenv_pop ()
+//
+  in
+    d3exp_trywith (loc0, d3e, c3ls)
+  end // end of [D2Etrywith]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_trywith]
 
 (* ****** ****** *)
@@ -2279,56 +2308,52 @@ end // end of [d2exp_trup_trywith]
 implement
 d2exp_trup_mac
   (d2e0) = let
-  val-D2Emac (d2m) = d2e0.d2exp_node
-(*
-  val () = println! ("d2exp_trup: D2Emac: loc0 = ", d2e0.d2exp_loc)
-*)
-  val d2e_mac =
-    $MAC.dmacro_eval_app_short (d2e0.d2exp_loc, d2m, list_nil(*d2as*))
-  // end of [val]
-(*
-  val () = println! ("d2exp_trup: D2Emac: loc_mac = ", d2e_mac.d2exp_loc)
-*)
 in
-  d2exp_trup (d2e_mac)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Emac (d2m) => let
+    val d2e_mac =
+      $MAC.dmacro_eval_app_short (d2e0.d2exp_loc (), d2m, glist_nil{d2exparg}((*d2as*)))
+    // end of [val]
+  in
+    d2exp_trup (d2e_mac)
+  end // end of [D2Emac]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [D2Emac]
 
 implement
 d2exp_trup_macsyn
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Emacsyn (knd, d2e) = d2e0.d2exp_node
-//
-(*
-val () = (
-  println! ("d2exp_trup: D2Emacsyn: knd = ", knd);
-  println! ("d2exp_trup: D2Emacsyn: d2e = ", d2e);
-) (* end of [val] *)
-*)
-//
-val d2e_mac = (
-//
-case+ knd of
-| $SYN.MSKdecode () => $MAC.dmacro_eval_decode (d2e)
-| $SYN.MSKxstage () => $MAC.dmacro_eval_xstage (d2e)
-| $SYN.MSKencode () => let
-    val () =
-    prerr_errmac_loc(loc0)
-    val () =
-    prerrln! ": the macro syntax `(...) is used incorrectly."
-  in
-    d2exp_errexp (loc0)
-  end // end of [MSKINDencode]
-//
-) : d2exp // end of [val]
-//
-(*
-val () = println! ("d2exp_trup: D2Emacsyn: d2e_mac = ", d2e_mac)
-*)
+val loc0 = d2e0.d2exp_loc ()
 //
 in
-  d2exp_trup (d2e_mac)
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Emacsyn (knd, d2e) => let
+//
+    val d2e_mac = (
+    //
+    case+ knd of
+    | $SYN.MSKdecode () => $MAC.dmacro_eval_decode (d2e)
+    | $SYN.MSKxstage () => $MAC.dmacro_eval_xstage (d2e)
+    | $SYN.MSKencode () => let
+        val () =
+        prerr_errmac_loc(loc0)
+        val () = prerr ": the macro syntax `(...) is used incorrectly."
+        val () = prerr_newline ()
+      in
+        d2exp_errexp (loc0)
+      end // end of [MSKINDencode]
+    //
+    ) : d2exp // end of [val]
+//
+  in
+    d2exp_trup (d2e_mac)
+  end // end of [D2Emacsyn]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [d2exp_trup_macsyn]
 
 (* ****** ****** *)
@@ -2338,26 +2363,22 @@ d2exp_trup_solassert
   (d2e0) = let
 //
 val
-loc0 = d2e0.d2exp_loc
-//
-val-
-D2Esolassert
-  (d2e_prf) = d2e0.d2exp_node
-//
-val d3e_prf = d2exp_trup(d2e_prf)
-val s2e_prop = d3exp_get_type(d3e_prf)
-//
-(*
-val () =
-println!
-  ("d2exp_trup: D2Esolassert: s2e_prop = ", s2e_prop)
-// end of [val]
-*)
-//
-val ((*added*)) = trans3_env_solver_assert (loc0, s2e_prop)
+loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_empty (loc0, s2exp_void_t0ype())
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Esolassert (d2e_prf) => let
+    val d3e_prf = d2exp_trup(d2e_prf)
+    val s2e_prop = d3exp_get_type(d3e_prf)
+//
+    val ((*added*)) = trans3_env_solver_assert (loc0, s2e_prop)
+//
+  in
+    d3exp_empty (loc0, s2exp_void_t0ype())
+  end // end of [D2Esolassert]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
 end // end of [D2Esolassert]
 
 (* ****** ****** *)
@@ -2367,25 +2388,22 @@ d2exp_trup_solverify
   (d2e0) = let
 //
 val
-loc0 = d2e0.d2exp_loc
-//
-val-
-D2Esolverify
-  (s2e_prop) = d2e0.d2exp_node
-//
-(*
-val () =
-println!
-  ("d2exp_trup: D2Esolverify: s2e_prop = ", s2e_prop)
-*)
-//
-val s2f_prop = s2exp_hnfize(s2e_prop)
-//
-val ((*added*)) = trans3_env_solver_verify (loc0, s2f_prop)
+loc0 = d2e0.d2exp_loc ()
 //
 in
-  d3exp_solverify (loc0, s2f_prop)
-end // end of [D2Esolverify]
+//
+case+ d2exp_node_view (d2e0.d2exp_node ()) of
+| ~D2Esolverify (s2e_prop) => let
+    val s2f_prop = s2exp_hnfize(s2e_prop)
+//
+    val ((*added*)) = trans3_env_solver_verify (loc0, s2f_prop)
+//
+  in
+    d3exp_solverify (loc0, s2f_prop)
+  end // end of [D2Esolverify]
+| v => (d2exp_node_view_free (v); $ERR.abort_interr<d3exp> ((*MatchError*)))
+//
+end // end of [d2exp_trup_solverify]
 
 (* ****** ****** *)
 

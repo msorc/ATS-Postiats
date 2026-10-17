@@ -60,77 +60,17 @@ staload "./../SATS/baconjs.sats"
 //
 (* ****** ****** *)
 //
-implement
-EStream_map_method
-  (xs, _) =
-  lam(fopr) => EStream_map(xs, fopr)
-//
-implement
-Property_map_method
-  (xs, _) =
-  lam(fopr) => Property_map(xs, fopr)
+(* ****** ****** *)
 //
 (* ****** ****** *)
 //
-implement
-EStream_filter_method
-  (xs) =
-  lam(pred) => EStream_filter(xs, pred)
+(* ****** ****** *)
 //
 (* ****** ****** *)
 //
-implement
-EStream_scan_method
-  (xs, _(*type*)) =
-  lam(ini, fopr) => EStream_scan(xs, ini, fopr)
-//
 (* ****** ****** *)
 //
-implement
-EStream_flatMap_method
-  (xs, _) =
-  lam(fopr) => EStream_flatMap(xs, fopr)
-//
-implement
-Property_flatMap_method
-  (xs, _) =
-  lam(fopr) => Property_flatMap(xs, fopr)
-//
 (* ****** ****** *)
-//
-implement
-EStream_onValue_method
-  (xs) =
-  lam(fopr) => EStream_onValue(xs, fopr)
-//
-implement
-Property_onValue_method
-  (xs) =
-  lam(fopr) => Property_onValue(xs, fopr)
-//
-(* ****** ****** *)
-//
-implement
-EStream_subscribe_method
-  (xs) =
-  lam(fopr) => EStream_subscribe(xs, fopr)
-//
-implement
-Property_subscribe_method
-  (xs) =
-  lam(fopr) => Property_subscribe(xs, fopr)
-//
-(* ****** ****** *)
-//
-implement
-EStream_doAction_method
-  (xs) =
-  lam(fopr) => EStream_doAction(xs, fopr)
-//
-implement
-Property_doAction_method
-  (xs) =
-  lam(fopr) => Property_doAction(xs, fopr)
 //
 (* ****** ****** *)
 

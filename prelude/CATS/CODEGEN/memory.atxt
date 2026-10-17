@@ -58,5 +58,5 @@ val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "memory_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "memory_atxt.txt")
 %}\

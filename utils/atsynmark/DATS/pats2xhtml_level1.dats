@@ -3,19 +3,22 @@
 *)
 
 (* ****** ****** *)
-
-#define ATS_DYNLOADFLAG 0
-
-(* ****** ****** *)
 //
-staload
-STDIO = "libc/SATS/stdio.sats"
+// HX-2026-10: no GC (ATS2 port of the ATS1 version of this file)
 //
 (* ****** ****** *)
 
-staload _(*anon*) = "prelude/DATS/list.dats"
-staload _(*anon*) = "prelude/DATS/list_vt.dats"
+#include "share/atspre_staload.hats"
 
+(* ****** ****** *)
+
+#define ATS_DYNLOADFLAG 0 // no initialization
+
+(* ****** ****** *)
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 staload

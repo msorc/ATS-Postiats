@@ -32,30 +32,24 @@
 // Time: February 2012
 //
 (* ****** ****** *)
-
-#define ATS_DYNLOADFLAG 0 // no need for dynloading at run-time
-
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_lintprgm_myint_gmp.dats)
+// This file is #include-d by the user of [icnstrlst_solve<gmpknd>] (link with -lgmp)
+// A [myint(gmpknd)] is a pointer to a malloc-ed [mpz_t]
+//
 (* ****** ****** *)
 
 %{^
-#include "pats_lintprgm_myint.cats"
+#include "pats_lintprgm_myint_gmp.cats"
 %} // end of [%{^]
 
 (* ****** ****** *)
 
-staload "libc/SATS/gmp.sats"
+staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload
-INTINF = "./pats_intinf.sats"
-
-(* ****** ****** *)
-
-viewtypedef
-lintinf (l:addr) = //
-  (free_gc_v (mpz_vt?, l), mpz_vt @ l | ptr l)
-viewtypedef lintinf = [l:addr] lintinf (l)
+staload INTINF = "./pats_intinf.sats"
 
 (* ****** ****** *)
 
@@ -63,31 +57,42 @@ staload "./pats_lintprgm.sats"
 
 (* ****** ****** *)
 
-viewtypedef myint = myint (gmpknd)
+vtypedef myint = myint (gmpknd)
 
-extern castfn myint2int (x: myint):<> lintinf
-macdef mi2i = myint2int
-extern castfn int2myint (x: lintinf):<> myint
-macdef i2mi = int2myint
+extern castfn myint2ptr0 (x: myint):<> ptr
+// HX: the pointer is only borrowed
+extern castfn myint2ptr1 (x: !myint):<> ptr
+extern castfn ptr2myint (x: ptr):<> myint
+//
+macdef mi2p0 = myint2ptr0
+macdef mi2p1 = myint2ptr1
+macdef p2mi = ptr2myint
 
-extern praxi myintenc (x: !lintinf >> myint): void
-macdef mienc = myintenc
-extern praxi myintdec (x: !myint >> lintinf): void
-macdef midec = myintdec
+(* ****** ****** *)
+
+extern fun lpz_new_si (i: int):<> ptr = "mac#patsopt_lpz_new_si"
+extern fun lpz_new_copy (p: ptr):<> ptr = "mac#patsopt_lpz_new_copy"
+extern fun lpz_new_zero ():<> ptr = "mac#patsopt_lpz_new_zero"
+extern fun lpz_free (p: ptr):<> void = "mac#patsopt_lpz_free"
+extern fun lpz_neg (p: ptr):<> void = "mac#patsopt_lpz_neg"
+extern fun lpz_neg_to (r: ptr, p: ptr):<> void = "mac#patsopt_lpz_neg_to"
+extern fun lpz_add_si (p: ptr, i: int):<> void = "mac#patsopt_lpz_add_si"
+extern fun lpz_add (p: ptr, q: ptr):<> void = "mac#patsopt_lpz_add"
+extern fun lpz_sub (p: ptr, q: ptr):<> void = "mac#patsopt_lpz_sub"
+extern fun lpz_mul_to (r: ptr, p: ptr, q: ptr):<> void = "mac#patsopt_lpz_mul_to"
+extern fun lpz_tdiv_q (p: ptr, q: ptr):<> void = "mac#patsopt_lpz_tdiv_q"
+extern fun lpz_divexact (p: ptr, q: ptr):<> void = "mac#patsopt_lpz_divexact"
+extern fun lpz_mod_to (r: ptr, p: ptr, q: ptr):<> void = "mac#patsopt_lpz_mod_to"
+extern fun lpz_gcd (p: ptr, q: ptr):<> void = "mac#patsopt_lpz_gcd"
+extern fun lpz_cmp_si (p: ptr, i: int):<> int = "mac#patsopt_lpz_cmp_si"
+extern fun lpz_cmp (p: ptr, q: ptr):<> int = "mac#patsopt_lpz_cmp"
+extern fun lpz_fprint (out: FILEref, p: ptr):<> void = "mac#patsopt_lpz_fprint"
 
 (* ****** ****** *)
 //
 implement
 fprint_myint<gmpknd>
-  (out, x) = let
-  prval () = midec (x)
-  prval pfat_x = x.1  
-  val () = fprint0_mpz (out, !(x.2))
-  prval () = x.1 := pfat_x
-  prval () = mienc (x)
-in
-  (*nothing*)
-end // end of [fprint_myint<gmpknd>]
+  (out, x) = lpz_fprint (out, mi2p1(x))
 //
 implement
 print_myint<gmpknd> (x) = fprint_myint<gmpknd> (stdout_ref, x)
@@ -97,293 +102,138 @@ prerr_myint<gmpknd> (x) = fprint_myint<gmpknd> (stderr_ref, x)
 (* ****** ****** *)
 
 implement
-myint_make_int<gmpknd> (i) = let
-  val (
-    pfgc, pfat | p
-  ) = ptr_alloc_tsz {mpz_vt} (sizeof<mpz_vt>)
-  val () = mpz_init_set_int (!p, i)
-in
-  int2myint @(pfgc, pfat | p)
-end // end of [intinf_make_int]
+myint_make_int<gmpknd> (i) = p2mi (lpz_new_si (i))
 
 (* ****** ****** *)
-
-local
-
-extern
-castfn
-intinf_takeout_mpz
-(
-  intinf: $INTINF.intinf
-) :<!ref> [l:addr]
-(
-  mpz_vt @ l, mpz_vt @ l -<lin,prf> void | ptr l
-) // end of [intinf_takeout_mpz]
-
-in (* in-of-local *)
-
+//
+// HX: an intinf is a pointer to the [mpz_t] cell
+//
 implement
-myint_make_intinf<gmpknd> (i) = let
-  val (
-    pfgc, pfat | p
-  ) = ptr_alloc_tsz {mpz_vt} (sizeof<mpz_vt>)
-  val (pf, fpf | p_i) = intinf_takeout_mpz (i)
-  val () = mpz_init_set_mpz (!p, !p_i)
-  prval () = fpf (pf)
-in
-  int2myint @(pfgc, pfat | p)
-end // end of [intinf_make_int]
-
-end // end of [local]
+myint_make_intinf<gmpknd> (i) = p2mi (lpz_new_copy ($UN.cast{ptr}(i)))
 
 (* ****** ****** *)
 
 implement
-myint_copy<gmpknd> (x) = let
-  val (pfgc, pfat | p) = ptr_alloc_tsz {mpz_vt} (sizeof<mpz_vt>)
-  prval () = midec (x)
-  prval pfat_x = x.1  
-  val () = mpz_init_set_mpz (!p, !(x.2))
-  prval () = x.1 := pfat_x
-  prval () = mienc (x)
-in
-  i2mi @(pfgc, pfat | p)
-end // end of [myint_copy<gmpknd>]
+myint_copy<gmpknd> (x) = p2mi (lpz_new_copy (mi2p1(x)))
 
 (* ****** ****** *)
 
 implement
-myint_free<gmpknd> (x) = let
-  val x = mi2i (x)
-  prval pfat_x = x.1
-  val () = mpz_clear (!(x.2))
-in
-  ptr_free {mpz_vt?} (x.0, pfat_x | x.2)
-end // end of [myint_free<gmpknd>]
+myint_free<gmpknd> (x) = lpz_free (mi2p0(x))
 
 (* ****** ****** *)
 
 implement
 neg_myint<gmpknd>
-  (x) = i2mi(x) where {
-  val x = mi2i (x)
-  prval pfat_x = x.1
-  val () = mpz_neg (!(x.2))
-  prval () = x.1 := pfat_x
-} // end of [neg_myint<gmpknd>]
-
-(* ****** ****** *)
+  (x) = let val p = mi2p0(x) in lpz_neg (p); p2mi(p) end
+// end of [neg_myint<gmpknd>]
 
 implement
 neg1_myint<gmpknd>
-  (x) = i2mi @(pfgc, pfat | p) where {
-  val (pfgc, pfat | p) = ptr_alloc_tsz {mpz_vt} (sizeof<mpz_vt>)
-  val () = mpz_init (!p)
-  prval () = midec (x)
-  prval pfat_x = x.1
-  val () = mpz_neg (!p, !(x.2))
-  prval () = x.1 := pfat_x
-  prval () = mienc (x)
-} // end of [neg1_myint<gmpknd>]
+  (x) = let
+  val r = lpz_new_zero ()
+  val () = lpz_neg_to (r, mi2p1(x))
+in
+  p2mi(r)
+end // end of [neg1_myint<gmpknd>]
 
 (* ****** ****** *)
 
 implement
 add01_myint_myint<gmpknd>
-  (x, y) = i2mi(x) where {
-  val x = mi2i (x); prval () = midec (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_add2_mpz (!(x.2), !(y.2))
-  prval () = x.1 := pfat_x; prval () = y.1 := pfat_y
-  prval () = mienc (y)
-} // end of [add_myint_myint<gmpknd>]
-
-(* ****** ****** *)
+  (x, y) = let
+  val p = mi2p0(x) in lpz_add (p, mi2p1(y)); p2mi(p)
+end // end of [add_myint_myint<gmpknd>]
 
 implement
 sub01_myint_myint<gmpknd>
-  (x, y) = i2mi(x) where {
-  val x = mi2i (x); prval () = midec (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_sub2_mpz (!(x.2), !(y.2))
-  prval () = x.1 := pfat_x; prval () = y.1 := pfat_y
-  prval () = mienc (y)
-} // end of [sub_myint_myint<gmpknd>]
-
-(* ****** ****** *)
+  (x, y) = let
+  val p = mi2p0(x) in lpz_sub (p, mi2p1(y)); p2mi(p)
+end // end of [sub_myint_myint<gmpknd>]
 
 implement
 add_myint_int<gmpknd>
-  (x, i) = i2mi(x) where {
-  val x = mi2i (x)
-  prval pfat_x = x.1
-  val () = mpz_add2_int (!(x.2), i)
-  prval () = x.1 := pfat_x
-} // end of [add_myint_int<gmpknd>]
+  (x, i) = let
+  val p = mi2p0(x) in lpz_add_si (p, i); p2mi(p)
+end // end of [add_myint_int<gmpknd>]
 
 (* ****** ****** *)
 
 implement
 mul01_myint_myint<gmpknd>
-  (x, y) = i2mi(x) where {
-  val x = mi2i (x); prval () = midec (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_mul2_mpz (!(x.2), !(y.2))
-  prval () = x.1 := pfat_x
-  prval () = y.1 := pfat_y
-  prval () = mienc (y)
-} // end of [mul01_myint_myint<gmpknd>]
+  (x, y) = let
+  val p = mi2p0(x) in lpz_mul_to (p, p, mi2p1(y)); p2mi(p)
+end // end of [mul01_myint_myint<gmpknd>]
 
 implement
 mul10_myint_myint<gmpknd>
-  (x, y) = i2mi(y) where {
-  prval () = midec (x); val y = mi2i (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val [l:addr] (
-    pf_y, fpf_y | p_y
-  ) = __cast (y.2) where {
-    extern castfn __cast (p: ptr)
-      :<> [l:addr] (mpz_vt@l, mpz_vt@l -<lin,prf> void | ptr l)
-    // end of [extern]
-  } // end of [val]
-  val () = mpz_mul3_mpz (!(y.2), !(x.2), !p_y)
-  prval () = fpf_y (pf_y)
-  prval () = x.1 := pfat_x
-  prval () = mienc (x)
-  prval () = y.1 := pfat_y
-} // end of [mul10_myint_myint<gmpknd>]
+  (x, y) = let
+  val q = mi2p0(y) in lpz_mul_to (q, mi2p1(x), q); p2mi(q)
+end // end of [mul10_myint_myint<gmpknd>]
 
 implement
 mul11_myint_myint<gmpknd>
   (x, y) = let
-  val (pfgc, pfat | p) = ptr_alloc_tsz {mpz_vt} (sizeof<mpz_vt>)
-  val () = mpz_init (!p)
-  prval () = midec (x) and () = midec (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_mul3_mpz (!p, !(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = mienc (x) and () = mienc (y)
+  val r = lpz_new_zero ()
+  val () = lpz_mul_to (r, mi2p1(x), mi2p1(y))
 in
-  i2mi @(pfgc, pfat | p)
+  p2mi(r)
 end // end of [mul11_myint_myint<gmpknd>]
 
 (* ****** ****** *)
 
 implement
 div01_myint_myint<gmpknd>
-  (x, y) = i2mi (x) where {
-  val x = mi2i (x); prval () = midec (y)
-  val [l:addr] (
-    pf_x, fpf_x | p_x
-  ) = __cast (x.2) where {
-    extern castfn __cast (p: ptr)
-      :<> [l:addr] (mpz_vt@l, mpz_vt@l -<lin,prf> void | ptr l)
-    // end of [extern]
-  } // end of [val]
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_tdiv3_q_mpz (!p_x, !(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = fpf_x (pf_x)
-  prval () = mienc (y)
-} // end of [div01_myint_myint<gmpknd>]
+  (x, y) = let
+  val p = mi2p0(x) in lpz_tdiv_q (p, mi2p1(y)); p2mi(p)
+end // end of [div01_myint_myint<gmpknd>]
 
-(* ****** ****** *)
+(*
+** HX: div11 is declared but not implemented in ATS1 (gmpknd)
+*)
 
 implement
 ediv01_myint_myint<gmpknd>
-  (x, y) = i2mi (x) where {
-  val x = mi2i (x); prval () = midec (y)
-  val [l:addr] (
-    pf_x, fpf_x | p_x
-  ) = __cast (x.2) where {
-    extern castfn __cast (p: ptr)
-      :<> [l:addr] (mpz_vt@l, mpz_vt@l -<lin,prf> void | ptr l)
-    // end of [extern]
-  } // end of [val]
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_divexact3 (!p_x, !(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = fpf_x (pf_x)
-  prval () = mienc (y)
-} // end of [ediv01_myint_myint<gmpknd>]
+  (x, y) = let
+  val p = mi2p0(x) in lpz_divexact (p, mi2p1(y)); p2mi(p)
+end // end of [ediv01_myint_myint<gmpknd>]
 
 (* ****** ****** *)
 
 implement
 mod01_myint_myint<gmpknd>
-  (x, y) = i2mi (x) where {
-  val x = mi2i (x); prval () = midec (y)
-  val [l:addr] (
-    pf_x, fpf_x | p_x
-  ) = __cast (x.2) where {
-    extern castfn __cast (p: ptr)
-      :<> [l:addr] (mpz_vt@l, mpz_vt@l -<lin,prf> void | ptr l)
-    // end of [extern]
-  } // end of [val]
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_mod3_mpz (!p_x, !(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = fpf_x (pf_x)
-  prval () = mienc (y)
-} // end of [mod01_myint_myint<gmpknd>]
+  (x, y) = let
+  val p = mi2p0(x) in lpz_mod_to (p, p, mi2p1(y)); p2mi(p)
+end // end of [mod01_myint_myint<gmpknd>]
 
 implement
 mod11_myint_myint<gmpknd>
   (x, y) = let
-  val (pfgc, pfat | p) = ptr_alloc_tsz {mpz_vt} (sizeof<mpz_vt>)
-  val () = mpz_init (!p)
-  prval () = midec (x) and () = midec (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_mod3_mpz (!p, !(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = mienc (x) and () = mienc (y)
+  val r = lpz_new_zero ()
+  val () = lpz_mod_to (r, mi2p1(x), mi2p1(y))
 in
-  i2mi @(pfgc, pfat | p)
+  p2mi(r)
 end // end of [mod11_myint_myint<gmpknd>]
 
 (* ****** ****** *)
 
 implement
 gcd01_myint_myint<gmpknd>
-  (x, y) = i2mi (x) where {
-  val x = mi2i (x); prval () = midec (y)
-  val [l:addr] (
-    pf_x, fpf_x | p_x
-  ) = __cast (x.2) where {
-    extern castfn __cast (p: ptr)
-      :<> [l:addr] (mpz_vt@l, mpz_vt@l -<lin,prf> void | ptr l)
-    // end of [extern]
-  } // end of [val]
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val () = mpz_gcd3_mpz (!p_x, !(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = fpf_x (pf_x)
-  prval () = mienc (y)
-} // end of [gcd01_myint_myint<gmpknd>]
+  (x, y) = let
+  val p = mi2p0(x) in lpz_gcd (p, mi2p1(y)); p2mi(p)
+end // end of [gcd01_myint_myint<gmpknd>]
 
 (* ****** ****** *)
 
 implement
 compare_myint_int<gmpknd>
-  (x, i) = sgn where {
-  prval () = midec (x)
-  prval pfat_x = x.1  
-  val sgn = mpz_cmp_int (!(x.2), i)
-  prval () = x.1 := pfat_x
-  prval () = mienc (x)
-} // end of [compare_intinf_int]
-
-(* ****** ****** *)
+  (x, i) = lpz_cmp_si (mi2p1(x), i)
+// end of [compare_myint_int<gmpknd>]
 
 implement
 compare_myint_myint<gmpknd>
-  (x, y) = sgn where {
-  prval () = midec (x) and () = midec (y)
-  prval pfat_x = x.1; prval pfat_y = y.1
-  val sgn = mpz_cmp_mpz (!(x.2), !(y.2))
-  prval () = x.1 := pfat_x and () = y.1 := pfat_y
-  prval () = mienc (x) and () = mienc (y)
-} // end of [compare_intinf_int]
+  (x, y) = lpz_cmp (mi2p1(x), mi2p1(y))
+// end of [compare_myint_myint<gmpknd>]
 
 (* ****** ****** *)
 

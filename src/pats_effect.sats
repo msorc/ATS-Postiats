@@ -25,6 +25,7 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -32,24 +33,32 @@
 // Start Time: April, 2011
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_effect.sats)
+//
+(* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
 staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
 abst@ype effect_t0ype = int
 typedef effect = effect_t0ype
-typedef effectlst = List (effect)
+typedef effectlst = glist(effect)
 abst@ype effset_t0ype = uint
 typedef effset = effset_t0ype
 
 (* ****** ****** *)
 
-val effect_ntm : effect
-val effect_exn : effect
-val effect_ref : effect
-val effect_wrt : effect
-val effectlst_all : effectlst
+val effect_ntm : effect = "ext#patsopt_effect_ntm"
+val effect_exn : effect = "ext#patsopt_effect_exn"
+val effect_ref : effect = "ext#patsopt_effect_ref"
+val effect_wrt : effect = "ext#patsopt_effect_wrt"
+
+val effectlst_all : effectlst = "ext#patsopt_effectlst_all"
+
+(* ****** ****** *)
 
 fun effect_get_name (eff: effect): string
 
@@ -57,62 +66,65 @@ fun print_effect (x: effect): void
 overload print with print_effect
 fun prerr_effect (x: effect): void
 overload prerr with prerr_effect
-fun fprint_effect : fprint_type (effect)
-fun fprint_effectlst : fprint_type (effectlst)
+fun fprint_effect (out: FILEref, x: effect): void
+fun fprint_effectlst (out: FILEref, x: effectlst): void
 
-fun eq_effect_effect (x1: effect, x2: effect):<> bool
+fun eq_effect_effect (x1: effect, x2: effect): bool
 overload = with eq_effect_effect
 
 (* ****** ****** *)
 
-val effset_all: effset
-and effset_nil: effset
-val effset_ntm : effset
-val effset_exn : effset
-val effset_ref : effset
-val effset_wrt : effset
+val effset_all: effset = "ext#patsopt_effset_all"
+and effset_nil: effset = "ext#patsopt_effset_nil"
 
-fun effset_sing (eff: effect):<> effset
+val effset_ntm : effset = "ext#patsopt_effset_ntm"
+val effset_exn : effset = "ext#patsopt_effset_exn"
+val effset_ref : effset = "ext#patsopt_effset_ref"
+val effset_wrt : effset = "ext#patsopt_effset_wrt"
 
-fun eq_effset_effset (x1: effset, x2: effset):<> bool
+fun effset_sing (eff: effect): effset
+
+fun eq_effset_effset (x1: effset, x2: effset): bool
 overload = with eq_effset_effset
 
-fun effset_add (efs: effset, eff: effect):<> effset
-fun effset_del (efs: effset, eff: effect):<> effset
+fun effset_add (efs: effset, eff: effect): effset
+fun effset_del (efs: effset, eff: effect): effset
 
-fun effset_isnil (efs: effset):<> bool
-fun effset_isall (efs: effset):<> bool
+fun effset_isnil (efs: effset): bool
+fun effset_isall (efs: effset): bool
+
 (*
 ** HX-2012-03:
 ** [efs] is finite if its sign bit is clr
 ** [efs] is cofinite if its sign bit is set
 *)
-fun effset_isfin (efs: effset):<> bool
-fun effset_iscof (efs: effset):<> bool
+fun effset_isfin (efs: effset): bool
+fun effset_iscof (efs: effset): bool
 
-fun effset_ismem (efs: effset, eff: effect):<> bool
+fun effset_ismem (efs: effset, eff: effect): bool
 
-fun effset_supset (efs1: effset, efs2: effset):<> bool
-fun effset_subset (efs1: effset, efs2: effset):<> bool
+fun effset_supset (efs1: effset, efs2: effset): bool
+fun effset_subset (efs1: effset, efs2: effset): bool
 
 (*
 ** HX: complement and difference
 *)
-fun effset_cmpl (efs: effset):<> effset
-fun effset_diff (efs1: effset, efs2: effset):<> effset
+fun effset_cmpl (efs: effset): effset
+fun effset_diff (efs1: effset, efs2: effset): effset
+
 (*
 ** HX: intersection and union
 *)
-fun effset_inter (efs1: effset, efs2: effset):<> effset
-fun effset_union (efs1: effset, efs2: effset):<> effset
+fun effset_inter (efs1: effset, efs2: effset): effset
+fun effset_union (efs1: effset, efs2: effset): effset
 
-fun effset_is_inter (efs1: effset, efs2: effset):<> bool
+fun effset_is_inter (efs1: effset, efs2: effset): bool
 
 (* ****** ****** *)
 
 fun print_effset (efs: effset): void
 fun prerr_effset (efs: effset): void
-fun fprint_effset : fprint_type (effset)
+fun fprint_effset (out: FILEref, x: effset): void
 
 (* ****** ****** *)
 

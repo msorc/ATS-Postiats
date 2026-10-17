@@ -26,6 +26,8 @@ _(*DA*) = "libats/DATS/dynarray.dats"
 //
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
@@ -174,7 +176,7 @@ tokbuf_getinc_token
 
 implement
 tokbuf_get_location (buf) =
-  let val tok = tokbuf_get_token(buf) in tok.token_loc end
+  let val tok = tokbuf_get_token(buf) in tok.token_loc() end
 // end of [tokbuf_get_location]
 
 (* ****** ****** *)

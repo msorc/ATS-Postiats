@@ -221,5 +221,5 @@ otherwise readily go unnoticed.
 #comment(" end of [chap_hello.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "chap_hello_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "chap_hello_atxt.txt")
 %}

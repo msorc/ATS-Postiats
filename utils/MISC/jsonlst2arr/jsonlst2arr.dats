@@ -56,7 +56,7 @@ staload "libats/libc/SATS/string.sats"
 //
 #define
 JSONC_targetloc
-"$PATSHOME/contrib/atscntrb-libjson-c"
+"$PATSHOME/contrib/atscntrb/atscntrb-hx-libjson-c"
 //
 (* ****** ****** *)
 
@@ -148,18 +148,24 @@ end // end of [jsonlst2arr_main]
 
 (* ****** ****** *)
 
-datatype
-commarg =
-  | CAhelp of ()
-  | CAinput of ()
-  | CAoutput of stropt
-  | CAdelim of stropt
-  | CAgitem of string
-// end of [commarg]
+//
+// HX-2026-10: no GC
+// a command-line argument is a flat pair
+// of a tag and an optional string (from argv)
+//
+typedef
+commarg = @(int, stropt)
+//
+#define CAhelp 0
+#define CAinput 1
+#define CAoutput 2
+#define CAdelim 3
+#define CAgitem 4
+//
 
 (* ****** ****** *)
 //
-typedef commarglst = List0(commarg)
+vtypedef commarglst = List0_vt(commarg)
 //
 vtypedef commarglst_vt = List0_vt(commarg)
 //
@@ -243,7 +249,7 @@ case+ 0 of
 //
 | _ => let
     val res =
-      list_vt_cons{commarg}(CAgitem(str0), res)
+      list_vt_cons{commarg}(@(CAgitem, stropt_some(str0)), res)
     // end of [val]
   in
     aux0 (n, argv, i+1, res)
@@ -263,7 +269,7 @@ aux1_help
 , res: commarglst_vt
 ) : commarglst_vt = let
   val res =
-    list_vt_cons{commarg}(CAhelp(), res)
+    list_vt_cons{commarg}(@(CAhelp, stropt_none()), res)
   // end of [val]
 in
   aux0 (n, argv, i+1, res)
@@ -281,7 +287,7 @@ aux1_input
 , res: commarglst_vt
 ) : commarglst_vt = let
   val res =
-    list_vt_cons{commarg}(CAinput(), res)
+    list_vt_cons{commarg}(@(CAinput, stropt_none()), res)
   // end of [val]
 in
   aux0 (n, argv, i+1, res)
@@ -303,7 +309,7 @@ val opt =
   argv_getopt_at (n, argv, i)
 //
 val res =
-  list_vt_cons{commarg}(CAoutput(opt), res)
+  list_vt_cons{commarg}(@(CAoutput, opt), res)
 //
 in
   if i < n then aux0(n, argv, i+1, res) else res
@@ -324,7 +330,7 @@ aux1_delim
 val opt =
   argv_getopt_at(n, argv, i)
 val res =
-  list_vt_cons{commarg}(CAdelim(opt), res)
+  list_vt_cons{commarg}(@(CAdelim, opt), res)
 //
 in
   if i < n then aux0(n, argv, i+1, res) else res
@@ -346,7 +352,7 @@ val res = aux0(argc, argv, 0, res)
 val res = list_vt_reverse(res)
 //
 in
-  list_vt2t(res)
+  res
 end // end of [jsonlst2arr_cmdline]
 
 end // end of [local]
@@ -453,116 +459,95 @@ jsonlst2arr_proc
 //
 (* ****** ****** *)
 
-typedef
-param = @{
-, cmd= string
-, out= stropt
-, inplst= stringlst
-, delim= stropt
-, nexec= int
-} (* end of [param] *)
-
 implement
 jsonlst2arr_proc (arg0, cas) = let
 //
 fun auxexec
 (
-  param: &param
+  out: stropt
+, inplst: &stringlst_vt >> stringlst_vt
+, delim: stropt
+, nexec: &int >> int
 ) : void = let
 //
-val out = param.out
-val inplst = param.inplst
-val inplst = list_reverse (inplst)
-val () = param.inplst := list_nil (*void*)
-val delim = param.delim
-val nexec0 = param.nexec
-val () = param.nexec := nexec0 + 1
-//
-(*
-val () = println! ("auxexec: out= ", out)
-val () = println! ("auxexec: inplst= ", inplst)
-val () = println! ("auxexec: delim= ", delim)
-val () = println! ("auxexec: nexec= ", nexec0)
-*)
+val nexec0 = nexec
+val () = nexec := nexec0 + 1
+val xs = list_vt_reverse (inplst)
+val () = inplst := list_vt_nil ()
 //
 in
 //
-case+ inplst of
+case+ xs of
 | list_vt_cons _ =>
-    jsonlst2arr_exec (out, inplst, delim)
+    jsonlst2arr_exec (out, xs, delim)
 | ~list_vt_nil () =>
     if nexec0 = 0 then jsonlst2arr_exec (out, list_vt_nil, delim) else ()
   // end of [list_nil]
 //
 end // end of [auxexec]
 //
+var out: stropt = stropt_none ()
+var delim: stropt = stropt_none ()
+var nexec: int = 0
+var inplst: stringlst_vt = list_vt_nil ()
+//
 fun auxlst
 (
-  param: &param, cas0: commarglst
+  cas0: commarglst
+, out: &stropt, delim: &stropt
+, inplst: &stringlst_vt >> stringlst_vt, nexec: &int
+, input: bool
 ) : void = let
 in
 //
 case+ cas0 of
-| list_cons
-    (ca, cas) =>
-  (
-    case+ ca of
-    | CAhelp () => let
-        val (
-        ) = jsonlst2arr_usage (stdout_ref, param.cmd)
-        val () = param.nexec := param.nexec + 1
+| ~list_vt_cons
+    (ca, cas) => let
+    val tag = ca.0
+  in
+    if input && tag = CAgitem
+      then let
+        val opt = ca.1
+        val str =
+        (
+          if issome(opt) then unsome(opt) else ""
+        ) : string // end of [val]
+        val () =
+        inplst := list_vt_cons{string}(str, inplst)
       in
-        auxlst (param, cas)
-      end // end of [CAhelp]
-    | CAinput() => auxlst_input (param, cas)
-    | CAoutput(opt) => let
-        val () = param.out := opt in auxlst (param, cas)
-      end // end of [CAoutput]
-    | CAdelim(opt) => let
-        val () = param.delim := opt in auxlst (param, cas)
-      end // end of [CAoutput]
-    | CAgitem(str) => auxlst (param, cas)
-  )
-| list_nil () => auxexec (param)
+        auxlst (cas, out, delim, inplst, nexec, true)
+      end // end of [then]
+      else let
+        val () =
+          if input then auxexec (out, inplst, delim, nexec)
+        // end of [val]
+        val () =
+        (
+          case+ tag of
+          | CAhelp => let
+              val () =
+                jsonlst2arr_usage (stdout_ref, arg0)
+              // end of [val]
+            in
+              nexec := nexec + 1
+            end // end of [CAhelp]
+          | CAoutput => out := ca.1
+          | CAdelim => delim := ca.1
+          | _ (*CAinput/CAgitem*) => ()
+        ) : void // end of [val]
+      in
+        auxlst (cas, out, delim, inplst, nexec, tag = CAinput)
+      end // end of [else]
+  end // end of [list_vt_cons]
+| ~list_vt_nil () => auxexec (out, inplst, delim, nexec)
 //
 end // end of [auxlst]
 //
-and auxlst_input
-(
-  param: &param, cas0: commarglst
-) : void = let
-in
-//
-case+ cas0 of
-| list_cons
-    (ca, cas) =>
-  (
-    case+ ca of
-    | CAgitem (str) => let
-        val () =
-        param.inplst :=
-          list_cons{string}(str, param.inplst)
-        // end of [val]
-      in
-        auxlst_input (param, cas)
-      end // end of [CAgitem]
-    | _ => let
-        val () = auxexec (param) in auxlst (param, cas0)
-      end // end of [auxlst_input]
-  )
-| list_nil () => auxexec (param)
-//
-end // end of [auxlst_input]
-//
-var param: param
-val () = param.cmd := arg0
-val () = param.out := stropt_none ()
-val () = param.inplst := list_nil ()
-val () = param.delim := stropt_none ()
-val () = param.nexec := 0
+val () = auxlst (cas, out, delim, inplst, nexec, false)
+val () = list_vt_free (inplst)
 //
 in
-  auxlst (param, cas)
+  // nothing
 end // end of [jsonlst2arr_proc]
 
 (* ****** ****** *)
@@ -573,7 +558,7 @@ main0 (argc, argv) =
 //
 val cas =
   jsonlst2arr_cmdline (argc, argv)
-val-list_cons (_, cas) = cas
+val-~list_vt_cons (_, cas) = cas
 //
 val ((*void*)) = jsonlst2arr_proc (argv[0], cas)
 //

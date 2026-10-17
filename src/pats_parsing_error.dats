@@ -31,11 +31,24 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: March, 2011
 //
+
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC. The errors are kept in a global cell of the global
+// arena as a [glist] (as in pats_lexing_error.dats); [parerr] is a flat
+// record. This file also implements the two functions that pats_syntax
+// takes from the parser (pats_syntax_boundary.sats).
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload
@@ -49,18 +62,31 @@ staload "./pats_lexing.sats"
 
 (* ****** ****** *)
 
+staload "./pats_syntax_boundary.sats"
 staload "./pats_parsing.sats"
 
 (* ****** ****** *)
 
 implement
-parerr_make (loc, node) = '{
+parerr_make (loc, node) = @{
   parerr_loc= loc, parerr_node= node
 } // end of [parerr_make]
 
 (* ****** ****** *)
 
-vtypedef parerrlst_vt = List_vt (parerr)
+typedef parerrlst = glist(parerr)
+
+(* ****** ****** *)
+//
+// HX: the global (never freed) cells for the global state
+//
+fun{a:t@ype}
+gcell_make (x: a): ptr = let
+  val p = the_garena_alloc (sizeof<a>)
+  val () = $UN.ptr0_set<a> (p, x)
+in
+  p
+end // end of [gcell_make]
 
 (* ****** ****** *)
 //
@@ -69,8 +95,8 @@ vtypedef parerrlst_vt = List_vt (parerr)
 // which may not be recorded
 //
 extern
-fun the_parerrlst_get (n: &int? >> int): parerrlst_vt
-//
+fun the_parerrlst_get (n: &int? >> int): parerrlst
+
 (* ****** ****** *)
 
 local
@@ -79,48 +105,46 @@ local
 // MAXLEN is the max number of errors to be reported
 //
 #define MAXLEN 100
-#assert (MAXLEN > 0)
 //
-val the_length = ref<int> (0)
-val the_parerrlst = ref<parerrlst_vt> (list_vt_nil)
+val the_length = gcell_make<int> (0)
+val the_parerrlst = gcell_make<parerrlst> (glist_nil())
+//
+fn
+the_length_get(): int = $UN.ptr0_get<int> (the_length)
+fn
+the_length_set(n: int): void = $UN.ptr0_set<int> (the_length, n)
+fn
+the_parerrlst_get_(): parerrlst = $UN.ptr0_get<parerrlst> (the_parerrlst)
+fn
+the_parerrlst_set(xs: parerrlst): void =
+  $UN.ptr0_set<parerrlst> (the_parerrlst, xs)
 //
 in (* in-of-local *)
 
 implement
 the_parerrlst_clear
   () = () where {
-  val () = !the_length := 0
-  val () = () where {
-    val (vbox pf | p) = ref_get_view_ptr (the_parerrlst)
-    val () = list_vt_free (!p)
-    val () = !p := list_vt_nil ()
-  } // end of [val]
+  val () = the_length_set (0)
+  val () = the_parerrlst_set (glist_nil())
 } (* end of [the_parerrlst_clear] *)
 
 implement
 the_parerrlst_add
   (err) = () where {
-  val n = let
-    val (vbox pf | p) = ref_get_view_ptr (the_length)
-    val n = !p
-    val () = !p := n + 1
-  in n end // end of [val]
-  val () = if n < MAXLEN then let
-    val (vbox pf | p) = ref_get_view_ptr (the_parerrlst)
-  in
-    !p := list_vt_cons (err, !p)
-  end // end of [val]
+  val n = the_length_get ()
+  val () = the_length_set (n + 1)
+  val () = if n < MAXLEN then
+    the_parerrlst_set (glist_cons (err, the_parerrlst_get_()))
+  // end of [val]
 } (* end of [the_parerrlst_add] *)
 
 implement
 the_parerrlst_get
   (n) = xs where {
-  val () = n := !the_length
-  val () = !the_length := 0
-  val (vbox pf | p) = ref_get_view_ptr (the_parerrlst)
-  val xs = !p
-  val xs = list_vt_reverse (xs)
-  val () = !p := list_vt_nil ()
+  val () = n := the_length_get ()
+  val () = the_length_set (0)
+  val xs = glist_reverse (the_parerrlst_get_())
+  val () = the_parerrlst_set (glist_nil())
 } (* end of [the_parerrlst_get] *)
 
 end // end of [local]
@@ -138,18 +162,42 @@ if (bt = 0)
 end // end of [the_parerrlst_add_if0]
 
 (* ****** ****** *)
+//
+// HX: [string_contains] is gone
+//
+fun
+string_has_newline(name: string): bool = let
+  fun loop(p: ptr): bool = let
+    val c = $UN.ptr0_get<char> (p)
+  in
+    if c = '\000' then false
+    else if c = '\n' then true else loop (ptr0_succ<char> (p))
+  end
+in
+  loop ($UN.cast{ptr}(name))
+end // end of [string_has_newline]
 
 implement
 the_parerrlst_add_ifunclosed
   (loc, name) = let
-  val newline = '\n'
 in
 //
-if string_contains (name, newline)
+if string_has_newline (name)
   then the_parerrlst_add (parerr_make (loc, PE_fname_unclosed)) else ()
 //
 end // end of [the_parerrlst_add_ifunclosed]
 
+(* ****** ****** *)
+//
+// the boundary of pats_syntax
+//
+implement
+parerr_p0at_as (loc) =
+  the_parerrlst_add (parerr_make (loc, PE_p0at_as))
+implement
+parerr_add_ifunclosed (loc, name) =
+  the_parerrlst_add_ifunclosed (loc, name)
+//
 (* ****** ****** *)
 
 fun
@@ -160,8 +208,9 @@ synent_needed
 ) : void = () where {
 //
 val () = fprint (out, x.parerr_loc)
-val () =
-  fprintf (out, ": error(parsing): the syntactic entity [%s] is needed.", @(name))
+val () = fprint_string (out, ": error(parsing): the syntactic entity [")
+val () = fprint_string (out, name)
+val () = fprint_string (out, "] is needed.")
 val () = fprint_newline (out)
 //
 } (* end of [synent_needed] *)
@@ -175,7 +224,9 @@ keyword_needed
 , x: parerr, name: string
 ) : void = () where {
   val () = fprint (out, x.parerr_loc)
-  val () = fprintf (out, ": error(parsing): the keyword [%s] is needed.", @(name))
+  val () = fprint_string (out, ": error(parsing): the keyword [")
+  val () = fprint_string (out, name)
+  val () = fprint_string (out, "] is needed.")
   val () = fprint_newline (out)
 } (* end of [keyword_needed] *)
 
@@ -188,7 +239,9 @@ parenth_needed
 , x: parerr, name: string
 ) : void = () where {
   val () = fprint (out, x.parerr_loc)
-  val () = fprintf (out, ": error(parsing): the keyword '%s' is needed.", @(name))
+  val () = fprint_string (out, ": error(parsing): the keyword '")
+  val () = fprint_string (out, name)
+  val () = fprint_string (out, "' is needed.")
   val () = fprint_newline (out)
 } (* end of [parenth_needed] *)
 
@@ -200,7 +253,7 @@ fname_unclosed
   out: FILEref, x: parerr
 ) : void = () where {
   val () = fprint (out, x.parerr_loc)
-  val () = fprintf (out, ": error(parsing): the filename is unclosed.", @())
+  val () = fprint_string (out, ": error(parsing): the filename is unclosed.")
   val () = fprint_newline (out)
 } (* end of [fname_unclosed] *)
 
@@ -212,27 +265,9 @@ token_discarded
   out: FILEref, x: parerr
 ) : void = () where {
   val () = fprint (out, x.parerr_loc)
-  val () = fprintf (out, ": error(parsing): the token is discarded.", @())
+  val () = fprint_string (out, ": error(parsing): the token is discarded.")
   val () = fprint_newline (out)
 } // end of [token_discarded]
-
-(* ****** ****** *)
-
-(*
-fun
-file_unavailable
-(
-  out: FILEref, x: parerr
-) : void = let
-//
-val-PE_FILENONE(fname) = x.parerr_node
-val ((*void*)) = fprint (out, x.parerr_loc)
-val ((*void*)) = fprintf (out, ": error(parsing): the file [%s] is unavailable.", @(fname))
-//
-in
-  // nothing
-end // end of [file_unavailable]
-*)
 
 (* ****** ****** *)
 
@@ -250,160 +285,153 @@ in
 //
 case+ node of
 //
-| PE_AS() => KN (x, "as")
+| PE_AS () => KN (x, "as")
 //
-| PE_AND() => KN (x, "and")
+| PE_AND () => KN (x, "and")
 //
-| PE_END() => KN (x, "end")
+| PE_END () => KN (x, "end")
 //
-| PE_OF() => KN (x, "of")
-| PE_IN() => KN (x, "in")
+| PE_OF () => KN (x, "of")
+| PE_IN () => KN (x, "in")
 //
-| PE_IF() => KN (x, "if")
-| PE_SIF() => KN (x, "sif")
+| PE_IF () => KN (x, "if")
+| PE_SIF () => KN (x, "sif")
 //
-| PE_CASE() => KN (x, "case")
-| PE_SCASE() => KN (x, "scase")
+| PE_CASE () => KN (x, "case")
+| PE_SCASE () => KN (x, "scase")
 //
-| PE_IFCASE() => KN (x, "ifcase")
+| PE_IFCASE () => KN (x, "ifcase")
 //
-| PE_THEN () => KN (x, "then")
-| PE_ELSE () => KN (x, "else")
+| PE_THEN  () => KN (x, "then")
+| PE_ELSE  () => KN (x, "else")
 //
-| PE_REC () => KN (x, "rec")
-| PE_WHEN () => KN (x, "when")
-| PE_WITH () => KN (x, "with")
+| PE_REC  () => KN (x, "rec")
+| PE_WHEN  () => KN (x, "when")
+| PE_WITH  () => KN (x, "with")
 //
-| PE_TRY () => KN (x, "try")
+| PE_TRY  () => KN (x, "try")
 //
-| PE_FOR () => KN (x, "for")
-| PE_WHILE () => KN (x, "while")
+| PE_FOR  () => KN (x, "for")
+| PE_WHILE  () => KN (x, "while")
 //
-| PE_BAR () => KN (x, "|")
-| PE_COLON () => KN (x, ":")
-| PE_COMMA () => KN (x, ",")
-| PE_SEMICOLON () => KN (x, ";")
-| PE_BANG () => KN (x, "!")
-| PE_DOT () => KN (x, ",")
-| PE_EQ () => KN (x, "=")
-| PE_EQGT () => KN (x, "=>")
-| PE_GT () => KN (x, ">")
-| PE_GTDOT () => KN (x, ">.")
-| PE_GTLT () => KN (x, "><")
-| PE_SRPTHEN () => KN (x, "#then")
-| PE_SRPENDIF () => KN (x, "#endif")
+| PE_BAR  () => KN (x, "|")
+| PE_COLON  () => KN (x, ":")
+| PE_COMMA  () => KN (x, ",")
+| PE_SEMICOLON  () => KN (x, ";")
+| PE_BANG  () => KN (x, "!")
+| PE_DOT  () => KN (x, ",")
+| PE_EQ  () => KN (x, "=")
+| PE_EQGT  () => KN (x, "=>")
+| PE_GT  () => KN (x, ">")
+| PE_GTDOT  () => KN (x, ">.")
+| PE_GTLT  () => KN (x, "><")
+| PE_SRPTHEN  () => KN (x, "#then")
+| PE_SRPENDIF  () => KN (x, "#endif")
 //
-| PE_LPAREN () => PN (x, "(")
-| PE_RPAREN () => PN (x, ")")
-| PE_LBRACKET () => PN (x, "[")
-| PE_RBRACKET () => PN (x, "]")
-| PE_LBRACE () => PN (x, "{")
-| PE_RBRACE () => PN (x, "}")
+| PE_LPAREN  () => PN (x, "(")
+| PE_RPAREN  () => PN (x, ")")
+| PE_LBRACKET  () => PN (x, "[")
+| PE_RBRACKET  () => PN (x, "]")
+| PE_LBRACE  () => PN (x, "{")
+| PE_RBRACE  () => PN (x, "}")
 //
-| PE_EOF () => {
+| PE_EOF  () => {
     val () = fprint (out, loc)
-    val () = fprintf (out, ": error(parsing): [EOF] is needed", @())
+    val () = fprint_string (out, ": error(parsing): [EOF] is needed")
     val () = fprint_newline (out)
   }
 //
-| PE_i0nt () => {
+| PE_i0nt  () => {
     val () = fprint (out, loc)
-    val () = fprintf (out, ": error(parsing): [i0nt] is needed", @())
+    val () = fprint_string (out, ": error(parsing): [i0nt] is needed")
     val () = fprint_newline (out)
   }
-| PE_c0har () => {
+| PE_c0har  () => {
     val () = fprint (out, loc)
-    val () = fprintf (out, ": error(parsing): [c0har] is needed", @())
+    val () = fprint_string (out, ": error(parsing): [c0har] is needed")
     val () = fprint_newline (out)
   }
-| PE_f0loat () => {
+| PE_f0loat  () => {
     val () = fprint (out, loc)
-    val () = fprintf (out, ": error(parsing): [f0loat] is needed", @())
+    val () = fprint_string (out, ": error(parsing): [f0loat] is needed")
     val () = fprint_newline (out)
   }
-| PE_s0tring () => {
+| PE_s0tring  () => {
     val () = fprint (out, loc)
-    val () = fprintf (out, ": error(parsing): [s0tring] is needed", @())
+    val () = fprint_string (out, ": error(parsing): [s0tring] is needed")
     val () = fprint_newline (out)
   }
 //
-| PE_i0de () => SN (x, "i0de")
-| PE_i0dext () => SN (x, "i0dext")
+| PE_i0de  () => SN (x, "i0de")
+| PE_i0dext  () => SN (x, "i0dext")
 //
-| PE_i0de_dlr () => SN (x, "i0de_dlr")
+| PE_i0de_dlr  () => SN (x, "i0de_dlr")
 //
-| PE_l0ab () => SN (x, "l0ab")
-| PE_p0rec () => SN (x, "p0rec")
+| PE_l0ab  () => SN (x, "l0ab")
+| PE_p0rec  () => SN (x, "p0rec")
 //
-| PE_funarrow () => SN (x, "funarrow")
-| PE_colonwith () => SN (x, "colonwith")
+| PE_funarrow  () => SN (x, "funarrow")
+| PE_colonwith  () => SN (x, "colonwith")
 //
-| PE_e0xp () => SN (x, "e0xp")
-| PE_atme0xp () => SN (x, "atme0xp")
+| PE_e0xp  () => SN (x, "e0xp")
+| PE_atme0xp  () => SN (x, "atme0xp")
 //
-| PE_s0rt () => SN (x, "s0rt")
-| PE_s0rtid () => SN (x, "s0rtid")
-| PE_atms0rt () => SN (x, "atms0rt")
-| PE_s0marg () => SN (x, "s0marg")
-| PE_a0msrt () => SN (x, "a0msrt")
+| PE_s0rt  () => SN (x, "s0rt")
+| PE_s0rtid  () => SN (x, "s0rtid")
+| PE_atms0rt  () => SN (x, "atms0rt")
+| PE_s0marg  () => SN (x, "s0marg")
+| PE_a0msrt  () => SN (x, "a0msrt")
 //
-| PE_s0exp () => SN (x, "s0exp")
-| PE_si0de () => SN (x, "si0de")
-| PE_s0taq () => SN (x, "s0taq")
-| PE_atms0exp () => SN (x, "atms0exp")
-| PE_labs0exp () => SN (x, "labs0exp")
-| PE_s0rtext () => SN (x, "s0rtext")
-| PE_s0qua () => SN (x, "s0qua")
-| PE_q0marg () => SN (x, "q0marg")
+| PE_s0exp  () => SN (x, "s0exp")
+| PE_si0de  () => SN (x, "si0de")
+| PE_s0taq  () => SN (x, "s0taq")
+| PE_atms0exp  () => SN (x, "atms0exp")
+| PE_labs0exp  () => SN (x, "labs0exp")
+| PE_s0rtext  () => SN (x, "s0rtext")
+| PE_s0qua  () => SN (x, "s0qua")
+| PE_q0marg  () => SN (x, "q0marg")
 //
-| PE_p0at () => SN (x, "p0at")
-| PE_pi0de () => SN (x, "pi0de")
-| PE_atmp0at () => SN (x, "atmp0at")
-| PE_labp0at () => SN (x, "labp0at")
-| PE_p0at_as () => SN (x, "p0at_as")
+| PE_p0at  () => SN (x, "p0at")
+| PE_pi0de  () => SN (x, "pi0de")
+| PE_atmp0at  () => SN (x, "atmp0at")
+| PE_labp0at  () => SN (x, "labp0at")
+| PE_p0at_as  () => SN (x, "p0at_as")
 //
-| PE_i0fcl () => SN (x, "i0fcl")
+| PE_i0fcl  () => SN (x, "i0fcl")
 //
-| PE_gm0at () => SN (x, "gm0at")
-| PE_guap0at () => SN (x, "guap0at")
-| PE_c0lau () => SN (x, "c0lau")
-| PE_sc0lau () => SN (x, "sc0lau")
+| PE_gm0at  () => SN (x, "gm0at")
+| PE_guap0at  () => SN (x, "guap0at")
+| PE_c0lau  () => SN (x, "c0lau")
+| PE_sc0lau  () => SN (x, "sc0lau")
 //
-| PE_di0de () => SN (x, "di0de")
-| PE_d0ynq () => SN (x, "d0ynq")
-| PE_dqi0de () => SN (x, "dqi0de")
+| PE_di0de  () => SN (x, "di0de")
+| PE_d0ynq  () => SN (x, "d0ynq")
+| PE_dqi0de  () => SN (x, "dqi0de")
 //
-| PE_arrqi0de () => SN (x, "arrqi0de")
-| PE_tmpqi0de () => SN (x, "tmpqi0de")
-| PE_impqi0de () => SN (x, "impqi0de")
+| PE_arrqi0de  () => SN (x, "arrqi0de")
+| PE_tmpqi0de  () => SN (x, "tmpqi0de")
+| PE_impqi0de  () => SN (x, "impqi0de")
 //
-| PE_d0exp () => SN (x, "d0exp")
-| PE_d0exp0 () => SN (x, "d0exp0")
-| PE_d0exp1 () => SN (x, "d0exp1")
-| PE_atmd0exp () => SN (x, "atmd0exp")
-| PE_labd0exp () => SN (x, "labd0exp")
+| PE_d0exp  () => SN (x, "d0exp")
+| PE_d0exp0  () => SN (x, "d0exp0")
+| PE_d0exp1  () => SN (x, "d0exp1")
+| PE_atmd0exp  () => SN (x, "atmd0exp")
+| PE_labd0exp  () => SN (x, "labd0exp")
 //
-| PE_d0ecl () => SN (x, "d0ecl")
-| PE_stai0de () => SN (x, "stai0de")
-| PE_d0ecl_sta () => SN (x, "d0ecl_sta")
-| PE_d0ecl_dyn () => SN (x, "d0ecl_dyn")
-| PE_guad0ecl () => SN (x, "guad0ecl")
-| PE_staloadarg () => SN (x, "staloadarg")
+| PE_d0ecl  () => SN (x, "d0ecl")
+| PE_stai0de  () => SN (x, "stai0de")
+| PE_d0ecl_sta  () => SN (x, "d0ecl_sta")
+| PE_d0ecl_dyn  () => SN (x, "d0ecl_dyn")
+| PE_guad0ecl  () => SN (x, "guad0ecl")
+| PE_staloadarg  () => SN (x, "staloadarg")
 //
-| PE_fname_unclosed () => fname_unclosed (out, x)
+| PE_fname_unclosed  () => fname_unclosed (out, x)
 //
-| PE_DISCARD () => token_discarded (out, x)
+| PE_DISCARD  () => token_discarded (out, x)
 (*
 | PE_FILENONE (fname) => file_unavailable (out, x)
 *)
 //
-(*
-| _ => {
-    val () = fprint (out, loc)
-    val () = fprintf (out, ": error(parsing): unspecified", @())
-    val () = fprint_newline (out)
-  } (* end of [_] *)
-*)
 //
 end // end of [fprint_parerr]
 
@@ -419,39 +447,32 @@ val xs = the_parerrlst_get (nerr)
 fun loop
 (
   out: FILEref
-, xs: parerrlst_vt
+, xs: parerrlst
 , nerr: int
 , bchar_max: lint // local max
 , bchar_lst: lint // last char count
 ) : int = let
 in
-  case+ xs of
-  | ~list_vt_cons
+  case+ glist_view(xs) of
+  | ~GLcons
       (x, xs) => let
       val loc = x.parerr_loc
       val bchar = $LOC.location_get_bchar (loc)
     in
-      case+ 0 of
-      | _ when
-          bchar > bchar_max => let
-          val () = fprint_parerr (out, x) in
-          loop (out, xs, nerr-1, bchar, bchar)
-        end
-      | _ when
-          bchar <= bchar_lst => let
-          val () = fprint_parerr (out, x) in
-          loop (out, xs, nerr-1, bchar_max, bchar)
-        end
-      | _ => loop (out, xs, nerr-1, bchar_max, bchar_lst)
-    end // end of [list_vt_cons]
-  | ~list_vt_nil ((*void*)) => nerr
+      if bchar > bchar_max then let
+        val () = fprint_parerr (out, x) in
+        loop (out, xs, nerr-1, bchar, bchar)
+      end else if bchar <= bchar_lst then let
+        val () = fprint_parerr (out, x) in
+        loop (out, xs, nerr-1, bchar_max, bchar)
+      end else loop (out, xs, nerr-1, bchar_max, bchar_lst)
+    end // end of [GLcons]
+  | ~GLnil ((*void*)) => nerr
 end // end of [loop]
 //
 in
 //
-case+ xs of
-| list_vt_cons _ => let
-    prval () = fold@ (xs)
+if glist_is_cons (xs) then let
     val nerr = loop (out, xs, nerr, ~1l, ~1l)
     val () =
     if nerr > 0 then {
@@ -461,8 +482,8 @@ case+ xs of
     } // end of [if]
   in
     1 (* containing errors *)
-  end // end of [list_vt_cons]
-| ~list_vt_nil () => 0 (* free of errors *)
+  end // end of [then]
+else 0 (* free of errors *)
 //
 end // end of [fprint_the_parerrlst]
 

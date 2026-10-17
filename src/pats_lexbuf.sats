@@ -56,12 +56,8 @@ vtypedef lexbuf = lexbuf_vt0ype
 
 fun
 lexbuf_initize_filp
-  {m:file_mode}{l0:addr}
 (
-  pfmod:
-  file_mode_lte(m,r)
-, pffil: FILE (m) @ l0
-| lexbuf: &lexbuf? >> lexbuf, p0: ptr l0
+  lexbuf: &lexbuf? >> lexbuf, fp: FILEref
 ) : void // end of [lexbuf_initize_filp]
 
 (* ****** ****** *)
@@ -69,7 +65,7 @@ lexbuf_initize_filp
 fun
 lexbuf_initize_getc
 (
-  buf: &lexbuf? >> lexbuf, getc: () -<cloptr1> int
+  buf: &lexbuf? >> lexbuf, getc: () -<lincloptr1> int
 ) : void // end of [lexbuf_initize_getc]
 
 (* ****** ****** *)
@@ -140,24 +136,24 @@ fun lexbuf_incby_count (buf: &lexbuf, cnt: uint): void
 //
 fun
 lexbuf_get_strptr0
-  (buf: &lexbuf, ln: uint): strptr0
+  (buf: &lexbuf, ln: uint): Strptr0
 fun
 lexbuf_get_strptr1
-  (buf: &lexbuf, ln: uint): strptr1
+  (buf: &lexbuf, ln: uint): Strptr1
 //
 fun
 lexbufpos_get_strptr0
-  (buf: &lexbuf, pos: &position): strptr0
+  (buf: &lexbuf, pos: &position): Strptr0
 fun
 lexbufpos_get_strptr1
-  (buf: &lexbuf, pos: &position): strptr1
+  (buf: &lexbuf, pos: &position): Strptr1
 //
 fun
 lexbuf_get_substrptr0
-  (buf: &lexbuf, st: uint, ln: uint): strptr0
+  (buf: &lexbuf, st: uint, ln: uint): Strptr0
 fun
 lexbuf_get_substrptr1
-  (buf: &lexbuf, st: uint, ln: uint): strptr1
+  (buf: &lexbuf, st: uint, ln: uint): Strptr1
 //
 (* ****** ****** *)
 

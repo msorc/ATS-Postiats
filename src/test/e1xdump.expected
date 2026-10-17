@@ -1,0 +1,2233 @@
+TOPdyn: #define A 1
+#print A
+DEF A = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+ACT E0XPACTprint A
+V1ALint(1)
+nerr=0
+TOPdyn: #define A 1 + 2 * 3
+#print A
+#print (A - 1)
+DEF A = E1XPapp(+; E1XPintrep(1), E1XPapp(*; E1XPintrep(2), E1XPintrep(3)))
+VAL V1ALint(7)
+NORM E1XPapp(+; E1XPintrep(1), E1XPapp(*; E1XPintrep(2), E1XPintrep(3)))
+ACT E0XPACTprint A
+V1ALint(7)
+ACT E0XPACTprint E1XPlist(E1XPapp(-; A, E1XPintrep(1)))
+V1ALint(6)
+nerr=0
+TOPdyn: #define A 10 - 4 - 3
+#print A
+DEF A = E1XPapp(-; E1XPapp(-; E1XPintrep(10), E1XPintrep(4)), E1XPintrep(3))
+VAL V1ALint(3)
+NORM E1XPapp(-; E1XPapp(-; E1XPintrep(10), E1XPintrep(4)), E1XPintrep(3))
+ACT E0XPACTprint A
+V1ALint(3)
+nerr=0
+TOPdyn: #define A ~3
+#print A
+#print (~A)
+DEF A = E1XPapp(~; E1XPintrep(3))
+VAL V1ALint(-3)
+NORM E1XPapp(~; E1XPintrep(3))
+ACT E0XPACTprint A
+V1ALint(-3)
+ACT E0XPACTprint E1XPlist(E1XPapp(~; A))
+V1ALint(3)
+nerr=0
+TOPdyn: #define A 7 / 2
+#print A
+#print (A * 2)
+DEF A = E1XPapp(/; E1XPintrep(7), E1XPintrep(2))
+VAL V1ALint(3)
+NORM E1XPapp(/; E1XPintrep(7), E1XPintrep(2))
+ACT E0XPACTprint A
+V1ALint(3)
+ACT E0XPACTprint E1XPlist(E1XPapp(*; A, E1XPintrep(2)))
+V1ALint(6)
+nerr=0
+TOPdyn: #define A 1.5
+#define B 2.25
+#print (A + B)
+#print (A - B)
+#print (A * B)
+#print (A / B)
+#print (~A)
+DEF A = E1XPfloat(1.5)
+VAL V1ALdouble(1.500000)
+NORM E1XPfloat(1.5)
+DEF B = E1XPfloat(2.25)
+VAL V1ALdouble(2.250000)
+NORM E1XPfloat(2.25)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; A, B))
+V1ALdouble(3.750000)
+ACT E0XPACTprint E1XPlist(E1XPapp(-; A, B))
+V1ALdouble(-0.750000)
+ACT E0XPACTprint E1XPlist(E1XPapp(*; A, B))
+V1ALdouble(3.375000)
+ACT E0XPACTprint E1XPlist(E1XPapp(/; A, B))
+V1ALdouble(0.666667)
+ACT E0XPACTprint E1XPlist(E1XPapp(~; A))
+V1ALdouble(-1.500000)
+nerr=0
+TOPdyn: #define A 1.5
+#print (A < 2.5)
+#print (A <= 1.5)
+#print (A > 2.5)
+#print (A >= 1.5)
+DEF A = E1XPfloat(1.5)
+VAL V1ALdouble(1.500000)
+NORM E1XPfloat(1.5)
+ACT E0XPACTprint E1XPlist(E1XPapp(<; A, E1XPfloat(2.5)))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(<=; A, E1XPfloat(1.5)))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(>; A, E1XPfloat(2.5)))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(>=; A, E1XPfloat(1.5)))
+V1ALint(1)
+nerr=0
+TOPdyn: #define A 1
+#define B 2
+#print (A < B)
+#print (A <= B)
+#print (A > B)
+#print (A >= B)
+#print (A == B)
+#print (A != B)
+#print (A <> B)
+#print (A = B)
+DEF A = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF B = E1XPintrep(2)
+VAL V1ALint(2)
+NORM E1XPintrep(2)
+ACT E0XPACTprint E1XPlist(E1XPapp(<; A, B))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(<=; A, B))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(>; A, B))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(>=; A, B))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(==; A, B))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(!=; A, B))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(<>; A, B))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(=; A, B))
+V1ALint(0)
+nerr=0
+TOPdyn: #define S "abc"
+#define T "abd"
+#print (S + T)
+#print (S < T)
+#print (S <= T)
+#print (S > T)
+#print (S >= T)
+#print (S == T)
+#print (S != T)
+DEF S = E1XPstring(abc)
+VAL V1ALstring(abc)
+NORM E1XPstring(abc)
+DEF T = E1XPstring(abd)
+VAL V1ALstring(abd)
+NORM E1XPstring(abd)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; S, T))
+V1ALstring(abcabd)
+ACT E0XPACTprint E1XPlist(E1XPapp(<; S, T))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(<=; S, T))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(>; S, T))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(>=; S, T))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(==; S, T))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(!=; S, T))
+V1ALint(1)
+nerr=0
+TOPdyn: #define S ""
+#define T "x"
+#print (S && T)
+#print (T && T)
+#print (S || T)
+#print (S || S)
+#print (T || S)
+DEF S = E1XPstring()
+VAL V1ALstring()
+NORM E1XPstring()
+DEF T = E1XPstring(x)
+VAL V1ALstring(x)
+NORM E1XPstring(x)
+ACT E0XPACTprint E1XPlist(E1XPapp(&&; S, T))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(&&; T, T))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(||; S, T))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(||; S, S))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(||; T, S))
+V1ALint(1)
+nerr=0
+TOPdyn: #define A 0
+#define B 5
+#print (A && B)
+#print (B && B)
+#print (A || B)
+#print (A || A)
+#print (B || A)
+DEF A = E1XPintrep(0)
+VAL V1ALint(0)
+NORM E1XPintrep(0)
+DEF B = E1XPintrep(5)
+VAL V1ALint(5)
+NORM E1XPintrep(5)
+ACT E0XPACTprint E1XPlist(E1XPapp(&&; A, B))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(&&; B, B))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(||; A, B))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(||; A, A))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(||; B, A))
+V1ALint(1)
+nerr=0
+TOPdyn: #print (1 + "a")
+#print ("a" - "b")
+#print (1.5 + 1)
+#print (1 < 1.5)
+#print ('a' + 'b')
+#print (1.5 == 1.5)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPstring(a)))
+: 8(line=1, offs=8) -- 17(line=1, offs=17): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 16(line=1, offs=16): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 16(line=1, offs=16): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(-; E1XPstring(a), E1XPstring(b)))
+: 25(line=2, offs=8) -- 36(line=2, offs=19): error(1): the expression cannot be evaluated to a value.
+: 26(line=2, offs=9) -- 35(line=2, offs=18): error(1): the expression cannot be evaluated to a value.
+: 26(line=2, offs=9) -- 35(line=2, offs=18): error(1): the operator [-] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(+; E1XPfloat(1.5), E1XPintrep(1)))
+: 44(line=3, offs=8) -- 53(line=3, offs=17): error(1): the expression cannot be evaluated to a value.
+: 45(line=3, offs=9) -- 52(line=3, offs=16): error(1): the expression cannot be evaluated to a value.
+: 45(line=3, offs=9) -- 52(line=3, offs=16): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(<; E1XPintrep(1), E1XPfloat(1.5)))
+: 61(line=4, offs=8) -- 70(line=4, offs=17): error(1): the expression cannot be evaluated to a value.
+: 62(line=4, offs=9) -- 69(line=4, offs=16): error(1): the expression cannot be evaluated to a value.
+: 62(line=4, offs=9) -- 69(line=4, offs=16): error(1): the operator [<] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(+; E1XPchar(a), E1XPchar(b)))
+: 78(line=5, offs=8) -- 89(line=5, offs=19): error(1): the expression cannot be evaluated to a value.
+: 79(line=5, offs=9) -- 88(line=5, offs=18): error(1): the expression cannot be evaluated to a value.
+: 79(line=5, offs=9) -- 88(line=5, offs=18): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(==; E1XPfloat(1.5), E1XPfloat(1.5)))
+: 97(line=6, offs=8) -- 109(line=6, offs=20): error(1): the expression cannot be evaluated to a value.
+: 98(line=6, offs=9) -- 108(line=6, offs=19): error(1): the expression cannot be evaluated to a value.
+: 98(line=6, offs=9) -- 108(line=6, offs=19): error(1): the operator [==] cannot handle its argument(s).
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print ('a' == 'a')
+#print ('a' < 'b')
+#print (~"a")
+#print (~'a')
+#print ("a" * "b")
+#print ("a" / 2)
+ACT E0XPACTprint E1XPlist(E1XPapp(==; E1XPchar(a), E1XPchar(a)))
+: 8(line=1, offs=8) -- 20(line=1, offs=20): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 19(line=1, offs=19): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 19(line=1, offs=19): error(1): the operator [==] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(<; E1XPchar(a), E1XPchar(b)))
+: 28(line=2, offs=8) -- 39(line=2, offs=19): error(1): the expression cannot be evaluated to a value.
+: 29(line=2, offs=9) -- 38(line=2, offs=18): error(1): the expression cannot be evaluated to a value.
+: 29(line=2, offs=9) -- 38(line=2, offs=18): error(1): the operator [<] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(~; E1XPstring(a)))
+: 47(line=3, offs=8) -- 53(line=3, offs=14): error(1): the expression cannot be evaluated to a value.
+: 48(line=3, offs=9) -- 52(line=3, offs=13): error(1): the expression cannot be evaluated to a value.
+: 48(line=3, offs=9) -- 52(line=3, offs=13): error(1): the operator [~] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(~; E1XPchar(a)))
+: 61(line=4, offs=8) -- 67(line=4, offs=14): error(1): the expression cannot be evaluated to a value.
+: 62(line=4, offs=9) -- 66(line=4, offs=13): error(1): the expression cannot be evaluated to a value.
+: 62(line=4, offs=9) -- 66(line=4, offs=13): error(1): the operator [~] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(*; E1XPstring(a), E1XPstring(b)))
+: 75(line=5, offs=8) -- 86(line=5, offs=19): error(1): the expression cannot be evaluated to a value.
+: 76(line=5, offs=9) -- 85(line=5, offs=18): error(1): the expression cannot be evaluated to a value.
+: 76(line=5, offs=9) -- 85(line=5, offs=18): error(1): the operator [*] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(/; E1XPstring(a), E1XPintrep(2)))
+: 94(line=6, offs=8) -- 103(line=6, offs=17): error(1): the expression cannot be evaluated to a value.
+: 95(line=6, offs=9) -- 102(line=6, offs=16): error(1): the expression cannot be evaluated to a value.
+: 95(line=6, offs=9) -- 102(line=6, offs=16): error(1): the operator [/] cannot handle its argument(s).
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print (1 << 2)
+#print (1 >> 2)
+#print (<< (1, 2))
+ACT E0XPACTprint E1XPlist(E1XPapp(<<; E1XPintrep(1), E1XPintrep(2)))
+: 8(line=1, offs=8) -- 16(line=1, offs=16): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 15(line=1, offs=15): error(1): the applied identifier [<<] does not refer to a supported operator.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(>>; E1XPintrep(1), E1XPintrep(2)))
+: 24(line=2, offs=8) -- 32(line=2, offs=16): error(1): the expression cannot be evaluated to a value.
+: 25(line=2, offs=9) -- 31(line=2, offs=15): error(1): the expression cannot be evaluated to a value.
+: 25(line=2, offs=9) -- 31(line=2, offs=15): error(1): the applied identifier [>>] does not refer to a supported operator.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPerr())
+: 40(line=3, offs=8) -- 51(line=3, offs=19): error(1): the expression cannot be evaluated to a value.
+: 41(line=3, offs=9) -- 43(line=3, offs=11): error(1): the expression cannot be evaluated to a value.
+: 41(line=3, offs=9) -- 43(line=3, offs=11): error(1): the expression cannot be evaluated as it indicates an error.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print (+ (1, 2))
+#print (+ (1))
+#print (+ (1, 2, 3))
+#print (+ ())
+#print (~ (1, 2))
+#print (defined (1, 2))
+ACT E0XPACTprint E1XPlist(E1XPerr())
+: 8(line=1, offs=8) -- 18(line=1, offs=18): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 10(line=1, offs=10): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 10(line=1, offs=10): error(1): the expression cannot be evaluated as it indicates an error.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPerr())
+: 26(line=2, offs=8) -- 33(line=2, offs=15): error(1): the expression cannot be evaluated to a value.
+: 27(line=2, offs=9) -- 28(line=2, offs=10): error(1): the expression cannot be evaluated to a value.
+: 27(line=2, offs=9) -- 28(line=2, offs=10): error(1): the expression cannot be evaluated as it indicates an error.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPerr())
+: 41(line=3, offs=8) -- 54(line=3, offs=21): error(1): the expression cannot be evaluated to a value.
+: 42(line=3, offs=9) -- 43(line=3, offs=10): error(1): the expression cannot be evaluated to a value.
+: 42(line=3, offs=9) -- 43(line=3, offs=10): error(1): the expression cannot be evaluated as it indicates an error.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPerr())
+: 62(line=4, offs=8) -- 68(line=4, offs=14): error(1): the expression cannot be evaluated to a value.
+: 63(line=4, offs=9) -- 64(line=4, offs=10): error(1): the expression cannot be evaluated to a value.
+: 63(line=4, offs=9) -- 64(line=4, offs=10): error(1): the expression cannot be evaluated as it indicates an error.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(~; E1XPintrep(1), E1XPintrep(2)))
+: 76(line=5, offs=8) -- 86(line=5, offs=18): error(1): the expression cannot be evaluated to a value.
+: 77(line=5, offs=9) -- 85(line=5, offs=17): error(1): the expression cannot be evaluated to a value.
+: 77(line=5, offs=9) -- 85(line=5, offs=17): error(1): arity mismatch for this function application.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; E1XPintrep(1), E1XPintrep(2)))
+: 94(line=6, offs=8) -- 110(line=6, offs=24): error(1): the expression cannot be evaluated to a value.
+: 95(line=6, offs=9) -- 109(line=6, offs=23): error(1): the expression cannot be evaluated to a value.
+: 95(line=6, offs=9) -- 109(line=6, offs=23): error(1): arity mismatch for this function application.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print (defined (X))
+#define X 1
+#print (defined (X))
+#print (undefined (X))
+#undef X
+#print (defined (X))
+#print (undefined (X))
+#print (X)
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; X))
+V1ALint(0)
+DEF X = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; X))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(undefined; X))
+V1ALint(0)
+UNDEF X
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; X))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(undefined; X))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(X)
+: 138(line=8, offs=8) -- 141(line=8, offs=11): error(1): the expression cannot be evaluated to a value.
+: 139(line=8, offs=9) -- 140(line=8, offs=10): error(1): the expression cannot be evaluated to a value.
+: 78(line=5, offs=1) -- 86(line=5, offs=9): error(1): the expression cannot be evaluated to a value.
+: 78(line=5, offs=1) -- 86(line=5, offs=9): error(1): the expression cannot be evaluated as it is un-defined.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print (defined (1))
+#print (undefined (1))
+#print (defined ("a"))
+#print (defined (f(1)))
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; E1XPintrep(1)))
+: 8(line=1, offs=8) -- 21(line=1, offs=21): error(1): the expression cannot be evaluated to a value.
+: 9(line=1, offs=9) -- 20(line=1, offs=20): error(1): the expression cannot be evaluated to a value.
+: 18(line=1, offs=18) -- 19(line=1, offs=19): error(1): the expression is expected to be an indentifer.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(undefined; E1XPintrep(1)))
+: 29(line=2, offs=8) -- 44(line=2, offs=23): error(1): the expression cannot be evaluated to a value.
+: 30(line=2, offs=9) -- 43(line=2, offs=22): error(1): the expression cannot be evaluated to a value.
+: 41(line=2, offs=20) -- 42(line=2, offs=21): error(1): the expression is expected to be an indentifer.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; E1XPstring(a)))
+: 52(line=3, offs=8) -- 67(line=3, offs=23): error(1): the expression cannot be evaluated to a value.
+: 53(line=3, offs=9) -- 66(line=3, offs=22): error(1): the expression cannot be evaluated to a value.
+: 62(line=3, offs=18) -- 65(line=3, offs=21): error(1): the expression is expected to be an indentifer.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; E1XPapp(f; E1XPintrep(1))))
+: 75(line=4, offs=8) -- 91(line=4, offs=24): error(1): the expression cannot be evaluated to a value.
+: 76(line=4, offs=9) -- 90(line=4, offs=23): error(1): the expression cannot be evaluated to a value.
+: 85(line=4, offs=18) -- 89(line=4, offs=22): error(1): the expression is expected to be an indentifer.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define X
+#print X
+#print (defined (X))
+#define Y ()
+#print Y
+#define Z (1, 2)
+#print Z
+#print (Z + 1)
+DEF X = E1XPnone()
+VAL V1ALint(0)
+NORM E1XPnone()
+ACT E0XPACTprint X
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(defined; X))
+V1ALint(1)
+DEF Y = E1XPlist()
+VAL V1ALint(0)
+NORM E1XPlist()
+ACT E0XPACTprint Y
+V1ALint(0)
+DEF Z = E1XPlist(E1XPintrep(1), E1XPintrep(2))
+: 73(line=6, offs=11) -- 79(line=6, offs=17): error(1): the expression cannot be evaluated to a value.
+: 73(line=6, offs=11) -- 79(line=6, offs=17): error(1): the expression cannot be evaluated as it is a tuple.
+VAL ABORT
+V1ALerr()
+NORM E1XPlist(E1XPintrep(1), E1XPintrep(2))
+ACT E0XPACTprint Z
+: 87(line=7, offs=8) -- 88(line=7, offs=9): error(1): the expression cannot be evaluated to a value.
+: 73(line=6, offs=11) -- 79(line=6, offs=17): error(1): the expression cannot be evaluated to a value.
+: 73(line=6, offs=11) -- 79(line=6, offs=17): error(1): the expression cannot be evaluated as it is a tuple.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPlist(E1XPapp(+; Z, E1XPintrep(1)))
+: 96(line=8, offs=8) -- 103(line=8, offs=15): error(1): the expression cannot be evaluated to a value.
+: 97(line=8, offs=9) -- 102(line=8, offs=14): error(1): the expression cannot be evaluated to a value.
+: 97(line=8, offs=9) -- 102(line=8, offs=14): error(1): the operator [+] cannot handle its argument(s).
+: 97(line=8, offs=9) -- 98(line=8, offs=10): error(1): the expression cannot be evaluated to a value.
+: 73(line=6, offs=11) -- 79(line=6, offs=17): error(1): the expression cannot be evaluated to a value.
+: 73(line=6, offs=11) -- 79(line=6, offs=17): error(1): the expression cannot be evaluated as it is a tuple.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define f(x) x + 1
+#print (f(3))
+#print (f(f(2)))
+#print (f(1, 2))
+#print (f())
+#print (f)
+DEF f = E1XPfun(x; E1XPapp(+; x, E1XPintrep(1)))
+: 10(line=1, offs=10) -- 19(line=1, offs=19): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 19(line=1, offs=19): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(+; x, E1XPintrep(1)))
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(3)))
+V1ALint(4)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPapp(f; E1XPintrep(2))))
+V1ALint(4)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(1), E1XPintrep(2)))
+V1ALint(2)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; ))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(f)
+: 88(line=6, offs=8) -- 91(line=6, offs=11): error(1): the expression cannot be evaluated to a value.
+: 89(line=6, offs=9) -- 90(line=6, offs=10): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 19(line=1, offs=19): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 19(line=1, offs=19): error(1): the expression cannot be evaluated as it is a function.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define f(x, y) x - y
+#print (f(10, 3))
+#print (f(10))
+#print (f(3, 10, 5))
+#define g(x) f(x, x)
+#print (g(5))
+DEF f = E1XPfun(x, y; E1XPapp(-; x, y))
+: 10(line=1, offs=10) -- 22(line=1, offs=22): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 22(line=1, offs=22): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x, y; E1XPapp(-; x, y))
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(10), E1XPintrep(3)))
+V1ALint(7)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(10)))
+V1ALint(10)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(3), E1XPintrep(10), E1XPintrep(5)))
+V1ALint(-7)
+DEF g = E1XPfun(x; E1XPapp(f; x, x))
+: 86(line=5, offs=10) -- 97(line=5, offs=21): error(1): the expression cannot be evaluated to a value.
+: 86(line=5, offs=10) -- 97(line=5, offs=21): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(f; x, x))
+ACT E0XPACTprint E1XPlist(E1XPapp(g; E1XPintrep(5)))
+V1ALint(0)
+nerr=0
+TOPdyn: #define fact(n) if n <= 1 then 1 else n * fact(n - 1)
+#print (fact(5))
+#print (fact(10))
+#print (fact(0))
+DEF fact = E1XPfun(n; E1XPif(E1XPapp(<=; n, E1XPintrep(1)); E1XPintrep(1); E1XPapp(*; n, E1XPapp(fact; E1XPapp(-; n, E1XPintrep(1))))))
+: 13(line=1, offs=13) -- 54(line=1, offs=54): error(1): the expression cannot be evaluated to a value.
+: 13(line=1, offs=13) -- 54(line=1, offs=54): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(n; E1XPif(E1XPapp(<=; n, E1XPintrep(1)); E1XPintrep(1); E1XPapp(*; n, E1XPapp(fact; E1XPapp(-; n, E1XPintrep(1))))))
+ACT E0XPACTprint E1XPlist(E1XPapp(fact; E1XPintrep(5)))
+V1ALint(120)
+ACT E0XPACTprint E1XPlist(E1XPapp(fact; E1XPintrep(10)))
+V1ALint(3628800)
+ACT E0XPACTprint E1XPlist(E1XPapp(fact; E1XPintrep(0)))
+V1ALint(1)
+nerr=0
+TOPdyn: #define loop(n) loop(n)
+#print (loop(1))
+DEF loop = E1XPfun(n; E1XPapp(loop; n))
+: 13(line=1, offs=13) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 13(line=1, offs=13) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(n; E1XPapp(loop; n))
+ACT E0XPACTprint E1XPlist(E1XPapp(loop; E1XPintrep(1)))
+: 32(line=2, offs=8) -- 41(line=2, offs=17): error(1): the expression cannot be evaluated to a value.
+: 33(line=2, offs=9) -- 40(line=2, offs=16): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 24(line=1, offs=24): error(1): the maximal evaluation depth (100) has been reached.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define loop(n) 1 + loop(n)
+#print (loop(1))
+DEF loop = E1XPfun(n; E1XPapp(+; E1XPintrep(1), E1XPapp(loop; n)))
+: 13(line=1, offs=13) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 13(line=1, offs=13) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(n; E1XPapp(+; E1XPintrep(1), E1XPapp(loop; n)))
+ACT E0XPACTprint E1XPlist(E1XPapp(loop; E1XPintrep(1)))
+: 36(line=2, offs=8) -- 45(line=2, offs=17): error(1): the expression cannot be evaluated to a value.
+: 37(line=2, offs=9) -- 44(line=2, offs=16): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the operator [+] cannot handle its argument(s).
+: 21(line=1, offs=21) -- 28(line=1, offs=28): error(1): the expression cannot be evaluated to a value.
+: 17(line=1, offs=17) -- 28(line=1, offs=28): error(1): the maximal evaluation depth (100) has been reached.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define a b
+#define b a
+#print a
+DEF a = b
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the identifier [b] is unbound.
+VAL ABORT
+V1ALerr()
+NORM b
+DEF b = a
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the maximal evaluation depth (100) has been reached.
+VAL ABORT
+V1ALerr()
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the maximal normlization depth (100) has been reached.
+NORM E1XPerr()
+ACT E0XPACTprint a
+: 32(line=3, offs=8) -- 33(line=3, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 23(line=2, offs=11) -- 24(line=2, offs=12): error(1): the maximal evaluation depth (100) has been reached.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define X Y
+#print X
+#define Y 3
+#print X
+DEF X = Y
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the identifier [Y] is unbound.
+VAL ABORT
+V1ALerr()
+NORM Y
+ACT E0XPACTprint X
+: 20(line=2, offs=8) -- 21(line=2, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 12(line=1, offs=12): error(1): the identifier [Y] is unbound.
+ABORT
+V1ALerr()
+DEF Y = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+ACT E0XPACTprint X
+V1ALint(3)
+nerr=0
+TOPdyn: #define X 1
+#define Y X + 1
+#define X 10
+#print Y
+DEF X = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF Y = E1XPapp(+; X, E1XPintrep(1))
+VAL V1ALint(2)
+NORM E1XPapp(+; E1XPintrep(1), E1XPintrep(1))
+DEF X = E1XPintrep(10)
+VAL V1ALint(10)
+NORM E1XPintrep(10)
+ACT E0XPACTprint Y
+V1ALint(11)
+nerr=0
+TOPdyn: #if 1 #then
+#print "one"
+#endif
+COND if E1XPintrep(1)
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(one)
+V1ALstring(one)
+nerr=0
+TOPdyn: #if 0 #then
+#print "one"
+#else
+#print "two"
+#endif
+COND if E1XPintrep(0)
+V1ALint(0)
+ACT E0XPACTprint E1XPstring(two)
+V1ALstring(two)
+nerr=0
+TOPdyn: #if 0 #then
+#print "one"
+#elif 1 #then
+#print "two"
+#else
+#print "three"
+#endif
+COND if E1XPintrep(0)
+V1ALint(0)
+COND if E1XPintrep(1)
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(two)
+V1ALstring(two)
+nerr=0
+TOPdyn: #if 0 #then
+#print "one"
+#elif 0 #then
+#print "two"
+#else
+#print "three"
+#endif
+COND if E1XPintrep(0)
+V1ALint(0)
+COND if E1XPintrep(0)
+V1ALint(0)
+ACT E0XPACTprint E1XPstring(three)
+V1ALstring(three)
+nerr=0
+TOPdyn: #if 0 #then
+#print "one"
+#elif 0 #then
+#print "two"
+#endif
+COND if E1XPintrep(0)
+V1ALint(0)
+COND if E1XPintrep(0)
+V1ALint(0)
+nerr=0
+TOPdyn: #ifdef X #then
+#print "X"
+#else
+#print "noX"
+#endif
+#define X 1
+#ifdef X #then
+#print "X"
+#else
+#print "noX"
+#endif
+COND ifdef X
+V1ALint(0)
+ACT E0XPACTprint E1XPstring(noX)
+V1ALstring(noX)
+DEF X = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+COND ifdef X
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(X)
+V1ALstring(X)
+nerr=0
+TOPdyn: #ifndef X #then
+#print "noX"
+#else
+#print "X"
+#endif
+#define X 1
+#ifndef X #then
+#print "noX"
+#else
+#print "X"
+#endif
+COND ifndef X
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(noX)
+V1ALstring(noX)
+DEF X = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+COND ifndef X
+V1ALint(0)
+ACT E0XPACTprint E1XPstring(X)
+V1ALstring(X)
+nerr=0
+TOPdyn: #ifdef (1 + 1) #then
+#print "x"
+#endif
+COND ifdef E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))
+V1ALerr()
+nerr=0
+TOPdyn: #ifndef 1 #then
+#print "x"
+#endif
+COND ifndef E1XPintrep(1)
+V1ALerr()
+nerr=0
+TOPdyn: #if undefinedvar #then
+#print "x"
+#endif
+COND if undefinedvar
+: 5(line=1, offs=5) -- 17(line=1, offs=17): error(1): the expression cannot be evaluated to a value.
+: 5(line=1, offs=5) -- 17(line=1, offs=17): error(1): the identifier [undefinedvar] is unbound.
+: 9(line=1, offs=9) -- 10(line=1, offs=10): error(1): the expression is expected to be an indentifer.
+: 8(line=1, offs=8) -- 15(line=1, offs=15): error(1): the expression is expected to be an indentifer.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #if (1 + "a") #then
+#print "x"
+#else
+#print "y"
+#endif
+COND if E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPstring(a)))
+: 5(line=1, offs=5) -- 14(line=1, offs=14): error(1): the expression cannot be evaluated to a value.
+: 6(line=1, offs=6) -- 13(line=1, offs=13): error(1): the expression cannot be evaluated to a value.
+: 6(line=1, offs=6) -- 13(line=1, offs=13): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPstring(y)
+V1ALstring(y)
+nerr=0
+TOPdyn: #if "a" #then
+#print "x"
+#endif
+#if "" #then
+#print "x"
+#else
+#print "y"
+#endif
+#if 0.0 #then
+#print "x"
+#else
+#print "y"
+#endif
+#if 0.5 #then
+#print "x"
+#else
+#print "y"
+#endif
+COND if E1XPstring(a)
+V1ALstring(a)
+ACT E0XPACTprint E1XPstring(x)
+V1ALstring(x)
+COND if E1XPstring()
+V1ALstring()
+ACT E0XPACTprint E1XPstring(y)
+V1ALstring(y)
+COND if E1XPfloat(0.0)
+V1ALdouble(0.000000)
+ACT E0XPACTprint E1XPstring(y)
+V1ALstring(y)
+COND if E1XPfloat(0.5)
+V1ALdouble(0.500000)
+ACT E0XPACTprint E1XPstring(x)
+V1ALstring(x)
+nerr=0
+TOPdyn: #if '\0' #then
+#print "x"
+#else
+#print "y"
+#endif
+#if 'a' #then
+#print "x"
+#else
+#print "y"
+#endif
+COND if E1XPchar( )
+V1ALchar( )
+ACT E0XPACTprint E1XPstring(y)
+V1ALstring(y)
+COND if E1XPchar(a)
+V1ALchar(a)
+ACT E0XPACTprint E1XPstring(x)
+V1ALstring(x)
+nerr=0
+TOPdyn: #if 1 #then
+#if 0 #then
+#print "a"
+#else
+#print "b"
+#endif
+#else
+#print "c"
+#endif
+COND if E1XPintrep(1)
+V1ALint(1)
+COND if E1XPintrep(0)
+V1ALint(0)
+ACT E0XPACTprint E1XPstring(b)
+V1ALstring(b)
+nerr=0
+TOPdyn: #define N 3
+#if N > 2 && N < 5 #then
+#print "in"
+#else
+#print "out"
+#endif
+#if N == 3 || X #then
+#print "or"
+#endif
+DEF N = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+COND if E1XPapp(&&; E1XPapp(>; N, E1XPintrep(2)), E1XPapp(<; N, E1XPintrep(5)))
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(in)
+V1ALstring(in)
+COND if E1XPapp(||; E1XPapp(==; N, E1XPintrep(3)), X)
+: 80(line=7, offs=5) -- 91(line=7, offs=16): error(1): the expression cannot be evaluated to a value.
+: 80(line=7, offs=5) -- 91(line=7, offs=16): error(1): the operator [||] cannot handle its argument(s).
+: 90(line=7, offs=15) -- 91(line=7, offs=16): error(1): the expression cannot be evaluated to a value.
+: 90(line=7, offs=15) -- 91(line=7, offs=16): error(1): the identifier [X] is unbound.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define N 3
+#if N > 2 && undefinedvar #then
+#print "in"
+#endif
+DEF N = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+COND if E1XPapp(&&; E1XPapp(>; N, E1XPintrep(2)), undefinedvar)
+: 17(line=2, offs=5) -- 38(line=2, offs=26): error(1): the expression cannot be evaluated to a value.
+: 17(line=2, offs=5) -- 38(line=2, offs=26): error(1): the operator [&&] cannot handle its argument(s).
+: 26(line=2, offs=14) -- 38(line=2, offs=26): error(1): the expression cannot be evaluated to a value.
+: 26(line=2, offs=14) -- 38(line=2, offs=26): error(1): the identifier [undefinedvar] is unbound.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define N 3
+#if defined(N) && N > 2 #then
+#print "in"
+#endif
+DEF N = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+COND if E1XPapp(&&; E1XPapp(defined; N), E1XPapp(>; N, E1XPintrep(2)))
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(in)
+V1ALstring(in)
+nerr=0
+TOPdyn: #define N 3
+#print %(N + 1)
+#define M %(N + 1)
+#define N 10
+#print M
+#print N
+DEF N = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+ACT E0XPACTprint E1XPv1al(V1ALint(4))
+V1ALint(4)
+DEF M = E1XPv1al(V1ALint(4))
+VAL V1ALint(4)
+NORM E1XPv1al(V1ALint(4))
+DEF N = E1XPintrep(10)
+VAL V1ALint(10)
+NORM E1XPintrep(10)
+ACT E0XPACTprint M
+V1ALint(4)
+ACT E0XPACTprint N
+V1ALint(10)
+nerr=0
+TOPdyn: #define M %(1 + "a")
+#print M
+: 13(line=1, offs=13) -- 20(line=1, offs=20): error(1): the expression cannot be evaluated to a value.
+: 13(line=1, offs=13) -- 20(line=1, offs=20): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+DEF M = E1XPv1al(V1ALerr())
+: 11(line=1, offs=11) -- 21(line=1, offs=21): error(1): the expression cannot be evaluated to a value.
+VAL ABORT
+V1ALerr()
+NORM E1XPv1al(V1ALerr())
+ACT E0XPACTprint M
+: 29(line=2, offs=8) -- 30(line=2, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 21(line=1, offs=21): error(1): the expression cannot be evaluated to a value.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define M %(undefinedvar)
+#print M
+: 13(line=1, offs=13) -- 25(line=1, offs=25): error(1): the expression cannot be evaluated to a value.
+: 13(line=1, offs=13) -- 25(line=1, offs=25): error(1): the identifier [undefinedvar] is unbound.
+ABORT
+DEF M = E1XPv1al(V1ALerr())
+: 11(line=1, offs=11) -- 26(line=1, offs=26): error(1): the expression cannot be evaluated to a value.
+VAL ABORT
+V1ALerr()
+NORM E1XPv1al(V1ALerr())
+ACT E0XPACTprint M
+: 34(line=2, offs=8) -- 35(line=2, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 26(line=1, offs=26): error(1): the expression cannot be evaluated to a value.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print (if 1 then 2 else 3)
+#print (if 0 then 2 else 3)
+#print (if 0 then 2)
+#print (if "a" then 2 else 3)
+#print (if (1 + "a") then 2 else 3)
+ACT E0XPACTprint E1XPlist(E1XPif(E1XPintrep(1); E1XPintrep(2); E1XPintrep(3)))
+V1ALint(2)
+ACT E0XPACTprint E1XPlist(E1XPif(E1XPintrep(0); E1XPintrep(2); E1XPintrep(3)))
+V1ALint(3)
+ACT E0XPACTprint E1XPlist(E1XPif(E1XPintrep(0); E1XPintrep(2); E1XPnone()))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPif(E1XPstring(a); E1XPintrep(2); E1XPintrep(3)))
+V1ALint(2)
+ACT E0XPACTprint E1XPlist(E1XPif(E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPstring(a))); E1XPintrep(2); E1XPintrep(3)))
+: 115(line=5, offs=8) -- 143(line=5, offs=36): error(1): the expression cannot be evaluated to a value.
+: 116(line=5, offs=9) -- 142(line=5, offs=35): error(1): the expression cannot be evaluated to a value.
+: 119(line=5, offs=12) -- 128(line=5, offs=21): error(1): the expression cannot be evaluated to a value.
+: 120(line=5, offs=13) -- 127(line=5, offs=20): error(1): the expression cannot be evaluated to a value.
+: 120(line=5, offs=13) -- 127(line=5, offs=20): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define C if 1 then 2 else 3
+#print C
+DEF C = E1XPif(E1XPintrep(1); E1XPintrep(2); E1XPintrep(3))
+VAL V1ALint(2)
+NORM E1XPintrep(2)
+ACT E0XPACTprint C
+V1ALint(2)
+nerr=0
+TOPdyn: #define A (1)
+#print A
+#define A ((1))
+#print A
+#define A (1, (2))
+#print A
+DEF A = E1XPlist(E1XPintrep(1))
+VAL V1ALint(1)
+NORM E1XPlist(E1XPintrep(1))
+ACT E0XPACTprint A
+V1ALint(1)
+DEF A = E1XPlist(E1XPlist(E1XPintrep(1)))
+VAL V1ALint(1)
+NORM E1XPlist(E1XPlist(E1XPintrep(1)))
+ACT E0XPACTprint A
+V1ALint(1)
+DEF A = E1XPlist(E1XPintrep(1), E1XPlist(E1XPintrep(2)))
+: 59(line=5, offs=11) -- 67(line=5, offs=19): error(1): the expression cannot be evaluated to a value.
+: 59(line=5, offs=11) -- 67(line=5, offs=19): error(1): the expression cannot be evaluated as it is a tuple.
+VAL ABORT
+V1ALerr()
+NORM E1XPlist(E1XPintrep(1), E1XPlist(E1XPintrep(2)))
+ACT E0XPACTprint A
+: 75(line=6, offs=8) -- 76(line=6, offs=9): error(1): the expression cannot be evaluated to a value.
+: 59(line=5, offs=11) -- 67(line=5, offs=19): error(1): the expression cannot be evaluated to a value.
+: 59(line=5, offs=11) -- 67(line=5, offs=19): error(1): the expression cannot be evaluated as it is a tuple.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #print ()
+#print (1)
+ACT E0XPACTprint E1XPlist()
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPintrep(1))
+V1ALint(1)
+nerr=0
+TOPdyn: #print 1(2)
+#print "a"(2)
+#print (f)(1)
+#print (1)(2)
+ACT E0XPACTprint E1XPapp(E1XPintrep(1); E1XPintrep(2))
+: 8(line=1, offs=8) -- 12(line=1, offs=12): error(1): the expression cannot be evaluated to a value.
+: 8(line=1, offs=8) -- 12(line=1, offs=12): error(1): the applied expression is required to be an identifier.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPapp(E1XPstring(a); E1XPintrep(2))
+: 20(line=2, offs=8) -- 26(line=2, offs=14): error(1): the expression cannot be evaluated to a value.
+: 20(line=2, offs=8) -- 26(line=2, offs=14): error(1): the applied expression is required to be an identifier.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPapp(E1XPlist(f); E1XPintrep(1))
+: 34(line=3, offs=8) -- 40(line=3, offs=14): error(1): the expression cannot be evaluated to a value.
+: 34(line=3, offs=8) -- 40(line=3, offs=14): error(1): the applied expression is required to be an identifier.
+ABORT
+V1ALerr()
+ACT E0XPACTprint E1XPapp(E1XPlist(E1XPintrep(1)); E1XPintrep(2))
+: 48(line=4, offs=8) -- 54(line=4, offs=14): error(1): the expression cannot be evaluated to a value.
+: 48(line=4, offs=8) -- 54(line=4, offs=14): error(1): the applied expression is required to be an identifier.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define f(x) (x)
+#print (f(3))
+#print f(3)
+#print f 3
+DEF f = E1XPfun(x; E1XPlist(x))
+: 10(line=1, offs=10) -- 17(line=1, offs=17): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 17(line=1, offs=17): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPlist(x))
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(3)))
+V1ALint(3)
+ACT E0XPACTprint E1XPapp(f; E1XPintrep(3))
+V1ALint(3)
+ACT E0XPACTprint E1XPapp(f; E1XPintrep(3))
+V1ALint(3)
+nerr=0
+TOPdyn: #define f(x) g(x)
+#print (f(3))
+#define g(y) y * 2
+#print (f(3))
+DEF f = E1XPfun(x; E1XPapp(g; x))
+: 10(line=1, offs=10) -- 18(line=1, offs=18): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 18(line=1, offs=18): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(g; x))
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(3)))
+: 26(line=2, offs=8) -- 32(line=2, offs=14): error(1): the expression cannot be evaluated to a value.
+: 27(line=2, offs=9) -- 31(line=2, offs=13): error(1): the expression cannot be evaluated to a value.
+: 14(line=1, offs=14) -- 18(line=1, offs=18): error(1): the expression cannot be evaluated to a value.
+: 14(line=1, offs=14) -- 18(line=1, offs=18): error(1): the applied identifier [g] does not refer to a supported operator.
+ABORT
+V1ALerr()
+DEF g = E1XPfun(y; E1XPapp(*; y, E1XPintrep(2)))
+: 42(line=3, offs=10) -- 51(line=3, offs=19): error(1): the expression cannot be evaluated to a value.
+: 42(line=3, offs=10) -- 51(line=3, offs=19): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(y; E1XPapp(*; y, E1XPintrep(2)))
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(3)))
+V1ALint(6)
+nerr=0
+TOPdyn: #define f(x, g) g(x)
+#define h(y) y + 1
+#print (f(3, h))
+DEF f = E1XPfun(x, g; E1XPapp(g; x))
+: 10(line=1, offs=10) -- 21(line=1, offs=21): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 21(line=1, offs=21): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x, g; E1XPapp(g; x))
+DEF h = E1XPfun(y; E1XPapp(+; y, E1XPintrep(1)))
+: 31(line=2, offs=10) -- 40(line=2, offs=19): error(1): the expression cannot be evaluated to a value.
+: 31(line=2, offs=10) -- 40(line=2, offs=19): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(y; E1XPapp(+; y, E1XPintrep(1)))
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(3), h))
+: 48(line=3, offs=8) -- 57(line=3, offs=17): error(1): the expression cannot be evaluated to a value.
+: 49(line=3, offs=9) -- 56(line=3, offs=16): error(1): the expression cannot be evaluated to a value.
+: 54(line=3, offs=14) -- 55(line=3, offs=15): error(1): the expression cannot be evaluated to a value.
+: 31(line=2, offs=10) -- 40(line=2, offs=19): error(1): the expression cannot be evaluated to a value.
+: 31(line=2, offs=10) -- 40(line=2, offs=19): error(1): the expression cannot be evaluated as it is a function.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define f(x) x
+#define x 5
+#print (f(1))
+#print (f(x))
+DEF f = E1XPfun(x; x)
+: 10(line=1, offs=10) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; x)
+DEF x = E1XPintrep(5)
+VAL V1ALint(5)
+NORM E1XPintrep(5)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(1)))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(f; x))
+V1ALint(5)
+nerr=0
+TOPdyn: #define pi 3.14159
+#define r 2.0
+#print (pi * r * r)
+#print (pi < 4.0)
+DEF pi = E1XPfloat(3.14159)
+VAL V1ALdouble(3.141590)
+NORM E1XPfloat(3.14159)
+DEF r = E1XPfloat(2.0)
+VAL V1ALdouble(2.000000)
+NORM E1XPfloat(2.0)
+ACT E0XPACTprint E1XPlist(E1XPapp(*; E1XPapp(*; pi, r), r))
+V1ALdouble(12.566360)
+ACT E0XPACTprint E1XPlist(E1XPapp(<; pi, E1XPfloat(4.0)))
+V1ALint(1)
+nerr=0
+TOPdyn: #define big 2147483647
+#print (big + 1)
+#print (big * 2)
+#print (~big - 1)
+DEF big = E1XPintrep(2147483647)
+VAL V1ALint(2147483647)
+NORM E1XPintrep(2147483647)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; big, E1XPintrep(1)))
+V1ALint(-2147483648)
+ACT E0XPACTprint E1XPlist(E1XPapp(*; big, E1XPintrep(2)))
+V1ALint(-2)
+ACT E0XPACTprint E1XPlist(E1XPapp(-; E1XPapp(~; big), E1XPintrep(1)))
+V1ALint(-2147483648)
+nerr=0
+TOPdyn: #define big 4294967296
+#print big
+#define h 0xFF
+#print h
+#print (h + 1)
+#define o 0777
+#print o
+DEF big = E1XPintrep(4294967296)
+VAL V1ALint(0)
+NORM E1XPintrep(4294967296)
+ACT E0XPACTprint big
+V1ALint(0)
+DEF h = E1XPintrep(0xFF)
+VAL V1ALint(255)
+NORM E1XPintrep(0xFF)
+ACT E0XPACTprint h
+V1ALint(255)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; h, E1XPintrep(1)))
+V1ALint(256)
+DEF o = E1XPintrep(0777)
+VAL V1ALint(511)
+NORM E1XPintrep(0777)
+ACT E0XPACTprint o
+V1ALint(511)
+nerr=0
+TOPdyn: #define s "a\\nb"
+#print s
+#print (s + s)
+DEF s = E1XPstring(a\nb)
+VAL V1ALstring(a\nb)
+NORM E1XPstring(a\nb)
+ACT E0XPACTprint s
+V1ALstring(a\nb)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; s, s))
+V1ALstring(a\nba\nb)
+nerr=0
+TOPdyn: #define c 'x'
+#print c
+#define c '\\n'
+#print c
+DEF c = E1XPchar(x)
+VAL V1ALchar(x)
+NORM E1XPchar(x)
+ACT E0XPACTprint c
+V1ALchar(x)
+DEF c = E1XPnone()
+VAL V1ALint(0)
+NORM E1XPnone()
+ACT E0XPACTprint c
+V1ALint(0)
+nerr=1
+: 34(line=3, offs=11) -- 37(line=3, offs=14): error(lexing): the char constant is unclosed.
+: 34(line=3, offs=11) -- 37(line=3, offs=14): error(parsing): the token is discarded.
+TOPdyn: #define f(x) x
+#undef f
+#print (f(1))
+DEF f = E1XPfun(x; x)
+: 10(line=1, offs=10) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; x)
+UNDEF f
+ACT E0XPACTprint E1XPlist(E1XPapp(f; E1XPintrep(1)))
+: 32(line=3, offs=8) -- 38(line=3, offs=14): error(1): the expression cannot be evaluated to a value.
+: 33(line=3, offs=9) -- 37(line=3, offs=13): error(1): the expression cannot be evaluated to a value.
+: 33(line=3, offs=9) -- 37(line=3, offs=13): error(1): the applied identifier [f] does not refer to a function.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #undef nothing
+#print nothing
+UNDEF nothing
+ACT E0XPACTprint nothing
+: 23(line=2, offs=8) -- 30(line=2, offs=15): error(1): the expression cannot be evaluated to a value.
+: 1(line=1, offs=1) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated to a value.
+: 1(line=1, offs=1) -- 15(line=1, offs=15): error(1): the expression cannot be evaluated as it is un-defined.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define A 1
+#define B 2
+#define C 3
+#define D (A + B) * C
+#print D
+#print (D - A - B - C)
+DEF A = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF B = E1XPintrep(2)
+VAL V1ALint(2)
+NORM E1XPintrep(2)
+DEF C = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+DEF D = E1XPapp(*; E1XPlist(E1XPapp(+; A, B)), C)
+VAL V1ALint(9)
+NORM E1XPapp(*; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(2))), E1XPintrep(3))
+ACT E0XPACTprint D
+V1ALint(9)
+ACT E0XPACTprint E1XPlist(E1XPapp(-; E1XPapp(-; E1XPapp(-; D, A), B), C))
+V1ALint(3)
+nerr=0
+TOPdyn: #define a 1 b 2
+#print a
+DEF a = E1XPapp(E1XPapp(E1XPintrep(1); b); E1XPintrep(2))
+: 11(line=1, offs=11) -- 16(line=1, offs=16): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 16(line=1, offs=16): error(1): the applied expression is required to be an identifier.
+VAL ABORT
+V1ALerr()
+NORM E1XPapp(E1XPapp(E1XPintrep(1); b); E1XPintrep(2))
+ACT E0XPACTprint a
+: 24(line=2, offs=8) -- 25(line=2, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 16(line=1, offs=16): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 16(line=1, offs=16): error(1): the applied expression is required to be an identifier.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define a b c
+#print a
+DEF a = E1XPapp(b; c)
+: 11(line=1, offs=11) -- 14(line=1, offs=14): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 14(line=1, offs=14): error(1): the applied identifier [b] does not refer to a supported operator.
+VAL ABORT
+V1ALerr()
+NORM E1XPapp(b; c)
+ACT E0XPACTprint a
+: 22(line=2, offs=8) -- 23(line=2, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 14(line=1, offs=14): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 14(line=1, offs=14): error(1): the applied identifier [b] does not refer to a supported operator.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define t(x) if x then 1 else 0
+#print (t(1))
+#print (t(0))
+#print (t(""))
+#print (t("a"))
+#print (t(1 + "a"))
+DEF t = E1XPfun(x; E1XPif(x; E1XPintrep(1); E1XPintrep(0)))
+: 10(line=1, offs=10) -- 32(line=1, offs=32): error(1): the expression cannot be evaluated to a value.
+: 10(line=1, offs=10) -- 32(line=1, offs=32): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPif(x; E1XPintrep(1); E1XPintrep(0)))
+ACT E0XPACTprint E1XPlist(E1XPapp(t; E1XPintrep(1)))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(t; E1XPintrep(0)))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(t; E1XPstring()))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(t; E1XPstring(a)))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(t; E1XPapp(+; E1XPintrep(1), E1XPstring(a))))
+: 99(line=6, offs=8) -- 111(line=6, offs=20): error(1): the expression cannot be evaluated to a value.
+: 100(line=6, offs=9) -- 110(line=6, offs=19): error(1): the expression cannot be evaluated to a value.
+: 102(line=6, offs=11) -- 109(line=6, offs=18): error(1): the expression cannot be evaluated to a value.
+: 102(line=6, offs=11) -- 109(line=6, offs=18): error(1): the operator [+] cannot handle its argument(s).
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define ge(a, b) a >= b
+#print (ge(1, 2))
+#print (ge("b", "a"))
+#print (ge(1.5, 1.4))
+DEF ge = E1XPfun(a, b; E1XPapp(>=; a, b))
+: 11(line=1, offs=11) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 24(line=1, offs=24): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(a, b; E1XPapp(>=; a, b))
+ACT E0XPACTprint E1XPlist(E1XPapp(ge; E1XPintrep(1), E1XPintrep(2)))
+V1ALint(0)
+ACT E0XPACTprint E1XPlist(E1XPapp(ge; E1XPstring(b), E1XPstring(a)))
+V1ALint(1)
+ACT E0XPACTprint E1XPlist(E1XPapp(ge; E1XPfloat(1.5), E1XPfloat(1.4)))
+V1ALint(1)
+nerr=0
+TOPdyn: #define max(a, b) if a > b then a else b
+#print (max(3, 4))
+#print (max(4, 3))
+#print (max("a", "b"))
+DEF max = E1XPfun(a, b; E1XPif(E1XPapp(>; a, b); a; b))
+: 12(line=1, offs=12) -- 41(line=1, offs=41): error(1): the expression cannot be evaluated to a value.
+: 12(line=1, offs=12) -- 41(line=1, offs=41): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(a, b; E1XPif(E1XPapp(>; a, b); a; b))
+ACT E0XPACTprint E1XPlist(E1XPapp(max; E1XPintrep(3), E1XPintrep(4)))
+V1ALint(4)
+ACT E0XPACTprint E1XPlist(E1XPapp(max; E1XPintrep(4), E1XPintrep(3)))
+V1ALint(4)
+ACT E0XPACTprint E1XPlist(E1XPapp(max; E1XPstring(a), E1XPstring(b)))
+V1ALstring(b)
+nerr=0
+TOPdyn: #define fib(n) if n < 2 then n else fib(n - 1) + fib(n - 2)
+#print (fib(10))
+DEF fib = E1XPfun(n; E1XPif(E1XPapp(<; n, E1XPintrep(2)); n; E1XPapp(+; E1XPapp(fib; E1XPapp(-; n, E1XPintrep(1))), E1XPapp(fib; E1XPapp(-; n, E1XPintrep(2))))))
+: 12(line=1, offs=12) -- 60(line=1, offs=60): error(1): the expression cannot be evaluated to a value.
+: 12(line=1, offs=12) -- 60(line=1, offs=60): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(n; E1XPif(E1XPapp(<; n, E1XPintrep(2)); n; E1XPapp(+; E1XPapp(fib; E1XPapp(-; n, E1XPintrep(1))), E1XPapp(fib; E1XPapp(-; n, E1XPintrep(2))))))
+ACT E0XPACTprint E1XPlist(E1XPapp(fib; E1XPintrep(10)))
+V1ALint(55)
+nerr=0
+TOPdyn: #define ack(m, n) if m == 0 then n + 1 else if n == 0 then ack(m - 1, 1) else ack(m - 1, ack(m, n - 1))
+#print (ack(2, 2))
+DEF ack = E1XPfun(m, n; E1XPif(E1XPapp(==; m, E1XPintrep(0)); E1XPapp(+; n, E1XPintrep(1)); E1XPif(E1XPapp(==; n, E1XPintrep(0)); E1XPapp(ack; E1XPapp(-; m, E1XPintrep(1)), E1XPintrep(1)); E1XPapp(ack; E1XPapp(-; m, E1XPintrep(1)), E1XPapp(ack; m, E1XPapp(-; n, E1XPintrep(1)))))))
+: 12(line=1, offs=12) -- 104(line=1, offs=104): error(1): the expression cannot be evaluated to a value.
+: 12(line=1, offs=12) -- 104(line=1, offs=104): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(m, n; E1XPif(E1XPapp(==; m, E1XPintrep(0)); E1XPapp(+; n, E1XPintrep(1)); E1XPif(E1XPapp(==; n, E1XPintrep(0)); E1XPapp(ack; E1XPapp(-; m, E1XPintrep(1)), E1XPintrep(1)); E1XPapp(ack; E1XPapp(-; m, E1XPintrep(1)), E1XPapp(ack; m, E1XPapp(-; n, E1XPintrep(1)))))))
+ACT E0XPACTprint E1XPlist(E1XPapp(ack; E1XPintrep(2), E1XPintrep(2)))
+V1ALint(7)
+nerr=0
+TOPdyn: #define compose(f, g, x) f(g(x))
+#define inc(x) x + 1
+#define dbl(x) x * 2
+#print (compose(inc, dbl, 5))
+DEF compose = E1XPfun(f, g, x; E1XPapp(f; E1XPapp(g; x)))
+: 16(line=1, offs=16) -- 33(line=1, offs=33): error(1): the expression cannot be evaluated to a value.
+: 16(line=1, offs=16) -- 33(line=1, offs=33): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(f, g, x; E1XPapp(f; E1XPapp(g; x)))
+DEF inc = E1XPfun(x; E1XPapp(+; x, E1XPintrep(1)))
+: 45(line=2, offs=12) -- 54(line=2, offs=21): error(1): the expression cannot be evaluated to a value.
+: 45(line=2, offs=12) -- 54(line=2, offs=21): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(+; x, E1XPintrep(1)))
+DEF dbl = E1XPfun(x; E1XPapp(*; x, E1XPintrep(2)))
+: 66(line=3, offs=12) -- 75(line=3, offs=21): error(1): the expression cannot be evaluated to a value.
+: 66(line=3, offs=12) -- 75(line=3, offs=21): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(*; x, E1XPintrep(2)))
+ACT E0XPACTprint E1XPlist(E1XPapp(compose; inc, dbl, E1XPintrep(5)))
+: 83(line=4, offs=8) -- 105(line=4, offs=30): error(1): the expression cannot be evaluated to a value.
+: 84(line=4, offs=9) -- 104(line=4, offs=29): error(1): the expression cannot be evaluated to a value.
+: 97(line=4, offs=22) -- 100(line=4, offs=25): error(1): the expression cannot be evaluated to a value.
+: 66(line=3, offs=12) -- 75(line=3, offs=21): error(1): the expression cannot be evaluated to a value.
+: 66(line=3, offs=12) -- 75(line=3, offs=21): error(1): the expression cannot be evaluated as it is a function.
+: 92(line=4, offs=17) -- 95(line=4, offs=20): error(1): the expression cannot be evaluated to a value.
+: 45(line=2, offs=12) -- 54(line=2, offs=21): error(1): the expression cannot be evaluated to a value.
+: 45(line=2, offs=12) -- 54(line=2, offs=21): error(1): the expression cannot be evaluated as it is a function.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #define e %(1)
+#print e
+#define e2 %(e + 1)
+#print e2
+#print %(e2 + e2)
+DEF e = E1XPv1al(V1ALint(1))
+VAL V1ALint(1)
+NORM E1XPv1al(V1ALint(1))
+ACT E0XPACTprint e
+V1ALint(1)
+DEF e2 = E1XPv1al(V1ALint(2))
+VAL V1ALint(2)
+NORM E1XPv1al(V1ALint(2))
+ACT E0XPACTprint e2
+V1ALint(2)
+ACT E0XPACTprint E1XPv1al(V1ALint(4))
+V1ALint(4)
+nerr=0
+TOPdyn: #define e %(f(1))
+#define f(x) x
+#print e
+: 13(line=1, offs=13) -- 17(line=1, offs=17): error(1): the expression cannot be evaluated to a value.
+: 13(line=1, offs=13) -- 17(line=1, offs=17): error(1): the applied identifier [f] does not refer to a supported operator.
+ABORT
+DEF e = E1XPv1al(V1ALerr())
+: 11(line=1, offs=11) -- 18(line=1, offs=18): error(1): the expression cannot be evaluated to a value.
+VAL ABORT
+V1ALerr()
+NORM E1XPv1al(V1ALerr())
+DEF f = E1XPfun(x; x)
+: 28(line=2, offs=10) -- 33(line=2, offs=15): error(1): the expression cannot be evaluated to a value.
+: 28(line=2, offs=10) -- 33(line=2, offs=15): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; x)
+ACT E0XPACTprint e
+: 41(line=3, offs=8) -- 42(line=3, offs=9): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 18(line=1, offs=18): error(1): the expression cannot be evaluated to a value.
+ABORT
+V1ALerr()
+nerr=0
+TOPdyn: #error "stop"
+ACT E0XPACTerror E1XPstring(stop)
+V1ALstring(stop)
+nerr=0
+TOPdyn: #assert 1
+ACT E0XPACTassert E1XPintrep(1)
+V1ALint(1)
+nerr=0
+TOPdyn: #assert 0
+ACT E0XPACTassert E1XPintrep(0)
+V1ALint(0)
+nerr=0
+TOPdyn: #print "a"
+#prerr "b"
+#print 1
+#prerr 2
+ACT E0XPACTprint E1XPstring(a)
+V1ALstring(a)
+ACT E0XPACTprint E1XPstring(b)
+V1ALstring(b)
+ACT E0XPACTprint E1XPintrep(1)
+V1ALint(1)
+ACT E0XPACTprint E1XPintrep(2)
+V1ALint(2)
+nerr=0
+TOPdyn: #define x_ 1
+#define _x 2
+#print (x_ + _x)
+#define x' 3
+#print x'
+DEF x_ = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF _x = E1XPintrep(2)
+VAL V1ALint(2)
+NORM E1XPintrep(2)
+ACT E0XPACTprint E1XPlist(E1XPapp(+; x_, _x))
+V1ALint(3)
+DEF x' = E1XPintrep(3)
+VAL V1ALint(3)
+NORM E1XPintrep(3)
+ACT E0XPACTprint x'
+V1ALint(3)
+nerr=0
+TOPdyn: #define ATS_VERSION 5
+#if ATS_VERSION >= 5 #then
+#print "new"
+#else
+#print "old"
+#endif
+DEF ATS_VERSION = E1XPintrep(5)
+VAL V1ALint(5)
+NORM E1XPintrep(5)
+COND if E1XPapp(>=; ATS_VERSION, E1XPintrep(5))
+V1ALint(1)
+ACT E0XPACTprint E1XPstring(new)
+V1ALstring(new)
+nerr=0
+TOPdyn: #define A 1
+#define B (1 + 1)
+#define C (B + B)
+#define D (C + C)
+#define E (D + D)
+#define F (E + E)
+#print F
+DEF A = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF B = E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))
+VAL V1ALint(2)
+NORM E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))
+DEF C = E1XPlist(E1XPapp(+; B, B))
+VAL V1ALint(4)
+NORM E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))))
+DEF D = E1XPlist(E1XPapp(+; C, C))
+VAL V1ALint(8)
+NORM E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))))))
+DEF E = E1XPlist(E1XPapp(+; D, D))
+VAL V1ALint(16)
+NORM E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))))))))
+DEF F = E1XPlist(E1XPapp(+; E, E))
+VAL V1ALint(32)
+NORM E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))))), E1XPlist(E1XPapp(+; E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1))), E1XPlist(E1XPapp(+; E1XPintrep(1), E1XPintrep(1)))))))))))
+ACT E0XPACTprint F
+V1ALint(32)
+nerr=0
+TOPdyn: #define f1(x) x
+#define f2(x) f1(f1(x))
+#define f3(x) f2(f2(x))
+#define f4(x) f3(f3(x))
+#define f5(x) f4(f4(x))
+#print (f5(1))
+DEF f1 = E1XPfun(x; x)
+: 11(line=1, offs=11) -- 16(line=1, offs=16): error(1): the expression cannot be evaluated to a value.
+: 11(line=1, offs=11) -- 16(line=1, offs=16): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; x)
+DEF f2 = E1XPfun(x; E1XPapp(f1; E1XPapp(f1; x)))
+: 27(line=2, offs=11) -- 40(line=2, offs=24): error(1): the expression cannot be evaluated to a value.
+: 27(line=2, offs=11) -- 40(line=2, offs=24): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(f1; E1XPapp(f1; x)))
+DEF f3 = E1XPfun(x; E1XPapp(f2; E1XPapp(f2; x)))
+: 51(line=3, offs=11) -- 64(line=3, offs=24): error(1): the expression cannot be evaluated to a value.
+: 51(line=3, offs=11) -- 64(line=3, offs=24): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(f2; E1XPapp(f2; x)))
+DEF f4 = E1XPfun(x; E1XPapp(f3; E1XPapp(f3; x)))
+: 75(line=4, offs=11) -- 88(line=4, offs=24): error(1): the expression cannot be evaluated to a value.
+: 75(line=4, offs=11) -- 88(line=4, offs=24): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(f3; E1XPapp(f3; x)))
+DEF f5 = E1XPfun(x; E1XPapp(f4; E1XPapp(f4; x)))
+: 99(line=5, offs=11) -- 112(line=5, offs=24): error(1): the expression cannot be evaluated to a value.
+: 99(line=5, offs=11) -- 112(line=5, offs=24): error(1): the expression cannot be evaluated as it is a function.
+VAL ABORT
+V1ALerr()
+NORM E1XPfun(x; E1XPapp(f4; E1XPapp(f4; x)))
+ACT E0XPACTprint E1XPlist(E1XPapp(f5; E1XPintrep(1)))
+V1ALint(1)
+nerr=0
+TOPdyn: #define d0 1
+#define d1 d0
+#define d2 d1
+#define d3 d2
+#define d4 d3
+#define d5 d4
+#define d6 d5
+#define d7 d6
+#define d8 d7
+#define d9 d8
+#print d9
+DEF d0 = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d1 = d0
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d2 = d1
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d3 = d2
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d4 = d3
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d5 = d4
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d6 = d5
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d7 = d6
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d8 = d7
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF d9 = d8
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+ACT E0XPACTprint d9
+V1ALint(1)
+nerr=0
+TOPdyn: #define c0 1
+#define c1 c0 + 0
+#define c2 c1 + 0
+#define c3 c2 + 0
+#define c4 c3 + 0
+#define c5 c4 + 0
+#define c6 c5 + 0
+#define c7 c6 + 0
+#define c8 c7 + 0
+#define c9 c8 + 0
+#print c9
+DEF c0 = E1XPintrep(1)
+VAL V1ALint(1)
+NORM E1XPintrep(1)
+DEF c1 = E1XPapp(+; c0, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPintrep(1), E1XPintrep(0))
+DEF c2 = E1XPapp(+; c1, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0))
+DEF c3 = E1XPapp(+; c2, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+DEF c4 = E1XPapp(+; c3, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+DEF c5 = E1XPapp(+; c4, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+DEF c6 = E1XPapp(+; c5, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+DEF c7 = E1XPapp(+; c6, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+DEF c8 = E1XPapp(+; c7, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+DEF c9 = E1XPapp(+; c8, E1XPintrep(0))
+VAL V1ALint(1)
+NORM E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPapp(+; E1XPintrep(1), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0)), E1XPintrep(0))
+ACT E0XPACTprint c9
+V1ALint(1)
+nerr=0

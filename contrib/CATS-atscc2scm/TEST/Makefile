@@ -106,14 +106,6 @@ rtfind2_dats.scm ; $(SCHEME2) $<
 cleanall:: ; $(RMF) rtfind2_dats.scm
 #
 ######
-#
-all:: \
-twice_dats.scm
-regress:: \
-twice_dats.scm ; $(SCHEME2) $<
-cleanall:: ; $(RMF) twice_dats.scm
-#
-######
 
 all:: \
 queens_dats.scm
@@ -144,15 +136,6 @@ weekday_dats.scm
 regress:: \
 weekday_dats.scm ; $(SCHEME2) $<
 cleanall:: ; $(RMF) weekday_dats.scm
-#
-######
-#
-all:: \
-sieve_lazy_dats.scm
-test_sieve_lazy:: \
-sieve_lazy_dats.scm ; $(SCHEME2) $<
-regress:: test_sieve_lazy
-cleanall:: ; $(RMF) sieve_lazy_dats.scm
 #
 ######
 #

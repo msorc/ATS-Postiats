@@ -44,12 +44,7 @@ channeg_list
 //
 (* ****** ****** *)
 //
-fun
-{a:t@ype}
-list2sslist(List(a)): channeg(sslist(a))
-fun
-{a:t@ype}
-sslist2list(channeg(sslist(a))): List0(a)
+// HX-2026-10: no GC (only the linear versions)
 //
 fun
 {a:vt@ype}

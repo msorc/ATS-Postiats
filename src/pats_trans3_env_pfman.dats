@@ -25,7 +25,6 @@
 ** 02110-1301, USA.
 *)
 
-
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -34,13 +33,31 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_pfman.dats, see PORTING.md, "Type-checking environment (trans3_env)")
+// The marked list is a [glist] of records in a cell (see [pats_trans3_env_pfman.spec]).
 //
+
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
 staload _(*anon*) = "./pats_utils.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
@@ -56,6 +73,7 @@ typedef label = $LAB.label
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_dynexp2.sats"
@@ -64,114 +82,99 @@ staload "./pats_dynexp3.sats"
 (* ****** ****** *)
 
 staload "./pats_trans3_env.sats"
+staload "./pats_trans3_env_pfman.sats"
 
 (* ****** ****** *)
 
-dataviewtype
-d2varmrklst = // marked list
-  | D2VMRKLSTcons of (d2var, d2varmrklst)
-  | D2VMRKLSTmark of (int(*knd*), d2varmrklst) // knd: 0/1: stop/cont
-  | D2VMRKLSTnil of ()
-// end of [d2varmrklst]
+#include "./pats_trans3_env.hats"
 
 (* ****** ****** *)
 
-extern
-fun the_d2varmrklst_get_view_ptr ()
-  : [l:addr] (
-  d2varmrklst @ l, d2varmrklst @ l -<lin,prf> void | ptr l
-) // end of [the_d2varmrklst_get_view_ptr]
+#include "./pats_trans3_env_pfman_gen_dats.hats"
+
+(* ****** ****** *)
+
+typedef d2varmrklst = glist (d2vmrk)
 
 (* ****** ****** *)
 
 local
 
-assume pfmanenv_push_v = unit_v
-
-(* ****** ****** *)
-
 val
-the_d2varmrklst =
-  ref<d2varmrklst> (D2VMRKLSTnil)
+the_d2varmrklst = gcell_make<d2varmrklst> (glist_nil ())
 // end of [val]
 
-fun
-pushenv .<>.
-  (knd: int): (
-  pfmanenv_push_v | void
-) = let
-  val (vbox pf | p) =
-    ref_get_view_ptr (the_d2varmrklst)
-  val () = !p := D2VMRKLSTmark (knd, !p)
-in
-  (unit_v | ())
-end // end of [pushenv]
+fn
+mrklst_get (): d2varmrklst = gcell_get<d2varmrklst> (the_d2varmrklst)
+fn
+mrklst_set (xs: d2varmrklst): void = gcell_set<d2varmrklst> (the_d2varmrklst, xs)
+
+fn
+mrklst_add_dvar (d2v: d2var): void =
+  mrklst_set (glist_cons (d2vmrk_new (0, gopt_some (d2v), 0), mrklst_get ()))
+// end of [mrklst_add_dvar]
+
+fn
+pushenv
+  (knd: int): void =
+  mrklst_set (glist_cons (d2vmrk_new (1, gopt_none (), knd), mrklst_get ()))
+// end of [pushenv]
 
 in // in of [local]
 
 (* ****** ****** *)
 
-implement
-the_d2varmrklst_get_view_ptr () = let
-  val [l:addr]
-    (vbox pf | p) = ref_get_view_ptr (the_d2varmrklst)
-  viewdef V = d2varmrklst @ l
-  prval (pf, fpf) = __assert (pf) where {
-    extern praxi __assert (pf: !V): (V, V -<lin,prf> void)
-  } // end of [prval]
-in
-  (pf, fpf | p)
-end // end of [the_d2varmrklst_get_view_ptr]
-
-(* ****** ****** *)
+fun
+fprint_pfmanenv_loop (
+  out: FILEref, xs: d2varmrklst
+) : void =
+  if glist_is_cons (xs) then let
+    val x = glist_head (xs)
+    val xs1 = glist_tail (xs)
+    val () = (
+      if x.d2vmrk_knd () = 0 then let
+        val-~GOsome (d2v) = gopt_view (x.d2vmrk_d2v ())
+        val () = fprint_d2var (out, d2v)
+      in
+        fprint_newline (out)
+      end else let
+        val () = fprint_string (out, "D2VMRKLSTmark(")
+        val () = fprint_int (out, x.d2vmrk_mrk ())
+        val () = fprint_string (out, ")")
+      in
+        fprint_newline (out)
+      end // end of [if]
+    ) : void
+  in
+    fprint_pfmanenv_loop (out, xs1)
+  end else ()
+// end of [fprint_pfmanenv_loop]
 
 implement
 fprint_the_pfmanenv (out) = let
-  fun loop (
-    out: FILEref, xs: !d2varmrklst
-  ) : void =
-    case+ xs of
-    | D2VMRKLSTcons
-        (d2v, !p_xs) => let
-        val () = fprint_d2var (out, d2v)
-        val () = fprint_newline (out)
-        val () = loop (out, !p_xs)
-      in
-        fold@ (xs)
-      end // end of [D2VARNLSTcons]
-    | D2VMRKLSTmark (knd, !p_xs) => let
-        val () = fprintf
-          (out, "D2VMRKLSTmark(%d)", @(knd))
-        val () = fprint_newline (out)        
-        val () = loop (out, !p_xs) in fold@ (xs)
-      end // end of [D2VARNLSTmark]
-    | D2VMRKLSTnil () => fold@ (xs)
-  // end of [loop]
   val () = fprint_string
     (out, "the current pfmanenv is:\n")
-  val (vbox pf | p) = ref_get_view_ptr (the_d2varmrklst)
 in
-  $effmask_ref (loop (out, !p))
+  fprint_pfmanenv_loop (out, mrklst_get ())
 end // end of [fprint_the_pfmanenv]
 
 (* ****** ****** *)
 
+fun
+pop_loop (
+  xs: d2varmrklst
+) : d2varmrklst =
+  if glist_is_cons (xs) then let
+    val x = glist_head (xs)
+  in
+    if x.d2vmrk_knd () = 0 then pop_loop (glist_tail (xs)) else glist_tail (xs)
+  end else glist_nil ()
+// end of [pop_loop]
+
 implement
 the_pfmanenv_pop
-  (pfpush | (*void*)) = let
-  prval unit_v () = pfpush
-  fun loop (
-    xs: d2varmrklst
-  ) : d2varmrklst =
-    case+ xs of
-    | ~D2VMRKLSTcons (_, xs) => loop (xs)
-    | ~D2VMRKLSTmark (knd, xs) => xs
-    | ~D2VMRKLSTnil () => D2VMRKLSTnil ()
-  // end of [loop]
-  val (vbox pf | p) = ref_get_view_ptr (the_d2varmrklst)
-in
-  !p := $effmask_ref (loop (!p))
-end // end of [the_pfmanenv_pop]
+  ((*void*)) = mrklst_set (pop_loop (mrklst_get ()))
+// end of [the_pfmanenv_pop]
 
 (* ****** ****** *)
 
@@ -196,19 +199,14 @@ the_pfmanenv_add_dvar
 //
 val islin =
   d2var_is_linear (d2v)
-val () = if islin then let
-  val (vbox pf | p) = ref_get_view_ptr (the_d2varmrklst)
-in
-  !p := D2VMRKLSTcons (d2v, !p)
-end // end of [if]
+val () = if islin then mrklst_add_dvar (d2v)
 //
 val ismut =
   d2var_is_mutabl (d2v)
 val () = if ismut then let
-  val-Some (d2vw) = d2var_get_view (d2v)
-  val (vbox pf | p) = ref_get_view_ptr (the_d2varmrklst)
+  val-~GOsome (d2vw) = gopt_view (d2var_get_view (d2v))
 in
-  !p := D2VMRKLSTcons (d2vw, !p)
+  mrklst_add_dvar (d2vw)
 end // end of [if]
 //
 in
@@ -217,186 +215,66 @@ end // end of [the_pfmanenv_add_dvar]
 
 (* ****** ****** *)
 
+fun
+add_dvarlst_loop (d2vs: d2varlst): void =
+  case+ glist_view (d2vs) of
+  | ~GLcons (d2v, d2vs) => (the_pfmanenv_add_dvar (d2v); add_dvarlst_loop (d2vs))
+  | ~GLnil () => ()
+// end of [add_dvarlst_loop]
+
 implement
 the_pfmanenv_add_dvarlst
-  (d2vs) = (
-  list_app_fun (d2vs, the_pfmanenv_add_dvar)
-) // end of [the_pfmanenv_add_dvarlst]
+  (d2vs) = add_dvarlst_loop (d2vs)
+// end of [the_pfmanenv_add_dvarlst]
 
 implement
 the_pfmanenv_add_dvaropt
   (opt) = (
-  case+ opt of
-  | Some (d2v) => the_pfmanenv_add_dvar (d2v)
-  | None () => ()
+  case+ gopt_view (opt) of
+  | ~GOsome (d2v) => the_pfmanenv_add_dvar (d2v)
+  | ~GOnone () => ()
 ) // end of [the_pfmanenv_add_dvaropt]
 
 (* ****** ****** *)
 
-end // end of [local]
-
-(* ****** ****** *)
-
-extern
-fun the_pfmanenv_add_labp3atlst (xs: labp3atlst): void
-
-implement
-the_pfmanenv_add_p3at
-  (p3t) = let
-//
-val opt = p3at_get_dvaropt (p3t)
-val () = the_pfmanenv_add_dvaropt (opt)
-//
-in
-//
-case+ p3t.p3at_node of
-//
-| P3Tany (d2v) => the_pfmanenv_add_dvar (d2v)
-| P3Tvar (d2v) => the_pfmanenv_add_dvar (d2v)
-//
-| P3Tcon (
-    _(*pck*), d2c, npf, p3ts
-  ) => the_pfmanenv_add_p3atlst (p3ts)
-//
-| P3Tann (p3t, s2e) => the_pfmanenv_add_p3at (p3t)
-//
-| P3Tint _ => ()
-| P3Tintrep _ => ()
-//
-| P3Tbool _ => ()
-| P3Tchar _ => ()
-| P3Tfloat _ => ()
-| P3Tstring _ => ()
-//
-| P3Ti0nt _ => ()
-| P3Tf0loat _ => ()
-//
-| P3Tempty _ => ()
-//
-| P3Trec (
-    knd, npf, pck, lp3ts
-  ) =>
-    the_pfmanenv_add_labp3atlst(lp3ts)
-  // end of [P3Trec]
-| P3Tlst (
-    lin, s2e_elt, p3ts
-  ) => the_pfmanenv_add_p3atlst( p3ts )
-//
-| P3Trefas
-    (d2v, p3t) => {
-    val () = the_pfmanenv_add_dvar(d2v)
-    val () = the_pfmanenv_add_p3at(p3t)
-  } // end of [P3Trefas]
-//
-| P3Texist
-    (s2vs, p3t) => the_pfmanenv_add_p3at(p3t)
-  // P3Texist
-//
-| P3Tvbox(d2v) => the_pfmanenv_add_dvar(d2v)
-//
-| P3Terrpat ((*void*)) => ((*ignore*))
-//
-end // end of [the_pfmanenv_add_p3at]
-
-implement
-the_pfmanenv_add_p3atlst
-  (p3ts) = list_app_fun<p3at> (p3ts, the_pfmanenv_add_p3at)
-// end of [the_pfmanenv_add_p3atlst]
-
-implement
-the_pfmanenv_add_labp3atlst
-  (xs) = loop (xs) where {
-  fun loop (
-    xs: labp3atlst
-  ) : void =
-    case+ xs of
-    | list_cons (x, xs) => let
-        val LABP3AT (l, p3t) = x
-        val () = the_pfmanenv_add_p3at (p3t)
-      in
-        loop (xs)
-      end // end of [list_cons]
-    | list_nil () => ()
-  // end of [loop]
-} // end of [the_pfmanenv_add_labp3atlst]
-
-(* ****** ****** *)
-
-extern
-fun s2exp_search_atview
-  (s2e: s2exp, s2l: s2hnf): Option_vt @(s2exp (*ctx*), s2exp(*at*))
-// end of [s2exp_search_atview]
-
-(* ****** ****** *)
-
-local
-
-extern
-fun d2var_search
-  (d2v: d2var, s2l: s2exp, res: &s2exp): Option_vt (s2exp)
-// end of [d2var_search]
-extern
-fun d2var_search_sexp
-  (d2v: d2var, s2l: s2exp, s2e: s2exp, res: &s2exp): Option_vt (s2exp)
-// end of [d2var_search_sexp]
-extern
-fun d2var_search_labsexplst
-  (d2v: d2var, s2l: s2exp, ls2e: labs2explst, res: &s2exp): Option_vt (labs2explst)
-// end of [d2var_search_labsexplst]
-extern
-fun d2var_search_sexp_at
-  (d2v: d2var, s2l: s2exp, s2e: s2exp, res: &s2exp): Option_vt (s2exp)
-// end of [d2var_search_at]
-extern
-fun d2var_search_sexp_tyrec
-  (d2v: d2var, s2l: s2exp, s2e: s2exp, res: &s2exp): Option_vt (s2exp)
-// end of [d2var_search_sexp_tyrec]
-
-in // in of [local]
-
-implement
+fun
 d2var_search
-  (d2v, s2l, res) = let
-(*
-val () = (
-  println! ("d2var_search: d2v = ", d2v);
-  println! ("d2var_search: s2l = ", s2l);
-) (* end of [val] *)
-*)
+  (d2v: d2var, s2l: s2exp, res: &s2exp >> _): Option_vt (s2exp) = let
 //
 val opt = d2var_get_type (d2v)
 //
 in
 //
-case+ opt of
-| Some s2e =>
+case+ gopt_view (opt) of
+| ~GOsome s2e =>
     d2var_search_sexp (d2v, s2l, s2e, res)
-| None () => None_vt ()
+| ~GOnone () => None_vt ()
 //
 end // end of [d2var_search]
 
-implement
+and
 d2var_search_sexp
-  (d2v, s2l, s2e, res) = let
+  (d2v: d2var, s2l: s2exp, s2e: s2exp, res: &s2exp >> _): Option_vt (s2exp) = let
   val s2e = s2exp_hnfize (s2e)
 in
-  case+ s2e.s2exp_node of
-  | S2Eat _ =>
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2Eat _ =>
       d2var_search_sexp_at (d2v, s2l, s2e, res)
     // end of [S2Eat]
-  | S2Etyrec _ =>
+  | ~S2Etyrec _ =>
       d2var_search_sexp_tyrec (d2v, s2l, s2e, res)
     // end of [S2Etyrec]
-  | _ => None_vt ()
+  | v => (s2exp_node_view_free (v); None_vt ())
 end // end of [d2var_search_sexp]
 
-implement
+and
 d2var_search_labsexplst
-  (d2v, s2l, ls2es, res) =
-  case+ ls2es of
-  | list_cons (ls2e, ls2es) => let
-      val
-      SLABELED(l, name, s2e) = ls2e
+  (d2v: d2var, s2l: s2exp, ls2es: labs2explst, res: &s2exp >> _): Option_vt (labs2explst) =
+  case+ glist_view (ls2es) of
+  | ~GLcons (ls2e, ls2es) => let
+      val l = ls2e.labs2exp_lab ()
+      and name = ls2e.labs2exp_nam ()
+      and s2e = ls2e.labs2exp_elt ()
       val opt =
         d2var_search_sexp(d2v, s2l, s2e, res)
       // end of [val]
@@ -415,27 +293,23 @@ d2var_search_labsexplst
                ((*void*)) => None_vt()
              // end of [None_vt]
            | ~Some_vt(ls2es_ctx) =>
-               Some_vt (list_cons(ls2e, ls2es_ctx))
+               Some_vt (glist_cons(ls2e, ls2es_ctx))
              // end of [Some_vt]
          end // end of [None_vt]
       | ~Some_vt(s2e_ctx) =>
          (
-
-          Some_vt(list_cons(SLABELED(l, name, s2e_ctx), ls2es))
+          Some_vt(glist_cons(labs2exp_new(l, name, s2e_ctx), ls2es))
          ) (* en dof [Some_vt] *)
       // end of [case]
     end // end of [list_cons]
-  | list_nil () => None_vt ()
+  | ~GLnil () => None_vt ()
 // end of [d2var_search_labsexplst]
 
-implement
+and
 d2var_search_sexp_at
-(
-  d2v, s2l, s2e, res
-) = let
+  (d2v: d2var, s2l: s2exp, s2e: s2exp, res: &s2exp >> _): Option_vt (s2exp) = let
 //
-val-
-S2Eat(s2e1,s2e2) = s2e.s2exp_node
+val-~S2Eat(s2e1,s2e2) = s2exp_node_view (s2e.s2exp_node ())
 //
 val iseq = s2exp_syneq(s2l, s2e2)
 //
@@ -445,7 +319,7 @@ if
 iseq
 then let
   val () = res := s2e1
-  val s2t1 = s2e1.s2exp_srt
+  val s2t1 = s2e1.s2exp_srt ()
   val s2h1 = s2hole_make_srt(s2t1)
   val s2e1 = s2exp_hole(s2h1)
   val s2e_ctx = s2exp_at(s2e1, s2e2)
@@ -468,16 +342,12 @@ end // end of [if]
 //
 end // end of [d2var_search_sexp_at]
 
-implement
+and
 d2var_search_sexp_tyrec
-(
-  d2v, s2l, s2e, res
-) = let
+  (d2v: d2var, s2l: s2exp, s2e: s2exp, res: &s2exp >> _): Option_vt (s2exp) = let
 //
-val-
-S2Etyrec(knd, npf, ls2es) = s2e.s2exp_node
+val-~S2Etyrec(knd, npf, ls2es) = s2exp_node_view (s2e.s2exp_node ())
 //
-var res2: labs2explst = list_nil()
 val opt = d2var_search_labsexplst(d2v, s2l, ls2es, res)
 //
 in
@@ -488,41 +358,28 @@ case+ opt of
   // end of [None_vt]
 | ~Some_vt
     (ls2es_ctx) => let
-    val s2t = s2e.s2exp_srt
+    val s2t = s2e.s2exp_srt ()
   in
     Some_vt(s2exp_tyrec_srt(s2t, knd, npf, ls2es_ctx))
   end // end of [Some_vt]
 //
 end // end of [d2var_search_sexp_tyrec]
 
-implement
-pfobj_search_atview
-  (s2l0) = let
-//
-(*
-val () = (
-  println! ("pfobj_search_atview: s2l0 = ", s2l0)
-) (* end of [val] *)
-*)
-//
+(* ****** ****** *)
+
 fun
-loop (
-  xs: !d2varmrklst
-, s2l0: s2exp, res: &s2exp
+pfobj_search_loop (
+  xs: d2varmrklst
+, s2l0: s2exp, res: &s2exp >> _
 ) : Option_vt @(d2var, s2exp) = let
-//
-(*
-val () =
-println!
-  ("pfobj_search_atview: loop")
-*)
-//
 in
 //
-case+ xs of
-//
-| D2VMRKLSTcons
-    (d2v, !p_xs) => let
+if glist_is_cons (xs) then let
+  val x = glist_head (xs)
+  val xs1 = glist_tail (xs)
+in
+  if x.d2vmrk_knd () = 0 then let
+    val-~GOsome (d2v) = gopt_view (x.d2vmrk_d2v ())
     val opt =
       d2var_search(d2v, s2l0, res)
     // end of [val]
@@ -531,40 +388,29 @@ case+ xs of
     | ~Some_vt
         (s2e_ctx) =>
       (
-        fold@ (xs); Some_vt @(d2v, s2e_ctx)
+        Some_vt @(d2v, s2e_ctx)
       ) // end of [Some_vt]
-    | ~None_vt () => let
-        val opt =
-          loop(!p_xs, s2l0, res) in fold@(xs); opt
-      // end of [val]
-      end // end of [None]
-  end // end of [D2VMARKLSTcons]
+    | ~None_vt () => pfobj_search_loop(xs1, s2l0, res)
+  end else let
+    // HX-2015-01-12:
+    // searching is only blocked by [lam]
+    val knd = x.d2vmrk_mrk ()
+  in
+    if knd > 0 then pfobj_search_loop (xs1, s2l0, res) else None_vt ()
+  end // end of [if]
+end else None_vt ()
 //
-// HX-2015-01-12:
-// searching is only blocked by [lam]
-//
-| D2VMRKLSTmark
-    (knd, !p_xs) => (
-    if knd > 0 then let
-      val opt =
-        loop (!p_xs, s2l0, res) in fold@ (xs); opt
-      // end of [val]
-    end else (fold@ (xs); None_vt ())
-  ) (* end of [D2VMARKLSTmark] *)
-//
-| D2VMRKLSTnil((*void*)) => (fold@ (xs); None_vt())
-//
-end // end of [loop]
+end // end of [pfobj_search_loop]
+
+implement
+pfobj_search_atview
+  (s2l0) = let
 //
 var
 res: s2exp =
   s2exp_t0ype_err()
-val (pf, fpf | p0_lst) =
-  the_d2varmrklst_get_view_ptr ()
 //
-val opt = loop (!p0_lst, s2l0, res)
-//
-prval ((*void*)) = fpf (pf)
+val opt = pfobj_search_loop (mrklst_get (), s2l0, res)
 //
 in
 //
@@ -583,5 +429,91 @@ end // end of [pfobj_search_atview]
 end // end of [local]
 
 (* ****** ****** *)
+
+extern
+fun the_pfmanenv_add_labp3atlst (xs: labp3atlst): void
+
+implement
+the_pfmanenv_add_p3at
+  (p3t) = let
+//
+val opt = p3at_get_dvaropt (p3t)
+val () = the_pfmanenv_add_dvaropt (opt)
+//
+in
+//
+case+ p3at_node_view (p3t.p3at_node ()) of
+//
+| ~P3Tany (d2v) => the_pfmanenv_add_dvar (d2v)
+| ~P3Tvar (d2v) => the_pfmanenv_add_dvar (d2v)
+//
+| ~P3Tcon (
+    _(*pck*), d2c, npf, p3ts
+  ) => the_pfmanenv_add_p3atlst (p3ts)
+//
+| ~P3Tann (p3t, s2e) => the_pfmanenv_add_p3at (p3t)
+//
+| ~P3Tint _ => ()
+| ~P3Tintrep _ => ()
+//
+| ~P3Tbool _ => ()
+| ~P3Tchar _ => ()
+| ~P3Tfloat _ => ()
+| ~P3Tstring _ => ()
+//
+| ~P3Ti0nt _ => ()
+| ~P3Tf0loat _ => ()
+//
+| ~P3Tempty _ => ()
+//
+| ~P3Trec (
+    knd, npf, pck, lp3ts
+  ) =>
+    the_pfmanenv_add_labp3atlst(lp3ts)
+  // end of [P3Trec]
+| ~P3Tlst (
+    lin, s2e_elt, p3ts
+  ) => the_pfmanenv_add_p3atlst( p3ts )
+//
+| ~P3Trefas
+    (d2v, p3t) => {
+    val () = the_pfmanenv_add_dvar(d2v)
+    val () = the_pfmanenv_add_p3at(p3t)
+  } // end of [P3Trefas]
+//
+| ~P3Texist
+    (s2vs, p3t) => the_pfmanenv_add_p3at(p3t)
+  // P3Texist
+//
+| ~P3Tvbox(d2v) => the_pfmanenv_add_dvar(d2v)
+//
+| ~P3Terrpat ((*void*)) => ((*ignore*))
+//
+end // end of [the_pfmanenv_add_p3at]
+
+implement
+the_pfmanenv_add_p3atlst
+  (p3ts) =
+  case+ glist_view (p3ts) of
+  | ~GLcons (p3t, p3ts) => (the_pfmanenv_add_p3at (p3t); the_pfmanenv_add_p3atlst (p3ts))
+  | ~GLnil () => ()
+// end of [the_pfmanenv_add_p3atlst]
+
+implement
+the_pfmanenv_add_labp3atlst
+  (xs) = loop (xs) where {
+  fun loop (
+    xs: labp3atlst
+  ) : void =
+    case+ glist_view (xs) of
+    | ~GLcons (x, xs) => let
+        val p3t = x.labp3at_elt ()
+        val () = the_pfmanenv_add_p3at (p3t)
+      in
+        loop (xs)
+      end // end of [list_cons]
+    | ~GLnil () => ()
+  // end of [loop]
+} // end of [the_pfmanenv_add_labp3atlst]
 
 (* end of [pats_trans3_env_pfman.dats] *)

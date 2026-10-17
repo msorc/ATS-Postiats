@@ -13,6 +13,8 @@
 //
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
@@ -243,60 +245,60 @@ fprint_tnode
   (out, x0) = let
 in
 //
-case+ x0 of
+case+ token_node_view(x0) of
 //
-| T_CHAR (x) =>
+| ~T_CHAR (x) =>
     fprint! (out, "CHAR(", x, ")")
 //
-| T_INT (base, x) =>
+| ~T_INT (base, x) =>
     fprint! (out, "INT(", base, "; ", x, ")")
-| T_FLOAT (base, x) =>
+| ~T_FLOAT (base, x) =>
     fprint! (out, "FLOAT(", base, "; ", x, ")")
 //
-| T_STRING (x) =>
+| ~T_STRING (x) =>
     fprint! (out, "STRING(", x, ")")
 //
-| T_KWORD (x) =>
+| ~T_KWORD (x) =>
     fprint! (out, "KWORD(", x, ")")
 //
-| T_IDENT_alp (x) =>
+| ~T_IDENT_alp (x) =>
     fprint! (out, "IDENT(", x, ")")
-| T_IDENT_sym (x) =>
+| ~T_IDENT_sym (x) =>
     fprint! (out, "IDENT(", x, ")")
 //
-| T_IDENT_srp (x) =>
+| ~T_IDENT_srp (x) =>
     fprint! (out, "IDENT#(", x, ")")
 //
-| T_LT () => fprint! (out, "<")
-| T_GT () => fprint! (out, ">")
+| ~T_LT () => fprint! (out, "<")
+| ~T_GT () => fprint! (out, ">")
 //
-| T_MINUS () => fprint! (out, "-")
+| ~T_MINUS () => fprint! (out, "-")
 //
-| T_COLON () => fprint! (out, ":")
+| ~T_COLON () => fprint! (out, ":")
 //
-| T_COMMA () => fprint! (out, ",")
-| T_SEMICOLON () => fprint! (out, ";")
+| ~T_COMMA () => fprint! (out, ",")
+| ~T_SEMICOLON () => fprint! (out, ";")
 //
-| T_LPAREN () => fprint! (out, "(")
-| T_RPAREN () => fprint! (out, ")")
-| T_LBRACKET () => fprint! (out, "[")
-| T_RBRACKET () => fprint! (out, "]")
-| T_LBRACE () => fprint! (out, "{")
-| T_RBRACE () => fprint! (out, "}")
+| ~T_LPAREN () => fprint! (out, "(")
+| ~T_RPAREN () => fprint! (out, ")")
+| ~T_LBRACKET () => fprint! (out, "[")
+| ~T_RBRACKET () => fprint! (out, "]")
+| ~T_LBRACE () => fprint! (out, "{")
+| ~T_RBRACE () => fprint! (out, "}")
 //
-| T_SLASH () => fprint! (out, "/")
+| ~T_SLASH () => fprint! (out, "/")
 //
-| T_ENDL () =>
+| ~T_ENDL () =>
     fprint! (out, "ENDL(", ")")
-| T_SPACES (cs) =>
+| ~T_SPACES (cs) =>
     fprint! (out, "SPACES(", ")")
 //
-| T_COMMENT_line _ =>
+| ~T_COMMENT_line _ =>
     fprint! (out, "COMMENTline(", "...", ")")
-| T_COMMENT_block _ =>
+| ~T_COMMENT_block _ =>
     fprint! (out, "COMMENTblock(", "...", ")")
 //
-| T_EOF () => fprint! (out, "EOF(", ")")
+| ~T_EOF () => fprint! (out, "EOF(", ")")
 //
 end // end of [fprint_tnode]
 
@@ -314,9 +316,9 @@ fprint_token
   (out, tok) =
 {
 (*
-  val () = fprint! (out, tok.token_loc, ": ")
+  val () = fprint! (out, tok.token_loc(), ": ")
 *)
-  val () = fprint_tnode (out, tok.token_node)
+  val () = fprint_tnode (out, tok.token_node())
 } (* end of [fprint_token] *)
 //
 (* ****** ****** *)
@@ -328,7 +330,7 @@ prerr_i0de(x) = fprint(stderr_ref, x)
 //
 implement
 fprint_i0de
-  (out, x) = fprint (out, x.i0dex_sym)
+  (out, x) = fprint (out, x.i0dex_sym())
 //
 (* ****** ****** *)
 
@@ -351,13 +353,13 @@ overload fprint with fprint_s0explst of 1000000
 in
 //
 case+
-s0e.s0exp_node of
+s0exp_node_view(s0e.s0exp_node()) of
 //
-| S0Eide (id) =>
+| ~S0Eide (id) =>
     fprint! (out, "S0Eide(", id, ")")
-| S0Elist (s0es) =>
+| ~S0Elist (s0es) =>
     fprint! (out, "S0Elist(", s0es, ")")
-| S0Eappid (id, s0es) =>
+| ~S0Eappid (id, s0es) =>
     fprint! (out, "S0Eappid(", id, "; ", s0es, ")")
 //
 end // end of [fprint_s0exp]
@@ -365,7 +367,7 @@ end // end of [fprint_s0exp]
 (* ****** ****** *)
 
 implement
-fprint_s0explst (out, xs) = fprint_list_sep (out, xs, ", ")
+fprint_s0explst (out, xs) = fprint_glist_sep (out, xs, ", ")
   
 (* ****** ****** *)
 
@@ -388,78 +390,78 @@ overload fprint with fprint_d0explst of 1000000
 in
 //
 case+
-d0e.d0exp_node of
+d0exp_node_view(d0e.d0exp_node()) of
 //
-| D0Eide (id) => fprint! (out, "D0Eide(", id, ")")
-| D0Elist (d0es) => fprint! (out, "D0Elist(", d0es, ")")
+| ~D0Eide (id) => fprint! (out, "D0Eide(", id, ")")
+| ~D0Elist (d0es) => fprint! (out, "D0Elist(", d0es, ")")
 //
-| D0Eappid (id, d0es) =>
+| ~D0Eappid (id, d0es) =>
     fprint! (out, "D0Eappid(", id, "; ", d0es, ")")
-| D0Eappexp (d0e, d0es) =>
+| ~D0Eappexp (d0e, d0es) =>
     fprint! (out, "D0Eappexp(", d0e, "; ", d0es, ")")
 //
-| ATSPMVint (tok) => fprint! (out, "ATSPMVint(", tok, ")")
-| ATSPMVintrep (tok) => fprint! (out, "ATSPMVintrep(", tok, ")")
+| ~ATSPMVint (tok) => fprint! (out, "ATSPMVint(", tok, ")")
+| ~ATSPMVintrep (tok) => fprint! (out, "ATSPMVintrep(", tok, ")")
 //
-| ATSPMVbool (tfv) => fprint! (out, "ATSPMVbool(", tfv, ")")
+| ~ATSPMVbool (tfv) => fprint! (out, "ATSPMVbool(", tfv, ")")
 //
-| ATSPMVfloat (tok) => fprint! (out, "ATSPMVfloat(", tok, ")")
+| ~ATSPMVfloat (tok) => fprint! (out, "ATSPMVfloat(", tok, ")")
 //
-| ATSPMVstring (tok) => fprint! (out, "ATSPMVstring(", tok, ")")
+| ~ATSPMVstring (tok) => fprint! (out, "ATSPMVstring(", tok, ")")
 //
-| ATSPMVi0nt (tok) => fprint! (out, "ATSPMVi0nt(", tok, ")")
-| ATSPMVf0loat (tok) => fprint! (out, "ATSPMVf0loat(", tok, ")")
+| ~ATSPMVi0nt (tok) => fprint! (out, "ATSPMVi0nt(", tok, ")")
+| ~ATSPMVf0loat (tok) => fprint! (out, "ATSPMVf0loat(", tok, ")")
 //
-| ATSPMVempty (dummy) => fprint! (out, "ATSPMVempty(", ")")
-| ATSPMVextval (toklst) => fprint! (out, "ATSPMVextval(", "...", ")")
+| ~ATSPMVempty (dummy) => fprint! (out, "ATSPMVempty(", ")")
+| ~ATSPMVextval (toklst) => fprint! (out, "ATSPMVextval(", "...", ")")
 //
-| ATSPMVrefarg0 (d0e) => fprint! (out, "ATSPMVrefarg0(", d0e, ")")
-| ATSPMVrefarg1 (d0e) => fprint! (out, "ATSPMVrefarg1(", d0e, ")")
+| ~ATSPMVrefarg0 (d0e) => fprint! (out, "ATSPMVrefarg0(", d0e, ")")
+| ~ATSPMVrefarg1 (d0e) => fprint! (out, "ATSPMVrefarg1(", d0e, ")")
 //
-| ATSPMVfunlab (fl) =>
+| ~ATSPMVfunlab (fl) =>
     fprint! (out, "ATSPMVfunlab(", fl, ")")
-| ATSPMVcfunlab (knd, fl, d0es) =>
+| ~ATSPMVcfunlab (knd, fl, d0es) =>
     fprint! (out, "ATSPMVcfunlab(", knd, ";", fl, ";", d0es, ")")
 //
-| ATSPMVcastfn (fid, s0e, arg) =>
+| ~ATSPMVcastfn (fid, s0e, arg) =>
     fprint! (out, "ATSPMVcastfn(", fid, "; ", s0e, ";", arg, ")")
 //
-| ATSCSTSPmyloc (tok) => fprint! (out, "ATSCSTSPmyloc(", tok, ")")
+| ~ATSCSTSPmyloc (tok) => fprint! (out, "ATSCSTSPmyloc(", tok, ")")
 //
-| ATSCKiseqz(d0e) => fprint! (out, "ATSCKiseqz(", d0e, ")")
-| ATSCKisneqz(d0e) => fprint! (out, "ATSCKisneqz(", d0e, ")")
-| ATSCKptriscons(d0e) => fprint! (out, "ATSCKptriscons(", d0e, ")")
-| ATSCKptrisnull(d0e) => fprint! (out, "ATSCKptrisnull(", d0e, ")")
+| ~ATSCKiseqz(d0e) => fprint! (out, "ATSCKiseqz(", d0e, ")")
+| ~ATSCKisneqz(d0e) => fprint! (out, "ATSCKisneqz(", d0e, ")")
+| ~ATSCKptriscons(d0e) => fprint! (out, "ATSCKptriscons(", d0e, ")")
+| ~ATSCKptrisnull(d0e) => fprint! (out, "ATSCKptrisnull(", d0e, ")")
 //
-| ATSCKpat_int (d0e, int) =>
+| ~ATSCKpat_int (d0e, int) =>
     fprint! (out, "ATSCKpat_int(", d0e, int, ")")
-| ATSCKpat_bool (d0e, bool) =>
+| ~ATSCKpat_bool (d0e, bool) =>
     fprint! (out, "ATSCKpat_bool(", d0e, bool, ")")
-| ATSCKpat_string (d0e, string) =>
+| ~ATSCKpat_string (d0e, string) =>
     fprint! (out, "ATSCKpat_string(", d0e, string, ")")
 //
-| ATSCKpat_con0 (d0e, ctag) =>
+| ~ATSCKpat_con0 (d0e, ctag) =>
     fprint! (out, "ATSCKpat_con0(", d0e, ctag, ")")
-| ATSCKpat_con1 (d0e, ctag) =>
+| ~ATSCKpat_con1 (d0e, ctag) =>
     fprint! (out, "ATSCKpat_con1(", d0e, ctag, ")")
 //
-| ATSSELcon (d0e, s0e, lab) =>
+| ~ATSSELcon (d0e, s0e, lab) =>
     fprint! (out, "ATSSELcon(", d0e, ";", s0e, ";", lab, ")")
-| ATSSELrecsin (d0e, s0e, lab) =>
+| ~ATSSELrecsin (d0e, s0e, lab) =>
     fprint! (out, "ATSSELrecsin(", d0e, ";", s0e, ";", lab, ")")
-| ATSSELboxrec (d0e, s0e, lab) =>
+| ~ATSSELboxrec (d0e, s0e, lab) =>
     fprint! (out, "ATSSELboxrec(", d0e, ";", s0e, ";", lab, ")")
-| ATSSELfltrec (d0e, s0e, lab) =>
+| ~ATSSELfltrec (d0e, s0e, lab) =>
     fprint! (out, "ATSSELfltrec(", d0e, ";", s0e, ";", lab, ")")
 //
-| ATSextfcall (_fun, _arg) =>
+| ~ATSextfcall (_fun, _arg) =>
     fprint! (out, "ATSextfcall(", _fun, "; ", _arg, ")")
-| ATSextmcall (_obj, _mtd, _arg) =>
+| ~ATSextmcall (_obj, _mtd, _arg) =>
     fprint! (out, "ATSextmcall(", _obj, "; ", _mtd, "; ", _arg, ")")
 //
-| ATSfunclo_fun (d0e, arg, res) => 
+| ~ATSfunclo_fun (d0e, arg, res) => 
     fprint! (out, "ATSfunclo_fun(", d0e, ";", arg, ";", res, ")")
-| ATSfunclo_clo (d0e, arg, res) => 
+| ~ATSfunclo_clo (d0e, arg, res) => 
     fprint! (out, "ATSfunclo_clo(", d0e, ";", arg, ";", res, ")")
 //
 end // end of [fprint_d0exp]
@@ -467,7 +469,7 @@ end // end of [fprint_d0exp]
 (* ****** ****** *)
 
 implement
-fprint_d0explst (out, xs) = fprint_list_sep (out, xs, ", ")
+fprint_d0explst (out, xs) = fprint_glist_sep (out, xs, ", ")
 
 (* ****** ****** *)
 //
@@ -480,9 +482,9 @@ fprint_instr
 in
 //
 case+
-ins0.instr_node of
+instr_node_view(ins0.instr_node()) of
 //
-| ATSif (d0e, inss, inssopt) =>
+| ~ATSif (d0e, inss, inssopt) =>
   {
     val () = fprint (out, "ATSif()\n")
     val () = fprint_d0exp (out, d0e)
@@ -490,9 +492,9 @@ ins0.instr_node of
     val () = fprint_instrlst (out, inss)
     val () =
     (
-      case+ inssopt of
-      | None () => ()
-      | Some (inss) =>
+      case+ gopt_view(inssopt) of
+      | ~GOnone () => ()
+      | ~GOsome (inss) =>
         {
           val () = fprint (out, "\nATSelse()\n")
           val () = fprint_instrlst (out, inss)
@@ -500,10 +502,10 @@ ins0.instr_node of
     ) (* end of [val] *)
     val () = fprint (out, "\nATSendif()\n")
   }
-| ATSthen _ => fprint (out, "ATSthen(...)")
-| ATSelse _ => fprint (out, "ATSelse(...)")
+| ~ATSthen _ => fprint (out, "ATSthen(...)")
+| ~ATSelse _ => fprint (out, "ATSelse(...)")
 //
-| ATSifthen (d0e, inss) =>
+| ~ATSifthen (d0e, inss) =>
   {
     val () =
     fprint (out, "ATSifthen(")
@@ -511,7 +513,7 @@ ins0.instr_node of
     val () = fprint (out, ") ")
     val () = fprint_instrlst (out, inss)
   }
-| ATSifnthen (d0e, inss) =>
+| ~ATSifnthen (d0e, inss) =>
   {
     val () =
     fprint (out, "ATSifnthen(")
@@ -520,53 +522,53 @@ ins0.instr_node of
     val () = fprint_instrlst (out, inss)
   }
 //
-| ATSbranchseq _ => fprint (out, "ATSbranchseq(...)")
-| ATScaseofseq _ => fprint (out, "ATScaseofseq(...)")
+| ~ATSbranchseq _ => fprint (out, "ATSbranchseq(...)")
+| ~ATScaseofseq _ => fprint (out, "ATScaseofseq(...)")
 //
-| ATSfunbodyseq (inss) =>
+| ~ATSfunbodyseq (inss) =>
   {
     val () = fprint (out, "ATSfunbody_beg()\n")
     val () = fprint_instrlst (out, inss)
     val () = fprint (out, "\nATSfunbody_end()")
   }
 //
-| ATSreturn (id) => fprint! (out, "ATSreturn(", id, ")")
-| ATSreturn_void (id) => fprint! (out, "ATSreturn_void(", id, ")")
+| ~ATSreturn (id) => fprint! (out, "ATSreturn(", id, ")")
+| ~ATSreturn_void (id) => fprint! (out, "ATSreturn_void(", id, ")")
 //
-| ATSINSlab (lab) => fprint! (out, "ATSINSlab(", lab, ")")
-| ATSINSgoto (lab) => fprint! (out, "ATSINSgoto(", lab, ")")
-| ATSINSflab (lab) => fprint! (out, "ATSINSflab(", lab, ")")
-| ATSINSfgoto (lab) => fprint! (out, "ATSINSfgoto(", lab, ")")
+| ~ATSINSlab (lab) => fprint! (out, "ATSINSlab(", lab, ")")
+| ~ATSINSgoto (lab) => fprint! (out, "ATSINSgoto(", lab, ")")
+| ~ATSINSflab (lab) => fprint! (out, "ATSINSflab(", lab, ")")
+| ~ATSINSfgoto (lab) => fprint! (out, "ATSINSfgoto(", lab, ")")
 //
-| ATSINSmove (tmp, d0e) =>
+| ~ATSINSmove (tmp, d0e) =>
     fprint! (out, "ATSINSmove(", tmp, ", ", d0e, ")")
-| ATSINSmove_void (tmp, d0e) =>
+| ~ATSINSmove_void (tmp, d0e) =>
     fprint! (out, "ATSINSmove_void(", tmp, ", ", d0e, ")")
 //
-| ATSINSmove_nil (tmp) =>
+| ~ATSINSmove_nil (tmp) =>
     fprint! (out, "ATSINSmove_nil(", tmp, ")")
-| ATSINSmove_con0 (tmp, tag(*token*)) =>
+| ~ATSINSmove_con0 (tmp, tag(*token*)) =>
     fprint! (out, "ATSINSmove_con0(", tmp, ", ", tag, ")")
 //
-| ATSINScaseof_fail _ => fprint! (out, "ATSINScaseof_fail(...)")
-| ATSINSdeadcode_fail _ => fprint! (out, "ATSINSdeadcode_fail(...)")
+| ~ATSINScaseof_fail _ => fprint! (out, "ATSINScaseof_fail(...)")
+| ~ATSINSdeadcode_fail _ => fprint! (out, "ATSINSdeadcode_fail(...)")
 //
-| ATSdynload (dummy) => fprint! (out, "ATSdynload(", ")")
-| ATSdynloadset (flag) => fprint! (out, "ATSdynloadset(", flag, ")")
-| ATSdynloadfcall (fcall) => fprint! (out, "ATSdynloadfcall(", fcall, ")")
-| ATSdynloadflag_sta (flag) => fprint! (out, "ATSdynloadflag_sta(", flag, ")")
-| ATSdynloadflag_ext (flag) => fprint! (out, "ATSdynloadflag_ext(", flag, ")")
-| ATSdynloadflag_init (flag) => fprint! (out, "ATSdynloadflag_init(", flag, ")")
-| ATSdynloadflag_minit (flag) => fprint! (out, "ATSdynloadflag_minit(", flag, ")")
+| ~ATSdynload (dummy) => fprint! (out, "ATSdynload(", ")")
+| ~ATSdynloadset (flag) => fprint! (out, "ATSdynloadset(", flag, ")")
+| ~ATSdynloadfcall (fcall) => fprint! (out, "ATSdynloadfcall(", fcall, ")")
+| ~ATSdynloadflag_sta (flag) => fprint! (out, "ATSdynloadflag_sta(", flag, ")")
+| ~ATSdynloadflag_ext (flag) => fprint! (out, "ATSdynloadflag_ext(", flag, ")")
+| ~ATSdynloadflag_init (flag) => fprint! (out, "ATSdynloadflag_init(", flag, ")")
+| ~ATSdynloadflag_minit (flag) => fprint! (out, "ATSdynloadflag_minit(", flag, ")")
 //
-| _ (*rest*) => fprint (out, "fprint_instr(...)")
+| v0 (*rest*) => (instr_node_view_free(v0); fprint (out, "fprint_instr(...)"))
 //
 end // end of [fprint_instr]
 
 (* ****** ****** *)
 
 implement
-fprint_instrlst (out, xs) = fprint_list_sep (out, xs, "\n")
+fprint_instrlst (out, xs) = fprint_glist_sep (out, xs, "\n")
 
 (* ****** ****** *)
 
@@ -576,7 +578,7 @@ fprint_fkind
 in
 //
 case+
-x.fkind_node of
+x.fkind_node() of
 //
 | FKextern () => fprint! (out, "ATSextern()")
 | FKstatic () => fprint! (out, "ATSstatic()")
@@ -594,11 +596,11 @@ fprint_f0arg
 in
 //
 case+
-f0a.f0arg_node of
+f0arg_node_view(f0a.f0arg_node()) of
 //
-| F0ARGnone (s0e) =>
+| ~F0ARGnone (s0e) =>
     fprint! (out, "F0ARGsome(", s0e, ")")
-| F0ARGsome (id, s0e) =>
+| ~F0ARGsome (id, s0e) =>
     fprint! (out, "F0ARGsome(", id, ": ", s0e, ")")
 //
 end // end of [fprint_f0arg]
@@ -607,7 +609,7 @@ end // end of [fprint_f0arg]
 //
 implement
 fprint_f0marg
-  (out, x) = fprint_list_sep (out, x.f0marg_node, ", ")
+  (out, x) = fprint_glist_sep (out, x.f0marg_node(), ", ")
 //
 (* ****** ****** *)
 
@@ -617,8 +619,8 @@ fprint_f0head
 in
 //
 case+
-x.f0head_node of
-| F0HEAD
+f0head_node_view(x.f0head_node()) of
+| ~F0HEAD
   (
     id, marg, res
   ) =>
@@ -637,14 +639,14 @@ implement
 fprint_tmpdec
   (out, x) = let
 //
-val node = x.tmpdec_node
+val node = x.tmpdec_node()
 //
 in
 //
-case+ node of
-| TMPDECnone (tmp) =>
+case+ tmpdec_node_view(node) of
+| ~TMPDECnone (tmp) =>
     fprint! (out, "TMPDECnone(", tmp, ")")
-| TMPDECsome (tmp, s0e) =>
+| ~TMPDECsome (tmp, s0e) =>
     fprint! (out, "TMPDECsome(", tmp, ": ", s0e, ")")
 //
 end // end of [fprint_tmpdec]
@@ -652,7 +654,7 @@ end // end of [fprint_tmpdec]
 (* ****** ****** *)
 
 implement
-fprint_tmpdeclst (out, xs) = fprint_list_sep (out, xs, ", ")
+fprint_tmpdeclst (out, xs) = fprint_glist_sep (out, xs, ", ")
 
 (* ****** ****** *)
 
@@ -662,9 +664,9 @@ fprint_f0decl
 in
 //
 case+
-x.f0decl_node of
-| F0DECLnone (head) => fprint! (out, "F0DECLnone()")
-| F0DECLsome (head, body) => fprint! (out, "F0DECLsome(...)")
+f0decl_node_view(x.f0decl_node()) of
+| ~F0DECLnone (head) => fprint! (out, "F0DECLnone()")
+| ~F0DECLsome (head, body) => fprint! (out, "F0DECLsome(...)")
 //
 end // end of [fprint_f0decl]
 
@@ -679,55 +681,61 @@ fprint_d0ecl
 in
 //
 case+
-x.d0ecl_node of
+d0ecl_node_view(x.d0ecl_node()) of
 //
-| D0Cinclude (fname) =>
+| ~D0Cinclude (fname) =>
     fprint! (out, "D0Cinclude(", fname, ")")
 //
-| D0Cifdef (id, d0cs) =>
+| ~D0Cifdef (id, d0cs) =>
     fprint! (out, "D0Cifdef(", id, "; ", "...", ")")
-| D0Cifndef (id, d0cs) =>
+| ~D0Cifndef (id, d0cs) =>
     fprint! (out, "D0Cifndef(", id, "; ", "...", ")")
 //
-| D0Ctypedef (id, tyrec) =>
+| ~D0Ctypedef (id, tyrec) =>
     fprint! (out, "D0Ctypedef(", id, "; ", "...", ")")
 //
-| D0Cassume (name) =>
+| ~D0Cassume (name) =>
     fprint! (out, "D0Cassume(", name, ")")
 //
-| D0Cdyncst_mac (name) =>
+| ~D0Cdyncst_mac (name) =>
     fprint! (out, "D0Cdyncst_mac(", name, ")")
 //
-| D0Cdyncst_extfun (name, s0es, s0e) =>
+| ~D0Cdyncst_extfun (name, s0es, s0e) =>
     fprint! (out, "D0Cdyncst_extfun(", name, ")")
 //
-| D0Cdyncst_valdec (name, s0e) =>
+| ~D0Cdyncst_valdec (name, s0e) =>
     fprint! (out, "D0Cdyncst_valdec(", name, ")")
-| D0Cdyncst_valimp (name, s0e) =>
+| ~D0Cdyncst_valimp (name, s0e) =>
     fprint! (out, "D0Cdyncst_valimp(", name, ")")
 //
-| D0Cextcode _ =>
+| ~D0Cextcode _ =>
     fprint! (out, "D0Cextcode(", "...", ")")
 //
-| D0Cstatmp (tmp, opt) =>
-    fprint! (out, "D0Cstatmp(", tmp, ": ", opt, ")")
+| ~D0Cstatmp (tmp, opt) =>
+    (
+      fprint! (out, "D0Cstatmp(", tmp, ": ");
+      (case+ gopt_view(opt) of
+       | ~GOnone() => fprint(out, "gopt_none()")
+       | ~GOsome(s0e) => fprint!(out, "gopt_some(", s0e, ")"));
+      fprint(out, ")")
+    )
 //
-| D0Cfundecl (knd, fdec) =>
+| ~D0Cfundecl (knd, fdec) =>
     fprint! (out, "D0Cfundecl(", knd, "; ", "...", ")")
 //
-| D0Cclosurerize (flab, _, _, _) =>
+| ~D0Cclosurerize (flab, _, _, _) =>
     fprint! (out, "D0Cclosurerize(", flab, "; ", "...", ")")
 //
-| D0Cdynloadflag_init (flag) =>
+| ~D0Cdynloadflag_init (flag) =>
     fprint! (out, "D0Cdynloadflag_init(", flag, ")")
-| D0Cdynloadflag_minit (flag) =>
+| ~D0Cdynloadflag_minit (flag) =>
     fprint! (out, "D0Cdynloadflag_minit(", flag, ")")
 //
-| D0Cdynexn_dec (idexn) =>
+| ~D0Cdynexn_dec (idexn) =>
     fprint! (out, "D0Cdynexn_dec(", idexn, ")")
-| D0Cdynexn_extdec (idexn) =>
+| ~D0Cdynexn_extdec (idexn) =>
     fprint! (out, "D0Cdynexn_extdec(", idexn, ")")
-| D0Cdynexn_initize (idexn, fullname) =>
+| ~D0Cdynexn_initize (idexn, fullname) =>
     fprint! (out, "D0Cdynexn_initize(", idexn, fullname, ")")
 //
 end // end of [fprint_d0ecl]
@@ -739,7 +747,7 @@ fprint_d0eclist
   (out, xs) = let
 //
 val () =
-  fprint_list_sep (out, xs, "\n")
+  fprint_glist_sep (out, xs, "\n")
 //
 in
   fprint_newline (out)

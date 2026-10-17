@@ -39,6 +39,7 @@ staload
 "./../SATS/basis_intset.sats"
 staload _ =
 "./../DATS/basis_intset.dats"
+#staload _ = "libats/DATS/arena.dats" // HX-2026-10
 
 (* ****** ****** *)
 //
@@ -205,8 +206,10 @@ end // end of [local]
 
 local
 
+var title: string = "book1"
 val
-title_ref = ref<string>("book1")
+title_ref =
+ref_make_viewptr{string}(view@title | addr@title)
 
 in
 //

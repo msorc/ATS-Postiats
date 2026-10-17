@@ -34,17 +34,8 @@ $(PATSOPT) -d ./DATS/string.dats | \
 $(ATSCC2JS) -o ./output/DATS/string_dats.js -i
 #
 all:: ; \
-$(PATSOPT) -d ./DATS/list.dats | \
-$(ATSCC2JS) -o ./output/DATS/list_dats.js -i
-all:: ; \
 $(PATSOPT) -d ./DATS/list_vt.dats | \
 $(ATSCC2JS) -o ./output/DATS/list_vt_dats.js -i
-all:: ; \
-$(PATSOPT) -d ./DATS/option.dats | \
-$(ATSCC2JS) -o ./output/DATS/option_dats.js -i
-all:: ; \
-$(PATSOPT) -d ./DATS/stream.dats | \
-$(ATSCC2JS) -o ./output/DATS/stream_dats.js -i
 all:: ; \
 $(PATSOPT) -d ./DATS/stream_vt.dats | \
 $(ATSCC2JS) -o ./output/DATS/stream_vt_dats.js -i
@@ -81,9 +72,6 @@ $(ATSCC2JS) -o ./output/DATS/gmatrixref_dats.js -i
 ######
 #
 all:: ; \
-$(PATSOPT) -d ./DATS/funarray.dats | \
-$(ATSCC2JS) -o ./output/DATS/funarray_dats.js -i
-all:: ; \
 $(PATSOPT) -d ./DATS/slistref.dats | \
 $(ATSCC2JS) -o ./output/DATS/slistref_dats.js -i
 all:: ; \
@@ -92,18 +80,6 @@ $(ATSCC2JS) -o ./output/DATS/qlistref_dats.js -i
 #
 ######
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/list0.dats | \
-$(ATSCC2JS) -o ./output/DATS/ML/list0_dats.js -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/array0.dats | \
-$(ATSCC2JS) -o ./output/DATS/ML/array0_dats.js -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/matrix0.dats | \
-$(ATSCC2JS) -o ./output/DATS/ML/matrix0_dats.js -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/option0.dats | \
-$(ATSCC2JS) -o ./output/DATS/ML/option0_dats.js -i
 #
 ######
 #
@@ -157,10 +133,7 @@ $(CAT) >>$(LIBATSCC2JS_ALL_JS) \
 output/DATS/basics_dats.js \
 output/DATS/char_dats.js \
 output/DATS/string_dats.js \
-output/DATS/list_dats.js \
 output/DATS/list_vt_dats.js \
-output/DATS/option_dats.js \
-output/DATS/stream_dats.js \
 output/DATS/stream_vt_dats.js \
 output/DATS/gvalue_dats.js \
 output/DATS/intrange_dats.js \
@@ -169,13 +142,8 @@ output/DATS/reference_dats.js \
 output/DATS/arrayref_dats.js \
 output/DATS/matrixref_dats.js \
 output/DATS/gmatrixref_dats.js \
-output/DATS/funarray_dats.js \
 output/DATS/slistref_dats.js \
 output/DATS/qlistref_dats.js \
-output/DATS/ML/list0_dats.js \
-output/DATS/ML/array0_dats.js \
-output/DATS/ML/matrix0_dats.js \
-output/DATS/ML/option0_dats.js \
 
 ######
 #

@@ -34,7 +34,7 @@ UN = "prelude/SATS/unsafe.sats"
 (* ****** ****** *)
 
 implement
-PHParref_make_list
+PHParref_make_list_vt
 {a}(xs) = (A) where
 {
 //
@@ -43,37 +43,37 @@ PHParref_nil()
 //
 fun
 loop
-(xs: List(a)): void =
+(xs: !List_vt(a)): void =
 (
 case+ xs of
-| list_nil
+| list_vt_nil
   (
     // argless
   ) => ((*exit*))
-| list_cons
+| list_vt_cons
   (
-    x, xs
-  ) => loop(xs) where
+    x, xs1
+  ) => loop(xs1) where
   {
     val () = PHParref_extend(A, x)
-  } (* end of [list_cons] *)
+  } (* end of [list_vt_cons] *)
 )
 //
 val () = loop(xs) // initizing
 //
-} (* PHParref_make_list *)
+} (* PHParref_make_list_vt *)
 
 (* ****** ****** *)
 //
 implement
-PHParref2list
+PHParref2list_vt
   {a}(A) =
-  PHParray2list{a}(PHParref2array(A))
+  PHParray2list_vt{a}(PHParref2array(A))
 //
 implement
-PHParref2list_rev
+PHParref2list_vt_rev
   {a}(A) =
-  PHParray2list_rev{a}(PHParref2array(A))
+  PHParray2list_vt_rev{a}(PHParref2array(A))
 //
 (* ****** ****** *)
 //

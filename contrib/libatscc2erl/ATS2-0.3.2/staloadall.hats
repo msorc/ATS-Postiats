@@ -27,19 +27,21 @@ staload _ = "./DATS/print.dats"
 
 (* ****** ****** *)
 //
+staload "./SATS/list_vt.sats"
+staload _ = "./DATS/list_vt.dats"
+//
+staload "./SATS/stream_vt.sats"
+staload _ = "./DATS/stream_vt.dats"
+//
 staload "./SATS/intrange.sats"
 staload _ = "./DATS/intrange.dats"
 //
 (* ****** ****** *)
 //
-staload "./SATS/list.sats"
-staload _ = "./DATS/list.dats"
 //
 (* ****** ****** *)
 //
 (*
-staload "./SATS/stream.sats"
-staload _ = "./DATS/stream.dats"
 *)
 //
 (* ****** ****** *)

@@ -1,8 +1,5 @@
 %{
 //
-dynload
-"libatsdoc/dynloadall.dats"
-//
 #include "./../proginatsatxt.dats"
 //
 %}\
@@ -1172,5 +1169,5 @@ the above program for echoing each line of input.
 </chapter><!--id="effectful_programming_features"-->
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

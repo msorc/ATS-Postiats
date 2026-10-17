@@ -230,5 +230,5 @@ following interesting image:\
 #comment(" end of [chap_drawrectcirc.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "chap_drawrectcirc_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "chap_drawrectcirc_atxt.txt")
 %}

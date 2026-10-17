@@ -369,22 +369,25 @@ queue_enq
 //
 extern
 fun
-queue_map_cloref
+queue_map_cloptr
   {a:t0p}{b:t0p}{n:nat}
 (
-  que: channeg(ssque(a,n)), n: int(n), f: (a) -<cloref1> b
+  que: channeg(ssque(a,n)), n: int(n), f: (a) -<cloptr1> b
 ) : channeg(ssque(b,n)) // end-of-function
+//
+// HX-2026-10: no GC ([f] is consumed)
 //
 (* ****** ****** *)
 
 implement
-queue_map_cloref
+queue_map_cloptr
   {a}{b}{n}(que, n, f) = let
 //
 fun
 loop{i,j:nat}
 (
   que: channeg(ssque(a, i))
+, f: !(a) -<cloptr1> b
 , i: int(i), res: channeg(ssque(b, j))
 ) : channeg(ssque(b, i+j)) =
 (
@@ -395,7 +398,7 @@ then let
   val x = queue_deq(que)
   val () = queue_enq(res, f(x))
 in
-  loop(que, i-1, res)
+  loop(que, f, i-1, res)
 end // end of [then]
 else let
   val () = queue_free_nil(que) in res
@@ -403,9 +406,11 @@ end // end of [else]
 //
 ) (* end of [loop] *)
 //
+val res = loop(que, f, n, queue_nil())
+//
 in
-  loop(que, n, queue_nil())
-end // end of [queue_map_cloref]
+  cfun_free(f); res
+end // end of [queue_map_cloptr]
 
 (* ****** ****** *)
 
@@ -461,7 +466,7 @@ val x6 = queue_deq (Q0)
 val () = println! ("x7(6) = ", x6)
 //
 val () = queue_enq (Q0, 8)
-val Q1 = queue_map_cloref{int}{int}(Q0, 2, lam(x) => 2 * x)
+val Q1 = queue_map_cloptr{int}{int}(Q0, 2, lam(x) =<cloptr1> 2 * x)
 //
 val x7 = queue_top (Q1)
 val () = println! ("x7(7) = ", x7)

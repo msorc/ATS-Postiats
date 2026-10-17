@@ -32,15 +32,35 @@
 // Start Time: October, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_funent.dats, see PORTING.md, "ccomp core modules")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
 staload _(*anon*) = "./pats_utils.dats"
 
 (* ****** ****** *)
 
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
 staload LAB = "./pats_label.sats"
 staload LOC = "./pats_location.sats"
-typedef location = $LOC.location
 
 (* ****** ****** *)
 
@@ -50,55 +70,14 @@ staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
 
-staload "./pats_ccomp.sats"
+staload "./pats_histaexp.sats"
+staload "./pats_hidynexp.sats"
 
 (* ****** ****** *)
 
-local
+staload "./pats_ccomp.sats"
 
-typedef
-funent = '{
-//
-  funent_loc= location
-//
-, funent_lab= funlab // attached function label
-//
-, funent_imparg= s2varlst
-, funent_tmparg= s2explstlst
-, funent_tmpsub= tmpsubopt
-//
-, funent_tmpret= tmpvar // storing the return value
-//
-// HX-2013-04-12:
-// [flablst] may contain the following flabs:
-// 1. outer functions called internally
-// 2. sibling functions called internally
-//
-// [flablst_fin] may contain the following flabs:
-// 1. self
-// 1. outer functions called transitively
-// 2. sibling functions called transitively
-//
-, funent_flablst= funlablst // flabs in function body
-, funent_flablst_fin= Option(funlablst) // final value
-//
-, funent_d2envlst= d2envlst // d2vars in function body
-, funent_d2envlst_fin= Option(d2envlst) // final value
-//
-, funent_vbindmap= vbindmap // local varbind map
-//
-, funent_instrlst= instrlst // instructions of function body
-//
-, funent_tmpvarlst= tmpvarlst // tmpvars in function body
-//
-, funent_fnxlablst= funlablst // mutually tail-recursive funs
-//
-} (* end of [funent] *)
-
-assume funent_type = funent
-extern typedef "funent_t" = funent
-
-in (* in of [local] *)
+(* ****** ****** *)
 
 implement
 funent_make
@@ -106,91 +85,79 @@ funent_make
   loc, flab
 , imparg, tmparg, tmpsub
 , tmpret, fls0, d2es, vbmap, inss, tmplst
-) = let
-(*
-val () = fprintln! (stdout_ref, "funent_make: flab = ", flab)
-val () = fprintln! (stdout_ref, "funent_make: d2es = ", d2es)
-*)
-in '{
-  funent_loc= loc
-//
-, funent_lab= flab
-//
-, funent_imparg= imparg
-, funent_tmparg= tmparg
-, funent_tmpsub= tmpsub
-//
-, funent_tmpret= tmpret
-//
-, funent_flablst= fls0
-, funent_flablst_fin= None()
-//
-, funent_d2envlst= d2es
-, funent_d2envlst_fin= None()
-//
-, funent_vbindmap= vbmap
-//
-, funent_instrlst= inss
-//
-, funent_tmpvarlst= tmplst
-//
-, funent_fnxlablst= list_nil()
-//
-} end // end of [funent_make]
+) = funent_new
+(
+  loc, flab
+, imparg, tmparg, tmpsub
+, tmpret
+, fls0, gopt_none((*void*)) // flablst, flablst_fin
+, d2es, gopt_none((*void*)) // d2envlst, d2envlst_fin
+, vbmap, inss, tmplst
+, glist_nil((*void*)) // fnxlablst
+) (* end of [funent_make] *)
 
 (* ****** ****** *)
 
 implement
-funent_get_loc (fent) = fent.funent_loc
+funent_get_loc (fent) = funent_loc (fent)
 
 implement
-funent_get_lab (fent) = fent.funent_lab
+funent_get_lab (fent) = funent_lab (fent)
 
 implement
 funent_get_level
-  (fent) = funlab_get_level (fent.funent_lab)
+  (fent) = funlab_get_level (funent_lab (fent))
 // end of [funent_get_level]
 
 implement
-funent_get_imparg (fent) = fent.funent_imparg
+funent_get_imparg (fent) = funent_imparg (fent)
 
 implement
-funent_get_tmparg (fent) = fent.funent_tmparg
+funent_get_tmparg (fent) = funent_tmparg (fent)
 
 implement
-funent_get_tmpsub (fent) = fent.funent_tmpsub
+funent_get_tmpsub (fent) = funent_tmpsub (fent)
 
 implement
-funent_get_tmpret (fent) = fent.funent_tmpret
+funent_get_tmpret (fent) = funent_tmpret (fent)
 
 implement
-funent_get_flablst (fent) = fent.funent_flablst
+funent_get_flablst (fent) = funent_flablst (fent)
 implement
-funent_get_flablst_fin (fent) = fent.funent_flablst_fin
+funent_get_flablst_fin (fent) = funent_flablst_fin (fent)
 
 implement
-funent_get_d2envlst (fent) = fent.funent_d2envlst
+funent_get_d2envlst (fent) = funent_d2envlst (fent)
 implement
-funent_get_d2envlst_fin (fent) = fent.funent_d2envlst_fin
+funent_get_d2envlst_fin (fent) = funent_d2envlst_fin (fent)
 
 implement
-funent_get_vbindmap (fent) = fent.funent_vbindmap
+funent_get_vbindmap (fent) = funent_vbindmap (fent)
 
 implement
-funent_get_instrlst (fent) = fent.funent_instrlst
+funent_get_instrlst (fent) = funent_instrlst (fent)
 
 implement
-funent_get_tmpvarlst (fent) = fent.funent_tmpvarlst
+funent_get_tmpvarlst (fent) = funent_tmpvarlst (fent)
 
 (* ****** ****** *)
 
 implement
-funent_get_fnxlablst (fent) = fent.funent_fnxlablst
+funent_get_fnxlablst (fent) = funent_fnxlablst (fent)
 
 (* ****** ****** *)
-
-end // end of [local]
-
+//
+// HX-2026-10: the C functions patsopt_funent_set_* of src/ (declared in the sats)
+//
+implement
+funent_set_tmpsub (fent, opt) = set_funent_tmpsub (fent, opt)
+implement
+funent_set_flablst_fin (fent, opt) = set_funent_flablst_fin (fent, opt)
+implement
+funent_set_d2envlst_fin (fent, opt) = set_funent_d2envlst_fin (fent, opt)
+implement
+funent_set_fnxlablst (fent, fls) = set_funent_fnxlablst (fent, fls)
+//
 (* ****** ****** *)
 
 implement
@@ -203,13 +170,13 @@ funent_make2
   val tmps = instrlst_get_tmpvarset (inss)
   val tmps = tmpvarset_vt_add (tmps, tmpret)
   val tmplst = tmpvarset_vt_listize_free (tmps)
-  val tmplst = list_of_list_vt (tmplst)
+  val tmplst = glist_make_list_vt (tmplst)
 in
 //
 funent_make
 (
   loc, flab
-, imparg, tmparg, None(*tsub*), tmpret, fls0, d2es, vbmap, inss, tmplst
+, imparg, tmparg, gopt_none((*tsub*)), tmpret, fls0, d2es, vbmap, inss, tmplst
 ) // end of [funent_make]
 //
 end // end of [funent_make2]
@@ -243,7 +210,7 @@ val () = fprint_s2varlst (out, imparg)
 val () = prstr "\n"
 //
 val () = prstr "tmparg="
-val () = $UT.fprintlst (out, tmparg, "; ", fprint_s2explst)
+val () = $UT.fprintlst<s2explst> (out, tmparg, "; ", fprint_s2explst)
 val () = prstr "\n"
 //
 val () = prstr "tmpsub="
@@ -268,9 +235,7 @@ implement
 funent_is_tmplt (fent) = let
   val tmparg = funent_get_tmparg (fent)
 in
-//
-case+ tmparg of list_cons _ => true | list_nil () => false
-//
+  glist_is_cons (tmparg)
 end // end of [funent_is_tmplst]
 
 (* ****** ****** *)
@@ -279,48 +244,6 @@ implement
 print_funent (fent) = fprint_funent (stdout_ref, fent)
 implement
 prerr_funent (fent) = fprint_funent (stderr_ref, fent)
-
-(* ****** ****** *)
-
-%{$
-
-extern
-ats_void_type
-patsopt_funent_set_tmpsub
-(
-  ats_ptr_type fent, ats_ptr_type opt
-) {
-  ((funent_t)fent)->atslab_funent_tmpsub = opt ; return ;
-} // end of [patsopt_funent_set_tmpsub]
-
-extern
-ats_void_type
-patsopt_funent_set_flablst_fin
-(
-  ats_ptr_type fent, ats_ptr_type opt
-) {
-  ((funent_t)fent)->atslab_funent_flablst_fin = opt ; return ;
-} // end of [patsopt_funent_set_flablst_fin]
-
-extern
-ats_void_type
-patsopt_funent_set_d2envlst_fin
-(
-  ats_ptr_type fent, ats_ptr_type opt
-) {
-  ((funent_t)fent)->atslab_funent_d2envlst_fin = opt ; return ;
-} // end of [patsopt_funent_set_d2envlst_fin]
-
-extern
-ats_void_type
-patsopt_funent_set_fnxlablst
-(
-  ats_ptr_type fent, ats_ptr_type fls
-) {
-  ((funent_t)fent)->atslab_funent_fnxlablst = fls ; return ;
-} // end of [patsopt_funent_set_fnxlablst]
-
-%} // end of [%{$]
 
 (* ****** ****** *)
 

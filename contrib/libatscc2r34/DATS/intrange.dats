@@ -33,7 +33,6 @@ LIBATSCC_targetloc
 //
 (* ****** ****** *)
 //
-#staload "./../SATS/list.sats"
 //
 (* ****** ****** *)
 //

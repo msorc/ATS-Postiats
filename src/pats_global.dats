@@ -33,12 +33,12 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_global.dats)
+// The state is kept in cells of the global arena (never freed)
 //
 (* ****** ****** *)
 
-staload "./pats_global.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
@@ -47,24 +47,41 @@ staload "./pats_global.sats"
 (* ****** ****** *)
 //
 staload UN = "prelude/SATS/unsafe.sats"
-staload _(*anon*) = "prelude/DATS/unsafe.dats"
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
-local
+staload "./pats_global.sats"
+
+(* ****** ****** *)
 //
-val
-the_PACKNAME =
-ref<Stropt>(stropt_none)
+fn cell_make_int (x: int): ptr = let
+  val p = the_garena_alloc (sizeof<int>)
+  val () = $UN.ptr0_set<int> (p, x)
+in p end
+fn cell_make_ptr (x: ptr): ptr = let
+  val p = the_garena_alloc (sizeof<ptr>)
+  val () = $UN.ptr0_set<ptr> (p, x)
+in p end
 //
-in (* in of [local] *)
+fn cell_get_int (p: ptr): int = $UN.ptr0_get<int> (p)
+fn cell_set_int (p: ptr, x: int): void = $UN.ptr0_set<int> (p, x)
+fn cell_get_ptr (p: ptr): ptr = $UN.ptr0_get<ptr> (p)
+fn cell_set_ptr (p: ptr, x: ptr): void = $UN.ptr0_set<ptr> (p, x)
+//
+fn cell_get_stropt (p: ptr): Stropt = $UN.ptr0_get<Stropt> (p)
+fn cell_set_stropt (p: ptr, x: Stropt): void = $UN.ptr0_set<Stropt> (p, x)
+//
+(* ****** ****** *)
+
+val the_PACKNAME = cell_make_ptr ($UN.cast{ptr}(stropt_none ()))
 
 implement
-the_PACKNAME_get() = !the_PACKNAME
+the_PACKNAME_get() = $UN.cast{Stropt}(cell_get_ptr (the_PACKNAME))
 implement
-the_PACKNAME_set (opt) = !the_PACKNAME := opt
-
-end // end of [local]
+the_PACKNAME_set (opt) = cell_set_ptr (the_PACKNAME, $UN.cast{ptr}(opt))
 
 implement
 the_PACKNAME_set_name
@@ -72,240 +89,123 @@ the_PACKNAME_set_name
 // end of [the_PACKNAME_set]
 implement
 the_PACKNAME_set_none
-  ((*none*)) = the_PACKNAME_set(stropt_none)
+  ((*none*)) = the_PACKNAME_set(stropt_none())
 // end of [the_PACKNAME_set_none]
 
 (* ****** ****** *)
 
-local
-//
-val the_ATSRELOC = ref<int>(0)
-val the_ATSRELOC_decl = ref<ptr>(null)
-//
-in (* in-of-local *)
-//
+val the_ATSRELOC = cell_make_int (0)
+val the_ATSRELOC_decl = cell_make_ptr (the_null_ptr)
+
 implement
-the_ATSRELOC_get() = !the_ATSRELOC
+the_ATSRELOC_get() = cell_get_int (the_ATSRELOC)
 implement
-the_ATSRELOC_set(flag) = !the_ATSRELOC := flag
+the_ATSRELOC_set(flag) = cell_set_int (the_ATSRELOC, flag)
 //
 implement
 the_ATSRELOC_get_decl() = let
-  val d0c = !the_ATSRELOC_decl
-  val ((*void*)) = !the_ATSRELOC_decl := null in d0c
-end // end of [the_ATSRELOC_get_decl]
+  val d0c = cell_get_ptr (the_ATSRELOC_decl)
+  val ((*void*)) = cell_set_ptr (the_ATSRELOC_decl, the_null_ptr)
+in d0c end // end of [the_ATSRELOC_get_decl]
 //
 implement
-the_ATSRELOC_set_decl(d0c) = !the_ATSRELOC_decl := d0c
-//
-end // end of [local]
+the_ATSRELOC_set_decl(d0c) = cell_set_ptr (the_ATSRELOC_decl, d0c)
 
 (* ****** ****** *)
 
-local
-//
-(*
-//
-// HX: it is no longer in use
-//
-val the_STALOADFLAG = ref<int> (0)
-*)
-val the_DYNLOADFLAG = ref<int>(0)
-//
-in (* in of [local] *)
-//
-(*
-//
-// HX-2014-06-06:
-// [STALOADFLAG] is no longer in use
-//
-implement the_STALOADFLAG_get() = !the_STALOADFLAG
-implement the_STALOADFLAG_set(flag) = !the_STALOADFLAG := flag
-*)
-//
+val the_DYNLOADFLAG = cell_make_int (0)
+
 implement
-the_DYNLOADFLAG_get() = !the_DYNLOADFLAG
+the_DYNLOADFLAG_get() = cell_get_int (the_DYNLOADFLAG)
 implement
-the_DYNLOADFLAG_set(flag) = !the_DYNLOADFLAG := flag
-//
-end // end of [local]
+the_DYNLOADFLAG_set(flag) = cell_set_int (the_DYNLOADFLAG, flag)
 
 (* ****** ****** *)
 
-local
-//
-val
-the_DYNLOADNAME =
-ref<stropt>(stropt_none)
-//
-in (* in-of-local *)
+val the_DYNLOADNAME = cell_make_ptr ($UN.cast{ptr}(stropt_none ()))
 
 implement
-the_DYNLOADNAME_get
-  () = !the_DYNLOADNAME
+the_DYNLOADNAME_get() = $UN.cast{Stropt}(cell_get_ptr (the_DYNLOADNAME))
 implement
 the_DYNLOADNAME_set_none
-  () = !the_DYNLOADNAME := stropt_none(*void*)
+  () = cell_set_ptr (the_DYNLOADNAME, $UN.cast{ptr}(stropt_none ()))
 implement
 the_DYNLOADNAME_set_name
-  (name) = !the_DYNLOADNAME := stropt_some(name)
-
-end // end of [local]
+  (name) = cell_set_ptr (the_DYNLOADNAME, $UN.cast{ptr}(stropt_some (name)))
 
 (* ****** ****** *)
 
-local
-
-val the_MAINATSFLAG = ref<int>(0)
-
-in (* in of [local] *)
+val the_MAINATSFLAG = cell_make_int (0)
 
 implement
-the_MAINATSFLAG_get() = !the_MAINATSFLAG
+the_MAINATSFLAG_get() = cell_get_int (the_MAINATSFLAG)
 implement
-the_MAINATSFLAG_set(flag) = !the_MAINATSFLAG := flag
-
-end // end of [local]
+the_MAINATSFLAG_set(flag) = cell_set_int (the_MAINATSFLAG, flag)
 
 (* ****** ****** *)
 
-local
-//
-val
-the_STATIC_PREFIX =
-  ref<stropt>(stropt_none)
-//
-in (* in-of-local *)
-//
+val the_STATIC_PREFIX = cell_make_ptr ($UN.cast{ptr}(stropt_none ()))
+
 implement
-the_STATIC_PREFIX_get
-  () = !the_STATIC_PREFIX
+the_STATIC_PREFIX_get() = $UN.cast{Stropt}(cell_get_ptr (the_STATIC_PREFIX))
 implement
 the_STATIC_PREFIX_set_none
-  () = !the_STATIC_PREFIX := stropt_none
+  () = cell_set_ptr (the_STATIC_PREFIX, $UN.cast{ptr}(stropt_none ()))
 implement
 the_STATIC_PREFIX_set_name
-  (x) = !the_STATIC_PREFIX := stropt_some(x)
-//
-end // end of [local]  
-  
-(* ****** ****** *)
+  (x) = cell_set_ptr (the_STATIC_PREFIX, $UN.cast{ptr}(stropt_some (x)))
 
-local
+(* ****** ****** *)
 //
-typedef
-dirlst = List0(string)
-//
-val
-the_IATS_dirlst =
-ref<dirlst>(list_nil(*void*))
-//
-in (*in-of-local*)
+val the_IATS_dirlst = cell_make_ptr ($UN.cast{ptr}(glist_nil{string}()))
 //
 implement
 the_IATS_dirlst_get
-  () = !the_IATS_dirlst
+  () = $UN.cast{glist(string)}(cell_get_ptr (the_IATS_dirlst))
 //
 implement
 the_IATS_dirlst_ppush
   (dir) = let
-  val dirs = !the_IATS_dirlst
+  val dirs = the_IATS_dirlst_get ()
 in
-  !the_IATS_dirlst := list_cons(dir, dirs)
+  cell_set_ptr (the_IATS_dirlst, $UN.cast{ptr}(glist_cons (dir, dirs)))
 end // end of [the_IATS_dirlst_ppush]
 //
-(*
-//
-// HX-2017-02-01: reverted
-// HX-2017-01-31: push from the back!
-//
-implement
-the_IATS_dirlst_ppushb
-  (dir) = let
-  val dirs = !the_IATS_dirlst
-in
-  !the_IATS_dirlst :=
-    list_of_list_vt(list_extend(dirs, dir))
-end // end of [the_IATS_dirlst_ppushb]
-*)
-//
-end // end of [local]
-
-(* ****** ****** *)
-(*
-local
-//
-val rasmflag = ref<int> (1)
-//
-in
-//
-implement
-the_ASSUME_check_get() = !rasmflag
-implement
-the_ASSUME_check_set(flag) = !rasmflag := flag
-//
-end // end of [local]
-*)
 (* ****** ****** *)
 
-local
-//
-val rdbgflag = ref<int>(0)
-//
-in (*in-of-local*)
-//
+val the_DEBUGATS_dbgflag = cell_make_int (0)
+
 implement
-the_DEBUGATS_dbgflag_get() = !rdbgflag
+the_DEBUGATS_dbgflag_get() = cell_get_int (the_DEBUGATS_dbgflag)
 implement
-the_DEBUGATS_dbgflag_set(flag) = !rdbgflag := flag
-//
-end // end of [local]
+the_DEBUGATS_dbgflag_set(flag) = cell_set_int (the_DEBUGATS_dbgflag, flag)
 
 (* ****** ****** *)
 
-local
-//
-val rdbgline = ref<int>(0)
-//
-in (*in-of-local*)
-//
+val the_DEBUGATS_dbgline = cell_make_int (0)
+
 implement
-the_DEBUGATS_dbgline_get() = !rdbgline
+the_DEBUGATS_dbgline_get() = cell_get_int (the_DEBUGATS_dbgline)
 implement
-the_DEBUGATS_dbgline_set(flag) = !rdbgline := flag
-//
-end // end of [local]
+the_DEBUGATS_dbgline_set(flag) = cell_set_int (the_DEBUGATS_dbgline, flag)
 
 (* ****** ****** *)
 
-local
-//
-val rtlcalopt = ref<int>(1)
-//
-in
-//
+val the_CCOMPATS_tlcalopt = cell_make_int (1)
+
 implement
-the_CCOMPATS_tlcalopt_get() = !rtlcalopt
+the_CCOMPATS_tlcalopt_get() = cell_get_int (the_CCOMPATS_tlcalopt)
 implement
-the_CCOMPATS_tlcalopt_set(flag) = !rtlcalopt := flag
-//
-end // end of [local]
+the_CCOMPATS_tlcalopt_set(flag) = cell_set_int (the_CCOMPATS_tlcalopt, flag)
 
 (* ****** ****** *)
 
-local
-//
-val
-rmaxtmprecdepth = ref<int>(CCOMPENV_MAXTMPRECDEPTH)
-//
-in (*in-of-local*)
-//
+val the_CCOMPENV_maxtmprecdepth = cell_make_int (CCOMPENV_MAXTMPRECDEPTH)
+
 implement
-the_CCOMPENV_maxtmprecdepth_get() = !rmaxtmprecdepth
+the_CCOMPENV_maxtmprecdepth_get() = cell_get_int (the_CCOMPENV_maxtmprecdepth)
 implement
-the_CCOMPENV_maxtmprecdepth_set(mtd) = !rmaxtmprecdepth := mtd
-//
-end // end of [local]
+the_CCOMPENV_maxtmprecdepth_set(mtd) = cell_set_int (the_CCOMPENV_maxtmprecdepth, mtd)
 
 (* ****** ****** *)
 

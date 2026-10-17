@@ -23,12 +23,9 @@ all_html:: HTML/strptr.html
 all_html:: HTML/array.html
 all_html:: HTML/array_prf.html
 all_html:: HTML/arrayptr.html
-all_html:: HTML/arrayref.html
 
-all_html:: HTML/list.html
 all_html:: HTML/list_vt.html
 
-all_html:: HTML/option.html
 all_html:: HTML/option_vt.html
 
 all_html:: HTML/unsafe.html

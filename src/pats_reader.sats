@@ -39,30 +39,29 @@
 
 (* ****** ****** *)
 //
-// HX-2012-06:
-// this style is some sort of experiment; in retrospect, it seems more
+// HX: this style is some sort of experiment; in retrospect, it seems more
 // approriate to represent a reader as an object (instead of a struct)
 //
+// HX-2026-10: no GC
+// the reader is a flat tagged struct (see pats_reader.cats): the
+// closures that were stored in it are gone. A reader owns its input
+// (the FILE*, the getc closure, the char list) until [reader_uninitize].
+//
 (* ****** ****** *)
 
-absviewt@ype
+absvt@ype
 reader_vt0ype =
 $extype "pats_reader_struct"
-viewtypedef reader = reader_vt0ype
+vtypedef reader = reader_vt0ype
 
 (* ****** ****** *)
 //
-sortdef
-fmode = file_mode
+// HX-2026-10: the FILE is closed by [reader_uninitize]
 //
 fun
 reader_initize_filp
-  {m:fmode}{l0:addr}
 (
-  pfmod:
-  file_mode_lte(m,r)
-, pffil: FILE(m) @ l0
-| reader: &reader? >> reader, p0: ptr l0
+  reader: &reader? >> reader, fp: FILEref
 ) : void // end of [reader_initize_filp]
 //
 (* ****** ****** *)
@@ -70,7 +69,7 @@ reader_initize_filp
 fun
 reader_initize_getc
 (
-  r: &reader? >> reader, getc: () -<cloptr1> int
+  r: &reader? >> reader, getc: () -<lincloptr1> int
 ) : void // end of [reader_initize_getc]
 
 (* ****** ****** *)

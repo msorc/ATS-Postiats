@@ -13,38 +13,37 @@
 //
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
 //
-datatype
-filename = FNAME of (string)
 //
-assume filename_type = filename
+// HX-2026-10: no GC
+// a filename is a string that is never freed
+// (a literal or a command-line argument)
+//
+assume filename_type = string
 //
 (* ****** ****** *)
 
 implement
-filename_dummy = FNAME ("")
+filename_dummy = ""
 implement
-filename_stdin = FNAME ("__STDIN__")
+filename_stdin = "__STDIN__"
 
 (* ****** ****** *)
 
 implement
-filename_make(path) = FNAME(path)
+filename_make(path) = path
 
 (* ****** ****** *)
 
 implement
 fprint_filename
-  (out, fil) = let
-//
-val+FNAME (fname) = fil
-//
-in
-  fprint_string (out, fname)
-end // end of [fprint_filename]
+  (out, fil) = fprint_string (out, fil)
+// end of [fprint_filename]
 
 (* ****** ****** *)
 

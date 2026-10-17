@@ -225,5 +225,5 @@ atspre_ptr_nullize_tsz
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "pointer_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "pointer_atxt.txt")
 %}\

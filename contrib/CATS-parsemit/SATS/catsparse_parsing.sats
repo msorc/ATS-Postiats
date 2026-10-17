@@ -18,6 +18,7 @@ ATS_PACKNAME"CATS-PARSEMIT"
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
 #staload "./catsparse.sats" // opened
 //
 (* ****** ****** *)
@@ -67,11 +68,9 @@ parerr_node =
 //
   | PARERR_ATSclosurerize_end of ()
 //
-typedef parerr = '{
-  parerr_loc= loc_t, parerr_node= parerr_node
-} (* end of [parerr] *)
+#include "./catsparse_parsing_gen.hats"
 //
-typedef parerrlst = List0 (parerr)
+typedef parerrlst = glist(parerr)
 
 (* ****** ****** *)
 

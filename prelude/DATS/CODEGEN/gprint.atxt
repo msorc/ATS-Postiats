@@ -127,94 +127,35 @@ implement
 gprint_list
   (xs) = let
 //
-typedef tenv = int
+fun
+loop
+(
+  xs: !List_vt(a), i: int
+) : void =
+(
+case+ xs of
+| list_vt_nil() => ()
+| list_vt_cons(x, xs1) => let
+    val () =
+    if i > 0
+      then gprint_list$sep<>()
+    // end of [if]
+    val () = gprint_val<a>(x)
+  in
+    loop(xs1, i+1)
+  end // end of [list_vt_cons]
+) (* end of [loop] *)
 //
-implement
-list_foreach$fwork<a><tenv>
-  (x, env) = let
-  val () =
-  if env > 0
-    then gprint_list$sep<>()
-  // end of [if]
-  val () = env := succ (env)
-in
-  gprint_val<a>(x)
-end // end of [list_foreach$fwork]
-//
-var env: tenv = 0
 val () = gprint_list$beg<>()
-val () = list_foreach_env<a><tenv>(xs, env)
+val () = loop(xs, 0)
 val () = gprint_list$end<>()
 //
 in
   // nothing
 end // end of [gprint_list]
 //
-implement
-(a)(*tmp*)
-gprint_val<List(a)>(xs) = gprint_list<a>(xs)
-//
 #atscode_separator()
 //
-implement
-{}(*tmp*)
-gprint_listlist$beg1() = gprint_string "("
-implement
-{}(*tmp*)
-gprint_listlist$end1() = gprint_string ")"
-implement
-{}(*tmp*)
-gprint_listlist$sep1() = gprint_string ", "
-//
-implement
-{}(*tmp*)
-gprint_listlist$beg2() = gprint_string "("
-implement
-{}(*tmp*)
-gprint_listlist$end2() = gprint_string ")"
-implement
-{}(*tmp*)
-gprint_listlist$sep2() = gprint_string ", "
-//
-#atscode_separator()
-//
-implement
-{a}(*tmp*)
-gprint_listlist
-  (xss) = let
-//
-typedef xs = List(a)
-//
-implement
-gprint_val<xs>(xs) = let
-//
-implement
-gprint_list$beg<>() =
-  gprint_listlist$beg2<>()
-implement
-gprint_list$end<>() =
-  gprint_listlist$end2<>()
-implement
-gprint_list$sep<>() =
-  gprint_listlist$sep2<>()
-//
-in
-  gprint_list<a>(xs)
-end // end of [gprint_val]
-//
-implement
-gprint_list$beg<>() =
-  gprint_listlist$beg1<>()
-implement
-gprint_list$end<>() =
-  gprint_listlist$end1<>()
-implement
-gprint_list$sep<>() =
-  gprint_listlist$sep1<>()
-//
-in
-  gprint_list<xs>(xss)
-end // end of [gprint_listlist]
 //
 #atscode_separator()
 //
@@ -279,32 +220,6 @@ prval () = arrayptr_addback{a}(pf | A)
 
 #atscode_separator()
 
-implement
-{a}(*tmp*)
-gprint_arrayref
-  (A, n) = let
-//
-val (vbox pf | p) =
-  arrayref_get_viewptr(A)
-//
-in
-  $effmask_ref(gprint_array<a>(!p, n))
-end // end of [gprint_arrayref]
-
-#atscode_separator()
-
-implement
-{a}(*tmp*)
-gprint_arrszref
-  (ASZ) = () where {
-//
-var n: size_t
-val A =
-  arrszref_get_refsize<>(ASZ, n)
-//
-val () = gprint_arrayref<a>(A, n)
-//
-} (* end of [gprint_arrszref] *)
 
 #atscode_separator()
 
@@ -312,6 +227,6 @@ val () = gprint_arrayref<a>(A, n)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gprint_atxt.txt")
 %}\

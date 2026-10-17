@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun comment (x: string): atext
 //
@@ -74,7 +76,7 @@ packpostamble () = let
 val out = stdout_ref
 val () = fprint_string (out, "\
 #\n\
-echo \"The \${ATSHOME}/utils/myatscc files have been copied.\"\n\
+echo \"The \\${ATSHOME}/utils/myatscc files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -141,7 +143,6 @@ ATS/utils/myatscc
 #packfilename_r("./SATS")
 #packfilename_r("./DATS")
 #packfilename_r("./BUILD")
-#packfilename_r("./node_modules")
 //
 (* ****** ****** *)
 
@@ -150,7 +151,7 @@ ATS/utils/myatscc
 (* ****** ****** *)
 
 %{
-implement main(argc, argv) = ((*void*))
+implement main0(argc, argv) = ((*void*))
 %}
 
 (* ****** ****** *)

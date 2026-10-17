@@ -33,7 +33,15 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
 staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload SYM = "./pats_symbol.sats"
 
 (* ****** ****** *)
 
@@ -42,7 +50,7 @@ staload _(*anon*) = "libats/DATS/linmap_avltree.dats"
 
 (* ****** ****** *)
 
-staload "pats_symmap.sats"
+staload "./pats_symmap.sats"
 
 (* ****** ****** *)
 //
@@ -53,66 +61,58 @@ symmap_vtype (itm:type) = map (key, itm)
 
 (* ****** ****** *)
 //
-val cmp0 = $UN.cast{cmp(key)} (null)
-//
 implement
-compare_key_key<key> (x1, x2, _) = compare_uint_uint (x1, x2)
+compare_key_key<key> (x1, x2) =
+  if x1 < x2 then ~1 else (if x1 > x2 then 1 else 0)
 //
 (* ****** ****** *)
 
-implement symmap_make_nil () = linmap_make_nil<> ()
-implement symmap_free {itm} (map) = linmap_free<key,itm> (map)
+implement{itm}
+symmap_make_nil () = $effmask_wrt (linmap_make_nil<> ())
+implement{itm}
+symmap_free (map) = $effmask_wrt (linmap_free<key,itm> (map))
 
 (* ****** ****** *)
 
-implement
+implement{itm}
 symmap_search
-  {itm} (map, sym) = let
+  (map, sym) = $effmask_all let
   val k = $SYM.symbol_get_stamp (sym)
-  var res: itm?
-  val found = linmap_search (map, k, cmp0, res)
 in
-  if found then let
-    prval () = opt_unsome {itm} (res) in Some_vt (res)
-  end else let
-    prval () = opt_unnone {itm} (res) in None_vt ()
-  end (* end of [if] *)
+  linmap_search_opt<key,itm> (map, k)
 end // end of [symmap_search]
 
 (* ****** ****** *)
 
-implement
+implement{itm}
 symmap_insert
-  {itm} (map, sym, i) = {
+  (map, sym, i) = $effmask_all {
   val k = $SYM.symbol_get_stamp (sym)
-  var res: itm
-  val _exist = linmap_insert (map, k, i, cmp0, res)
+  var res: itm?
+  val _exist = linmap_insert<key,itm> (map, k, i, res)
   prval () = opt_clear (res)
 } (* end of [symmap_insert] *)
 
 (* ****** ****** *)
 
-implement
+implement{itm}
 symmap_joinwth
-  {itm} (map1, map2) = let
+  (map1, map2) = $effmask_all let
 //
 typedef keyitm = (key, itm)
 //
 fun loop
-  {n:nat} .<n>.
 (
-  map: &symmap (itm), kis: list_vt (keyitm, n)
-) :<> void = let
+  map: &symmap (itm) >> _, kis: List0_vt (keyitm)
+) : void = let
 in
 //
 case+ kis of
-| list_vt_cons
-    (!p_ki, kis1) => let
-    var res: itm
-    val _exist =
-      linmap_insert<key,itm> (map, p_ki->0, p_ki->1, cmp0, res)
+| ~list_vt_cons
+    (ki, kis1) => let
+    var res: itm?
+    val _exist = linmap_insert<key,itm> (map, ki.0, ki.1, res)
     prval () = opt_clear (res)
-    val () = free@ {keyitm} {0} (kis)
   in
     loop (map, kis1)
   end // end of [list_vt_cons]
@@ -120,7 +120,7 @@ case+ kis of
 //
 end // end of [loop]
 //
-val kis = linmap_listize<key,itm> (map2)
+val kis = linmap_listize1<key,itm> (map2)
 //
 in
   loop (map1, kis)
@@ -128,16 +128,31 @@ end // end of [symmap_joinwth]
 
 (* ****** ****** *)
 
+local
+//
+typedef fenv (itm:type) = @(FILEref, (FILEref, itm) -> void)
+//
+in (* in-of-local *)
+
+implement{itm}
+fprint_symmap (out, map, f) = let
+//
 implement
-fprint_symmap{itm} (out, map, f) = let
-  var !p_clo = @lam (pf: !unit_v | k: key, i: &itm): void =<clo>
-    $effmask_all (fprint (out, k); fprint (out, " -> "); f (out, i); fprint_newline (out))
-  prval pfu = unit_v ()
-  val () = linmap_foreach_vclo (pfu | map, !p_clo)
-  prval unit_v () = pfu
+linmap_foreach$fwork<key,itm><fenv(itm)>
+  (k, i, env) = {
+  val () = fprint (env.0, k)
+  val () = fprint (env.0, " -> ")
+  val () = env.1 (env.0, i)
+  val () = fprint_newline (env.0)
+} (* end of [linmap_foreach$fwork] *)
+//
+var env: fenv(itm) = @(out, f)
+//
 in
-  // nothing
+  linmap_foreach_env<key,itm><fenv(itm)> (map, env)
 end // end of [fprint_symmap]
+
+end // end of [local]
 
 (* ****** ****** *)
 

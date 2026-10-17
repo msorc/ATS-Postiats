@@ -1,0 +1,782 @@
+-
+-	-o
+-	-o	a.dats
+-	x.sats	-o
+-	-s
+-	-s	a.dats
+-	x.sats	-s
+-	-d
+-	-d	a.dats
+-	x.sats	-d
+-	-dd
+-	-dd	a.dats
+-	x.sats	-dd
+-	-cc
+-	-cc	a.dats
+-	x.sats	-cc
+-	-tc
+-	-tc	a.dats
+-	x.sats	-tc
+-	-dep
+-	-dep	a.dats
+-	x.sats	-dep
+-	-tag
+-	-tag	a.dats
+-	x.sats	-tag
+-	-h
+-	-h	a.dats
+-	x.sats	-h
+-	-v
+-	-v	a.dats
+-	x.sats	-v
+-	--help
+-	--help	a.dats
+-	x.sats	--help
+-	--output
+-	--output	a.dats
+-	x.sats	--output
+-	--output-w
+-	--output-w	a.dats
+-	x.sats	--output-w
+-	--output-a
+-	--output-a	a.dats
+-	x.sats	--output-a
+-	--static
+-	--static	a.dats
+-	x.sats	--static
+-	--dynamic
+-	--dynamic	a.dats
+-	x.sats	--dynamic
+-	--dynamics
+-	--dynamics	a.dats
+-	x.sats	--dynamics
+-	--compile
+-	--compile	a.dats
+-	x.sats	--compile
+-	--typecheck
+-	--typecheck	a.dats
+-	x.sats	--typecheck
+-	--gline
+-	--gline	a.dats
+-	x.sats	--gline
+-	--debug
+-	--debug	a.dats
+-	x.sats	--debug
+-	--debug2
+-	--debug2	a.dats
+-	x.sats	--debug2
+-	--depgen
+-	--depgen	a.dats
+-	x.sats	--depgen
+-	--taggen
+-	--taggen	a.dats
+-	x.sats	--taggen
+-	--atsreloc
+-	--atsreloc	a.dats
+-	x.sats	--atsreloc
+-	--codegen-2
+-	--codegen-2	a.dats
+-	x.sats	--codegen-2
+-	--jsonize-2
+-	--jsonize-2	a.dats
+-	x.sats	--jsonize-2
+-	--tlcalopt-disable
+-	--tlcalopt-disable	a.dats
+-	x.sats	--tlcalopt-disable
+-	--constraint-export
+-	--constraint-export	a.dats
+-	x.sats	--constraint-export
+-	--constraint-ignore
+-	--constraint-ignore	a.dats
+-	x.sats	--constraint-ignore
+-	--version
+-	--version	a.dats
+-	x.sats	--version
+-	-o	out.c
+-	-o	-s	a.sats
+-	-s	a.sats	-o	o.c	b.sats
+-	-o	-o	f
+-	--output	out.c
+-	--output	-s	a.sats
+-	-s	a.sats	--output	o.c	b.sats
+-	--output	--output	f
+-	--output-w	out.c
+-	--output-w	-s	a.sats
+-	-s	a.sats	--output-w	o.c	b.sats
+-	--output-w	--output-w	f
+-	--output-a	out.c
+-	--output-a	-s	a.sats
+-	-s	a.sats	--output-a	o.c	b.sats
+-	--output-a	--output-a	f
+-	-s	a
+-	-s	a	b	c
+-	-s	a	-	b
+-	-s	-
+-	-s	a	-s	b
+-	-s	-s
+-	-s	a	-o	out	b
+-	-s	--output	out	a	b
+-	-s	-DATS	X=1	a
+-	-s	-IATS	/tmp	a
+-	-d	a
+-	-d	a	b	c
+-	-d	a	-	b
+-	-d	-
+-	-d	a	-d	b
+-	-d	-d
+-	-d	a	-o	out	b
+-	-d	--output	out	a	b
+-	-d	-DATS	X=1	a
+-	-d	-IATS	/tmp	a
+-	-dd	a
+-	-dd	a	b	c
+-	-dd	a	-	b
+-	-dd	-
+-	-dd	a	-dd	b
+-	-dd	-dd
+-	-dd	a	-o	out	b
+-	-dd	--output	out	a	b
+-	-dd	-DATS	X=1	a
+-	-dd	-IATS	/tmp	a
+-	--static	a
+-	--static	a	b	c
+-	--static	a	-	b
+-	--static	-
+-	--static	a	--static	b
+-	--static	--static
+-	--static	a	-o	out	b
+-	--static	--output	out	a	b
+-	--static	-DATS	X=1	a
+-	--static	-IATS	/tmp	a
+-	--dynamic	a
+-	--dynamic	a	b	c
+-	--dynamic	a	-	b
+-	--dynamic	-
+-	--dynamic	a	--dynamic	b
+-	--dynamic	--dynamic
+-	--dynamic	a	-o	out	b
+-	--dynamic	--output	out	a	b
+-	--dynamic	-DATS	X=1	a
+-	--dynamic	-IATS	/tmp	a
+-	--dynamics	a
+-	--dynamics	a	b	c
+-	--dynamics	a	-	b
+-	--dynamics	-
+-	--dynamics	a	--dynamics	b
+-	--dynamics	--dynamics
+-	--dynamics	a	-o	out	b
+-	--dynamics	--output	out	a	b
+-	--dynamics	-DATS	X=1	a
+-	--dynamics	-IATS	/tmp	a
+-	-DATSFOO
+-	-DATS	FOO
+-	-DATSFOO	x.dats
+-	-DATSFOO=1
+-	-DATS	FOO=1
+-	-DATSFOO=1	x.dats
+-	-DATSFOO=1+2
+-	-DATS	FOO=1+2
+-	-DATSFOO=1+2	x.dats
+-	-DATSFOO=(1+2)*3
+-	-DATS	FOO=(1+2)*3
+-	-DATSFOO=(1+2)*3	x.dats
+-	-DATSFOO="str"
+-	-DATS	FOO="str"
+-	-DATSFOO="str"	x.dats
+-	-DATSFOO='c'
+-	-DATS	FOO='c'
+-	-DATSFOO='c'	x.dats
+-	-DATSFOO=1.5
+-	-DATS	FOO=1.5
+-	-DATSFOO=1.5	x.dats
+-	-DATSFOO=BAR
+-	-DATS	FOO=BAR
+-	-DATSFOO=BAR	x.dats
+-	-DATSFOO=BAR(1,2)
+-	-DATS	FOO=BAR(1,2)
+-	-DATSFOO=BAR(1,2)	x.dats
+-	-DATSFOO=~1
+-	-DATS	FOO=~1
+-	-DATSFOO=~1	x.dats
+-	-DATSFOO=1,2
+-	-DATS	FOO=1,2
+-	-DATSFOO=1,2	x.dats
+-	-DATSA=B=C
+-	-DATS	A=B=C
+-	-DATSA=B=C	x.dats
+-	-DATSF00=0x1F
+-	-DATS	F00=0x1F
+-	-DATSF00=0x1F	x.dats
+-	-DATSX_Y=1
+-	-DATS	X_Y=1
+-	-DATSX_Y=1	x.dats
+-	-DATSa1=-1
+-	-DATS	a1=-1
+-	-DATSa1=-1	x.dats
+-	-DATSDEBUG=1
+-	-DATS	DEBUG=1
+-	-DATSDEBUG=1	x.dats
+-	-DATSN=100
+-	-DATS	N=100
+-	-DATSN=100	x.dats
+-	-DATSFOO = 1
+-	-DATS	FOO = 1
+-	-DATSFOO = 1	x.dats
+-	-DATSFOO=
+-	-DATS	FOO=
+-	-DATSFOO=	x.dats
+-	-DATSS="a b"
+-	-DATS	S="a b"
+-	-DATSS="a b"	x.dats
+-	-DATSVERSION="0.4.2"
+-	-DATS	VERSION="0.4.2"
+-	-DATSVERSION="0.4.2"	x.dats
+-	-DATS
+-	-DATS	
+-	-DATS=
+-	-DATS	=
+-	-DATS1=
+-	-DATS	1=
+-	-DATS=1
+-	-DATS	=1
+-	-DATSA=(
+-	-DATS	A=(
+-	-DATSA=)
+-	-DATS	A=)
+-	-DATSA=1+
+-	-DATS	A=1+
+-	-DATSA='
+-	-DATS	A='
+-	-DATSA="
+-	-DATS	A="
+-	-DATS(
+-	-DATS	(
+-	-DATS-1
+-	-DATS	-1
+-	-DATS"s"
+-	-DATS	"s"
+-	-DATSA=B=
+-	-DATS	A=B=
+-	-DATS$X=1
+-	-DATS	$X=1
+-	-DATSA.B=1
+-	-DATS	A.B=1
+-	-DATS 
+-	-DATS	 
+-	-DATSA B
+-	-DATS	A B
+-	-DATSA==1
+-	-DATS	A==1
+-	-DATS
+-	-DATS	-DATS	X=1
+-	-DATSA=1	-DATSB=2	-DATSC=3
+-	-DATS	A=1	-DATSB=2	-DATS	C=3	x.dats
+-	-DAT	-DATSX	-DAT=1	-DATA=1	-DAT S=1	-D	-DATS=1	-DATS	=1
+-	-IATS/tmp
+-	-IATS	/tmp
+-	-IATS/tmp	f.sats
+-	-IATSdir
+-	-IATS	dir
+-	-IATSdir	f.sats
+-	-IATS.
+-	-IATS	.
+-	-IATS.	f.sats
+-	-IATS..
+-	-IATS	..
+-	-IATS..	f.sats
+-	-IATS/
+-	-IATS	/
+-	-IATS/	f.sats
+-	-IATS/usr/include
+-	-IATS	/usr/include
+-	-IATS/usr/include	f.sats
+-	-IATSa/b/c
+-	-IATS	a/b/c
+-	-IATSa/b/c	f.sats
+-	-IATSa b
+-	-IATS	a b
+-	-IATSa b	f.sats
+-	-IATS~/x
+-	-IATS	~/x
+-	-IATS~/x	f.sats
+-	-IATS$PATSHOME/prelude
+-	-IATS	$PATSHOME/prelude
+-	-IATS$PATSHOME/prelude	f.sats
+-	-IATS
+-	-IATS	
+-	-IATS	f.sats
+-	-IATS
+-	-IATS	-IATS	x
+-	-IATS	a	-IATSb	-IATS	c	-IATS/d
+-	-IAT	-IATSX	-IAT=1	-I	-IATS=1	-IATA/x
+-	-IATS	-s	a.sats
+-	-DATS	-s	a.sats
+-	-DATS	--static	-IATS	--dynamic
+-	-
+-	-s	-
+-	-d	-	-s	x
+-	-	-
+-	--
+-	-s	--
+-	-d	--	-s	x
+-	--	--
+-	---
+-	-s	---
+-	-d	---	-s	x
+-	---	---
+-	----
+-	-s	----
+-	-d	----	-s	x
+-	----	----
+-	-x
+-	-s	-x
+-	-d	-x	-s	x
+-	-x	-x
+-	--x
+-	-s	--x
+-	-d	--x	-s	x
+-	--x	--x
+-	--x=y
+-	-s	--x=y
+-	-d	--x=y	-s	x
+-	--x=y	--x=y
+-	-x=y
+-	-s	-x=y
+-	-d	-x=y	-s	x
+-	-x=y	-x=y
+-	-xy
+-	-s	-xy
+-	-d	-xy	-s	x
+-	-xy	-xy
+-	-s=a
+-	-s	-s=a
+-	-d	-s=a	-s	x
+-	-s=a	-s=a
+-	--static=a
+-	-s	--static=a
+-	-d	--static=a	-s	x
+-	--static=a	--static=a
+-	-S
+-	-s	-S
+-	-d	-S	-s	x
+-	-S	-S
+-	-D
+-	-s	-D
+-	-d	-D	-s	x
+-	-D	-D
+-	-I
+-	-s	-I
+-	-d	-I	-s	x
+-	-I	-I
+-	--DATS
+-	-s	--DATS
+-	-d	--DATS	-s	x
+-	--DATS	--DATS
+-	--IATS
+-	-s	--IATS
+-	-d	--IATS	-s	x
+-	--IATS	--IATS
+-	-DATS-
+-	-s	-DATS-
+-	-d	-DATS-	-s	x
+-	-DATS-	-DATS-
+-	-IATS-
+-	-s	-IATS-
+-	-d	-IATS-	-s	x
+-	-IATS-	-IATS-
+-	
+-	-s	
+-	-d		-s	x
+-		
+-	 
+-	-s	 
+-	-d	 	-s	x
+-	 	 
+-		
+-	-s		
+-	-d			-s	x
+-				
+-	-	
+-	-s	-	
+-	-d	-		-s	x
+-	-		-	
+-	- 
+-	-s	- 
+-	-d	- 	-s	x
+-	- 	- 
+-	 -
+-	-s	 -
+-	-d	 -	-s	x
+-	 -	 -
+-	-o-
+-	-s	-o-
+-	-d	-o-	-s	x
+-	-o-	-o-
+-	-s-
+-	-s	-s-
+-	-d	-s-	-s	x
+-	-s-	-s-
+-	--output-
+-	-s	--output-
+-	-d	--output-	-s	x
+-	--output-	--output-
+-	--help=1
+-	-s	--help=1
+-	-d	--help=1	-s	x
+-	--help=1	--help=1
+-	--version2
+-	-s	--version2
+-	-d	--version2	-s	x
+-	--version2	--version2
+-	-vv
+-	-s	-vv
+-	-d	-vv	-s	x
+-	-vv	-vv
+-	-hh
+-	-s	-hh
+-	-d	-hh	-s	x
+-	-hh	-hh
+-	-ss
+-	-s	-ss
+-	-d	-ss	-s	x
+-	-ss	-ss
+-	-dd2
+-	-s	-dd2
+-	-d	-dd2	-s	x
+-	-dd2	-dd2
+-	-ddd
+-	-s	-ddd
+-	-d	-ddd	-s	x
+-	-ddd	-ddd
+-	-cc1
+-	-s	-cc1
+-	-d	-cc1	-s	x
+-	-cc1	-cc1
+-	-dep1
+-	-s	-dep1
+-	-d	-dep1	-s	x
+-	-dep1	-dep1
+-	a-b
+-	-s	a-b
+-	-d	a-b	-s	x
+-	a-b	a-b
+-	a--b
+-	-s	a--b
+-	-d	a--b	-s	x
+-	a--b	a--b
+-	-a-b
+-	-s	-a-b
+-	-d	-a-b	-s	x
+-	-a-b	-a-b
+-	--a-b
+-	-s	--a-b
+-	-d	--a-b	-s	x
+-	--a-b	--a-b
+-	-1
+-	-s	-1
+-	-d	-1	-s	x
+-	-1	-1
+-	-0
+-	-s	-0
+-	-d	-0	-s	x
+-	-0	-0
+-	é
+-	-s	é
+-	-d	é	-s	x
+-	é	é
+-	-é
+-	-s	-é
+-	-d	-é	-s	x
+-	-é	-é
+-	--é
+-	-s	--é
+-	-d	--é	-s	x
+-	--é	--é
+-	@
+-	-s	@
+-	-d	@	-s	x
+-	@	@
+-	-@
+-	-s	-@
+-	-d	-@	-s	x
+-	-@	-@
+-	--@
+-	-s	--@
+-	-d	--@	-s	x
+-	--@	--@
+-	--=
+-	-s	--=
+-	-d	--=	-s	x
+-	--=	--=
+-	-=
+-	-s	-=
+-	-d	-=	-s	x
+-	-=	-=
+-	=
+-	-s	=
+-	-d	=	-s	x
+-	=	=
+-	-=-
+-	-s	-=-
+-	-d	-=-	-s	x
+-	-=-	-=-
+-	\
+-	-s	\
+-	-d	\	-s	x
+-	\	\
+-	"
+-	-s	"
+-	-d	"	-s	x
+-	"	"
+-	'
+-	-s	'
+-	-d	'	-s	x
+-	'	'
+-	-s	a.sats	-d	b.dats	c.dats
+-	-dd	a.dats	b.dats	c.dats	-o	out.c	d.dats	e.dats
+-	-IATS	/tmp	-DATS	X=1	-d	a.dats	--output	o.c	--typecheck
+-	--static	a.sats	--dynamic	b.dats	--dynamics	c.dats	d.dats
+-	-cc	-tc	-cc	--typecheck	--compile	-d	a.dats
+-	--depgen	--taggen	-dep	-tag	-s	a.sats
+-	--gline	--debug	--debug2	--atsreloc	--codegen-2	--jsonize-2	--tlcalopt-disable	--constraint-export	--constraint-ignore	-d	a
+-	-h	-v	--help	--version	-s	a.sats
+-	-s	a.sats	-h
+-	-s	a.sats	b.sats	-v	c.sats
+-	-d	a	x	-s	y	z	-dd	p	q	-d	-
+-	-s	-s	a	-s
+-	-o	-o	-o
+-	-DATS	A=1	-IATS	p	-DATS	A=2	-IATS	q	-d	x
+-	-DATSA=1	-DATSA=2	-DATSA=(3)
+-	a	b	c
+-	-	-	-
+-	-s	-	-d	-
+USER=alice
+USER=
+USER=;PATSRELOCROOT=/x/y
+PATSRELOCROOT=/root/reloc	-s	a
+PATSRELOCROOT=	-s	a
+USER=;PATSRELOCROOT=;ATSRELOCROOT=/atsroot	-s	a
+USER=bébé	-s	a
+USER=a/b	-s	a
+USER=' 	-s	a
+PATSRELOCROOT=a;ATSRELOCROOT=b	-d	a
+-	--output	-z	-v	--version	Y=2	a.sats	--debug2	-IATS/usr	--depgen
+-	b.dats	--depgen	-v	x	--tlcalopt-disable	--gline
+-	--tlcalopt-disable	--compile	--dynamic	-dd	--zz	--constraint-export	out.c	--debug
+-	-IATS/usr	Y=2	-IATS/usr	--codegen-2	--debug	--dynamics	--tlcalopt-disable	-DATS	--output-w
+-	--zz	--debug2
+-	-tag	--atsreloc	-dep	-o
+-	--taggen
+-	--codegen-2	-tag	--tlcalopt-disable	--atsreloc	-tc
+-	-v		--compile
+-	-dd	--taggen	--zz	-h	-dd	--output-a
+-	--typecheck
+-	-DATSX=1	-o	-o	--compile	-tc	--taggen	x	out.c	-
+-	--depgen	-o
+-	-o	-tag	-DATS	--version	--zz
+-	--output-a
+-	--help
+-	-DATSX=1	--debug	--zz	--static
+-	--typecheck	-o	--output-a	-v	-dep	
+-	--dynamic	-dep	out.c	--output-a
+-	x	--dynamics	a.sats	-v	-IATS	--output-a
+-	-s	-s	--constraint-ignore
+-	--version	--version	/tmp	--constraint-ignore	--	--zz	-o	--version	
+-	--gline	--dynamics	--static	--typecheck	-cc	--codegen-2	-	--taggen
+-	Y=2	-v	--tlcalopt-disable	--jsonize-2	-	--typecheck
+-	-	--codegen-2	/tmp	--static	--atsreloc	--tlcalopt-disable	--gline	--depgen
+-	-dep	--static	--constraint-ignore	Y=2	--	-IATS/usr	--output
+-	--atsreloc	-dd	-v	--depgen
+-	--compile	-	--dynamic	--tlcalopt-disable	--atsreloc	-cc
+-	-DATSX=1	-tag	--atsreloc	a.sats	-dd	-o
+-	--help	--jsonize-2	--gline
+-		--static	-z	--debug	--constraint-export
+-	--typecheck	--dynamic
+-	--taggen	--output	-cc	-IATS/usr	Y=2	-DATSX=1	--output-w	--taggen
+-	b.dats	Y=2
+-	--
+-	--constraint-ignore	--dynamic	-IATS	-DATSZ
+-	out.c	--depgen
+-	-DATS	--constraint-ignore	--output	--debug	--help	-IATS/usr	--jsonize-2	--output-w	/tmp
+-	-tag	-d	--help	--tlcalopt-disable	--debug
+-		-dep	--tlcalopt-disable	--gline	-dd	-dep	--	--help	-DATSX=1
+-	-d	-tag	--constraint-export	a.sats	--jsonize-2	--taggen	-IATS/usr
+-	-tc	-IATS/usr	--zz
+-	-IATS	--codegen-2	-dep	/tmp	--dynamics	--constraint-export	--static	--gline	--compile
+-	--help	--static	b.dats
+-	a.sats
+-	-cc	Y=2
+-	/tmp	-z	--depgen	--depgen
+-	--codegen-2	--debug2	-	-dd	-z	-dd	--constraint-ignore	Y=2
+-	/tmp
+-	--output	out.c	--debug2	--
+-	--	--tlcalopt-disable	-z	--jsonize-2	b.dats	-tc
+-	--dynamic	-d	-s
+-	--	--constraint-ignore	--constraint-export	--typecheck	-v	--dynamic	b.dats
+-	--help	--output-w	-h	-z	-z	Y=2
+-	-tag	Y=2	--output	-tag	x	--dynamic	--output
+-	--output	--compile	--constraint-ignore
+-	-dd	--atsreloc
+-	--atsreloc	--help	Y=2
+-	-tc	-DATSX=1	-dd	-DATS	-z		--taggen	--constraint-export
+-	--dynamics	--debug2	--help	-DATS	-
+-	--depgen	-d	-IATS/usr	--gline	--compile	-z	-dd	--atsreloc
+-	--debug2
+-	--typecheck	-dep	-o	-	-h
+-	--compile	-tc	-s		-IATS/usr	--codegen-2
+-	-DATSX=1	-h	--gline	out.c	--output	Y=2	-v
+-	--output	-d	Y=2	-s	--debug	--tlcalopt-disable	--typecheck	--atsreloc
+-	-s	--tlcalopt-disable
+-	a.sats	--taggen	-tc	--constraint-export	--debug	-cc	-tag
+-	-h	--output-w	--codegen-2	--depgen	--static	-dd
+-	--output-w	--taggen
+-	--dynamic	-z	--jsonize-2		--codegen-2	--constraint-export	--debug	-tc
+-	b.dats	--dynamics	--debug	-o	-dd	--zz	--gline	-v	--output-w
+-	--output-a	-tag	--atsreloc	--	--taggen	-z	--output	--output-a
+-		--output-w	--jsonize-2	-DATSX=1
+-	--codegen-2	--tlcalopt-disable
+-	-h	-z
+-	b.dats	/tmp	Y=2	--output-w	--help	--version	-h	--dynamics
+-	-DATS
+-	-s	--tlcalopt-disable	--zz	x	/tmp	--compile
+-	-s	-d
+-	--constraint-ignore	a.sats	-d	--compile
+-	--compile	-tag	-o	a.sats	-cc
+-	--jsonize-2	-dep	-IATS/usr	x	--zz	--static	-IATS	--tlcalopt-disable
+-	--static
+-	--jsonize-2	--gline	--debug2	b.dats
+-	out.c	out.c	--debug2	--atsreloc	x	--dynamics		-tag	Y=2
+-		x	-s	-DATSZ	-	--version	--output-a	Y=2	--output-w
+-	--typecheck
+-	out.c	-DATSZ	-dep	-h	--constraint-export	b.dats
+-	--output-a	--tlcalopt-disable	a.sats	--atsreloc	-DATSZ
+-	--output-w	--constraint-ignore	x
+-	--dynamics	b.dats	b.dats	-cc	--dynamics	-tag
+-	-tag	-tc
+-	-tag	-cc	-	-tag	--constraint-export	-DATS	--constraint-export	--output-a
+-	-	--gline	x	a.sats
+-	--zz	--output-a	--output-a	--dynamics	--zz	-dep	--dynamics
+-	-tc	-o	/tmp
+-	--static	--output-a	--dynamics	--constraint-ignore	--taggen	--constraint-export	out.c
+-	--output-a
+-	-cc	--depgen	--constraint-export	--version	--dynamics	--	--output-w	Y=2
+-	-dep	a.sats	--zz	--taggen	b.dats	--	-dd	Y=2	-d
+-	-z	-	--output-a
+-	--zz	-
+-	-o	--output-a	-IATS	--output-w	--debug	--dynamics
+-	--output-a	--depgen
+-	--dynamics	--version	--depgen	x		-z
+-	--atsreloc	--typecheck
+-	--typecheck	-DATSZ	--codegen-2	-IATS/usr	-dd	-h	--help
+-	--help	--tlcalopt-disable	--compile	--tlcalopt-disable	-DATSX=1	-IATS
+-	--atsreloc	-h
+-	-dep
+-	--constraint-export	-o	--output-w	--compile	--constraint-ignore
+-		-	--output-w	--version
+-	out.c
+-	--jsonize-2	--dynamic	--static	-o	-IATS/usr	-IATS/usr	x	-z	--debug
+-	--constraint-ignore	--dynamic	/tmp	a.sats	--constraint-export	--output-w
+-	-d
+-	--tlcalopt-disable	--codegen-2	--compile	x	--constraint-ignore
+-	-tc	-s	-dd	--compile
+-	--tlcalopt-disable
+-	--typecheck	--output-w	--typecheck	-DATSZ
+-	--typecheck	-
+-	-cc	--help	a.sats	-tc	b.dats	--debug2	--typecheck	-v
+-	-o	--typecheck	--constraint-export	--tlcalopt-disable
+-	-o	--help	-	--debug	-DATSX=1	--constraint-export
+-	-dep	--version	-o	--output-a	-DATSX=1
+-	-d	--constraint-export
+-	-d	--output-w	--constraint-ignore	x
+-	--taggen	-z	-d	-IATS	-d
+-	-dep	--jsonize-2
+-	-tag	-	-	--version	--help	--output-w	--debug2	-DATSX=1	-tag
+-	-h	--debug	--output	--static	--dynamic	-tag	-DATS	--depgen	-IATS/usr
+-	--	-o
+-	--static	out.c	--zz	--dynamic	/tmp	--	-s
+-	b.dats	--output	--compile
+-	--static	-DATS	--dynamics	-s
+-	-	-DATSX=1		-dd	out.c	-s
+-	--dynamics	-d	--taggen	--codegen-2	-dep	--zz
+-	out.c	-DATS		--atsreloc	a.sats	--compile
+-	-IATS/usr	--jsonize-2	--debug
+-	--constraint-export	a.sats	-dd	--version
+-	-v	/tmp	--gline	--debug
+-	--constraint-ignore	--atsreloc
+-	--jsonize-2	-tag	x	-h	--codegen-2	a.sats	a.sats
+-	--jsonize-2	-o
+-	--	-h	-DATSZ	--static	--gline	-IATS/usr	-DATSZ
+-	--static	--taggen
+-	--typecheck	--output-a	-	-dd	--dynamic	--compile	-s	Y=2
+-	-dd	-	-dep	--version	-DATSZ	
+-	--output	-DATSX=1	--compile	-v	-dd	-dep
+-	-DATSX=1	--version	x	-IATS	--atsreloc	-h	-dep	--codegen-2	-DATS
+-	--output-a	--constraint-export
+-	--gline	b.dats	/tmp	--dynamics	-o
+-	--zz	--output
+-	-v	--constraint-export	--depgen	-o	--jsonize-2	-DATSZ	-h
+-	-h	--tlcalopt-disable
+-	x	-cc	--tlcalopt-disable	--typecheck	--output
+-	Y=2	--codegen-2
+-	--taggen	x	--taggen	a.sats
+-	--debug	-z	/tmp	-DATSX=1	-DATSX=1
+-	--tlcalopt-disable	-s	-v
+-	--atsreloc	-IATS/usr	-h	--version	-IATS/usr
+-	b.dats	/tmp	-DATSX=1	-o	--dynamics	--static	--version
+-	--help	--dynamics	--version	--gline	--debug	--compile	-DATSZ
+-	--tlcalopt-disable	x	-z	-IATS/usr	--codegen-2		--help
+-		--gline	--dynamics	-v
+-	-DATS
+-	-cc	a.sats
+-	--atsreloc	-IATS	/tmp	--constraint-export
+-	--typecheck	--output-w	/tmp	--compile	--typecheck	-d
+-	-dep	-o	a.sats	--static	--constraint-ignore	-s	
+-	-dd	-tag	-dep	--debug	--output-w	--zz	-IATS/usr
+-	--version	--	--debug2	--help	a.sats	Y=2	--atsreloc	--debug2	-
+-	--atsreloc	-tc	-IATS/usr	b.dats
+-	b.dats	--depgen	--dynamic	-tc	--codegen-2	--codegen-2
+-	-DATSX=1
+-	-o	--compile
+-	--debug	-o	/tmp	Y=2	--depgen	-z
+-	--constraint-ignore	--debug	
+-	-v	-tc
+-	out.c	-IATS	-o	--constraint-ignore		--debug2	--depgen
+-	--tlcalopt-disable	Y=2	--zz	out.c	-DATS	--dynamics	--atsreloc	-v	-cc
+-	--depgen	--dynamics	-	-o	-o	--dynamics	--gline	
+-	-	--codegen-2	-v	x	
+-	-DATSZ	/tmp	-IATS	--output	-z
+-	b.dats	--output-a	--version
+-	-tc	Y=2	--
+-		-IATS/usr
+-	--debug
+-	--gline	out.c	-
+-	b.dats	--codegen-2	-	--
+-	-tag	--help
+-	-dd	--zz
+-	--zz	--version	-dep	--depgen	-s
+-	out.c
+-	--dynamic	--static	-DATS	-dep	--output-a	-s	-dep
+-	--atsreloc	--constraint-export	--dynamic	a.sats	-v	-h	-DATS	--codegen-2
+-	--constraint-ignore	--compile	--constraint-export	-d	--typecheck	--constraint-ignore	-tc
+-	--tlcalopt-disable	-cc	--tlcalopt-disable
+-	-tag
+-	-v
+-	--constraint-export	-cc	--	-	-DATSZ	--output	--typecheck	--typecheck
+-	-DATS	--dynamic	-tag	--codegen-2	--static	--atsreloc
+-	-d	--debug	-IATS
+-	--typecheck	--dynamic	--debug
+-	out.c	--taggen	-tag	--atsreloc	-IATS/usr	-cc	Y=2
+-	--typecheck	-IATS	--dynamics
+-	--debug	-tag
+-	--zz	--output	--constraint-ignore	--depgen	-DATSX=1	-dd	-cc	out.c	--static
+-	--debug2	--debug2	out.c	
+-	b.dats	--typecheck	-s	out.c	-v
+-	--typecheck	-o	--dynamics	--codegen-2	--debug2	--	--dynamic	--output-w
+-	--version	-s	out.c	--jsonize-2	-dd
+-	--jsonize-2	--help	--debug	-h	-IATS	--typecheck	--dynamic	/tmp	-v
+-	--debug	--version	--	--static	Y=2
+-	-cc
+-	--taggen	-dep	--static	-DATSX=1	-d	out.c	--debug2	--constraint-export
+-	--taggen	--constraint-export	--debug2	--
+-	--version	--output-w
+-	--compile	b.dats	out.c	--debug

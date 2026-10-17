@@ -1,5 +1,4 @@
 ######
-#
 # HX-2013-03:
 # for compiling a distribution of ATS-Postiats
 # KO-2014-04-09:
@@ -23,7 +22,6 @@ MAKE=make
 MAKEJ4=make -j4
 
 ######
-#
 all:: config.mk
 #
 all:: bin2_patsopt
@@ -39,47 +37,39 @@ all:: ccomp/atslib/lib/libatslib.a
 configure: ; /bin/bash autogen.sh
 
 ######
-#
 # HX: this seems to be working
 #
 # config.mk : configure ; ./configure
 #
 #######
-#
 config.mk: \
 configure ; \
 @echo "Please execute './configure'." ; exit 1 ;
 #
 ######
-#
 #C3NSTRINTKND=gmpknd
 #C3NSTRINTKND=intknd
 #
 ######
-#
+# the compiler from its sources needs a stage-0 patsopt (PATSOPT=..., src/README)
 src_patsopt: ; \
 $(MAKEJ4) C3NSTRINTKND=$(C3NSTRINTKND) -C src patsopt
 #
 bin_patsopt: src_patsopt ; $(CPF) src/patsopt bin/patsopt
 #
 ######
-#
 CC ?= gcc
 CCOMP=$(CC)
 #
-GCFLAG=
-#GCFLAG=-D_ATS_NGC
-#GCFLAG=-D_ATS_GCBDW
-#GCFLAG=-D_ATS_GCATS
+GCFLAG=-D_ATS_NGC
 #
 CFLAGS=
 LDFLAGS=
 #
 ######
-#
 src2_patsopt: ; \
 $(MAKEJ4) -C src/CBOOT patsopt \
-CCOMP=$(CCOMP) GCFLAG=$(GCFLAG) LDFLAGS=$(LDFLAGS) 
+CC=$(CCOMP) LDFLAGS=$(LDFLAGS)
 #
 bin2_patsopt: src2_patsopt ; $(CPF) src/CBOOT/patsopt bin/patsopt
 #
@@ -98,9 +88,8 @@ bin_myatscc: utl_myatscc ; \
 $(MVF) utils/myatscc/BUILD/myatscc bin/myatscc
 
 ######
-#
 src2_libatsopt: ; \
-$(MAKE) -C src/CBOOT CCOMP=$(CCOMP) libatsopt
+$(MAKE) -C src/CBOOT CC=$(CCOMP) libatsopt.a
 lib2_libatsopt: src2_libatsopt ; \
 $(CPF) src/CBOOT/libatsopt.a ccomp/atslib/lib/.
 #
@@ -113,7 +102,6 @@ ccomp/atslib/lib/libatslib.a: ; $(MAKE) -C ccomp/atslib atslib
 -include config.mk
 
 ######
-#
 # This variable is to be set externally
 #
 DESTDIR :=
@@ -129,7 +117,6 @@ bindir2 := $(DESTDIR)$(bindir)
 PATSLIBHOME2 := $(DESTDIR)$(PATSLIBHOME)
 
 ######
-#
 # HX-2011-06-01:
 # This part was originally written by Georg Bauhaus
 # (bauhausATarcorDOTde): It addresses the issue that
@@ -190,7 +177,6 @@ install_files_50: ; \
   done
 
 ######
-#
 # HX-2017-11-11:
 # Please execute the following
 # command-lines before reinstall
@@ -201,7 +187,6 @@ install_files_50: ; \
 reinstall_atslib: install_files_50  
 #
 ######
-#
 uninstall:: uninstall_bin
 uninstall:: uninstall_home
 #
@@ -240,7 +225,7 @@ cleanall:: ; $(RMF) ccomp/atslib/lib64/*
 cleanall:: ; $(RMF) ccomp/atslib/output/*
 
 cleanall:: ; $(MAKE) -C src -f Makefile cleanall
-cleanall:: ; $(MAKE) -C src/CBOOT -f Makefile cleanall
+cleanall:: ; $(MAKE) -C src/CBOOT -f Makefile clean
 cleanall:: ; $(MAKE) -C utils/atscc -f Makefile cleanall
 
 ######

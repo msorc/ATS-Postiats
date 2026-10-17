@@ -15,19 +15,18 @@ ATS_DYNLOADNAME
 #define
 LIBATSCC2JS_targetloc
 "$PATSHOME\
-/contrib/libatscc2js/ATS2-0.3.2"
+/contrib/libatscc2js"
 //
 #include
-"{$LIBATSCC2JS}/staloadall.hats"
+"{$LIBATSCC2JS}/mylibies.hats"
 //
-staload "libats/ML/SATS/basis.sats"
 //
 staload
-"{$LIBATSCC2JS}/SATS/Worker/channel.sats"
+"{$LIBATSCC2JS}/WorkerSession/SATS/channel.sats"
 staload
-"{$LIBATSCC2JS}/DATS/Worker/channel.dats"
+"{$LIBATSCC2JS}/WorkerSession/DATS/channel.dats"
 #include
-"{$LIBATSCC2JS}/DATS/Worker/chanpos.dats"
+"{$LIBATSCC2JS}/WorkerSession/DATS/chanpos.dats"
 //
 (* ****** ****** *)
 
@@ -36,22 +35,22 @@ UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 //
-#staload
-"./../../../DATS/libatscc2js_ext.dats"
+//
+// HX-2026-10: no GC
+// the protocol between the client and the worker:
+// a command-line argument is a flat pair (tag, string),
+// the arguments form a JSarray, and the result is a flat
+// triple (nerr, stdout, stderr); they are parsed by the
+// generic chmsg_parse of WorkerSession
+//
+typedef comarg = @(int, string)
+typedef comarglst = JSarray(comarg)
+typedef atscc2jsres = @(int, string, string)
+//
 //
 (* ****** ****** *)
 //
-datatype
-comarg_ =
-//
-| COMARGstrlit_ of chmsg(string)
-//
-| COMARGstrinp_ of chmsg(string)
-//
-| COMARGprefil_ of chmsg(string)
-| COMARGpostfil_ of chmsg(string)
-//
-typedef comarglst = list0(comarg)
+
 //
 (* ****** ****** *)
 //
@@ -145,45 +144,28 @@ emcc_comarglst
 implement
 emcc_comarg(arg) =
 (
-case+ arg of
-| COMARGstrlit(x) => _comarg_strlit(emcc_string(x))
-| COMARGstrinp(x) => _comarg_strinp(emcc_string(x))
-| COMARGprefil(x) => _comarg_prefil(emcc_string(x))
-| COMARGpostfil(x) => _comarg_postfil(emcc_string(x))
+case+ arg.0 of
+| 0 => _comarg_strlit(emcc_string(arg.1))
+| 1 => _comarg_strinp(emcc_string(arg.1))
+| 2 => _comarg_prefil(emcc_string(arg.1))
+| _ => _comarg_postfil(emcc_string(arg.1))
 )
 //
 implement
-emcc_comarglst(args) =
+emcc_comarglst(args) = let
+//
+fun
+loop
 (
-case+ args of
-| list0_nil() =>
-    _comarglst_nil()
-| list0_cons(arg, args) =>
-    _comarglst_cons(emcc_comarg(arg), emcc_comarglst(args))
-)
-//
-(* ****** ****** *)
-//
-implement
-chmsg_parse<comarg>(arg) = let
-//
-val xs =
-  $UN.cast{JSarray(JSobj)}(arg)
-val () =
-  (xs[0] := $extfcall(JSobj, "parseInt", xs[0]))
-//
-val arg_ = $UN.cast{comarg_}(arg)
+  i: int, res: emcc_comarglst
+) : emcc_comarglst =
+  if i > 0
+    then loop(i-1, _comarglst_cons(emcc_comarg(args[i-1]), res))
+    else res
 //
 in
-//
-case+ arg_ of
-//
-| COMARGstrlit_(x) => COMARGstrlit(chmsg_parse(x))
-| COMARGstrinp_(x) => COMARGstrinp(chmsg_parse(x))
-| COMARGprefil_(x) => COMARGprefil(chmsg_parse(x))
-| COMARGpostfil_(x) => COMARGpostfil(chmsg_parse(x))
-//
-end // end of [chmsg_parse]
+  loop(JSarray_length(args), _comarglst_nil())
+end // end of [emcc_comarglst]
 
 (* ****** ****** *)
 //
@@ -207,11 +189,10 @@ $extfcall(void, "_libatscc2js_dynload")
 //
 in
 //
-case+ args of
-| list0_nil() =>
-    ATSCC2JSRES(0, "", "")
-  // list0_nil
-| list0_cons _ => let
+if
+JSarray_length(args) = 0
+then @(0, "", "")
+else let
     val
     args = emcc_comarglst(args)
     val
@@ -227,8 +208,8 @@ case+ args of
       (string, "libatscc2js_stderr_store_join")
     // end of [val]
   in
-    ATSCC2JSRES(un_emcc_int(nerr), stdout, stderr)
-  end // end of [list0_cons]
+    @(un_emcc_int(nerr), stdout, stderr)
+  end // end of [else]
 //
 end (* end of [my_atscc2jsres_main_arglst] *)
 //
@@ -249,9 +230,9 @@ chp = $UN.cast{chanpos()}(0)
 val () =
 chanpos0_send
 ( chp, 0
-, lam(chp) =>
+, llam(chp) =>
   rpc_server<comarglst><atscc2jsres>
-    (chp, lam(args) =<cloref1> my_atscc2jsres_main_arglst(args))
+    (chp, lam(args) => my_atscc2jsres_main_arglst(args))
   // end of [rpc_server] // end of [lam]
 ) (* end of [chanpos_send] *)
 //

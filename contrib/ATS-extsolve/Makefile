@@ -74,7 +74,6 @@ SOURCES_SATS= \
 
 SOURCES_DATS= \
   patsolve_main.dats \
-  patsolve_mylib.dats \
   patsolve_commarg.dats \
   patsolve_cnstrnt.dats \
   patsolve_parsing.dats \
@@ -115,8 +114,6 @@ DATS/patsolve_main.dats; $(PATSCC2) -c $<
 
 ######
 
-patsolve_mylib_dats.o: \
-DATS/patsolve_mylib.dats; $(PATSCC3) -c $<
 
 ######
 

@@ -652,6 +652,6 @@ overload isneqz with p2tr_isnot_null of 10
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "pointer_atxt.txt")
 %}\

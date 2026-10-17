@@ -25,8 +25,6 @@ PATSPRE_targetloc "$PATSHOME/prelude"
 #define
 PATSLIBATS_targetloc "$PATSHOME/libats"
 #define
-PATSLIBATSML_targetloc "$PATSHOME/libats/ML"
-#define
 PATSLIBATSLIBC_targetloc "$PATSHOME/libats/libc"
 //
 (* ****** ****** *)

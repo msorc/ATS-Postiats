@@ -20,7 +20,7 @@ ATS_PACKNAME
 //
 (* ****** ****** *)
 
-datatype
+datavtype
 commarg =
   | CAhelp of (string)
   | CAgitem of (string)
@@ -32,8 +32,6 @@ commarg =
 
 (* ****** ****** *)
 //
-typedef
-commarglst = List0 (commarg)
 vtypedef
 commarglst_vt = List0_vt (commarg)
 //
@@ -41,7 +39,7 @@ commarglst_vt = List0_vt (commarg)
 //
 fun
 fprint_commarg
-  (out: FILEref, ca: commarg): void
+  (out: FILEref, ca: !commarg): void
 //
 overload fprint with fprint_commarg
 //

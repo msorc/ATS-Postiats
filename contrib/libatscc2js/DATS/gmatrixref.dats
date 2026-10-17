@@ -42,6 +42,7 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 //
+#staload "./../SATS/arrayref.sats"
 #staload "./../SATS/matrixref.sats"
 #staload "./../SATS/gmatrixref.sats"
 //

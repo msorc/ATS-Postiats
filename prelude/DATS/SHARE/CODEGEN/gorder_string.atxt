@@ -35,6 +35,6 @@ gcompare_val_val<string> = compare_string_string
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_string_atxt.txt")
 %}\

@@ -132,7 +132,7 @@ dllist_unsnoc{f:int | f > 0}
 
 fun{a:t0p}
 dllist_make_list
-  {n:int} (xs: list (INV(a), n)):<!wrt> dllist (a, 0, n)
+  {n:int} (xs: !list_vt (INV(a), n)):<!wrt> dllist (a, 0, n)
 // end of [dllist_make_list]
 
 (* ****** ****** *)

@@ -33,6 +33,8 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
 staload "./pats_basics.sats"
 
 (* ****** ****** *)
@@ -41,16 +43,16 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
-implement VIEWT0YPE_knd = VIEWT0YPE_int
+implement VIEWT0YPE_knd_get () = VIEWT0YPE_int
 
 (* ****** ****** *)
 
 implement
 test_fltkind(knd) = let
-  val knd = uint_of (knd)
-  val fltflag = uint_of (FLTFLAG)
+  val knd = g0int2uint_int_uint(knd)
+  val fltflag = g0int2uint_int_uint(FLTFLAG)
 in
-  (knd \land_uint_uint fltflag) > 0u
+  g0uint_gt_uint (g0uint_land_uint (knd, fltflag), 0u)
 end // end of [test_fltkind]
 
 implement
@@ -60,38 +62,38 @@ test_boxkind(knd) =
 
 implement
 test_linkind(knd) = let
-  val knd = uint_of (knd)
-  val linflag = uint_of (LINFLAG)
+  val knd = g0int2uint_int_uint(knd)
+  val linflag = g0int2uint_int_uint(LINFLAG)
 in
-  (knd \land_uint_uint linflag) > 0u
+  g0uint_gt_uint (g0uint_land_uint (knd, linflag), 0u)
 end // end of [test_linkind]
 
 implement
 test_prfkind(knd) = let
-  val knd = uint_of(knd)
-  val prfflag = uint_of(PRFFLAG)
+  val knd = g0int2uint_int_uint(knd)
+  val prfflag = g0int2uint_int_uint(PRFFLAG)
 in
-  (knd \land_uint_uint prfflag) > 0u
+  g0uint_gt_uint (g0uint_land_uint (knd, prfflag), 0u)
 end // end of [test_prfkind]
 
 implement
 test_prgmkind(knd) = let
-  val knd = uint_of(knd)
-  val prfflag = uint_of(PRFFLAG)
+  val knd = g0int2uint_int_uint(knd)
+  val prfflag = g0int2uint_int_uint(PRFFLAG)
 in
-  (knd \land_uint_uint prfflag) = 0u
+  g0uint_eq_uint (g0uint_land_uint (knd, prfflag), 0u)
 end // end of [test_prgmkind]
 
 implement
 test_polkind (knd) = let
-  val knd = uint_of (knd)
-  val polflag = uint_of(POLFLAG)
-  val knd = knd \land_uint_uint polflag
+  val knd = g0int2uint_int_uint(knd)
+  val polflag = g0int2uint_int_uint(POLFLAG)
+  val knd = g0uint_land_uint (knd, polflag)
 in
 //
 if
-(knd = 0u)
-then 0 else (if knd < polflag then 1 else ~1)
+g0uint_eq_uint (knd, 0u)
+then 0 else (if g0uint_lt_uint (knd, polflag) then 1 else ~1)
 // end of [if]
 //
 end // end of [test_polkind]
@@ -100,18 +102,18 @@ end // end of [test_polkind]
 
 implement
 impkind_linearize(knd) = let
-  val linflag = uint_of(LINFLAG)
-  val knd = uint_of(knd) \lor_uint_uint linflag
+  val linflag = g0int2uint_int_uint(LINFLAG)
+  val knd = g0uint_lor_uint (g0int2uint_int_uint(knd), linflag)
 in
-  int_of(knd)
+  g0uint2int_uint_int(knd)
 end // end of [impkind_linearize]
 
 implement
 impkind_neutralize(knd) = let
-  val polflag = uint_of(POLFLAG)
-  val knd = uint_of(knd) \land_uint_uint ~polflag
+  val polflag = g0int2uint_int_uint(POLFLAG)
+  val knd = g0uint_land_uint (g0int2uint_int_uint(knd), g0uint_lnot_uint(polflag))
 in
-  int_of(knd)
+  g0uint2int_uint_int(knd)
 end // end of [impkind_neutralize]
 
 (* ****** ****** *)
@@ -121,15 +123,15 @@ lte_impkind_impkind(k1, k2) = let
 //
   val
   polflag =
-  uint_of(POLFLAG)
+  g0int2uint_int_uint(POLFLAG)
   val
-  polmask = ~polflag
+  polmask = g0uint_lnot_uint(polflag)
 //
-  val k1 = uint_of(k1) \land_uint_uint polmask
-  val k2 = uint_of(k2) \land_uint_uint polmask
+  val k1 = g0uint_land_uint (g0int2uint_int_uint(k1), polmask)
+  val k2 = g0uint_land_uint (g0int2uint_int_uint(k2), polmask)
 //
 in
-  (k1 \land_uint_uint ~k2) = 0u
+  g0uint_eq_uint (g0uint_land_uint (k1, g0uint_lnot_uint(k2)), 0u)
 end // end of [lte_impkind_impkind]
 
 (* ****** ****** *)
@@ -314,34 +316,54 @@ end // end of [fprint_dcstkind]
 
 (* ****** ****** *)
 
+fun funclo_tag (fc: funclo): int =
+  case+ fc of
+  | FUNCLOfun () => 0
+  | FUNCLOcloptr () => 1
+  | FUNCLOclo0 () => 2
+  | FUNCLOcloref () => 3
+// end of [funclo_tag]
+
+implement
+FUNCLOclo (knd) =
+  if knd > 0 then FUNCLOcloptr () else (if knd < 0 then FUNCLOcloref () else FUNCLOclo0 ())
+// end of [FUNCLOclo]
+
+implement
+funclo_get_clokind (fc) =
+  case+ fc of
+  | FUNCLOfun () => 0
+  | FUNCLOcloptr () => 1
+  | FUNCLOclo0 () => 0
+  | FUNCLOcloref () => ~1
+// end of [funclo_get_clokind]
+
+(* ****** ****** *)
+
 implement
 funclo_is_clo (fc) =
-  case+ fc of
-  | FUNCLOclo (knd) => true | FUNCLOfun _ => false
+  case+ fc of FUNCLOfun () => false | _ => true
 // end of [funclo_is_clo]
 
 (* ****** ****** *)
 
 implement
 funclo_is_ptr (fc) =
-  case+ fc of
-  | FUNCLOclo (knd) => knd != 0 | FUNCLOfun _ => true
+  case+ fc of FUNCLOclo0 () => false | _ => true
 // end of [funclo_is_ptr]
 
 implement
 funclo_is_cloptr (fc) =
   case+ fc of
-  | FUNCLOclo (knd) => knd != 0 | FUNCLOfun _ => false
+  | FUNCLOcloptr () => true | FUNCLOcloref () => true | _ => false
 // end of [funclo_is_cloptr]
 
 (* ****** ****** *)
 
 implement
 eq_funclo_funclo
-  (fc1, fc2) = case+ (fc1, fc2) of
-  | (FUNCLOclo knd1, FUNCLOclo knd2) => knd1 = knd2
-  | (FUNCLOfun (), FUNCLOfun ()) => true
-  | (_, _) => false
+  (fc1, fc2) =
+  (funclo_tag (fc1) = funclo_tag (fc2))
 // end of [eq_funclo_funclo]
 
 implement
@@ -354,9 +376,13 @@ fprint_funclo
   (out, fc) =
 (
   case+ fc of
-  | FUNCLOclo (knd) =>
-      fprintf (out, "CLO(%i)", @(knd))
-  | FUNCLOfun () => fprintf (out, "FUN", @())
+  | FUNCLOfun () => fprint_string (out, "FUN")
+  | _ (*closure*) => let
+      val () = fprint_string (out, "CLO(")
+      val () = fprint_int (out, funclo_get_clokind (fc))
+    in
+      fprint_string (out, ")")
+    end // end of [closure]
 ) (* end of [fprint_funclo] *)
 
 implement print_funclo (fc) = fprint_funclo (stdout_ref, fc)
@@ -367,23 +393,17 @@ implement prerr_funclo (fc) = fprint_funclo (stderr_ref, fc)
 local
 //
 var the_flag: int = 0 // 1
-val p_the_flag = &the_flag
 //
-val (
-  pf_the_flag | ((*void*))
-) = vbox_make_view_ptr{int}(view@ the_flag | p_the_flag)
+val the_flag_ref =
+  ref_make_viewptr{int}(view@ the_flag | addr@ the_flag)
 //
 in (* in-of-local *)
 
 implement
-debug_flag_get () = let
-  prval vbox (pf) = pf_the_flag in !p_the_flag
-end // end of [debug_flag_get]
+debug_flag_get () = ref_get_elt (the_flag_ref)
 
 implement
-debug_flag_set (x) = let
-  prval vbox (pf) = pf_the_flag in !p_the_flag := x
-end // end of [debug_flag_set]
+debug_flag_set (x) = ref_set_elt (the_flag_ref, x)
 
 end // end of [local]
 
@@ -391,10 +411,10 @@ end // end of [local]
 
 %{$
 
-ats_void_type
+atstype_void
 patsopt_vfprintf_ifdebug (
-  ats_ptr_type out
-, ats_ptr_type fmt
+  atstype_ptr out
+, atstype_ptr fmt
 , va_list ap // variadic arguments
 ) {
 //
@@ -405,9 +425,9 @@ patsopt_vfprintf_ifdebug (
   return ;
 } // end of [patsopt_debug_printf]
 
-ats_void_type
+atstype_void
 patsopt_prerrf_ifdebug (
-  ats_ptr_type fmt, ...
+  atstype_ptr fmt, ...
 ) {
   va_list ap ;
   va_start(ap, fmt) ;

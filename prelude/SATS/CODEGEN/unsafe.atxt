@@ -124,14 +124,6 @@ fun{} int2ptr (i: int): ptr and ptr2int (p: ptr): int
 //
 // HX: these are popular ones:
 //
-castfn list_vt2t
-  {a:t0p}{n:int} (xs: !list_vt(INV(a), n)):<> list(a, n)
-// end of [list_vt2t]
-
-castfn arrayptr2ref
-  {a:vt0p}{n:int} (x: !arrayptr (INV(a), n)):<> arrayref(a, n)
-// end of [arrayptr2ref]
-
 castfn strptr2string{l:agz}(x: !strptr(l)):<> String0
 castfn strptr2stropt{l:addr}(x: !strptr(l)):<> Stropt0
 castfn strnptr2string{l:addr}{n:nat}(x: !strnptr(l, n)):<> string(n)
@@ -156,20 +148,6 @@ ptr1_vtake
 overload ptr_vtake with ptr0_vtake of 0
 overload ptr_vtake with ptr1_vtake of 10
 //
-#atscode_separator()
-
-castfn
-ref_vtake
-{a:vt0p}
-{l:addr}
-(
-  ref: ref(a)
-) :<>
-[
-  l:addr
-] (a@l, a@l -<lin,prf> void | ptr(l))
-// end of [ref_vtake]
-
 #atscode_separator()
 
 praxi
@@ -307,6 +285,6 @@ string_get_at(src: string, i: intGte(0)): char
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "unsafe_atxt.txt")
 %}\

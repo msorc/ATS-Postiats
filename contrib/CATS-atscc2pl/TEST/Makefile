@@ -108,20 +108,6 @@ cleanall:: ; $(RMF) queens_dats.pl
 ######
 #
 all:: \
-queens_comb_dats.pl
-queens_comb_dats.pl: queens_comb.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2PL) -o $@
-#
-regress:: \
-test_queens_comb
-test_queens_comb:: \
-queens_comb_dats.pl ; $(PERL) queens_comb_dats.pl
-#
-cleanall:: ; $(RMF) queens_comb_dats.pl
-#
-######
-#
-all:: \
 weekday_dats.pl
 weekday_dats.pl: weekday.dats ; \
 $(PATSOPT) -d $< | $(ATSCC2PL) -o $@
@@ -188,33 +174,6 @@ test_listmap:: \
 listmap_dats.pl ; $(PERL) listmap_dats.pl
 #
 cleanall:: ; $(RMF) listmap_dats.pl
-#
-######
-#
-all:: \
-twice_dats.pl
-twice_dats.pl: twice.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2PL) -o $@
-#
-regress:: \
-test_twice
-test_twice:: twice_dats.pl ; $(PERL) twice_dats.pl
-#
-cleanall:: ; $(RMF) twice_dats.pl
-#
-######
-#
-all:: \
-sieve_lazy_dats.pl
-sieve_lazy_dats.pl: sieve_lazy.dats ; \
-$(PATSOPT) -d $< | $(ATSCC2PL) -o $@
-#
-regress:: \
-test_sieve_lazy
-test_sieve_lazy:: \
-sieve_lazy_dats.pl ; $(PERL) sieve_lazy_dats.pl
-#
-cleanall:: ; $(RMF) sieve_lazy_dats.pl
 #
 ######
 #

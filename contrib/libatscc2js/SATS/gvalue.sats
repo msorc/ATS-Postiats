@@ -23,7 +23,16 @@ LIBATSCC_targetloc
 //
 (* ****** ****** *)
 //
-datatype gvalue =
+//
+// HX-2026-10: no GC
+// A gvalue is a (shared) value of the target language.
+// For pattern matching, it is viewed as a linear value
+// [gvalue_vt] of the same representation; consuming the view
+// is a no-op, as JavaScript has its own GC.
+//
+abstype gvalue
+//
+datavtype gvalue_vt =
 //
   | GVnil of ()
 //
@@ -40,6 +49,11 @@ datatype gvalue =
   | GVlist of gvlist
   | GVarray of gvarray
   | GVhashtbl of gvhashtbl
+//
+castfn
+gvalue_view(x: gvalue):<> gvalue_vt
+castfn
+gvalue_encode(x: gvalue_vt):<> gvalue
 //
 (* ****** ****** *)
 //

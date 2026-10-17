@@ -1,0 +1,281 @@
+(* the test doubles of the driver of the group 4 test (g4_gen.py): the functions of the other groups of the trans3 port (declared in
+   pats_trans3_others.sats), implemented once, in the driver. "2|" lines are ATS2 only, "1|" lines ATS1 only, "<<(" is "@(" in ATS2 and "(" in ATS1
+   (expand_hand of t3_gen.py). Every double prints its arguments (the order of the calls and the arguments are part of the comparison). *)
+(* ****** ****** *)
+//
+(* ****** ****** *)
+//
+// the pervasive environment, the instantiation of the constructors (the doubles of t3env.tmpl)
+//
+2|var the_penv_ids: glist (symbol) = glist_nil ()
+2|var the_penv_itms: glist (s2itm) = glist_nil ()
+2|val the_penv_ids_r = ref_make_viewptr{glist (symbol)} (view@ the_penv_ids | addr@ the_penv_ids)
+2|val the_penv_itms_r = ref_make_viewptr{glist (s2itm)} (view@ the_penv_itms | addr@ the_penv_itms)
+2|implement t_penv_add (id, itm) = {
+2|  val () = ref_set_elt (the_penv_ids_r, glist_cons<symbol> (id, ref_get_elt (the_penv_ids_r)))
+2|  val () = ref_set_elt (the_penv_itms_r, glist_cons<s2itm> (itm, ref_get_elt (the_penv_itms_r)))
+2|}
+2|fun penv_find (ids: glist (symbol), itms: glist (s2itm), id: symbol): Option_vt (s2itm) =
+2|  case+ glist_view (ids) of
+2|  | ~GLnil () => None_vt ()
+2|  | ~GLcons (id1, ids) => (
+2|    case+ glist_view (itms) of
+2|    | ~GLnil () => None_vt ()
+2|    | ~GLcons (itm1, itms) => if $SYM.eq_symbol_symbol (id, id1) then Some_vt (itm1) else penv_find (ids, itms, id)
+2|    )
+2|implement the_s2expenv_pervasive_find (id) =
+2|  penv_find (ref_get_elt (the_penv_ids_r), ref_get_elt (the_penv_itms_r), id)
+1|val the_penv_ids = ref<List (symbol)> (list_nil ())
+1|val the_penv_itms = ref<List (s2itm)> (list_nil ())
+1|implement t_penv_add (id, itm) = {
+1|  val () = !the_penv_ids := list_cons (id, !the_penv_ids)
+1|  val () = !the_penv_itms := list_cons (itm, !the_penv_itms)
+1|}
+1|fun penv_find (ids: List (symbol), itms: List (s2itm), id: symbol): Option_vt (s2itm) =
+1|  case+ ids of
+1|  | list_nil () => None_vt ()
+1|  | list_cons (id1, ids) => (
+1|    case+ itms of
+1|    | list_nil () => None_vt ()
+1|    | list_cons (itm1, itms) => if $SYM.eq_symbol_symbol (id, id1) then Some_vt (itm1) else penv_find (ids, itms, id)
+1|    )
+1|implement $TRENV2.the_s2expenv_pervasive_find (id) = penv_find (!the_penv_ids, !the_penv_itms, id)
+2|fun t_con_inst (e: s2exp): @(s2qualst, s2exp) = let
+2|  var vs: s2varlst? and ps: s2explst? and sc: s2exp?
+2|in
+2|  if uns2exp_exiuni (1, e, vs, ps, sc) then let
+2|    val @(qs, e1) = t_con_inst (sc)
+2|  in @(glist_cons<s2qua> (s2qua_new (vs, ps), qs), e1) end else @(glist_nil (), e)
+2|end
+2|implement trans3_env_d2con_instantiate (loc, d2c) = t_con_inst (d2con_get_type (d2c))
+1|fun t_con_inst (e: s2exp): @(s2qualst, s2exp) = let
+1|  var vs: s2varlst and ps: s2explst and sc: s2exp
+1|in
+1|  if uns2exp_exiuni (1, e, vs, ps, sc) then let
+1|    val @(qs, e1) = t_con_inst (sc)
+1|  in @(list_cons (@{ s2qua_svs= vs, s2qua_sps= ps }, qs), e1) end else @(list_nil (), e)
+1|end
+1|implement $TR2.d2con_instantiate (loc, d2c) = t_con_inst (d2con_get_type (d2c))
+2|implement d2var_get_type_some (loc0, d2v) = (
+2|  case+ gopt_view (d2var_get_type (d2v)) of
+2|  | ~GOsome (s2e) => s2e
+2|  | ~GOnone () => let
+2|      val () = (prerr "d2var_get_type_some: "; prerr_d2var (d2v); prerr_newline ())
+2|      val () = the_trans3errlst_add (trans3err_T3E_d2var_typeless (loc0, d2v))
+2|    in s2exp_t0ype_err () end
+2|)
+1|implement d2var_get_type_some (loc0, d2v) = (
+1|  case+ d2var_get_type (d2v) of
+1|  | Some (s2e) => s2e
+1|  | None () => let
+1|      val () = (prerr "d2var_get_type_some: "; prerr_d2var (d2v); prerr_newline ())
+1|      val () = the_trans3errlst_add (T3E_d2var_typeless (loc0, d2v))
+1|    in s2exp_t0ype_err () end
+1|)
+//
+// the file environment: the field [decl3] is a cell, the list of the declarations is a handle (number 6)
+//
+2|implement filenv_getref_d3eclistopt (fenv) = $UN.cast{Ptr1} (g4_fenv_cell (0))
+1|implement $TRENV2.filenv_getref_d3eclistopt (fenv) = $UN.cast{Ptr1} (g4_fenv_cell (0))
+2|implement filenv_get_d2eclist (fenv) = $UN.cast{d2eclist} (g4_getp (6))
+1|implement $TRENV2.filenv_get_d2eclist (fenv) = $UN.cast{d2eclist} (g4_getp (6))
+//
+(* ****** ****** *)
+//
+// the dynamic expressions: a small [d2exp_trup] (the real one dispatches in the same way to the functions of group 4)
+//
+2|fun g4_trup_lst (d2es: d2explst): d3explst = (
+2|  case+ glist_view (d2es) of
+2|  | ~GLnil () => glist_nil ()
+2|  | ~GLcons (d2e, d2es1) => let
+2|      val d3e = d2exp_trup (d2e) in glist_cons (d3e, g4_trup_lst (d2es1))
+2|    end
+2|)
+1|fun g4_trup_lst (d2es: d2explst): d3explst = (
+1|  case+ d2es of
+1|  | list_nil () => list_nil ()
+1|  | list_cons (d2e, d2es1) => let
+1|      val d3e = d2exp_trup (d2e) in list_cons (d3e, g4_trup_lst (d2es1))
+1|    end
+1|)
+2|fun g4_trup_seq (loc0: location, d2es: d2explst): d3exp = (
+2|  case+ glist_view (d2es) of
+2|  | ~GLnil () => d3exp_empty (loc0, s2exp_void_t0ype ())
+2|  | ~GLcons (d2e, d2es1) => let
+2|      val d3e = d2exp_trup (d2e)
+2|    in
+2|      if glist_is_nil (d2es1) then d3e else g4_trup_seq (loc0, d2es1)
+2|    end
+2|)
+1|fun g4_trup_seq (loc0: location, d2es: d2explst): d3exp = (
+1|  case+ d2es of
+1|  | list_nil () => d3exp_empty (loc0, s2exp_void_t0ype ())
+1|  | list_cons (d2e, d2es1) => let
+1|      val d3e = d2exp_trup (d2e)
+1|    in
+1|      case+ d2es1 of list_nil () => d3e | list_cons _ => g4_trup_seq (loc0, d2es1)
+1|    end
+1|)
+2|implement d2exp_trup (d2e0) = let
+2|  val loc0 = g4_d2loc (d2e0)
+2|  val () = (dd_ps "[d2exp_trup "; dd_d2exp d2e0; dd_ps "]"; dd_nl ())
+2|in
+2|  case+ d2exp_node_view (d2e0.d2exp_node ()) of
+2|  | ~D2Evar (d2v) => d3exp_var (loc0, d2var_get_type_some (loc0, d2v), d2v)
+2|  | ~D2Etop2 (s2e) => d3exp_top (loc0, s2e)
+2|  | ~D2Eint (i) => d3exp_int (loc0, s2exp_int_int_t0ype (i), i)
+2|  | ~D2Eempty () => d3exp_empty (loc0, s2exp_void_t0ype ())
+2|  | ~D2Eseq (d2es) => g4_trup_seq (loc0, d2es)
+2|  | ~D2Eptrof _ => d2exp_trup_ptrof (d2e0)
+2|  | ~D2Eviewat _ => d2exp_trup_viewat (d2e0)
+2|  | ~D2Ederef (d2s, d2e) => d2exp_trup_deref (loc0, d2s, d2e, glist_nil ())
+2|  | ~D2Eassgn _ => d2exp_trup_assgn (d2e0)
+2|  | ~D2Exchng _ => d2exp_trup_xchng (d2e0)
+2|  | ~D2Eloopexn (knd) => d2exp_trup_loopexn (loc0, knd)
+2|  | v => (d2exp_node_view_free (v); d3exp_errexp (loc0))
+2|end
+1|implement d2exp_trup (d2e0) = let
+1|  val loc0 = g4_d2loc (d2e0)
+1|  val () = (dd_ps "[d2exp_trup "; dd_d2exp d2e0; dd_ps "]"; dd_nl ())
+1|in
+1|  case+ d2e0.d2exp_node of
+1|  | D2Evar (d2v) => d3exp_var (loc0, d2var_get_type_some (loc0, d2v), d2v)
+1|  | D2Etop2 (s2e) => d3exp_top (loc0, s2e)
+1|  | D2Eint (i) => d3exp_int (loc0, s2exp_int_int_t0ype (i), i)
+1|  | D2Eempty () => d3exp_empty (loc0, s2exp_void_t0ype ())
+1|  | D2Eseq (d2es) => g4_trup_seq (loc0, d2es)
+1|  | D2Eptrof _ => d2exp_trup_ptrof (d2e0)
+1|  | D2Eviewat _ => d2exp_trup_viewat (d2e0)
+1|  | D2Ederef (d2s, d2e) => d2exp_trup_deref (loc0, d2s, d2e, list_nil ())
+1|  | D2Eassgn _ => d2exp_trup_assgn (d2e0)
+1|  | D2Exchng _ => d2exp_trup_xchng (d2e0)
+1|  | D2Eloopexn (knd) => d2exp_trup_loopexn (loc0, knd)
+1|  | _ => d3exp_errexp (loc0)
+1|end
+//
+implement d3exp_trdn (d3e, s2e) = let
+  val () = (dd_ps "[d3exp_trdn "; dd_s2exp (g4_d3ty d3e); dd_ps " <= "; dd_s2exp s2e; dd_ps "]"; dd_nl ())
+in
+  d3e
+end // end of [d3exp_trdn]
+implement d2exp_trdn (d2e, s2e) = let
+  val () = (dd_ps "[d2exp_trdn "; dd_s2exp s2e; dd_ps "]"; dd_nl ())
+  val d3e = d2exp_trup (d2e)
+in
+  d3exp_trdn (d3e, s2e)
+end // end of [d2exp_trdn]
+//
+2|implement d2lablst_trup (d2ls) = (
+2|  case+ glist_view (d2ls) of
+2|  | ~GLnil () => glist_nil ()
+2|  | ~GLcons (d2l, d2ls1) => let
+2|      val loc = d2l.d2lab_loc ()
+2|      val x = (
+2|        case+ d2lab_node_view (d2l.d2lab_node ()) of
+2|        | ~D2LABlab (l) => d3lab_lab (loc, l, d2l.d2lab_overld ())
+2|        | ~D2LABind (ind) => d3lab_ind (loc, g4_trup_lst (ind))
+2|      ) : d3lab
+2|    in
+2|      glist_cons (x, d2lablst_trup (d2ls1))
+2|    end
+2|)
+1|implement d2lablst_trup (d2ls) = (
+1|  case+ d2ls of
+1|  | list_nil () => list_nil ()
+1|  | list_cons (d2l, d2ls1) => let
+1|      val loc = d2l.d2lab_loc
+1|      val x = (
+1|        case+ d2l.d2lab_node of
+1|        | D2LABlab (l) => d3lab_lab (loc, l, d2l.d2lab_overld)
+1|        | D2LABind (ind) => d3lab_ind (loc, g4_trup_lst (ind))
+1|      ) : d3lab
+1|    in
+1|      list_cons (x, d2lablst_trup (d2ls1))
+1|    end
+1|)
+//
+// the patterns of [val] declarations
+//
+implement p2at_syn_type (p2t) = let
+  val () = (dd_ps "[p2at_syn_type "; dd_p2at p2t; dd_ps "]"; dd_nl ())
+in
+  g4_s2e (4, s2exp_void_t0ype ())
+end // end of [p2at_syn_type]
+2|implement p2at_trdn (p2t, s2e) = let
+2|  val () = (dd_ps "[p2at_trdn "; dd_p2at p2t; dd_ps " <= "; dd_s2exp s2e; dd_ps "]"; dd_nl ())
+2|  val loc = g4_p2loc (p2t)
+2|in
+2|  case+ p2at_node_view (p2t.p2at_node ()) of
+2|  | ~P2Tvar (d2v) => p3at_var (loc, s2e, d2v)
+2|  | v => (p2at_node_view_free (v); p3at_any (loc, s2e, d2var_make_any (loc)))
+2|end // end of [p2at_trdn]
+1|implement p2at_trdn (p2t, s2e) = let
+1|  val () = (dd_ps "[p2at_trdn "; dd_p2at p2t; dd_ps " <= "; dd_s2exp s2e; dd_ps "]"; dd_nl ())
+1|  val loc = g4_p2loc (p2t)
+1|in
+1|  case+ p2t.p2at_node of
+1|  | P2Tvar (d2v) => p3at_var (loc, s2e, d2v)
+1|  | _ => p3at_any (loc, s2e, d2var_make_any (loc))
+1|end // end of [p2at_trdn]
+2|implement d2exp_syn_type (d2e) = (
+2|  case+ d2exp_node_view (d2e.d2exp_node ()) of
+2|  | ~D2Etop2 (s2e) => s2e
+2|  | v => (d2exp_node_view_free (v); g4_s2e (5, s2exp_void_t0ype ()))
+2|)
+1|implement d2exp_syn_type (d2e) = (
+1|  case+ d2e.d2exp_node of
+1|  | D2Etop2 (s2e) => s2e
+1|  | _ => g4_s2e (5, s2exp_void_t0ype ())
+1|)
+implement d3lval_set_pat_type_left (d3e, p3t) = let
+  val () = (dd_ps "[d3lval_set_pat_type_left "; dd_s2exp (g4_d3ty d3e); dd_ps " "; dd_s2exp (p3at_get_type p3t); dd_ps "]"; dd_nl ())
+in
+end // end of [d3lval_set_pat_type_left]
+//
+(* ****** ****** *)
+//
+// the selections ([pats_trans3_selab.dats], [pats_trans3_lvalres.dats]): the knobs decide
+// 0: the value of [linrest], 1: the value of [sharing], 2: a context (0/1: none/some), 3: the list of the propositions (0/1: nil/one),
+// 4: the selected type (0/1: the type itself / the handle 0), 5: the result of [d2exp_trup_applst_sym] (0/1: an error/an application)
+// the handles: 0: the selected type, 1: a proposition, 2: the old type of [s2addr_exch_type], 3: the type of an application
+//
+implement s2exp_get_dlablst_linrest_sharing (loc0, s2e, d3ls, linrest, sharing) = let
+  val () = (dd_ps "[linrest_sharing "; dd_location loc0; dd_ps " "; dd_s2exp s2e; dd_ps " "; dd_d3lablst d3ls; dd_ps "]"; dd_nl ())
+  val () = linrest := g4_getk (0)
+  val () = sharing := g4_getk (1)
+  val sel = (if g4_getk (4) = 0 then s2e else g4_s2e (0, s2e)) : s2exp
+  val ps = (
+    if g4_getk (3) = 0 then list_vt_nil () else list_vt_cons (g4_s2e (1, s2e), list_vt_nil ())
+  ) : s2explst_vt
+in
+  <<(sel, ps)
+end // end of [s2exp_get_dlablst_linrest_sharing]
+//
+fun g4_mkctxt (s2e: s2exp): s2ctxt = let
+  val h = s2hole_make_srt (s2rt_t0ype)
+in
+  s2ctxt_make (K_s2exp (s2rt_t0ype, K_S2Ehole (h)), h)
+end // end of [g4_mkctxt]
+implement s2exp_get_dlablst_context (loc0, s2e, d3ls, context) = let
+  val () = (dd_ps "[context "; dd_location loc0; dd_ps " "; dd_s2exp s2e; dd_ps " "; dd_d3lablst d3ls; dd_ps "]"; dd_nl ())
+  val () = (
+    if g4_getk (2) = 0 then context := ON_s2ctxtopt ()
+    else context := OS_s2ctxtopt (g4_mkctxt (s2e))
+  ) : void
+in
+  if g4_getk (4) = 0 then s2e else g4_s2e (0, s2e)
+end // end of [s2exp_get_dlablst_context]
+//
+implement s2addr_exch_type (loc0, s2l, d3ls, s2e_new) = let
+  val () = (dd_ps "[exch_type "; dd_location loc0; dd_ps " "; dd_s2exp s2l; dd_ps " "; dd_d3lablst d3ls; dd_ps " "; dd_s2exp s2e_new; dd_ps "]"; dd_nl ())
+in
+  g4_s2e (2, s2e_new)
+end // end of [s2addr_exch_type]
+//
+implement d2exp_trup_applst_sym (d2e0, d2s, d2as) = let
+  val loc0 = g4_d2loc (d2e0)
+  val () = (dd_ps "[applst_sym "; dd_d2exp d2e0; dd_ps " "; dd_d2exparglst d2as; dd_ps "]"; dd_nl ())
+in
+  if g4_getk (5) = 0 then d3exp_errexp (loc0)
+  else d3exp_app_dyn (loc0, g4_s2e (3, s2exp_void_t0ype ()), d3exp_top (loc0, s2exp_void_t0ype ()), ~1, LC_d3explst (d3exp_top (loc0, s2exp_void_t0ype ()), LN_d3explst ()))
+end // end of [d2exp_trup_applst_sym]

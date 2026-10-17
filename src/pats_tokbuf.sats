@@ -41,7 +41,7 @@
 
 staload
 LBF = "./pats_lexbuf.sats"
-stadef lexbuf = $LBF.lexbuf
+vtypedef lexbuf = $LBF.lexbuf
 staload
 LEX = "./pats_lexing.sats"
 typedef token = $LEX.token
@@ -54,26 +54,24 @@ typedef location = $LOC.location
 // HX-2011-03-13:
 // [tokbuf] may store visited tokens to support backtracking
 //
-absviewt@ype
+absvt@ype
 tokbuf_vt0ype =
 $extype "pats_tokbuf_struct"
 //
-viewtypedef tokbuf = tokbuf_vt0ype
+vtypedef tokbuf = tokbuf_vt0ype
 //
 (* ****** ****** *)
 
 fun
 tokbuf_initize_filp
-  {m:file_mode} {l:addr} (
-  pfmod: file_mode_lte (m, r)
-, pffil: FILE m @ l
-| r: &tokbuf? >> tokbuf, p: ptr l
+(
+  r: &tokbuf? >> tokbuf, fp: FILEref
 ) : void // end of [tokbuf_initize_filp]
 
 fun
 tokbuf_initize_getc
 (
-  buf: &tokbuf? >> tokbuf, getc: () -<cloptr1> int
+  buf: &tokbuf? >> tokbuf, getc: () -<lincloptr1> int
 ) : void // end of [tokbuf_initize_getc]
 
 fun

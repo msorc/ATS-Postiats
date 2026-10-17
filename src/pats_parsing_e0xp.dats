@@ -31,11 +31,21 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: March, 2011
 //
+
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (see PORTING.md, section "Parser")
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_lexing.sats"
@@ -46,10 +56,13 @@ staload "./pats_syntax.sats"
 
 staload "./pats_parsing.sats"
 
+staload _(*templates*) = "./pats_syntax.dats"
+staload _(*templates*) = "./pats_parsing_util.dats"
+
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
-#define t2t option_of_option_vt
+#define l2l glist_make_list_vt
+#define t2t gopt_make_option_vt
 
 (* ****** ****** *)
 
@@ -62,9 +75,9 @@ p_e0xpseq_vt
 (
   buf: &tokbuf
 , bt: int, err: &int
-) : List_vt (e0xp) =
+) : List0_vt (e0xp) =
 (
-  pstar_fun0_COMMA {e0xp} (buf, bt, p_e0xp)
+  pstar_fun0_COMMA<e0xp> (buf, bt, p_e0xp)
 ) (* p_e0xpseq_vt *)
 
 (* ****** ****** *)
@@ -88,15 +101,6 @@ atme0xp ::=
 *)
 //
 fun
-p_atme0xp (
-  buf: &tokbuf, bt: int, err: &int
-) : e0xp =
-(
-  ptokwrap_fun
-    (buf, bt, err, p_atme0xp_tok, PE_atme0xp)
-) (* p_atme0xp *)
-//
-and
 p_atme0xp_tok (
   buf: &tokbuf, bt: int, err: &int, tok: token
 ) : e0xp = let
@@ -104,63 +108,67 @@ p_atme0xp_tok (
 val
 err0 = err
 //
-var ent: synent?
-val loc = tok.token_loc
+var ent: synent = synent_null<synent> ()
+val loc = tok.token_loc()
+val tnd = tok.token_node()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
-case+
-tok.token_node
-of // case+
+if
+ptest_fun<i0de>(buf, p_i0de, ent)
+  then e0xp_i0de (synent_decode (ent))
 //
-| _ when
-    ptest_fun(buf, p_i0de, ent) =>
-    e0xp_i0de (synent_decode (ent))
-//
-| T_INT _ => let
+else if token_node_is_T_INT (tnd) then let
     val () = incby1 () in e0xp_i0nt (tok)
   end
-| T_CHAR _ => let
+else if token_node_is_T_CHAR (tnd) then let
     val () = incby1 () in e0xp_c0har (tok)
   end
-| T_FLOAT _ => let
+else if token_node_is_T_FLOAT (tnd) then let
     val () = incby1 () in e0xp_f0loat (tok)
   end
-| T_STRING _ => let
+else if token_node_is_T_STRING (tnd) then let
     val () = incby1 () in e0xp_s0tring (tok)
   end
 //
-| T_LPAREN() => let
+else if token_node_is_T_LPAREN (tnd) then let
     val bt = 0
     val () = incby1 ()
     val ent2 = p_e0xpseq_vt (buf, bt, err)
     val ent3 = p_RPAREN (buf, bt, err) // err=err0
   in
     if err = err0 then
-      e0xp_list (tok, (l2l)ent2, ent3)
+      e0xp_list (tok, l2l(ent2), ent3)
     else let
-      val () = list_vt_free (ent2) in synent_null()
+      val () = list_vt_free (ent2) in synent_null<e0xp> ()
     end (* end of [if] *)
   end // end of [T_LPAREN]
 //
-| T_PERCENTLPAREN
-    ((*void*)) => let
+else if token_node_is_T_PERCENTLPAREN (tnd) then let
     val bt = 0
     val () = incby1 ()
     val ent2 = p_e0xp (buf, bt, err)
-    val ent3 = pif_fun (buf, bt, err, p_RPAREN, err0)
+    val ent3 = pif_fun<token> (buf, bt, err, p_RPAREN, err0)
   in
     if err = err0 then
-      e0xp_eval (tok, ent2, ent3) else synent_null()
+      e0xp_eval (tok, ent2, ent3) else synent_null<e0xp> ()
     // end of [if]
   end // end of [T_PERCENTLPAREN]
 //
-| _ (*rest-of-tokens*) =>
-    let val () = err := err + 1 in synent_null() end
+else let val () = err := err + 1 in synent_null<e0xp> () end
 //
 end // end of [p_atme0xp_tok]
+//
+fun
+p_atme0xp (
+  buf: &tokbuf, bt: int, err: &int
+) : e0xp =
+(
+  ptokwrap_fun<e0xp>
+    (buf, bt, err, p_atme0xp_tok, PE_atme0xp)
+) (* p_atme0xp *)
 //
 (* ****** ****** *)
 //
@@ -175,7 +183,7 @@ p_e0xp0 (
 //
 fun
 loop (
-  x0: e0xp, xs1: List_vt (e0xp)
+  x0: e0xp, xs1: List0_vt (e0xp)
 ) : e0xp =
 (
   case+ xs1 of
@@ -185,12 +193,12 @@ loop (
     end // end of [list_vt_cons]
 ) (* end of [loop] *)
 //
-val xs = pstar1_fun (buf, bt, err, p_atme0xp)
+val xs = pstar1_fun<e0xp> (buf, bt, err, p_atme0xp)
 //
 in
 //
 case+ xs of
-| ~list_vt_nil () => synent_null ()
+| ~list_vt_nil () => synent_null<e0xp> ()
 | ~list_vt_cons (x, xs) => loop (x, xs)
 //
 end // end of [p_e0xp0]
@@ -210,19 +218,16 @@ err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
 //
-var ent: synent?
+var ent: synent = synent_null<synent> ()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
-case+
-tok.token_node
-of // case+
-| _ when
-    ptest_fun (
-    buf, p_e0xp0, ent
-  ) => let
+if
+ptest_fun<e0xp> (
+  buf, p_e0xp0, ent
+) then let
     val ent1 = synent_decode {e0xp} (ent)
     val ent2 = p_e0xp (buf, 0(*bt*), err) // optional
   in
@@ -230,22 +235,23 @@ of // case+
       then e0xp_app (ent1, ent2) else (err := err0; ent1)
     // end of [if]
   end
-| T_IF () => let
+else if token_node_is_T_IF (tok.token_node()) then let
     val () = incby1 ()
     val ent2 = p_e0xp0 (buf, bt, err)
-    val ent3 = pif_fun (buf, bt, err, p_THEN, err0)
-    val ent4 = pif_fun (buf, bt, err, p_e0xp, err0)
-    val ent5 = ptokentopt_fun {e0xp} (buf, is_ELSE, p_e0xp)
+    val ent3 = pif_fun<token> (buf, bt, err, p_THEN, err0)
+    val ent4 = pif_fun<e0xp> (buf, bt, err, p_e0xp, err0)
+    val ent5 = ptokentopt_fun<e0xp> (buf, is_ELSE, p_e0xp)
   in
     if err = err0
-      then e0xp_if (tok, ent2, ent4, (t2t)ent5)
+      then e0xp_if (tok, ent2, ent4, t2t(ent5))
       else let
-        val () = option_vt_free (ent5) in tokbuf_set_ntok_null (buf, n0)
+        val () = option_vt_free (ent5) in tokbuf_set_ntok_null<e0xp> (buf, n0)
       end (* end of [else] *)
     // end of [if]
   end // end of [T_IF]
-| _ (*rest-of-tokens*) =>
-    let val () = err := err + 1 in synent_null() end
+else let val () = err := err + 1 in synent_null<e0xp> () end
+(*rest-of-tokens*)
+//
 end // end of [p_e0xp]
 //
 (* ****** ****** *)
@@ -267,35 +273,35 @@ err0 = err
 val n0 = tokbuf_get_ntok (buf)
 val tok = tokbuf_get_token (buf)
 //
-var ent: synent?
-val loc = tok.token_loc
+val loc = tok.token_loc()
+val tnd = tok.token_node()
 //
 macdef incby1 () = tokbuf_incby1 (buf)
 //
 in
 //
-case+
-tok.token_node
-of // case+
-//
-| T_INT _ => let
+if token_node_is_T_INT (tnd) then let
     val () = incby1 () in e0xp_i0nt (tok)
   end
-| T_CHAR _ => let
+else if token_node_is_T_CHAR (tnd) then let
     val () = incby1 () in e0xp_c0har (tok)
   end
-| T_FLOAT _ => let
+else if token_node_is_T_FLOAT (tnd) then let
     val () = incby1 () in e0xp_f0loat (tok)
   end
-| T_STRING _ => let
+else if token_node_is_T_STRING (tnd) then let
     val () = incby1 () in e0xp_s0tring (tok)
   end
 //
-| T_IDENT_alp (id) => let
-    val () = incby1 () in e0xp_make_stringid (loc, id)
-  end // end of [T_IDENT_alp]
-//
-| _(*rest-of-tokens*) => e0xp_make_stringid (loc, "")
+else (
+  case+ token_node_view (tnd) of
+  | ~T_IDENT_alp (id) => let
+      val () = incby1 () in e0xp_make_stringid (loc, id)
+    end // end of [T_IDENT_alp]
+  | v (*rest-of-tokens*) => let
+      val () = token_node_view_free (v) in e0xp_make_stringid (loc, "")
+    end
+) (* end of [else] *)
 //
 end // end of [p_datsval]
 //
@@ -318,7 +324,7 @@ val n0 = tokbuf_get_ntok (buf)
 val ent1 = p_i0de (buf, bt, err)
 val ent2 = (
   if err = err0
-    then ptokentopt_fun (buf, is_EQ, p_datsval)
+    then ptokentopt_fun<e0xp> (buf, is_EQ, p_datsval)
     else None_vt ()
    // end of [if]
 ) : Option_vt (e0xp)
@@ -327,9 +333,9 @@ in
 //
 if
 err = err0
-then datsdef_make (ent1, (t2t)ent2)
+then datsdef_make (ent1, t2t(ent2))
 else let
-  val () = option_vt_free (ent2) in tokbuf_set_ntok_null (buf, n0)
+  val () = option_vt_free (ent2) in tokbuf_set_ntok_null<datsdef> (buf, n0)
 end // end of [else]
 //
 end // end of [p_datsdef]

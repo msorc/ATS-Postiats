@@ -214,9 +214,9 @@ hashtable-based implementation of symbol table available
 
 %{
 //
-staload STDIO = "libc/SATS/stdio.sats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 //
-implement main () = {
+implement main0 () = {
 //
 val filr =
   $STDIO.fopen_ref_exn ("../TEMP/chap_hashtable.dats", file_mode_w)

@@ -33,8 +33,19 @@
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (ATS2 port of src/pats_depgen.dats)
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+//
 staload
-ATSPRE = "./pats_atspre.dats"
+UN = "prelude/SATS/unsafe.sats"
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -54,8 +65,8 @@ staload "./pats_depgen.sats"
 (* ****** ****** *)
 
 typedef path = string
-typedef pathlst = List (path)
-viewtypedef pathlst_vt = List_vt (path)
+typedef pathlst = glist (path)
+vtypedef pathlst_vt = List0_vt (path)
 
 (* ****** ****** *)
 //
@@ -73,35 +84,20 @@ extern
 castfn
 p2s{l:agz}(x: !strptr l):<> string
 //
-(*
-val () =
-printf
-(
-"pathtry_givename: given = %s\n", @(given)
-) (* printf *)
-*)
-//
 fun
 loop
 (
-ps: List(string), given: string
+ps: glist(string), given: string
 ) : Option_vt(string) = let
-(*
-val () =
-printf("pathtry_givename: loop\n")
-*)
 in
-  case+ ps of
-  | list_nil
+  case+ glist_view(ps) of
+  | ~GLnil
       () => None_vt()
-    // end of [list_nil]
-  | list_cons 
+    // end of [GLnil]
+  | ~GLcons 
       (p, ps) => let
       val pname =
       $FIL.filename_dirbase(p, given)
-(*
-      val test = true
-*)
       val test =
         test_file_exists((p2s)pname)
       // end of [val]
@@ -121,7 +117,7 @@ in
       {
         val ((*freed*)) = strptr_free(pname)
       } (* end of [else] *)
-    end // end of [list_cons]
+    end // end of [GLcons]
 end // end of [loop]
 //
 val knd = $FIL.givename_srchknd(given)
@@ -154,36 +150,16 @@ case+ knd of
 //
 | 1 => None_vt() // $PATSHOMELOCS
 //
-(*
-| _ (*non-local*) => None_vt(*void*)
-*)
 | _ (*non-local*) =>
     loop($GLOB.the_IATS_dirlst_get(), given)
 //
 end // end of [pathtry_givename]
 
 (* ****** ****** *)
-//
-extern
-fun
-pathtry_staloadarg
-  (arg: staloadarg): Option_vt(string)
-//
-implement
-pathtry_staloadarg(arg) =
-(
-  case+ arg of
-  | STLDfname
-      (loc, name) => pathtry_givename(name)
-    // end of [STLDfname]
-  | _(*non-STLDfname*) => None_vt((*void*))
-) (* end of [pathtry_staloadarg] *)
-//
-(* ****** ****** *)
 
 typedef
 depgen_ftype
-  (a: type) = (a, &pathlst_vt) -> void
+  (a: type) = (a, &pathlst_vt >> pathlst_vt) -> void
 // end of [depgen_ftype]
 
 (* ****** ****** *)
@@ -207,48 +183,29 @@ depgen_d0exp
 in
 //
 case+
-  d0e0.d0exp_node of
+  d0exp_node_view(d0e0.d0exp_node()) of
 //
-| D0Eide _ => ()
-| D0Edqid _ => ()
-| D0Eopid _ => ()
+| ~D0Efoldat(d0es) => depgen_d0explst (d0es, res)
+| ~D0Efreeat(d0es) => depgen_d0explst (d0es, res)
 //
-| D0Eidext _ => ()
-//
-| D0Eint _ => ()
-| D0Echar _ => ()
-| D0Efloat _ => ()
-| D0Estring _ => ()
-//
-| D0Eempty () => ()
-| D0Ecstsp _ => ()
-| D0Eextval _ => ()
-//
-| D0Eloopexn _ => ()
-//
-| D0Efoldat(d0es) => depgen_d0explst (d0es, res)
-| D0Efreeat(d0es) => depgen_d0explst (d0es, res)
-//
-| D0Etmpid _ => ()
-//
-| D0Elet(d0cs1, d0e2) => let
+| ~D0Elet(d0cs1, d0e2) => let
     val () = depgen_d0eclist (d0cs1, res) in depgen_d0exp (d0e2, res)
   end // end of [D0Elet]
-| D0Edeclseq(d0cs) => depgen_d0eclist (d0cs, res)
-| D0Ewhere(d0e1, d0cs2) => let
+| ~D0Edeclseq(d0cs) => depgen_d0eclist (d0cs, res)
+| ~D0Ewhere(d0e1, d0cs2) => let
     val () = depgen_d0eclist (d0cs2, res) in depgen_d0exp (d0e1, res)
   end // end of [D0Ewhere]
 //
-| D0Eapp(d0e1, d0e2) => let
+| ~D0Eapp(d0e1, d0e2) => let
     val () = depgen_d0exp (d0e1, res)
     val () = depgen_d0exp (d0e2, res)
   in
     // nothing
   end // end of [D0Eapp]
 //
-| D0Elist(npf, d0es) => depgen_d0explst (d0es, res)
+| ~D0Elist(npf, d0es) => depgen_d0explst (d0es, res)
 //
-| D0Eifhead
+| ~D0Eifhead
   (
     hd, _cond, _then, _else
   ) => let
@@ -258,7 +215,7 @@ case+
   in
     // nothing
   end // end of [D0Eifhead]
-| D0Esifhead
+| ~D0Esifhead
   (
     hd, _cond, _then, _else
   ) => let
@@ -268,15 +225,15 @@ case+
     // nothing
   end // end of [D0Esifhead]
 //
-| D0Eseq(d0es) => depgen_d0explst(d0es, res)
+| ~D0Eseq(d0es) => depgen_d0explst(d0es, res)
 //
-| D0Elst(lin, elt, d0e) => depgen_d0exp(d0e, res)
+| ~D0Elst(lin, elt, d0e) => depgen_d0exp(d0e, res)
 //
-| D0Etup(knd, npf, d0es) => depgen_d0explst(d0es, res)
+| ~D0Etup(knd, npf, d0es) => depgen_d0explst(d0es, res)
 //
-| D0Erec(knd, npf, ld0es) => depgen_labd0explst(ld0es, res)
+| ~D0Erec(knd, npf, ld0es) => depgen_labd0explst(ld0es, res)
 //
-| _ (* rest-of-d0exp *) => ((*nothing*))
+| v (* rest-of-d0exp *) => (d0exp_node_view_free(v))
 //
 end // end of [depgen_d0exp]
 
@@ -287,12 +244,12 @@ depgen_d0explst
   (xs, res) =
 (
 //
-case+ xs of
-| list_cons
+case+ glist_view(xs) of
+| ~GLcons
     (x, xs) => let
     val () = depgen_d0exp (x, res) in depgen_d0explst (xs, res)
-  end // end of [list_cons]
-| list_nil () => ()
+  end // end of [GLcons]
+| ~GLnil () => ()
 //
 ) // end of [depgen_d0explst]
 
@@ -301,8 +258,8 @@ depgen_d0expopt
   (opt, res) =
 (
 //
-case+ opt of
-| Some (d0e) => depgen_d0exp (d0e, res) | None () => ()
+case+ gopt_view(opt) of
+| ~GOsome (d0e) => depgen_d0exp (d0e, res) | ~GOnone () => ()
 //
 ) // end of [depgen_d0expopt]
 
@@ -313,14 +270,13 @@ depgen_labd0explst
   (lxs, res) =
 (
 //
-case+ lxs of
-| list_nil() => ()
-| list_cons(lx, lxs) => let
-    val DL0ABELED(l, x) = lx
-    val () = depgen_d0exp(x, res)
+case+ glist_view(lxs) of
+| ~GLnil() => ()
+| ~GLcons(lx, lxs) => let
+    val () = depgen_d0exp(lx.labd0exp_elt(), res)
   in
     depgen_labd0explst(lxs, res)
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 ) // end of [depgen_labd0explst]
 
@@ -329,15 +285,12 @@ case+ lxs of
 implement
 depgen_d0ecl
   (d0c0, res) = let
-(*
-val () = println! ("depgen_d0ecl")
-*)
 in
 //
 case+
-  d0c0.d0ecl_node of
+  d0ecl_node_view(d0c0.d0ecl_node()) of
 //
-| D0Cinclude
+| ~D0Cinclude
     (pfil, _, given) => let
     val opt = pathtry_givename(given)
   in
@@ -348,7 +301,7 @@ case+
       // end of [Some_vt]
   end // end of [DOCinclude]
 //
-| D0Cstaload
+| ~D0Cstaload
     (pfil, _, given) => let
     val opt = pathtry_givename(given)
   in
@@ -359,21 +312,21 @@ case+
       // end of [Some_vt]
   end // end of [D0Cstaload]
 //
-| D0Cstaloadloc
+| ~D0Cstaloadloc
     (pfil, nspace, d0cs) => depgen_d0eclist (d0cs, res)
 //
-| D0Clocal
+| ~D0Clocal
     (d0cs_head, d0cs_body) =>
   {
     val () = depgen_d0eclist (d0cs_head, res)
     val () = depgen_d0eclist (d0cs_body, res)
   } (* end of [D0Clocal] *)
 //
-| D0Cguadecl
-    (knd, gd0c) => depgen_guad0ecl_node (gd0c.guad0ecl_node, res)
+| ~D0Cguadecl
+    (knd, gd0c) => depgen_guad0ecl_node (gd0c.guad0ecl_node(), res)
   // end of [D0Cguadecl]
 //
-| _ (* rest-of-d0ecl *) => ((*void*))
+| v (* rest-of-d0ecl *) => (d0ecl_node_view_free(v))
 //
 end // end of [depgen_d0ecl]
 
@@ -384,11 +337,11 @@ depgen_d0eclist
   (xs, res) =
 (
 //
-case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) => let
+case+ glist_view(xs) of
+| ~GLnil() => ()
+| ~GLcons(x, xs) => let
     val () = depgen_d0ecl(x, res) in depgen_d0eclist(xs, res)
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 ) // end of [depgen_d0eclist]
 
@@ -399,17 +352,17 @@ depgen_guad0ecl_node
   (x, res) = let
 in
 //
-case+ x of
-| GD0Cone(gua, d0cs) =>
+case+ guad0ecl_node_view(x) of
+| ~GD0Cone(gua, d0cs) =>
     depgen_d0eclist(d0cs, res)
-| GD0Ctwo
+| ~GD0Ctwo
     (gua, d0cs1, d0cs2) => let
     val () = depgen_d0eclist(d0cs1, res)
     val () = depgen_d0eclist(d0cs2, res)
   in
     // nothing
   end // end of [GD0Ctwo]
-| GD0Ccons
+| ~GD0Ccons
     (gua, d0cs1, knd, x2) => let
     val () = depgen_d0eclist(d0cs1, res)
     val () = depgen_guad0ecl_node(x2, res)
@@ -439,40 +392,43 @@ implement
 fprint_target
   (out, given) = let
 //
-val
-[n:int] given = string1_of_string(given)
+fun
+rindex
+(
+  p: ptr, i: int, k: int
+) : int = let
+  val c = $UN.ptr0_get<char> (p)
+in
+  if c = '\000'
+    then k
+    else rindex (ptr0_succ<char> (p), i+1, (if c = '.' then i else k))
+end // end of [rindex]
 //
-val k = string_index_of_char_from_right(given, '.')
+val k = rindex ($UN.cast{ptr}(given), 0, ~1)
 //
 in
 //
-case+ 0 of
-| _ when k >= 0 => let
+if k >= 0 then let
     fun fpr
-      {i:nat | i <= n} .<n-i>.
     (
       out: FILEref
-    , given: string n
-    , k: size_t(*un*), i: size_t(i)
+    , p: ptr, k: int, i: int
     ) : void = let
-      val not =
-        string_isnot_atend(given, i)
-      // end of [val]
+      val c = $UN.ptr0_get<char> (p)
     in
-      if not then let
+      if c != '\000' then let
         val c =
         (
-          if i = k then '_' else given[i]
+          if i = k then '_' else c
         ) : char // end of [val]
       in
-        fprint_char(out, c); fpr(out, given, k, i+1)
+        fprint_char(out, c); fpr(out, ptr0_succ<char> (p), k, i+1)
       end // end of [if]
     end (* end of [fpr] *)
-    val k = size_of_ssize(k)
   in
-    fpr(out, given, k, 0); fprint_string(out, ".o")
+    fpr(out, $UN.cast{ptr}(given), k, 0); fprint_string(out, ".o")
   end // end of [_ when ...]
-| _ (*~found*) => fprint_string (out, given)
+else fprint_string (out, given) (*~found*)
 //
 end // end of [fprint_target]
 

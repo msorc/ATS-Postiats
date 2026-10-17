@@ -65,14 +65,23 @@ val () =
 println!
   ("Hello from [patsolve_z3]!")
 //
-val () = the_s2cinterp_initize()
 //
 val arglst =
   patsolve_z3_cmdline (argc, argv)
 //
 // HX: skipping argv[0]
 //
-val-~list_vt_cons(_, arglst) = arglst
+val-~list_vt_cons(arg0, arglst) = arglst
+val () = commarg_free(arg0) where
+{
+  fun commarg_free(x: commarg): void =
+  (
+    case+ x of
+    | ~CAhelp _ => () | ~CAgitem _ => ()
+    | ~CAinput _ => () | ~CAoutput _ => ()
+    | ~CAscript _ => () | ~CAargend() => ()
+  )
+}
 //
 val () = patsolve_z3_commarglst(arglst)
 //

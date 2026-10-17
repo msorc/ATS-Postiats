@@ -32,8 +32,26 @@
 // Start Time: February, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_constraint3_init.dats, see PORTING.md, "Constraint solving (constraint3)")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
 
 staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
@@ -51,17 +69,36 @@ staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
 
+staload _(*anon*) = "./pats_staexp2_scst.dats" // [s2cstmap_add]
+
+(* ****** ****** *)
+
+staload "./pats_trans3_env.sats"
 staload "./pats_constraint3.sats"
 
 (* ****** ****** *)
 
-local
+#include "./pats_constraint3.hats"
+
+(* ****** ****** *)
+//
+// HX: [val-list_cons (x, xs) = xs] of ATS1 (MatchError)
+//
+fn s2es_uncons
+  (xs: s2explst): @(s2exp, s2explst) =
+  if glist_is_cons (xs) then
+    @(glist_head<s2exp> (xs), glist_tail<s2exp> (xs))
+  else $ERR.abort_interr<@(s2exp, s2explst)> ()
+// end of [s2es_uncons]
+
+(* ****** ****** *)
+
 //
 fun
 f_identity (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let
-  val-list_cons (s2e1, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
 in
   s3exp_make (env, s2e1)
 end // end of [identity]
@@ -72,7 +109,7 @@ fun
 f_neg_bool (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let
-  val-list_cons (s2e, s2es) = s2es
+  val @(s2e, s2es) = s2es_uncons (s2es)
   val s3be = s3exp_make (env, s2e)
 in
   s3exp_bneg (s3be)
@@ -82,8 +119,8 @@ fun
 f_add_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
   val s3be2 = s3exp_make (env, s2e2)
 in
@@ -94,8 +131,8 @@ fun
 f_mul_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
   val s3be2 = s3exp_make (env, s2e2)
 in
@@ -106,8 +143,8 @@ fun
 f_eq_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
   val s3be2 = s3exp_make (env, s2e2)
 in
@@ -118,8 +155,8 @@ fun
 f_neq_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
   val s3be2 = s3exp_make (env, s2e2)
 in
@@ -132,7 +169,7 @@ fun
 f_neg_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
 in
   s3exp_ineg (s3ie1)
@@ -142,8 +179,8 @@ fun
 f_add_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -154,8 +191,8 @@ fun
 f_sub_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -166,8 +203,8 @@ fun
 f_mul_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -190,13 +227,13 @@ f_idiv_int_int
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let
   val s2es0 = s2es
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val sgn = (
-    case+ s2e2.s2exp_node of
-    | S2Eint (i) => compare_int_int (i, 0)
-    | S2Eintinf (i) => $INTINF.compare_intinf_int (i, 0)
-    | _ => 0 (* HX: no integer constant *)
+    case+ s2exp_node_view (s2e2.s2exp_node ()) of
+    | ~S2Eint (i) => (if i < 0 then ~1 else (if i > 0 then 1 else 0))
+    | ~S2Eintinf (i) => $INTINF.compare_intinf_int (i, 0)
+    | v => (s2exp_node_view_free (v); 0) (* HX: no integer constant *)
   ) : int // end of [val]
   val s2c = (
     if sgn != 0 then
@@ -209,7 +246,7 @@ f_idiv_int_int
 //
   val s2es = (
     if sgn >= 0 then
-      s2es0 else list_pair (s2e1, s2exp_ineg (s2e2))
+      s2es0 else glist_pair<s2exp> (s2e1, s2exp_ineg (s2e2))
     // end of [if]
   ) : s2explst // end of [val]
   val s2v = s2vbcfenv_replace_cstapp (env, s2rt_int, s2c, s2es)
@@ -222,8 +259,8 @@ fun
 f_lt_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -234,8 +271,8 @@ fun
 f_lte_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -246,8 +283,8 @@ fun
 f_gt_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -258,8 +295,8 @@ fun
 f_gte_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -270,8 +307,8 @@ fun
 f_eq_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -282,8 +319,8 @@ fun
 f_neq_int_int (
   env: &s2vbcfenv, s2es: s2explst
 ) : s3exp = let 
-  val-list_cons (s2e1, s2es) = s2es
-  val-list_cons (s2e2, s2es) = s2es
+  val @(s2e1, s2es) = s2es_uncons (s2es)
+  val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
   val s3ie2 = s3exp_make (env, s2e2)
 in
@@ -363,60 +400,53 @@ f_lte_cls_cls (
   env: &s2vbcfenv, s2es0: s2explst
 ) : s3exp = let 
 //
-(*
-val () =
-println! ("f_lte_cls_cls: s2es = ", s2es0)
-*)
-//
 val s2c = s2cstref_get_cst (the_lte_cls_cls)
 //
-val-list_cons (s2e1, s2es1) = s2es0
-val-list_cons (s2e2, s2es2) = s2es1
+val @(s2e1, s2es1) = s2es_uncons (s2es0)
+val @(s2e2, s2es2) = s2es_uncons (s2es1)
 //
 val s2e1 = s2exp_hnfize (s2e1) and s2e2 = s2exp_hnfize (s2e2)
 //
-in
-//
-case+
-(
-  s2e1.s2exp_node
-, s2e2.s2exp_node
-) of (* caseof *)
-| (S2Ecst (s2c1),
-   S2Ecst (s2c2)) =>
-  (
-    s3exp_bool (s2cst_lte_cls_cls (s2c1, s2c2))
-  )
-| (_, _) => let
+fun auxdflt (
+  env: &s2vbcfenv, s2es0: s2explst
+) : s3exp = let
     val s2c_rel = s2cstref_get_cst (the_lterel_cls_cls)
     val s2v_res =
       s2vbcfenv_replace_cstapp (env, s2rt_bool, s2c_rel, s2es0)
     // end of [val]
-(*
-    val ((*void*)) = println! ("f_lte_cls_cls: s2v_res = ", s2v_res)
-*)
   in
     s3exp_bvar (s2v_res)
-  end // end of [_, _]
+  end // end of [auxdflt]
+//
+in
+//
+case+ s2exp_node_view (s2e1.s2exp_node ()) of
+| ~S2Ecst (s2c1) => (
+  case+ s2exp_node_view (s2e2.s2exp_node ()) of
+  | ~S2Ecst (s2c2) =>
+    (
+      s3exp_bool (s2cst_lte_cls_cls (s2c1, s2c2))
+    )
+  | v => (s2exp_node_view_free (v); auxdflt (env, s2es0))
+  ) // end of [S2Ecst]
+| v => (s2exp_node_view_free (v); auxdflt (env, s2es0))
+//
 end // end of [f_lte_cls_cls]
 //
-(* ****** ****** *)
-
-in (* in of [local] *)
 
 (* ****** ****** *)
 
 implement
 constraint3_initialize_map (map) = let
 //
-typedef tfun = (&s2vbcfenv, s2explst) -<fun1> s3exp
+typedef tfun = (&s2vbcfenv, s2explst) -> s3exp
 //
 fun ins (
   map: &s2cfunmap, r: s2cstref, f: tfun
 ) : void = let
   val s2c = s2cstref_get_cst (r)
   val map1 = $UN.cast {s2cstmap(tfun)} (map)
-  val map2 = s2cstmap_add (map1, s2c, f)
+  val map2 = s2cstmap_add<tfun> (map1, s2c, f)
   val () = map := $UN.cast {s2cfunmap} (map2)
 in
   (*nothing*)
@@ -480,10 +510,6 @@ val () = ins (map, the_gte_cls_cls, f_gte_cls_cls)
 in
   (*nothing*)
 end // end of [constraint3_initialize_map]
-
-(* ****** ****** *)
-
-end // end of [local]
 
 (* ****** ****** *)
 

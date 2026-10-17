@@ -34,9 +34,7 @@ JSarray_pair
 //
 (* ****** ****** *)
 //
-fun
-JSarray_make_list
-  {a:t0p}(List(INV(a))): JSarray(a) = "mac#%"
+
 fun
 JSarray_make_list_vt
   {a:vt0p}(List_vt(INV(a))): JSarray(a) = "mac#%"
@@ -113,7 +111,7 @@ JSarray_remove_at
 (* ****** ****** *)
 //
 fun
-JSarray_tabulate_cloref
+JSarray_tabulate_cloptr
   {a:vt0p}{n:nat}
   (int(n), cfun(natLt(n), a)): JSarray(a) = "mac#%"
 //
@@ -132,7 +130,7 @@ fun{a:t0p}
 JSarray_sort_1(A: JSarray(a)): void
 fun
 JSarray_sort_2{a:t0p}
-  (A: JSarray(a), cmp: (a, a) -<cloref1> int): void = "mac#%"
+  (A: JSarray(a), cmp: (a, a) -<cloptr1> int): void = "mac#%"
 //
 (* ****** ****** *)
 //

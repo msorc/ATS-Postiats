@@ -291,10 +291,10 @@ implementation given above leaks no memory.
 
 %{
 //
-staload STDIO = "libc/SATS/stdio.sats"
+staload STDIO = "libats/libc/SATS/stdio.sats"
 //
 implement
-main((*void*)) = {
+main0((*void*)) = {
 //
   val filr =
   $STDIO.fopen_ref_exn

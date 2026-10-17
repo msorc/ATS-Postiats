@@ -199,6 +199,6 @@ a0,a1,a2,a3:vt0p
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "tuple_atxt.txt")
 %}\

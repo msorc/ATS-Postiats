@@ -16,7 +16,12 @@ libatsopt_dynloadall
 //
 (* ****** ****** *)
 //
-datatype
+//
+// HX-2026-10: no GC
+// (the layout is the same as that of the ATS1
+// datatype expected by libatsopt)
+//
+datavtype
 comarg =
 //
 | COMARGstrlit of string
@@ -26,12 +31,27 @@ comarg =
 | COMARGprefil of string
 | COMARGpostfil of string
 //
-typedef comarglst0 = List0(comarg)
-typedef comarglst1 = List1(comarg)
+vtypedef comarglst0 = List0_vt(comarg)
+vtypedef comarglst1 = List1_vt(comarg)
+//
+fun
+comarg_free
+  (x: comarg): void =
+(
+case+ x of
+| ~COMARGstrlit _ => ()
+| ~COMARGstrinp _ => ()
+| ~COMARGprefil _ => ()
+| ~COMARGpostfil _ => ()
+)
 //
 (* ****** ****** *)
 //
-datatype
+//
+// HX-2026-10:
+// the strings are allocated by libatsopt
+//
+datavtype
 patsoptres =
 PATSOPTRES of
 (
@@ -46,7 +66,7 @@ fun
 patsopt_main_arglst
   {n:pos}
 (
-  args: list(comarg, n)
+  args: !list_vt(comarg, n)
 ) : int(*nerr*) =
   "ext#libatsopt_patsopt_main_arglst"
 //
@@ -55,7 +75,7 @@ fun
 patsoptres_main_arglst
   {n:pos}
 (
-  args: list(comarg, n)
+  args: !list_vt(comarg, n)
 ) : patsoptres =
   "ext#libatsopt_patsoptres_main_arglst"
 //
@@ -120,7 +140,7 @@ alert(ats2jspre_the_print_store_join());
 (* ****** ****** *)
 
 implement
-main(argc, argv) =
+main0(argc, argv) =
 {
 //
 val () =
@@ -137,12 +157,12 @@ val arg2 = COMARGpostfil(POSTAMBLE)
 val arg3 = COMARGstrlit("--dynamic")
 val arg4 = COMARGstrinp(HELLO_WORLD)
 //
-#define :: list_cons
+#define :: list_vt_cons
 //
 val
 args =
 (
-  arg1::arg2::arg3::arg4::list_nil()
+  arg1::arg2::arg3::arg4::list_vt_nil()
 ) : comarglst1
 //
 (*
@@ -152,11 +172,14 @@ val () =
 println! ("patsopt_main_arglst: nerr = ", nerr)
 *)
 //
-val
-PATSOPTRES
+val+
+~PATSOPTRES
 ( nerr
 , strout
 , strerr ) = patsoptres_main_arglst(args)
+//
+val () =
+list_vt_freelin_fun<comarg>(args, lam(x) =<fun1> comarg_free(x))
 //
 (*
 val () =

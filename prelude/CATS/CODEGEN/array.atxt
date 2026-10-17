@@ -41,6 +41,11 @@ void qsort
   void *base, size_t nmemb, size_t size
 , int(*compar)(const void *, const void *)
 ) ; // end of [qsort]
+//
+// HX-2026-10:
+// glibc (>= 2.40) may define [bsearch] as a macro
+//
+\#ifndef bsearch
 extern
 void *bsearch
 (
@@ -49,6 +54,7 @@ void *bsearch
 , size_t nmemb, size_t size
 , int (*compar)(const void *, const void *)
 ) ; // end of [bsearch]
+\#endif // end of [ifndef(bsearch)]
 //
 \#define atspre_array_qsort qsort
 \#define atspre_array_bsearch bsearch
@@ -101,5 +107,5 @@ atspre_array_foreach_funenv_tsz
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "array_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "array_atxt.txt")
 %}\

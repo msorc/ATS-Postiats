@@ -6,7 +6,7 @@
 (* ****** ****** *)
 
 fun unpack_test_sep{n:int}
-  (arrayref(char, n), n: size_t n): bool
+  (A: &(@[char][n]), n: size_t n): bool
 
 (* ****** ****** *)
 

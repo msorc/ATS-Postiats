@@ -18,39 +18,52 @@ LIBATSCC2PL_targetloc
 //
 (* ****** ****** *)
 //
-implement
-list_map (xs, f) =
+//
+// HX-2026-10: no GC (linear lists and closures)
+//
+fun
+{a:t0p}
+{b:t0p}
+list_vt_map0
+(
+  xs: List0_vt(a), f: !(a) -<cloptr1> b
+) : List0_vt(b) =
 (
 case+ xs of
-| list_nil () => list_nil ()
-| list_cons (x, xs) => list_cons (f(x), list_map (xs, f))
-) (* end of [list_map] *)
+| ~list_vt_nil () => list_vt_nil ()
+| ~list_vt_cons (x, xs) =>
+    let val y = f(x) in list_vt_cons (y, list_vt_map0<a><b> (xs, f)) end
+) (* end of [list_vt_map0] *)
 //
 (* ****** ****** *)
 //
 extern
 fun
 fromto
-  : (int, int) -> List0 (int) = "mac#fromto"
+  : (int, int) -> List0_vt (int) = "mac#fromto"
 //
 implement
-fromto (m, n) =
+fromto(m, n) =
 if m < n
-  then list_cons (m, fromto (m+1, n)) else list_nil ()
+  then list_vt_cons(m, fromto(m+1, n)) else list_vt_nil()
 // end of [if]
 //
 (* ****** ****** *)
 //
 extern
 fun
-mytest : (int, int) -> List0(int) = "mac#mytest"
+mytest
+  : (int, int) -> List0_vt(int) = "mac#mytest"
 //
 implement
-mytest(m, n) = let
+mytest (m, n) = let
   val xs = fromto (m, n)
+  val f = lam (x: int): int =<cloptr1> m * n * x
+  val ys = list_vt_map0<int><int> (xs, f)
 in
-  list_map{int}{int} (xs, lam x => m * n * x)
+  cfun_free(f); ys
 end // end of [mytest]
+//
 //
 (* ****** ****** *)
 
@@ -61,8 +74,24 @@ implement
 main0_pl () =
 {
 //
-val () =
-println! ("mytest(5, 10) = ", mytest(5, 10))
+val xs = mytest(5, 10)
+val () = print("mytest(5, 10) = ")
+val () = loop(xs, 0) where
+{
+fun
+loop
+(
+  xs: !List0_vt(int), i: int
+) : void =
+(
+case+ xs of
+| list_vt_nil() => ()
+| list_vt_cons(x, xs1) =>
+  (if i > 0 then print(", "); print(x); loop(xs1, i+1))
+)
+}
+val () = print_newline()
+val () = list_vt_free(xs)
 //
 } (* end of [main0_pl] *)
 

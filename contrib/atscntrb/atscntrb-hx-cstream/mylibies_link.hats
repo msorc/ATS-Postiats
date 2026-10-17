@@ -24,7 +24,7 @@ in end // end of [local]
 
 local
 #include
-"./DATS/cstream_cloref.dats"
+"./DATS/cstream_cloptr.dats"
 in end // end of [local]
 
 (* ****** ****** *)

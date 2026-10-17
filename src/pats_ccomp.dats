@@ -32,45 +32,78 @@
 // Start Time: October, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp.dats, see PORTING.md, "ccomp core modules")
+//
+(* ****** ****** *)
 
-staload UN = "prelude/SATS/unsafe.sats"
-staload _(*anon*) = "prelude/DATS/unsafe.dats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
 
 (* ****** ****** *)
 
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+// The only .dats that includes [pats_ccomp_gen_dats.hats]
+//
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
+staload "./pats_avlmap.sats"
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
 staload "./pats_histaexp.sats"
 staload "./pats_hidynexp.sats"
+
+(* ****** ****** *)
+
+staload _ = "./pats_dynexp2_dcst.dats"
+staload _ = "./pats_dynexp2_dvar.dats"
 
 (* ****** ****** *)
 
 staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
-//
+
+#include "./pats_ccomp_gen_dats.hats"
+
+(* ****** ****** *)
+
 implement
 hifundec_get_funlabopt
-  (hfd) = $UN.cast{funlabopt}(hfd.hifundec_funlab)
+  (hfd) = $UN.cast{funlabopt}(hfd.hifundec_funlab())
 implement
 hifundec_set_funlabopt (hfd, opt) =
-  $UN.ptrset<funlabopt> (hifundec_getref_funlabopt (hfd), opt)
+  set_hifundec_funlab (hfd, $UN.cast{hifunlabopt}(opt))
 //
 (* ****** ****** *)
 //
 implement
 hiimpdec_get_funlabopt
-  (imp) = $UN.cast{funlabopt}(imp.hiimpdec_funlab)
+  (imp) = $UN.cast{funlabopt}(imp.hiimpdec_funlab())
 implement
 hiimpdec_set_funlabopt (imp, opt) =
-  $UN.ptrset<funlabopt> (hiimpdec_getref_funlabopt (imp), opt)
+  set_hiimpdec_funlab (imp, $UN.cast{hifunlabopt}(opt))
 //
 (* ****** ****** *)
 //
 implement
 hiimpdec_get_instrlstopt
-  (imp) = $UN.cast{instrlstopt}(imp.hiimpdec_instrlst)
+  (imp) = $UN.cast{instrlstopt}(imp.hiimpdec_instrlst())
 implement
 hiimpdec_set_instrlstopt (imp, opt) =
-  $UN.ptrset<instrlstopt> (hiimpdec_getref_instrlstopt (imp), opt)
+  set_hiimpdec_instrlst (imp, $UN.cast{hiinstrlstopt}(opt))
 //
 (* ****** ****** *)
 
@@ -82,29 +115,27 @@ primdec_make_node
 ) : primdec // end-of-function
 implement
 primdec_make_node
-  (loc, node) = '{
-  primdec_loc= loc, primdec_node= node
-} // end of [primdec_make_node]
+  (loc, node) = primdec_new(loc, node) // end of [primdec_make_node]
 
 (* ****** ****** *)
 
 implement
 primdec_none (loc) =
-  primdec_make_node (loc, PMDnone ())
+  primdec_make_node (loc, primdec_node_PMDnone())
 // end of [primdec_none]
 
 (* ****** ****** *)
 
 implement
 primdec_list (loc, pmds) =
-  primdec_make_node (loc, PMDlist (pmds))
+  primdec_make_node (loc, primdec_node_PMDlist(pmds))
 // end of [primdec_list]
 
 (* ****** ****** *)
 
 implement
 primdec_saspdec (loc, d2c) =
-  primdec_make_node (loc, PMDsaspdec (d2c))
+  primdec_make_node (loc, primdec_node_PMDsaspdec(d2c))
 // end of [primdec_saspdec]
 
 (* ****** ****** *)
@@ -112,24 +143,24 @@ primdec_saspdec (loc, d2c) =
 implement
 primdec_extvar
   (loc, name, inss) =
-  primdec_make_node (loc, PMDextvar (name, inss))
+  primdec_make_node (loc, primdec_node_PMDextvar(name, inss))
 // end of [primdec_extvar]
 
 (* ****** ****** *)
 
 implement
 primdec_datdecs (loc, s2cs) =
-  primdec_make_node (loc, PMDdatdecs (s2cs))
+  primdec_make_node (loc, primdec_node_PMDdatdecs(s2cs))
 implement
 primdec_exndecs (loc, d2cs) =
-  primdec_make_node (loc, PMDexndecs (d2cs))
+  primdec_make_node (loc, primdec_node_PMDexndecs(d2cs))
 
 (* ****** ****** *)
 
 implement
 primdec_impdec
   (loc, impdec) =
-  primdec_make_node (loc, PMDimpdec (impdec))
+  primdec_make_node (loc, primdec_node_PMDimpdec(impdec))
 // end of [primdec_impdec]
 
 (* ****** ****** *)
@@ -137,55 +168,55 @@ primdec_impdec
 implement
 primdec_fundecs
   (loc, knd, decarg, hfds) =
-  primdec_make_node (loc, PMDfundecs (knd, decarg, hfds))
+  primdec_make_node (loc, primdec_node_PMDfundecs(knd, decarg, hfds))
 // end of [primdec_fundecs]
 
 (* ****** ****** *)
 
 implement
 primdec_valdecs (loc, knd, hvds, inss) =
-  primdec_make_node (loc, PMDvaldecs (knd, hvds, inss))
+  primdec_make_node (loc, primdec_node_PMDvaldecs(knd, hvds, inss))
 implement
 primdec_valdecs_rec (loc, knd, hvds, inss) =
-  primdec_make_node (loc, PMDvaldecs_rec (knd, hvds, inss))
+  primdec_make_node (loc, primdec_node_PMDvaldecs_rec(knd, hvds, inss))
 
 (* ****** ****** *)
 //
 implement
 primdec_vardecs
   (loc, hvds, inss) =
-  primdec_make_node (loc, PMDvardecs (hvds, inss))
+  primdec_make_node (loc, primdec_node_PMDvardecs(hvds, inss))
 //
 (* ****** ****** *)
 //
 implement
 primdec_include
   (loc, knd, pmds) =
-  primdec_make_node (loc, PMDinclude (knd, pmds))
+  primdec_make_node (loc, primdec_node_PMDinclude(knd, pmds))
 //
 (* ****** ****** *)
 //
 implement
 primdec_staload (loc, hid) =
-  primdec_make_node (loc, PMDstaload (hid))
+  primdec_make_node (loc, primdec_node_PMDstaload(hid))
 //
 implement
 primdec_staloadloc
 (
   loc, pfil, nspace, hids
 ) = primdec_make_node
-  (loc, PMDstaloadloc (pfil, nspace, hids))
+  (loc, primdec_node_PMDstaloadloc(pfil, nspace, hids))
 //
 implement
 primdec_dynload (loc, hid) =
-  primdec_make_node (loc, PMDdynload (hid))
+  primdec_make_node (loc, primdec_node_PMDdynload(hid))
 //
 (* ****** ****** *)
 
 implement
 primdec_local
   (loc, _head, _body) =
-  primdec_make_node (loc, PMDlocal (_head, _body))
+  primdec_make_node (loc, primdec_node_PMDlocal(_head, _body))
 // end of [primdec_local]
 
 (* ****** ****** *)
@@ -196,50 +227,48 @@ primval_make_node
   (loc: loc_t, hse: hisexp, node: primval_node): primval
 implement
 primval_make_node
-  (loc, hse, node) = '{
-  primval_loc= loc, primval_type= hse, primval_node= node
-} // end of [primval_make_node]
+  (loc, hse, node) = primval_new(loc, hse, node) // end of [primval_make_node]
 
 (* ****** ****** *)
 
 implement
 primval_tmp (loc, hse, tmp) =
-  primval_make_node (loc, hse, PMVtmp (tmp))
+  primval_make_node (loc, hse, primval_node_PMVtmp(tmp))
 // end of [primval_tmp]
 
 implement
 primval_tmpref (loc, hse, tmp) =
-  primval_make_node (loc, hse, PMVtmpref (tmp))
+  primval_make_node (loc, hse, primval_node_PMVtmpref(tmp))
 // end of [primval_tmpref]
 
 (* ****** ****** *)
 //
 implement
 primval_arg (loc, hse, narg) =
-  primval_make_node (loc, hse, PMVarg (narg))
+  primval_make_node (loc, hse, primval_node_PMVarg(narg))
 implement
 primval_argref (loc, hse, narg) =
-  primval_make_node (loc, hse, PMVargref (narg))
+  primval_make_node (loc, hse, primval_node_PMVargref(narg))
 implement
 primval_argtmpref (loc, hse, narg) =
-  primval_make_node (loc, hse, PMVargtmpref (narg))
+  primval_make_node (loc, hse, primval_node_PMVargtmpref(narg))
 //
 implement
 primval_argenv (loc, hse, nenv) =
-  primval_make_node (loc, hse, PMVargenv (nenv))
+  primval_make_node (loc, hse, primval_node_PMVargenv(nenv))
 //
 (* ****** ****** *)
 
 implement
 primval_cst
   (loc, hse, d2c) =
-  primval_make_node (loc, hse, PMVcst (d2c))
+  primval_make_node (loc, hse, primval_node_PMVcst(d2c))
 // end of [primval_cst]
 
 implement
 primval_env
   (loc, hse, d2v) =
-  primval_make_node (loc, hse, PMVenv (d2v))
+  primval_make_node (loc, hse, primval_node_PMVenv(d2v))
 // end of [primval_env]
 
 (* ****** ****** *)
@@ -247,13 +276,13 @@ primval_env
 implement
 primval_int
   (loc, hse, i) =
-  primval_make_node (loc, hse, PMVint (i))
+  primval_make_node (loc, hse, primval_node_PMVint(i))
 // end of [primval_int]
 
 implement
 primval_intrep
   (loc, hse, rep) =
-  primval_make_node (loc, hse, PMVintrep (rep))
+  primval_make_node (loc, hse, primval_node_PMVintrep(rep))
 // end of [primval_intrep]
 
 (* ****** ****** *)
@@ -261,25 +290,25 @@ primval_intrep
 implement
 primval_bool
   (loc, hse, b) =
-  primval_make_node (loc, hse, PMVbool (b))
+  primval_make_node (loc, hse, primval_node_PMVbool(b))
 // end of [primval_bool]
 
 implement
 primval_char
   (loc, hse, c) =
-  primval_make_node (loc, hse, PMVchar (c))
+  primval_make_node (loc, hse, primval_node_PMVchar(c))
 // end of [primval_char]
 
 implement
 primval_float
   (loc, hse, f) =
-  primval_make_node (loc, hse, PMVfloat (f))
+  primval_make_node (loc, hse, primval_node_PMVfloat(f))
 // end of [primval_float]
 
 implement
 primval_string
   (loc, hse, str) =
-  primval_make_node (loc, hse, PMVstring (str))
+  primval_make_node (loc, hse, primval_node_PMVstring(str))
 // end of [primval_string]
 
 (* ****** ****** *)
@@ -287,13 +316,13 @@ primval_string
 implement
 primval_i0nt
   (loc, hse, x) =
-  primval_make_node (loc, hse, PMVi0nt (x))
+  primval_make_node (loc, hse, primval_node_PMVi0nt(x))
 // end of [primval_i0nt]
 
 implement
 primval_f0loat
   (loc, hse, x) =
-  primval_make_node (loc, hse, PMVf0loat (x))
+  primval_make_node (loc, hse, primval_node_PMVf0loat(x))
 // end of [primval_f0loat]
 
 (* ****** ****** *)
@@ -301,7 +330,7 @@ primval_f0loat
 implement
 primval_cstsp
   (loc, hse, cstsp) =
-  primval_make_node (loc, hse, PMVcstsp (cstsp))
+  primval_make_node (loc, hse, primval_node_PMVcstsp(cstsp))
 // end of [primval_cstsp]
 
 (* ****** ****** *)
@@ -309,32 +338,32 @@ primval_cstsp
 implement
 primval_tyrep
   (loc, hse0, hse) =
-  primval_make_node (loc, hse0, PMVtyrep (hse))
+  primval_make_node (loc, hse0, primval_node_PMVtyrep(hse))
 // end of [primval_tyrep]
 
 implement
 primval_sizeof
   (loc, hse0, hse) =
-  primval_make_node (loc, hse0, PMVsizeof (hse))
+  primval_make_node (loc, hse0, primval_node_PMVsizeof(hse))
 // end of [primval_sizeof]
 
 (* ****** ****** *)
 
 implement
 primval_top (loc, hse) =
-  primval_make_node (loc, hse, PMVtop ())
+  primval_make_node (loc, hse, primval_node_PMVtop())
 // end of [primval_top]
 
 implement
 primval_empty (loc, hse) =
-  primval_make_node (loc, hse, PMVempty ())
+  primval_make_node (loc, hse, primval_node_PMVempty())
 // end of [primval_empty]
 
 (* ****** ****** *)
 
 implement
 primval_extval (loc, hse, name) =
-  primval_make_node (loc, hse, PMVextval (name))
+  primval_make_node (loc, hse, primval_node_PMVextval(name))
 // end of [primval_extval]
 
 (* ****** ****** *)
@@ -342,7 +371,7 @@ primval_extval (loc, hse, name) =
 implement
 primval_castfn
   (loc, hse, d2c, arg) =
-  primval_make_node (loc, hse, PMVcastfn (d2c, arg))
+  primval_make_node (loc, hse, primval_node_PMVcastfn(d2c, arg))
 // end of [primval_castfn]
 
 (* ****** ****** *)
@@ -350,7 +379,7 @@ primval_castfn
 implement
 primval_selcon
   (loc, hse, pmv, hse_sum, lab) =
-  primval_make_node (loc, hse, PMVselcon (pmv, hse_sum, lab))
+  primval_make_node (loc, hse, primval_node_PMVselcon(pmv, hse_sum, lab))
 // end of [primval_selcon]
 
 (* ****** ****** *)
@@ -358,13 +387,13 @@ primval_selcon
 implement
 primval_select
   (loc, hse, pmv, hse_rt, pml) =
-  primval_make_node (loc, hse, PMVselect (pmv, hse_rt, pml))
+  primval_make_node (loc, hse, primval_node_PMVselect(pmv, hse_rt, pml))
 // end of [primval_select]
 
 implement
 primval_select2
   (loc, hse, pmv, hse_rt, pmls) =
-  primval_make_node (loc, hse, PMVselect2 (pmv, hse_rt, pmls))
+  primval_make_node (loc, hse, primval_node_PMVselect2(pmv, hse_rt, pmls))
 // end of [primval_select2]
 
 (* ****** ****** *)
@@ -372,7 +401,7 @@ primval_select2
 implement
 primval_selptr
   (loc, hse, pmv, hse_rt, pmls) =
-  primval_make_node(loc, hse, PMVselptr (pmv, hse_rt, pmls))
+  primval_make_node(loc, hse, primval_node_PMVselptr(pmv, hse_rt, pmls))
 // end of [primval_selptr]
 
 (* ****** ****** *)
@@ -380,7 +409,7 @@ primval_selptr
 implement
 primval_ptrof
   (loc, hse, pmv) =
-  primval_make_node(loc, hse, PMVptrof(pmv))
+  primval_make_node(loc, hse, primval_node_PMVptrof(pmv))
 // end of [primval_ptrof]
 
 implement
@@ -389,7 +418,7 @@ primval_ptrofsel
   loc, hse, pmv, hse_rt, pmls
 ) =
 (
-  primval_make_node(loc, hse, PMVptrofsel(pmv, hse_rt, pmls))
+  primval_make_node(loc, hse, primval_node_PMVptrofsel(pmv, hse_rt, pmls))
 ) // end of [primval_ptrofsel]
 
 (* ****** ****** *)
@@ -397,7 +426,7 @@ primval_ptrofsel
 implement
 primval_vararg
   (loc, hse, pmvs) =
-  primval_make_node(loc, hse, PMVvararg(pmvs))
+  primval_make_node(loc, hse, primval_node_PMVvararg(pmvs))
 // end of [primval_refarg]
 
 (* ****** ****** *)
@@ -405,7 +434,7 @@ primval_vararg
 implement
 primval_refarg
   (loc, hse, knd, freeknd, pmv) =
-  primval_make_node(loc, hse, PMVrefarg(knd, freeknd, pmv))
+  primval_make_node(loc, hse, primval_node_PMVrefarg(knd, freeknd, pmv))
 // end of [primval_refarg]
 
 (* ****** ****** *)
@@ -413,13 +442,13 @@ primval_refarg
 implement
 primval_funlab
   (loc, hse, fl) =
-  primval_make_node(loc, hse, PMVfunlab(fl))
+  primval_make_node(loc, hse, primval_node_PMVfunlab(fl))
 // end of [primval_funlab]
 
 implement
 primval_cfunlab
   (loc, hse, knd, fl) =
-  primval_make_node(loc, hse, PMVcfunlab(knd, fl))
+  primval_make_node(loc, hse, primval_node_PMVcfunlab(knd, fl))
 // end of [primval_cfunlab]
 
 (* ****** ****** *)
@@ -427,7 +456,7 @@ primval_cfunlab
 implement
 primval_d2vfunlab
   (loc, hse, d2v, fl) =
-  primval_make_node(loc, hse, PMVd2vfunlab(d2v, fl))
+  primval_make_node(loc, hse, primval_node_PMVd2vfunlab(d2v, fl))
 // end of [primval_d2vfunlab]
 
 (* ****** ****** *)
@@ -436,11 +465,11 @@ implement
 primval_lamfix
   (knd, pmv_funval) = let
 //
-val loc = pmv_funval.primval_loc
-val hse = pmv_funval.primval_type
+val loc = pmv_funval.primval_loc()
+val hse = pmv_funval.primval_type()
 //
 in
-  primval_make_node(loc, hse, PMVlamfix(knd, pmv_funval))
+  primval_make_node(loc, hse, primval_node_PMVlamfix(knd, pmv_funval))
 end // end of [primval_lamfix]
 
 (* ****** ****** *)
@@ -448,12 +477,12 @@ end // end of [primval_lamfix]
 implement
 primval_tmpltcst
   (loc, hse, d2c, t2mas) =
-  primval_make_node(loc, hse, PMVtmpltcst(d2c, t2mas))
+  primval_make_node(loc, hse, primval_node_PMVtmpltcst(d2c, t2mas))
 // end of [primval_tmpltcst]
 implement
 primval_tmpltvar
   (loc, hse, d2v, t2mas) =
-  primval_make_node(loc, hse, PMVtmpltvar(d2v, t2mas))
+  primval_make_node(loc, hse, primval_node_PMVtmpltvar(d2v, t2mas))
 // end of [primval_tmpltvar]
 
 (* ****** ****** *)
@@ -462,14 +491,14 @@ implement
 primval_tmpltcstmat
   (loc, hse, d2c, t2mas, mat) =
 (
-primval_make_node(loc, hse, PMVtmpltcstmat(d2c, t2mas, mat))
+primval_make_node(loc, hse, primval_node_PMVtmpltcstmat(d2c, t2mas, mat))
 ) // end of [primval_tmpltcstmat]
 //
 implement
 primval_tmpltvarmat
   (loc, hse, d2v, t2mas, mat) =
 (
-primval_make_node(loc, hse, PMVtmpltvarmat(d2v, t2mas, mat))
+primval_make_node(loc, hse, primval_node_PMVtmpltvarmat(d2v, t2mas, mat))
 ) // end of [primval_tmpltvarmat]
 //
 (* ****** ****** *)
@@ -486,7 +515,7 @@ primval_tempenver
 implement
 primval_error
   (loc, hse) =
-  primval_make_node (loc, hse, PMVerror((*error*)))
+  primval_make_node (loc, hse, primval_node_PMVerror((*error*)))
 // end of [primval_error]
 
 (* ****** ****** *)
@@ -532,35 +561,29 @@ end // end of [primval_make_ptrofsel]
 
 implement
 ibranch_make
-  (loc, inss) = '{
-  ibranch_loc= loc, ibranch_inslst= inss
-} // end of [ibranch_make]
+  (loc, inss) = ibranch_new(loc, inss) // end of [ibranch_make]
 
 (* ****** ****** *)
 
 implement
 primlab_is_lab (pml) =
-  case+ pml.primlab_node of
-  | PMLlab _ => true | PMLind _ => false
+  case+ primlab_node_view(pml.primlab_node()) of
+  | ~PMLlab _ => true | ~PMLind _ => false
 // end of [primlab_is_lab]
 
 implement
 primlab_is_ind (pml) =
-  case+ pml.primlab_node of
-  | PMLlab _ => false | PMLind _ => true
+  case+ primlab_node_view(pml.primlab_node()) of
+  | ~PMLlab _ => false | ~PMLind _ => true
 // end of [primlab_is_ind]
 
 (* ****** ****** *)
 
 implement
-primlab_lab (loc, lab) = '{
-  primlab_loc= loc, primlab_node= PMLlab (lab)
-} // end of [primlab_lab]
+primlab_lab (loc, lab) = primlab_new(loc, primlab_node_PMLlab(lab)) // end of [primlab_lab]
 
 implement
-primlab_ind (loc, ind) = '{
-  primlab_loc= loc, primlab_node= PMLind (ind)
-} // end of [primlab_ind]
+primlab_ind (loc, ind) = primlab_new(loc, primlab_node_PMLind(ind)) // end of [primlab_ind]
 
 (* ****** ****** *)
 
@@ -572,48 +595,46 @@ instr_make_node
 ) : instr // end-of-function
 implement
 instr_make_node
-  (loc, node) = '{
-  instr_loc= loc, instr_node= node
-} // end of [instr_make_node]
+  (loc, node) = instr_new(loc, node) // end of [instr_make_node]
 
 (* ****** ****** *)
 
 implement
 instr_funlab (loc, fl) =
-  instr_make_node (loc, INSfunlab (fl))
+  instr_make_node (loc, instr_node_INSfunlab(fl))
 // end of [instr_funlab]
 
 (* ****** ****** *)
 
 implement
 instr_tmplab (loc, tl) =
-  instr_make_node (loc, INStmplab (tl))
+  instr_make_node (loc, instr_node_INStmplab(tl))
 // end of [instr_tmplab]
 
 (* ****** ****** *)
 
 implement
 instr_comment (loc, str) =
-  instr_make_node (loc, INScomment (str))
+  instr_make_node (loc, instr_node_INScomment(str))
 // end of [instr_comment]
 
 (* ****** ****** *)
 
 implement
 instr_move_val (loc, tmp, pmv) =
-  instr_make_node (loc, INSmove_val (tmp, pmv))
+  instr_make_node (loc, instr_node_INSmove_val(tmp, pmv))
 // end of [instr_move_val]
 
 implement
 instr_pmove_val (loc, tmp, pmv) =
-  instr_make_node (loc, INSpmove_val (tmp, pmv))
+  instr_make_node (loc, instr_node_INSpmove_val(tmp, pmv))
 // end of [instr_pmove_val]
 
 (* ****** ****** *)
 
 implement
 instr_move_arg_val (loc, arg, pmv) =
-  instr_make_node (loc, INSmove_arg_val (arg, pmv))
+  instr_make_node (loc, instr_node_INSmove_arg_val(arg, pmv))
 // end of [instr_move_arg_val]
 
 (* ****** ****** *)
@@ -623,7 +644,7 @@ instr_fcall
 (
   loc, tmpret, hde_fun, hse_fun, hdes_arg
 ) = instr_make_node
-  (loc, INSfcall (tmpret, hde_fun, hse_fun, hdes_arg))
+  (loc, instr_node_INSfcall(tmpret, hde_fun, hse_fun, hdes_arg))
 // end of [instr_fcall]
 
 implement
@@ -631,7 +652,7 @@ instr_fcall2
 (
   loc, tmpret, flab, ntl ,hse_fun, hdes_arg
 ) = instr_make_node
-  (loc, INSfcall2 (tmpret, flab, ntl, hse_fun, hdes_arg))
+  (loc, instr_node_INSfcall2(tmpret, flab, ntl, hse_fun, hdes_arg))
 // end of [instr_fcall2]
 
 (* ****** ****** *)
@@ -639,13 +660,13 @@ instr_fcall2
 implement
 instr_extfcall
   (loc, tmpret, _fun, _arg) =
-  instr_make_node(loc, INSextfcall (tmpret, _fun, _arg))
+  instr_make_node(loc, instr_node_INSextfcall(tmpret, _fun, _arg))
 // end of [instr_extfcall]
 
 implement
 instr_extmcall
   (loc, tmpret, _obj, _mtd, _arg) =
-  instr_make_node(loc, INSextmcall (tmpret, _obj, _mtd, _arg))
+  instr_make_node(loc, instr_node_INSextmcall(tmpret, _obj, _mtd, _arg))
 // end of [instr_extmcall]
 
 (* ****** ****** *)
@@ -653,14 +674,14 @@ instr_extmcall
 implement
 instr_cond
   (loc, _cond, _then, _else) =
-  instr_make_node (loc, INScond (_cond, _then, _else))
+  instr_make_node (loc, instr_node_INScond(_cond, _then, _else))
 // end of [instr_cond]
 
 (* ****** ****** *)
 
 implement
 instr_freecon
-  (loc, pmv) = instr_make_node (loc, INSfreecon (pmv))
+  (loc, pmv) = instr_make_node (loc, instr_node_INSfreecon(pmv))
 // end of [instr_freecon]
 
 (* ****** ****** *)
@@ -672,8 +693,7 @@ instr_loop
 , inss_init, pmv_test, inss_test, inss_post, inss_body
 ) = let
 //
-val node = INSloop
-(
+val node = instr_node_INSloop(
   tlab_init, tlab_fini, tlab_cont
 , inss_init, pmv_test, inss_test, inss_post, inss_body
 )
@@ -685,25 +705,25 @@ end // end of [instr_loop]
 implement
 instr_loopexn (
   loc, knd, tlab
-) = instr_make_node (loc, INSloopexn (knd, tlab))
+) = instr_make_node (loc, instr_node_INSloopexn(knd, tlab))
 
 (* ****** ****** *)
 
 implement
 instr_caseof
-  (loc, xs) = instr_make_node (loc, INScaseof (xs))
+  (loc, xs) = instr_make_node (loc, instr_node_INScaseof(xs))
 // end of [instr_caseof]
 
 (* ****** ****** *)
 
 implement
 instr_letpop
-  (loc) = instr_make_node (loc, INSletpop ())
+  (loc) = instr_make_node (loc, instr_node_INSletpop())
 // end of [instr_letpop]
 
 implement
 instr_letpush
-  (loc, pmds) = instr_make_node (loc, INSletpush (pmds))
+  (loc, pmds) = instr_make_node (loc, instr_node_INSletpush(pmds))
 // end of [instr_letpush]
 
 (* ****** ****** *)
@@ -712,7 +732,7 @@ implement
 instr_move_con (
   loc, tmpret, d2c, hse_sum, _arg
 ) = instr_make_node
-  (loc, INSmove_con (tmpret, d2c, hse_sum, _arg))
+  (loc, instr_node_INSmove_con(tmpret, d2c, hse_sum, _arg))
 // end of [instr_move_con]
 
 (* ****** ****** *)
@@ -720,7 +740,7 @@ instr_move_con (
 implement
 instr_move_ref
   (loc, tmpret, pmv) =
-  instr_make_node (loc, INSmove_ref (tmpret, pmv))
+  instr_make_node (loc, instr_node_INSmove_ref(tmpret, pmv))
 // end of [instr_move_ref]
 
 (* ****** ****** *)
@@ -730,7 +750,7 @@ instr_move_boxrec
 (
   loc, tmpret, lpmvs, hse_rec
 ) = instr_make_node
-  (loc, INSmove_boxrec (tmpret, lpmvs, hse_rec))
+  (loc, instr_node_INSmove_boxrec(tmpret, lpmvs, hse_rec))
 // end of [instr_move_boxrec]
 
 implement
@@ -738,7 +758,7 @@ instr_move_fltrec
 (
   loc, tmpret, lpmvs, hse_rec
 ) = instr_make_node
-  (loc, INSmove_fltrec (tmpret, lpmvs, hse_rec))
+  (loc, instr_node_INSmove_fltrec(tmpret, lpmvs, hse_rec))
 // end of [instr_move_fltrec]
 
 implement
@@ -749,14 +769,15 @@ instr_move_fltrec2
 in
 //
 case+
-  hse_rec.hisexp_node of
-| HSEtyrecsin (lhse) => let
-    val-list_cons (lpmv, _) = lpmvs
-    val+LABPRIMVAL (lab, pmv) = lpmv
+  hisexp_node_view(hse_rec.hisexp_node()) of
+| ~HSEtyrecsin (lhse) => let
+    val () = assertloc (glist_is_cons (lpmvs)) // HX: val-list_cons (lpmv, _) = lpmvs
+    val lpmv = glist_head (lpmvs)
+    val pmv = lpmv.labprimval_elt ()
   in
     instr_move_val (loc, tmpret, pmv)
   end // end of [HSEtyrecsin]
-| _ => instr_move_fltrec (loc, tmpret, lpmvs, hse_rec)
+| v => (hisexp_node_view_free (v); instr_move_fltrec (loc, tmpret, lpmvs, hse_rec))
 //
 end // end of [instr_move_fltrec2]
 
@@ -765,7 +786,7 @@ end // end of [instr_move_fltrec2]
 implement
 instr_patck
   (loc, pmv, ptck, ptcknt) =
-  instr_make_node (loc, INSpatck (pmv, ptck, ptcknt))
+  instr_make_node (loc, instr_node_INSpatck(pmv, ptck, ptcknt))
 // end of [instr_patck]
 
 (* ****** ****** *)
@@ -805,7 +826,7 @@ instr_move_ptrofsel
   loc, tmp, pmv, hse_rt, hils
 ) = let
 //
-val ins = INSmove_ptrofsel (tmp, pmv, hse_rt, hils)
+val ins = instr_node_INSmove_ptrofsel(tmp, pmv, hse_rt, hils)
 //
 in
   instr_make_node (loc, ins)
@@ -830,7 +851,7 @@ instr_store_ptrofs
 ) = let
 //
 val ins =
-INSstore_ptrofs (pmv_l, hse_rt, ofs, pmv_r)
+instr_node_INSstore_ptrofs(pmv_l, hse_rt, ofs, pmv_r)
 //
 in
   instr_make_node (loc, ins)
@@ -843,7 +864,7 @@ instr_xstore_ptrofs
 ) = let
 //
 val ins =
-INSxstore_ptrofs(tmp, pmv_l, hse_rt, ofs, pmv_r)
+instr_node_INSxstore_ptrofs(tmp, pmv_l, hse_rt, ofs, pmv_r)
 //
 in
   instr_make_node (loc, ins)
@@ -854,7 +875,7 @@ end // end of [instr_xstore_ptrofs]
 implement
 instr_raise
   (loc, tmp, pmv_exn) =
-  instr_make_node (loc, INSraise (tmp, pmv_exn))
+  instr_make_node (loc, instr_node_INSraise(tmp, pmv_exn))
 // end of [instr_raise]
 
 (* ****** ****** *)
@@ -865,7 +886,7 @@ instr_move_delay
 in
 //
 instr_make_node
-  (loc, INSmove_delay (tmp, lin, hse, thunk))
+  (loc, instr_node_INSmove_delay(tmp, lin, hse, thunk))
 // instr_make_node
 //
 end // end of [instr_move_delay]
@@ -876,7 +897,7 @@ instr_move_lazyeval
 in
 //
 instr_make_node
-  (loc, INSmove_lazyeval (tmp, lin, hse, pmv_lazy))
+  (loc, instr_node_INSmove_lazyeval(tmp, lin, hse, pmv_lazy))
 // instr_make_node
 end // end of [instr_move_lazyeval]
 
@@ -886,7 +907,7 @@ implement
 instr_trywith
   (loc, tmp, _try, _with) = let
 in
-  instr_make_node (loc, INStrywith (tmp, _try, _with))
+  instr_make_node (loc, instr_node_INStrywith(tmp, _try, _with))
 end // end of [instr_trywith]
 
 (* ****** ****** *)
@@ -894,17 +915,17 @@ end // end of [instr_trywith]
 implement
 instr_move_list_nil
   (loc, tmp) =
-  instr_make_node (loc, INSmove_list_nil (tmp))
+  instr_make_node (loc, instr_node_INSmove_list_nil(tmp))
 // end of [instr_move_list_nil]
 implement
 instr_pmove_list_nil
   (loc, tmp) =
-  instr_make_node (loc, INSpmove_list_nil (tmp))
+  instr_make_node (loc, instr_node_INSpmove_list_nil(tmp))
 // end of [instr_pmove_list_nil]
 implement
 instr_pmove_list_cons
   (loc, tmp, hse_elt) =
-  instr_make_node (loc, INSpmove_list_cons (tmp, hse_elt))
+  instr_make_node (loc, instr_node_INSpmove_list_cons(tmp, hse_elt))
 // end of [instr_pmove_list_cons]
 
 (* ****** ****** *)
@@ -913,14 +934,14 @@ implement
 instr_move_list_phead
   (loc, tmphd, tmptl, hse_elt) =
   instr_make_node
-  (loc, INSmove_list_phead (tmphd, tmptl, hse_elt))
+  (loc, instr_node_INSmove_list_phead(tmphd, tmptl, hse_elt))
 // end of [instr_move_list_phead]
 
 implement
 instr_move_list_ptail
   (loc, tl_new, tl_old, hse_elt) =
   instr_make_node
-  (loc, INSmove_list_ptail (tl_new, tl_old, hse_elt))
+  (loc, instr_node_INSmove_list_ptail(tl_new, tl_old, hse_elt))
 // end of [instr_move_list_ptail]
 
 (* ****** ****** *)
@@ -929,7 +950,7 @@ implement
 instr_move_arrpsz_ptr
   (loc, tmp, psz) =
   instr_make_node
-  (loc, INSmove_arrpsz_ptr (tmp, psz))
+  (loc, instr_node_INSmove_arrpsz_ptr(tmp, psz))
 // end of [instr_move_arrpsz_ptr]
 
 (* ****** ****** *)
@@ -938,7 +959,7 @@ implement
 instr_store_arrpsz_asz
   (loc, tmp, asz) =
   instr_make_node
-  (loc, INSstore_arrpsz_asz (tmp, asz))
+  (loc, instr_node_INSstore_arrpsz_asz(tmp, asz))
 // end of [instr_store_arrpsz_asz]
 
 implement
@@ -947,7 +968,7 @@ instr_store_arrpsz_ptr
 (
 instr_make_node
 (
-loc, INSstore_arrpsz_ptr(tmp, hse_elt, asz)
+loc, instr_node_INSstore_arrpsz_ptr(tmp, hse_elt, asz)
 )
 ) // end of [instr_store_arrpsz_ptr]
 
@@ -957,14 +978,14 @@ implement
 instr_update_ptrinc
   (loc, tmpelt, hse_elt) =
   instr_make_node
-  (loc, INSupdate_ptrinc (tmpelt, hse_elt))
+  (loc, instr_node_INSupdate_ptrinc(tmpelt, hse_elt))
 // end of [instr_update_ptrinc]
 
 implement
 instr_update_ptrdec
   (loc, tmpelt, hse_elt) =
   instr_make_node
-  (loc, INSupdate_ptrdec (tmpelt, hse_elt))
+  (loc, instr_node_INSupdate_ptrdec(tmpelt, hse_elt))
 // end of [instr_update_ptrdec]
 
 (* ****** ****** *)
@@ -973,14 +994,14 @@ implement
 instr_closure_initize
   (loc, tmpret, knd, flab) =
   instr_make_node
-  (loc, INSclosure_initize(tmpret, knd, flab))
+  (loc, instr_node_INSclosure_initize(tmpret, knd, flab))
 //
 (* ****** ****** *)
 
 implement
 instr_tmpdec
   (loc, tmp) =
-  instr_make_node(loc, INStmpdec(tmp))
+  instr_make_node(loc, instr_node_INStmpdec(tmp))
 // end of [instr_tmpdec]
 
 (* ****** ****** *)
@@ -988,7 +1009,7 @@ instr_tmpdec
 implement
 instr_extvar
   (loc, xnm, pmv) =
-  instr_make_node(loc, INSextvar(xnm, pmv))
+  instr_make_node(loc, instr_node_INSextvar(xnm, pmv))
 // end of [instr_extvar]
 
 (* ****** ****** *)
@@ -996,7 +1017,7 @@ instr_extvar
 implement
 instr_dcstdef
   (loc, d2c, pmv) =
-  instr_make_node(loc, INSdcstdef(d2c, pmv))
+  instr_make_node(loc, instr_node_INSdcstdef(d2c, pmv))
 // end of [instr_dcstdef]
 
 (* ****** ****** *)
@@ -1004,7 +1025,7 @@ instr_dcstdef
 implement
 instr_tempenver
   (loc, d2vs) =
-  instr_make_node(loc, INStempenver( d2vs ))
+  instr_make_node(loc, instr_node_INStempenver( d2vs ))
 // end of [instr_dcstdef]
 
 (* ****** ****** *)

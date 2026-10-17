@@ -15,17 +15,18 @@
 
 implement
 fprint_label
-  (out, lab) =
+  (ar, out, lab) =
 (
-//
-case+ lab of
-//
-| LABint(int) =>
+case+
+label_view(ar, lab)
+of // case+
+| ~LABint(int) =>
     fprint! (out, "LABint(", int, ")")
-//
-| LABsym(sym) =>
-    fprint! (out, "LABsym(", sym, ")")
-//
+| ~LABsym(sym) =>
+  (
+    fprint(out, "LABsym(");
+    fprint_symbol(ar, out, sym); fprint(out, ")")
+  )
 ) (* end of [fprint_label] *)
 
 (* ****** ****** *)

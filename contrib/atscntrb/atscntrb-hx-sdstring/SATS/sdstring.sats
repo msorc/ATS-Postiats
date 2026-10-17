@@ -69,7 +69,7 @@ sdsnew(RD(string)): sds0 = "mac#%"
 //
 fun
 sdsnewlen{n:int}
-  (arrayref(char, n), sizeLte(n)): sds0 = "mac#%"
+  (ptr(*char[n]*), sizeLte(n)): sds0 = "mac#%"
 //
 (* ****** ****** *)
 
@@ -105,7 +105,7 @@ fun sdscatsds(sds1: sds0, sds2: !sds0): sds0 = "mac#%"
 fun
 sdscatlen
   {n:int}
-  (sds0, arrayref(char, n), size_t(n)): sds0 = "mac#%"
+  (sds0, ptr(*char[n]*), size_t(n)): sds0 = "mac#%"
 //
 (*
 fun sdscatlen(sds0, string, size_t): sds0 = "mac#%"
@@ -120,7 +120,7 @@ fun sdscpy(sds: sds0, string): sds0 = "mac#%"
 fun
 sdscpylen
   {n:int}
-  (sds0, arrayref(char, n), size_t(n)): sds0 = "mac#%"
+  (sds0, ptr(*char[n]*), size_t(n)): sds0 = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -145,7 +145,7 @@ fun sdsfromlonglong(inp: llint): sds0 = "mac#%"
 fun
 sdsjoin{n,n2:int}
 (
-  arrayref(string, n), int(n), sep: string(n2), size_t(n2)
+  ptr(*string[n]*), int(n), sep: string(n2), size_t(n2)
 ) : sds0 = "mac#%" // end of [sdsjoin]
 
 fun

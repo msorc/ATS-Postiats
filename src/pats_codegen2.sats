@@ -33,8 +33,17 @@
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (ATS2 port of src/pats_codegen2.sats, see PORTING.md, "Codegen2")
+// The trees are the arena trees of staexp1/staexp2/dynexp2; the lists are [glist]s.
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+//
 staload
-S1E = "pats_staexp1.sats"
+S1E = "./pats_staexp1.sats"
 //
 typedef e1xp = $S1E.e1xp
 typedef e1xplst = $S1E.e1xplst
@@ -42,9 +51,9 @@ typedef e1xplst = $S1E.e1xplst
 (* ****** ****** *)
 //
 staload
-S2E = "pats_staexp2.sats"
+S2E = "./pats_staexp2.sats"
 staload
-D2E = "pats_dynexp2.sats"
+D2E = "./pats_dynexp2.sats"
 //
 typedef s2rt = $S2E.s2rt
 typedef s2cst = $S2E.s2cst

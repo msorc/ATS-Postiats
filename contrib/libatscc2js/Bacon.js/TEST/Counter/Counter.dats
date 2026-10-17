@@ -69,13 +69,13 @@ datatype action = Up | Down | Random | Reset
 (* ****** ****** *)
 //
 val theUps =
-  theUps.map(TYPE{action})(lam(x) => Up())
+  $BACONJS.EStream_map(theUps, lam(x) => Up())
 val theDowns =
-  theDowns.map(TYPE{action})(lam(x) => Down())
+  $BACONJS.EStream_map(theDowns, lam(x) => Down())
 val theRandoms =
-  theRandoms.map(TYPE{action})(lam(x) => Random())
+  $BACONJS.EStream_map(theRandoms, lam(x) => Random())
 val theResets =
-  theResets.map(TYPE{action})(lam(x) => Reset())
+  $BACONJS.EStream_map(theResets, lam(x) => Reset())
 //
 val theClicks = theUps
 val theClicks = merge(theClicks, theDowns)
@@ -90,7 +90,7 @@ $BACONJS.EStream_scan
   {int}{action}
 (
   theClicks, 0
-, lam(y, x) =<cloref1>
+, lam(y, x) =<cloptr1>
   case+ x of
   | Up() => min(99, y+1)
   | Down() => max(0, y-1)
@@ -117,7 +117,7 @@ end // end of [stringize]
 //
 in
 //
-theCounts.map(TYPE{string})(lam(x) =<cloref1> stringize(x))
+$BACONJS.Property_map(theCounts, lam(x) =<cloptr1> stringize(x))
 //
 end // end of [val]
 //

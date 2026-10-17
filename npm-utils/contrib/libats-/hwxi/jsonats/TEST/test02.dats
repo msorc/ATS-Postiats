@@ -23,6 +23,8 @@ atstyarr_field_undef(fname) fname[]
 #include "./../mylibies_link.hats"
 #staload $JSONATS // opening it!
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+//
 (* ****** ****** *)
 //
 #define
@@ -61,7 +63,7 @@ implement
 fprint_val<jsonval>
   (out, x) = fprint_jsonval (out, x)
 in (*in-of-local*)
-val () = fprint_list_sep (stdout_ref, jsvs, "\n")
+val () = fprint_glist_sep (stdout_ref, jsvs, "\n")
 end // end of [local]
 val () = fprint_newline (stdout_ref)
 //

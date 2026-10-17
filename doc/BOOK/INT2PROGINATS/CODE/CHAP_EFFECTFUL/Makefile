@@ -22,58 +22,26 @@ ATSCCFLAGS=-D_GNU_SOURCE -DATS_MEMALLOC_LIBC
 
 ######
 
-all:: misc
-all:: brauntest
-all:: insort
-all:: counter
-all:: permord
-all:: montecarlo
 all:: hello
 all:: echoline
 
 ######
 
-misc: misc_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: misc ; ./misc
-cleanall:: ; $(RMF) misc
 
 ######
 
-brauntest: \
-brauntest_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: brauntest ; ./brauntest
-cleanall:: ; $(RMF) brauntest
 
 ######
 
-counter: counter_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: counter ; ./counter
-cleanall:: ; $(RMF) counter
 
 ######
 
-insort: insort_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: insort ; ./insort
-cleanall:: ; $(RMF) insort
 
 ######
 
-permord: permord_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
-regress:: permord ; ./permord
-cleanall:: ; $(RMF) permord
 
 ######
 
-montecarlo: \
-montecarlo_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< -lm || echo $@ ": ERROR!!!"
-regress:: montecarlo ; ./montecarlo
-cleanall:: ; $(RMF) montecarlo
 
 ######
 

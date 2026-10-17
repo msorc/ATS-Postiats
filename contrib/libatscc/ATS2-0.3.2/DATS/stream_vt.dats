@@ -53,45 +53,6 @@ stream_vt_free{a}(xs) = ~(xs)
 (* ****** ****** *)
 
 implement
-stream_vt2t
-  {a}(xs) =
-(
-$effmask_all(aux(xs)) where
-{
-//
-fun
-aux
-(
-xs:
-stream_vt(a)
-) : stream(a) = let
-//
-val xs = $UN.castvwtp0{ptr}(xs)
-//
-in
-//
-$delay
-(
-let
-//
-val xs =
-  $UN.castvwtp0{stream_vt(a)}(xs)
-//
-in
-  case+ !xs of
-  | ~stream_vt_nil() => stream_nil()
-  | ~stream_vt_cons(x, xs) => stream_cons(x, aux(xs))
-end // end of [let]
-)
-//
-end // end of [aux]
-//
-} (* end of [where] *)
-) (* end of [stream_vt2t] *)
-
-(* ****** ****** *)
-
-implement
 stream_vt_takeLte
   {a}(xs, n0) =
 (
@@ -151,7 +112,6 @@ case+ !xs of
 
 (* ****** ****** *)
 //
-(*
 implement
 stream2list_vt
   {a}(xs) =
@@ -168,15 +128,6 @@ case+ !xs of
 )
 //
 }
-*)
-(* ****** ****** *)
-//
-implement
-stream2list_vt
-  {a}(xs) =
-  list_vt_reverse(stream2list_vt_rev(xs))
-//
-(* ****** ****** *)
 //
 implement
 stream2list_vt_rev
@@ -257,308 +208,230 @@ end (* end of [stream_vt_concat] *)
 
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC
+// The closure is passed along the stream and freed when the
+// stream is exhausted or freed.
+//
 implement
-stream_vt_map_cloref
+stream_vt_map_cloptr
   {a}{b}
 (
   xs, f0
 ) =
-  auxmain(xs) where
+  auxmain(xs, f0) where
 {
 //
 fun
 auxmain
 (
-xs: stream_vt(a)
+  xs: stream_vt(a), f0: (a) -<cloptr1> b
 ) : stream_vt(b) = $ldelay
 (
 (
 case+ !xs of
 | ~stream_vt_nil() =>
-    stream_vt_nil()
-| ~stream_vt_cons(x, xs) =>
-    stream_vt_cons(f0(x), auxmain(xs))
+    (cfun_free(f0); stream_vt_nil())
+| ~stream_vt_cons(x, xs) => let
+    val y = f0(x)
+  in
+    stream_vt_cons(y, auxmain(xs, f0))
+  end // end of [stream_vt_cons]
 ) : stream_vt_con(b)
 ,
-~(xs) // called when the stream is freed
+(~(xs); cfun_free(f0)) // called when the stream is freed
 ) (* end of [auxmain] *)
 //
-} (* end of [stream_vt_map_cloref] *)
-//
-implement
-stream_vt_map_method
-  (xs, _) =
-(
-  llam(f0) => stream_vt_map_cloref(xs, f0)
-) (* end of [stream_vt_map_method] *)
-//
-(* ****** ****** *)
-//
-implement
-stream_vt_mapopt_cloref
-  {a}{b}
-(
-  xs, f0
-) =
-  auxmain(xs) where
-{
-//
-fun
-auxmain
-(
-xs: stream_vt(a)
-) : stream_vt(b) = $ldelay
-(
-(
-case+ !xs of
-| ~stream_vt_nil() =>
-    stream_vt_nil()
-| ~stream_vt_cons(x, xs) =>
-  (
-    case+ f0(x) of
-    | ~None_vt() => !(auxmain(xs))
-    | ~Some_vt(y) =>
-        stream_vt_cons(y, auxmain(xs))
-      // end of [Some_vt]
-  )
-) : stream_vt_con(b)
-,
-~(xs) // called when the stream is freed
-) (* end of [auxmain] *)
-//
-} (* end of [stream_vt_mapopt_cloref] *)
-//
-implement
-stream_vt_mapopt_method
-  (xs, _) =
-(
-  llam(f0) => stream_vt_mapopt_cloref(xs, f0)
-) (* end of [stream_vt_map_method] *)
-//
+} (* end of [stream_vt_map_cloptr] *)
+
 (* ****** ****** *)
 
 implement
-stream_vt_filter_cloref
+stream_vt_filter_cloptr
   {a}(xs, p0) =
-  auxmain(xs) where
+  auxmain(xs, p0) where
 {
 //
 fun
 auxmain
 (
-xs: stream_vt(a)
+  xs: stream_vt(a), p0: (a) -<cloptr1> bool
 ) : stream_vt(a) = $ldelay
 (
+  auxcon(xs, p0)
+,
+(~(xs); cfun_free(p0)) // called when the stream is freed
+) (* end of auxmain *)
 //
-let
-  val xs_con = !xs
-in
-//
-case+ xs_con of
+and
+auxcon
+(
+  xs: stream_vt(a), p0: (a) -<cloptr1> bool
+) : stream_vt_con(a) =
+(
+case+ !xs of
 | ~stream_vt_nil
-    ((*_*)) => stream_vt_nil()
+    ((*_*)) => (cfun_free(p0); stream_vt_nil())
   // end of [stream_vt_nil]
 | ~stream_vt_cons
     (x, xs1) =>
   (
     if p0(x)
-      then (
-        stream_vt_cons(x, auxmain(xs1))
-      ) (* end of [then] *)
-      else (
-        !(auxmain(xs1))
-      ) (* end of [else] *)
+      then stream_vt_cons(x, auxmain(xs1, p0))
+      else auxcon(xs1, p0)
     // end of [if]
   ) (* end of [stream_vt_cons] *)
+) (* end of [auxcon] *)
 //
-end : stream_vt_con(a) // end of [let]
-//
-,
-//
-~(xs) // called when the stream is freed
-//
-) (* end of auxmain *)
-//
-} (* end of [stream_vt_filter_cloref] *)
-//
-implement
-stream_vt_filter_method
-  (xs) =
-(
-llam(p0) =>
-  stream_vt_filter_cloref(xs, p0)
-) (* end of [stream_vt_filter_method] *)
-//
+} (* end of [stream_vt_filter_cloptr] *)
+
 (* ****** ****** *)
-//
+
 implement
-stream_vt_exists_cloref
-  {a}(xs, pred) = loop(xs) where
-{
+stream_vt_exists_cloptr
+  {a}(xs, pred) = let
 //
 fun
 loop
 (
-  xs: stream_vt(a)
+  xs: stream_vt(a), pred: !(a) -<cloptr1> bool
 ) : bool =
 (
   case+ !xs of
   | ~stream_vt_nil() => false
   | ~stream_vt_cons(x, xs) =>
-      if pred(x) then (~xs; true) else loop(xs)
+      if pred(x) then (~xs; true) else loop(xs, pred)
     // stream_vt_cons
 )
 //
-} (* end of [stream_vt_exists_cloref] *)
+val ans = loop(xs, pred)
 //
-implement
-stream_vt_exists_method
-  (xs) =
-(
-llam(pred) =>
-  stream_vt_exists_cloref(xs, pred)
-) (* end of [stream_vt_exists_method] *)
-//
+in
+  cfun_free(pred); ans
+end // end of [stream_vt_exists_cloptr]
+
 (* ****** ****** *)
-//
+
 implement
-stream_vt_forall_cloref
-  {a}(xs, pred) = loop(xs) where
-{
+stream_vt_forall_cloptr
+  {a}(xs, pred) = let
 //
 fun
 loop
 (
-  xs: stream_vt(a)
+  xs: stream_vt(a), pred: !(a) -<cloptr1> bool
 ) : bool =
 (
   case+ !xs of
   | ~stream_vt_nil() => true
   | ~stream_vt_cons(x, xs) =>
-      if pred(x) then loop(xs) else (~xs; false)
+      if pred(x) then loop(xs, pred) else (~xs; false)
     // stream_vt_cons
 )
 //
-} (* end of [stream_vt_forall_cloref] *)
+val ans = loop(xs, pred)
 //
-implement
-stream_vt_forall_method
-  (xs) =
-(
-llam(pred) =>
-  stream_vt_forall_cloref(xs, pred)
-) (* end of [stream_vt_forall_method] *)
-//
-(* ****** ****** *)
-//
-implement
-stream_vt_foreach_cloref
-  {a}(*poly*)
-  (xs, fwork) =
-  loop(xs) where
-{
-//
-fun
-loop
-(
-  xs: stream_vt(a)
-) : void =
-(
-case+ !xs of
-| ~stream_vt_nil() => ()
-| ~stream_vt_cons(x, xs) =>
-    (fwork(x); loop(xs))
-)
-//
-} (* end of [stream_vt_foreach_cloref] *)
-//
-implement
-stream_vt_foreach_method
-  (xs) =
-(
-llam(fwork) =>
-  stream_vt_foreach_cloref(xs, fwork)
-) (* end of [stream_vt_foreach_method] *)
-//
-(* ****** ****** *)
-//
-implement
-stream_vt_iforeach_cloref
-  {a}(*poly*)
-  (xs, fwork) =
-  loop(0, xs) where
-{
-//
-fun
-loop
-(
-  i: Nat, xs: stream_vt(a)
-) : void =
-(
-case+ !xs of
-| ~stream_vt_nil() => ()
-| ~stream_vt_cons(x, xs) =>
-    (fwork(i, x); loop(i+1, xs))
-)
-//
-} (* end of [stream_vt_iforeach_cloref] *)
-//
-implement
-stream_vt_iforeach_method
-  (xs) =
-(
-llam(fwork) =>
-  stream_vt_iforeach_cloref(xs, fwork)
-) (* end of [stream_vt_iforeach_method] *)
-//
-(* ****** ****** *)
-//
-implement
-stream_vt_rforeach_cloref
-  {a}(*poly*)
-  (xs, fwork) =
-  auxmain(xs) where
-{
-//
-fun
-auxmain
-(
-  xs: stream_vt(a)
-) : void =
-(
-case+ !xs of
-| ~stream_vt_nil() => ()
-| ~stream_vt_cons(x, xs) =>
-    (auxmain(xs); fwork(x))
-)
-//
-} (* end of [stream_vt_rforeach_cloref] *)
-//
-implement
-stream_vt_rforeach_method
-  (xs) =
-(
-llam(fwork) =>
-  stream_vt_rforeach_cloref(xs, fwork)
-) (* end of [stream_vt_rforeach_method] *)
-//
+in
+  cfun_free(pred); ans
+end // end of [stream_vt_forall_cloptr]
+
 (* ****** ****** *)
 
 implement
-stream_vt_tabulate_cloref
-  {a}(fopr) = auxmain(0) where
+stream_vt_foreach_cloptr
+  {a}(*poly*)
+  (xs, fwork) = let
+//
+fun
+loop
+(
+  xs: stream_vt(a), fwork: !(a) -<cloptr1> void
+) : void =
+(
+case+ !xs of
+| ~stream_vt_nil() => ()
+| ~stream_vt_cons(x, xs) =>
+    (fwork(x); loop(xs, fwork))
+)
+//
+val () = loop(xs, fwork)
+//
+in
+  cfun_free(fwork)
+end // end of [stream_vt_foreach_cloptr]
+
+(* ****** ****** *)
+
+implement
+stream_vt_iforeach_cloptr
+  {a}(*poly*)
+  (xs, fwork) = let
+//
+fun
+loop
+(
+  i: Nat, xs: stream_vt(a), fwork: !(Nat, a) -<cloptr1> void
+) : void =
+(
+case+ !xs of
+| ~stream_vt_nil() => ()
+| ~stream_vt_cons(x, xs) =>
+    (fwork(i, x); loop(i+1, xs, fwork))
+)
+//
+val () = loop(0, xs, fwork)
+//
+in
+  cfun_free(fwork)
+end // end of [stream_vt_iforeach_cloptr]
+
+(* ****** ****** *)
+
+implement
+stream_vt_rforeach_cloptr
+  {a}(*poly*)
+  (xs, fwork) = let
+//
+fun
+auxmain
+(
+  xs: stream_vt(a), fwork: !(a) -<cloptr1> void
+) : void =
+(
+case+ !xs of
+| ~stream_vt_nil() => ()
+| ~stream_vt_cons(x, xs) =>
+    (auxmain(xs, fwork); fwork(x))
+)
+//
+val () = auxmain(xs, fwork)
+//
+in
+  cfun_free(fwork)
+end // end of [stream_vt_rforeach_cloptr]
+
+(* ****** ****** *)
+
+implement
+stream_vt_tabulate_cloptr
+  {a}(fopr) = auxmain(0, fopr) where
 {
 //
 fun
 auxmain
 (
-n0: intGte(0)
+  n0: intGte(0), fopr: intGte(0) -<cloptr1> a
 ) : stream_vt(a) =
+$ldelay
 (
-$ldelay(stream_vt_cons(fopr(n0), auxmain(n0+1)))
+let
+  val x = fopr(n0) in stream_vt_cons(x, auxmain(n0+1, fopr))
+end
+,
+cfun_free(fopr) // called when the stream is freed
 ) (* end of [auxmain] *)
 //
-} (* end of [stream_tabulate_cloref] *)
+} (* end of [stream_tabulate_cloptr] *)
 
 (* ****** ****** *)
 

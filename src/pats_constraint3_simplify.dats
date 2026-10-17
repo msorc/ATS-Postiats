@@ -33,13 +33,26 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_constraint3_simplify.dats, see PORTING.md, "Constraint solving (constraint3)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
@@ -48,104 +61,118 @@ staload "./pats_intinf.sats"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_trans3_env.sats"
 staload "./pats_constraint3.sats"
 
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
+#include "./pats_constraint3.hats"
 
 (* ****** ****** *)
 
 implement
 s3exp_bneg (s3e0) = (
-  case+ s3e0 of
-  | S3Ebool b => S3Ebool (not b)
-  | S3Ebneg (s3e) => s3e
-  | S3Ebadd (s3e1, s3e2) => S3Ebmul (S3Ebneg s3e1, S3Ebneg s3e2)
-  | S3Ebmul (s3e1, s3e2) => S3Ebadd (S3Ebneg s3e1, S3Ebneg s3e2)
-  | S3Ebeq (s3e1, s3e2) => S3Ebneq (s3e1, s3e2)
-  | S3Ebneq (s3e1, s3e2) => S3Ebeq (s3e1, s3e2)
-  | S3Ebineq (knd, s3e) => S3Ebineq (~knd, s3e)
-  | _ => S3Ebneg (s3e0)
+  case+ s3exp_view (s3e0) of
+  | ~S3Ebool b => s3exp_S3Ebool (not b)
+  | ~S3Ebneg (s3e) => s3e
+  | ~S3Ebadd (s3e1, s3e2) => s3exp_S3Ebmul (s3exp_S3Ebneg s3e1, s3exp_S3Ebneg s3e2)
+  | ~S3Ebmul (s3e1, s3e2) => s3exp_S3Ebadd (s3exp_S3Ebneg s3e1, s3exp_S3Ebneg s3e2)
+  | ~S3Ebeq (s3e1, s3e2) => s3exp_S3Ebneq (s3e1, s3e2)
+  | ~S3Ebneq (s3e1, s3e2) => s3exp_S3Ebeq (s3e1, s3e2)
+  | ~S3Ebineq (knd, s3e) => s3exp_S3Ebineq (~knd, s3e)
+  | v => (s3exp_view_free (v); s3exp_S3Ebneg (s3e0))
 ) // end of [s3exp_bneg]
 
 (* ****** ****** *)
 
+fn s3exp_unbool (x: s3exp): int = // 1/0: true/false; ~1: not a constant
+  case+ s3exp_view (x) of
+  | ~S3Ebool b => (if b then 1 else 0)
+  | v => (s3exp_view_free (v); ~1)
+// end of [s3exp_unbool]
+
 implement
 s3exp_badd
   (s3e1, s3e2) = let
+  val b1 = s3exp_unbool (s3e1)
 in
-  case+ s3e1 of
-  | S3Ebool b1 =>
-      if b1 then s3exp_true else s3e2
-  | _ (*non-bool*) => (
-    case+ s3e2 of
-    | S3Ebool b2 =>
-        if b2 then s3exp_true else s3e1
-    | _(*non-bool*) => S3Ebadd (s3e1, s3e2)
-    ) (* end of [_] *)
+  if b1 >= 0 then (
+    if b1 > 0 then s3exp_true else s3e2
+  ) else let
+    val b2 = s3exp_unbool (s3e2)
+  in
+    if b2 >= 0 then (
+      if b2 > 0 then s3exp_true else s3e1
+    ) else s3exp_S3Ebadd (s3e1, s3e2)
+  end (* end of [_] *)
 end // end of [s3exp_badd]
 
 implement
 s3exp_bmul
   (s3e1, s3e2) = let
+  val b1 = s3exp_unbool (s3e1)
 in
-  case+ s3e1 of
-  | S3Ebool b1 =>
-      if b1 then s3e2 else s3exp_false
-  | _(*non-bool*) =>
-    (
-    case+ s3e2 of
-    | S3Ebool b2 =>
-        if b2 then s3e1 else s3exp_false
-    | _ (*non-bool*) => S3Ebmul (s3e1, s3e2)
-    ) (* end of [_] *)
+  if b1 >= 0 then (
+    if b1 > 0 then s3e2 else s3exp_false
+  ) else let
+    val b2 = s3exp_unbool (s3e2)
+  in
+    if b2 >= 0 then (
+      if b2 > 0 then s3e1 else s3exp_false
+    ) else s3exp_S3Ebmul (s3e1, s3e2)
+  end (* end of [_] *)
 end // end of [s3exp_bmul]
 
 (* ****** ****** *)
 
 implement
 s3exp_beq
-  (s3e1, s3e2) = (
-  case+ s3e1 of
-  | S3Ebool b1 =>
-      if b1 then s3e2 else s3exp_bneg (s3e2)
-  | _ => (case+ s3e2 of
-    | S3Ebool b2 =>
-        if b2 then s3e1 else s3exp_bneg (s3e1)
-    | _ => S3Ebeq (s3e1, s3e2)
-    ) // end of [_]
-) // end of [s3exp_beq]
+  (s3e1, s3e2) = let
+  val b1 = s3exp_unbool (s3e1)
+in
+  if b1 >= 0 then (
+    if b1 > 0 then s3e2 else s3exp_bneg (s3e2)
+  ) else let
+    val b2 = s3exp_unbool (s3e2)
+  in
+    if b2 >= 0 then (
+      if b2 > 0 then s3e1 else s3exp_bneg (s3e1)
+    ) else s3exp_S3Ebeq (s3e1, s3e2)
+  end (* end of [_] *)
+end // end of [s3exp_beq]
 
 implement
 s3exp_bneq
-  (s3e1, s3e2) = (
-  case+ s3e1 of
-  | S3Ebool b1 =>
-      if b1 then s3exp_bneg (s3e2) else s3e2
-  | _ => (case+ s3e2 of
-    | S3Ebool b2 =>
-        if b2 then s3exp_bneg (s3e1) else s3e1
-    | _ => S3Ebneq (s3e1, s3e2)
-    ) // end of [_]
-) // end of [s3exp_bneq]
+  (s3e1, s3e2) = let
+  val b1 = s3exp_unbool (s3e1)
+in
+  if b1 >= 0 then (
+    if b1 > 0 then s3exp_bneg (s3e2) else s3e2
+  ) else let
+    val b2 = s3exp_unbool (s3e2)
+  in
+    if b2 >= 0 then (
+      if b2 > 0 then s3exp_bneg (s3e1) else s3e1
+    ) else s3exp_S3Ebneq (s3e1, s3e2)
+  end (* end of [_] *)
+end // end of [s3exp_bneq]
 
 (* ****** ****** *)
 
 fun
 uns3exp_intinf
   (s3e: s3exp): Option_vt (intinf) =
-  case+ s3e of
-  | S3Enull () => Some_vt (intinf_0)
-  | S3Eunit () => Some_vt (intinf_1)
-  | S3Eicff (c, s3e) => let
+  case+ s3exp_view (s3e) of
+  | ~S3Enull () => Some_vt (intinf_0)
+  | ~S3Eunit () => Some_vt (intinf_1)
+  | ~S3Eicff (c, s3e) => let
       val opt = uns3exp_intinf (s3e)
     in
       case+ opt of
       | ~Some_vt (i) => Some_vt (c * i)
       | ~None_vt () => None_vt ()
     end // end of [S3Eicff]
-  | _ => None_vt ()
+  | v => (s3exp_view_free (v); None_vt ())
 // end of [uns3exp_intinf]
 
 implement
@@ -153,16 +180,16 @@ s3exp_bineq (knd, s3e) = let
   val opt = uns3exp_intinf (s3e)
 in
   case+ opt of
-  | ~Some_vt (i) => (case+ 0 of
-    | _ when knd =  2 => s3exp_bool (i >= 0)
-    | _ when knd = ~2 => s3exp_bool (i < 0)
-    | _ when knd =  1 => s3exp_bool (i = 0)
-    | _ when knd = ~1 => s3exp_bool (i != 0)
-    | _ => let
+  | ~Some_vt (i) => (
+      if knd = 2 then s3exp_bool (i >= 0)
+      else if knd = ~2 then s3exp_bool (i < 0)
+      else if knd = 1 then s3exp_bool (i = 0)
+      else if knd = ~1 then s3exp_bool (i != 0)
+      else let
         val () = assertloc (false) in s3exp_false
       end // end of [_]
     ) // end of [Some_vt]
-  | ~None_vt () => S3Ebineq (knd, s3e)
+  | ~None_vt () => s3exp_S3Ebineq (knd, s3e)
 end // end of [s3exp_bineq]
 
 (* ****** ****** *)
@@ -210,28 +237,30 @@ implement s3exp_intinf (int) = s3exp_icff (int, s3exp_1)
 
 implement
 s3exp_icff (c, x) = let
-(*
-  val () = print "s3exp_icff"
-*)
 in
-case+ 0 of
-| _ when c = 1 => x
-| _ when c = 0 => s3exp_0
-| _ => (
-  case+ x of
-  | S3Enull () => s3exp_0
-  | S3Eicff
+if c = 1 then x
+else if c = 0 then s3exp_0
+else (
+  case+ s3exp_view (x) of
+  | ~S3Enull () => s3exp_0
+  | ~S3Eicff
       (c1, x1) => s3exp_icff (c * c1, x1)
-  | S3Eisum (xs) => let
-      val cxs = s3explst_icff (c, xs) in S3Eisum ((l2l)cxs)
+  | ~S3Eisum (xs) => let
+      val cxs = s3explst_icff (c, xs) in s3exp_S3Eisum (l2l cxs)
     end // end of [S3Eisum]
-  | _ => S3Eicff (c, x)
-  ) // end of [_]
+  | v => (s3exp_view_free (v); s3exp_S3Eicff (c, x))
+) // end of [_]
 end // end of [s3exp_icff]
 
 implement
 s3explst_icff (c, xs) = (
-  list_map_cloptr (xs, lam x =<1> s3exp_icff (c, x))
+  if glist_is_cons (xs) then let
+    val x = glist_head<s3exp> (xs)
+    val y = s3exp_icff (c, x)
+    val ys = s3explst_icff (c, glist_tail<s3exp> (xs))
+  in
+    list_vt_cons (y, ys)
+  end else list_vt_nil ()
 ) // end of [s3explst_icff]
 
 implement
@@ -241,12 +270,10 @@ s3exp_ineg (x) = s3exp_icff (intinf_neg_1, x)
 
 implement
 s3exp_isum (xs) = (
-  case+ xs of
-  | list_cons (x, xs1) => (
-    case+ xs1 of
-    | list_cons _ => S3Eisum (xs) | list_nil () => x
-    ) // end of [list_cons]
-  | list_nil () => s3exp_0
+  if glist_is_cons (xs) then (
+    if glist_is_cons (glist_tail<s3exp> (xs))
+      then s3exp_S3Eisum (xs) else glist_head<s3exp> (xs)
+  ) else s3exp_0
 ) // end of [s3exp_isum]
 
 (* ****** ****** *)
@@ -265,43 +292,43 @@ s3exp_isgte (x1, x2) = let
 *)
 in
 //
-case+ x1 of
+case+ s3exp_view (x1) of
 // nonlinear terms go first
-| S3Eiatm
+| ~S3Eiatm
     (s2vs1) => (
-  case+ x2 of
-  | S3Eiatm(s2vs2) =>
+  case+ s3exp_view (x2) of
+  | ~S3Eiatm(s2vs2) =>
       s2varmset_gte (s2vs1, s2vs2)
     // end of [S3Eiatm]
-  | _ => true
+  | v => (s3exp_view_free (v); true)
   ) (* end of [S3Eiatm] *)
-| S3Evar(s2v1) => (
-  case+ x2 of
-  | S3Eiatm _ => false
-  | S3Evar s2v2 =>
+| ~S3Evar(s2v1) => (
+  case+ s3exp_view (x2) of
+  | ~S3Eiatm _ => false
+  | ~S3Evar s2v2 =>
       compare_s2var_s2var (s2v1, s2v2) <= 0 // HX: not [>=]!
     // end of [S3Ecst]
-  | _ => true
+  | v => (s3exp_view_free (v); true)
   ) (* end of [S3Evar] *)
-| S3Ecst(s2c1) => (
-  case+ x2 of
-  | S3Eiatm _ => false
-  | S3Evar s2v2 => false
-  | S3Ecst s2c2 =>
+| ~S3Ecst(s2c1) => (
+  case+ s3exp_view (x2) of
+  | ~S3Eiatm _ => false
+  | ~S3Evar s2v2 => false
+  | ~S3Ecst s2c2 =>
       compare_s2cst_s2cst (s2c1, s2c2) <= 0 // HX: not [>=]!
     // end of [S3Ecst]
-  | _ => true
+  | v => (s3exp_view_free (v); true)
   ) (* end of [S3Evar] *)
-| S3Eunit((*void*)) => (
-  case+ x2 of
-  | S3Eiatm _ => false
-  | S3Evar s2v2 => false
-  | S3Ecst s2c2 => false
-  | S3Eunit () => true
-  | _ => true
+| ~S3Eunit((*void*)) => (
+  case+ s3exp_view (x2) of
+  | ~S3Eiatm _ => false
+  | ~S3Evar s2v2 => false
+  | ~S3Ecst s2c2 => false
+  | ~S3Eunit () => true
+  | v => (s3exp_view_free (v); true)
   ) (* end of [S3Eunit] *)
 //
-| _(*unrecognized*) => false
+| v (*unrecognized*) => (s3exp_view_free (v); false)
 //
 end // end of [s3exp_isgte]
 
@@ -311,7 +338,9 @@ local
 
 fun uns3exp_icff
   (x: s3exp): s3exp =
-  case+ x of S3Eicff (c, x) => x | _ => x
+  case+ s3exp_view (x) of
+  | ~S3Eicff (c, x) => x
+  | v => (s3exp_view_free (v); x)
 // end of [uns3exp_icff]
 
 (*
@@ -319,12 +348,21 @@ fun uns3exp_icff
 *)
 fun s3exp_icff_add
   (x1: s3exp, x2: s3exp): s3exp =
-  case+ (x1, x2) of
-  | (S3Eicff (c1, y1),
-     S3Eicff (c2, _)) => s3exp_icff (c1+c2, y1)
-  | (S3Eicff (c1, y1), _) => s3exp_icff (c1+1, y1)
-  | (_, S3Eicff (c2, y2)) => s3exp_icff (c2+1, y2)
-  | (_, _) => s3exp_icff (intinf_2, x1)
+  if s3exp_is_S3Eicff (x1) then let
+    val (c1, y1) = un_S3Eicff (x1)
+  in
+    if s3exp_is_S3Eicff (x2) then let
+      val (c2, _) = un_S3Eicff (x2)
+    in
+      s3exp_icff (c1+c2, y1)
+    end else s3exp_icff (c1+1, y1)
+  end else (
+    if s3exp_is_S3Eicff (x2) then let
+      val (c2, y2) = un_S3Eicff (x2)
+    in
+      s3exp_icff (c2+1, y2)
+    end else s3exp_icff (intinf_2, x1)
+  )
 // end of [s3exp_icff_add]
 
 fun
@@ -340,10 +378,10 @@ if gte12 then let
   val gte21 = s3exp_isgte (y2, y1)
 in
   if gte21 then
-    s3exp_icff_add (x1, x2) else S3Eisum (list_pair (x1, x2))
+    s3exp_icff_add (x1, x2) else s3exp_S3Eisum (glist_pair<s3exp> (x1, x2))
   // end of [if]
 end else (
-  S3Eisum (list_pair (x2, x1))
+  s3exp_S3Eisum (glist_pair<s3exp> (x2, x1))
 ) (* end of [if] *)
 //
 end // end of [s3exp_isum_pair]
@@ -356,35 +394,38 @@ s3exp_isum_list (
 fun aux (
   xs1: s3explst, xs2: s3explst
 ) : s3explst_vt =
-  case+ xs1 of
-  | list_cons (x1, xs11) => (
-    case+ xs2 of
-    | list_cons (x2, xs21) => let
-        val y1 = uns3exp_icff (x1)
-        val y2 = uns3exp_icff (x2)
-        val gte12 = s3exp_isgte (y1, y2)
+  if glist_is_cons (xs1) then let
+    val x1 = glist_head<s3exp> (xs1)
+    val xs11 = glist_tail<s3exp> (xs1)
+  in
+    if glist_is_cons (xs2) then let
+      val x2 = glist_head<s3exp> (xs2)
+      val xs21 = glist_tail<s3exp> (xs2)
+      val y1 = uns3exp_icff (x1)
+      val y2 = uns3exp_icff (x2)
+      val gte12 = s3exp_isgte (y1, y2)
+    in
+      if gte12 then let
+        val gte21 = s3exp_isgte (y2, y1)
       in
-        if gte12 then let
-          val gte21 = s3exp_isgte (y2, y1)
+        if gte21 then let
+          val x12 = s3exp_icff_add (x1, x2)
         in
-          if gte21 then let
-            val x12 = s3exp_icff_add (x1, x2)
-          in
-            case+ x12 of
-            | S3Enull () => aux (xs11, xs21)
-            | _ =>
-                list_vt_cons (x12, aux (xs11, xs21))
-              // end of [_]
-          end else
-            list_vt_cons (x1, aux (xs11, xs2))
-          // end of [if]
-        end else
-          list_vt_cons (x2, aux (xs1, xs21))
-        // end of [if]
-      end // end of [list_cons]
-    | list_nil () => list_copy (xs1)
-    ) // end of [list_cons]
-  | list_nil () => list_copy (xs2)
+          if s3exp_is_S3Enull (x12)
+            then aux (xs11, xs21)
+            else let
+              val rest = aux (xs11, xs21) in list_vt_cons (x12, rest)
+            end // end of [_]
+        end else let
+          val rest = aux (xs11, xs2) in list_vt_cons (x1, rest)
+        end // end of [if]
+      end else let
+        val rest = aux (xs1, xs21) in list_vt_cons (x2, rest)
+      end // end of [if]
+    end // end of [list_cons]
+    else glist_listize<s3exp> (xs1)
+  end // end of [list_cons]
+  else glist_listize<s3exp> (xs2)
  // end of [aux]
 in
   aux (xs1, xs2)
@@ -394,22 +435,27 @@ fun
 s3exp_imul_list (
   xs1: s3explst, xs2: s3explst
 ) : s3explst_vt = let
+//
+fun mulmap
+  (x1: s3exp, xs2: s3explst): s3explst_vt =
+  if glist_is_cons (xs2) then let
+    val y = s3exp_imul (x1, glist_head<s3exp> (xs2))
+    val ys = mulmap (x1, glist_tail<s3exp> (xs2))
+  in
+    list_vt_cons (y, ys)
+  end else list_vt_nil ()
+//
 in
 //
-case+ xs1 of
-| list_cons (x1, xs1) => let
-    val x1xs2 = list_map_cloptr
-      (xs2, lam x2 =<1> s3exp_imul (x1, x2))
-    val xs1xs2 = s3exp_imul_list (xs1, xs2)
-    val res = s3exp_isum_list (
-      $UN.castvwtp1{s3explst} (x1xs2), $UN.castvwtp1{s3explst} (xs1xs2)
-    ) // end of [val]
-    val () = list_vt_free (x1xs2)
-    val () = list_vt_free (xs1xs2)
+if glist_is_cons (xs1) then let
+    val x1 = glist_head<s3exp> (xs1)
+    val x1xs2 = mulmap (x1, xs2)
+    val xs1xs2 = s3exp_imul_list (glist_tail<s3exp> (xs1), xs2)
+    val res = s3exp_isum_list (l2l x1xs2, l2l xs1xs2)
   in
     res
   end // end of [list_cons]
-| list_nil () => list_vt_nil ()
+else list_vt_nil ()
 //
 end // end of [s3exp_imul_list]
 
@@ -417,115 +463,142 @@ in (* in of [local] *)
 
 implement
 s3exp_iadd
-  (x1, x2) = (
-  case+ (x1, x2) of
-  | (S3Enull (), _) => x2
-  | (_, S3Enull ()) => x1
-  | (S3Eisum xs1, S3Eisum xs2) => let
+  (x1, x2) =
+  if s3exp_is_S3Enull (x1) then x2
+  else if s3exp_is_S3Enull (x2) then x1
+  else if s3exp_is_S3Eisum (x1) then let
+    val xs1 = un_S3Eisum (x1)
+  in
+    if s3exp_is_S3Eisum (x2) then let
+      val xs2 = un_S3Eisum (x2)
       val xs = s3exp_isum_list (xs1, xs2)
     in
-      s3exp_isum ((l2l)xs)
+      s3exp_isum (l2l xs)
     end // end of [S3Eisum, S3Eisum]
-  | (S3Eisum xs1, _) => let
-      val xs2 = list_vt_sing (x2)
-      val xs = s3exp_isum_list (xs1, $UN.castvwtp1{s3explst} (xs2))
-      val () = list_vt_free (xs2)
+    else let
+      val xs = s3exp_isum_list (xs1, glist_sing<s3exp> (x2))
     in
-      s3exp_isum ((l2l)xs)
+      s3exp_isum (l2l xs)
     end // end of [S3Eisum, _]
-  | (_, S3Eisum xs2) => let
-      val xs1 = list_vt_sing (x1)
-      val xs = s3exp_isum_list ($UN.castvwtp1{s3explst} (xs1), xs2)
-      val () = list_vt_free (xs1)
+  end else (
+    if s3exp_is_S3Eisum (x2) then let
+      val xs2 = un_S3Eisum (x2)
+      val xs = s3exp_isum_list (glist_sing<s3exp> (x1), xs2)
     in
-      s3exp_isum ((l2l)xs)
+      s3exp_isum (l2l xs)
     end // end of [_, S3Eisum]
-  | (_, _) => s3exp_isum_pair (x1, x2)
-) // end of [s3exp_iadd]
+    else s3exp_isum_pair (x1, x2)
+  ) (* end of [s3exp_iadd] *)
 
 implement
 s3exp_isub
-  (x1, x2) = (
-  case+ (x1, x2) of
-  | (S3Enull (), _) => s3exp_ineg (x2)
-  | (_, S3Enull ()) => x1
-  | (S3Eisum xs1, S3Eisum xs2) => let
-      val xs2 =
-        s3explst_icff (intinf_neg_1, xs2)
-      val xs = s3exp_isum_list (xs1, $UN.castvwtp1{s3explst} (xs2))
-      val () = list_vt_free (xs2)
+  (x1, x2) =
+  if s3exp_is_S3Enull (x1) then s3exp_ineg (x2)
+  else if s3exp_is_S3Enull (x2) then x1
+  else if s3exp_is_S3Eisum (x1) then let
+    val xs1 = un_S3Eisum (x1)
+  in
+    if s3exp_is_S3Eisum (x2) then let
+      val xs2 = un_S3Eisum (x2)
+      val xs2 = l2l (s3explst_icff (intinf_neg_1, xs2))
+      val xs = s3exp_isum_list (xs1, xs2)
     in
-      s3exp_isum ((l2l)xs)
+      s3exp_isum (l2l xs)
     end // end of [S3Eisum, S3Eisum]
-  | (S3Eisum xs1, _) => let
-      val xs2 = list_vt_sing (s3exp_ineg (x2))
-      val xs = s3exp_isum_list (xs1, $UN.castvwtp1{s3explst} (xs2))
-      val () = list_vt_free (xs2)
+    else let
+      val xs2 = glist_sing<s3exp> (s3exp_ineg (x2))
+      val xs = s3exp_isum_list (xs1, xs2)
     in
-      s3exp_isum ((l2l)xs)
+      s3exp_isum (l2l xs)
     end // end of [S3Eisum, _]
-  | (_, S3Eisum xs2) => let
-      val xs1 = list_vt_sing (x1)
-      val xs2 =
-        s3explst_icff (intinf_neg_1, xs2)
-      val xs = s3exp_isum_list (
-        $UN.castvwtp1{s3explst} (xs1), $UN.castvwtp1{s3explst} (xs2)
-      ) // end of [val]
-      val () = list_vt_free (xs1)
-      val () = list_vt_free (xs2)
+  end else (
+    if s3exp_is_S3Eisum (x2) then let
+      val xs1 = glist_sing<s3exp> (x1)
+      val xs2 = un_S3Eisum (x2)
+      val xs2 = l2l (s3explst_icff (intinf_neg_1, xs2))
+      val xs = s3exp_isum_list (xs1, xs2)
     in
-      s3exp_isum ((l2l)xs)
+      s3exp_isum (l2l xs)
     end // end of [_, S3Eisum]
-  | (_, _) => s3exp_isum_pair (x1, s3exp_ineg (x2))
-) // end of [s3exp_isub]
+    else s3exp_isum_pair (x1, s3exp_ineg (x2))
+  ) (* end of [s3exp_isub] *)
+
+fun
+s3explst_imul_map
+  (x1: s3exp, xs2: s3explst): s3explst_vt =
+  if glist_is_cons (xs2) then let
+    val y = s3exp_imul (x1, glist_head<s3exp> (xs2))
+    val ys = s3explst_imul_map (x1, glist_tail<s3exp> (xs2))
+  in
+    list_vt_cons (y, ys)
+  end else list_vt_nil ()
+//
+fun
+s3explst_imul_map2
+  (xs1: s3explst, x2: s3exp): s3explst_vt =
+  if glist_is_cons (xs1) then let
+    val y = s3exp_imul (glist_head<s3exp> (xs1), x2)
+    val ys = s3explst_imul_map2 (glist_tail<s3exp> (xs1), x2)
+  in
+    list_vt_cons (y, ys)
+  end else list_vt_nil ()
+
+fun
+auxrest (x1: s3exp, x2: s3exp): s3exp =
+  if s3exp_is_S3Eisum (x1) then let
+    val xs1 = un_S3Eisum (x1)
+  in
+    if s3exp_is_S3Eisum (x2) then let
+      val xs2 = un_S3Eisum (x2)
+      val xs1xs2 = s3exp_imul_list (xs1, xs2)
+    in
+      s3exp_isum (l2l xs1xs2)
+    end // end of [S3Eisum, S3Eisum]
+    else let
+      val ys1 = s3explst_imul_map2 (xs1, x2)
+    in
+      s3exp_S3Eisum (l2l ys1)
+    end // end of [S3Eisum, _]
+  end else (
+    if s3exp_is_S3Eisum (x2) then let
+      val xs2 = un_S3Eisum (x2)
+      val ys2 = s3explst_imul_map (x1, xs2)
+    in
+      s3exp_S3Eisum (l2l ys2)
+    end // end of [_, S3Eisum]
+    else s3exp_S3Eimul (x1, x2)
+  ) (* end of [auxrest] *)
+
 
 implement
 s3exp_imul
   (x1, x2) = let
-(*
-val () = (
-  print "s3exp_imul: x1 = "; print_s3exp (x1); print_newline ();
-  print "s3exp_imul: x2 = "; print_s3exp (x2); print_newline ();
-) // end of [val]
-*)
 in
 //
-case+ (x1, x2) of
-| (S3Enull (), _) => s3exp_0
-| (_, S3Enull ()) => s3exp_0
-| (S3Eunit (), _) => x2
-| (_, S3Eunit ()) => x1
-| (S3Eicff (c, x1), x2) => s3exp_icff (c, s3exp_imul (x1, x2))
-| (x1, S3Eicff (c, x2)) => s3exp_icff (c, s3exp_imul (x1, x2))
-//
-| (S3Evar (s2v1), S3Evar (s2v2)) =>
-    S3Eiatm (s2varmset_pair (s2v1, s2v2))
-| (S3Eiatm (s2vs1), S3Evar (s2v2)) =>
-    S3Eiatm (s2varmset_add (s2vs1, s2v2))
-| (S3Evar (s2v1), S3Eiatm (s2vs2)) =>
-    S3Eiatm (s2varmset_add (s2vs2, s2v1))
-| (S3Eiatm (s2vs1), S3Eiatm (s2vs2)) =>
-    S3Eiatm (s2varmset_union (s2vs1, s2vs2))
-//
-| (S3Eisum (xs1), S3Eisum (xs2)) => let
-    val xs1xs2 = s3exp_imul_list (xs1, xs2)
-  in
-    s3exp_isum ((l2l)xs1xs2)
-  end // end of [S3Eisum, S3Eisum]
-| (S3Eisum (xs1), _) => let
-    val ys1 = list_map_cloptr (xs1, lam x1 =<1> s3exp_imul (x1, x2))
-  in
-    S3Eisum ((l2l)ys1)
-  end // end of [S3Eisum, _]
-| (_, S3Eisum (xs2)) => let
-    val ys2 = list_map_cloptr (xs2, lam x2 =<1> s3exp_imul (x1, x2))
-  in
-    S3Eisum ((l2l)ys2)
-  end // end of [_, S3Eisum]
-//
-| (_, _) => S3Eimul (x1, x2)
+if s3exp_is_S3Enull (x1) then s3exp_0
+else if s3exp_is_S3Enull (x2) then s3exp_0
+else if s3exp_is_S3Eunit (x1) then x2
+else if s3exp_is_S3Eunit (x2) then x1
+else if s3exp_is_S3Eicff (x1) then let
+  val (c, y1) = un_S3Eicff (x1) in s3exp_icff (c, s3exp_imul (y1, x2))
+end else if s3exp_is_S3Eicff (x2) then let
+  val (c, y2) = un_S3Eicff (x2) in s3exp_icff (c, s3exp_imul (x1, y2))
+end else if s3exp_is_S3Evar (x1) then (
+  if s3exp_is_S3Evar (x2) then
+    s3exp_S3Eiatm (s2varmset_pair (un_S3Evar (x1), un_S3Evar (x2)))
+  else if s3exp_is_S3Eiatm (x2) then
+    s3exp_S3Eiatm (s2varmset_add (un_S3Eiatm (x2), un_S3Evar (x1)))
+  else auxrest (x1, x2)
+) else if s3exp_is_S3Eiatm (x1) then (
+  if s3exp_is_S3Evar (x2) then
+    s3exp_S3Eiatm (s2varmset_add (un_S3Eiatm (x1), un_S3Evar (x2)))
+  else if s3exp_is_S3Eiatm (x2) then
+    s3exp_S3Eiatm (s2varmset_union (un_S3Eiatm (x1), un_S3Eiatm (x2)))
+  else auxrest (x1, x2)
+) else auxrest (x1, x2)
 //
 end // end of [s3exp_imul]
+
 
 end // end of [local]
 
@@ -533,11 +606,11 @@ end // end of [local]
 
 extern
 fun s3exp_lintize_flag (
-  env: &s2vbcfenv, s3e: s3exp, flag: &int
+  env: &s2vbcfenv, s3e: s3exp, flag: &int >> int
 ) : s3exp // end of [s3exp_lintize_flag]
 extern
 fun s3explst_lintize_flag (
-  env: &s2vbcfenv, s3es: s3explst, flag: &int
+  env: &s2vbcfenv, s3es: s3explst, flag: &int >> int
 ) : s3explst // end of [s3explst_lintize_flag]
 
 (* ****** ****** *)
@@ -545,11 +618,6 @@ fun s3explst_lintize_flag (
 implement
 s3exp_lintize
   (env, s3e) = let
-(*
-val () = (
-  print "s3exp_lintize: s3e = "; print_s3exp (s3e); print_newline ()
-) (* end of [val] *)
-*)
 var flag: int = 0
 val s3e_res = s3exp_lintize_flag (env, s3e, flag)
 //
@@ -567,85 +635,85 @@ s3exp_lintize_flag
   val flag0 = flag
 in
 //
-case+ s3e0 of
+case+ s3exp_view (s3e0) of
 //
-| S3Evar _ => s3e0
-| S3Ecst _ => let
+| ~S3Evar _ => s3e0
+| ~S3Ecst _ => let
     val () = flag := flag + 1
     val s2v = s2vbcfenv_replace_nonlin (env, s3e0)
   in
     s3exp_var (s2v)
   end // end of [val]
-| S3Enull _ => s3e0
-| S3Eunit _ => s3e0
-| S3Ebool _ => s3e0
+| ~S3Enull _ => s3e0
+| ~S3Eunit _ => s3e0
+| ~S3Ebool _ => s3e0
 //
-| S3Ebvar _ => s3e0
-| S3Ebneg (s3e) => let
+| ~S3Ebvar _ => s3e0
+| ~S3Ebneg (s3e) => let
     val s3e =
       s3exp_lintize_flag (env, s3e, flag)
     // end of [val]
   in
-    if flag > flag0 then S3Ebneg (s3e) else s3e0
+    if flag > flag0 then s3exp_S3Ebneg (s3e) else s3e0
   end // end of [S3Ebneg]
-| S3Ebadd (s3e1, s3e2) => let
+| ~S3Ebadd (s3e1, s3e2) => let
     val s3e1 = s3exp_lintize_flag (env, s3e1, flag)
     val s3e2 = s3exp_lintize_flag (env, s3e2, flag)
   in
-    if flag > flag0 then S3Ebadd (s3e1, s3e2) else s3e0
+    if flag > flag0 then s3exp_S3Ebadd (s3e1, s3e2) else s3e0
   end // end of [S3Ebadd]
-| S3Ebmul (s3e1, s3e2) => let
+| ~S3Ebmul (s3e1, s3e2) => let
     val s3e1 = s3exp_lintize_flag (env, s3e1, flag)
     val s3e2 = s3exp_lintize_flag (env, s3e2, flag)
   in
-    if flag > flag0 then S3Ebmul (s3e1, s3e2) else s3e0
+    if flag > flag0 then s3exp_S3Ebmul (s3e1, s3e2) else s3e0
   end // end of [S3Ebmul]
-| S3Ebeq (s3e1, s3e2) => let
+| ~S3Ebeq (s3e1, s3e2) => let
     val s3e1 = s3exp_lintize_flag (env, s3e1, flag)
     val s3e2 = s3exp_lintize_flag (env, s3e2, flag)
   in
-    if flag > flag0 then S3Ebeq (s3e1, s3e2) else s3e0
+    if flag > flag0 then s3exp_S3Ebeq (s3e1, s3e2) else s3e0
   end // end of [S3Ebeq]
-| S3Ebneq (s3e1, s3e2) => let
+| ~S3Ebneq (s3e1, s3e2) => let
     val s3e1 = s3exp_lintize_flag (env, s3e1, flag)
     val s3e2 = s3exp_lintize_flag (env, s3e2, flag)
   in
-    if flag > flag0 then S3Ebneq (s3e1, s3e2) else s3e0
+    if flag > flag0 then s3exp_S3Ebneq (s3e1, s3e2) else s3e0
   end // end of [S3Ebneq]
-| S3Ebineq (knd, s3e) => let
+| ~S3Ebineq (knd, s3e) => let
     val s3e = s3exp_lintize_flag (env, s3e, flag)
   in
-    if flag > flag0 then S3Ebineq (knd, s3e) else s3e0
+    if flag > flag0 then s3exp_S3Ebineq (knd, s3e) else s3e0
   end // end of [S3Ebineq]
 //
-| S3Ebdom _ => s3e0
+| ~S3Ebdom _ => s3e0
 //
-| S3Eiatm _ => let
+| ~S3Eiatm _ => let
     val () = flag := flag + 1
     val s2v = s2vbcfenv_replace_nonlin (env, s3e0)
   in
     s3exp_var (s2v)
   end // end of [val]
-| S3Eicff
+| ~S3Eicff
     (cff, s3e) => let
     val s3e = s3exp_lintize_flag (env, s3e, flag)
   in
-    if flag > flag0 then S3Eicff (cff, s3e) else s3e0
+    if flag > flag0 then s3exp_S3Eicff (cff, s3e) else s3e0
   end // end of [S3Eicff
 //
-| S3Eisum (s3es) => let
+| ~S3Eisum (s3es) => let
     val s3es =
       s3explst_lintize_flag (env, s3es, flag)
     // end of [s3es]
   in
-    if flag > flag0 then S3Eisum (s3es) else s3e0
+    if flag > flag0 then s3exp_S3Eisum (s3es) else s3e0
   end // end of [S3Eisum]
-| S3Eimul
+| ~S3Eimul
     (s3e1, s3e2) => let
     val s3e1 = s3exp_lintize_flag (env, s3e1, flag)
     val s3e2 = s3exp_lintize_flag (env, s3e2, flag)
     val s3e0 = (
-      if flag > flag0 then S3Eimul (s3e1, s3e2) else s3e0
+      if flag > flag0 then s3exp_S3Eimul (s3e1, s3e2) else s3e0
     ) : s3exp // end of [val]
     val () = flag := flag + 1
     val s2v = s2vbcfenv_replace_nonlin (env, s3e0)
@@ -653,19 +721,19 @@ case+ s3e0 of
     s3exp_var (s2v)
   end // end of [S3Eimul]
 //
-| S3Esizeof _ => let
+| ~S3Esizeof _ => let
     val () = flag := flag + 1
     val s2v = s2vbcfenv_replace_nonlin (env, s3e0)
   in
     s3exp_var (s2v)
   end // end of [val]
 //
-| S3Eapp
+| ~S3Eapp
     (s3e1, s3es2) => let
     val s3e1 = s3exp_lintize_flag (env, s3e1, flag)
     val s3es2 = s3explst_lintize_flag (env, s3es2, flag)
     val s3e0 = (
-      if flag > flag0 then S3Eapp (s3e1, s3es2) else s3e0
+      if flag > flag0 then s3exp_S3Eapp (s3e1, s3es2) else s3e0
     ) : s3exp // end of [val]
     val () = flag := flag + 1
     val s2v = s2vbcfenv_replace_nonlin (env, s3e0)
@@ -673,7 +741,7 @@ case+ s3e0 of
     s3exp_var (s2v)
   end // end of [S3Eapp]
 //
-| S3Eerr _(*ERROR*) => s3e0
+| ~S3Eerr _(*ERROR*) => s3e0
 //
 end // end of [s3exp_lintize]
 
@@ -687,15 +755,14 @@ s3explst_lintize_flag
   val flag0 = flag
 in
 //
-case+ s3es0 of
-| list_cons
-    (s3e, s3es) => let
-    val s3e = s3exp_lintize_flag (env, s3e, flag)
-    val s3es = s3explst_lintize_flag (env, s3es, flag)
-  in
-    if flag > flag0 then list_cons (s3e, s3es) else s3es0
-  end // end of [list_cons]
-| list_nil ((*void*)) => list_nil ()
+if glist_is_cons (s3es0) then let
+  val s3e = glist_head<s3exp> (s3es0)
+  val s3es = glist_tail<s3exp> (s3es0)
+  val s3e = s3exp_lintize_flag (env, s3e, flag)
+  val s3es = s3explst_lintize_flag (env, s3es, flag)
+in
+  if flag > flag0 then glist_cons<s3exp> (s3e, s3es) else s3es0
+end else glist_nil{s3exp} ((*void*))
 //
 end // end of [s3explst_lintize_flag]
 

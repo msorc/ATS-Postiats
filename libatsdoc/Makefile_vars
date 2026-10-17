@@ -1,0 +1,59 @@
+#
+# Makefile_vars: the variables that the makefiles of libatsdoc and atsdoc share
+#
+# HX-2026-10: libatsdoc and atsdoc are written in ATS2 (no GC) and built by
+# patsopt and the C compiler alone, on top of the ATS2 sources of the compiler
+# (PATSHOME/src: symbols, readers, lexical buffers, locations, filenames)
+# and libatsopt.a. ATS1 is not needed.
+#
+# PATSHOME   the root of the repository (default: the one that contains this file)
+# PATSOPT    the compiler (default: PATSHOME/bin/patsopt, then PATSHOME/src/patsopt, then the PATH)
+# CC, CCFLAGS   the C compiler (default: gcc -O2)
+# LIBATSOPT  the path of libatsopt.a (default: the first of PATSHOME/src/libatsopt.a,
+#            PATSHOME/utils/libatsopt/BUILD/libatsopt.a, PATSHOME/ccomp/atslib/lib/libatsopt.a
+#            that exists; it is built by `make -C PATSHOME/src libatsopt.a` if there is none)
+# LIBGMP     -lgmp (empty if libatsopt.a was built with C3NSTRINTKND=intknd)
+#
+
+PATSHOME ?= $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/..)
+export PATSHOME
+
+ifndef PATSOPT
+ifneq ($(wildcard $(PATSHOME)/bin/patsopt),)
+PATSOPT=$(PATSHOME)/bin/patsopt
+else ifneq ($(wildcard $(PATSHOME)/src/patsopt),)
+PATSOPT=$(PATSHOME)/src/patsopt
+else
+PATSOPT=patsopt
+endif
+endif
+
+CC ?= gcc
+AR ?= ar
+CCFLAGS ?= -O2
+
+# what patscc does: the C compiler with the run-time of ATS2 (src/ for the .cats files of the staloaded modules)
+PATSCC=$(CC) -std=c99 -D_XOPEN_SOURCE -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime -I$(PATSHOME)/src \
+  -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h $(CCFLAGS)
+
+LIBATSDOCDIR=$(PATSHOME)/libatsdoc
+LIBATSDOC=$(LIBATSDOCDIR)/BUILD/libatsdoc.a
+
+ifndef LIBATSOPT
+LIBATSOPT=$(firstword $(wildcard $(PATSHOME)/src/libatsopt.a \
+  $(PATSHOME)/utils/libatsopt/BUILD/libatsopt.a $(PATSHOME)/ccomp/atslib/lib/libatsopt.a) \
+  $(PATSHOME)/src/libatsopt.a)
+endif
+
+LIBGMP ?= -lgmp
+
+# libatsopt.a, if there is none
+$(PATSHOME)/src/libatsopt.a:
+	$(MAKE) -C $(PATSHOME)/src libatsopt.a
+
+RMF=rm -f
+
+# the rules above are not the default goal of the makefiles that include this one
+.DEFAULT_GOAL := all
+
+###### end of [Makefile_vars] ######

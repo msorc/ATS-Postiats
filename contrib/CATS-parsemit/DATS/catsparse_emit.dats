@@ -18,6 +18,8 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 staload "./../SATS/catsparse_syntax.sats"
 //
@@ -138,10 +140,10 @@ emit_symbol(out, x) =
 //
 implement
 emit_i0de
-  (out, id) = emit_symbol(out, id.i0dex_sym)
+  (out, id) = emit_symbol(out, id.i0dex_sym())
 implement
 emit_label
-  (out, lab) = emit_symbol(out, lab.i0dex_sym)
+  (out, lab) = emit_symbol(out, lab.i0dex_sym())
 //
 (* ****** ****** *)
 
@@ -156,64 +158,64 @@ auxtok
 ) : void =
 (
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_KWORD _ => ()
+| ~T_KWORD _ => ()
 //
-| T_ENDL() => emit_ENDL(out)
-| T_SPACES(cs) => emit_text(out, cs)
+| ~T_ENDL() => emit_ENDL(out)
+| ~T_SPACES(cs) => emit_text(out, cs)
 //
-| T_COMMENT_line _ => emit_COMMENT_line(out, tok)
-| T_COMMENT_block _ => emit_COMMENT_block(out, tok)
+| ~T_COMMENT_line _ => emit_COMMENT_line(out, tok)
+| ~T_COMMENT_block _ => emit_COMMENT_block(out, tok)
 //
-| T_INT(_, rep) => emit_text(out, rep)
-| T_FLOAT(_, rep) => emit_text(out, rep)
+| ~T_INT(_, rep) => emit_text(out, rep)
+| ~T_FLOAT(_, rep) => emit_text(out, rep)
 //
-| T_STRING(str) => emit_text(out, str)
+| ~T_STRING(str) => emit_text(out, str)
 //
-| T_IDENT_alp(name) =>
+| ~T_IDENT_alp(name) =>
   (
     emit_text(out, name)
   ) (* end of [T_IDENT_alp] *)
-| T_IDENT_srp(name) =>
+| ~T_IDENT_srp(name) =>
   (
     emit_SHARP(out); emit_text(out, name)
   ) (* end of [T_IDENT_srp] *)
 //
-| T_IDENT_sym(name) => emit_text(out, name)
+| ~T_IDENT_sym(name) => emit_text(out, name)
 //
-| T_LPAREN() => emit_LPAREN(out)
-| T_RPAREN() => emit_RPAREN(out)
+| ~T_LPAREN() => emit_LPAREN(out)
+| ~T_RPAREN() => emit_RPAREN(out)
 //
-| T_LBRACKET() => emit_LBRACKET(out)
-| T_RBRACKET() => emit_RBRACKET(out)
+| ~T_LBRACKET() => emit_LBRACKET(out)
+| ~T_RBRACKET() => emit_RBRACKET(out)
 //
-| T_LBRACE() => emit_LBRACE(out)
-| T_RBRACE() => emit_RBRACE(out)
+| ~T_LBRACE() => emit_LBRACE(out)
+| ~T_RBRACE() => emit_RBRACE(out)
 //
-| T_LT((*void*)) => emit_text(out, "<")
-| T_GT((*void*)) => emit_text(out, ">")
+| ~T_LT((*void*)) => emit_text(out, "<")
+| ~T_GT((*void*)) => emit_text(out, ">")
 //
-| T_MINUS() => emit_text(out, "-")
+| ~T_MINUS() => emit_text(out, "-")
 //
-| T_COLON() => emit_text(out, ":")
+| ~T_COLON() => emit_text(out, ":")
 //
-| T_COMMA() => emit_text(out, ",")
-| T_SEMICOLON() => emit_text(out, ";")
+| ~T_COMMA() => emit_text(out, ",")
+| ~T_SEMICOLON() => emit_text(out, ";")
 //
-| T_SLASH() => emit_text(out, "/")
+| ~T_SLASH() => emit_text(out, "/")
 //
-| _ (*unrecognized*) =>
+| v0 (*unrecognized*) => (token_node_view_free(v0);
   {
     val () = fprint!(out, "TOKERR(", tok, ")")
-  }
+  })
 ) (* end of [auxtok] *)
 //
 in
 //
-case+ toks of
-| list_nil () => ()
-| list_cons (tok, toks) =>
+case+ glist_view(toks) of
+| ~GLnil () => ()
+| ~GLcons (tok, toks) =>
   (
     auxtok (out, tok); emit_extcode (out, toks)
   ) (* end of [list_cons] *)

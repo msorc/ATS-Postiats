@@ -41,6 +41,6 @@ gcompare_val_val<size_t> = g0uint_compare_size
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_uint_atxt.txt")
 %}\

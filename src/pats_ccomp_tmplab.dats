@@ -32,6 +32,19 @@
 // Start Time: October, 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_tmplab.dats, see PORTING.md, "ccomp core modules")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
 
 staload "./pats_basics.sats"
 
@@ -39,15 +52,6 @@ staload "./pats_basics.sats"
 
 staload
 STMP = "./pats_stamp.sats"
-typedef stamp = $STMP.stamp
-
-staload
-LOC = "./pats_location.sats"
-typedef location = $LOC.location
-
-(* ****** ****** *)
-
-staload "./pats_histaexp.sats"
 
 (* ****** ****** *)
 
@@ -55,28 +59,17 @@ staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
 
-local
-
-assume
-tmplab_type = '{
-  tmplab_loc = location, tmplab_stamp = stamp
-} // end of [tmplab]
-
-in (* in of [local] *)
-
 implement
 tmplab_make (loc) = let
   val stamp = $STMP.tmplab_stamp_make ()
 in
-  '{ tmplab_loc= loc, tmplab_stamp= stamp }
+  tmplab_new (loc, stamp)
 end // end of [tmplab_make]
 
 implement
-tmplab_get_loc (tl) = tl.tmplab_loc
+tmplab_get_loc (tl) = tmplab_loc (tl)
 implement
-tmplab_get_stamp (tl) = tl.tmplab_stamp
-
-end // end of [local]
+tmplab_get_stamp (tl) = tmplab_stamp (tl)
 
 (* ****** ****** *)
 

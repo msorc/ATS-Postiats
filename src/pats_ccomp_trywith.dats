@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -32,13 +32,30 @@
 // Start Time: June, 2013
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_trywith.dats, see PORTING.md,
+// "ccomp group C1 (ccompenv/environ/caseof/looping/trywith/lazyeval)")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
 
 staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
-staload
-GLOBAL = "./pats_global.sats"
+staload GLOBAL = "./pats_global.sats"
 
 (* ****** ****** *)
 
@@ -63,10 +80,10 @@ implement
 hidexp_ccomp_ret_trywith
   (env, res, tmpret, hde0) = let
 //
-val loc0 = hde0.hidexp_loc
+val loc0 = hde0.hidexp_loc()
 val lvl0 = the_d2varlev_get()
-val-HDEtrywith
-  (hde_try, hicls_with) = hde0.hidexp_node
+val-~HDEtrywith
+  (hde_try, hicls_with) = hidexp_node_view(hde0.hidexp_node())
 //
 val hse_exn = hisexp_exnconptr
 val tmp_exn = tmpvar_make(loc0, hse_exn)
@@ -93,13 +110,13 @@ val
 val inss_try = instrseq_get_free(res_try)
 //
 val fail =
-  PTCKNTraise(tmpret, pmv_exn)
+  patckont_PTCKNTraise(tmpret, pmv_exn)
 //
 val
 ibrs_with =
 hiclaulst_ccomp
 (
-  env, lvl0, list_sing(pmv_exn), hicls_with, tmpret, fail
+  env, lvl0, glist_sing(pmv_exn), hicls_with, tmpret, fail
 ) (* end of [val] *)
 //
 val
@@ -109,7 +126,7 @@ val ((*void*)) = instrseq_add(res, ins_trywith)
 //
 in
   // nothing
-end // end of [hidexp_ccomp_ret_case]
+end // end of [hidexp_ccomp_ret_trywith]
 
 (* ****** ****** *)
 

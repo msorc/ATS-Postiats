@@ -97,6 +97,6 @@ a:vtp
 
 %{
 implement
-main(argc, argv) =
+main0(argc, argv) =
   fprint_filsub (stdout_ref, "parray_atxt.txt")
 %}\

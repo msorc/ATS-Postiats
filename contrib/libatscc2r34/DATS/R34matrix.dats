@@ -59,7 +59,7 @@ $extfcall(R34vector(double, n), "solve", xss, ys0)
 (* ****** ****** *)
 //
 implement
-R34matrix_tabulate_cloref
+R34matrix_tabulate_cloptr
 {a}(*tmp*)
 (m0, n0, fopr) =
 R34matrix_tabulate_fun{a}(m0, n0, cloref2fun2(fopr))

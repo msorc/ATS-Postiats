@@ -212,7 +212,7 @@ stkarray_takeout_opt
 fun{a:vt0p}
 stkarray_getref_top
   {m,n:int | n > 0}
-  (stk: !stkarray(INV(a), m, n)):<> cPtr1(a)
+  (stk: !stkarray(INV(a), m, n)):<> P2tr1(a)
 // end of [stkarray_getref_top]
 
 (* ****** ****** *)
@@ -222,12 +222,12 @@ symintr stkarray_getref_at
 fun{a:vt0p}
 stkarray_getref_at_int
   {m,n:int}{i:nat | i < n}
-  (stk: !stkarray(INV(a), m, n), i: int(i)):<> cPtr1(a)
+  (stk: !stkarray(INV(a), m, n), i: int(i)):<> P2tr1(a)
 //
 fun{a:vt0p}
 stkarray_getref_at_size
   {m,n:int}{i:nat | i < n}
-  (stk: !stkarray(INV(a), m, n), i: size_t(i)):<> cPtr1(a)
+  (stk: !stkarray(INV(a), m, n), i: size_t(i)):<> P2tr1(a)
 //
 overload stkarray_getref_at with stkarray_getref_at_int
 overload stkarray_getref_at with stkarray_getref_at_size

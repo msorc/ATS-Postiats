@@ -12,110 +12,114 @@
 *)
 
 (* ****** ****** *)
-
+//
 typedef
-s2cst_struct = @{
-//
-  s2cst_srt= s2rt
-, s2cst_name= symbol
+s2cst_struct(l:addr) = @{
+  s2cst_srt= s2rt(l)
+, s2cst_name= symbol(l)
 , s2cst_stamp= stamp
-//
-, s2cst_extdef= stringopt
-//
-, s2cst_supcls= List0(s2exp)
-//
+, s2cst_extdef= ptr // null or astring
 , s2cst_nused= int
-//
 , s2cst_payload= ptr
-//
 } (* end of [s2cst_struct] *)
-
+//
 (* ****** ****** *)
 
 local
 //
 assume
-s2cst_type =
-  ref (s2cst_struct)
+s2cst_type(l:addr) = aref(l, s2cst_struct(l))
 //
 in (* in of [local] *)
 
 implement
 s2cst_make
-(
-  name, srt, stamp, extdef
-) = let
+  {l}(ar, name, srt, stamp, extdef) = let
 //
-val [l:addr] (
-  pfat, pfgc | p
-) = ptr_alloc<s2cst_struct> ()
-//
-val () = p->s2cst_srt := srt
-//
-val () = p->s2cst_name := name
-//
-val () = p->s2cst_stamp := stamp
-//
-val () = p->s2cst_extdef := extdef
-//
-val () = p->s2cst_supcls := list_nil()
-//
-val () = p->s2cst_nused := (0)
-//
-val () = p->s2cst_payload := the_null_ptr
+var x: s2cst_struct(l)
+val () = x.s2cst_srt := srt
+val () = x.s2cst_name := name
+val () = x.s2cst_stamp := stamp
+val () = x.s2cst_extdef := extdef
+val () = x.s2cst_nused := (0)
+val () = x.s2cst_payload := the_null_ptr
 //
 in
-  $UN.castvwtp0{s2cst}((pfat, pfgc | p))
+  aref_make<s2cst_struct(l)>(ar, x)
 end // end of [s2cst_make]
 
 (* ****** ****** *)
 //
 implement
-s2cst_get_srt(s2c) = !s2c.s2cst_srt
+s2cst_get_srt
+  {l}(ar, s2c) =
+  (aref_get<s2cst_struct(l)>(ar, s2c)).s2cst_srt
+implement
+s2cst_get_name
+  {l}(ar, s2c) =
+  (aref_get<s2cst_struct(l)>(ar, s2c)).s2cst_name
+implement
+s2cst_get_stamp
+  {l}(ar, s2c) =
+  (aref_get<s2cst_struct(l)>(ar, s2c)).s2cst_stamp
 //
 implement
-s2cst_get_name(s2c) = !s2c.s2cst_name
-//
-implement
-s2cst_get_stamp(s2c) = !s2c.s2cst_stamp
-//
-implement
-s2cst_get_extdef(s2c) = !s2c.s2cst_extdef
+s2cst_get_extdef
+  {l}(ar, s2c) = let
+  val p =
+  (aref_get<s2cst_struct(l)>(ar, s2c)).s2cst_extdef
+in
+  if p > the_null_ptr
+    then Some_vt($UN.cast{astring(l)}(p)) else None_vt()
+  // end of [if]
+end // end of [s2cst_get_extdef]
 //
 (* ****** ****** *)
 //
 implement
-s2cst_get_nused(s2c) = !s2c.s2cst_nused
-//
+s2cst_get_nused
+  {l}(ar, s2c) =
+  (aref_get<s2cst_struct(l)>(ar, s2c)).s2cst_nused
 implement
-s2cst_incby1_nused(s2c) = 
-  (!s2c.s2cst_nused := !s2c.s2cst_nused + 1)
+s2cst_incby1_nused
+  {l}(ar, s2c) = let
+  var x = aref_get<s2cst_struct(l)>(ar, s2c)
+  val () = x.s2cst_nused := x.s2cst_nused + 1
+in
+  aref_set<s2cst_struct(l)>(ar, s2c, x)
+end // end of [s2cst_incby1_nused]
 //
 (* ****** ****** *)
-  
+//
 implement
-s2cst_get_payload (s2c) = !s2c.s2cst_payload
+s2cst_get_payload
+  {l}(ar, s2c) =
+  (aref_get<s2cst_struct(l)>(ar, s2c)).s2cst_payload
 implement
-s2cst_set_payload (s2c, x) = (!s2c.s2cst_payload := x)
-
-(* ****** ****** *)
-
+s2cst_set_payload
+  {l}(ar, s2c, pl) = let
+  var x = aref_get<s2cst_struct(l)>(ar, s2c)
+  val () = x.s2cst_payload := pl
+in
+  aref_set<s2cst_struct(l)>(ar, s2c, x)
+end // end of [s2cst_set_payload]
+//
 end // end of [local]
 
 (* ****** ****** *)
-//
+
 implement
 fprint_s2cst
-  (out, s2c) = fprint! (out, s2c.name())
-//
-(*
-implement
-fprint_s2cst
-  (out, s2c) =
-  fprint! (out, s2c.name(), "(", s2c.srt(), ")")
+  (ar, out, s2c) =
+  fprint_symbol(ar, out, s2cst_get_name(ar, s2c))
 // end of [fprint_s2cst]
-*)
-//
+
+(* ****** ****** *)
+
+implement
+fprint_s2cstlst
+  (ar, out, xs) = fprint_alist_sep(ar, out, xs, ", ", fprint_s2cst)
+
 (* ****** ****** *)
 
 (* end of [patsolve_cnstrnt_s2cst.dats] *)

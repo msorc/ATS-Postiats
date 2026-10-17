@@ -16,20 +16,18 @@
 
 implement
 parse_label
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-val-JSONobject(lxs) = jsnv0
-//
-val-list_cons (lx, lxs) = lxs
-val name = lx.0 and jsnv2 = lx.1
+val name = jsonval_get_name(jsnv0)
+val jsnv2 = jsonval_get_value(jsnv0)
 //
 in
 //
 case+ name of
-//
-| "LABint" => LABint(parse_int(jsnv2))
-| "LABsym" => LABsym(parse_symbol(jsnv2))
-//
+| "LABint" =>
+    label_LABint(ar, parse_int(jsnv2))
+| "LABsym" =>
+    label_LABsym(ar, parse_symbol(ar, tbls, jsnv2))
 | _(*unrecognized*) => 
   let
     val () =

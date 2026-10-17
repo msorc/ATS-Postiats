@@ -257,6 +257,6 @@ end // end of [list_vt_mergesort_fun]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "list_vt_mergesort_atxt.txt")
 %}\

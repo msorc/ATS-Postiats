@@ -151,7 +151,7 @@ stadef service = chansrvc2
 fun
 chansrvc_create{ss:type}
 (
-  fserv: chanpos(ss) -<cloref1> void
+  fserv: chanpos(ss) -<cloptr1> void // HX-2026-10: no GC
 ) : chansrvc(ss) = "mac#%" // end-of-fun
 //
 fun
@@ -165,7 +165,7 @@ fun
 chansrvc2_create
   {env:vt0p}{ss:type}
 (
-  fserv: (env, chanpos(ss)) -<cloref1> void
+  fserv: (env, chanpos(ss)) -<cloptr1> void // HX-2026-10: no GC
 ) : chansrvc2(env, ss) = "mac#%" // end-of-fun
 //
 fun

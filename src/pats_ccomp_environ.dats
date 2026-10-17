@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -33,31 +33,27 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_environ.dats, see PORTING.md,
+// "ccomp group C1 (ccompenv/environ/caseof/looping/trywith/lazyeval)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
-staload
-S2E = "./pats_staexp2.sats"
-typedef s2cst = $S2E.s2cst
-typedef d2con = $S2E.d2con
+staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload
-D2E = "./pats_dynexp2.sats"
-typedef d2cst = $D2E.d2cst
-typedef d2var = $D2E.d2var
-typedef d2varlst = $D2E.d2varlst
-vtypedef d2varlst_vt = $D2E.d2varlst_vt
-typedef d2varset = $D2E.d2varset
-vtypedef d2varset_vt = $D2E.d2varset_vt
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
+staload _(*anon*) = "./pats_dynexp2_dvar.dats"
 
 (* ****** ****** *)
 
@@ -66,56 +62,45 @@ staload "./pats_hidynexp.sats"
 
 (* ****** ****** *)
 
-staload "pats_ccomp.sats"
+staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
 
 vtypedef
-funlablst2_vt = List_vt (funlablst)
+funlablst2_vt = List0_vt (funlablst)
 
 (* ****** ****** *)
 
 overload fprint with fprint_vbindmap
 
 (* ****** ****** *)
+//
+// HX-2026-10: the global map of the bindings of the function being emitted
+// lives in a cell of the global arena; it is taken out and put back
+//
+fn
+cell_make (x: ptr): ptr = let
+  val p = the_garena_alloc (sizeof<ptr>)
+  val () = $UN.ptr0_set<ptr> (p, x)
+in
+  p
+end // end of [cell_make]
+//
+fn cell_get (p: ptr): ptr = $UN.ptr0_get<ptr> (p)
+fn cell_set (p: ptr, x: ptr): void = $UN.ptr0_set<ptr> (p, x)
+//
+(* ****** ****** *)
 
 local
 
-extern
-fun
-funent_set_flablst_fin
-(
-  fent: funent, opt: Option(funlablst)
-) : void = "ext#patsopt_funent_set_flablst_fin"
-
-(*
 fun
 aux_funlab_get_flablst
 (
   flab: funlab
 ) : funlablst = let
 //
-val opt =
-  funlab_get_funent(flab)
-//
-in
-//
-case+ opt of
-| Some(fent) =>
-    funent_get_flablst(fent)
-  // end of [Some]
-| None((*void*)) => list_nil()
-//
-end // end of [aux_funlab_get_flablst]
-*)
-fun
-aux_funlab_get_flablst
-(
-  flab: funlab
-) : funlablst = let
-//
-val-Some(fent) =
-  funlab_get_funent(flab)
+val-~GOsome(fent) =
+  gopt_view(funlab_get_funent(flab))
 //
 in
   funent_get_flablst(fent)
@@ -129,17 +114,10 @@ auxtrclo
 , xss: funlablst2_vt
 , res: funlabset_vt
 ) : funlabset_vt = let
-(*
-val () =
-println!
-(
-"auxtrclo: flvl0 = ", flvl0
-) (* println! *)
-*)
 in
 //
-case+ xs of
-| list_cons
+case+ glist_view(xs) of
+| ~GLcons
     (x, xs) => let
 //
 // HX-2013-04-12:
@@ -158,13 +136,6 @@ case+ xs of
       ) else let
         val res = funlabset_vt_add(res, x)
         val xs_new = aux_funlab_get_flablst(x) 
-//
-(*
-        val out = stdout_ref
-        val () = fprintln! (out, "x = ", x)
-        val () = fprintln! (out, "xs_new = ", xs_new)
-*)
-//
       in
         auxtrclo(flvl0, xs_new, list_vt_cons(xs, xss), res)
       end (* end of [if] *)
@@ -174,7 +145,7 @@ case+ xs of
       // end of [val]
     end (* end of [if] *)
   end // end of [list_vt_cons]
-| list_nil((*void*)) =>
+| ~GLnil((*void*)) =>
   (
     case+ xss of
     | ~list_vt_nil
@@ -191,32 +162,14 @@ in (* in of [local] *)
 implement
 funent_eval_flablst
   (fent) = let
-// (*
-(*
-val
-fl0 = funent_get_lab (fent)
-val () =
-println!
-(
-"funent_eval_flablst: fent.lab = ", fl0
-) (* println! *)
-*)
 //
 val opt = funent_get_flablst_fin(fent)
 //
-(*
-val () =
-fprintln!
-(
-  stdout_ref, "funent_eval_flablst: opt = ", opt
-) (* fprintln! *)
-*)
-//
 in
 //
-case+ opt of
-| Some(fls) => fls
-| None((*void*)) => fls where
+case+ gopt_view(opt) of
+| ~GOsome(fls) => fls
+| ~GOnone((*void*)) => fls where
   {
 //
     val fl0 = funent_get_lab(fent)
@@ -228,14 +181,9 @@ case+ opt of
     val res = funlabset_vt_add(res, fl0)
     val res = auxtrclo(flvl, xs0, xss, res)
     val fls = funlabset_vt_listize_free(res)
-    val fls = list_of_list_vt{funlab}(fls)
-    val ((*void*)) = funent_set_flablst_fin(fent, Some(fls))
+    val fls = glist_make_list_vt<funlab>(fls)
+    val ((*void*)) = funent_set_flablst_fin(fent, gopt_some<funlablst>(fls))
 //
-(*
-    val ((*void*)) =
-      fprintln!(stdout_ref, "funent_eval_flablst(", fl0, "): fls = ", fls)
-    // end of [val]
-*)
   } (* end of [None] *)
 //
 end // end of [funent_eval_flablst]
@@ -246,42 +194,18 @@ end // end of [local]
 
 local
 
-extern
-fun
-funent_set_d2envlst_fin
-(
-  fent: funent, opt: Option (d2envlst)
-) : void = "ext#patsopt_funent_set_d2envlst_fin"
-
-(*
 fun
 aux_funlab_get_d2envlst
   (flab: funlab): d2envlst = let
 //
-val opt = funlab_get_funent (flab)
-//
-in
-//
-case+ opt of
-| Some (fent) =>
-    funent_get_d2envlst (fent)
-  // end of [Some]
-| None ((*void*)) => list_nil ()
-//
-end // end of [aux_funlab_get_d2envlst]
-*)
-fun
-aux_funlab_get_d2envlst
-  (flab: funlab): d2envlst = let
-//
-val-Some (fent) = funlab_get_funent (flab)
+val-~GOsome(fent) = gopt_view(funlab_get_funent (flab))
 val d2esopt = funent_get_d2envlst_fin (fent)
 //
 in
 //
-case+ d2esopt of
-| Some (d2es) => d2es
-| None ((*void*)) =>
+case+ gopt_view(d2esopt) of
+| ~GOsome(d2es) => d2es
+| ~GOnone((*void*)) =>
     funent_get_d2envlst (fent) (* HX-2013-10-09: error? *)
   // end of [None]
 //
@@ -295,28 +219,16 @@ auxd2es
 ) : d2envset_vt = let
 in
 //
-case+ d2es of
+case+ glist_view(d2es) of
 //
-| list_cons
+| ~GLcons
     (d2e, d2es) => let
-(*
-//
-// HX-2013-04: [d2e] cannot be in [vbmap]
-//
-    val d2v = d2env_get_var (d2e)
-    val opt = $D2E.d2varmap_search (vbmap, d2v)
-    val res =
-    (
-      case+ opt of
-      | ~None_vt _ => d2envset_vt_add (res, d2e) | ~Some_vt _ => res
-    ) : d2envset_vt
-*)
     val res = d2envset_vt_add (res, d2e)
   in
     auxd2es (d2es, vbmap, res)
   end (* end of [list_cons] *)
 //
-| list_nil () => res
+| ~GLnil () => res
 //
 end // end of [auxd2es]
 
@@ -331,22 +243,15 @@ auxtrclo
   fls: funlablst
 , vbmap: vbindmap, res: d2envset_vt
 ) : d2envset_vt = let
-(*
-val () = fprintln! (stdout_ref, "auxtrclo: fls = ", fls)
-*)
 in
 //
-case+ fls of
-| list_nil () => res
-| list_cons
+case+ glist_view(fls) of
+| ~GLnil () => res
+| ~GLcons
     (fl, fls) => let
     val d2es =
       aux_funlab_get_d2envlst (fl)
     // end of [val]
-(*
-    val () = fprintln! (stdout_ref, "auxtrclo: fl = ", fl)
-    val () = fprintln! (stdout_ref, "auxtrclo: d2es = ", d2es)
-*)
     val res = auxd2es (d2es, vbmap, res)
   in
     auxtrclo (fls, vbmap, res)
@@ -359,31 +264,22 @@ in (* in of [local] *)
 implement
 funent_eval_d2envlst
   (fent) = let
-(*
-val fl = funent_get_lab (fent)
-val () = println! ("funent_eval_d2envlst: ======")
-val () = println! ("funent_eval_d2envlst: fent.lab = ", fl)
-*)
 //
 val opt = funent_get_d2envlst_fin (fent)
 //
-(*
-val () = fprintln! (stdout_ref, "funent_eval_d2envlst: opt = ", opt)
-*)
-//
 in
 //
-case+ opt of
-| Some (d2es) => d2es
-| None ((*void*)) => d2es where
+case+ gopt_view(opt) of
+| ~GOsome (d2es) => d2es
+| ~GOnone ((*void*)) => d2es where
   {
     val fls0 = funent_eval_flablst (fent)
     val vbmap = funent_get_vbindmap (fent)
     val d2es(*set*) = d2envset_vt_nil()
     val d2es(*set*) = auxtrclo (fls0, vbmap, d2es)
     val d2es(*list*) = d2envset_vt_listize_free (d2es)
-    val d2es(*list*) = list_of_list_vt{d2env}(d2es)
-    val ((*void*)) = funent_set_d2envlst_fin (fent, Some (d2es))
+    val d2es(*list*) = glist_make_list_vt<d2env>($UN.castvwtp0{List0_vt(d2env)}(d2es))
+    val ((*void*)) = funent_set_d2envlst_fin (fent, gopt_some<d2envlst>(d2es))
   } (* end of [None] *)
 //
 end // end of [funent_eval_d2envlst]
@@ -399,12 +295,12 @@ funlab_is_envful
 val opt = funlab_get_funent (flab)
 val d2es =
 (
-case+ opt of
-| Some (fent) => funent_eval_d2envlst (fent) | None () => list_nil ()
+case+ gopt_view(opt) of
+| ~GOsome (fent) => funent_eval_d2envlst (fent) | ~GOnone () => glist_nil ()
 ) : d2envlst // end of [val]
 //
 in
-  list_is_cons (d2es)
+  glist_is_cons (d2es)
 end // end of [funlab_is_envful]
 
 (* ****** ****** *)
@@ -419,22 +315,22 @@ fun aux
 ) : hisexplst = let
 in
 //
-case+ d2es of
-| list_cons
+case+ glist_view(d2es) of
+| ~GLcons
     (d2e, d2es) => let
     val hse = d2env_get_type (d2e)
   in
-    list_cons(hse, aux (d2es, hses))
+    glist_cons<hisexp>(hse, aux (d2es, hses))
   end // end of [list_cons]
-| list_nil((*void*)) => hses
+| ~GLnil((*void*)) => hses
 //
 end (* end of [aux] *)
 //
 val opt = funlab_get_funent (flab)
 val d2es =
 (
-case+ opt of
-| Some(fent) => funent_eval_d2envlst(fent) | None() => list_nil()
+case+ gopt_view(opt) of
+| ~GOsome(fent) => funent_eval_d2envlst(fent) | ~GOnone() => glist_nil()
 ) : d2envlst // end of [val]
 //
 val hses = funlab_get_type_arg (flab)
@@ -455,13 +351,17 @@ fun the_funent_varbindmap_find (d2v: d2var): Option_vt (primval)
 *)
 
 vtypedef
-vbindlst_vt = List_vt @(d2var, primval)
+vbindlst_vt = List0_vt @(d2var, primval)
 vtypedef
-vbindmap_vt = $D2E.d2varmap_vt (primval)
+vbindmap_vt = d2varmap_vt (primval)
 
-val the_vbmap = let
-  val map = $D2E.d2varmap_vt_nil () in ref<vbindmap_vt> (map)
-end // end of [val]
+val the_vbmap =
+  cell_make ($UN.castvwtp0{ptr}(d2varmap_vt_nil<primval> ()))
+
+fn
+vbmap_take (): vbindmap_vt = $UN.castvwtp0{vbindmap_vt}(cell_get (the_vbmap))
+fn
+vbmap_put (map: vbindmap_vt): void = cell_set (the_vbmap, $UN.castvwtp0{ptr}(map))
 
 in (* in of [local] *)
 
@@ -481,7 +381,7 @@ case+ vbs of
     (vb, vbs) => let
     val _ =
     ( // replaced
-      $D2E.d2varmap_vt_insert (map, vb.0, vb.1)
+      d2varmap_vt_insert<primval> (map, vb.0, vb.1)
     ) (* end of [val] *)
   in
     auxmap (map, vbs)
@@ -497,15 +397,15 @@ auxenv
 ) : void = let
 in
 //
-case+ d2es of
-| list_nil
+case+ glist_view(d2es) of
+| ~GLnil
     ((*void*)) => ()
-| list_cons
+| ~GLcons
     (d2e, d2es) => let
     val d2v = d2env_get_var (d2e)
     val hse = d2env_get_type (d2e)
     val argenv = primval_argenv (loc0, hse, i)
-    val _(*replaced*) = $D2E.d2varmap_vt_insert (map, d2v, argenv)
+    val _(*replaced*) = d2varmap_vt_insert<primval> (map, d2v, argenv)
   in
     auxenv (map, loc0, i+1, d2es)
   end (* end of [list_cons] *)
@@ -516,13 +416,12 @@ val loc0 = funent_get_loc (fent0)
 //
 val vbmap = funent_get_vbindmap (fent0)
 //
-val
-(
-  vbox pf | p
-) = ref_get_view_ptr (the_vbmap)
+var map = vbmap_take ()
 //
-val () = $effmask_ref (auxmap (!p, $D2E.d2varmap_listize(vbmap)))
-val () = $effmask_ref (auxenv (!p, loc0, 0, funent_eval_d2envlst(fent0)))
+val () = auxmap (map, d2varmap_listize<primval> (vbmap))
+val () = auxenv (map, loc0, 0, funent_eval_d2envlst(fent0))
+//
+val () = vbmap_put (map)
 //
 in
   (*nothing*)
@@ -540,15 +439,15 @@ auxlst
   fls: funlablst
 ) : void =
 (
-case+ fls of
-| list_nil () => ()
-| list_cons (fl, fls) => let
+case+ glist_view(fls) of
+| ~GLnil () => ()
+| ~GLcons (fl, fls) => let
     val opt = funlab_get_funent (fl)
     val ((*void*)) =
     (
-      case+ opt of
-      | None () => ()
-      | Some (fent) =>
+      case+ gopt_view(opt) of
+      | ~GOnone () => ()
+      | ~GOsome (fent) =>
           funent_varbindmap_initize (fent)
         // end of [Some]
     ) : void // end of [val]
@@ -559,18 +458,11 @@ case+ fls of
 //
 val fls0 = funent_get_fnxlablst (fent0)
 //
-(*
-val ((*void*)) =
-(
-  fprintln! (stdout_ref, "funent_varbindmap_initize2: fls0 = ", fls0)
-) (* end of [val] *)
-*)
-//
 in
 //
-case+ fls0 of
-| list_nil () => ()
-| list_cons (_, fls) => auxlst (fls)
+case+ glist_view(fls0) of
+| ~GLnil () => ()
+| ~GLcons (_, fls) => auxlst (fls)
 //
 end // end of [funent_varbindmap_initize2]
 
@@ -580,12 +472,8 @@ implement
 funent_varbindmap_uninitize
   (fent0) = let
 //
-val
-(
-  vbox pf | p
-) = ref_get_view_ptr (the_vbmap)
-val () = $D2E.d2varmap_vt_free (!p)
-val () = !p := $D2E.d2varmap_vt_nil ()
+val () = d2varmap_vt_free<primval> (vbmap_take ())
+val () = vbmap_put (d2varmap_vt_nil<primval> ())
 //
 in
   // nothing
@@ -595,13 +483,14 @@ end // end of [the_funent_varbindmap_uninitize]
 
 implement
 the_funent_varbindmap_find
-  (d2v) = let
+  (d2v) = res where
+{
 //
-val (vbox pf | p) = ref_get_view_ptr (the_vbmap)
+val map = vbmap_take ()
+val res = d2varmap_vt_search<primval> (map, d2v)
+val () = vbmap_put (map)
 //
-in
-  $D2E.d2varmap_vt_search (!p, d2v)
-end // end of [the_funent_varbindmap_find]
+} // end of [the_funent_varbindmap_find]
 
 end // end of [local]
 

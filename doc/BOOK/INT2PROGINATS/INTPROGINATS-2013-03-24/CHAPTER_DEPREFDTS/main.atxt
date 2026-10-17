@@ -1,8 +1,5 @@
 %{
 //
-dynload
-"libatsdoc/dynloadall.dats"
-//
 #include "./../proginatsatxt.dats"
 //
 %}\
@@ -480,7 +477,7 @@ merge {m,n:nat} .<m+n>. (
   | list_cons (x, xs1) => (
     case+ ys of
     | list_cons (y, ys1) =>
-        if x \lte y then
+        if x \\\lte y then
           list_cons (x, merge (xs1, ys, lte))
         else
           list_cons (y, merge (xs, ys1, lte))
@@ -1216,5 +1213,5 @@ testing #mycodelink("CHAPTER_DEPREFDTS/rbtree.dats", "on-line").
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}

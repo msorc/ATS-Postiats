@@ -80,7 +80,7 @@ vtypedef cstream = [tk:tkind] cstream(tk)
 (* ****** ****** *)
 
 tkindef TKfun = "TKfun"
-tkindef TKcloref = "TKcloref"
+tkindef TKcloptr = "TKcloptr"
 tkindef TKstring = "TKstring"
 tkindef TKstrptr = "TKstrptr"
 tkindef TKfileref = "TKfileref"
@@ -117,8 +117,12 @@ fun cstream_make_fun (() -> int): cstream(TKfun)
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC
+// the closure is linear: it is freed by [cstream_free]
+//
 fun
-cstream_make_cloref (() -<cloref1> int): cstream(TKcloref)
+cstream_make_cloptr (() -<cloptr1> int): cstream(TKcloptr)
 
 (* ****** ****** *)
 //

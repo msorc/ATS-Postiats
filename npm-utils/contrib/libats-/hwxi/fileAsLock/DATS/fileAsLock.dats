@@ -43,6 +43,12 @@ staload
 (* ****** ****** *)
 
 staload "./../SATS/fileAsLock.sats"
+//
+// HX-2026-10: no GC
+// a lock name lives in the global arena
+//
+staload "libats/SATS/arena.sats"
+staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
@@ -58,8 +64,11 @@ implement{
 implement{
 } lock_create (name) = let
   val LOCKDIR = theLOCKDIR_get ()
+  val lock = string0_append (LOCKDIR, name)
+  val lock2 = the_garena_strdup ($UN.strptr2string(lock))
+  val ((*freed*)) = strptr_free (lock)
 in
-  strptr2string (string0_append (LOCKDIR, name))
+  lock2
 end // end of [lock_create]
 
 (* ****** ****** *)

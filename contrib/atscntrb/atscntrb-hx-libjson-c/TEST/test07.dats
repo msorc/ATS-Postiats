@@ -61,18 +61,23 @@ val () =
 //
 val x = jsonval_ofstring "1"
 val () = fprintln! (stdout_ref, "x = ", x)
+val () = jsonval_free(x)
 //
 val x = jsonval_ofstring "1.0"
 val () = fprintln! (stdout_ref, "x = ", x)
+val () = jsonval_free(x)
 //
 val x = jsonval_ofstring "'foo'"
 val () = fprintln! (stdout_ref, "x = ", x)
+val () = jsonval_free(x)
 //
 val x = jsonval_ofstring "[1, 2, 3]"
 val () = fprintln! (stdout_ref, "x = ", x)
+val () = jsonval_free(x)
 //
 val x = jsonval_ofstring "{'a':1, 'b':2, 'c':3}"
 val () = fprintln! (stdout_ref, "x = ", x)
+val () = jsonval_free(x)
 //
 } (* end of [val] *)
 
@@ -93,9 +98,26 @@ json_tokener_parse_list ("\
 //
 val vs = json_object2val0_list (xs)
 //
-val () =
-fprint_list_vt_sep<jsonval>(out, vs, "\n")
-val () = list_vt_free(vs)
+//
+// HX-2026-10: no GC (jsonvals are linear)
+//
+val () = loop(vs, 0) where
+{
+fun
+loop
+(
+  vs: List0_vt(jsonval), i: int
+) : void =
+(
+case+ vs of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(v, vs) =>
+  (
+    if i > 0 then fprint(out, "\n");
+    fprint_jsonval(out, v); jsonval_free(v); loop(vs, i+1)
+  )
+)
+}
 val () = fprint_newline(out)
 //
 } // end of [val]

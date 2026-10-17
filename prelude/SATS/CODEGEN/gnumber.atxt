@@ -122,6 +122,6 @@ fun{a:t0p} gpow_int_val (n: intGte(0), x: a):<> a
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gnumber_atxt.txt")
 %}\

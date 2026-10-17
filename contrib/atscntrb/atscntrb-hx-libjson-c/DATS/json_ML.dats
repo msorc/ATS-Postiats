@@ -30,40 +30,105 @@ fprint_jsonval(stderr_ref, jsv)
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC (jsonvals are linear)
+//
 implement
-fprint_val<jsonval> = fprint_jsonval
-
+jsonval_free(x0) =
+(
+case+ x0 of
+| ~JSONnul() => ()
+| ~JSONint(_) => ()
+| ~JSONbool(_) => ()
+| ~JSONfloat(_) => ()
+| ~JSONstring(str) => strptr_free(str)
+| ~JSONarray(xs) => auxlst(xs)
+| ~JSONobject(lxs) => auxlablst(lxs)
+) where
+{
+//
+fun
+auxlst(xs: jsonvalist): void =
+(
+case+ xs of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(x, xs) => (jsonval_free(x); auxlst(xs))
+)
+//
+fun
+auxlablst(lxs: labjsonvalist): void =
+(
+case+ lxs of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(lx, lxs) =>
+  let
+    val @(l, x) = lx
+  in
+    strptr_free(l); jsonval_free(x); auxlablst(lxs)
+  end // end of [list_vt_cons]
+)
+//
+} (* end of [jsonval_free] *)
+//
+(* ****** ****** *)
+//
+implement
+jsonval_copy(x0) =
+(
+case+ x0 of
+| JSONnul() => JSONnul()
+| JSONint(i) => JSONint(i)
+| JSONbool(b) => JSONbool(b)
+| JSONfloat(d) => JSONfloat(d)
+| JSONstring(str) => JSONstring(strptr1_copy(str))
+| JSONarray(xs) => JSONarray(auxlst(xs))
+| JSONobject(lxs) => JSONobject(auxlablst(lxs))
+) where
+{
+//
+fun
+auxlst(xs: !jsonvalist): jsonvalist =
+(
+case+ xs of
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs1) =>
+    list_vt_cons(jsonval_copy(x), auxlst(xs1))
+)
+//
+fun
+auxlablst(lxs: !labjsonvalist): labjsonvalist =
+(
+case+ lxs of
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(lx, lxs1) =>
+    list_vt_cons
+    ( @(strptr1_copy(lx.0), jsonval_copy(lx.1))
+    , auxlablst(lxs1) )
+)
+//
+} (* end of [jsonval_copy] *)
+//
 (* ****** ****** *)
 
 implement
 fprint_jsonval
-  (out, jsv) = let
-//
-(*
-val () =
-println!("fprint_jsonval")
-*)
-//
-in
-//
+  (out, jsv) =
+(
 case+ jsv of
-//
 | JSONnul() =>
-    fprint!
-    (out, "JSONnul(", ")")
+    fprint!(out, "JSONnul(", ")")
 | JSONint(lli) =>
-    fprint!
-    (out, "JSONint(", lli, ")")
+    fprint!(out, "JSONint(", lli, ")")
 | JSONbool(bool) =>
-    fprint!
-    (out, "JSONbool(", bool, ")")
+    fprint!(out, "JSONbool(", bool, ")")
 | JSONfloat(dbl) =>
-    fprint!
-    (out, "JSONfloat(", dbl, ")")
+    fprint!(out, "JSONfloat(", dbl, ")")
 | JSONstring(str) =>
-    fprint!
-    (out, "JSONstring(", str, ")")
-//
+  {
+    val () = fprint(out, "JSONstring(")
+    val () = fprint_strptr(out, str)
+    val () = fprint(out, ")")
+  }
 | JSONarray(xs) =>
   {
     val () =
@@ -72,7 +137,6 @@ case+ jsv of
     fprint_jsonvalist(out, xs)
     val ((*closing*)) = fprint(out, ")")
   }
-//
 | JSONobject(lxs) =>
   {
     val () =
@@ -81,8 +145,7 @@ case+ jsv of
     fprint_labjsonvalist(out, lxs)
     val ((*closing*)) = fprint(out, ")")
   }
-//
-end // end of [fprint_jsonval]
+) (* end of [fprint_jsonval] *)
 
 (* ****** ****** *)
 
@@ -90,32 +153,22 @@ implement
 fprint_jsonvalist
   (out, xs) = let
 //
-macdef SEP = ("; ")
-//
 fun
 loop
 (
-xs: jsonvalist, i0: int
-) : void = let
-//
-in
-//
+xs: !jsonvalist, i0: int
+) : void =
+(
 case+ xs of
-| list_nil
-    () => ((*void*))
-  // list_nil
-| list_cons
-    (x, xs) => let
+| list_vt_nil() => ((*void*))
+| list_vt_cons(x, xs1) => let
     val () =
-    if i0 > 0
-      then fprint(out, SEP)
-    // end of [if]
+    if i0 > 0 then fprint(out, "; ")
     val () = fprint_jsonval(out, x)
   in
-    loop(xs, i0+1)
-  end // end of [list_cons]
-//
-end // end of [loop]
+    loop(xs1, i0+1)
+  end // end of [list_vt_cons]
+)
 //
 in
   loop (xs, 0(*i0*))
@@ -127,33 +180,24 @@ implement
 fprint_labjsonvalist
   (out, lxs) = let
 //
-macdef SEP = "; "
-macdef MAPTO = ": "
-//
 fun
 loop
 (
-lxs: labjsonvalist, i0: int
-) : void = let
-//
-in
-//
+lxs: !labjsonvalist, i0: int
+) : void =
+(
 case+ lxs of
-| list_nil
-    () => ((*void*))
-| list_cons
-    (lx, lxs) => let
+| list_vt_nil() => ((*void*))
+| list_vt_cons(lx, lxs1) => let
     val () =
-    if i0 > 0
-      then fprint(out, SEP)
-    // end of [if]
-    val () =
-    fprint!(out, lx.0, MAPTO, lx.1)
+    if i0 > 0 then fprint(out, "; ")
+    val () = fprint_strptr(out, lx.0)
+    val () = fprint(out, ": ")
+    val () = fprint_jsonval(out, lx.1)
   in
-    loop(lxs, i0+1)
-  end // end of [list_cons]
-//
-end // end of [loop]
+    loop(lxs1, i0+1)
+  end // end of [list_vt_cons]
+)
 //
 in
   loop(lxs, 0(*i0*))
@@ -173,19 +217,15 @@ implement
 jsonval_tostring
   (jsv) = rep2 where
 {
-//
   val jso =
-  jsonval_objectify(jsv)
-//
+  jsonval_objectify1(jsv)
   val
   (fpf | rep) =
   json_object_to_json_string(jso)
   val rep2 =
   string0_copy($UN.strptr2string(rep))
   prval ((*returned*)) = fpf(rep)
-//
   val freed(*1*) = json_object_put(jso)
-//
 } (* end of [jsonval_tostring] *)
 
 (* ****** ****** *)
@@ -222,44 +262,44 @@ case+ 0 of
     json_type_null => JSONnul()
 | _ when type =
     json_type_int => let
-  prval () = __assert_agz(jso) 
+  prval () = __assert_agz(jso)
     val i = json_object_get_int(jso)
   in
     JSONint($UN.cast2llint(i))
   end // end of [json_type_int]
 | _ when type =
     json_type_boolean => let
-  prval () = __assert_agz(jso) 
+  prval () = __assert_agz(jso)
     val tf = json_object_get_boolean(jso)
   in
     JSONbool(tf)
   end // end of [json_type_boolean]
 | _ when type =
     json_type_double => let
-  prval () = __assert_agz (jso) 
+  prval () = __assert_agz (jso)
     val dbl = json_object_get_double(jso)
   in
     JSONfloat(dbl)
   end // end of [json_type_double]
 | _ when type =
     json_type_string => let
-  prval () = __assert_agz(jso) 
+  prval () = __assert_agz(jso)
     val
     (fpf | str) =
     json_object_get_string(jso)
-    val str2 =
-    strptr2string(strptr1_copy(str))
+    val str2 = strptr1_copy(str)
   prval ((*returned*)) = fpf(str)
   in
     JSONstring(str2)
   end // end of [json_type_string]
 | _ when type =
     json_type_array => let
+//
     vtypedef
     tenv = ptr(* list_vt *)
-  prval () = __assert_agz(jso) 
-    val asz =
-    json_object_array_length(jso)
+//
+  prval () = __assert_agz(jso)
+//
     local
     implement
     json_object_iforeach$fwork<tenv>
@@ -267,7 +307,7 @@ case+ 0 of
     {
       val v2 = json_object2val1(v)
       val vs2 =
-      $UN.castvwtp0{jsonvalist_vt}(env)
+      $UN.castvwtp0{jsonvalist}(env)
       val () =
       (
         env :=
@@ -280,27 +320,29 @@ case+ 0 of
     var env: tenv = the_null_ptr
     val (_) =
     json_object_iforeach_env<tenv>(jso, env)
-    val vs2 = $UN.castvwtp0{jsonvalist_vt}(env)
+    val vs2 = $UN.castvwtp0{jsonvalist}(env)
     //
     end // end of [local]
   in
-    JSONarray(list_vt2t(list_vt_reverse(vs2)))
+    JSONarray(list_vt_reverse(vs2))
   end // end of [json_type_array]
 | _ when type =
     json_type_object => let
+//
     typedef tenv = ptr
+//
   prval () = __assert_agz (jso)
+//
     local
-    implement    
+    implement
     json_object_kforeach$fwork<tenv>
       (k, v, env) =
     {
       val k2 = strptr1_copy(k)
-      val k2 = strptr2string(k2)
       val v2 = json_object2val1 (v)
-      val kvs = $UN.cast{labjsonvalist}(env)
-      val kvs = list_cons{labjsonval}((k2, v2), kvs)
-      val ((*void*)) = env := $UN.cast2ptr (kvs)
+      val kvs = $UN.castvwtp0{labjsonvalist}(env)
+      val kvs = list_vt_cons{labjsonval}(@(k2, v2), kvs)
+      val ((*void*)) = env := $UN.castvwtp0{ptr}(kvs)
     }
     in (* in of [local] *)
     //
@@ -309,21 +351,29 @@ case+ 0 of
     json_object_kforeach_env<tenv>(jso, env)
     //
     end // end of [local]
+//
     val kvs =
-    $UN.castvwtp0{List0_vt(labjsonval)}(env)
-    val kvs = list_vt_reverse<labjsonval> (kvs)
+    $UN.castvwtp0{labjsonvalist}(env)
+//
   in
-    JSONobject(list_vt2t(kvs))
+    JSONobject(list_vt_reverse<labjsonval>(kvs))
   end // end of [json_type_object]
 | _ (*deadcode*) =>
-    let val () = assertloc (false) in exit(1) end
+    let val () = assertloc (false) in JSONnul() end
 //
 end // end of [json_object2val1]
 
 (* ****** ****** *)
 
 implement
-jsonval_objectify
+jsonval_objectify(jsv) = let
+  val jso = jsonval_objectify1(jsv) in jsonval_free(jsv); jso
+end // end of [jsonval_objectify]
+
+(* ****** ****** *)
+
+implement
+jsonval_objectify1
   (jsv0) = let
 //
 fun
@@ -331,22 +381,19 @@ auxarr
 (
   jarr:
  !json_object1
-, jsvs:
-  jsonvalist, i0: intGte(0)
+, jsvs: !jsonvalist
 ) : void =
 (
   case+ jsvs of
-  | list_nil
-      ((*void*)) => ((*void*))
-  | list_cons
-      (jsv, jsvs) => let
+  | list_vt_nil() => ((*void*))
+  | list_vt_cons(jsv, jsvs1) => let
       val jso =
-      jsonval_objectify(jsv)
+      jsonval_objectify1(jsv)
       val err =
       json_object_array_add(jarr, jso)
     in
-      auxarr(jarr, jsvs, succ(i0))
-    end // end of [list_cons]
+      auxarr(jarr, jsvs1)
+    end // end of [list_vt_cons]
 )
 //
 fun
@@ -354,64 +401,54 @@ auxobj
 (
   jobj:
  !json_object1
-, ljsvs:
-  labjsonvalist
+, ljsvs: !labjsonvalist
 ) : void =
 (
   case+ ljsvs of
-  | list_nil
-      () => ((*void*))
-    // list_nil
-  | list_cons
-    (
-      (l, jsv), ljsvs
-    ) => let
+  | list_vt_nil() => ((*void*))
+  | list_vt_cons(ljsv, ljsvs1) => let
       val jso =
-      jsonval_objectify(jsv)
+      jsonval_objectify1(ljsv.1)
       val ((*void*)) =
-      json_object_object_add(jobj, l, jso)
+      json_object_object_add(jobj, $UN.strptr2string(ljsv.0), jso)
     in
-      auxobj ( jobj, ljsvs )
-    end // end of [list_cons]
+      auxobj(jobj, ljsvs1)
+    end // end of [list_vt_cons]
 )
 //
 in
 //
 case+ jsv0 of
-//
 | JSONnul() =>
     $UN.castvwtp0{json_object0}(the_null_ptr)
-//
 | JSONint(lli) =>
     json_object_new_int64($UN.cast{int64}(lli))
-//
 | JSONbool(tf) => json_object_new_boolean(tf)
-//
 | JSONfloat(dbl) => json_object_new_double(dbl)
-//
-| JSONstring(str) => json_object_new_string(str)
-//
+| JSONstring(str) =>
+    json_object_new_string($UN.strptr2string(str))
 | JSONarray(jsvs) => let
     val jarr =
     json_object_new_array()
     val isnot =
     json_object_isnot_null(jarr)
     val ((*void*)) =
-    if isnot
-      then auxarr(jarr, jsvs, 0) in jarr
-    // end of [val]
+    if isnot then auxarr(jarr, jsvs)
+  in
+    jarr
   end // end of [JSONarray]
-//
 | JSONobject(ljsvs) => let
     val jobj =
     json_object_new_object()
     val isnot =
     json_object_isnot_null(jobj)
     val ((*void*)) =
-    if isnot then auxobj(jobj, ljsvs) in jobj
+    if isnot then auxobj(jobj, ljsvs)
+  in
+    jobj
   end // end of [JSONobject]
 //
-end // end of [jsonval_objectify]
+end // end of [jsonval_objectify1]
 
 (* ****** ****** *)
 

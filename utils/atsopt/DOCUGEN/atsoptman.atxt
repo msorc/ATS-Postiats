@@ -8,8 +8,6 @@
 
 %{
 //
-dynload "libatsdoc/dynloadall.dats"
-//
 #include "utils/atsdoc/HATS/xhtmlatxt.hats"
 //
 %}
@@ -205,5 +203,5 @@ can be justified if constraint-solving is performed externally.
 </html>
 
 %{
-implement main () = fprint_filsub (stdout_ref, "atsoptman_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "atsoptman_atxt.txt")
 %}

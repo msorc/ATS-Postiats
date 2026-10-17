@@ -62,10 +62,12 @@ $(CFLAGS2) $(EXTRA_CFLAGS)
 ######
 
 LDFLAGS :=
+#
+# HX-2026-10: for [fileref_get_line_string]
+#
+LDFLAGS += -L$(PATSHOMEQ)/ccomp/atslib/lib -latslib
 LDFLAGS += \
 $(shell pkg-config --libs json-c)
-LDFLAGS +=-lgc
-
 ######
 
 INCLUDE :=
@@ -92,7 +94,6 @@ $(PATSOLVE)/CATS/patsolve_parsing_dats.c \
 
 SOURCES_DATS :=
 SOURCES_DATS += patsolve_smt2_main.dats
-SOURCES_DATS += patsolve_smt2_mylib.dats
 SOURCES_DATS += patsolve_smt2_commarg.dats
 SOURCES_DATS += patsolve_smt2_solving.dats
 

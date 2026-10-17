@@ -9,9 +9,6 @@
 (* ****** ****** *)
 //
 #staload
-"libats/ML/SATS/basis.sats"
-//
-#staload
 "libats/SATS/stringbuf.sats"
 //
 (* ****** ****** *)
@@ -79,19 +76,31 @@ process_linenumlst(linenumlst_vt): void
 //
 (* ****** ****** *)
 //
-fun
-streamize_fileref_gvhashtbl_0
-  (inp: FILEref): stream_vt(gvhashtbl)
-fun
-streamize_fileref_gvhashtbl_cap
-  (inp: FILEref, cap: intGte(1)): stream_vt(gvhashtbl)
+// HX-2026-10: no GC
+// A record is a linear list of (key, value) pairs
+// in the order in which they appear in the file
+// (it used to be a hashtable from libats/ML).
 //
-symintr
-streamize_fileref_gvhashtbl
-overload
-streamize_fileref_gvhashtbl with streamize_fileref_gvhashtbl_0
-overload
-streamize_fileref_gvhashtbl with streamize_fileref_gvhashtbl_cap
+vtypedef
+atsrec = List0_vt(@(Strptr1(*key*), Strptr1(*value*)))
+//
+fun
+atsrec_free(kvs: atsrec): void
+//
+// HX: a copy of the value associated with [key]
+//
+fun
+atsrec_search
+  (kvs: !atsrec, key: string): Option_vt(Strptr1)
+//
+fun
+fprint_atsrec(out: FILEref, kvs: !atsrec): void
+//
+overload fprint with fprint_atsrec
+//
+fun
+streamize_fileref_atsrec
+  (inp: FILEref): stream_vt(atsrec)
 //
 (* ****** ****** *)
 

@@ -60,9 +60,6 @@ castfn
 carrayptr_array
   {a:t@ype}{n:int} (A: &array(INV(a), n)):<> carrayptr1 (a, n)
 castfn
-carrayptr_arrayref
-  {a:t@ype}{n:int} (A: arrayref(INV(a), n)):<> carrayptr1 (a, n)
-castfn
 carrayptr_arrayptr
   {a:t@ype}{l:addr}{n:int}
   (A: !arrayptr(INV(a), l, n)):<> [l > null] carrayptr (a, l, n)
@@ -72,7 +69,6 @@ carrayptr_arrayptr
 symintr carrayptr
 overload carrayptr with carrayptr_null
 overload carrayptr with carrayptr_array
-overload carrayptr with carrayptr_arrayref
 overload carrayptr with carrayptr_arrayptr
 
 #atscode_separator()
@@ -171,6 +167,6 @@ argv_takeout_parray
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "extern_atxt.txt")
 %}\

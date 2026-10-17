@@ -128,7 +128,7 @@ implement draw_decorate
   val rad = 1.0 / 7
 //
   fn do1
-    (cr: !cairo_ref l):<cloref1> void = let
+    (cr: !cairo_ref l): void = let
     val (pf0 | ()) = cairo_save (cr)
     val () = cairo_move_to (cr,  0.0, ~0.5)
     val () = cairo_line_to (cr,  0.0,  0.5)
@@ -144,7 +144,7 @@ implement draw_decorate
     // nothing
   end // end of [do1]
 //
-  fn do2 (cr: !cairo_ref l):<cloref1> void = let
+  fn do2 (cr: !cairo_ref l): void = let
     val (pf0 | ()) = cairo_save (cr)
     val () = cairo_scale (cr, x0/1.8, x0/1.8)
     val () = do1 (cr)
@@ -196,7 +196,7 @@ draw_board {l} {n}
 //
   fun loop1 {i:nat | i <= n} {bw:two}
     (cr: !cr, c0: &color, c1: &color, i: int i, bw: int bw)
-    :<cloref1> void =
+    : void =
     if i < N then let
       val () = loop2 (cr, c0, c1, i, 0, bw)
     in
@@ -204,7 +204,7 @@ draw_board {l} {n}
     end // end of [if]
   and loop2 {i,j:nat | i < n; j <= n} {bw:two}
     (cr: !cr, c0: &color, c1: &color, i: int i, j: int j, bw: int bw)
-    :<cloref1> void =
+    : void =
     if j < N then let
       val (
       ) = (

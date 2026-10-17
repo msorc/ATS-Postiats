@@ -33,9 +33,47 @@
 //
 (* ****** ****** *)
 
+(* ****** ****** *)
+//
+// HX-2026-10: no GC. Porting notes for the users of this interface
+// (read PORTING.md, section "Parser"):
+//
+// * [token], [tnode] (= [token_node]) and all the syntax entities are
+//   arena handles (pointers): a failed parser returns [synent_null<a>()]
+//   (a null pointer) and bumps [err]; the callers never look at it.
+// * A parser is a plain function pointer of type [parser(a)] (not a
+//   closure). The combinators ([pstar_fun], [popt_fun], [pseq2_fun], ...)
+//   take such pointers and are templates ([fun{a:type} ...]): call them
+//   with the type argument ([pstar_fun<s0exp>(buf, bt, p_s0exp)]) when it
+//   cannot be inferred.
+// * The ATS1 lists [List_vt] stay [List_vt] (written [List0_vt]) while a
+//   list is built; [glist_make_list_vt] (abbreviation [l2l] in the .dats)
+//   turns it into the shared immutable [glist] of the syntax tree.
+//   Options: [t2t] = [gopt_make_option_vt].
+// * Pattern matching on a token: [token_node_is_T_X(tnode)] for a test,
+//   [case+ token_node_view(tnode) of ~T_X(..) => .. | v => (token_node_view_free(v); ..)]
+//   for the arguments (or the helpers of [pats_syntax_token.hats]).
+// * The parsers of dynamic expressions, patterns and declarations are
+//   implemented by pats_parsing_{p0at,dynexp,decl}.dats. [p_t0kindef] and
+//   [p_s0aspdec] are implemented there too (static in ATS1: not callable
+//   from outside there, nothing else changes). [p_d0eclseq_fun] is a
+//   template implemented in pats_parsing_util.dats.
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+
 staload
 LEX = "./pats_lexing.sats"
 typedef tnode = $LEX.tnode
+
+(* ****** ****** *)
+
+staload
+FIL = "./pats_filename.sats"
+typedef filename = $FIL.filename
 
 (* ****** ****** *)
 
@@ -43,7 +81,10 @@ staload "./pats_tokbuf.sats"
 staload "./pats_syntax.sats"
 
 (* ****** ****** *)
-
+//
+// The kinds of parsing errors: an enumeration (the two last ones had
+// the argument [()] in ATS1).
+//
 datatype
 parerr_node =
 //
@@ -169,16 +210,19 @@ parerr_node =
   | PE_guad0ecl
   | PE_staloadarg
 //
-  | PE_fname_unclosed of ()
+  | PE_fname_unclosed
 //
-  | PE_DISCARD of ()
+  | PE_DISCARD
 (*
   | PE_FILENONE of string
 *)
 // end of [parerr_node]
 
+//
+// flat (a field is read as x.parerr_loc, x.parerr_node)
+//
 typedef
-parerr = '{
+parerr = @{
   parerr_loc= location
 , parerr_node= parerr_node
 } // end of [parerr]
@@ -216,8 +260,8 @@ fprint_the_parerrlst(out: FILEref): int(*err*) // 0/1
 //
 (* ****** ****** *)
 //
-fun
-tokbuf_set_ntok_null{a:type}(buf: &tokbuf, n0: uint): (a)
+fun{a:type}
+tokbuf_set_ntok_null(buf: &tokbuf, n0: uint): (a)
 //
 (* ****** ****** *)
 
@@ -230,8 +274,6 @@ typedef
 parser_tok (a:type) =
   (&tokbuf(*>> _*), int(*bt*), &int(*err*), token) -> a
 // end of [parser_tok]
-
-(* ****** ****** *)
 
 fun p_AND : parser (token)
 fun is_AND (x: tnode): bool
@@ -378,6 +420,7 @@ fun is_LBRACE_deco (x: tnode): bool
 
 (* ****** ****** *)
 
+
 fun
 ptoken_fun
 (
@@ -392,9 +435,8 @@ ptoken_test_fun
   buf: &tokbuf, f: (tnode) -> bool
 ) : bool // end of [ptoken_test_fun]
 
-fun
+fun{a:type}
 ptokentopt_fun
-  {a:type}
 (
   buf: &tokbuf
 , f1: (tnode) -> bool, f2: parser(a)
@@ -402,27 +444,25 @@ ptokentopt_fun
 
 (* ****** ****** *)
 
-fun
-pstar_fun{a:type}
-  (buf: &tokbuf, bt: int, f: parser(a)): List_vt(a)
+fun{a:type}
+pstar_fun
+  (buf: &tokbuf, bt: int, f: parser(a)): List0_vt(a)
 // end of [pstar_fun]
 
 (* ****** ****** *)
 
-fun
+fun{a:type}
 pstar_sep_fun
-  {a:type}
 (
   buf: &tokbuf
 , bt: int, sep: (&tokbuf) -> bool, f: parser(a)
-) : List_vt (a) // end of [pstar_sep_fun]
+) : List0_vt (a) // end of [pstar_sep_fun]
 
 (* ****** ****** *)
 
-fun
+fun{a:type}
 pstar_COMMA_fun
-  {a:type}
-  (buf: &tokbuf, bt: int, f: parser(a)): List_vt(a)
+  (buf: &tokbuf, bt: int, f: parser(a)): List0_vt(a)
 // end of [pstar_COMMA_fun]
 
 (* ****** ****** *)
@@ -430,64 +470,56 @@ pstar_COMMA_fun
 // HX: fun1_sep: fun sep_fun
 // HX: fun0_sep: /*empty*/ | fun1_sep
 *)
-fun
-pstar_fun0_sep
-  {a:type} (
+fun{a:type}
+pstar_fun0_sep (
   buf: &tokbuf, bt: int, f: parser (a), sep: (&tokbuf) -> bool
-) : List_vt (a) // end of [pstar_fun0_sep]
+) : List0_vt (a) // end of [pstar_fun0_sep]
 
-fun
-pstar_fun0_BAR
-  {a:type} (
+fun{a:type}
+pstar_fun0_BAR (
   buf: &tokbuf, bt: int, f: parser (a)
-) : List_vt (a) // end of [pstar_fun0_BAR]
+) : List0_vt (a) // end of [pstar_fun0_BAR]
 
-fun
-pstar_fun0_COMMA
-  {a:type} (
+fun{a:type}
+pstar_fun0_COMMA (
   buf: &tokbuf, bt: int, f: parser (a)
-) : List_vt (a) // end of [pstar_fun0_COMMA]
+) : List0_vt (a) // end of [pstar_fun0_COMMA]
 
-fun
-pstar_fun0_SEMICOLON
-  {a:type} (
+fun{a:type}
+pstar_fun0_SEMICOLON (
   buf: &tokbuf, bt: int, f: parser (a)
-) : List_vt (a) // end of [pstar_fun0_SEMICOLON]
+) : List0_vt (a) // end of [pstar_fun0_SEMICOLON]
 
-fun
-pstar_fun0_BARSEMI
-  {a:type} (
+fun{a:type}
+pstar_fun0_BARSEMI (
   buf: &tokbuf, bt: int, f: parser (a)
-) : List_vt (a) // end of [pstar_fun0_BARSEMI]
+) : List0_vt (a) // end of [pstar_fun0_BARSEMI]
 
 (* ****** ****** *)
 
-fun
-pstar_fun1_sep
-  {a:type} (
+fun{a:type}
+pstar_fun1_sep (
   buf: &tokbuf
 , bt: int, err: &int
 , f: parser (a), sep: (&tokbuf) -> bool
-) : List_vt (a) // end of [pstar_fun1_sep]
+) : List0_vt (a) // end of [pstar_fun1_sep]
 
-fun
-pstar_fun1_AND
-  {a:type} (
+fun{a:type}
+pstar_fun1_AND (
   buf: &tokbuf, bt: int, err: &int, f: parser (a)
-) : List_vt (a) // end of [pstar_fun1_AND]
+) : List0_vt (a) // end of [pstar_fun1_AND]
 
 (* ****** ****** *)
 
-fun
-pstar1_fun
-  {a:type} (
+fun{a:type}
+pstar1_fun (
   buf: &tokbuf, bt: int, err: &int, f: parser (a)
-) : List_vt (a) // end of [pplus_fun]
+) : List0_vt (a) // end of [pplus_fun]
 
 (* ****** ****** *)
 
-fun popt_fun
-  {a:type} (
+fun{a:type}
+popt_fun (
   buf: &tokbuf, bt: int, f: parser (a)
 ) : Option_vt (a) // end of [popt_fun]
 
@@ -495,12 +527,11 @@ fun popt_fun
 
 datavtype
 synent2 (
-  a1: viewtype, a2:viewtype
-) = SYNENT2 (a1, a2) of (a1, a2)
+  a1: vt@ype, a2: vt@ype
+) = SYNENT2 of (a1, a2)
 
-fun
-pseq2_fun
-  {a1,a2:type} (
+fun{a1,a2:type}
+pseq2_fun (
   buf: &tokbuf
 , bt: int, err: &int
 , f1: parser (a1), f2: parser (a2)
@@ -510,12 +541,11 @@ pseq2_fun
 
 datavtype
 synent3 (
-  a1: viewtype, a2:viewtype, a3:viewtype
-) = SYNENT3 (a1, a2, a3) of (a1, a2, a3)
+  a1: vt@ype, a2: vt@ype, a3: vt@ype
+) = SYNENT3 of (a1, a2, a3)
 
-fun
-pseq3_fun
-  {a1,a2,a3:type} (
+fun{a1,a2,a3:type}
+pseq3_fun (
   buf: &tokbuf
 , bt: int, err: &int
 , f1: parser (a1), f2: parser (a2), f3: parser (a3)
@@ -523,46 +553,51 @@ pseq3_fun
 
 (* ****** ****** *)
 
-fun
-ptest_fun
-  {a:type} (
-  buf: &tokbuf, f: parser (a), ent: &synent? >> synent
+//
+// HX-2026-10: [ent] must be initialized (ATS2 cannot merge a
+// [synent?] with a [synent] over the branches that do not call [ptest_fun]):
+//   var ent: synent = synent_null<synent>()
+//
+fun{a:type}
+ptest_fun (
+  buf: &tokbuf, f: parser (a), ent: &synent >> synent
 ) : bool // end of [ptest_fun]
 
 (* ****** ****** *)
 //
 // HX: for syntax like: ... | ...
 //
-dataviewtype
+datavtype
 list12 (a:type) =
-  | LIST12one (a) of List_vt (a)
-  | LIST12two (a) of (List_vt (a), List_vt (a))
+  | LIST12one of List0_vt (a)
+  | LIST12two of (List0_vt (a), List0_vt (a))
 // end of [list12]
 
-fun list12_free {a:type} (ent: list12 a): void
+fun{a:type}
+list12_free (ent: list12 a): void
 
-fun plist12_fun {a:type}
+fun{a:type}
+plist12_fun
   (buf: &tokbuf, bt: int, f: parser (a)): list12 (a)
 // end of [plist12_fun]
 
-fun p1list12_fun {a:type}
+fun{a:type}
+p1list12_fun
   (x: a, buf: &tokbuf, bt: int, f: parser (a)): list12 (a)
 // end of [p1list12_fun]
 
 (* ****** ****** *)
 
-fun
-pif_fun
-  {a:type} (
+fun{a:type}
+pif_fun (
   buf: &tokbuf
 , bt: int, err: &int, f: parser (a), err0: int
 ) : (a) // end of [pif_fun]
 
 (* ****** ****** *)
 
-fun
-ptokwrap_fun
-  {a:type} (
+fun{a:type}
+ptokwrap_fun (
   buf: &tokbuf
 , bt: int, err: &int, f: parser_tok (a), enode: parerr_node
 ) : (a) // end of [ptokwrap_fun]
@@ -708,11 +743,11 @@ fun p_d0ecl : parser (d0ecl)
 fun p_d0ecl_sta : parser (d0ecl)
 fun p_d0ecl_dyn : parser (d0ecl)
 //
-fun
-p_d0eclseq_fun{a:type}
+fun{a:type}
+p_d0eclseq_fun
 (
   buf: &tokbuf, bt: int, f: parser a
-) : List_vt (a) // end-of-fun
+) : List0_vt (a) // end-of-fun
 //
 fun p_d0eclseq_sta : parser (d0eclist)
 fun p_d0eclseq_dyn : parser (d0eclist)
@@ -741,6 +776,9 @@ fun p_d0cstdecseq : parser (d0cstdeclst)
 //
 (* ****** ****** *)
 //
+// [p_toplevel_sta/dyn] parse a whole file: errors are recorded and the
+// parser resumes at the next declaration keyword (pats_parsing_toplevel.dats)
+//
 fun p_toplevel_sta
   (buf: &tokbuf, nerr: &int? >> int): d0eclist
 // end of [p_toplevel_sta]
@@ -751,9 +789,8 @@ fun p_toplevel_dyn
 //
 (* ****** ****** *)
 //
-fun
+fun{a:type}
 parse_from_string_parser
-  {a:type}
 (
   inp: string, fparse: parser(a)
 ) : Option_vt(a) // end-of-fun
@@ -823,7 +860,7 @@ fun
 parse_from_givenames_toplocal2
 (
   stadyn: int
-, givenames: List(string), filref: &filename? >> filename
+, givenames: glist(string), filref: &filename? >> filename
 ) : d0eclist // end of [parse_from_givename_toplocal2]
 //
 (* ****** ****** *)

@@ -15,57 +15,39 @@ ATS_DYNLOADNAME
 #define
 LIBATSCC2JS_targetloc
 "$PATSHOME\
-/contrib/libatscc2js/ATS2-0.3.2"
+/contrib/libatscc2js"
 //
 (* ****** ****** *)
 //
 #include
-"{$LIBATSCC2JS}/staloadall.hats"
+"{$LIBATSCC2JS}/mylibies.hats"
 //
 (* ****** ****** *)
 //
 #staload
-"{$LIBATSCC2JS}/SATS/Worker/channel.sats"
+"{$LIBATSCC2JS}/WorkerSession/SATS/channel.sats"
 #staload
-"{$LIBATSCC2JS}/DATS/Worker/channel.dats"
+"{$LIBATSCC2JS}/WorkerSession/DATS/channel.dats"
 #include
-"{$LIBATSCC2JS}/DATS/Worker/channeg.dats"
+"{$LIBATSCC2JS}/WorkerSession/DATS/channeg.dats"
 //
 (* ****** ****** *)
 //
-#staload
-"./../../../DATS/libatscc2js_ext.dats"
+//
+// HX-2026-10: no GC
+// the protocol between the client and the worker:
+// a command-line argument is a flat pair (tag, string),
+// the arguments form a JSarray, and the result is a flat
+// triple (nerr, stdout, stderr); they are parsed by the
+// generic chmsg_parse of WorkerSession
+//
+typedef comarg = @(int, string)
+typedef comarglst = JSarray(comarg)
+typedef atscc2jsres = @(int, string, string)
+//
 //
 (* ****** ****** *)
 
-datatype
-atscc2jsres_ =
-ATSCC2JSRES_ of
-(
-  chmsg(int)(*nerr*)
-, chmsg(string)(*stdout*), chmsg(string)(*stderr*)
-)
-
-(* ****** ****** *)
-
-implement
-chmsg_parse<atscc2jsres>
-  (arg) = let
-//
-  val
-  arg_ =
-  $UN.cast{atscc2jsres_}(arg)
-//
-  val+
-  ATSCC2JSRES_
-    (nerr, stdout, stderr) = arg_
-//
-  val nerr = chmsg_parse<int>(nerr)
-  val stdout = chmsg_parse<string>(stdout)
-  val stderr = chmsg_parse<string>(stderr)
-in
-  ATSCC2JSRES(nerr, stdout, stderr)
-end // end of [chmsg_parse<atscc2jsres>]
 
 (* ****** ****** *)
 //
@@ -106,21 +88,14 @@ theExample_atscc2js_optstr_get_value(): string = "mac#"
 extern
 fun
 theExample_atscc2js_getarg
-  ((*void*)): comarglst1
+  ((*void*)): comarglst
 //
 implement
 theExample_atscc2js_getarg
   ((*void*)) = let
 //
 val
-arglst = list_nil((*void*))
-//
-val
-comarg =
-COMARGstrinp
-  (theExample_dats_c_get_value())
-val
-arglst = list_cons(comarg, arglst)
+args = JSarray_nil{comarg}()
 //
 val
 delim = " "
@@ -131,28 +106,22 @@ val
 optarr =
 $extmcall(JSarray(string), optstr, "split", delim)
 //
-typedef res = comarglst1
-//
 fun
-aux(n: int, xs: res): res =
-(
+loop(i: int, n: int): void =
+  if i < n
+    then let
+      val _ = JSarray_push(args, @(0(*strlit*), optarr[i]))
+    in
+      loop(i+1, n)
+    end // end of [then]
 //
-if
-n > 0
-then let
-  val n = n - 1
-  val x =
-    COMARGstrlit(optarr[n])
-  // end of [val]
-in
-  aux(n, list_cons{comarg}(x, xs))
-end // end of [then]
-else xs // end of [else]
-//
-) (* end of [aux] *)
+val () = loop(0, length(optarr))
+val _ =
+JSarray_push
+  (args, @(1(*strinp*), theExample_dats_c_get_value()))
 //
 in
-  aux(length(optarr), arglst)
+  args
 end // end of [theExample_atscc2js_getarg]
 
 (* ****** ****** *)
@@ -161,8 +130,8 @@ extern
 fun
 theExample_atscc2js_arglst
 (
-  arglst: comarglst1
-, fpost: (int) -<cloref1> void
+  arglst: comarglst
+, fpost: (int) -> void
 ) : void // end-of-function
 //
 implement
@@ -186,20 +155,20 @@ channeg0_send{int}
 (
 chn
 ,
-lam(chn, res) =>
+llam(chn, res) =>
 // theWorker is ready
-channeg0_recv{comarglst1}
+channeg0_recv{comarglst}
 (
 chn
 ,
 args
 ,
-lam(chn) =>
+llam(chn) =>
 channeg0_send{atscc2jsres}
 (
 chn
 ,
-lam(chn, res) => let
+llam(chn, res) => let
 //
 val
 res =
@@ -207,9 +176,8 @@ chmsg_parse<atscc2jsres>(res)
 //
 val () = channeg0_close(chn)
 //
-val+
-ATSCC2JSRES
-  (nerr, stdout, stderr) = res
+val
+@(nerr, stdout, stderr) = res
 // end of [val]
 (*
 val () = alert("nerr = " + String(nerr))
@@ -227,7 +195,7 @@ in
   fpost(nerr) // for the post action
 end // end of [lam]
 ) (* send{atscc2jsres} *)
-) (* recv{comarglst1} *)
+) (* recv{comarglst} *)
 ) (* channeg_send{int} *)
 //
 } (* end of [theExample_atscc2js_arglst] *)

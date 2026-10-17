@@ -30,19 +30,10 @@ $(PATSOPT) -d ./DATS/reference.dats | \
 $(ATSCC2PY) -o ./output/DATS/reference_dats.py -i
 #
 all:: ; \
-$(PATSOPT) -d ./DATS/list.dats | \
-$(ATSCC2PY) -o ./output/DATS/list_dats.py -i
-all:: ; \
 $(PATSOPT) -d ./DATS/list_vt.dats | \
 $(ATSCC2PY) -o ./output/DATS/list_vt_dats.py -i
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/option.dats | \
-$(ATSCC2PY) -o ./output/DATS/option_dats.py -i
 #
-all:: ; \
-$(PATSOPT) -d ./DATS/stream.dats | \
-$(ATSCC2PY) -o ./output/DATS/stream_dats.py -i
 all:: ; \
 $(PATSOPT) -d ./DATS/stream_vt.dats | \
 $(ATSCC2PY) -o ./output/DATS/stream_vt_dats.py -i
@@ -61,9 +52,6 @@ $(ATSCC2PY) -o ./output/DATS/matrixref_dats.py -i
 ######
 #
 all:: ; \
-$(PATSOPT) -d ./DATS/funarray.dats | \
-$(ATSCC2PY) -o ./output/DATS/funarray_dats.py -i
-all:: ; \
 $(PATSOPT) -d ./DATS/slistref.dats | \
 $(ATSCC2PY) -o ./output/DATS/slistref_dats.py -i
 all:: ; \
@@ -72,15 +60,6 @@ $(ATSCC2PY) -o ./output/DATS/qlistref_dats.py -i
 #
 ######
 
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/list0.dats | \
-$(ATSCC2PY) -o ./output/DATS/ML/list0_dats.py -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/array0.dats | \
-$(ATSCC2PY) -o ./output/DATS/ML/array0_dats.py -i
-all:: ; \
-$(PATSOPT) -d ./DATS/ML/option0.dats | \
-$(ATSCC2PY) -o ./output/DATS/ML/option0_dats.py -i
 
 ######
 #
@@ -146,20 +125,13 @@ $(CAT) >>$(LIBATSCC2PY3_ALL_PY) \
 output/DATS/string_dats.py \
 output/DATS/PYlist_dats.py \
 output/DATS/reference_dats.py \
-output/DATS/list_dats.py \
 output/DATS/list_vt_dats.py \
-output/DATS/option_dats.py \
-output/DATS/stream_dats.py \
 output/DATS/stream_vt_dats.py \
 output/DATS/intrange_dats.py \
 output/DATS/arrayref_dats.py \
 output/DATS/matrixref_dats.py \
-output/DATS/funarray_dats.py \
 output/DATS/slistref_dats.py \
 output/DATS/qlistref_dats.py \
-output/DATS/ML/list0_dats.py \
-output/DATS/ML/array0_dats.py \
-output/DATS/ML/option0_dats.py \
 
 ######
 #
@@ -197,7 +169,6 @@ cleanall:: clean
 cleanall:: ; rm -rf output/__pycache__
 #
 cleanall:: ; $(RMF) output/DATS/*_?ats.py
-cleanall:: ; $(RMF) output/DATS/ML/*_?ats.py
 #
 cleanall:: ; $(RMF) $(LIBATSCC2PY3_ALL_PY)
 cleanall:: ; $(RMF) $(LIBATSCC2PY3_ALL_PYLIBC_PY)

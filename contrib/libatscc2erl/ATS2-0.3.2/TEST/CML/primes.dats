@@ -16,7 +16,7 @@ CML = "./../../SATS/CML/CML.sats"
 //
 extern
 fun
-primes{n:nat} : (int(n)) -> list(int, n)
+primes{n:nat} : (int(n)) -> list_vt(int, n)
 //
 (* ****** ****** *)
 
@@ -28,7 +28,7 @@ fun
 counter(n: int) = let
   val outCh = $CML.channel{int}()
   fun loop(n: int): void = ($CML.send(outCh, n); loop(n+1))
-  val _(*tid*) = $CML.spawn(lam () => loop(n))
+  val _(*tid*) = $CML.spawn(lam () =<cloptr1> loop(n))
 in
   outCh
 end // end of [counter]
@@ -46,7 +46,7 @@ filter
   in
     if i % p != 0 then $CML.send(outCh, i); loop()
   end // end of [loop]
-  val _(*tid*) = $CML.spawn(lam () => loop())
+  val _(*tid*) = $CML.spawn(lam () =<cloptr1> loop())
 in
   outCh
 end // end of [filter]
@@ -70,7 +70,7 @@ sieve
   in
     loop (ch2)
   end // end of [loop]
-  val _(*tid*) = $CML.spawn(lam () => loop(counter(2)))
+  val _(*tid*) = $CML.spawn(lam () =<cloptr1> loop(counter(2)))
 in
   primes
 end // end of [sieve]
@@ -84,15 +84,15 @@ val ch = sieve()
 //
 fun
 loop{i,j:nat | i+j==n}
-  (i: int(i), res: list(int, j)): list(int, n) =
+  (i: int(i), res: list_vt(int, j)): list_vt(int, n) =
 (
   case+ i of
-  | 0 => list_reverse(res)
-  | _ =>> loop(i-1, cons($CML.recv(ch), res))
+  | 0 => list_vt_reverse(res)
+  | _ =>> loop(i-1, list_vt_cons($CML.recv(ch), res))
 )
 //
 in
-  loop(n, nil)
+  loop(n, list_vt_nil())
 end // end of [primes]
 
 (* ****** ****** *)

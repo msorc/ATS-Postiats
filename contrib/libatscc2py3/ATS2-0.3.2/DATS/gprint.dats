@@ -26,6 +26,9 @@ LIBATSCC_targetloc
 //
 (* ****** ****** *)
 
+#staload "./../basics_py.sats"
+#staload "./../SATS/integer.sats"
+#staload "./../SATS/arrayref.sats"
 #staload "./../SATS/gprint.sats"
 
 (* ****** ****** *)

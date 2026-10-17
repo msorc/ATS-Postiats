@@ -51,7 +51,7 @@ extern
 fun
 {a:t@ype}
 mergesort
-  {n:nat}(list(a, n)): list(a, n)
+  {n:nat}(list_vt(a, n)): list_vt(a, n)
 //
 (* ****** ****** *)
 
@@ -250,11 +250,11 @@ implement
 mergesort(xs) = let
 //
 val n = length(xs)
-val chn = list2ssarray(xs)
+val chn = list2ssarray_vt<a>(xs)
 val chn = ssarray_msort(n, chn)
 //
 in
-  ssarray2list(chn, n)
+  ssarray2list_vt<a>(chn, n)
 end // end of [mergesort]
 
 (* ****** ****** *)
@@ -272,11 +272,17 @@ main0 () =
 val xs =
 $list{int}(3, 9, 8, 2, 5, 7, 4, 6, 0, 1)
 //
-val () = fprintln! (stdout_ref, "xs =\n", xs)
+val () = fprint! (stdout_ref, "xs =\n")
+val () = fprint_list_vt (stdout_ref, xs)
+val () = fprint_newline (stdout_ref)
 //
 val xs = mergesort<int> (xs)
 //
-val () = fprintln! (stdout_ref, "xs(sorted) =\n", xs)
+val () = fprint! (stdout_ref, "xs(sorted) =\n")
+val () = fprint_list_vt (stdout_ref, xs)
+val () = fprint_newline (stdout_ref)
+//
+val () = list_vt_free (xs)
 //
 } (* end of [main0] *)
 

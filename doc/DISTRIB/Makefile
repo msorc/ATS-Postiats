@@ -1,21 +1,17 @@
 ######
 #
-#
 # This Makefile is automatically generated
 # from executing the following command-line:
 #
 # make -f Makefile.gen
 #
-#
 ######
 
-ATSHOMEQ="$(ATSHOME)"
 
 ######
 
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSOPT=$(ATSHOMEQ)/bin/atsopt
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 
@@ -23,13 +19,10 @@ PATSHOMEQ="$(PATSHOME)"
 
 ######
 
-INCLATS:=-IATS $(ATSHOMEQ)
+INCLATS:=-IATS $(PATSHOMEQ)
 
 ######
-#
-GCFLAG=
-#
-# GCFLAG=-D_ATS_GCATS
+PATSCCFLAGS=-DATS_MEMALLOC_LIBC
 #
 ######
 
@@ -53,34 +46,11 @@ all_script::
 ######
 
 all_script:: \
-SCRIPT/patsopt_src.bash
-SCRIPT/patsopt_src.bash: patsopt_src_atxt.exe ; ./$< > $@
-patsopt_src_atxt.dats: ATEXT/patsopt_src.atxt ; \
-  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patsopt_src_atxt.exe: patsopt_src_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
-clean:: ; $(RMF) patsopt_src_atxt.exe
-cleanall:: ; $(RMF) HTML/patsopt_src.html
-cleanall:: ; $(RMF) SCRIPT/patsopt_src.bash
-
-all_script:: \
-SCRIPT/patsopt_src_cboot.bash
-SCRIPT/patsopt_src_cboot.bash: patsopt_src_cboot_atxt.exe ; ./$< > $@
-patsopt_src_cboot_atxt.dats: ATEXT/patsopt_src_cboot.atxt ; \
-  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patsopt_src_cboot_atxt.exe: patsopt_src_cboot_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
-clean:: ; $(RMF) patsopt_src_cboot_atxt.exe
-cleanall:: ; $(RMF) HTML/patsopt_src_cboot.html
-cleanall:: ; $(RMF) SCRIPT/patsopt_src_cboot.bash
-
-
-######
-
-all_script:: \
 SCRIPT/ccomp_atslib.bash
 SCRIPT/ccomp_atslib.bash: ccomp_atslib_atxt.exe ; ./$< > $@
 ccomp_atslib_atxt.dats: ATEXT/ccomp_atslib.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-ccomp_atslib_atxt.exe: ccomp_atslib_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+ccomp_atslib_atxt.exe: ccomp_atslib_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) ccomp_atslib_atxt.exe
 cleanall:: ; $(RMF) HTML/ccomp_atslib.html
 cleanall:: ; $(RMF) SCRIPT/ccomp_atslib.bash
@@ -90,7 +60,7 @@ SCRIPT/ccomp_runtime.bash
 SCRIPT/ccomp_runtime.bash: ccomp_runtime_atxt.exe ; ./$< > $@
 ccomp_runtime_atxt.dats: ATEXT/ccomp_runtime.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-ccomp_runtime_atxt.exe: ccomp_runtime_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+ccomp_runtime_atxt.exe: ccomp_runtime_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) ccomp_runtime_atxt.exe
 cleanall:: ; $(RMF) HTML/ccomp_runtime.html
 cleanall:: ; $(RMF) SCRIPT/ccomp_runtime.bash
@@ -103,7 +73,7 @@ SCRIPT/atslib_prelude.bash
 SCRIPT/atslib_prelude.bash: atslib_prelude_atxt.exe ; ./$< > $@
 atslib_prelude_atxt.dats: ATEXT/atslib_prelude.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_prelude_atxt.exe: atslib_prelude_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+atslib_prelude_atxt.exe: atslib_prelude_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) atslib_prelude_atxt.exe
 cleanall:: ; $(RMF) HTML/atslib_prelude.html
 cleanall:: ; $(RMF) SCRIPT/atslib_prelude.bash
@@ -116,70 +86,29 @@ SCRIPT/atslib_libats.bash
 SCRIPT/atslib_libats.bash: atslib_libats_atxt.exe ; ./$< > $@
 atslib_libats_atxt.dats: ATEXT/atslib_libats.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_libats_atxt.exe: atslib_libats_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+atslib_libats_atxt.exe: atslib_libats_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) atslib_libats_atxt.exe
 cleanall:: ; $(RMF) HTML/atslib_libats.html
 cleanall:: ; $(RMF) SCRIPT/atslib_libats.bash
-
-all_script:: \
-SCRIPT/atslib_libats_ML.bash
-SCRIPT/atslib_libats_ML.bash: atslib_libats_ML_atxt.exe ; ./$< > $@
-atslib_libats_ML_atxt.dats: ATEXT/atslib_libats_ML.atxt ; \
-  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_libats_ML_atxt.exe: atslib_libats_ML_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
-clean:: ; $(RMF) atslib_libats_ML_atxt.exe
-cleanall:: ; $(RMF) HTML/atslib_libats_ML.html
-cleanall:: ; $(RMF) SCRIPT/atslib_libats_ML.bash
 
 all_script:: \
 SCRIPT/atslib_libats_libc.bash
 SCRIPT/atslib_libats_libc.bash: atslib_libats_libc_atxt.exe ; ./$< > $@
 atslib_libats_libc_atxt.dats: ATEXT/atslib_libats_libc.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_libats_libc_atxt.exe: atslib_libats_libc_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+atslib_libats_libc_atxt.exe: atslib_libats_libc_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) atslib_libats_libc_atxt.exe
 cleanall:: ; $(RMF) HTML/atslib_libats_libc.html
 cleanall:: ; $(RMF) SCRIPT/atslib_libats_libc.bash
 
-all_script:: \
-SCRIPT/atslib_libats_ATS1.bash
-SCRIPT/atslib_libats_ATS1.bash: atslib_libats_ATS1_atxt.exe ; ./$< > $@
-atslib_libats_ATS1_atxt.dats: ATEXT/atslib_libats_ATS1.atxt ; \
-  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_libats_ATS1_atxt.exe: atslib_libats_ATS1_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
-clean:: ; $(RMF) atslib_libats_ATS1_atxt.exe
-cleanall:: ; $(RMF) HTML/atslib_libats_ATS1.html
-cleanall:: ; $(RMF) SCRIPT/atslib_libats_ATS1.bash
-
-all_script:: \
-SCRIPT/atslib_libats_ATS2.bash
-SCRIPT/atslib_libats_ATS2.bash: atslib_libats_ATS2_atxt.exe ; ./$< > $@
-atslib_libats_ATS2_atxt.dats: ATEXT/atslib_libats_ATS2.atxt ; \
-  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_libats_ATS2_atxt.exe: atslib_libats_ATS2_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
-clean:: ; $(RMF) atslib_libats_ATS2_atxt.exe
-cleanall:: ; $(RMF) HTML/atslib_libats_ATS2.html
-cleanall:: ; $(RMF) SCRIPT/atslib_libats_ATS2.bash
-
-all_script:: \
-SCRIPT/atslib_libats_BUCS320.bash
-SCRIPT/atslib_libats_BUCS320.bash: atslib_libats_BUCS320_atxt.exe ; ./$< > $@
-atslib_libats_BUCS320_atxt.dats: ATEXT/atslib_libats_BUCS320.atxt ; \
-  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-atslib_libats_BUCS320_atxt.exe: atslib_libats_BUCS320_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
-clean:: ; $(RMF) atslib_libats_BUCS320_atxt.exe
-cleanall:: ; $(RMF) HTML/atslib_libats_BUCS320.html
-cleanall:: ; $(RMF) SCRIPT/atslib_libats_BUCS320.bash
-
 
 ######
-#
 all_script:: \
 SCRIPT/contrib_atscntrb.bash
 SCRIPT/contrib_atscntrb.bash: contrib_atscntrb_atxt.exe ; ./$< > $@
 contrib_atscntrb_atxt.dats: ATEXT/contrib_atscntrb.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscntrb_atxt.exe: contrib_atscntrb_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscntrb_atxt.exe: contrib_atscntrb_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscntrb_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscntrb.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscntrb.bash
@@ -192,7 +121,7 @@ SCRIPT/utils_emacs.bash
 SCRIPT/utils_emacs.bash: utils_emacs_atxt.exe ; ./$< > $@
 utils_emacs_atxt.dats: ATEXT/utils_emacs.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-utils_emacs_atxt.exe: utils_emacs_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+utils_emacs_atxt.exe: utils_emacs_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) utils_emacs_atxt.exe
 cleanall:: ; $(RMF) HTML/utils_emacs.html
 cleanall:: ; $(RMF) SCRIPT/utils_emacs.bash
@@ -202,7 +131,7 @@ SCRIPT/utils_atscc.bash
 SCRIPT/utils_atscc.bash: utils_atscc_atxt.exe ; ./$< > $@
 utils_atscc_atxt.dats: ATEXT/utils_atscc.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-utils_atscc_atxt.exe: utils_atscc_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+utils_atscc_atxt.exe: utils_atscc_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) utils_atscc_atxt.exe
 cleanall:: ; $(RMF) HTML/utils_atscc.html
 cleanall:: ; $(RMF) SCRIPT/utils_atscc.bash
@@ -212,7 +141,7 @@ SCRIPT/utils_myatscc.bash
 SCRIPT/utils_myatscc.bash: utils_myatscc_atxt.exe ; ./$< > $@
 utils_myatscc_atxt.dats: ATEXT/utils_myatscc.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-utils_myatscc_atxt.exe: utils_myatscc_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+utils_myatscc_atxt.exe: utils_myatscc_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) utils_myatscc_atxt.exe
 cleanall:: ; $(RMF) HTML/utils_myatscc.html
 cleanall:: ; $(RMF) SCRIPT/utils_myatscc.bash
@@ -222,7 +151,7 @@ SCRIPT/utils_libatsopt.bash
 SCRIPT/utils_libatsopt.bash: utils_libatsopt_atxt.exe ; ./$< > $@
 utils_libatsopt_atxt.dats: ATEXT/utils_libatsopt.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-utils_libatsopt_atxt.exe: utils_libatsopt_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+utils_libatsopt_atxt.exe: utils_libatsopt_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) utils_libatsopt_atxt.exe
 cleanall:: ; $(RMF) HTML/utils_libatsopt.html
 cleanall:: ; $(RMF) SCRIPT/utils_libatsopt.bash
@@ -235,20 +164,19 @@ SCRIPT/contrib_ats2cpp.bash
 SCRIPT/contrib_ats2cpp.bash: contrib_ats2cpp_atxt.exe ; ./$< > $@
 contrib_ats2cpp_atxt.dats: ATEXT/contrib_ats2cpp.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_ats2cpp_atxt.exe: contrib_ats2cpp_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_ats2cpp_atxt.exe: contrib_ats2cpp_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_ats2cpp_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_ats2cpp.html
 cleanall:: ; $(RMF) SCRIPT/contrib_ats2cpp.bash
 
 
 ######
-#
 all_script:: \
 SCRIPT/contrib_extsolve.bash
 SCRIPT/contrib_extsolve.bash: contrib_extsolve_atxt.exe ; ./$< > $@
 contrib_extsolve_atxt.dats: ATEXT/contrib_extsolve.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_extsolve_atxt.exe: contrib_extsolve_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_extsolve_atxt.exe: contrib_extsolve_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_extsolve_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_extsolve.html
 cleanall:: ; $(RMF) SCRIPT/contrib_extsolve.bash
@@ -258,7 +186,7 @@ SCRIPT/contrib_extsolve_z3.bash
 SCRIPT/contrib_extsolve_z3.bash: contrib_extsolve_z3_atxt.exe ; ./$< > $@
 contrib_extsolve_z3_atxt.dats: ATEXT/contrib_extsolve_z3.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_extsolve_z3_atxt.exe: contrib_extsolve_z3_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_extsolve_z3_atxt.exe: contrib_extsolve_z3_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_extsolve_z3_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_extsolve_z3.html
 cleanall:: ; $(RMF) SCRIPT/contrib_extsolve_z3.bash
@@ -268,7 +196,7 @@ SCRIPT/contrib_extsolve_smt2.bash
 SCRIPT/contrib_extsolve_smt2.bash: contrib_extsolve_smt2_atxt.exe ; ./$< > $@
 contrib_extsolve_smt2_atxt.dats: ATEXT/contrib_extsolve_smt2.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_extsolve_smt2_atxt.exe: contrib_extsolve_smt2_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_extsolve_smt2_atxt.exe: contrib_extsolve_smt2_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_extsolve_smt2_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_extsolve_smt2.html
 cleanall:: ; $(RMF) SCRIPT/contrib_extsolve_smt2.bash
@@ -279,7 +207,7 @@ SCRIPT/contrib_parsemit.bash
 SCRIPT/contrib_parsemit.bash: contrib_parsemit_atxt.exe ; ./$< > $@
 contrib_parsemit_atxt.dats: ATEXT/contrib_parsemit.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_parsemit_atxt.exe: contrib_parsemit_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_parsemit_atxt.exe: contrib_parsemit_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_parsemit_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_parsemit.html
 cleanall:: ; $(RMF) SCRIPT/contrib_parsemit.bash
@@ -290,7 +218,7 @@ SCRIPT/contrib_atscc2js.bash
 SCRIPT/contrib_atscc2js.bash: contrib_atscc2js_atxt.exe ; ./$< > $@
 contrib_atscc2js_atxt.dats: ATEXT/contrib_atscc2js.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2js_atxt.exe: contrib_atscc2js_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2js_atxt.exe: contrib_atscc2js_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2js_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2js.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2js.bash
@@ -300,7 +228,7 @@ SCRIPT/contrib_atscc2pl.bash
 SCRIPT/contrib_atscc2pl.bash: contrib_atscc2pl_atxt.exe ; ./$< > $@
 contrib_atscc2pl_atxt.dats: ATEXT/contrib_atscc2pl.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2pl_atxt.exe: contrib_atscc2pl_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2pl_atxt.exe: contrib_atscc2pl_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2pl_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2pl.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2pl.bash
@@ -310,7 +238,7 @@ SCRIPT/contrib_atscc2py3.bash
 SCRIPT/contrib_atscc2py3.bash: contrib_atscc2py3_atxt.exe ; ./$< > $@
 contrib_atscc2py3_atxt.dats: ATEXT/contrib_atscc2py3.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2py3_atxt.exe: contrib_atscc2py3_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2py3_atxt.exe: contrib_atscc2py3_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2py3_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2py3.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2py3.bash
@@ -320,7 +248,7 @@ SCRIPT/contrib_atscc2php.bash
 SCRIPT/contrib_atscc2php.bash: contrib_atscc2php_atxt.exe ; ./$< > $@
 contrib_atscc2php_atxt.dats: ATEXT/contrib_atscc2php.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2php_atxt.exe: contrib_atscc2php_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2php_atxt.exe: contrib_atscc2php_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2php_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2php.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2php.bash
@@ -330,7 +258,7 @@ SCRIPT/contrib_atscc2scm.bash
 SCRIPT/contrib_atscc2scm.bash: contrib_atscc2scm_atxt.exe ; ./$< > $@
 contrib_atscc2scm_atxt.dats: ATEXT/contrib_atscc2scm.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2scm_atxt.exe: contrib_atscc2scm_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2scm_atxt.exe: contrib_atscc2scm_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2scm_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2scm.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2scm.bash
@@ -340,7 +268,7 @@ SCRIPT/contrib_atscc2clj.bash
 SCRIPT/contrib_atscc2clj.bash: contrib_atscc2clj_atxt.exe ; ./$< > $@
 contrib_atscc2clj_atxt.dats: ATEXT/contrib_atscc2clj.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2clj_atxt.exe: contrib_atscc2clj_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2clj_atxt.exe: contrib_atscc2clj_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2clj_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2clj.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2clj.bash
@@ -350,7 +278,7 @@ SCRIPT/contrib_atscc2r34.bash
 SCRIPT/contrib_atscc2r34.bash: contrib_atscc2r34_atxt.exe ; ./$< > $@
 contrib_atscc2r34_atxt.dats: ATEXT/contrib_atscc2r34.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_atscc2r34_atxt.exe: contrib_atscc2r34_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_atscc2r34_atxt.exe: contrib_atscc2r34_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_atscc2r34_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscc2r34.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscc2r34.bash
@@ -363,7 +291,7 @@ SCRIPT/contrib_libatscc.bash
 SCRIPT/contrib_libatscc.bash: contrib_libatscc_atxt.exe ; ./$< > $@
 contrib_libatscc_atxt.dats: ATEXT/contrib_libatscc.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc_atxt.exe: contrib_libatscc_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc_atxt.exe: contrib_libatscc_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc.bash
@@ -373,7 +301,7 @@ SCRIPT/contrib_libatscc2js.bash
 SCRIPT/contrib_libatscc2js.bash: contrib_libatscc2js_atxt.exe ; ./$< > $@
 contrib_libatscc2js_atxt.dats: ATEXT/contrib_libatscc2js.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2js_atxt.exe: contrib_libatscc2js_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2js_atxt.exe: contrib_libatscc2js_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2js_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2js.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2js.bash
@@ -383,7 +311,7 @@ SCRIPT/contrib_libatscc2pl.bash
 SCRIPT/contrib_libatscc2pl.bash: contrib_libatscc2pl_atxt.exe ; ./$< > $@
 contrib_libatscc2pl_atxt.dats: ATEXT/contrib_libatscc2pl.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2pl_atxt.exe: contrib_libatscc2pl_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2pl_atxt.exe: contrib_libatscc2pl_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2pl_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2pl.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2pl.bash
@@ -393,7 +321,7 @@ SCRIPT/contrib_libatscc2py3.bash
 SCRIPT/contrib_libatscc2py3.bash: contrib_libatscc2py3_atxt.exe ; ./$< > $@
 contrib_libatscc2py3_atxt.dats: ATEXT/contrib_libatscc2py3.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2py3_atxt.exe: contrib_libatscc2py3_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2py3_atxt.exe: contrib_libatscc2py3_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2py3_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2py3.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2py3.bash
@@ -403,7 +331,7 @@ SCRIPT/contrib_libatscc2php.bash
 SCRIPT/contrib_libatscc2php.bash: contrib_libatscc2php_atxt.exe ; ./$< > $@
 contrib_libatscc2php_atxt.dats: ATEXT/contrib_libatscc2php.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2php_atxt.exe: contrib_libatscc2php_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2php_atxt.exe: contrib_libatscc2php_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2php_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2php.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2php.bash
@@ -413,7 +341,7 @@ SCRIPT/contrib_libatscc2scm.bash
 SCRIPT/contrib_libatscc2scm.bash: contrib_libatscc2scm_atxt.exe ; ./$< > $@
 contrib_libatscc2scm_atxt.dats: ATEXT/contrib_libatscc2scm.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2scm_atxt.exe: contrib_libatscc2scm_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2scm_atxt.exe: contrib_libatscc2scm_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2scm_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2scm.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2scm.bash
@@ -423,7 +351,7 @@ SCRIPT/contrib_libatscc2clj.bash
 SCRIPT/contrib_libatscc2clj.bash: contrib_libatscc2clj_atxt.exe ; ./$< > $@
 contrib_libatscc2clj_atxt.dats: ATEXT/contrib_libatscc2clj.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2clj_atxt.exe: contrib_libatscc2clj_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2clj_atxt.exe: contrib_libatscc2clj_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2clj_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2clj.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2clj.bash
@@ -433,7 +361,7 @@ SCRIPT/contrib_libatscc2r34.bash
 SCRIPT/contrib_libatscc2r34.bash: contrib_libatscc2r34_atxt.exe ; ./$< > $@
 contrib_libatscc2r34_atxt.dats: ATEXT/contrib_libatscc2r34.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-contrib_libatscc2r34_atxt.exe: contrib_libatscc2r34_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+contrib_libatscc2r34_atxt.exe: contrib_libatscc2r34_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) contrib_libatscc2r34_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_libatscc2r34.html
 cleanall:: ; $(RMF) SCRIPT/contrib_libatscc2r34.bash
@@ -446,7 +374,7 @@ SCRIPT/doc_example_pcpv.bash
 SCRIPT/doc_example_pcpv.bash: doc_example_pcpv_atxt.exe ; ./$< > $@
 doc_example_pcpv_atxt.dats: ATEXT/doc_example_pcpv.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-doc_example_pcpv_atxt.exe: doc_example_pcpv_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+doc_example_pcpv_atxt.exe: doc_example_pcpv_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) doc_example_pcpv_atxt.exe
 cleanall:: ; $(RMF) HTML/doc_example_pcpv.html
 cleanall:: ; $(RMF) SCRIPT/doc_example_pcpv.bash
@@ -456,7 +384,7 @@ SCRIPT/doc_example_misc.bash
 SCRIPT/doc_example_misc.bash: doc_example_misc_atxt.exe ; ./$< > $@
 doc_example_misc_atxt.dats: ATEXT/doc_example_misc.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-doc_example_misc_atxt.exe: doc_example_misc_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+doc_example_misc_atxt.exe: doc_example_misc_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) doc_example_misc_atxt.exe
 cleanall:: ; $(RMF) HTML/doc_example_misc.html
 cleanall:: ; $(RMF) SCRIPT/doc_example_misc.bash
@@ -466,7 +394,7 @@ SCRIPT/doc_example_intro.bash
 SCRIPT/doc_example_intro.bash: doc_example_intro_atxt.exe ; ./$< > $@
 doc_example_intro_atxt.dats: ATEXT/doc_example_intro.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-doc_example_intro_atxt.exe: doc_example_intro_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+doc_example_intro_atxt.exe: doc_example_intro_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) doc_example_intro_atxt.exe
 cleanall:: ; $(RMF) HTML/doc_example_intro.html
 cleanall:: ; $(RMF) SCRIPT/doc_example_intro.bash
@@ -476,7 +404,7 @@ SCRIPT/doc_example_atslib.bash
 SCRIPT/doc_example_atslib.bash: doc_example_atslib_atxt.exe ; ./$< > $@
 doc_example_atslib_atxt.dats: ATEXT/doc_example_atslib.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-doc_example_atslib_atxt.exe: doc_example_atslib_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+doc_example_atslib_atxt.exe: doc_example_atslib_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) doc_example_atslib_atxt.exe
 cleanall:: ; $(RMF) HTML/doc_example_atslib.html
 cleanall:: ; $(RMF) SCRIPT/doc_example_atslib.bash
@@ -489,7 +417,7 @@ SCRIPT/npm_utils_contrib_atscntrb.bash
 SCRIPT/npm_utils_contrib_atscntrb.bash: npm_utils_contrib_atscntrb_atxt.exe ; ./$< > $@
 npm_utils_contrib_atscntrb_atxt.dats: ATEXT/npm_utils_contrib_atscntrb.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-npm_utils_contrib_atscntrb_atxt.exe: npm_utils_contrib_atscntrb_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+npm_utils_contrib_atscntrb_atxt.exe: npm_utils_contrib_atscntrb_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) npm_utils_contrib_atscntrb_atxt.exe
 cleanall:: ; $(RMF) HTML/npm_utils_contrib_atscntrb.html
 cleanall:: ; $(RMF) SCRIPT/npm_utils_contrib_atscntrb.bash
@@ -499,20 +427,19 @@ SCRIPT/npm_utils_contrib_libats_hwxi.bash
 SCRIPT/npm_utils_contrib_libats_hwxi.bash: npm_utils_contrib_libats_hwxi_atxt.exe ; ./$< > $@
 npm_utils_contrib_libats_hwxi_atxt.dats: ATEXT/npm_utils_contrib_libats_hwxi.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-npm_utils_contrib_libats_hwxi_atxt.exe: npm_utils_contrib_libats_hwxi_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+npm_utils_contrib_libats_hwxi_atxt.exe: npm_utils_contrib_libats_hwxi_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) npm_utils_contrib_libats_hwxi_atxt.exe
 cleanall:: ; $(RMF) HTML/npm_utils_contrib_libats_hwxi.html
 cleanall:: ; $(RMF) SCRIPT/npm_utils_contrib_libats_hwxi.bash
 
 
 ######
-#
 all_script:: \
 SCRIPT/patscontrib_JNI.bash
 SCRIPT/patscontrib_JNI.bash: patscontrib_JNI_atxt.exe ; ./$< > $@
 patscontrib_JNI_atxt.dats: ATEXT/patscontrib_JNI.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_JNI_atxt.exe: patscontrib_JNI_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_JNI_atxt.exe: patscontrib_JNI_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_JNI_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_JNI.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_JNI.bash
@@ -523,7 +450,7 @@ SCRIPT/patscontrib_glib.bash
 SCRIPT/patscontrib_glib.bash: patscontrib_glib_atxt.exe ; ./$< > $@
 patscontrib_glib_atxt.dats: ATEXT/patscontrib_glib.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_glib_atxt.exe: patscontrib_glib_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_glib_atxt.exe: patscontrib_glib_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_glib_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_glib.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_glib.bash
@@ -533,7 +460,7 @@ SCRIPT/patscontrib_GTK.bash
 SCRIPT/patscontrib_GTK.bash: patscontrib_GTK_atxt.exe ; ./$< > $@
 patscontrib_GTK_atxt.dats: ATEXT/patscontrib_GTK.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_GTK_atxt.exe: patscontrib_GTK_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_GTK_atxt.exe: patscontrib_GTK_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_GTK_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_GTK.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_GTK.bash
@@ -543,7 +470,7 @@ SCRIPT/patscontrib_SDL2.bash
 SCRIPT/patscontrib_SDL2.bash: patscontrib_SDL2_atxt.exe ; ./$< > $@
 patscontrib_SDL2_atxt.dats: ATEXT/patscontrib_SDL2.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_SDL2_atxt.exe: patscontrib_SDL2_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_SDL2_atxt.exe: patscontrib_SDL2_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_SDL2_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_SDL2.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_SDL2.bash
@@ -554,7 +481,7 @@ SCRIPT/patscontrib_zeromq.bash
 SCRIPT/patscontrib_zeromq.bash: patscontrib_zeromq_atxt.exe ; ./$< > $@
 patscontrib_zeromq_atxt.dats: ATEXT/patscontrib_zeromq.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_zeromq_atxt.exe: patscontrib_zeromq_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_zeromq_atxt.exe: patscontrib_zeromq_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_zeromq_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_zeromq.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_zeromq.bash
@@ -565,7 +492,7 @@ SCRIPT/patscontrib_OpenSSL.bash
 SCRIPT/patscontrib_OpenSSL.bash: patscontrib_OpenSSL_atxt.exe ; ./$< > $@
 patscontrib_OpenSSL_atxt.dats: ATEXT/patscontrib_OpenSSL.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_OpenSSL_atxt.exe: patscontrib_OpenSSL_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_OpenSSL_atxt.exe: patscontrib_OpenSSL_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_OpenSSL_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_OpenSSL.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_OpenSSL.bash
@@ -576,7 +503,7 @@ SCRIPT/patscontrib_HTML-emscripten.bash
 SCRIPT/patscontrib_HTML-emscripten.bash: patscontrib_HTML-emscripten_atxt.exe ; ./$< > $@
 patscontrib_HTML-emscripten_atxt.dats: ATEXT/patscontrib_HTML-emscripten.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_HTML-emscripten_atxt.exe: patscontrib_HTML-emscripten_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_HTML-emscripten_atxt.exe: patscontrib_HTML-emscripten_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_HTML-emscripten_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_HTML-emscripten.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_HTML-emscripten.bash
@@ -586,7 +513,7 @@ SCRIPT/patscontrib_HTML-emscripten_canvas-2d.bash
 SCRIPT/patscontrib_HTML-emscripten_canvas-2d.bash: patscontrib_HTML-emscripten_canvas-2d_atxt.exe ; ./$< > $@
 patscontrib_HTML-emscripten_canvas-2d_atxt.dats: ATEXT/patscontrib_HTML-emscripten_canvas-2d.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_HTML-emscripten_canvas-2d_atxt.exe: patscontrib_HTML-emscripten_canvas-2d_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_HTML-emscripten_canvas-2d_atxt.exe: patscontrib_HTML-emscripten_canvas-2d_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_HTML-emscripten_canvas-2d_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_HTML-emscripten_canvas-2d.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_HTML-emscripten_canvas-2d.bash
@@ -597,7 +524,7 @@ SCRIPT/patscontrib_libats_hwxi.bash
 SCRIPT/patscontrib_libats_hwxi.bash: patscontrib_libats_hwxi_atxt.exe ; ./$< > $@
 patscontrib_libats_hwxi_atxt.dats: ATEXT/patscontrib_libats_hwxi.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_libats_hwxi_atxt.exe: patscontrib_libats_hwxi_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_libats_hwxi_atxt.exe: patscontrib_libats_hwxi_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_libats_hwxi_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_libats_hwxi.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_libats_hwxi.bash
@@ -607,7 +534,7 @@ SCRIPT/patscontrib_libats_hwxi_teaching.bash
 SCRIPT/patscontrib_libats_hwxi_teaching.bash: patscontrib_libats_hwxi_teaching_atxt.exe ; ./$< > $@
 patscontrib_libats_hwxi_teaching_atxt.dats: ATEXT/patscontrib_libats_hwxi_teaching.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_libats_hwxi_teaching_atxt.exe: patscontrib_libats_hwxi_teaching_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_libats_hwxi_teaching_atxt.exe: patscontrib_libats_hwxi_teaching_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_libats_hwxi_teaching_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_libats_hwxi_teaching.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_libats_hwxi_teaching.bash
@@ -626,14 +553,13 @@ SCRIPT/patscontrib_kernelats.bash
 SCRIPT/patscontrib_kernelats.bash: patscontrib_kernelats_atxt.exe ; ./$< > $@
 patscontrib_kernelats_atxt.dats: ATEXT/patscontrib_kernelats.atxt ; \
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-patscontrib_kernelats_atxt.exe: patscontrib_kernelats_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+patscontrib_kernelats_atxt.exe: patscontrib_kernelats_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) patscontrib_kernelats_atxt.exe
 cleanall:: ; $(RMF) HTML/patscontrib_kernelats.html
 cleanall:: ; $(RMF) SCRIPT/patscontrib_kernelats.bash
 
 #
 ######
-#
 atspackaging:: srcget_home
 atspackaging:: srcget_share
 #
@@ -651,11 +577,9 @@ atspackaging:: srcget_utils_atscc
 atspackaging:: srcget_utils_myatscc
 #
 ######
-#
 # atspackaging:: srcget_utils_libatsopt
 #
 ######
-#
 atspackaging:: srcget_contrib_ats2cpp
 #
 atspackaging:: srcget_contrib_extsolve
@@ -686,7 +610,6 @@ atspackaging:: srcget_doc_example
 atspackaging:: srcget_npm_utils_contrib
 #
 ######
-#
 atspackaging:: srcget_dist_cleanup
 #
 atspackaging:: ; (cd ATS-Postiats && ./autogen.sh)
@@ -706,7 +629,6 @@ srcget_home:: ; $(CPF) ../../CHANGES-contrib $(ATSDIST)/
 #srcget_home:: ; $(CPF) ../../bin/patsopt_env.sh.in $(ATSDIST)/bin/
 
 ######
-#
 srcget_share:: ; \
   $(CPF) ../../share/Makefile.gen $(ATSDIST)/share/.
 srcget_share:: ; \
@@ -714,15 +636,11 @@ srcget_share:: ; \
 srcget_share:: ; \
   $(CPF) ../../share/atspre_staload.hats $(ATSDIST)/share/.
 srcget_share:: ; \
-  $(CPF) ../../share/atspre_staload_libats_ML.hats $(ATSDIST)/share/.
-srcget_share:: ; \
   $(CPF) ../../share/H/pats_atslib.h $(ATSDIST)/share/H/.
 srcget_share:: ; \
   $(CPF) ../../share/HATS/atspre_define_pkgreloc.hats $(ATSDIST)/share/HATS/.
 srcget_share:: ; \
   $(CPF) ../../share/HATS/atspre_staload_prelude.hats $(ATSDIST)/share/HATS/.
-srcget_share:: ; \
-  $(CPF) ../../share/HATS/atspre_staload_libats_ML.hats $(ATSDIST)/share/HATS/.
 srcget_share:: ; \
   $(CPF) ../../share/HATS/atslib_staload_libats_libc.hats $(ATSDIST)/share/HATS/.
 #
@@ -731,25 +649,25 @@ srcget_share:: ; $(CPF) ../../share/atsmake-post.mk $(ATSDIST)/share/.
 #
 ######
 
-srcget_patsrc:: SCRIPT/patsopt_src.bash ; bash $<
-srcget_patsrc_cboot:: SCRIPT/patsopt_src_cboot.bash ; bash $<
+#
+# The compiler sources (ATS2, no GC): everything of src/ but the tests and the porting notes;
+# the bootstrap bundle needs `make -C ../../src CBOOT` first (no generated C is kept in git)
+srcget_patsrc:: ; \
+  mkdir -p $(ATSDIST)/src && \
+  cd ../../src && for f in Makefile README mylibies.hats *.sats *.dats *.hats *.cats *.spec *.c; do \
+    [ -f $$f ] && cp -f $$f ../doc/DISTRIB/$(ATSDIST)/src/ ; done ; true
+srcget_patsrc_cboot:: ; \
+  mkdir -p $(ATSDIST)/src/CBOOT && \
+  cd ../../src/CBOOT && cp -Rf Makefile README mkboot.sh modules.mk *.c gmpknd intknd inc \
+    ../../doc/DISTRIB/$(ATSDIST)/src/CBOOT/
 
 ######
-#
 srcget_atslib:: srcget_atslib_prelude
 srcget_atslib_prelude:: SCRIPT/atslib_prelude.bash ; bash $<
 srcget_atslib:: srcget_atslib_libats
 srcget_atslib_libats:: SCRIPT/atslib_libats.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_ML
-srcget_atslib_libats_ML:: SCRIPT/atslib_libats_ML.bash ; bash $<
 srcget_atslib:: srcget_atslib_libats_libc
 srcget_atslib_libats_libc:: SCRIPT/atslib_libats_libc.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_ATS1
-srcget_atslib_libats_ATS1:: SCRIPT/atslib_libats_ATS1.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_ATS2
-srcget_atslib_libats_ATS2:: SCRIPT/atslib_libats_ATS2.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_BUCS320
-srcget_atslib_libats_BUCS320:: SCRIPT/atslib_libats_BUCS320.bash ; bash $<
 #
 srcget_contrib_atscntrb:: SCRIPT/contrib_atscntrb.bash ; bash $<
 #
@@ -765,7 +683,6 @@ srcget_utils_atscc:: SCRIPT/utils_atscc.bash ; bash $<
 srcget_utils_myatscc:: SCRIPT/utils_myatscc.bash ; bash $<
 
 ######
-#
 # srcget_utils_libatsopt:: SCRIPT/utils_libatsopt.bash ; bash $<
 #
 ######
@@ -773,7 +690,6 @@ srcget_utils_myatscc:: SCRIPT/utils_myatscc.bash ; bash $<
 srcget_contrib_ats2cpp:: SCRIPT/contrib_ats2cpp.bash ; bash $<
 
 ######
-#
 srcget_contrib_extsolve:: SCRIPT/contrib_extsolve.bash ; bash $<
 srcget_contrib_extsolve_z3:: SCRIPT/contrib_extsolve_z3.bash ; bash $<
 srcget_contrib_extsolve_smt2:: SCRIPT/contrib_extsolve_smt2.bash ; bash $<
@@ -798,7 +714,6 @@ srcget_contrib_libatscc2clj:: SCRIPT/contrib_libatscc2clj.bash ; bash $<
 srcget_contrib_libatscc2r34:: SCRIPT/contrib_libatscc2r34.bash ; bash $<
 #
 ######
-#
 srcget_doc_example:: srcget_doc_example_misc
 srcget_doc_example:: srcget_doc_example_pcpv
 srcget_doc_example:: srcget_doc_example_intro
@@ -818,11 +733,9 @@ srcget_npm_utils_contrib:: srcget_npm_utils_contrib_libats_hwxi
 srcget_npm_utils_contrib_libats_hwxi:: SCRIPT/npm_utils_contrib_libats_hwxi.bash; bash $<
 
 ######
-#
 srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/*_?ats.js
 srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/ML/*_?ats.js
 srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/Bacon.js/*_?ats.js
-srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/BUCS320/parcomb/*_?ats.js
 #
 srcget_dist_cleanup:: ; rm -rf ATS-Postiats/contrib/libatscc2py3/ATS2-0.3.2/output/__pycache__
 srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/contrib/libatscc2py3/ATS2-0.3.2/output/DATS/*_?ats.py
@@ -839,8 +752,6 @@ srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/contrib/libatscc2clj/ATS2-0.3.2/outp
 #
 srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libsdl2/TEST/DATA/*.png
 srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libcairo/TEST/DATA/*.png
-#
-srcget_dist_cleanup:: ; $(RMF) ATS-Postiats/npm-utils/contrib/libats-/hwxi/OpenSCAD/TEST/output/*.stl
 #
 ######
 
@@ -877,7 +788,6 @@ srcget_patscontrib:: srcget_patscontrib_OpenSSL
 srcget_patscontrib_OpenSSL:: SCRIPT/patscontrib_OpenSSL.bash ; bash $<
 
 ######
-#
 # srcget_patscontrib:: srcget_patscontrib_HTML-emscripten
 # srcget_patscontrib_HTML-emscripten:: SCRIPT/patscontrib_HTML-emscripten.bash ; bash $<
 # srcget_patscontrib:: srcget_patscontrib_HTML-emscripten_canvas-2d
@@ -905,7 +815,6 @@ PACKNAME=ATS2-Postiats-$(PATSVER)
 # atspacktarzvcf: atspacktarzvcf_int
 # atspacktarzvcf: atspacktarzvcf_gmp
 ######
-#
 PACKNAMEgmp=ATS2-Postiats-gmp-$(PATSVER)
 #
 atspacktarzvcf_gmp:: ; $(RMRF) $(PACKNAMEgmp)
@@ -920,7 +829,6 @@ atspacktarzvcf_gmp_up:: ; \
 scp $(PACKNAMEgmp).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(PACKNAMEgmp).tgz
 #
 ######
-#
 PACKNAMEint=ATS2-Postiats-int-$(PATSVER)
 #
 atspacktarzvcf_int:: ; $(RMRF) $(PACKNAMEint)
@@ -933,7 +841,6 @@ atspacktarzvcf_int:: ; $(TARZVCF) $(PACKNAMEint).tgz $(PACKNAMEint)/.
 atspacktarzvcf_int_up:: ; scp $(PACKNAMEint).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(PACKNAMEint).tgz
 #
 ######
-#
 CONTRIBNAME=ATS2-Postiats-contrib-0.3.13
 CONTRIBNAME=ATS2-Postiats-contrib-$(PATSVER)
 #

@@ -445,6 +445,6 @@ url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07/CODE/Permute.h
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
 

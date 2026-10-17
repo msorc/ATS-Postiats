@@ -199,17 +199,17 @@ R34vector_map_fun
 ( xs: R34vector(a, n)
 , fopr: (a) -<fun1> b): R34vector(b, n) = "mac#%"
 fun
-R34vector_map_cloref
+R34vector_map_cloptr
 {a:t0p}
 {b:t0p}
 {n:int}
 ( xs: R34vector(a, n)
-, fopr: (a) -<cloref1> b): R34vector(b, n) = "mac#%"
+, fopr: (a) -<cloptr1> b): R34vector(b, n) = "mac#%"
 //
 (*
 overload map with R34vector_map_fun
 *)
-overload map with R34vector_map_cloref
+overload map with R34vector_map_cloptr
 //
 (* ****** ****** *)
 //
@@ -219,12 +219,12 @@ R34vector_foreach_fun
 ( xs: R34vector(a)
 , fopr: (a) -<fun1> void): void = "mac#%"
 fun
-R34vector_foreach_cloref
+R34vector_foreach_cloptr
 {a:t0p}
 ( xs: R34vector(a)
-, fopr: (a) -<cloref1> void): void = "mac#%"
+, fopr: (a) -<cloptr1> void): void = "mac#%"
 //
-overload foreach with R34vector_foreach_cloref
+overload foreach with R34vector_foreach_cloptr
 //
 (* ****** ****** *)
 //
@@ -235,13 +235,13 @@ R34vector_iforeach_fun
 ( xs: R34vector(a, n)
 , fopr: (natLt(n), a) -<fun1> void): void = "mac#%"
 fun
-R34vector_iforeach_cloref
+R34vector_iforeach_cloptr
 {a:t0p}
 {n:int}
 ( xs: R34vector(a, n)
-, fopr: (natLt(n), a) -<cloref1> void): void = "mac#%"
+, fopr: (natLt(n), a) -<cloptr1> void): void = "mac#%"
 //
-overload iforeach with R34vector_iforeach_cloref
+overload iforeach with R34vector_iforeach_cloptr
 //
 (* ****** ****** *)
 //
@@ -252,13 +252,13 @@ R34vector_foldleft_fun
 ( xs: R34vector(a)
 , r0: (r), fopr: (r, a) -<fun1> r): (r) = "mac#%"
 fun
-R34vector_foldleft_cloref
+R34vector_foldleft_cloptr
 {r:t0p}
 {a:t0p}
 ( xs: R34vector(a)
-, r0: (r), fopr: (r, a) -<cloref1> r): (r) = "mac#%"
+, r0: (r), fopr: (r, a) -<cloptr1> r): (r) = "mac#%"
 //
-overload foldleft with R34vector_foldleft_cloref
+overload foldleft with R34vector_foldleft_cloptr
 //
 (* ****** ****** *)
 //
@@ -269,11 +269,11 @@ R34vector_tabulate_fun
 ( int(n)
 , fopr: (natLt(n)) -<fun1> a): R34vector(a, n) = "mac#%"
 fun
-R34vector_tabulate_cloref
+R34vector_tabulate_cloptr
 {a:t0p}
 {n:nat}
 ( int(n)
-, fopr: (natLt(n)) -<cloref1> a): R34vector(a, n) = "mac#%"
+, fopr: (natLt(n)) -<cloptr1> a): R34vector(a, n) = "mac#%"
 //
 (* ****** ****** *)
 //
@@ -285,12 +285,12 @@ R34vector_tabulate2_fun
 , init: a
 , fopr: (a, natLt(n)) -<fun1> a): R34vector(a, n) = "mac#%"
 fun
-R34vector_tabulate2_cloref
+R34vector_tabulate2_cloptr
 {a:t0p}
 {n:nat}
 ( int(n)
 , init: a
-, fopr: (a, natLt(n)) -<cloref1> a): R34vector(a, n) = "mac#%"
+, fopr: (a, natLt(n)) -<cloptr1> a): R34vector(a, n) = "mac#%"
 //
 (* ****** ****** *)
 

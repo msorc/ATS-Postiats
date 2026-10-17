@@ -41,14 +41,14 @@ exception FatalErrorExn_interr of ()
 // HX:
 // raising FatalErrorException
 //
-fun abort{a:viewt@ype}():<!exn> (a)
+fun{a:vt0p} abort ():<!exn> (a)
 //
 (* ****** ****** *)
 //
 // HX-2015-01-04:
 // raising FatalErrorException_interr
 //
-fun abort_interr{a:viewt@ype}():<!exn> (a)
+fun{a:vt0p} abort_interr ():<!exn> (a)
 //
 (* ****** ****** *)
 //

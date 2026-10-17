@@ -1,0 +1,1 @@
+#define ATS_STATIC_PREFIX 12

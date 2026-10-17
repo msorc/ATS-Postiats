@@ -33,6 +33,8 @@
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
 staload "./pats_error.sats"
 
 (* ****** ****** *)
@@ -49,7 +51,7 @@ segfault
 //
 in (* in-of-local *)
 
-implement
+implement{a}
 abort() = let
 (*
   val _ = segfault()
@@ -58,7 +60,7 @@ in
   $raise FatalErrorExn((*void*))
 end // end of [abort]
 
-implement
+implement{a}
 abort_interr() = let
 (*
   val _ = segfault()

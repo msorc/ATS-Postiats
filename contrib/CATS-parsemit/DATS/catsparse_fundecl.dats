@@ -13,6 +13,8 @@
 //
 (* ****** ****** *)
 //
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 #staload
 "./../SATS/catsparse.sats"
 #staload
@@ -85,11 +87,11 @@ val () =
 *)
 //
 val+
-F0HEAD(fid, _, _) = fhd.f0head_node
+~F0HEAD(fid, _, _) = f0head_node_view(fhd.f0head_node())
 //
 val
 opt =
-$F0HEAD.insert_opt(fid.i0dex_sym, fhd)
+$F0HEAD.insert_opt(fid.i0dex_sym(), fhd)
 //
 in
 //

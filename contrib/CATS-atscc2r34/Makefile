@@ -44,8 +44,8 @@ bin_atscc2r34
 bin_atscc2r34: \
 $(SOURCES_DATS); \
 $(PATSCC) \
--DATS_MEMALLOC_GCBDW -O2 -o bin/atscc2r34 \
-$(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS) -lgc
+-DATS_MEMALLOC_LIBC -O2 -o bin/atscc2r34 \
+$(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS)
 #
 ######
 #

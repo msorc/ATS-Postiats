@@ -20,6 +20,10 @@ LIBATSCC_targetloc
 //
 (* ****** ****** *)
 //
+#staload "./../basics_pl.sats"
+//
+(* ****** ****** *)
+//
 #include "{$LIBATSCC}/SATS/arrayref.sats"
 //
 (* ****** ****** *)

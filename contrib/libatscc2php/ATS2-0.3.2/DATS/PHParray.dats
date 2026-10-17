@@ -28,14 +28,15 @@ UN = "prelude/SATS/unsafe.sats"
 //
 #staload "./../SATS/integer.sats"
 //
-#staload "./../SATS/list.sats"
 #staload "./../SATS/PHParray.sats"
 #staload "./../SATS/PHParref.sats"
+//
+#staload "./../SATS/list_vt.sats"
 //
 (* ****** ****** *)
 //
 implement
-PHParray_make_list
+PHParray_make_list_vt
 {a}(xs) =
 (
 $extfcall
@@ -44,13 +45,13 @@ $extfcall
 )
 ) where
 {
-  val A = PHParref_make_list{a}(xs)
+  val A = PHParref_make_list_vt{a}(xs)
 }
 //
 (* ****** ****** *)
 
 implement
-PHParray2list
+PHParray2list_vt
   {a}(A) = let
 //
 val [n:int] asz = A.size()
@@ -59,23 +60,23 @@ fun
 loop
 {i:nat|i <= n}
 (i: int(i),
- res: list(a, n-i)): list(a, n) =
+ res: list_vt(a, n-i)): list_vt(a, n) =
 (
 if i > 0
   then
-  loop(i-1, list_cons(A[i-1], res))
+  loop(i-1, list_vt_cons(A[i-1], res))
   else res
 // end of [if]
 ) (* end of [loop] *)
 //
 in
-  loop(asz, list_nil())
-end // end of [PHParray2list]
+  loop(asz, list_vt_nil())
+end // end of [PHParray2list_vt]
 
 (* ****** ****** *)
 
 implement
-PHParray2list_rev
+PHParray2list_vt_rev
   {a}(A) = let
 //
 val [n:int] asz = A.size()
@@ -86,24 +87,24 @@ loop
 {i:nat|i <= n}
 ( n: int(n)
 , i: int(i)
-, res: list(a, i)): list(a, n) =
+, res: list_vt(a, i)): list_vt(a, n) =
 (
 if
 (i < n)
 then
-loop(n, i+1, list_cons(A[i], res))
+loop(n, i+1, list_vt_cons(A[i], res))
 else res
 // end of [if]
 ) (* end of [loop] *)
 //
 in
-  loop(asz, 0, list_nil())
-end // end of [PHParray2list_rev]
+  loop(asz, 0, list_vt_nil())
+end // end of [PHParray2list_vt_rev]
 
 (* ****** ****** *)
 
 implement
-PHParray2list_map
+PHParray2list_vt_map
   {a}{b}(A, fopr) = let
 //
 val [n:int] asz = A.size()
@@ -112,54 +113,63 @@ fun
 loop
 {n:nat}
 {i:nat|i <= n}
-( n: int(n)
+( A: PHParray(a)
+, f: !cfun(a, b)
+, n: int(n)
 , i: int(i)
-, res: list(b, i)): list(b, n) =
+, res: list_vt(b, i)): list_vt(b, n) =
 (
 if
 (i < n)
 then
-loop(n, i+1, list_cons(fopr(A[i]), res))
+loop(A, f, n, i+1, list_vt_cons(f(A[i]), res))
 else res
 // end of [if]
 ) (* end of [loop] *)
 //
+val res = loop(A, fopr, asz, 0, list_vt_nil())
+//
 in
-  list_reverse(loop(asz, 0, list_nil()))
-end // end of [PHParray2list_map]
+  cfun_free(fopr); list_vt_reverse(res)
+end // end of [PHParray2list_vt_map]
 
 (* ****** ****** *)
 
 implement
-PHParray2list_map_rev
+PHParray2list_vt_map_rev
   {a}{b}(A, fopr) = let
 //
 val [n:int] asz = A.size()
 //
 fun
 loop
+{n:nat}
 {i:nat|i <= n}
-(i: int(i),
- res: list(b, n-i)): list(b, n) =
+( A: PHParray(a)
+, f: !cfun(a, b)
+, n: int(n)
+, i: int(i)
+, res: list_vt(b, i)): list_vt(b, n) =
 (
-if i > 0
-  then
-  loop(i-1, list_cons(fopr(A[i-1]), res))
-  else res
+if
+(i < n)
+then
+loop(A, f, n, i+1, list_vt_cons(f(A[i]), res))
+else res
 // end of [if]
 ) (* end of [loop] *)
 //
+val res = loop(A, fopr, asz, 0, list_vt_nil())
+//
 in
-  list_reverse(loop(asz, list_nil()))
-end // end of [PHParray2list_map_rev]
+  cfun_free(fopr); res
+end // end of [PHParray2list_vt_map_rev]
 
 (* ****** ****** *)
 
 implement
 PHParray_forall
-  (A, test) =
-  loop(asz, 0) where
-{
+  {a}(A, test) = let
 //
 val [n:int] asz = A.size()
 //
@@ -167,7 +177,9 @@ fun
 loop
 {n:nat}
 {i:nat|i <= n}
-( n: int(n)
+( A: PHParray(a)
+, f: !cfun(a, bool)
+, n: int(n)
 , i: int(i)): bool =
 (
 if
@@ -175,21 +187,23 @@ if
 then
 (
 if
-test(A[i]) then loop(n, i+1) else false
+f(A[i]) then loop(A, f, n, i+1) else false
 ) (* end of [then] *)
 else true // end of [else]
 // end of [if]
 ) (* end of [loop] *)
 //
-} // end of [PHParray_forall]
+val res = loop(A, test, asz, 0)
+//
+in
+  cfun_free(test); res
+end // end of [PHParray_forall]
 
 (* ****** ****** *)
 
 implement
 PHParray_foreach
-  (A, fwork) =
-  loop(asz, 0) where
-{
+  {a}(A, fwork) = let
 //
 val [n:int] asz = A.size()
 //
@@ -197,7 +211,9 @@ fun
 loop
 {n:nat}
 {i:nat|i <= n}
-( n: int(n)
+( A: PHParray(a)
+, f: !cfun(a, void)
+, n: int(n)
 , i: int(i)): void =
 (
 if
@@ -205,14 +221,16 @@ if
 then
 (
 let val () =
-  fwork(A[i]) in loop(n, i+1)
+  f(A[i]) in loop(A, f, n, i+1)
 end // end of [let]
 ) (* end of [then] *)
 else ((*void*)) // end of [else]
 // end of [if]
 ) (* end of [loop] *)
 //
-} // end of [PHParray_foreach]
+in
+  loop(A, fwork, asz, 0); cfun_free(fwork)
+end // end of [PHParray_foreach]
 
 (* ****** ****** *)
 

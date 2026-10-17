@@ -233,6 +233,6 @@ end // end of [checkast_Strptr1]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "checkast_atxt.txt")
 %}\

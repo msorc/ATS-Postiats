@@ -106,6 +106,6 @@ ckastloc_Strptr1(x) = checkast_Strptr1(,(x), $mylocation)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "checkast_atxt.txt")
 %}\

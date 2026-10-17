@@ -161,6 +161,6 @@ atspre_g0string2int_ssize
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "integer_size_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "integer_size_atxt.txt")
 %}\
 

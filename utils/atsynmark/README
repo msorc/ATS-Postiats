@@ -5,11 +5,39 @@
 ######
 
 The command [pats2xhtml] is for syntax-hilighting level-1 ATS2 syntax
-trees.
+trees: it turns ATS2 source into XHTML (the keywords, comments, external
+code, static and dynamic expressions, labels and strings are in <span>s).
+
+The command line:
+
+  pats2xhtml [--embedded] -s|--static <file> ...   # a .sats file
+  pats2xhtml [--embedded] -d|--dynamic <file> ...  # a .dats file
+  pats2xhtml [--embedded] -d|-s                    # the input is STDIN
+  pats2xhtml -o|--output <file> ...                # the output goes to <file>
+  pats2xhtml -h|--help
+
+[--embedded] gives the <pre> element only (no HTML head). See the usage text.
+The same is available as a library: utils/libatsynmark (for example
+string_pats2xhtmlize_bground, which doc/EXAMPLE/EFFECTIVATS/MYTEXT calls).
 
 ######
 
-Please note that the code in this directory is written in ATS/Anairiats
-(ATS1) as ATS/Postiats (ATS2) is implemented in ATS1.
+Building (ATS1 is not needed):
+
+  make                  # in this directory (or: make -C utils/atsynmark)
+
+builds BUILD/pats2xhtml with patsopt and the C compiler (see Makefile_build and
+../libatsynmark/Makefile_vars for the variables PATSHOME, PATSOPT, CC,
+LIBATSOPT), links it with BUILD/libatsynmark.a (../libatsynmark, built first
+if it is missing) and libatsopt.a (src/libatsopt.a, built first if it is
+missing: the compiler as a library), and copies it to $(PATSHOME)/bin.
+
+  make test             # the md5 suite of ../libatsynmark/TEST (needs python3)
+
+Please note that the code in this directory is written in ATS2 without GC
+(CLAUDE.md, "No GC"): the lexer, the parser and the syntax trees are those of
+the compiler in src/ (written in ATS2 too; it used to be the ATS1 modules).
+The output is the same as that of the ATS1 version (src/PORTING.md, section
+"pats2xhtml and libatsynmark").
 
 ###### end of [README for Atsynmark] ######

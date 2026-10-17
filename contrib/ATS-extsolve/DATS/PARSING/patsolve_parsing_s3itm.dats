@@ -14,140 +14,41 @@
 
 (* ****** ****** *)
 
-local
-
-fun
-aux_S3ITMsvar
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S3ITMsvar(parse_s2var(x))
-end (* aux_S3ITMsvar *)
-
-fun
-aux_S3ITMsVar
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S3ITMsVar(parse_s2Var(x))
-end (* aux_S3ITMsVar *)
-
-fun
-aux_S3ITMhypo
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S3ITMhypo(parse_h3ypo(x))
-end (* aux_S3ITMhypo *)
-
-fun
-aux_S3ITMcnstr
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S3ITMcnstr(parse_c3nstr(x))
-end (* aux_S3ITMcnstr *)
-
-fun
-aux_S3ITMcnstr_ref
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x_loc, xs) = xs
-val-list_cons (x_opt, xs) = xs
-//
-in
-  S3ITMcnstr_ref(parse_location(x_loc), parse_c3nstropt(x_opt))
-end (* aux_S3ITMcnstropt *)
+macdef
+JAG(x0, i) = jsonval_array_get(,(x0), ,(i))
 
 (* ****** ****** *)
-
-fun
-aux_S3ITMdisj
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S3ITMdisj(parse_s3itmlstlst(x))
-end // (* aux_S3ITMdisj *)
-
-(* ****** ****** *)
-
-fun
-aux_S3ITMsolassert
-(
-  x0: jsonval
-) : s3itm = let
-//
-val-JSONarray(xs) = x0
-val-list_cons (x, xs) = xs
-//
-in
-  S3ITMsolassert(parse_s2exp(x))
-end (* aux_S3ITMsolassert *)
-
-in (* in-of-local *)
 
 implement
 parse_s3itm
-  (jsnv0) = let
+  (ar, tbls, jsnv0) = let
 //
-(*
-val () =
-println!
-  ("parse_s3itm: jsnv0 = ", jsnv0)
-*)
-//
-val-JSONobject(lxs) = jsnv0
-val () = assertloc(length(lxs) >= 1)
-val+list_cons (lx, lxs) = lxs
-//
-val name = lx.0 and jsnv2 = lx.1
+val name = jsonval_get_name(jsnv0)
+val x0 = jsonval_get_value(jsnv0)
 //
 in
 //
 case+ name of
-//
-| "S3ITMsvar" => aux_S3ITMsvar(jsnv2)
-//
-| "S3ITMsVar" => aux_S3ITMsVar(jsnv2)
-//
-| "S3ITMhypo" => aux_S3ITMhypo(jsnv2)
-//
-| "S3ITMcnstr" => aux_S3ITMcnstr(jsnv2)
-//
-| "S3ITMcnstr_ref" => aux_S3ITMcnstr_ref(jsnv2)
-//
-| "S3ITMdisj" => aux_S3ITMdisj(jsnv2)
-//
-| "S3ITMsolassert" => aux_S3ITMsolassert(jsnv2)
-//
+| "S3ITMsvar" =>
+    s3itm_S3ITMsvar(ar, parse_s2var(ar, tbls, JAG(x0, 0)))
+| "S3ITMsVar" =>
+    s3itm_S3ITMsVar(ar, parse_s2Var(ar, tbls, JAG(x0, 0)))
+| "S3ITMhypo" =>
+    s3itm_S3ITMhypo(ar, parse_h3ypo(ar, tbls, JAG(x0, 0)))
+| "S3ITMcnstr" =>
+    s3itm_S3ITMcnstr(ar, parse_c3nstr(ar, tbls, JAG(x0, 0)))
+| "S3ITMcnstr_ref" => let
+    val loc =
+      parse_location(ar, tbls, JAG(x0, 0))
+    val opt =
+      parse_c3nstropt(ar, tbls, JAG(x0, 1))
+  in
+    s3itm_S3ITMcnstr_ref(ar, loc, opt)
+  end // end of [S3ITMcnstr_ref]
+| "S3ITMdisj" =>
+    s3itm_S3ITMdisj(ar, parse_s3itmlstlst(ar, tbls, JAG(x0, 0)))
+| "S3ITMsolassert" =>
+    s3itm_S3ITMsolassert(ar, parse_s2exp(ar, tbls, JAG(x0, 0)))
 | _(*unrecognized*) =>
   let
     val () =
@@ -160,8 +61,6 @@ case+ name of
   end // end of [unrecognized]
 //
 end // end of [parse_s3itm]
-
-end // end of [local]
 
 (* ****** ****** *)
 

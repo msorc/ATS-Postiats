@@ -33,6 +33,6 @@ gcompare_val_val<bool> = compare_bool0_bool0
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_bool_atxt.txt")
 %}\

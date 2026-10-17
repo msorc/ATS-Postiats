@@ -9,15 +9,13 @@ PATSOPT=$(PATSHOME)/bin/patsopt
 
 ######
 #
-LDPATH :=
-LDPATH := -L$(ATSHOME)/ccomp/lib
-LDPATH += -L$(ATSHOME)/ccomp/lib64
-#LDPATH += -L$(PATSHOME)/utils/libatsopt
-#LDPATH += -L$(PATSHOME)/utils/libatsynmark
+INPATH := -I$(PATSHOME)/src
 #
-LIBRARY = -latsynmark -latsopt -lats -lgmp -lgc
+LDPATH := -L$(PATSHOME)/ccomp/atslib/lib
 #
-ATSRUNTIME=$(ATSHOME)/ccomp/runtime
+# libatsynmark.a: make -f Makefile_devl bin_pats2xhtml (or make -C utils/libatsynmark install)
+#
+LIBRARY = -latsynmark -latsopt -latslib -lgmp
 #
 ######
 #
@@ -27,8 +25,8 @@ mytexting: \
 mytexting.dats ; \
 $(PATSCC) -verbose \
   -O2 -o $@ mytexting.dats \
-  -D_ATS_GCBDW -DATS_MEMALLOC_GCBDW \
-  $(ATSRUNTIME)/ats_prelude.c $(LDPATH) $(LIBRARY)
+  -DATS_MEMALLOC_LIBC \
+  $(INPATH) $(LDPATH) $(LIBRARY)
 #
 ######
 #

@@ -32,19 +32,17 @@
 // Time: February 2012
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_lintprgm_myint_int.dats)
+// This file is #include-d by the user of [icnstrlst_solve<intknd>]
+//
+(* ****** ****** *)
 
-#define ATS_DYNLOADFLAG 0 // no need for dynloading at run-time
+staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-%{^
-#include "pats_lintprgm_myint.cats"
-%} // end of [%{^]
-
-(* ****** ****** *)
-
-staload
-INTINF = "./pats_intinf.sats"
+staload INTINF = "./pats_intinf.sats"
 
 (* ****** ****** *)
 
@@ -52,7 +50,7 @@ staload "./pats_lintprgm.sats"
 
 (* ****** ****** *)
 
-viewtypedef myint = myint(intknd)
+vtypedef myint = myint(intknd)
 
 extern castfn myint2int0 (x: myint):<> int
 //
@@ -71,6 +69,11 @@ extern
 praxi myint_int_free (x: myint): void
 extern
 castfn myint_int_copy (x: !myint):<> myint
+
+(* ****** ****** *)
+
+extern
+fun patsopt_lintprgm_gcd_int_int (int, int):<> int = "mac#"
 
 (* ****** ****** *)
 
@@ -94,53 +97,53 @@ implement myint_copy<intknd> (x) = myint_int_copy (x)
 (* ****** ****** *)
 
 implement
-neg_myint<intknd> (x) = i2mi(~(mi2i0)x)
+neg_myint<intknd> (x) = i2mi(~(mi2i0(x)))
 implement
-neg1_myint<intknd> (x) = i2mi(~(mi2i1)x)
+neg1_myint<intknd> (x) = i2mi(~(mi2i1(x)))
 
 (* ****** ****** *)
 
 implement
-add_myint_int<intknd> (x, i) = i2mi((mi2i0)x + i)
+add_myint_int<intknd> (x, i) = i2mi(mi2i0(x) + i)
 
 (* ****** ****** *)
 
 implement
 add01_myint_myint<intknd>
   (x, y) = i2mi(res) where {
-  val res = (mi2i0)x + (mi2i1)y
+  val res = mi2i0(x) + mi2i1(y)
 } // end of [add_myint_myint<intknd>]
 
 implement
 sub01_myint_myint<intknd>
   (x, y) = (i2mi)res where {
-  val res = (mi2i0)x - (mi2i1)y
+  val res = mi2i0(x) - mi2i1(y)
 } // end of [sub_myint_myint<intknd>]
 
 (* ****** ****** *)
 
 implement
-mul01_myint_myint<intknd> (x, y) = i2mi((mi2i0)x * (mi2i1)y)
+mul01_myint_myint<intknd> (x, y) = i2mi(mi2i0(x) * mi2i1(y))
 implement
-mul10_myint_myint<intknd> (x, y) = i2mi((mi2i1)x * (mi2i0)y)
+mul10_myint_myint<intknd> (x, y) = i2mi(mi2i1(x) * mi2i0(y))
 implement
-mul11_myint_myint<intknd> (x, y) = i2mi((mi2i1)x * (mi2i1)y)
+mul11_myint_myint<intknd> (x, y) = i2mi(mi2i1(x) * mi2i1(y))
 
 (* ****** ****** *)
 
 implement
 div01_myint_myint<intknd>
   (x, y) = (i2mi)res where {
-  val res = (mi2i0)x / (mi2i1)y
+  val res = mi2i0(x) / mi2i1(y)
 } // end of [div01_myint_myint<intknd>]
 
 implement
-div11_myint_myint<intknd> (x, y) = i2mi((mi2i1)x / (mi2i1)y)
+div11_myint_myint<intknd> (x, y) = i2mi(mi2i1(x) / mi2i1(y))
 
 implement
 ediv01_myint_myint<intknd>
   (x, y) = (i2mi)res where {
-  val res = (mi2i0)x / (mi2i1)y
+  val res = mi2i0(x) / mi2i1(y)
 } // end of [ediv_myint_myint<intknd>]
 
 (* ****** ****** *)
@@ -148,37 +151,43 @@ ediv01_myint_myint<intknd>
 implement
 mod01_myint_myint<intknd>
   (x, y) = (i2mi)res where {
-  val res = op mod ((mi2i0)x, (mi2i1)y)
+  val res = mi2i0(x) % mi2i1(y)
 } // end of [mod01_myint_myint<intknd>]
 
 implement
-mod11_myint_myint<intknd> (x, y) = i2mi((mi2i1)x mod (mi2i1)y)
+mod11_myint_myint<intknd> (x, y) = i2mi(mi2i1(x) % mi2i1(y))
 
 (* ****** ****** *)
 
 implement
 gcd01_myint_myint<intknd>
   (x, y) = (i2mi)res where {
-  val res = op gcd ((mi2i0)x, (mi2i1)y)
+  val res = patsopt_lintprgm_gcd_int_int (mi2i0(x), mi2i1(y))
 } // end of [gcd_myint_myint<intknd>]
 
 (* ****** ****** *)
 
-implement lt_myint_int<intknd> (x, y) = (mi2i1)x < y
-implement lte_myint_int<intknd> (x, y) = (mi2i1)x <= y
-implement gt_myint_int<intknd> (x, y) = (mi2i1)x > y
-implement gte_myint_int<intknd> (x, y) = (mi2i1)x >= y
-implement eq_myint_int<intknd> (x, y) = (mi2i1)x = y
-implement neq_myint_int<intknd> (x, y) = (mi2i1)x != y
+implement lt_myint_int<intknd> (x, y) = mi2i1(x) < y
+implement lte_myint_int<intknd> (x, y) = mi2i1(x) <= y
+implement gt_myint_int<intknd> (x, y) = mi2i1(x) > y
+implement gte_myint_int<intknd> (x, y) = mi2i1(x) >= y
+implement eq_myint_int<intknd> (x, y) = mi2i1(x) = y
+implement neq_myint_int<intknd> (x, y) = mi2i1(x) != y
 implement
-compare_myint_int<intknd> (x, y) = compare ((mi2i1)x, y)
+compare_myint_int<intknd> (x, y) = let
+  val x = mi2i1(x) in if x < y then ~1 else (if x > y then 1 else 0)
+end // end of [compare_myint_int<intknd>]
 
 (* ****** ****** *)
 
-implement lt_myint_myint<intknd> (x, y) = ((mi2i1)x < (mi2i1)y)
-implement lte_myint_myint<intknd> (x, y) = ((mi2i1)x <= (mi2i1)y)
-implement gt_myint_myint<intknd> (x, y) = ((mi2i1)x > (mi2i1)y)
-implement gte_myint_myint<intknd> (x, y) = ((mi2i1)x >= (mi2i1)y)
+implement lt_myint_myint<intknd> (x, y) = (mi2i1(x) < mi2i1(y))
+implement lte_myint_myint<intknd> (x, y) = (mi2i1(x) <= mi2i1(y))
+implement gt_myint_myint<intknd> (x, y) = (mi2i1(x) > mi2i1(y))
+implement gte_myint_myint<intknd> (x, y) = (mi2i1(x) >= mi2i1(y))
+implement
+compare_myint_myint<intknd> (x, y) = let
+  val x = mi2i1(x) and y = mi2i1(y) in if x < y then ~1 else (if x > y then 1 else 0)
+end // end of [compare_myint_myint<intknd>]
 
 (* ****** ****** *)
 
@@ -193,14 +202,14 @@ myintvec_free<intknd>
 //
 // HX: myint(int) is actually a type
 //
-  viewtypedef vt = myint
+  vtypedef vt = myint
   val (pfgc, pf | p) = __cast (xs) where {
     extern castfn __cast
       (x: myintvec (intknd, n))
-      :<> [l:addr] (free_gc_v (vt?, n, l), array_v(vt?, n, l) | ptr l)
+      :<> [l:addr] (mfree_gc_v (l), array_v(vt?, l, n) | ptr l)
   } // end of [val]
 in
-  array_ptr_free (pfgc, pf | p)
+  $effmask_wrt (array_ptr_free (pf, pfgc | p))
 end // end of [myintvec_free]
 
 (* ****** ****** *)

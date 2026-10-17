@@ -1,0 +1,1 @@
+9150cb325ff77c17188ad48e23d763d1 e8aaa0b4daf5f0acc31b13521bd31a64  (G2SEED=1 G2SCALE=3: md5 of the stdout and the stderr of the ATS1 build g2dump1; make g2test checks the ATS2 build against it)

@@ -538,6 +538,6 @@ neq_g1uint_int
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "integer_atxt.txt")
 %}\

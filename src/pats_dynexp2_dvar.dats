@@ -33,13 +33,24 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_dynexp2_dvar.dats, see PORTING.md)
+// The cell of ATS1 ([ref (d2var_struct)]) is the record [d2var] of pats_dynexp2.spec (the field
+// [d2var_view], [d2varopt2] in ATS1, is a plain [d2varopt]). The sets and the maps are
+// persistent AVL trees of pats_avlmap.sats (nothing is freed).
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
 (* ****** ****** *)
 
 staload
 UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -64,48 +75,15 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
+staload _(*avlmap*) = "./pats_avlmap.dats"
+
+(* ****** ****** *)
+
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
-//
-// HX: this is for handling type recursion
-//
-abstype d2varopt2 // = d2varopt
-extern
-castfn d2varopt2_encode (x: d2varopt):<> d2varopt2
-extern
-castfn d2varopt2_decode (x: d2varopt2):<> d2varopt
-//
-(* ****** ****** *)
-
-typedef
-d2var_struct =
-@{
-  d2var_sym= symbol // name
-, d2var_loc= location // first location
-, d2var_level= int // toplevel: 0
-, d2var_linval= int // nonlinear (-1) and linear (>=0)
-, d2var_isfix= bool // is fix-variable?
-, d2var_isprf= bool // is proof?
-, d2var_decarg= s2qualst // nil/cons -> function/template
-, d2var_addr= s2expopt //
-, d2var_view= d2varopt2 // 
-, d2var_finknd= d2vfin // the status at the end of scope
-, d2var_type= s2expopt // the (current) type of a variable
-, d2var_hisexp= hisexpopt // the type erasure of [d2var_type]
-, d2var_mastype= s2expopt // the master type of a variable
-, d2var_utimes= int //
-, d2var_stamp= stamp // uniqueness stamp
-} (* end of [d2var_struct] *)
-
-(* ****** ****** *)
-
-local
-
-assume d2var_type = ref (d2var_struct)
-
-in (* in of [local] *)
 
 implement
 d2var_make
@@ -113,28 +91,25 @@ d2var_make
 //
 val stamp = $STMP.d2var_stamp_make ()
 //
-val (pfgc, pfat | p) = ptr_alloc<d2var_struct> ()
-prval ((*freed*)) = free_gc_elim {d2var_struct?} (pfgc)
-//
-val () = p->d2var_sym := id
-val () = p->d2var_loc := loc
-val () = p->d2var_level := ~1
-val () = p->d2var_linval := ~1;
-val () = p->d2var_isfix := false
-val () = p->d2var_isprf := false
-val () = p->d2var_decarg := list_nil ()
-val () = p->d2var_addr := None ()
-val () = p->d2var_view := d2varopt2_encode (None(*d2v*))
-val () = p->d2var_finknd := D2VFINnone ()
-val () = p->d2var_type := None ()
-val () = p->d2var_hisexp := None ()
-val () = p->d2var_mastype := None ()
-val () = p->d2var_utimes := 0
-val () = p->d2var_stamp := stamp
-//
 in
 //
-ref_make_view_ptr (pfat | p)
+d2var_new
+(
+  id, loc
+, ~1 // level: toplevel is 0
+, ~1 // linval: nonlinear (-1) and linear (>=0)
+, false // isfix
+, false // isprf
+, glist_nil((*void*)) // decarg
+, gopt_none((*void*)) // addr
+, gopt_none((*void*)) // view
+, d2vfin_D2VFINnone() // finknd
+, gopt_none((*void*)) // type
+, gopt_none((*void*)) // hisexp
+, gopt_none((*void*)) // mastype
+, 0 // utimes
+, stamp
+) (* end of [d2var_new] *)
 //
 end // end of [d2var_make]
 
@@ -148,154 +123,81 @@ d2var_make_any
 (* ****** ****** *)
 
 implement
-d2var_get_sym
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_sym
-end // end of [d2var_get_sym]
+d2var_get_sym (d2v) = $effmask_all (d2var_sym (d2v))
 
 implement
-d2var_get_loc
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_loc
-end // end of [d2var_get_loc]
+d2var_get_loc (d2v) = $effmask_all (d2var_loc (d2v))
 
 implement
-d2var_get_level
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_level
-end // end of [d2var_get_level]
+d2var_get_level (d2v) = $effmask_all (d2var_level (d2v))
 implement
-d2var_set_level (d2v, lev) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_level := lev
-end // end of [d2var_set_level]
+d2var_set_level (d2v, lev) = set_d2var_level (d2v, lev)
 
 implement
-d2var_get_linval
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_linval
-end // end of [d2var_get_linval]
+d2var_get_linval (d2v) = $effmask_all (d2var_linval (d2v))
 implement
-d2var_set_linval (d2v, lin) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_linval := lin
-end // end of [d2var_set_linval]
+d2var_set_linval (d2v, lin) = set_d2var_linval (d2v, lin)
 
 implement
-d2var_get_isfix
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_isfix
-end // end of [d2var_get_isfix]
+d2var_get_isfix (d2v) = $effmask_all (d2var_isfix (d2v))
 implement
-d2var_set_isfix (d2v, isfix) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_isfix := isfix
-end // end of [d2var_set_isfix]
+d2var_set_isfix (d2v, isfix) = set_d2var_isfix (d2v, isfix)
 
 implement
-d2var_get_isprf
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_isprf
-end // end of [d2var_get_isprf]
+d2var_get_isprf (d2v) = $effmask_all (d2var_isprf (d2v))
 implement
-d2var_set_isprf (d2v, isprf) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_isprf := isprf
-end // end of [d2var_set_isprf]
+d2var_set_isprf (d2v, isprf) = set_d2var_isprf (d2v, isprf)
 
 implement
-d2var_get_decarg
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_decarg
-end // end of [d2var_get_decarg]
+d2var_get_decarg (d2v) = $effmask_all (d2var_decarg (d2v))
 implement
-d2var_set_decarg (d2v, decarg) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_decarg := decarg
-end // end of [d2var_set_decarg]
+d2var_set_decarg (d2v, decarg) = set_d2var_decarg (d2v, decarg)
 
 implement
-d2var_get_addr
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_addr
-end // end of [d2var_get_addr]
+d2var_get_addr (d2v) = $effmask_all (d2var_addr (d2v))
 implement
-d2var_set_addr (d2v, s2fopt) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_addr := s2fopt
-end // end of [d2var_set_addr]
+d2var_set_addr (d2v, s2fopt) = set_d2var_addr (d2v, s2fopt)
 
 implement
-d2var_get_view
-  (d2v) = $effmask_ref let
-  val (
-    vbox pf | p
-  ) = ref_get_view_ptr (d2v) in d2varopt2_decode (p->d2var_view)
-end // end of [d2var_get_view]
+d2var_get_view (d2v) = $effmask_all (d2var_view (d2v))
 implement
-d2var_set_view (d2v, opt) = let
-  val (
-    vbox pf | p
-  ) = ref_get_view_ptr (d2v) in p->d2var_view := d2varopt2_encode (opt)
-end // end of [d2var_set_view]
+d2var_set_view (d2v, opt) = set_d2var_view (d2v, opt)
 
 implement
-d2var_get_finknd
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_finknd
-end // end of [d2var_get_finknd]
+d2var_get_finknd (d2v) = $effmask_all (d2var_finknd (d2v))
 implement
-d2var_set_finknd (d2v, knd) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_finknd := knd
-end // end of [d2var_set_finknd]
+d2var_set_finknd (d2v, knd) = set_d2var_finknd (d2v, knd)
 
 (* ****** ****** *)
 
 implement
-d2var_get_type (d2v) =
-  $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_type
-end // end of [d2var_get_type]
+d2var_get_type (d2v) = $effmask_all (d2var_type (d2v))
 implement
-d2var_set_type (d2v, opt) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_type := opt
-end // end of [d2var_set_type]
+d2var_set_type (d2v, opt) = set_d2var_type (d2v, opt)
 
 (* ****** ****** *)
 
 implement
-d2var_get_mastype
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_mastype
-end // end of [d2var_get_mastype]
+d2var_get_mastype (d2v) = $effmask_all (d2var_mastype (d2v))
 implement
-d2var_set_mastype (d2v, opt) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_mastype := opt
-end // end of [d2var_set_mastype]
+d2var_set_mastype (d2v, opt) = set_d2var_mastype (d2v, opt)
 
 (* ****** ****** *)
 
 implement
-d2var_get_hisexp
-  (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_hisexp
-end // end of [d2var_get_hisexp]
+d2var_get_hisexp (d2v) = $effmask_all (d2var_hisexp (d2v))
 implement
-d2var_set_hisexp (d2v, opt) = let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_hisexp := opt
-end // end of [d2var_set_hisexp]
+d2var_set_hisexp (d2v, opt) = set_d2var_hisexp (d2v, opt)
 
 (* ****** ****** *)
 
 implement
-d2var_get_utimes (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_utimes
-end // end of [d2var_get_utimes]
+d2var_get_utimes (d2v) = $effmask_all (d2var_utimes (d2v))
 implement
-d2var_set_utimes (d2v, nused) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_utimes := nused
-end // end of [d2var_set_utimes]
+d2var_set_utimes (d2v, nused) = $effmask_all (set_d2var_utimes (d2v, nused))
 
 implement
-d2var_get_stamp (d2v) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (d2v) in p->d2var_stamp
-end // end of [d2var_get_stamp]
-
-end // end of [local]
+d2var_get_stamp (d2v) = $effmask_all (d2var_stamp (d2v))
 
 (* ****** ****** *)
 
@@ -305,7 +207,7 @@ d2var_inc_linval (d2v) = let
 end // end of [d2var_inc_linval]
 
 implement
-d2var_inc_utimes (d2v) = let
+d2var_inc_utimes (d2v) = $effmask_all let
   val nused = d2var_get_utimes (d2v) in d2var_set_utimes (d2v, nused+1)
 end // end of [d2var_inc_utimes]
 
@@ -318,8 +220,7 @@ d2var_is_linprf (d2v) =
 if d2var_get_isprf(d2v) then d2var_is_linear(d2v) else false
 //
 implement
-d2var_is_mutabl (d2v) =
-  case+ d2var_get_view d2v of Some _ => true | None () => false
+d2var_is_mutabl (d2v) = gopt_is_some (d2var_get_view d2v)
 // end of [d2var_is_mutabl]
 //
 (* ****** ****** *)
@@ -361,11 +262,13 @@ d2var_ptr_viewat_make
   val loc = d2var_get_loc (ptr)
   and sym = d2var_get_sym (ptr)
   val d2vw = (
-    case+ opt of
-    | Some d2vw => d2vw
-    | None () => let
+    case+ gopt_view (opt) of
+    | ~GOsome d2vw => d2vw
+    | ~GOnone () => let
        val nam = $SYM.symbol_get_name (sym)
-       val sym1 = $SYM.symbol_make_string (nam + "$view")
+       val nam1 = string0_append (nam, "$view")
+       val sym1 = $SYM.symbol_make_string ($UN.strptr2string (nam1))
+       val () = strptr_free (nam1)
      in
        d2var_make (loc, sym1)
      end // end of [None]
@@ -378,7 +281,7 @@ d2var_ptr_viewat_make
 
 implement
 d2var_ptr_viewat_make_none
-  (d2v_ptr) = d2var_ptr_viewat_make (d2v_ptr, None)
+  (d2v_ptr) = d2var_ptr_viewat_make (d2v_ptr, gopt_none((*void*)))
 // end of [d2var_ptr_viewat_make_none]
 
 (* ****** ****** *)
@@ -406,7 +309,7 @@ val () = fprint_string (out, ")")
 
 implement
 fprint_d2varlst
-  (out, d2vs) = $UT.fprintlst (out, d2vs, ", ", fprint_d2var)
+  (out, d2vs) = $UT.fprintlst<d2var> (out, d2vs, ", ", fprint_d2var)
 // end of [fprint_d2varlst]
 
 (* ****** ****** *)
@@ -425,25 +328,25 @@ prstr (str) = fprint_string (out, ,(str))
 //
 in
 //
-case+ d2vfin of
-| D2VFINnone () =>
+case+ d2vfin_view (d2vfin) of
+| ~D2VFINnone () =>
     prstr "D2VFINnone()"
-| D2VFINsome (s2e) => {
+| ~D2VFINsome (s2e) => {
     val () = prstr "D2VFINsome("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   }
-| D2VFINsome_lvar (s2e) => {
+| ~D2VFINsome_lvar (s2e) => {
     val () = prstr "D2VFINsome_lvar("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   }
-| D2VFINsome_vbox (s2e) => {
+| ~D2VFINsome_vbox (s2e) => {
     val () = prstr "D2VFINsome_vbox("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   }
-| D2VFINdone (d2vfin) => {
+| ~D2VFINdone (d2vfin) => {
     val () = prstr "D2VFINdone("
     val () = fprint_d2vfin (out, d2vfin)
     val () = prstr ")"
@@ -454,68 +357,63 @@ end // end of [fprint_d2vfin]
 (* ****** ****** *)
 
 local
-
-staload
-FS = "libats/SATS/funset_avltree.sats"
-staload _ = "libats/DATS/funset_avltree.dats"
-
-staload
-LS = "libats/SATS/linset_avltree.sats"
-staload _ = "libats/DATS/linset_avltree.dats"
-
-val cmp = lam (
-  d2v1: d2var, d2v2: d2var
-) : int =<cloref>
-  compare_d2var_d2var (d2v1, d2v2)
-// end of [val]
-
-assume d2varset_type = $FS.set (d2var)
-assume d2varset_vtype = $LS.set (d2var)
-
-in (* in of [local] *)
+//
+fun
+cmp (x1: ptr, x2: ptr): int =
+  compare_d2var_d2var ($UN.cast{d2var} (x1), $UN.cast{d2var} (x2))
+//
+fn
+ins (xs: avlmap, x: d2var): avlmap =
+  avlmap_insert (xs, $UN.cast{ptr} (x), the_null_ptr, cmp)
+//
+in (* in-of-local *)
 
 implement
-d2varset_nil () = $FS.funset_make_nil ()
-
+d2varset_nil
+  ((*void*)) = $effmask_all ($UN.cast{d2varset} (avlmap_nil ()))
+//
 implement
 d2varset_ismem
-  (xs, x) = $FS.funset_is_member (xs, x, cmp)
-// end of [d2varset_ismem]
-
+  (xs, x) = $effmask_all (avlmap_ismem ($UN.cast{avlmap} (xs), $UN.cast{ptr} (x), cmp))
+//
 implement
 d2varset_add
-  (xs, x) = xs where {
-  var xs = xs
-  val _(*replaced*) = $FS.funset_insert (xs, x, cmp)
-} // end of [d2varset_add]
-
+  (xs, x) = $effmask_all ($UN.cast{d2varset} (ins ($UN.cast{avlmap} (xs), x)))
+// end of [d2varset_add]
+//
 implement
-d2varset_listize (xs) = $FS.funset_listize (xs)
+d2varset_listize (xs) =
+  $effmask_all ($UN.castvwtp0{d2varlst_vt} (avlmap_keys ($UN.cast{avlmap} (xs))))
 
 (* ****** ****** *)
 
 implement
-d2varset_vt_nil () = $LS.linset_make_nil ()
-
+d2varset_vt_nil
+  ((*void*)) = $effmask_all ($UN.castvwtp0{d2varset_vt} (avlmap_nil ()))
+//
 implement
-d2varset_vt_free (xs) = $LS.linset_free (xs)
-
+d2varset_vt_free (xs) = $effmask_all (
+  let val _ = $UN.castvwtp0{ptr} (xs) in () end
+) (* end of [d2varset_vt_free] *)
+//
 implement
 d2varset_vt_ismem
-  (xs, x) = $LS.linset_is_member (xs, x, cmp)
-// end of [d2varset_vt_ismem]
-
+  (xs, x) = $effmask_all (
+  avlmap_ismem ($UN.castvwtp1{avlmap} (xs), $UN.cast{ptr} (x), cmp)
+) (* end of [d2varset_vt_ismem] *)
+//
 implement
 d2varset_vt_add
-  (xs, x) = xs where {
-  var xs = xs
-  val _(*replaced*) = $LS.linset_insert (xs, x, cmp)
-} // end of [d2varset_vt_add]
-
+  (xs, x) = $effmask_all ($UN.castvwtp0{d2varset_vt}
+  (ins ($UN.castvwtp0{avlmap} (xs), x)))
+// end of [d2varset_vt_add]
+//
 implement
-d2varset_vt_listize (xs) = $LS.linset_listize (xs)
+d2varset_vt_listize (xs) =
+  $effmask_all ($UN.castvwtp0{d2varlst_vt} (avlmap_keys ($UN.castvwtp1{avlmap} (xs))))
 implement
-d2varset_vt_listize_free (xs) = $LS.linset_listize_free (xs)
+d2varset_vt_listize_free (xs) =
+  $effmask_all ($UN.castvwtp0{d2varlst_vt} (avlmap_keys ($UN.castvwtp0{avlmap} (xs))))
 
 end // end of [local]
 
@@ -525,221 +423,172 @@ implement
 fprint_d2varset
   (out, d2vset) = {
 //
-val xs =
-  d2varset_listize (d2vset)
-val () = $UT.fprintlst (out, $UN.linlst2lst(xs), ", ", fprint_d2var)
-val () = list_vt_free (xs)
+val xs = d2varset_listize (d2vset)
+val () = $UT.fprintlst<d2var> (out, glist_make_list_vt (xs), ", ", fprint_d2var)
 //
 } // end of [fprint_d2varset]
 
 (* ****** ****** *)
 
-local
-
-staload
-FM = "libats/SATS/funmap_avltree.sats"
-staload _ = "libats/DATS/funmap_avltree.dats"
-
-staload
-LM = "libats/SATS/linmap_avltree.sats"
-staload _ = "libats/DATS/linmap_avltree.dats"
-
-val cmp = lam (
-  d2v1: d2var, d2v2: d2var
-) : int =<cloref>
-  compare_d2var_d2var (d2v1, d2v2)
-// end of [val]
-
-assume
-d2varmap_type (a:type) = $FM.map (d2var, a)
-assume
-d2varmap_vtype (a:type) = $LM.map (d2var, a)
-assume
-d2varmaplst_vtype (a:type) = $LM.map (d2var, List_vt(a))
-
-in (* in of [local] *)
+implement
+compare_d2var_ptr (x1, x2) =
+  compare_d2var_d2var ($UN.cast{d2var} (x1), $UN.cast{d2var} (x2))
 
 implement
-d2varmap_nil () = $FM.funmap_make_nil ()
-
-implement
-d2varmap_search
-  {a} (map, d2v) =
-  $FM.funmap_search_opt (map, d2v, cmp)
-// end of [d2varmap_search]
-
-implement
-d2varmap_insert
-  {a} (map, d2v, x) =
-  $FM.funmap_insert (map, d2v, x, cmp)
-// end of [d2varmap_insert]
-
-implement
-d2varmap_listize
-  {a} (map) = $FM.funmap_listize (map)
-// end of [d2varmap_listize]
+d2varmap_zip_ptr (ks, vs) =
+(
+case+ ks of
+| ~list_vt_cons (k, ks1) => (
+  case+ vs of
+  | ~list_vt_cons (v, vs1) =>
+      list_vt_cons (@($UN.cast{d2var} (k), v), d2varmap_zip_ptr (ks1, vs1))
+  | ~list_vt_nil () => (list_vt_free (ks1); list_vt_nil ())
+  )
+| ~list_vt_nil () => (list_vt_free (vs); list_vt_nil ())
+) (* end of [d2varmap_zip_ptr] *)
 
 (* ****** ****** *)
 
-implement
-d2varmap_vt_nil () = $LM.linmap_make_nil ()
+implement{a}
+d2varmap_nil () = $effmask_all ($UN.cast{d2varmap(a)} (avlmap_nil ()))
 
-implement
-d2varmap_vt_free (map) = $LM.linmap_free (map)
-
-implement
-d2varmap_vt_search
-  {a} (map, d2v) =
-  $LM.linmap_search_opt (map, d2v, cmp)
-// end of [d2varmap_vt_search]
-
-implement
-d2varmap_vt_insert
-  {a} (map, d2v, x) = let
-  var res: a? // uninitialized
-  val ans = $LM.linmap_insert (map, d2v, x, cmp, res)
-  prval () = opt_clear (res)
+implement{a}
+d2varmap_search
+  (map, d2v) = $effmask_all let
+  var res: ptr?
+  val found = avlmap_find ($UN.cast{avlmap} (map), $UN.cast{ptr} (d2v), compare_d2var_ptr, res)
 in
-  ans
+  if found then Some_vt ($UN.cast{a} (res)) else None_vt ((*empty*))
+end // end of [d2varmap_search]
+
+implement{a}
+d2varmap_insert
+  (map, d2v, x) = $effmask_all let
+  val m = $UN.cast{avlmap} (map)
+  val found = avlmap_ismem (m, $UN.cast{ptr} (d2v), compare_d2var_ptr)
+  val () = map := $UN.cast{d2varmap(a)}
+    (avlmap_insert (m, $UN.cast{ptr} (d2v), $UN.cast{ptr} (x), compare_d2var_ptr))
+in
+  found
+end // end of [d2varmap_insert]
+
+implement{a}
+d2varmap_listize (map) = $effmask_all let
+  val m = $UN.cast{avlmap} (map)
+in
+  $UN.castvwtp0{List0_vt(@(d2var, a))} (d2varmap_zip_ptr (avlmap_keys (m), avlmap_vals (m)))
+end // end of [d2varmap_listize]
+
+(* ****** ****** *)
+
+implement{a}
+d2varmap_vt_nil () = $effmask_all ($UN.castvwtp0{d2varmap_vt(a)} (avlmap_nil ()))
+
+implement{a}
+d2varmap_vt_free (map) = $effmask_all (
+  let val _ = $UN.castvwtp0{ptr} (map) in () end
+) (* end of [d2varmap_vt_free] *)
+
+implement{a}
+d2varmap_vt_search
+  (map, d2v) = $effmask_all let
+  var res: ptr?
+  val found = avlmap_find ($UN.castvwtp1{avlmap} (map), $UN.cast{ptr} (d2v), compare_d2var_ptr, res)
+in
+  if found then Some_vt ($UN.cast{a} (res)) else None_vt ((*empty*))
+end // end of [d2varmap_vt_search]
+
+implement{a}
+d2varmap_vt_insert
+  (map, d2v, x) = $effmask_all let
+  val m = $UN.castvwtp0{avlmap} (map)
+  val found = avlmap_ismem (m, $UN.cast{ptr} (d2v), compare_d2var_ptr)
+  val () = map := $UN.castvwtp0{d2varmap_vt(a)}
+    (avlmap_insert (m, $UN.cast{ptr} (d2v), $UN.cast{ptr} (x), compare_d2var_ptr))
+in
+  found
 end // end of [d2varmap_vt_insert]
 
-implement
+implement{a}
 d2varmap_vt_remove
-  {a} (map, d2v) =
-  $LM.linmap_remove (map, d2v, cmp)
-// end of [d2varmap_vt_remove]
+  (map, d2v) = $effmask_all let
+  val m = $UN.castvwtp0{avlmap} (map)
+  val found = avlmap_ismem (m, $UN.cast{ptr} (d2v), compare_d2var_ptr)
+  val () = map := $UN.castvwtp0{d2varmap_vt(a)}
+    (avlmap_remove (m, $UN.cast{ptr} (d2v), compare_d2var_ptr))
+in
+  found
+end // end of [d2varmap_vt_remove]
 
-implement
-d2varmap_vt_listize
-  {a} (map) = $LM.linmap_listize (map)
-// end of [d2varmap_vt_listize]
+implement{a}
+d2varmap_vt_listize (map) = $effmask_all let
+  val m = $UN.castvwtp1{avlmap} (map)
+in
+  $UN.castvwtp0{List0_vt(@(d2var, a))} (d2varmap_zip_ptr (avlmap_keys (m), avlmap_vals (m)))
+end // end of [d2varmap_vt_listize]
 
 (* ****** ****** *)
+//
+// HX: a map from d2var to a stack of items (the values of the avlmap are [glist(ptr)])
+//
+implement{a}
+d2varmaplst_vt_nil () = $effmask_all ($UN.castvwtp0{d2varmaplst_vt(a)} (avlmap_nil ()))
 
-implement
-d2varmaplst_vt_nil () = $LM.linmap_make_nil ()
+implement{a}
+d2varmaplst_vt_free (map) = $effmask_all (
+  let val _ = $UN.castvwtp0{ptr} (map) in () end
+) (* end of [d2varmaplst_vt_free] *)
 
-implement
-d2varmaplst_vt_free
-  {a} (map) = let
-//
-typedef key = d2var
-vtypedef itm = List_vt (a)
-//
-fn f
-(
-  pfv: !unit_v | k: key, x: &itm >> itm?, env: !ptr
-) :<> void = list_vt_free (x)
-//
-val env = null
-prval pfv = unit_v ()
-val ((*void*)) =
-$effmask_all($LM.linmap_clear_funenv<key,itm> {unit_v}{ptr} (pfv | map, f, env))
-prval unit_v () = pfv
-//
-in
-  $LM.linmap_free<key,itm?> (map)
-end // end of [d2varmaplst_vt_free]
-
-implement
+implement{a}
 d2varmaplst_vt_search
-  {a} (map, d2v) = let
-//
-typedef key = d2var
-vtypedef itm = List_vt (a)
-//
-val p =
-$LM.linmap_search_ref<key,itm> (map, d2v, cmp)
-//
+  (map, d2v) = $effmask_all let
+  var res: ptr?
+  val found = avlmap_find ($UN.castvwtp1{avlmap} (map), $UN.cast{ptr} (d2v), compare_d2var_ptr, res)
 in
-//
-if (p > null)
-  then let
-    val xs = $UN.ptrget<List(a)> (p)
+  if found then let
+    val xs = $UN.cast{glist(ptr)} (res)
   in
-    case+ xs of
-      list_cons (x, _) => Some_vt (x) | _ => None_vt ()
-    // end of [case]
-  end // end of [then]
-  else None_vt((*void*))
-// end of [if]
-//
+    if glist_is_cons (xs)
+      then Some_vt ($UN.cast{a} (glist_head<ptr> (xs))) else None_vt ()
+  end else None_vt ((*empty*))
 end // end of [d2varmaplst_vt_search]
 
-implement
+implement{a}
 d2varmaplst_vt_insert
-  {a} (map, d2v, x0) = let
-//
-typedef key = d2var
-vtypedef itm = List_vt (a)
-//
-val p =
-$LM.linmap_search_ref<key,itm> (map, d2v, cmp)
-//
+  (map, d2v, x0) = $effmask_all let
+  val m = $UN.castvwtp0{avlmap} (map)
+  var res: ptr?
+  val found = avlmap_find (m, $UN.cast{ptr} (d2v), compare_d2var_ptr, res)
+  val xs = (
+    if found then $UN.cast{glist(ptr)} (res) else glist_nil{ptr} ()
+  ) : glist(ptr)
+  val xs = glist_cons<ptr> ($UN.cast{ptr} (x0), xs)
+  val () = map := $UN.castvwtp0{d2varmaplst_vt(a)}
+    (avlmap_insert (m, $UN.cast{ptr} (d2v), $UN.cast{ptr} (xs), compare_d2var_ptr))
 in
-//
-if (p > null)
-  then let
-    val xs = $UN.ptrget<itm> (p)
-    val () = $UN.ptrset<itm> (p, list_vt_cons{a}(x0, xs))
-  in
-    true
-  end // end of [then]
-  else let
-    var res: itm
-    val _(*false*) =
-      $LM.linmap_insert<key,itm> (map, d2v, list_vt_sing(x0), cmp, res)
-    val () = $UN.castvwtp0{void}(res)
-  in
-    false
-  end // end of [else]
-// end of [if]
-//
-end // end of [d2varmaplst_vt_search]
+  found
+end // end of [d2varmaplst_vt_insert]
 
-implement
+implement{a}
 d2varmaplst_vt_remove
-  {a} (map, d2v) = let
-//
-typedef key = d2var
-vtypedef itm = List_vt (a)
-//
-val p =
-$LM.linmap_search_ref<key,itm> (map, d2v, cmp)
-//
+  (map, d2v) = $effmask_all let
+  val m = $UN.castvwtp0{avlmap} (map)
+  var res: ptr?
+  val found = avlmap_find (m, $UN.cast{ptr} (d2v), compare_d2var_ptr, res)
+  val m = (
+    if found then let
+      val xs = $UN.cast{glist(ptr)} (res)
+      val xs1 = glist_tail<ptr> (xs)
+    in
+      if glist_is_cons (xs1)
+        then avlmap_insert (m, $UN.cast{ptr} (d2v), $UN.cast{ptr} (xs1), compare_d2var_ptr)
+        else avlmap_remove (m, $UN.cast{ptr} (d2v), compare_d2var_ptr)
+    end else m
+  ) : avlmap
+  val () = map := $UN.castvwtp0{d2varmaplst_vt(a)} (m)
 in
-//
-if (p > null)
-  then let
-    val xs = $UN.ptrget<itm> (p)
-  in
-    case+ xs of
-    | ~list_vt_cons
-        (_, xs) => let
-        val () = (
-          case+ xs of
-          | list_vt_cons _ => let
-              prval () = fold@(xs) in $UN.ptrset<itm> (p, xs)
-            end // end of [list_vt_cons]
-          | ~list_vt_nil () => let
-              var res: itm
-              val _(*true*) =
-                $LM.linmap_takeout<key,itm> (map, d2v, cmp, res)
-              // end of [val]
-            in
-              $UN.castvwtp0{void}(res)
-            end // end of [list_vt_nil]
-        ) : void // end of [val]
-      in
-        true
-      end // end of [list_vt_cons]
-    | ~list_vt_nil ((*void*)) => false
-  end // end of [then]
-  else false // end of [else]
-// end of [if]
+  found
 end // end of [d2varmaplst_vt_remove]
-
-end // end of [local]
 
 (* ****** ****** *)
 

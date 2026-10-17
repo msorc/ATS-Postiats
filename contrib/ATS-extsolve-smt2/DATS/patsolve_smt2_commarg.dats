@@ -45,8 +45,38 @@ PATSOLVE_targetloc"./../ATS-extsolve"
 //
 (* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
+//
 staload "./../SATS/patsolve_smt2_commarg.sats"
 staload "./../SATS/patsolve_smt2_solving.sats"
+//
+(* ****** ****** *)
+//
+// HX-2026-10: no GC
+// The constraints are parsed into an arena that
+// is freed once they are emitted
+//
+extern
+fun
+patsolve_smt2_fileref_solve
+  (inp: FILEref, out: FILEref): void
+//
+implement
+patsolve_smt2_fileref_solve
+  (inp, out) = let
+//
+val ar = arena_make_nil()
+val tbls = ptables_make_nil(ar)
+val c3t0 =
+  parse_fileref_constraints(ar, tbls, inp)
+// end of [val]
+val ((*void*)) = c3nstr_smt2_solve(ar, tbls, out, c3t0)
+//
+in
+  arena_free(ar)
+end // end of [patsolve_smt2_fileref_solve]
+//
 
 (* ****** ****** *)
 
@@ -374,22 +404,22 @@ in
 //
 case+ x of
 //
-| CAhelp _ => patsolve_smt2_help()
+| ~CAhelp _ => patsolve_smt2_help()
 //
-| CAgitem
+| ~CAgitem
     (str) => patsolve_smt2_gitem(str)
   // CAgitem
 //
-| CAinput _ => patsolve_smt2_input()
+| ~CAinput _ => patsolve_smt2_input()
 //
-| CAoutput
+| ~CAoutput
     (knd, _) => patsolve_smt2_output(knd)
   // CAoutput
 //
-| CAprintln _ => patsolve_smt2_println()
-| CAprintfile _ => patsolve_smt2_printfile()
+| ~CAprintln _ => patsolve_smt2_println()
+| ~CAprintfile _ => patsolve_smt2_printfile()
 //
-| CAargend((*void*)) => patsolve_smt2_argend()
+| ~CAargend((*void*)) => patsolve_smt2_argend()
 //
 end // end of [process_arg]
 
@@ -622,25 +652,9 @@ case+ opt of
 | ~Some_vt(filr) =>
   {
 //
-    val c3t0 =
-      parse_fileref_constraints(filr)
-    // end of [val]
-    val ((*void*)) = fileref_close(filr)
-//
-(*
-    val () =
-    fprint! (
-      stdout_ref
-    , "patsolve_smt2_input_arg: c3t0 =\n"
-    ) (* end of [fprint] *)
-    val () =
-      fpprint_c3nstr(stdout_ref, c3t0)
-    // end of [val]
-    val () = fprint_newline (stdout_ref)
-*)
-//
     val out = !the_state.outfil_ref
-    val ((*void*)) = c3nstr_smt2_solve(out, c3t0)
+    val ((*void*)) = patsolve_smt2_fileref_solve(filr, out)
+    val ((*void*)) = fileref_close(filr)
 //
   } (* end of [Some_vt] *)
 //
@@ -673,8 +687,7 @@ path of
   {
     val inp = stdin_ref
     val out = !the_state.outfil_ref
-    val c3t0 = parse_fileref_constraints(inp)
-    val ((*void*)) = c3nstr_smt2_solve(out, c3t0)
+    val ((*void*)) = patsolve_smt2_fileref_solve(inp, out)
   }
 | _(* ... *) => auxmain(path)
 //
@@ -791,8 +804,7 @@ case+ 0 of
 //
     val inp = stdin_ref
     val out = !the_state.outfil_ref
-    val c3t0 = parse_fileref_constraints(inp)
-    val ((*void*)) = c3nstr_smt2_solve(out, c3t0)
+    val ((*void*)) = patsolve_smt2_fileref_solve(inp, out)
 //
   } (* end of [test] *)
 | _ (*rest*) => ((*ignored*))

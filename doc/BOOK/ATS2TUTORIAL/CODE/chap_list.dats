@@ -9,52 +9,56 @@
 //
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC
+// lists are linear (list_vt): a function either
+// borrows a list (!list_vt) or consumes it
+//
 fun
 fromto
 {m,n:int | m <= n}
 (
   m: int(m), n: int(n)
-) : list(int, n-m) =
-  if m < n then list_cons(m, fromto(m+1, n)) else list_nil()
+) : list_vt(int, n-m) =
+  if m < n
+    then list_vt_cons(m, fromto(m+1, n)) else list_vt_nil()
+  // end of [if]
 //
-(* ****** ****** *)
-
 fun
 {a:t@ype}
 list_length
   {n:nat}
 (
-  xs: list(a, n)
+  xs: !list_vt(a, n)
 ) : int(n) = let
 //
 fun
 loop
 {i,j:nat}
 (
-  xs: list(a, i), j: int(j)
+  xs: !list_vt(a, i), j: int(j)
 ) : int(i+j) =
 (
 case+ xs of
-| list_nil () => j
-| list_cons (_, xs) => loop(xs, j+1)
+| list_vt_nil () => j
+| list_vt_cons (_, xs) => loop(xs, j+1)
 )
 //
 in
   loop (xs, 0)
 end // end of [list_length]
-
-(* ****** ****** *)
 //
 fun
 {a,b:t@ype}
 list_foldleft
   {n:nat}
 (
-  f: (a, b) -> a, ini: a, xs: list(b, n)
+  f: (a, b) -> a, ini: a, xs: !list_vt(b, n)
 ) : a =
 (
-if iseqz(xs)
-  then ini else list_foldleft (f, f(ini, xs.head()), xs.tail())
+case+ xs of
+| list_vt_nil () => ini
+| list_vt_cons (x, xs) => list_foldleft (f, f(ini, x), xs)
 ) (* end of [list_foldleft] *)
 //
 fun
@@ -62,24 +66,12 @@ fun
 list_foldright
   {n:nat}
 (
-  f: (a, b) -> b, xs: list(a, n), snk: b
+  f: (a, b) -> b, xs: !list_vt(a, n), snk: b
 ) : b =
 (
-if iseqz(xs)
-  then snk else f (xs.head(), list_foldright (f, xs.tail(), snk))
-)
-//
-(* ****** ****** *)
-//
-fun
-{a:t@ype}
-list_reverse
-(
-  xs: List0(a)
-) : List0(a) =
-(
-list_foldleft<List0(a),a>
-  (lam (xs, x) => list_cons(x, xs), list_nil, xs)
+case+ xs of
+| list_vt_nil () => snk
+| list_vt_cons (x, xs) => f (x, list_foldright (f, xs, snk))
 )
 //
 fun
@@ -87,74 +79,68 @@ fun
 list_reverse
   {n:nat}
 (
-  xs: list(a, n)
-) : list(a, n) = let
+  xs: list_vt(a, n)
+) : list_vt(a, n) = let
 //
 fun
 loop{i,j:nat}
 (
-  xs: list(a, i), ys: list(a, j)
-) : list(a, i+j) =
+  xs: list_vt(a, i), ys: list_vt(a, j)
+) : list_vt(a, i+j) =
   case+ xs of
-  | list_nil () => ys
-  | list_cons (x, xs) => loop (xs, list_cons (x, ys))
+  | ~list_vt_nil () => ys
+  | ~list_vt_cons (x, xs) => loop (xs, list_vt_cons (x, ys))
 //
 in
-  loop (xs, list_nil)
+  loop (xs, list_vt_nil)
 end // end of [list_reverse]
-//  
-(* ****** ****** *)
-//
-fun
-{a:t@ype}
-list_append
-(
-  xs: List0(a), ys: List0(a)
-) : List0(a) =
-(
-list_foldright<a, List0(a)>
-  (lam (x, xs) => list_cons(x, xs), ys, xs)
-)
 //
 fun
 {a:t@ype}
 list_append
   {m,n:nat}
 (
-  xs: list(a,m), ys: list(a,n)
-) : list(a,m+n) =
+  xs: list_vt(a,m), ys: list_vt(a,n)
+) : list_vt(a,m+n) =
 (
 case+ xs of
-| list_nil () => ys
-| list_cons (x, xs) => list_cons (x, list_append (xs, ys))
+| ~list_vt_nil () => ys
+| ~list_vt_cons (x, xs) => list_vt_cons (x, list_append (xs, ys))
 )
-//
-(* ****** ****** *)
 //
 fun
 {a:t@ype}
 list_get_at
   {n:nat}
 (
-  xs: list(a, n), i: natLt(n)
+  xs: !list_vt(a, n), i: natLt(n)
 ) : a =
-  if i > 0 then list_get_at(xs.tail(), i-1) else xs.head()
+(
+case+ xs of
+| list_vt_cons (x, xs) =>
+    if i > 0 then list_get_at(xs, i-1) else x
+  // end of [list_vt_cons]
+)
 //
-(* ****** ****** *)
+// HX: the list is updated in place
 //
 fun
 {a:t@ype}
 list_set_at
   {n:nat}
 (
-  xs: list(a, n), i: natLt(n), x0: a
-) : list(a, n) =
-  if i > 0
-    then list_cons(xs.head(), list_set_at(xs.tail(), i-1, x0))
-    else list_cons(x0, xs.tail())
-  // end of [if]
-//
-(* ****** ****** *)
+  xs: !list_vt(a, n), i: natLt(n), x0: a
+) : void =
+(
+case+ xs of
+| @list_vt_cons (x, xs1) =>
+  (
+    if i > 0
+      then (list_set_at(xs1, i-1, x0); fold@ (xs))
+      else (x := x0; fold@ (xs))
+    // end of [if]
+  )
+)
 //
 val
 digits = fromto(0, 10)
@@ -171,22 +157,26 @@ list_foldright<int,int> (lam (x, y) => x + y, digits, 0) = 45
 ) (* end of [val] *)
 //
 val () =
-println! ("digits[4] = ", digits[4])
+println! ("digits[4] = ", list_get_at<int>(digits, 4))
 val () =
-println! ("digits[5] = ", digits[5])
+println! ("digits[5] = ", list_get_at<int>(digits, 5))
 val () = println! ("digits = ", digits)
 //
-val digits = list_set_at<int> (digits, 4, 5)
-val digits = list_set_at<int> (digits, 5, 4)
+val () = list_set_at<int> (digits, 4, 5)
+val () = list_set_at<int> (digits, 5, 4)
 //
 val () =
-println! ("digits[4] = ", digits[4])
+println! ("digits[4] = ", list_get_at<int>(digits, 4))
 val () =
-println! ("digits[5] = ", digits[5])
+println! ("digits[5] = ", list_get_at<int>(digits, 5))
 val () = println! ("digits = ", digits)
 //
-(* ****** ****** *)
-
+val digits = list_reverse<int> (digits)
+val digits = list_append<int> (digits, fromto(10, 12))
+val () = println! ("digits = ", digits)
+//
+val () = list_vt_free (digits)
+//
 implement main0 () = {}
 
 (* ****** ****** *)

@@ -13,7 +13,6 @@
 //
 (* ****** ****** *)
 
-staload _(*anon*) = "prelude/DATS/list.dats"
 staload _(*anon*) = "prelude/DATS/list_vt.dats"
 
 (* ****** ****** *)
@@ -312,48 +311,48 @@ g0int_type_aop_cmp_decl
 ) : atext = let
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 (*
-val () = res := list_cons(f_intofstr (tnm1, tnm2), res)
+val () = res := glist_cons(f_intofstr (tnm1, tnm2), res)
 *)
-val () = res := list_cons(f_int_int("neg", tnm1, tnm2), res)
-val () = res := list_cons(f_int_int("abs", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_int("neg", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_int("abs", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_int_int("succ", tnm1, tnm2), res)
-val () = res := list_cons(f_int_int("pred", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_int("succ", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_int("pred", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_int_int("half", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_int("half", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_int_X_int("asl", tnm1, tnm2, "intGte(0)"), res)
-val () = res := list_cons(f_int_X_int("asr", tnm1, tnm2, "intGte(0)"), res)
+val () = res := glist_cons(f_int_X_int("asl", tnm1, tnm2, "intGte(0)"), res)
+val () = res := glist_cons(f_int_X_int("asr", tnm1, tnm2, "intGte(0)"), res)
 //
-val () = res := list_cons(f_int2_int("add", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_int("sub", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_int("mul", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_int("div", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_int("mod", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("add", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("sub", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("mul", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("div", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("mod", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_int2_bool("lt", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_bool("lte", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_bool("gt", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_bool("gte", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_bool("eq", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_bool("neq", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_bool("lt", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_bool("lte", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_bool("gt", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_bool("gte", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_bool("eq", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_bool("neq", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_compare("compare", tnm1, tnm2), res)
+val () = res := glist_cons(f_compare("compare", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_int2_int("max", tnm1, tnm2), res)
-val () = res := list_cons(f_int2_int("min", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("max", tnm1, tnm2), res)
+val () = res := glist_cons(f_int2_int("min", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_int_bool("isltz", tnm1, tnm2), res)
-val () = res := list_cons(f_int_bool("isltez", tnm1, tnm2), res)
-val () = res := list_cons(f_int_bool("isgtz", tnm1, tnm2), res)
-val () = res := list_cons(f_int_bool("isgtez", tnm1, tnm2), res)
-val () = res := list_cons(f_int_bool("iseqz", tnm1, tnm2), res)
-val () = res := list_cons(f_int_bool("isneqz", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_bool("isltz", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_bool("isltez", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_bool("isgtz", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_bool("isgtez", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_bool("iseqz", tnm1, tnm2), res)
+val () = res := glist_cons(f_int_bool("isneqz", tnm1, tnm2), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0int_type_aop_cmp_decl]
 //
 fun
@@ -500,56 +499,56 @@ g0uint_type_aop_cmp_decl
 ) : atext = let
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 (*
-val () = res := list_cons(f_uintofstr (tnm1, tnm2), res)
+val () = res := glist_cons(f_uintofstr (tnm1, tnm2), res)
 *)
-val () = res := list_cons(f_uint_uint("succ", tnm1, tnm2), res)
-val () = res := list_cons(f_uint_uint("pred", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_uint("succ", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_uint("pred", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_uint_uint("half", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_uint("half", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_uint2_uint("add", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("sub", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("mul", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("div", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("mod", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("add", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("sub", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("mul", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("div", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("mod", tnm1, tnm2), res)
 //
 val () =
 (
   res :=
-  list_cons(f_uint_X_uint("lsl", tnm1, tnm2, "intGte(0)"), res)
+  glist_cons(f_uint_X_uint("lsl", tnm1, tnm2, "intGte(0)"), res)
 )
 val () =
 (
   res :=
-  list_cons(f_uint_X_uint("lsr", tnm1, tnm2, "intGte(0)"), res)
+  glist_cons(f_uint_X_uint("lsr", tnm1, tnm2, "intGte(0)"), res)
 )
 //
-val () = res := list_cons(f_uint_uint("lnot", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("lor", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("lxor", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("land", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_uint("lnot", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("lor", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("lxor", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("land", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_uint2_bool("lt", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_bool("lte", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_bool("gt", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_bool("gte", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_bool("eq", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_bool("neq", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_bool("lt", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_bool("lte", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_bool("gt", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_bool("gte", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_bool("eq", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_bool("neq", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_compare("compare", tnm1, tnm2), res)
+val () = res := glist_cons(f_compare("compare", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_uint2_uint("max", tnm1, tnm2), res)
-val () = res := list_cons(f_uint2_uint("min", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("max", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint2_uint("min", tnm1, tnm2), res)
 //
-val () = res := list_cons(f_uint_bool("isgtz", tnm1, tnm2), res)
-val () = res := list_cons(f_uint_bool("iseqz", tnm1, tnm2), res)
-val () = res := list_cons(f_uint_bool("isneqz", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_bool("isgtz", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_bool("iseqz", tnm1, tnm2), res)
+val () = res := glist_cons(f_uint_bool("isneqz", tnm1, tnm2), res)
 //
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0uint_type_aop_cmp_decl]
 //
 end // end of [local]
@@ -581,47 +580,47 @@ in
 end // end of [fopr]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr("neg", tnm1, tnm2), res)
-val () = res := list_cons(fopr("abs", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("neg", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("abs", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("succ", tnm1, tnm2), res)
-val () = res := list_cons(fopr("pred", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("succ", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("pred", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("half", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("half", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("add", tnm1, tnm2), res)
-val () = res := list_cons(fopr("sub", tnm1, tnm2), res)
-val () = res := list_cons(fopr("mul", tnm1, tnm2), res)
-val () = res := list_cons(fopr("div", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("add", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("sub", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("mul", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("div", tnm1, tnm2), res)
 (*
 val () =
-res := list_cons(fopr("mod", tnm1, tnm2), res) // HX: skipped
+res := glist_cons(fopr("mod", tnm1, tnm2), res) // HX: skipped
 *)
-val () = res := list_cons(fopr("nmod", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("nmod", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("lt", tnm1, tnm2), res)
-val () = res := list_cons(fopr("lte", tnm1, tnm2), res)
-val () = res := list_cons(fopr("gt", tnm1, tnm2), res)
-val () = res := list_cons(fopr("gte", tnm1, tnm2), res)
-val () = res := list_cons(fopr("eq", tnm1, tnm2), res)
-val () = res := list_cons(fopr("neq", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("lt", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("lte", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("gt", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("gte", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("eq", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("neq", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("compare", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("compare", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("max", tnm1, tnm2), res)
-val () = res := list_cons(fopr("min", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("max", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("min", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("isltz", tnm1, tnm2), res)
-val () = res := list_cons(fopr("isltez", tnm1, tnm2), res)
-val () = res := list_cons(fopr("isgtz", tnm1, tnm2), res)
-val () = res := list_cons(fopr("isgtez", tnm1, tnm2), res)
-val () = res := list_cons(fopr("iseqz", tnm1, tnm2), res)
-val () = res := list_cons(fopr("isneqz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isltz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isltez", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isgtz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isgtez", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("iseqz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isneqz", tnm1, tnm2), res)
 //
 in
-  atext_concatxt (list_of_list_vt(list_reverse(res)))
+  atext_concatxt (glist_reverse(res))
 end // end of [g1int_type_aop_cmp_decl]
 //
 fun
@@ -656,41 +655,41 @@ in
 end // end of [fopr]
 //
 var
-res: atextlst = list_nil(*void*)
+res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr("succ", tnm1, tnm2), res)
-val () = res := list_cons(fopr("pred", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("succ", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("pred", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("half", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("half", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("add", tnm1, tnm2), res)
-val () = res := list_cons(fopr("sub", tnm1, tnm2), res)
-val () = res := list_cons(fopr("mul", tnm1, tnm2), res)
-val () = res := list_cons(fopr("div", tnm1, tnm2), res)
-val () = res := list_cons(fopr("mod", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("add", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("sub", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("mul", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("div", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("mod", tnm1, tnm2), res)
 (*
 val () =
-res := list_cons(fopr("nmod", tnm1, tnm2), res) // HX: skipped
+res := glist_cons(fopr("nmod", tnm1, tnm2), res) // HX: skipped
 *)
 //
-val () = res := list_cons(fopr("lt", tnm1, tnm2), res)
-val () = res := list_cons(fopr("lte", tnm1, tnm2), res)
-val () = res := list_cons(fopr("gt", tnm1, tnm2), res)
-val () = res := list_cons(fopr("gte", tnm1, tnm2), res)
-val () = res := list_cons(fopr("eq", tnm1, tnm2), res)
-val () = res := list_cons(fopr("neq", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("lt", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("lte", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("gt", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("gte", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("eq", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("neq", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("compare", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("compare", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("max", tnm1, tnm2), res)
-val () = res := list_cons(fopr("min", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("max", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("min", tnm1, tnm2), res)
 //
-val () = res := list_cons(fopr("isgtz", tnm1, tnm2), res)
-val () = res := list_cons(fopr("iseqz", tnm1, tnm2), res)
-val () = res := list_cons(fopr("isneqz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isgtz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("iseqz", tnm1, tnm2), res)
+val () = res := glist_cons(fopr("isneqz", tnm1, tnm2), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g1uint_type_aop_cmp_decl]
 
 (* ****** ****** *)
@@ -773,7 +772,7 @@ g0float_declist
 fun
 fopr (
   opknd: string, opnam: string
-) :<cloref1> atext = let
+) : atext = let
 //
 val
 ent = sprintf
@@ -789,44 +788,44 @@ in
   atext_strptr(ent)
 end // end of [fopr]
 //
-var res: atextlst = list_nil(*void*)
+var res: atextlst = glist_nil()
 //
-val () = res := list_cons(fopr("uop", "neg"), res)
-val () = res := list_cons(fopr("uop", "abs"), res)
+val () = res := glist_cons(fopr("uop", "neg"), res)
+val () = res := glist_cons(fopr("uop", "abs"), res)
 //
-val () = res := list_cons(atext_newline(), res)
+val () = res := glist_cons(atext_newline(), res)
 //
-val () = res := list_cons(fopr("uop", "succ"), res)
-val () = res := list_cons(fopr("uop", "pred"), res)
+val () = res := glist_cons(fopr("uop", "succ"), res)
+val () = res := glist_cons(fopr("uop", "pred"), res)
 //
-val () = res := list_cons(atext_newline(), res)
+val () = res := glist_cons(atext_newline(), res)
 //
-val () = res := list_cons(fopr("aop", "add"), res)
-val () = res := list_cons(fopr("aop", "sub"), res)
-val () = res := list_cons(fopr("aop", "mul"), res)
-val () = res := list_cons(fopr("aop", "div"), res)
-val () = res := list_cons(fopr("aop", "mod"), res)
+val () = res := glist_cons(fopr("aop", "add"), res)
+val () = res := glist_cons(fopr("aop", "sub"), res)
+val () = res := glist_cons(fopr("aop", "mul"), res)
+val () = res := glist_cons(fopr("aop", "div"), res)
+val () = res := glist_cons(fopr("aop", "mod"), res)
 //
-val () = res := list_cons(atext_newline(), res)
+val () = res := glist_cons(atext_newline(), res)
 //
-val () = res := list_cons(fopr("cmp", "lt"), res)
-val () = res := list_cons(fopr("cmp", "lte"), res)
-val () = res := list_cons(fopr("cmp", "gt"), res)
-val () = res := list_cons(fopr("cmp", "gte"), res)
-val () = res := list_cons(fopr("cmp", "eq"), res)
-val () = res := list_cons(fopr("cmp", "neq"), res)
+val () = res := glist_cons(fopr("cmp", "lt"), res)
+val () = res := glist_cons(fopr("cmp", "lte"), res)
+val () = res := glist_cons(fopr("cmp", "gt"), res)
+val () = res := glist_cons(fopr("cmp", "gte"), res)
+val () = res := glist_cons(fopr("cmp", "eq"), res)
+val () = res := glist_cons(fopr("cmp", "neq"), res)
 //
-val () = res := list_cons(atext_newline(), res)
+val () = res := glist_cons(atext_newline(), res)
 //
-val () = res := list_cons(fopr("compare", "compare"), res)
+val () = res := glist_cons(fopr("compare", "compare"), res)
 //
-val () = res := list_cons(atext_newline(), res)
+val () = res := glist_cons(atext_newline(), res)
 //
-val () = res := list_cons(fopr("aop", "max"), res)
-val () = res := list_cons(fopr("aop", "min"), res)
+val () = res := glist_cons(fopr("aop", "max"), res)
+val () = res := glist_cons(fopr("aop", "min"), res)
 //
 in
-  atext_concatxt(list_of_list_vt(list_reverse(res)))
+  atext_concatxt(glist_reverse(res))
 end // end of [g0float_declist]
 
 (* ****** ****** *)

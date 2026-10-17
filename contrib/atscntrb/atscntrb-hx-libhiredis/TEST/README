@@ -1,12 +1,11 @@
 #
-# Testing hiredis and hiredis_ML
+# Testing hiredis
 #
 
 ######
 
 test00: getting started
 test01: testing hiredis
-test02: testing hiredis_ML
 
 ######
 

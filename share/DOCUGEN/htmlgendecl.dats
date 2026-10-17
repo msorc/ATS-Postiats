@@ -5,18 +5,31 @@
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC (ATS2 port of the ATS1 version of this file): the
+// lists are [glist]s of the global arena (never freed), a [declitem] is
+// a flat tuple, the references are toplevel variables
+//
+(* ****** ****** *)
+
 staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload _(*anon*) = "prelude/DATS/list.dats"
-staload _(*anon*) = "prelude/DATS/list_vt.dats"
-staload _(*anon*) = "prelude/DATS/reference.dats"
+#include "share/atspre_staload.hats"
+staload "libats/SATS/arena.sats"
+staload _(*anon*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
-staload "declatext.sats"
-staload "htmlgendecl.sats"
+staload "./declatext.sats"
+staload "./htmlgendecl.sats"
+
+(* ****** ****** *)
+
+staload
+LDOC = "libatsdoc/SATS/libatsdoc_atext.sats"
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 
 (* ****** ****** *)
 
@@ -41,22 +54,16 @@ end // end of [myatscodelink]
 
 (* ****** ****** *)
 
-viewtypedef
-stringlst_vt = List_vt (string)
-viewtypedef
-declitemlst_vt = List_vt (declitem)
-
 (* ****** ****** *)
 
 local
 
-typedef charlst = List (char)
 staload SYM = "src/pats_symbol.sats"
 
 fun auxlst
 (
-  stadyn: int, css: List_vt (charlst), i: int
-) : List_vt (strptr1) = let
+  stadyn: int, css: List0_vt ($LSYNMK.charlst), i: int
+) : List0_vt (Strptr1) = let
 in
 //
 case+ css of
@@ -78,11 +85,6 @@ in (* in of [local] *)
 implement
 declname_find_synoplst
   (stadyn, name) = let
-(*
-val (
-) = println! ("declname_find_synopsis: stadyn = ", stadyn)
-val () = println! ("declname_find_synopsis: name = ", name)
-*)
 //
 val sym =
   $SYM.symbol_make_string (name)
@@ -110,17 +112,17 @@ in
   $LDOC.atext_strptr (str)
 end // end of [aux]
 fun auxlst (
-  xs: stringlst_vt
+  xs: stringlst
 ) : atextlst = let
 in
-  case+ xs of
-  | ~list_vt_cons
+  case+ glist_view (xs) of
+  | ~GLcons
       (x, xs) => let
       val y = aux (x); val ys = auxlst (xs)
     in
-      list_cons (y, ys)
-    end // end of [list_vt_cons]
-  | ~list_vt_nil () => list_nil ()
+      glist_cons (y, ys)
+    end // end of [GLcons]
+  | ~GLnil () => glist_nil ()
 end // end of [auxlst]
 //
 val xs =
@@ -138,48 +140,50 @@ end // end of [theDeclnameLst_make_menu]
 
 (* ****** ****** *)
 
+//
+// HX: the program that links this module does [dynload] libatsdoc (a
+// second [dynload] of the same file in another module would define its
+// flag twice)
+//
+#define ATSDOC_NO_DYNLOAD 1
 #include "utils/atsdoc/HATS/xhtmlatxt.hats"
 
 (* ****** ****** *)
 
-datatype paramadd =
-  PMADD of (string(*name*), string(*desc*))
-// end of [paramadd]
-
-viewtypedef paramaddlst_vt = List_vt (paramadd)
+typedef paramadd = @(string(*name*), string(*desc*))
+typedef paramaddlst = glist(paramadd)
 
 extern
 fun theParamaddLst_add (x: paramadd): void
 extern
 fun theParamaddLst_add2 (name: string, desc: string): void
 extern
-fun theParamaddLst_get (): paramaddlst_vt
+fun theParamaddLst_get (): paramaddlst
 
 local
 
-val theParamaddLst = ref<paramaddlst_vt> (list_vt_nil)
+var theParamaddLst_var: paramaddlst = glist_nil()
+val theParamaddLst =
+  ref_make_viewptr{paramaddlst}(view@ theParamaddLst_var | addr@ theParamaddLst_var)
 
 in
 
 implement
-theParamaddLst_add (x) = let
-  val (vbox pf | p) = ref_get_view_ptr (theParamaddLst)
-in
-  !p := list_vt_cons (x, !p)
-end // end of [theParamaddLst_add]
+theParamaddLst_add (x) =
+  ref_set_elt (theParamaddLst, glist_cons (x, ref_get_elt (theParamaddLst)))
+// end of [theParamaddLst_add]
 
 implement
 theParamaddLst_add2
-  (name, desc) = theParamaddLst_add (PMADD (name, desc)) 
+  (name, desc) = theParamaddLst_add (@(name, desc)) 
 // end of [theParamaddLst_add2]
 
 implement
 theParamaddLst_get () = let
-  val (vbox pf | p) = ref_get_view_ptr (theParamaddLst)
-  val xs = !p
-  val () = !p := list_vt_nil ()
+  val xs = ref_get_elt (theParamaddLst)
+  val () = ref_set_elt (theParamaddLst, glist_nil())
 in
-  list_vt_reverse (xs)
+  glist_reverse (xs)
 end // end of [theParamaddLst_get]
 
 end // end of [local]
@@ -188,11 +192,11 @@ end // end of [local]
 
 fun synoplst2atext
 (
-  name: string, xs: List_vt (strptr1)
+  name: string, xs: List0_vt (Strptr1)
 ) : atext = let
 //
 fun auxlst
-  (xs: List_vt (strptr1)): atextlst = let
+  (xs: List0_vt (Strptr1)): atextlst = let
 in
 //
 case+ xs of
@@ -203,9 +207,9 @@ case+ xs of
     val atxt = $LDOC.atext_strptr (x2)
     val atxtlst = auxlst (xs)
   in
-    list_cons (atxt, atxtlst)
+    glist_cons (atxt, atxtlst)
   end // end of [list_vt_cons]
-| ~list_vt_nil () => list_nil ()
+| ~list_vt_nil () => glist_nil ()
 //
 end // end of [auxlst]
 //
@@ -213,16 +217,16 @@ val atxtlst = auxlst (xs)
 //
 in
 //
-case+ atxtlst of
-| list_cons _ => $LDOC.atext_concatxt (atxtlst)
-| list_nil () => let
+case+ glist_view (atxtlst) of
+| ~GLcons _ => $LDOC.atext_concatxt (atxtlst)
+| ~GLnil () => let
     val x = sprintf ("Synopsis for [%s] is unavailable.", @(name))
     val x1 = $UN.castvwtp1{string}(x)
     val x2 = sprintf ("<pre class=\"patsyntax\">\n%s</pre>\n", @(x1))
     val () = strptr_free (x)
   in
     $LDOC.atext_strptr (x2)
-  end // end of [list_nil]
+  end // end of [GLnil]
 //
 end // end of [synoplst2atext]
 
@@ -231,9 +235,11 @@ end // end of [synoplst2atext]
 local
 
 fn HR (sz: int): atext = let
+  val szs = tostrptr_int (sz)
   val str = sprintf (
-    "<hr style=\"background-color: #E0E0E0; height: %ipx;\"></hr>\n", @(sz)
+    "<hr style=\"background-color: #E0E0E0; height: %spx;\"></hr>\n", @($UN.strptr2string(szs))
   ) // end of [val]
+  val () = strptr_free (szs)
 in
   $LDOC.atext_strptr (str)
 end // end of [HR]
@@ -313,13 +319,13 @@ val ul_beg = atext_strcst "<ul>"
 val ul_body = let
 //
 fun auxlst
-  (xs: paramaddlst_vt): atext = let
+  (xs: paramaddlst): atext = let
 in
-  case+ xs of
-  | ~list_vt_cons (x, xs) => let
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs) => let
       val li_beg = atext_strcst "<li>"
       val li_end = atext_strcst "</li>"
-      val PMADD (name, desc) = x
+      val name = x.0 and desc = x.1
       val itm1 = atext_strsub name
       val itm2 = atext_strcst " : "
       val itm3 = atext_strsub desc
@@ -329,7 +335,7 @@ in
     in
       atext_apptxt2 (li_one, li_rest)
     end
-  | ~list_vt_nil () => atext_nil ()
+  | ~GLnil () => atext_nil ()
 end // end of [auxlst]
 //
 in
@@ -357,53 +363,50 @@ theDeclitemLst_make_content () = let
 //
 fun aux
   (x: declitem): atext = let
+  val tag = x.0 and s1 = x.1 and s2 = x.2
 in
 //
-case+ x of
+if tag = DITMname then aux_name (s1)
+else if tag = DITMname2 then aux_name2 (s1, s2)
 //
-| DITMname (name) => aux_name (name)
-| DITMname2 (name, href) => aux_name2 (name, href)
+else if tag = DITMsynop then aux_synop ((*void*))
+else if tag = DITMsynop2 then aux_synop2 (s1)
 //
-| DITMsynop () => aux_synop ((*void*))
-| DITMsynop2 (synop) => aux_synop2 (synop)
+else if tag = DITMdescrpt then aux_descrpt (s1)
 //
-| DITMdescrpt (cntnt) => aux_descrpt (cntnt)
+else if tag = DITMexample then aux_example (s1)
 //
-| DITMexample (cntnt) => aux_example (cntnt)
+else if tag = DITMparamadd then aux_paramadd (s1, s2)
+else if tag = DITMparamlist then aux_paramlist ()
 //
-| DITMparamadd
-    (name, desc) => aux_paramadd (name, desc)
-| DITMparamlist () => aux_paramlist ()
-//
-| DITMfunretval (cntnt) => aux_funretval (cntnt)
+else (* tag = DITMfunretval *) aux_funretval (s1)
 //
 end // end of [aux]
 //
 fun auxlst
 (
-  xs: declitemlst_vt, i: int
+  xs: declitemlst, i: int
 ) : atextlst = let
 in
 //
-case+ xs of
-| ~list_vt_cons
+case+ glist_view (xs) of
+| ~GLcons
     (x, xs) => let
     val y = aux (x)
     val ys = auxlst (xs, i+1)
-    val res = list_cons {atext} (y, ys)
+    val res = glist_cons<atext> (y, ys)
     val sep = (
       if i > 0 then
       (
-        case+ x of
-        | DITMname _ => true
-        | DITMname2 _ => true
-        | _(*non-name-entry*) => false
+        if x.0 = DITMname then true
+        else if x.0 = DITMname2 then true
+        else false (*non-name-entry*)
       ) else false
     ) : bool // end of [val]
   in
-    if sep then list_cons (HR(1), res) else res
-  end // end of [list_vt_cons]
-| ~list_vt_nil () => list_nil ()
+    if sep then glist_cons (HR(1), res) else res
+  end // end of [GLcons]
+| ~GLnil () => glist_nil ()
 //
 end // end of [auxlst]
 //

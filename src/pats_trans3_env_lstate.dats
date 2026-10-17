@@ -33,13 +33,23 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_lstate.dats, see PORTING.md, "Type-checking environment (trans3_env)")
+// The linear state [lstaftc3nstr] is a handle ([ptr]) of an arena record with [mut] fields (pats_trans3_env_lstate.spec).
 //
+
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
@@ -64,6 +74,7 @@ LOC = "./pats_location.sats"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
@@ -71,9 +82,7 @@ staload "./pats_staexp2_error.sats"
 (* ****** ****** *)
 
 staload "./pats_dynexp2.sats"
-(*
-overload compare with compare_d2var_d2var
-*)
+staload "./pats_dynexp3.sats"
 
 (* ****** ****** *)
 
@@ -83,19 +92,23 @@ staload SOL = "./pats_staexp2_solve.sats"
 
 staload "./pats_trans3.sats"
 staload "./pats_trans3_env.sats"
+staload "./pats_trans3_env_lstate.sats"
 
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
+#include "./pats_trans3_env.hats"
+
+(* ****** ****** *)
+
+#include "./pats_trans3_env_lstate_gen_dats.hats"
 
 (* ****** ****** *)
 
 implement
 lstbefitm_make
   (d2v, linval) = let
-  val opt = d2var_get_type (d2v) in '{
-  lstbefitm_var= d2v, lstbefitm_linval= linval, lstbefitm_type= opt
-} end // end of [lstbefitm_make]
+  val opt = d2var_get_type (d2v) in lstbefitm_new (d2v, linval, opt)
+end // end of [lstbefitm_make]
 
 (* ****** ****** *)
 
@@ -106,16 +119,16 @@ macdef
   prstr (s) = fprint_string (out, ,(s))
 // end of [macdef]
 val () = prstr "lstbefitm("
-val () = fprint_d2var (out, x.lstbefitm_var)
+val () = fprint_d2var (out, x.lstbefitm_var ())
 val () = prstr ", "
-val () = fprint_int (out, x.lstbefitm_linval)
+val () = fprint_int (out, x.lstbefitm_linval ())
 val () = prstr ", "
-val opt = x.lstbefitm_type
+val opt = x.lstbefitm_type ()
 val () = (
-  case+ opt of
-  | Some (s2e) =>
+  case+ gopt_view (opt) of
+  | ~GOsome (s2e) =>
       (prstr "Some("; fprint_s2exp (out, s2e); prstr ")")
-  | None () => prstr "None()"
+  | ~GOnone () => prstr "None()"
 ) : void // end of [val]
 val () = prstr ")" // end of [val]
 //
@@ -125,274 +138,196 @@ end // end of [fprint_lstbefitm]
 
 implement
 fprint_lstbefitmlst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_lstbefitm)
+  (out, xs) = $UT.fprintlst<lstbefitm> (out, xs, ", ", fprint_lstbefitm)
 // end of [fprint_lstbefitmlst]
 
 (* ****** ****** *)
 
 implement
 lstbefitmlst_restore_type
-  (xs) = list_app_fun (xs, f) where {
-  fun f (x: lstbefitm): void =
-    d2var_set_type (x.lstbefitm_var, x.lstbefitm_type)
-  // end of [f]
-} // end of [where] // end of [lstbefitmlst_restore_type]
+  (xs) = (
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs) => (
+      d2var_set_type (x.lstbefitm_var (), x.lstbefitm_type ());
+      lstbefitmlst_restore_type (xs)
+    )
+  | ~GLnil () => ()
+) // end of [lstbefitmlst_restore_type]
 
 implement
 lstbefitmlst_restore_linval_type
-  (xs) = list_app_fun (xs, f) where {
-  fun f (x: lstbefitm): void = let
-    val d2v = x.lstbefitm_var
-    val () =
-      d2var_set_linval (d2v, x.lstbefitm_linval)
-    val () = d2var_set_type (d2v, x.lstbefitm_type)
-  in
-    // nothing
-  end // end of [f]
-} // end of [where] // end of [lstbefitmlst_restore_type]
+  (xs) = (
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs) => let
+      val d2v = x.lstbefitm_var ()
+      val () =
+        d2var_set_linval (d2v, x.lstbefitm_linval ())
+      val () = d2var_set_type (d2v, x.lstbefitm_type ())
+    in
+      lstbefitmlst_restore_linval_type (xs)
+    end // end of [f]
+  | ~GLnil () => ()
+) // end of [lstbefitmlst_restore_linval_type]
 
 (* ****** ****** *)
 
-typedef saityp = s2expopt
-typedef saityplst = List (saityp)
-viewtypedef saityplst_vt = List_vt (saityp)
-
-extern
-fun fprint_saityp : fprint_type (saityp)
-implement
-fprint_saityp (out, x) = let
+fun
+fprint_saityp (out: FILEref, x: s2expopt): void = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
-  case+ x of
-  | Some (s2e) =>
+  case+ gopt_view (x) of
+  | ~GOsome (s2e) =>
       (prstr "Some("; fpprint_s2exp (out, s2e); prstr ")")
-  | None () => prstr "None()"
+  | ~GOnone () => prstr "None()"
 end // end of [fprint_saityp]
 
-extern
-fun fprint_saityplst : fprint_type (saityplst)
-implement
+fun
 fprint_saityplst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_saityp)
+  (out: FILEref, xs: saityplst): void = $UT.fprintlst<s2expopt> (out, xs, ", ", fprint_saityp)
 // end of [fprint_saityplst]
-
-extern
-fun fprint_saityplst_vt (out: FILEref, xs: !saityplst_vt): void
-implement
-fprint_saityplst_vt
-  (out, xs) = fprint_saityplst (out, $UN.castvwtp1 {saityplst} (xs))
-// end of [fprint_saityplst_vt]
 
 (* ****** ****** *)
 
-extern
-fun saityplst_check
-  (d2v: d2var, xs: saityplst): int // 0/1: skip/merge
-// end of [saityplst_check]
-
-local
-
-fun auxlst (
+fun
+saityplst_check_auxlst (
   s2e0: s2exp, xs: saityplst
 ) : int = (
-  case+ xs of
-  | list_cons (x, xs) => (
-    case+ x of
-    | Some (s2e) => let
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs) => (
+    case+ gopt_view (x) of
+    | ~GOsome (s2e) => let
         val iseq = s2exp_refeq (s2e0, s2e)
       in
-        if iseq then auxlst (s2e0, xs) else 1(*merge*)
+        if iseq then saityplst_check_auxlst (s2e0, xs) else 1(*merge*)
       end // end of [SAITYPsome]
-    | None () => auxlst (s2e0, xs)
+    | ~GOnone () => saityplst_check_auxlst (s2e0, xs)
     ) // end of [list_cons]
-  | list_nil () => 0 (*skip*)
+  | ~GLnil () => 0 (*skip*)
 ) // end of [auxlst_check]
 
-in // in of [local]
-
-implement
+// HX: 0/1: skip/merge
+fun
 saityplst_check
-  (d2v, xs) = let
-  val-list_cons (x, xs) = xs
+  (d2v: d2var, xs: saityplst): int = let
+  val-~GLcons (x, xs) = glist_view (xs)
 in
 //
-case x of
-| Some (s2e0) => let
-    val () = d2var_set_type (d2v, Some s2e0)
+case+ gopt_view (x) of
+| ~GOsome (s2e0) => let
+    val () = d2var_set_type (d2v, gopt_some s2e0)
   in
-    auxlst (s2e0, xs)
+    saityplst_check_auxlst (s2e0, xs)
   end // end of [None]
-| None () => let
-    val () = d2var_set_type (d2v, None ()) in 0(*skip*)
+| ~GOnone () => let
+    val () = d2var_set_type (d2v, gopt_none ()) in 0(*skip*)
   end // end of [None]
 //
 end // end of [saityplst_check]
 
-end // end of [local]
-
 (* ****** ****** *)
 
-viewtypedef
-lstaftitm = @{
-  lstaftitm_var= d2var
-, lstaftitm_knd= int // 0/1/2: skip/merge/sub+merge
-, lstaftitm_type= s2expopt // it can be found in [lstaftitm_var]
-, lstaftitm_saits= saityplst_vt
-} // end of [lstaftitm]
-viewtypedef
-lstaftitmlst = List_vt (lstaftitm)
-
-(* ****** ****** *)
-
-extern
-fun fprint_lstaftitm
-  (out: FILEref, x: &lstaftitm): void
-implement
+fun
 fprint_lstaftitm
-  (out, x) = let
+  (out: FILEref, x: lstaftitm): void = let
   macdef prstr (s) =
     fprint_string (out, ,(s))
   val () = prstr "LSTAFTITM(\n"
-  val () = fprint_d2var (out, x.lstaftitm_var)
+  val () = fprint_d2var (out, x.lstaftitm_var ())
   val () = prstr "\n"
-  val () = fprint_int (out, x.lstaftitm_knd)
+  val () = fprint_int (out, x.lstaftitm_knd ())
   val () = prstr "\n"
-  val () = fprint_s2expopt (out, x.lstaftitm_type)
+  val () = fprint_s2expopt (out, x.lstaftitm_type ())
   val () = prstr "\n"
-  val () = fprint_saityplst_vt (out, x.lstaftitm_saits)
+  val () = fprint_saityplst (out, x.lstaftitm_saits ())
   val () = prstr "\n)"
 in
   // nothing
 end // end of [fprint_lstaftitm]
 
-extern
-fun fprint_lstaftitmlst
-  (out: FILEref, xs: !lstaftitmlst): void
-implement
+fun
 fprint_lstaftitmlst
-  (out, xs) = (
-  case+ xs of
-  | list_vt_cons
-      (!p_x, !p_xs1) => let
-      val () = fprint_lstaftitm (out, !p_x)
+  (out: FILEref, xs: lstaftitmlst): void = (
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs1) => let
+      val () = fprint_lstaftitm (out, x)
       val () = fprint_newline (out)
-      val () = fprint_lstaftitmlst (out, !p_xs1)
-      prval () = fold@ (xs)
+      val () = fprint_lstaftitmlst (out, xs1)
     in
       // nothing
     end // end of [list_vt_cons]
-  | list_vt_nil () => fold@ (xs)
+  | ~GLnil () => ()
 ) // end of [fprint_lstaftitmlst]
 
-extern
-fun lstaftitmlst_free (xs: lstaftitmlst): void
-implement
-lstaftitmlst_free (xs) = (
-  case+ xs of
-  | ~list_vt_cons
+fun
+lstaftitmlst_free (xs: lstaftitmlst): void = (
+  case+ glist_view (xs) of
+  | ~GLcons
       (x, xs) => let
-      val-~list_vt_nil () = x.lstaftitm_saits
+      val () = assertloc (glist_is_nil (x.lstaftitm_saits ()))
     in
       lstaftitmlst_free (xs)
     end // end of [list_vt_cons]
-  | ~list_vt_nil () => ()
+  | ~GLnil () => ()
 ) // end of [lstaftitmlst_free]
 
 (* ****** ****** *)
 
-extern
-fun lstaftitmlst_make
-  (xs: lstbefitmlst): lstaftitmlst
-implement
-lstaftitmlst_make (xs) = let
-//
-fun loop
-(
-  xs: lstbefitmlst
-, res: &lstaftitmlst? >> lstaftitmlst
-) : void = let
-in
-  case+ xs of
-  | list_cons (x, xs) => let
-      val d2v = x.lstbefitm_var
-      val () =
-        res := list_vt_cons {lstaftitm}{0} (?, ?)
-      // end of [val]
-      val+list_vt_cons (!p_x, !p_res1) = res
-      val () = p_x->lstaftitm_var := d2v
-      val () = p_x->lstaftitm_knd := 0(*default*)
-      val () = p_x->lstaftitm_type := None(*default*)
-      val () = p_x->lstaftitm_saits := list_vt_nil
-      val () = loop (xs, !p_res1)
+fun
+lstaftitmlst_make
+  (xs: lstbefitmlst): lstaftitmlst = (
+  case+ glist_view (xs) of
+  | ~GLcons (x, xs) => let
+      val d2v = x.lstbefitm_var ()
+      val item = lstaftitm_new (d2v, 0(*default*), gopt_none() (*default*), glist_nil ())
     in
-      fold@ (res)
+      glist_cons (item, lstaftitmlst_make (xs))
     end
-  | list_nil () => (res := list_vt_nil ())
-end // end of [loop]
-//
-var res: lstaftitmlst
-val () = loop (xs, res)
-//
-in
-  res
-end // end of [lstaftitmlst_make]
+  | ~GLnil () => glist_nil ()
+) // end of [lstaftitmlst_make]
 
 (* ****** ****** *)
 
-extern
-fun lstaftitmlst_update (xs: !lstaftitmlst): void
-implement
-lstaftitmlst_update (xs) =
+fun
+lstaftitmlst_update (xs: lstaftitmlst): void =
 (
 //
-case+ xs of
-| list_vt_cons
-    (!p_x, !p_xs1) => let
-    val d2v = p_x->lstaftitm_var
+case+ glist_view (xs) of
+| ~GLcons (x, xs1) => let
+    val d2v = x.lstaftitm_var ()
     val sait = d2var_get_type (d2v)
-    val saits = p_x->lstaftitm_saits
-    val () = p_x->lstaftitm_saits := list_vt_cons (sait, saits)
-    val () = lstaftitmlst_update (!p_xs1)
-    prval () = fold@ (xs)
+    val saits = x.lstaftitm_saits ()
+    val () = set_lstaftitm_saits (x, glist_cons (sait, saits))
   in
-    // nothing
+    lstaftitmlst_update (xs1)
   end // end of [list_vt_cons]
-| list_vt_nil () => fold@ (xs)
+| ~GLnil () => ()
 //
 ) // end of [lstaftitmlst_update]
 
 (* ****** ****** *)
 
-extern
-fun lstaftitmlst_reverse
-  (xs: !lstaftitmlst): void // reverse saityplst
-implement
+fun
 lstaftitmlst_reverse
-  (xs) = (
+  (xs: lstaftitmlst): void = // reverse saityplst
+(
 //
-case+ xs of
-| list_vt_cons
-    (!p_x, !p_xs1) => let
-    val saits = p_x->lstaftitm_saits
-    val () = p_x->lstaftitm_saits := list_vt_reverse (saits)
-    val () = lstaftitmlst_reverse (!p_xs1)
-    prval () = fold@ (xs)
+case+ glist_view (xs) of
+| ~GLcons (x, xs1) => let
+    val saits = x.lstaftitm_saits ()
+    val () = set_lstaftitm_saits (x, glist_reverse (saits))
   in
-    // nothing
+    lstaftitmlst_reverse (xs1)
   end // end of [list_vt_cons]
-| list_vt_nil () => fold@ (xs)
+| ~GLnil () => ()
 //
 ) // end of [lstaftitmlst_reverse]
 
 (* ****** ****** *)
 
-dataviewtype
-lstaftc3nstr =
-LSTAFTC3NSTR of (lstaftitmlst, List_vt (c3nstroptref))
+assume lstaftc3nstr_vtype = ptr
 
-(* ****** ****** *)
-
-assume lstaftc3nstr_viewtype = lstaftc3nstr
+fn
+lsaft_get (x: !lstaftc3nstr): lstaftc3nstr_rec = $UN.castvwtp1{lstaftc3nstr_rec}(x)
 
 (* ****** ****** *)
 
@@ -400,9 +335,8 @@ implement
 fprint_lstaftc3nstr
   (out, x) = let
 //
-val LSTAFTC3NSTR (!p_lsais, _) = x
-val () = fprint_lstaftitmlst (out, !p_lsais)
-prval () = fold@ (x)
+val rc = lsaft_get (x)
+val () = fprint_lstaftitmlst (out, rc.lstaftc3nstr_rec_lsais ())
 //
 in
   // nothing
@@ -415,10 +349,10 @@ lstaftc3nstr_initize
   (lsbis) = let
 //
 val lsais = lstaftitmlst_make (lsbis)
-val ctrs = list_vt_nil {c3nstroptref} ()
+val ctrs = glist_nil ()
 //
 in
-  LSTAFTC3NSTR (lsais, ctrs)
+  $UN.castvwtp0{lstaftc3nstr} (lstaftc3nstr_rec_new (lsais, ctrs))
 end // end of [lstaftc3nstr_initize]
 
 (* ****** ****** *)
@@ -427,10 +361,9 @@ implement
 lstaftc3nstr_update
   (lsaft, ctr) = let
 //
-val+LSTAFTC3NSTR (!p1_lsais, !p2_ctrs) = lsaft
-val () = lstaftitmlst_update (!p1_lsais)
-val () = !p2_ctrs := list_vt_cons (ctr, !p2_ctrs)
-prval () = fold@ (lsaft)
+val rc = lsaft_get (lsaft)
+val () = lstaftitmlst_update (rc.lstaftc3nstr_rec_lsais ())
+val () = set_lstaftc3nstr_rec_ctrs (rc, glist_cons (ctr, rc.lstaftc3nstr_rec_ctrs ()))
 //
 in
   // nothing
@@ -442,9 +375,9 @@ implement
 lstaftc3nstr_finalize
   (lsaft) = let
 //
-val+~LSTAFTC3NSTR (lsais, ctrs) = lsaft
-val () = lstaftitmlst_free (lsais)
-val-list_vt_nil () = ctrs // HX: [ctrs] should be nil!
+val rc = $UN.castvwtp0{lstaftc3nstr_rec} (lsaft)
+val () = lstaftitmlst_free (rc.lstaftc3nstr_rec_lsais ())
+val () = assertloc (glist_is_nil (rc.lstaftc3nstr_rec_ctrs ())) // HX: [ctrs] should be nil!
 //
 in
   // nothing
@@ -452,78 +385,71 @@ end // end of [lstaftc3nstr_finalize]
 
 (* ****** ****** *)
 
-extern
-fun lstaftc3nstr_check
-  (lsaft: !lstaftc3nstr, invres: i2nvresstate): void
-// end of [lstaftc3nstr_check]
-
-local
-
-fun d2var_is_done
+fun
+d2var_is_done
   (d2v: d2var): bool = let
   val opt = d2var_get_finknd (d2v)
 in
-  case+ opt of D2VFINdone _ => true | _ => false
+  d2vfin_is_D2VFINdone (opt)
 end // end of [d2var_is_done]
 
-fun aux1
-  (xs: !lstaftitmlst): d2varlst_vt =
+fun
+lstaftc3nstr_check_aux1
+  (xs: lstaftitmlst): d2varlst_vt =
 (
 //
-case+ xs of
-| list_vt_cons
-    (!p_x, !p_xs1) => let
-    val d2v = p_x->lstaftitm_var
+case+ glist_view (xs) of
+| ~GLcons (x, xs1) => let
+    val d2v = x.lstaftitm_var ()
     val ans = let
       val isdone = d2var_is_done (d2v)
     in
       if isdone then 0 else let
-        val saits = $UN.castvwtp1{saityplst}(p_x->lstaftitm_saits)
+        val saits = x.lstaftitm_saits ()
       in
         saityplst_check (d2v, saits)
       end // end of [if]
     end : int // end of [val]
-    val d2vs = aux1 (!p_xs1)
-    prval () = fold@ (xs)
+    val d2vs = lstaftc3nstr_check_aux1 (xs1)
   in
     if ans(*merge*) > 0 then list_vt_cons (d2v, d2vs) else d2vs
   end // end of [list_vt_cons]
-| list_vt_nil () => let
-    prval () = fold@ (xs) in list_vt_nil ()
-  end // end of [list_vt_nil]
+| ~GLnil () => list_vt_nil ()
 //
 ) // end of [aux1]
 
-fun aux2
+fun
+lstaftc3nstr_check_aux2
 (
-  d2v0: d2var, d2vs: d2varlst, k: &int
+  d2v0: d2var, d2vs: d2varlst, k: &int >> _
 ) : s2expopt =
 (
 //
-case+ d2vs of
-| list_cons
+case+ glist_view (d2vs) of
+| ~GLcons
     (d2v, d2vs) => let
     val sgn = compare (d2v0, d2v)
   in
     if sgn = 0 then let
       val opt = d2var_get_mastype (d2v) in (k := 1; opt)
     end else
-      aux2 (d2v0, d2vs, k)
+      lstaftc3nstr_check_aux2 (d2v0, d2vs, k)
     // end of [if]
   end // end of [list_cons]
-| list_nil () => None ()
+| ~GLnil () => gopt_none ()
 //
 ) // end of [aux2]
 
-fun aux3
+fun
+lstaftc3nstr_check_aux3
 (
   d2v0: d2var
-, args: i2nvarglst, d2vs: d2varlst, k: &int
+, args: i2nvarglst, d2vs: d2varlst, k: &int >> _
 ) : s2expopt =
 (
 //
-case+ args of
-| list_cons
+case+ glist_view (args) of
+| ~GLcons
     (arg, args) => let
     val d2v =
       i2nvarg_get_var (arg)
@@ -533,68 +459,61 @@ case+ args of
     if sgn = 0 then let
       val () = k := 2 in i2nvarg_get_type (arg)
     end else
-      aux3 (d2v0, args, d2vs, k)
+      lstaftc3nstr_check_aux3 (d2v0, args, d2vs, k)
     // end of [if]
   end // end of [list_cons]
-| list_nil () => aux2 (d2v0, d2vs, k)
+| ~GLnil () => lstaftc3nstr_check_aux2 (d2v0, d2vs, k)
 //
 ) // end of [aux3]
 
-fun auxlst
+fun
+lstaftc3nstr_check_auxlst
 (
-  xs: !lstaftitmlst, args: i2nvarglst, d2vs: d2varlst
+  xs: lstaftitmlst, args: i2nvarglst, d2vs: d2varlst
 ) : void = let
 in
 //
-case+ xs of
-| list_vt_cons
-    (!p_x, !p_xs1) => let
-    val d2v0 = p_x->lstaftitm_var
+case+ glist_view (xs) of
+| ~GLcons (x, xs1) => let
+    val d2v0 = x.lstaftitm_var ()
     var knd: int = 0
-    val opt = aux3 (d2v0, args, d2vs, knd)
-    val () = p_x->lstaftitm_knd := knd
-    val () = p_x->lstaftitm_type := opt
+    val opt = lstaftc3nstr_check_aux3 (d2v0, args, d2vs, knd)
+    val () = set_lstaftitm_knd (x, knd)
+    val () = set_lstaftitm_type (x, opt)
     val () = if knd > 0 then d2var_set_type (d2v0, opt)
-    val () = auxlst (!p_xs1, args, d2vs)
   in
-    fold@ (xs)
+    lstaftc3nstr_check_auxlst (xs1, args, d2vs)
   end // end of [list_vt_cons]
-| list_vt_nil () => fold@ (xs)
+| ~GLnil () => ()
 //
 end // end of [auxlst]
 
-in (* in of [local] *)
-
-implement
+fun
 lstaftc3nstr_check
-  (lsaft, invres) = let
+  (lsaft: !lstaftc3nstr, invres: i2nvresstate): void = let
 //
-val+LSTAFTC3NSTR (!p_lsais, _) = lsaft
+val rc = lsaft_get (lsaft)
+val lsais = rc.lstaftc3nstr_rec_lsais ()
 //
-val d2vs = aux1 (!p_lsais)
+val d2vs = lstaftc3nstr_check_aux1 (lsais)
 //
 val () = let
-  val args = invres.i2nvresstate_arg
-  val d2vs = $UN.castvwtp1 {d2varlst} (d2vs)
+  val args = invres.i2nvresstate_arg ()
+  val d2vs1 = glist_make_list_vt (list_vt_copy (d2vs))
 in
-  auxlst (!p_lsais, args, d2vs)
+  lstaftc3nstr_check_auxlst (lsais, args, d2vs1)
 end // end of [val]
 //
 val () = list_vt_free (d2vs)
-//
-prval () = fold@ (lsaft)
 //
 in
   // nothing
 end // end of [lstaftc3nstr_check]
 
-end // end of [local]
-
 (* ****** ****** *)
 
-local
-
-fun auxerr_some
+fun
+lstaftc3nstr_auxerr_some
 (
   loc: loc_t, d2v: d2var, s2e0: s2exp
 ) : void = let
@@ -606,10 +525,11 @@ fun auxerr_some
   val () = prerr "] instead."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d2var_some (loc, d2v, s2e0))
+  the_trans3errlst_add (trans3err_T3E_d2var_some (loc, d2v, s2e0))
 end // end of [auxerr_some]
 
-fun auxerr_none
+fun
+lstaftc3nstr_auxerr_none
 (
   loc: loc_t, d2v: d2var, s2e: s2exp
 ) : void = let
@@ -621,10 +541,11 @@ fun auxerr_none
   val () = prerr "] but it should be consumed instead."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_d2var_some (loc, d2v, s2e))
+  the_trans3errlst_add (trans3err_T3E_d2var_some (loc, d2v, s2e))
 end // end of [auxerr_none]
 
-fun auxerr_some2
+fun
+lstaftc3nstr_auxerr_some2
 (
   loc: loc_t, d2v: d2var, s2e0: s2exp, s2e: s2exp
 ) : void = let
@@ -635,10 +556,11 @@ fun auxerr_some2
   val () = prerr_newline ()
   val () = prerr_the_staerrlst ()
 in
-  the_trans3errlst_add (T3E_d2var_some2 (loc, d2v, s2e0, s2e))
+  the_trans3errlst_add (trans3err_T3E_d2var_some2 (loc, d2v, s2e0, s2e))
 end // end of [auxerr_some2]
 
-fun auxsait
+fun
+lstaftc3nstr_auxsait
 (
   loc: loc_t
 , d2v: d2var (* perform merge for [d2v] *)
@@ -648,12 +570,11 @@ fun auxsait
 ) : void = let
 in
 //
-case+ sait0 of
-| Some(s2e0) => (
-  case+ sait of
-  | Some(s2e) => (
-    case+ 0 of
-    | _ when knd >= 1 => let
+case+ gopt_view (sait0) of
+| ~GOsome(s2e0) => (
+  case+ gopt_view (sait) of
+  | ~GOsome(s2e) => (
+    if knd >= 1 then let
         val
         s2e0 = (
           if knd >= 2
@@ -661,93 +582,87 @@ case+ sait0 of
           // end of [if]
         ) : s2exp // end of [val]
 //
-        val
-        (pfpush|()) =
-        trans3_env_push()
+        val () = trans3_env_push()
         val err = $SOL.s2exp_tyleq_solve (loc, s2e, s2e0)
-        val knd = C3TKlstate_var (d2v)
-        val ((*void*)) = trans3_env_pop_and_add (pfpush | loc, knd)
+        val knd = c3nstrkind_C3TKlstate_var (d2v)
+        val ((*void*)) = trans3_env_pop_and_add (loc, knd)
 //
         val () =
         if (err > 0) then {
           val () = prerr_the_staerrlst ()
-          val () = auxerr_some2 (loc, d2v, s2e0, s2e)
+          val () = lstaftc3nstr_auxerr_some2 (loc, d2v, s2e0, s2e)
         } (* end of [if] *) // end of [val]
       in
         // nothing
-      end
-    | _ (* knd = 0 *) => ()
+      end else () (* knd = 0 *)
     ) // end of [Some]
-  | None ((*void*)) => auxerr_some (loc, d2v, s2e0)
+  | ~GOnone ((*void*)) => lstaftc3nstr_auxerr_some (loc, d2v, s2e0)
   )
-| None((*void*)) =>
+| ~GOnone((*void*)) =>
   (
-    case+ sait of
-    | Some(s2e) => auxerr_none (loc, d2v, s2e) | None() => ()
+    case+ gopt_view (sait) of
+    | ~GOsome(s2e) => lstaftc3nstr_auxerr_none (loc, d2v, s2e) | ~GOnone() => ()
   ) (* end of [None] *)
 //
 end // end of [auxsait]
 
-fun auxmain
+fun
+lstaftc3nstr_auxmain
 (
-  xs: !lstaftitmlst
+  xs: lstaftitmlst
 , ctr: c3nstroptref, sub: !stasub
 ) : void = (
-  case+ xs of
-  | list_vt_cons
-      (!p_x, !p_xs1) => let
-      val d2v = p_x->lstaftitm_var
-      val knd = p_x->lstaftitm_knd
+  case+ glist_view (xs) of
+  | ~GLcons
+      (x, xs1) => let
+      val d2v = x.lstaftitm_var ()
+      val knd = x.lstaftitm_knd ()
       val sait0 = d2var_get_type (d2v)
-      val-~list_vt_cons (sait, saits) = p_x->lstaftitm_saits
-      val () = p_x->lstaftitm_saits := saits
-      val ctrloc = ctr.c3nstroptref_loc
-      val () = auxsait (ctrloc, d2v, knd, sub, sait0, sait)
-      val () = auxmain (!p_xs1, ctr, sub)
+      val saits = x.lstaftitm_saits ()
+      val-~GLcons (sait, saits) = glist_view (saits)
+      val () = set_lstaftitm_saits (x, saits)
+      val ctrloc = ctr.c3nstroptref_loc ()
+      val () = lstaftc3nstr_auxsait (ctrloc, d2v, knd, sub, sait0, sait)
     in
-      fold@ (xs)
+      lstaftc3nstr_auxmain (xs1, ctr, sub)
     end // end of [list_vt_cons]
-  | list_vt_nil () => fold@ (xs)
+  | ~GLnil () => ()
 ) // end of [auxmain]
 
-fun auxmainlst
+fun
+lstaftc3nstr_auxmainlst
 (
-  xs: !lstaftitmlst
-, ctrs: List_vt (c3nstroptref), invres: i2nvresstate
+  xs: lstaftitmlst
+, ctrs: c3nstroptreflst, invres: i2nvresstate
 ) : void = let
 in
 //
-case+ ctrs of
-| ~list_vt_cons
+case+ glist_view (ctrs) of
+| ~GLcons
     (ctr, ctrs) => let
-    val ctrloc = ctr.c3nstroptref_loc
+    val ctrloc = ctr.c3nstroptref_loc ()
     val sub =
-      stasub_make_svarlst (ctrloc, invres.i2nvresstate_svs)
-    val s2ps = s2explst_subst_vt (sub, invres.i2nvresstate_gua)
+      stasub_make_svarlst (ctrloc, invres.i2nvresstate_svs ())
+    val s2ps = s2explst_subst_vt (sub, invres.i2nvresstate_gua ())
 //
-    val
-    (pfpush|()) = trans3_env_push()
+    val () = trans3_env_push()
 //
     val () = trans3_env_add_proplst_vt (ctrloc, s2ps)
-    val () = auxmain (xs, ctr, sub)
+    val () = lstaftc3nstr_auxmain (xs, ctr, sub)
 //
-    val s3is = trans3_env_pop (pfpush | (*none*))
+    val s3is = trans3_env_pop ()
     val c3t0 =
-      c3nstr_itmlst (ctrloc, C3TKlstate(), (l2l)s3is)
-    val () = let
-      val ref = ctr.c3nstroptref_ref in !ref := Some (c3t0)
-    end // end of [val]
+      c3nstr_itmlst (ctrloc, c3nstrkind_C3TKlstate(), l2l(s3is))
+    val () = set_c3nstroptref_val (ctr, gopt_some (c3t0))
 //
     val () = stasub_free (sub)
   in
-    auxmainlst (xs, ctrs, invres)
+    lstaftc3nstr_auxmainlst (xs, ctrs, invres)
   end // end of [list_vt_cons]
 //
-| ~list_vt_nil((*void*)) => ()
+| ~GLnil((*void*)) => ()
 //
 end // end of [auxmainlst]
-
-in // in of [local]
 
 implement
 lstaftc3nstr_process
@@ -756,26 +671,15 @@ lstaftc3nstr_process
 val () =
   lstaftc3nstr_check (lsaft, invres)
 //
-(*
-val () = print "lstaftc3nstr_process:\n"
-val () = fprint_lstaftc3nstr (stdout_ref, lsaft)
-*)
+val rc = lsaft_get (lsaft)
 //
-val
-LSTAFTC3NSTR
-  (!p_lsais, !p_ctrs) = lsaft
-//
-val ctrs = !p_ctrs
-val () = !p_ctrs := list_vt_nil ()
-val () = auxmainlst (!p_lsais, ctrs, invres)
-//
-prval ((*void*)) = fold@ (lsaft)
+val ctrs = rc.lstaftc3nstr_rec_ctrs ()
+val () = set_lstaftc3nstr_rec_ctrs (rc, glist_nil ())
+val () = lstaftc3nstr_auxmainlst (rc.lstaftc3nstr_rec_lsais (), ctrs, invres)
 //
 in
   // nothing
 end // end of [lstaftc3nstr_process]
-
-end // end of [local]
 
 (* ****** ****** *)
 
@@ -784,16 +688,12 @@ i2nvarglst_update
   (loc, args) = let
 in
 //
-case+ args of
-| list_cons
+case+ glist_view (args) of
+| ~GLcons
     (arg, args) => let
 //
     val d2v = i2nvarg_get_var (arg)
     val opt = i2nvarg_get_type (arg)
-(*
-    val () = println! ("i2nvarglst_update: d2v = ", d2v)
-    val () = println! ("i2nvarglst_update: opt = ", opt)
-*)
     val () =
       d2var_inc_linval (d2v)
     // end of [val]
@@ -803,7 +703,7 @@ case+ args of
   in
     i2nvarglst_update (loc, args)
   end // end of [list_cons]
-| list_nil () => ()
+| ~GLnil () => ()
 //
 end // end of [i2nvarglst_update]
 
@@ -814,15 +714,15 @@ i2nvresstate_update
   (loc, invres) = let
 //
 val () =
-  trans3_env_add_svarlst (invres.i2nvresstate_svs)
+  trans3_env_add_svarlst (invres.i2nvresstate_svs ())
 val () =
-  trans3_env_hypadd_proplst (loc, invres.i2nvresstate_gua)
+  trans3_env_hypadd_proplst (loc, invres.i2nvresstate_gua ())
 //
 in
 //
 // HX-2012-08:
 // updating is already done during merge but this is
-  i2nvarglst_update (loc, invres.i2nvresstate_arg) // more appropriate
+  i2nvarglst_update (loc, invres.i2nvresstate_arg ()) // more appropriate
 //
 end // end of [i2nvresstate_update]
 

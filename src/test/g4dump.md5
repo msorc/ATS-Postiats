@@ -1,0 +1,1 @@
+e14a38f3994b238ff3cdac8987c35637 0c0fbbeb429f42cd523fbdb9d174f62c  (G4SEED=1 G4SCALE=3: md5 of the stdout and the stderr of the ATS1 build g4dump1; make g4test checks the ATS2 build against it)

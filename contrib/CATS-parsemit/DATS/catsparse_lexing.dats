@@ -19,6 +19,8 @@ staload UN = $UNSAFE
 
 (* ****** ****** *)
 
+#staload "libats/SATS/arena.sats"
+#staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
@@ -28,13 +30,33 @@ macdef ENDL = char2int0('\n')
 (* ****** ****** *)
 
 implement
-token_get_loc (tok) = tok.token_loc
+token_get_loc (tok) = tok.token_loc()
 
 (* ****** ****** *)
 //
 implement
 token_make (loc, node) =
-  '{ token_loc= loc, token_node= node }
+  token_TOKEN(loc, node)
+//
+// HX-2026-10: no GC
+//
+fun
+token_make_v
+(
+  loc: loc_t, node: token_node_view
+) : token = token_make(loc, token_node_encode(node))
+//
+// HX-2026-10:
+// a string taken out of the lexing buffer is
+// copied into the global arena (and freed)
+//
+fun
+strptr2gstring
+  (x: Strptr1): string = let
+  val res = the_garena_strdup($UN.strptr2string(x))
+in
+  strptr_free(x); res
+end // end of [strptr2gstring]
 //
 (* ****** ****** *)
 
@@ -336,7 +358,7 @@ val nchr =
   testing_identrstseq0(buf)
 val nchr1 = succ(nchr)
 val name = lexbuf_takeout(buf, nchr1)
-val name = strptr2string(name)
+val name = strptr2gstring(name)
 //
 val loc =
   lexbuf_getincby_location(buf, nchr1)
@@ -348,9 +370,9 @@ in
 case+ kwd of
 //
 | KWORDnone () =>
-    token_make (loc, T_IDENT_alp(name))
+    token_make_v(loc, T_IDENT_alp(name))
   // end of [KWORDnone]
-| _ (*keyword*) => token_make (loc, T_KWORD(kwd))
+| _ (*keyword*) => token_make_v(loc, T_KWORD(kwd))
 //
 end // end of [lexing_IDENT_alp]
 
@@ -369,21 +391,21 @@ val nchr =
   testing_symbolicseq0 (buf)
 val nchr1 = succ(nchr)
 val name = lexbuf_takeout (buf, nchr1)
-val name = strptr2string (name)
+val name = strptr2gstring (name)
 //
 val loc = lexbuf_getincby_location (buf, nchr1)
 //
 in
 //
 case+ name of
-| "<" => token_make (loc, T_LT)
-| ">" => token_make (loc, T_GT)
+| "<" => token_make_v(loc, T_LT)
+| ">" => token_make_v(loc, T_GT)
 //
-| "-" => token_make (loc, T_MINUS)
+| "-" => token_make_v(loc, T_MINUS)
 //
-| ":" => token_make (loc, T_COLON)
+| ":" => token_make_v(loc, T_COLON)
 //
-| _ (*rest*) => token_make (loc, T_IDENT_sym(name))
+| _ (*rest*) => token_make_v(loc, T_IDENT_sym(name))
 //
 end // end of [lexing_IDENT_sym]
 
@@ -449,7 +471,7 @@ if k2 = 0 then
   val loc =
     lexbuf_getincby_location (buf, k1+1)
   val err =
-    lexerr_make (loc, LEXERR_FEXPONENT_nil)
+    lexerr_make (loc, lexerr_node_encode(LEXERR_FEXPONENT_nil))
   val ((*void*)) = the_lexerrlst_insert (err)
 } (* end of [if] *) // end of [val]
 //
@@ -536,7 +558,7 @@ then let
 val k1 = testing_intspseq0 (buf)
 val nchr = succ(k0 + k1)
 val intrep = lexbuf_takeout (buf, nchr)
-val intrep = strptr2string (intrep)
+val intrep = strptr2gstring (intrep)
 //
 val loc = lexbuf_getincby_location (buf, nchr)
 //
@@ -544,7 +566,7 @@ val base =
   (if k0 > 0 then 8 else 10): int
 //
 in
-  token_make (loc, T_INT(base, intrep))
+  token_make_v(loc, T_INT(base, intrep))
 end // end of [then]
 else lexing_INT_dec (buf)
 //
@@ -568,12 +590,12 @@ then let
 //
   val nchr = succ(k0 + k1)
   val float = lexbuf_takeout (buf, nchr)
-  val float = strptr2string (float)
+  val float = strptr2gstring (float)
 //
   val loc = lexbuf_getincby_location (buf, nchr)
 //
 in
-  token_make (loc, T_FLOAT(10(*base*), float))
+  token_make_v(loc, T_FLOAT(10(*base*), float))
 end // end of [then]
 else let
 //
@@ -587,12 +609,12 @@ then let
 //
   val nchr = succ(k0 + k1)
   val float = lexbuf_takeout (buf, nchr)
-  val float = strptr2string (float)
+  val float = strptr2gstring (float)
 //
   val loc = lexbuf_getincby_location (buf, nchr)
 //
 in
-  token_make (loc, T_FLOAT(10(*base*), float))
+  token_make_v(loc, T_FLOAT(10(*base*), float))
 end // end of [then]
 else let
 //
@@ -600,12 +622,12 @@ else let
 //
   val nchr = succ(k0 + k1)
   val intrep = lexbuf_takeout (buf, nchr)
-  val intrep = strptr2string (intrep)
+  val intrep = strptr2gstring (intrep)
 //
   val loc = lexbuf_getincby_location (buf, nchr)
 //
 in
-  token_make (loc, T_INT(10(*base*), intrep))
+  token_make_v(loc, T_INT(10(*base*), intrep))
 end // end of [else]
 //
 end // end of [else]
@@ -627,12 +649,12 @@ val k0 =
 val k1 = testing_intspseq0 (buf)
 val nchr = k0 + k1 + 2
 val intrep = lexbuf_takeout (buf, nchr)
-val intrep = strptr2string (intrep)
+val intrep = strptr2gstring (intrep)
 //
 val loc = lexbuf_getincby_location (buf, nchr)
 //
 in
-  token_make (loc, T_INT(16(*base*), intrep))
+  token_make_v(loc, T_INT(16(*base*), intrep))
 end // end of [lexing_INT_hex]
 
 (* ****** ****** *)
@@ -672,11 +694,11 @@ val nchr =
 val nchr1 = nchr + 1
 val () = lexbuf_set_nspace (buf, nchr1)
 val spaces = lexbuf_takeout (buf, nchr1)
-val spaces = strptr2string (spaces)
+val spaces = strptr2gstring (spaces)
 val loc = lexbuf_getincby_location (buf, nchr1)
 //
 in
-  token_make (loc, T_SPACES (spaces))
+  token_make_v(loc, T_SPACES (spaces))
 end // end of [lexing_SPACES]
 //
 (* ****** ****** *)
@@ -694,7 +716,7 @@ val () = lexbuf_remove (buf, 1)
 val loc = lexbuf_getbyrow_location (buf)
 //
 in
-  token_make (loc, T_ENDL())
+  token_make_v(loc, T_ENDL())
 end // end of [lexing_ENDL]
 
 (* ****** ****** *)
@@ -702,7 +724,7 @@ end // end of [lexing_ENDL]
 extern
 fun
 lexing_litchar
-  (buf: &lexbuf, node: tnode): token
+  (buf: &lexbuf, node: token_node_view): token
 //
 implement
 lexing_litchar
@@ -712,7 +734,7 @@ val () = lexbuf_remove (buf, 1)
 val loc = lexbuf_getincby_location (buf, 1)
 //
 in
-  token_make (loc, node)
+  token_make_v(loc, node)
 end // end of [lexing_litchar]
 //
 (* ****** ****** *)
@@ -743,31 +765,31 @@ case+ 0 of
     val nchr = testing_identrstseq0 (buf)
     val nchr2 = nchr + 2
     val name = lexbuf_takeout (buf, nchr2)
-    val name = strptr2string (name)
+    val name = strptr2gstring (name)
     val loc = lexbuf_getincby_location (buf, nchr2)
     val kwd = keyword_search (name)
   in
     case+ kwd of
     | KWORDnone () =>
-        token_make (loc, T_IDENT_srp(name))
+        token_make_v(loc, T_IDENT_srp(name))
       // end of [KWORDnone]
-    | _(*keyword*) => token_make (loc, T_KWORD (kwd))
+    | _(*keyword*) => token_make_v(loc, T_KWORD (kwd))
   end
 | _ (* rest-of-char *) => let
     val nchr = testing_symbolicseq0 (buf)
     val nchr1 = succ(nchr)
     val name = lexbuf_takeout (buf, nchr1)
-    val name = strptr2string (name)
+    val name = strptr2gstring (name)
     val loc = lexbuf_getincby_location (buf, nchr1)
   in
-    token_make (loc, T_IDENT_alp(name))
+    token_make_v(loc, T_IDENT_alp(name))
   end
 end // end of [then]
 else let
   val () = lexbuf_remove (buf, 1)
   val loc = lexbuf_getincby_location (buf, 1)
 in
-  token_make (loc, T_SLASH((*void*)))
+  token_make_v(loc, T_SLASH((*void*)))
 end // end of [else]
 //
 end // end of [lexing_SHARP]
@@ -897,7 +919,7 @@ val () = println! ("lexing_quote: strp = ", strp)
 *)
 //
 in
-  token_make(loc, T_STRING(strptr2string(strp)))
+  token_make_v(loc, T_STRING(strptr2gstring(strp)))
 end // end of [lexing_quote]
 
 (* ****** ****** *)
@@ -1003,7 +1025,7 @@ val loc = lexbufpos_get_location (buf, pos)
 val ((*void*)) = lexbuf_set_position (buf, pos)
 //
 in
-  token_make(loc, T_COMMENT_block(strptr2string(str)))
+  token_make_v(loc, T_COMMENT_block(strptr2gstring(str)))
 end // end of [lexing_SLASHSTAR]
 
 (* ****** ****** *)
@@ -1025,7 +1047,7 @@ val str = lexbuf_takeout(buf, nchr + 2)
 val loc = lexbuf_getincby_location(buf, nchr + 2)
 //
 in
-  token_make(loc, T_COMMENT_line(strptr2string(str)))
+  token_make_v(loc, T_COMMENT_line(strptr2gstring(str)))
 end // end of [lexing_SLASHSLASH]
 
 (* ****** ****** *)
@@ -1098,7 +1120,7 @@ case+ 0 of
     val () = lexbuf_remove_all(buf)
 //
     val loc = lexbuf_getincby_location(buf, 1)
-    val err = lexerr_make (loc, LEXERR_UNSUPPORTED_char(c0))
+    val err = lexerr_make (loc, lexerr_node_encode(LEXERR_UNSUPPORTED_char(c0)))
     val ((*void*)) = prerrln! ("Warning(lex): ", err)
 (*
     val ((*inserted*)) = the_lexerrlst_insert (err)
@@ -1111,7 +1133,7 @@ case+ 0 of
 end // end of [then]
 else let
   val loc =
-    lexbuf_getincby_location (buf, 0) in token_make (loc, T_EOF)
+    lexbuf_getincby_location (buf, 0) in token_make_v(loc, T_EOF)
   // end of [val]
 end // end of [else]
 //
@@ -1128,12 +1150,12 @@ val tok = get_token_any (buf)
 in
 //
 case+
-tok.token_node of
+token_node_view(tok.token_node()) of
 //
-| T_SPACES _ => tok
-| _ (*non-SPACES*) => let
+| ~T_SPACES _ => tok
+| v0 (*non-SPACES*) => (token_node_view_free(v0); let
     val () = lexbuf_set_nspace (buf, 0) in tok
-  end // end of [non-SPACES]
+  end) // end of [non-SPACES]
 //
 end // end of [lexbuf_get_token_any]
 //
@@ -1150,12 +1172,12 @@ val tok = lexbuf_get_token_any (buf)
 in
 //
 case+
-tok.token_node of
-| T_ENDL () => lexbuf_get_token_skip (buf)
-| T_SPACES _ => lexbuf_get_token_skip (buf)
-| T_COMMENT_line _ => lexbuf_get_token_skip (buf)
-| T_COMMENT_block _ => lexbuf_get_token_skip (buf)
-| _ (*non-skip-token*) => tok
+token_node_view(tok.token_node()) of
+| ~T_ENDL () => lexbuf_get_token_skip (buf)
+| ~T_SPACES _ => lexbuf_get_token_skip (buf)
+| ~T_COMMENT_line _ => lexbuf_get_token_skip (buf)
+| ~T_COMMENT_block _ => lexbuf_get_token_skip (buf)
+| v0 (*non-skip-token*) => (token_node_view_free(v0); tok)
 //
 end // end of [lexing_get_token_skip]
 

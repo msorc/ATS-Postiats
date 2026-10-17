@@ -23,31 +23,34 @@ LIBATSCC2SCM_targetloc
 //
 (* ****** ****** *)
 //
-extern
-fun
-list_map
-  {a:t0p}{b:t0p}{n:int}
-  (xs: list(INV(a), n), f: cfun(a, b)): list (b, n)
 //
-implement
-list_map (xs, f) =
+// HX-2026-10: no GC (linear lists and closures)
+//
+fun
+{a:t0p}
+{b:t0p}
+list_vt_map0
+(
+  xs: List0_vt(a), f: !(a) -<cloptr1> b
+) : List0_vt(b) =
 (
 case+ xs of
-| list_nil () => list_nil ()
-| list_cons (x, xs) => list_cons (f(x), list_map (xs, f))
-) (* end of [list_map] *)
+| ~list_vt_nil () => list_vt_nil ()
+| ~list_vt_cons (x, xs) =>
+    let val y = f(x) in list_vt_cons (y, list_vt_map0<a><b> (xs, f)) end
+) (* end of [list_vt_map0] *)
 //
 (* ****** ****** *)
 //
 extern
 fun
 fromto
-  : (int, int) -> List0 (int) = "mac#fromto"
+  : (int, int) -> List0_vt (int) = "mac#fromto"
 //
 implement
 fromto(m, n) =
 if m < n
-  then list_cons(m, fromto(m+1, n)) else list_nil()
+  then list_vt_cons(m, fromto(m+1, n)) else list_vt_nil()
 // end of [if]
 //
 (* ****** ****** *)
@@ -55,43 +58,39 @@ if m < n
 extern
 fun
 mytest
-  : (int, int) -> List0(int) = "mac#mytest"
+  : (int, int) -> List0_vt(int) = "mac#mytest"
 //
 implement
 mytest (m, n) = let
   val xs = fromto (m, n)
+  val f = lam (x: int): int =<cloptr1> m * n * x
+  val ys = list_vt_map0<int><int> (xs, f)
 in
-  list_map{int}{int} (xs, lam x => m * n * x)
+  cfun_free(f); ys
 end // end of [mytest]
 //
 (* ****** ****** *)
-
-implement
-{a}(*tmp*)
-print_list(xs) = let
 //
-val sep = ", "
+fun
+print_intlist
+  (xs: !List0_vt(int)): void = let
 //
 fun
 loop
 (
-  i: int, xs: List(a)
+  xs: !List0_vt(int), i: int
 ) : void =
 (
 case+ xs of
-| list_nil() => ()
-| list_cons(x, xs) => let
-    val () =
-    if i > 0 then print(sep)
-    val () = print_val<a> (x)
-  in
-    loop (i+1, xs)
-  end // end of [list_cons]
+| list_vt_nil() => ()
+| list_vt_cons(x, xs1) =>
+  (if i > 0 then print(", "); print(x); loop(xs1, i+1))
 )
 //
 in
-  loop (0, xs)
-end // end of [print_list]
+  loop(xs, 0)
+end // end of [print_intlist]
+
 
 (* ****** ****** *)
 
@@ -103,7 +102,11 @@ implement
 main0_ats () =
 {
 //
-val () = println! ("mytest(5, 10) = ", mytest(5, 10))
+val xs = mytest(5, 10)
+val () = print("mytest(5, 10) = ")
+val () = print_intlist(xs)
+val () = print_newline()
+val () = list_vt_free(xs)
 //
 } (* end of [main0_ats] *)
 

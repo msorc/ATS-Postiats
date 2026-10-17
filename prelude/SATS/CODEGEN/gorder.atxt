@@ -164,6 +164,6 @@ gcompare_ref_ref (x: &INV(a), y: &a):<> int
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "gorder_atxt.txt")
 %}\

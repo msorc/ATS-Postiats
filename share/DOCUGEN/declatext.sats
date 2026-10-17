@@ -18,23 +18,29 @@ staload LSYNMK =
 //
 typedef d0eclreplst = $LSYNMK.d0eclreplst
 //
+staload "libats/SATS/arena.sats"
+//
 (* ****** ****** *)
 
-datatype
-declitem =
 //
-  | DITMname of (string)
-  | DITMname2 of (string(*name*), string(*href*))
+// HX-2026-10: no GC. A [declitem] is a flat tuple (tag, string, string)
+// (a datatype with non-nullary constructors is rejected); the lists are
+// [glist]s (the global arena: they are never freed) and the unused
+// components are [""]
 //
-  | DITMsynop of () | DITMsynop2 of (string)
-  | DITMdescrpt of (string)
-  | DITMexample of (string)
+#define DITMname 0 // (name, "")
+#define DITMname2 1 // (name, href)
+#define DITMsynop 2 // ("", "")
+#define DITMsynop2 3 // (synop, "")
+#define DITMdescrpt 4 // (content, "")
+#define DITMexample 5 // (content, "")
+#define DITMparamadd 6 // (name, desc)
+#define DITMparamlist 7 // ("", "")
+#define DITMfunretval 8 // (content, "")
 //
-  | DITMparamadd of (string, string)
-  | DITMparamlist of () // listing the parameters
-//
-  | DITMfunretval of (string) // describing the return value
-// end of [declitem]
+typedef declitem = @(int(*tag*), string, string)
+typedef declitemlst = glist(declitem)
+typedef stringlst = glist(string)
 
 (* ****** ****** *)
 
@@ -58,10 +64,10 @@ fun theDeclname_get (): string
 fun theDeclname_set (x: string): void
 
 fun theDeclnameLst_add (x: string): void
-fun theDeclnameLst_get (): List_vt (string)
+fun theDeclnameLst_get (): stringlst
 
 fun theDeclitemLst_add (x: declitem): void
-fun theDeclitemLst_get (): List_vt (declitem)
+fun theDeclitemLst_get (): declitemlst
 
 fun declname (x: string): atext
 fun declname2 (name: string, href: string): atext

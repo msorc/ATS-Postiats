@@ -1,0 +1,186 @@
+(* the part of the level-3 test (t3_gen.py) that differs in ATS1 and ATS2 (generated from t3hand.tmpl: "2|" lines are ATS2 only, "1|" lines ATS1 only,
+   "<<(" is "@(" in ATS2 and "(" in ATS1), after the generated dumpers *)
+(* ****** ****** *)
+//
+// implemented by the driver (t3env.tmpl): the table of the pervasive static environment of trans2_env
+//
+2|extern fun t_penv_add (id: symbol, itm: s2itm): void = "ext#t3t_penv_add"
+1|extern fun t_penv_add (id: symbol, itm: s2itm): void = "t3t_penv_add"
+//
+// the check of the errors of the translation (only the count is observable)
+//
+2|fun t3chk (): void = (
+2|  try the_trans3errlst_finalize () with | ~$ERR.PATSOPT_TRANS3_EXN () => dd_ps "[trans3 errors]\n"
+2|)
+1|fun t3chk (): void = (
+1|  try the_trans3errlst_finalize () with ~($ERR.PATSOPT_TRANS3_EXN ()) => dd_ps "[trans3 errors]\n"
+1|)
+//
+// the conversions of the lists of the tree into linear lists (copies)
+//
+2|fun vt_s2explst (xs: s2explst): s2explst_vt = glist_listize<s2exp> (xs)
+2|fun vt_s2cstlst (xs: s2cstlst): s2cstlst_vt = glist_listize<s2cst> (xs)
+2|fun vt_p2atcstlst (xs: p2atcstlst): p2atcstlst_vt = glist_listize<p2atcst> (xs)
+2|fun mk_lp2tcs_vt (k: int): labp2atcstlst_vt =
+2|  list_vt_cons (labp2atcst_new (mklab (k), mkp2atcst0 (k)), list_vt_cons (labp2atcst_new (mklab (k+1), mkp2atcst0 (k+2)), list_vt_nil ()))
+1|fun vt_s2explst (xs: s2explst): s2explst_vt = list_copy (xs)
+1|fun vt_s2cstlst (xs: s2cstlst): s2cstlst_vt = list_copy (xs)
+1|fun vt_p2atcstlst (xs: p2atcstlst): p2atcstlst_vt = list_copy (xs)
+1|fun mk_lp2tcs_vt (k: int): labp2atcstlst_vt =
+1|  list_vt_cons (LABP2ATCST (mklab (k), mkp2atcst0 (k)), list_vt_cons (LABP2ATCST (mklab (k+1), mkp2atcst0 (k+2)), list_vt_nil ()))
+2|fun mk_lab_p2tc (l: int, k: int): labp2atcst = labp2atcst_new (mklab (l), mkp2atcst0 (k))
+1|fun mk_lab_p2tc (l: int, k: int): labp2atcst = LABP2ATCST (mklab (l), mkp2atcst0 (k))
+fun mk_p2tcs_vt (k: int): p2atcstlst_vt = vt_p2atcstlst (mkp2atcstlst (k))
+fun mk_p2tcss_vt (k: int): p2atcstlstlst_vt =
+  list_vt_cons (mk_p2tcs_vt (k), list_vt_cons (mk_p2tcs_vt (k+2), list_vt_cons (mk_p2tcs_vt (k+3), list_vt_nil ())))
+//
+// the results that are tuples
+//
+fun t_inst_dump (e1: s2exp, ps: s2explst_vt, err: int): void =
+  (dd_s2exp e1; dd_ps " "; dd_listvt_s2exp ps; dd_ps " err="; dd_int err; dd_nl ())
+fun t_inst (knd: int, e: s2exp, loc: location): void = let
+  var err: int = 0
+in
+  if knd = 0 then let
+    val <<(e1, ps) = s2exp_exi_instantiate_all (e, loc, err)
+  in t_inst_dump (e1, ps, err) end
+  else if knd = 1 then let
+    val <<(e1, ps) = s2exp_uni_instantiate_all (e, loc, err)
+  in t_inst_dump (e1, ps, err) end
+  else if knd = 2 then let
+    val <<(e1, ps) = s2exp_unimet_instantiate_all (e, loc, err)
+  in t_inst_dump (e1, ps, err) end
+  else let
+    val <<(e1, ps) = s2exp_exiuni_instantiate_all (knd - 3, e, loc, err)
+  in t_inst_dump (e1, ps, err) end
+end
+fun t_inst_sexparg (e: s2exp, a: s2exparg): void = let
+  var err: int = 0
+  val <<(e1, ps) = s2exp_exi_instantiate_sexparg (e, a, err)
+  val () = (dd_s2exp e1; dd_ps " "; dd_listvt_s2exp ps; dd_ps " err="; dd_int err; dd_nl ())
+in end
+fun t_inst_sexparglst (e: s2exp, a: s2exparglst): void = let
+  var err: int = 0
+  val <<(e1, ps) = s2exp_uni_instantiate_sexparglst (e, a, err)
+  val () = (dd_s2exp e1; dd_ps " "; dd_listvt_s2exp ps; dd_ps " err="; dd_int err; dd_nl ())
+in end
+fun t_tmp_rest (e: s2exp, loc: location, qs: s2qualst): void = let
+  var err: int = 0
+  val <<(e1, ms) = s2exp_tmp_instantiate_rest (e, loc, qs, err)
+  val () = (dd_s2exp e1; dd_ps " "; dd_t2mpmarglst ms; dd_ps " err="; dd_int err; dd_nl ())
+in end
+fun t_tmp_tmparg (e: s2exp, loc: location, qs: s2qualst, ms0: t2mpmarglst): void = let
+  var err: int = 0
+  val <<(e1, ms) = s2exp_tmp_instantiate_tmpmarglst (e, loc, qs, ms0, err)
+  val () = (dd_s2exp e1; dd_ps " "; dd_t2mpmarglst ms; dd_ps " err="; dd_int err; dd_nl ())
+in end
+fun t_unwth (loc: location, e: s2exp): void = let
+  val <<(b, e1, ws) = un_s2exp_wthtype (loc, e)
+  val () = (dd_bool b; dd_ps " "; dd_s2exp e1; dd_ps " "; dd_wths2explst ws; dd_nl ())
+in end
+fun t_stasub (loc: location, vs: s2varlst): void = let
+  var sub = stasub_make_svarlst (loc, vs)
+  val () = (fprint_stasub (dd_out, sub); dd_nl ())
+  val () = stasub_free (sub)
+in end
+fun t_c3exh (loc: location, k: caskind, n: int): c3nstr = let
+  val xs = mk_p2tcs_vt (n)
+  val c = c3nstr_case_exhaustiveness (loc, k, xs)
+  val () = list_vt_free (xs)
+in
+  c
+end
+2|fun mkp2atcst_con (d2c: d2con, k: int): p2atcst = p2atcst_P2TCcon (d2c, glist_cons<p2atcst> (mkp2atcst0 (k), glist_nil ()))
+1|fun mkp2atcst_con (d2c: d2con, k: int): p2atcst = P2TCcon (d2c, list_cons (mkp2atcst0 (k), list_nil ()))
+// a record of the constraint kinds: labels 2j, j = 0..n-1 (the labels of a sorted list)
+fun mk_lp2tcs_n (n: int): labp2atcstlst_vt = let
+  fun loop (i: int, n: int): labp2atcstlst_vt =
+    if i >= n then list_vt_nil () else list_vt_cons (mk_lab_p2tc (2 * i, i + 2), loop (i + 1, n))
+in
+  loop (0, n)
+end
+fun dd_pfobjx (x: Option_vt (pfobj)): void = dd_optvt_pfobj (x)
+//
+// the functions with the proofs of ATS1 (a push returns a proof, a pop takes it): the wrappers [t_xxx] of both languages (the proofs are axioms here)
+//
+1|extern praxi pf_make_trans3_env (): trans3_env_push_v
+1|extern praxi pf_mk_trans3_env_push_v (): trans3_env_push_v
+1|extern praxi pf_dr_trans3_env_push_v (pf: trans3_env_push_v): void
+1|extern praxi pf_mk_s2varbindmap_push_v (): s2varbindmap_push_v
+1|extern praxi pf_dr_s2varbindmap_push_v (pf: s2varbindmap_push_v): void
+1|extern praxi pf_mk_s2cstbindlst_push_v (): s2cstbindlst_push_v
+1|extern praxi pf_dr_s2cstbindlst_push_v (pf: s2cstbindlst_push_v): void
+1|extern praxi pf_mk_termetenv_push_v (): termetenv_push_v
+1|extern praxi pf_dr_termetenv_push_v (pf: termetenv_push_v): void
+1|extern praxi pf_mk_effenv_push_v (): effenv_push_v
+1|extern praxi pf_dr_effenv_push_v (pf: effenv_push_v): void
+1|extern praxi pf_mk_d2varenv_push_v (): d2varenv_push_v
+1|extern praxi pf_dr_d2varenv_push_v (pf: d2varenv_push_v): void
+1|extern praxi pf_mk_lamlpenv_push_v (): lamlpenv_push_v
+1|extern praxi pf_dr_lamlpenv_push_v (pf: lamlpenv_push_v): void
+1|extern praxi pf_mk_pfmanenv_push_v (): pfmanenv_push_v
+1|extern praxi pf_dr_pfmanenv_push_v (pf: pfmanenv_push_v): void
+2|fun t_trans3_env_push (): void = trans3_env_push ()
+1|fun t_trans3_env_push (): void = let val (pf | ()) = trans3_env_push () prval () = pf_dr_trans3_env_push_v (pf) in end
+2|fun t_trans3_env_pop (): s3itmlst_vt = trans3_env_pop ()
+1|fun t_trans3_env_pop (): s3itmlst_vt = trans3_env_pop (pf_mk_trans3_env_push_v () | )
+2|fun t_trans3_env_pop_and_add (loc: location, knd: c3nstrkind): void = trans3_env_pop_and_add (loc, knd)
+1|fun t_trans3_env_pop_and_add (loc: location, knd: c3nstrkind): void = trans3_env_pop_and_add (pf_mk_trans3_env_push_v () | loc, knd)
+2|fun t_trans3_env_pop_and_add_main (loc: location): void = trans3_env_pop_and_add_main (loc)
+1|fun t_trans3_env_pop_and_add_main (loc: location): void = trans3_env_pop_and_add_main (pf_mk_trans3_env_push_v () | loc)
+2|fun t_the_s2varbindmap_push (): void = the_s2varbindmap_push ()
+1|fun t_the_s2varbindmap_push (): void = let val (pf | ()) = the_s2varbindmap_push () prval () = pf_dr_s2varbindmap_push_v (pf) in end
+2|fun t_the_s2varbindmap_pop (): void = the_s2varbindmap_pop ()
+1|fun t_the_s2varbindmap_pop (): void = the_s2varbindmap_pop (pf_mk_s2varbindmap_push_v () | )
+2|fun t_the_s2cstbindlst_push (): void = the_s2cstbindlst_push ()
+1|fun t_the_s2cstbindlst_push (): void = let val (pf | ()) = the_s2cstbindlst_push () prval () = pf_dr_s2cstbindlst_push_v (pf) in end
+2|fun t_the_s2cstbindlst_pop (): s2cstlst_vt = the_s2cstbindlst_pop ()
+1|fun t_the_s2cstbindlst_pop (): s2cstlst_vt = the_s2cstbindlst_pop (pf_mk_s2cstbindlst_push_v () | )
+2|fun t_the_s2cstbindlst_pop_and_unbind (): void = the_s2cstbindlst_pop_and_unbind ()
+1|fun t_the_s2cstbindlst_pop_and_unbind (): void = the_s2cstbindlst_pop_and_unbind (pf_mk_s2cstbindlst_push_v () | )
+2|fun t_termetenv_push (d2vs: stampset_vt, met: s2explst): void = termetenv_push (d2vs, met)
+1|fun t_termetenv_push (d2vs: stampset_vt, met: s2explst): void = let val (pf | ()) = termetenv_push (d2vs, met) prval () = pf_dr_termetenv_push_v (pf) in end
+2|fun t_termetenv_push_dvarlst (d2vs: d2varlst, met: s2explst): void = termetenv_push_dvarlst (d2vs, met)
+1|fun t_termetenv_push_dvarlst (d2vs: d2varlst, met: s2explst): void = let val (pf | ()) = termetenv_push_dvarlst (d2vs, met) prval () = pf_dr_termetenv_push_v (pf) in end
+2|fun t_termetenv_pop (): void = termetenv_pop ()
+1|fun t_termetenv_pop (): void = termetenv_pop (pf_mk_termetenv_push_v () | )
+2|fun t_the_effenv_push (): void = the_effenv_push ()
+1|fun t_the_effenv_push (): void = let val (pf | ()) = the_effenv_push () prval () = pf_dr_effenv_push_v (pf) in end
+2|fun t_the_effenv_push_lam (s2fe: s2eff): void = the_effenv_push_lam (s2fe)
+1|fun t_the_effenv_push_lam (s2fe: s2eff): void = let val (pf | ()) = the_effenv_push_lam (s2fe) prval () = pf_dr_effenv_push_v (pf) in end
+2|fun t_the_effenv_push_set (efs: effset): void = the_effenv_push_set (efs)
+1|fun t_the_effenv_push_set (efs: effset): void = let val (pf | ()) = the_effenv_push_set (efs) prval () = pf_dr_effenv_push_v (pf) in end
+2|fun t_the_effenv_push_effmask (s2fe: s2eff): void = the_effenv_push_effmask (s2fe)
+1|fun t_the_effenv_push_effmask (s2fe: s2eff): void = let val (pf | ()) = the_effenv_push_effmask (s2fe) prval () = pf_dr_effenv_push_v (pf) in end
+2|fun t_the_effenv_pop (): void = the_effenv_pop ()
+1|fun t_the_effenv_pop (): void = the_effenv_pop (pf_mk_effenv_push_v () | )
+2|fun t_the_d2varenv_push_lam (knd: int): void = the_d2varenv_push_lam (knd)
+1|fun t_the_d2varenv_push_lam (knd: int): void = let val (pf | ()) = the_d2varenv_push_lam (knd) prval () = pf_dr_d2varenv_push_v (pf) in end
+2|fun t_the_d2varenv_push_let (): void = the_d2varenv_push_let ()
+1|fun t_the_d2varenv_push_let (): void = let val (pf | ()) = the_d2varenv_push_let () prval () = pf_dr_d2varenv_push_v (pf) in end
+2|fun t_the_d2varenv_push_try (): void = the_d2varenv_push_try ()
+1|fun t_the_d2varenv_push_try (): void = let val (pf | ()) = the_d2varenv_push_try () prval () = pf_dr_d2varenv_push_v (pf) in end
+2|fun t_the_d2varenv_pop (): void = the_d2varenv_pop ()
+1|fun t_the_d2varenv_pop (): void = the_d2varenv_pop (pf_mk_d2varenv_push_v () | )
+2|fun t_the_lamlpenv_push_lam (p3ts: p3atlst): void = the_lamlpenv_push_lam (p3ts)
+1|fun t_the_lamlpenv_push_lam (p3ts: p3atlst): void = let val (pf | ()) = the_lamlpenv_push_lam (p3ts) prval () = pf_dr_lamlpenv_push_v (pf) in end
+2|fun t_the_lamlpenv_push_loop0 (): void = the_lamlpenv_push_loop0 ()
+1|fun t_the_lamlpenv_push_loop0 (): void = let val (pf | ()) = the_lamlpenv_push_loop0 () prval () = pf_dr_lamlpenv_push_v (pf) in end
+2|fun t_the_lamlpenv_push_loop1 (i2nv: loopi2nv, lbis: lstbefitmlst, post: d2expopt): void = the_lamlpenv_push_loop1 (i2nv, lbis, post)
+1|fun t_the_lamlpenv_push_loop1 (i2nv: loopi2nv, lbis: lstbefitmlst, post: d2expopt): void = let val (pf | ()) = the_lamlpenv_push_loop1 (i2nv, lbis, post) prval () = pf_dr_lamlpenv_push_v (pf) in end
+2|fun t_the_lamlpenv_pop (): void = the_lamlpenv_pop ()
+1|fun t_the_lamlpenv_pop (): void = the_lamlpenv_pop (pf_mk_lamlpenv_push_v () | )
+2|fun t_the_pfmanenv_push_let (): void = the_pfmanenv_push_let ()
+1|fun t_the_pfmanenv_push_let (): void = let val (pf | ()) = the_pfmanenv_push_let () prval () = pf_dr_pfmanenv_push_v (pf) in end
+2|fun t_the_pfmanenv_push_lam (lin: int): void = the_pfmanenv_push_lam (lin)
+1|fun t_the_pfmanenv_push_lam (lin: int): void = let val (pf | ()) = the_pfmanenv_push_lam (lin) prval () = pf_dr_pfmanenv_push_v (pf) in end
+2|fun t_the_pfmanenv_push_try (): void = the_pfmanenv_push_try ()
+1|fun t_the_pfmanenv_push_try (): void = let val (pf | ()) = the_pfmanenv_push_try () prval () = pf_dr_pfmanenv_push_v (pf) in end
+2|fun t_the_pfmanenv_pop (): void = the_pfmanenv_pop ()
+1|fun t_the_pfmanenv_pop (): void = the_pfmanenv_pop (pf_mk_pfmanenv_push_v () | )
+2|fun t_the_effenv_push_set_if (test: bool, efs: effset): void = the_effenv_push_set_if (test, efs)
+2|fun t_the_effenv_pop_if (test: bool): void = the_effenv_pop_if (test)
+1|extern praxi pf_dropopt {b:bool} (pf: option_v (effenv_push_v, b)): void
+1|extern praxi pf_mkopt {b:bool} (): option_v (effenv_push_v, b)
+1|fun t_the_effenv_push_set_if {b:bool} (test: bool b, efs: effset): void = let val (pf | ()) = the_effenv_push_set_if (test, efs) prval () = pf_dropopt (pf) in end
+1|fun t_the_effenv_pop_if {b:bool} (test: bool b): void = the_effenv_pop_if (pf_mkopt {b} () | test)

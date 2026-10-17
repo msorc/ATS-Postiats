@@ -33,16 +33,27 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE =
-"./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_staexp2_util2.dats, see PORTING.md, "Level 2, slice 2")
+// [s2hnf2exp] and [s2exp2hnf_cast] are in pats_staexp2_util1.dats (S2-11).
+// The syntactic equality of ATS1 raised the exception SYNEQexn: here the functions
+// [s2hnf_syneq_exn] etc. return a bool (same order of the tests: [andalso]), since an exception
+// would leak the views of the matches that it skips.
+// [s2exp_hnfize_flag_svar] is declared in pats_staexp2_util.sats and implemented by pats_trans3_env.dats.
 //
 (* ****** ****** *)
-//
-staload
-UN =
-"prelude/SATS/unsafe.sats"
-//
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -54,6 +65,7 @@ staload UT = "./pats_utils.sats"
 (* ****** ****** *)
 
 staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 //
@@ -74,13 +86,14 @@ macdef eq_intinf_intinf = $INTINF.eq_intinf_intinf
 //
 (* ****** ****** *)
 
+staload "./pats_staexp1.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_stacst2.sats"
 staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
 
-#define l2l list_of_list_vt
+#include "./pats_staexp2.hats"
 
 (* ****** ****** *)
 //
@@ -136,16 +149,15 @@ prerrln! ("1. template arguments are not given explicitly;");
 prerrln! ("2. ...(other potential causes are yet to be added!)");
 )
 //
-val () = $ERR.abort_interr{void}()
+val () = $ERR.abort_interr<void>()
 //
 } (* end of [if] *)
 //
 in
 //
 case+
-s2e0.s2exp_node
-of (* case+ *)
-| S2Ecst(s2c) => let
+s2exp_node_view(s2e0.s2exp_node()) of (* case+ *)
+| ~S2Ecst(s2c) => let
 //
     val
     isr =
@@ -157,9 +169,9 @@ of (* case+ *)
         s2cst_get_def(s2c)
       // end of [val]
     in
-      case+ opt of
-      | None() => s2e0
-      | Some(s2e) => let
+      case+ gopt_view(opt) of
+      | ~GOnone() => s2e0
+      | ~GOsome(s2e) => let
           val () =
             (flag := flag + 1)
           // end of [val]
@@ -171,20 +183,19 @@ of (* case+ *)
 //
 // HX: the link of s2V should not be updated!!!
 //
-| S2EVar(s2V) =>
+| ~S2EVar(s2V) =>
   (
   case+
-  s2Var_get_link(s2V)
-  of (* case+ *)
-  | Some(s2e) => let
+  gopt_view(s2Var_get_link(s2V)) of (* case+ *)
+  | ~GOsome(s2e) => let
       val () =
         (flag := flag + 1) in auxlinkrem(s2e, flag, tick-1)
       // end of [val]
     end // end of [Some]
-  | None((*void*)) => s2e0
+  | ~GOnone((*void*)) => s2e0
   ) (* end of [S2EVar] *)
 //
-| _ (* rest-of-s2exp *) => s2e0 // end of [_]
+| v (* rest-of-s2exp *) => (s2exp_node_view_free (v); s2e0) // end of [_]
 //
 end // end of [auxlinkrem]
 //
@@ -208,22 +219,23 @@ labs2explst_top
 ) : labs2explst = let
 in
 //
-case+ ls2es0 of
-| list_nil
-    ((*void*)) => list_nil()
+case+ glist_view(ls2es0) of
+| ~GLnil
+    ((*void*)) => glist_nil()
   // end of [list_nil]
 //
-| list_cons
-    (ls2e, ls2es) => let
+| ~GLcons(ls2e, ls2es) => let
 //
-    val SLABELED(l, name, s2e) = ls2e
+    val l = labs2exp_lab (ls2e)
+    val name = labs2exp_nam (ls2e)
+    val s2e = labs2exp_elt (ls2e)
 //
     val s2e = s2exp_top(knd, s2e)
-    val ls2e = SLABELED(l, name, s2e) 
+    val ls2e = labs2exp_new (l, name, s2e)
     val ls2es = labs2explst_top(knd, ls2es)
 //
   in
-    list_cons(ls2e, ls2es)
+    glist_cons(ls2e, ls2es)
   end // end of [list_cons]
 end // end of [labs2explst_top]
 
@@ -270,7 +282,7 @@ implement
 s2exp_topize_flag
   (knd, s2e0, flag) = let
 //
-val s2t0 = s2e0.s2exp_srt
+val s2t0 = s2e0.s2exp_srt()
 //
 in
 //
@@ -297,18 +309,17 @@ case+ 0 of
       val () = flag := flag+1
     in
       case+
-      s2e0.s2exp_node
-      of (* case+ *)
-      | S2Etop(_, s2e) =>
+      s2exp_node_view(s2e0.s2exp_node()) of (* case+ *)
+      | ~S2Etop(_, s2e) =>
           s2exp_topize_flag(knd, s2e, flag)
         // end of [S2Etop]
-      | S2Etyarr
+      | ~S2Etyarr
           (s2e_elt, dim) => let
           val s2e_elt = s2exp_top (knd, s2e_elt)
         in
           s2exp_tyarr_srt(s2rt_t0ype, s2e_elt, dim)
         end // end of [S2Etyarr]
-      | S2Etyrec
+      | ~S2Etyrec
           (recknd, npf, ls2es) => let
           val isboxed = tyreckind_is_boxed(recknd)
         in
@@ -321,9 +332,14 @@ case+ 0 of
             end // end of [else]
           // end of [if]
         end // end of [S2Etyrec]
-      | _ when // HX: this seems adequate
-          s2rt_is_boxed(s2t0) => s2exp_ptr_type()
-      | _ => s2exp_top_srt(s2rt_t0ype, knd, s2e0)
+      | v => let
+          val () = s2exp_node_view_free (v)
+        in
+          if // HX: this seems adequate
+          s2rt_is_boxed(s2t0)
+            then s2exp_ptr_type()
+            else s2exp_top_srt(s2rt_t0ype, knd, s2e0)
+        end // end of [_]
     end (* end of [if] *)
   end // end of [_]
 //
@@ -350,17 +366,20 @@ implement
 s2exp_invar_flag
   (s2e0, flag) = let
 //
-val-S2Einvar(s2e) = s2e0.s2exp_node
+val s2e = (
+  case+ s2exp_node_view (s2e0.s2exp_node()) of
+  | ~S2Einvar (s2e) => s2e
+  | v => (s2exp_node_view_free (v); $ERR.abort_interr<s2exp> ())
+) : s2exp // HX: [val-S2Einvar(s2e) = ..] of ATS1
 //
 in
 //
 case+
-s2e.s2exp_node
-of (*case+*)
+s2exp_node_view(s2e.s2exp_node()) of (*case+*)
 //
-| S2Evar _ => s2e0
+| ~S2Evar _ => s2e0
 //
-| S2EVar _ => let
+| ~S2EVar _ => let
     val flag0 = flag
     val s2e =
       s2exp_hnfize_flag(s2e, flag)
@@ -369,7 +388,8 @@ of (*case+*)
     if flag <= flag0 then s2e0 else s2e
   end // end of [S2Evar]
 //
-| _ => let
+| v => let
+    val () = s2exp_node_view_free (v)
     val () = flag := flag + 1 in s2exp_hnfize_flag(s2e, flag)
   end // end of [_]
 //
@@ -408,28 +428,27 @@ println!
 in
 //
 case+
-s2e_fun.s2exp_node
-of // case+
-| S2Elam (
+s2exp_node_view(s2e_fun.s2exp_node()) of // case+
+| ~S2Elam (
     s2vs_arg, s2e_body
   ) => let
-    #define :: list_cons
     fun
     aux (
       s2vs: s2varlst
-    , s2es: s2explst, sub: &stasub
+    , s2es: s2explst, sub: &stasub >> _
     ) : void =
-      case+
-      (
-        s2vs, s2es
-      ) of (* case+ *)
-      | (list_nil(), _) => ()
-      | (_, list_nil()) => ()
-      | (s2v :: s2vs, s2e :: s2es) =>
-        aux(s2vs, s2es, sub) where
-        {
-          val () = stasub_add(sub, s2v, s2e)
-        } (* end of [cons, cons] *)
+      case+ glist_view (s2vs) of
+      | ~GLnil() => ()
+      | ~GLcons(s2v, s2vs) =>
+        (
+        case+ glist_view (s2es) of
+        | ~GLnil() => ()
+        | ~GLcons(s2e, s2es) =>
+          aux(s2vs, s2es, sub) where
+          {
+            val () = stasub_add(sub, s2v, s2e)
+          } (* end of [cons, cons] *)
+        ) (* end of [GLcons] *)
     // end of [aux]
     val () = flag := flag + 1
     var sub = stasub_make_nil()
@@ -443,13 +462,14 @@ of // case+
   in
     s2exp_hnfize_flag(s2e0, flag)
   end // end of [S2Elam]
-| _ (* non-S2Elam *) =>
-  (
+| v (* non-S2Elam *) => let
+    val () = s2exp_node_view_free (v)
+  in
     if flag > flag0
-      then s2exp_app_srt(s2e0.s2exp_srt, s2e_fun, s2es_arg)
+      then s2exp_app_srt(s2e0.s2exp_srt(), s2e_fun, s2es_arg)
       else s2e0 (* there is no change *)
     // end of [if]
-  ) (* end of [non-S2Elam] *)
+  end (* end of [non-S2Elam] *)
 //
 end // end of [s2exp_hnfize_flag_app]
 
@@ -469,7 +489,7 @@ println!
 ) // end of [val]
 *)
 //
-val s2t0 = s2e0.s2exp_srt
+val s2t0 = s2e0.s2exp_srt()
 val s2e0 = s2exp_linkrem_flag(s2e0, flag)
 //
 (*
@@ -486,46 +506,45 @@ println!
 in
 //
 case+
-s2e0.s2exp_node
-of (* case+ *)
+s2exp_node_view(s2e0.s2exp_node()) of (* case+ *)
 //
-| S2Eint _ => s2e0
-| S2Eintinf _ => s2e0
+| ~S2Eint _ => s2e0
+| ~S2Eintinf _ => s2e0
 //
-| S2Efloat _ => s2e0
-| S2Estring _ => s2e0
+| ~S2Efloat _ => s2e0
+| ~S2Estring _ => s2e0
 //
-| S2Ecst _ => s2e0
+| ~S2Ecst _ => s2e0
 //
-| S2Eextype _ => s2e0
-| S2Eextkind _ => s2e0
+| ~S2Eextype _ => s2e0
+| ~S2Eextkind _ => s2e0
 //
-| S2Evar (s2v) =>
+| ~S2Evar (s2v) =>
     s2exp_hnfize_flag_svar (s2e0, s2v, flag)
   // end of [S2Evar]
 //
-| S2EVar _ => s2e0
+| ~S2EVar _ => s2e0
 //
-| S2Ehole _ => s2e0
+| ~S2Ehole _ => s2e0
 //
-| S2Edatcontyp _ => s2e0
-| S2Edatconptr _ => s2e0
+| ~S2Edatcontyp _ => s2e0
+| ~S2Edatconptr _ => s2e0
 //
-| S2Eat _ => s2e0
-| S2Esizeof _ => s2e0
+| ~S2Eat _ => s2e0
+| ~S2Esizeof _ => s2e0
 //
-| S2Eeff _ => s2e0
-| S2Eeqeq _ => s2e0
+| ~S2Eeff _ => s2e0
+| ~S2Eeqeq _ => s2e0
 //
-| S2Eproj _ => s2e0
+| ~S2Eproj _ => s2e0
 //
-| S2Eapp
+| ~S2Eapp
   (
     s2e_fun, s2es_arg
   ) =>
     s2exp_hnfize_app(s2e0, s2e_fun, s2es_arg, flag)
   // end of [S2Eapp]
-| S2Elam
+| ~S2Elam
   (
     s2vs_arg, s2e_body
   ) => let
@@ -536,23 +555,23 @@ of (* case+ *)
       then s2exp_lam_srt(s2t0, s2vs_arg, s2e_body) else s2e0
     // end of [if]
   end // end of [S2Elam]
-| S2Efun _ => s2e0
-| S2Emetfun _ => s2e0
-| S2Emetdec _ => s2e0
+| ~S2Efun _ => s2e0
+| ~S2Emetfun _ => s2e0
+| ~S2Emetdec _ => s2e0
 //
-| S2Etop(knd, s2e) => s2exp_topize_flag (knd, s2e, flag)
-| S2Ewithout _ => s2e0
+| ~S2Etop(knd, s2e) => s2exp_topize_flag (knd, s2e, flag)
+| ~S2Ewithout _ => s2e0
 //
-| S2Etyarr _ => s2e0
-| S2Etyrec _ => s2e0
+| ~S2Etyarr _ => s2e0
+| ~S2Etyrec _ => s2e0
 //
-| S2Einvar _ => s2exp_invar_flag (s2e0, flag)
+| ~S2Einvar _ => s2exp_invar_flag (s2e0, flag)
 //
 (*
 | S2Eexi _=> s2e0
 | S2Euni _=> s2e0
 *)
-| S2Eexi
+| ~S2Eexi
   (
     s2vs, s2ps, s2e_scope
   ) => let
@@ -561,7 +580,7 @@ of (* case+ *)
   in
     if flag > flag0 then s2exp_exi(s2vs, s2ps, s2e_scope) else s2e0
   end // end of [S2Eexi]
-| S2Euni
+| ~S2Euni
   (
     s2vs, s2ps, s2e_scope
   ) => let
@@ -571,13 +590,13 @@ of (* case+ *)
     if flag > flag0 then s2exp_uni(s2vs, s2ps, s2e_scope) else s2e0
   end // end of [S2Euni]
 //
-| S2Erefarg _ => s2e0
+| ~S2Erefarg _ => s2e0
 //
-| S2Evararg _ => s2e0
+| ~S2Evararg _ => s2e0
 //
-| S2Ewthtype _ => s2e0
+| ~S2Ewthtype _ => s2e0
 //
-| S2Eerrexp((*void*)) => s2e0
+| ~S2Eerrexp((*void*)) => s2e0
 //
 (*
 | _ (*rest-of-s2exp*) => let
@@ -600,12 +619,11 @@ s2explst_hnfize_flag
   (s2es0, flag) = let
 in
 //
-case+ s2es0 of
-| list_nil
-    ((*void*)) => list_nil()
+case+ glist_view(s2es0) of
+| ~GLnil
+    ((*void*)) => glist_nil()
   // end of [list_nil]
-| list_cons
-    (s2e, s2es) => let
+| ~GLcons(s2e, s2es) => let
 //
     val
     flag0 = flag
@@ -615,7 +633,7 @@ case+ s2es0 of
 //
   in
     if flag > flag0 then
-      list_cons (s2e, s2es) else s2es0
+      glist_cons(s2e, s2es) else s2es0
     // end of [if]
   end // end of [list_cons]
 //
@@ -628,19 +646,20 @@ labs2explst_hnfize_flag
   (ls2es0, flag) = let
 in
 //
-case+ ls2es0 of
-| list_nil
-    ((*void*)) => list_nil()
+case+ glist_view(ls2es0) of
+| ~GLnil
+    ((*void*)) => glist_nil()
   // end of [list_nil]
-| list_cons
-    (ls2e, ls2es) => let
+| ~GLcons(ls2e, ls2es) => let
     val flag0 = flag
-    val SLABELED(l, name, s2e) = ls2e
+    val l = labs2exp_lab (ls2e)
+    val name = labs2exp_nam (ls2e)
+    val s2e = labs2exp_elt (ls2e)
     val s2e = s2exp_hnfize_flag(s2e, flag)
     val ls2es = labs2explst_hnfize_flag(ls2es, flag)
   in
     if flag > flag0 then
-      list_cons(SLABELED(l, name, s2e), ls2es) else ls2es0
+      glist_cons(labs2exp_new (l, name, s2e), ls2es) else ls2es0
     // end of [if]
   end // end of [list_cons]
 //
@@ -670,14 +689,14 @@ s2expopt_hnfize
   var flag: int = 0
 in
 //
-case+ opt of
-| None() => None()
-| Some(s2e) => let
+case+ gopt_view(opt) of
+| ~GOnone() => gopt_none()
+| ~GOsome(s2e) => let
     val s2f =
       s2exp_hnfize_flag(s2e, flag)
     // end of [val]
   in
-    if flag > 0 then Some(s2f) else opt
+    if flag > 0 then gopt_some(s2f) else opt
   end // end of [Some]
 //
 end // end of [s2expopt_hnfsize]
@@ -716,18 +735,18 @@ val s2e0 =
 in
 //
 case+
-s2e0.s2exp_node of
-| S2EVar(s2V) => let
+s2exp_node_view(s2e0.s2exp_node()) of
+| ~S2EVar(s2V) => let
     val f0 = flag
     val s2ze = s2Var_get_szexp(s2V)
   in
-    case+ s2ze of
-    | S2ZEvar (s2v) => let
+    case+ s2zexp_view(s2ze) of
+    | ~S2ZEvar (s2v) => let
         val () = flag := f0 + 1 in s2exp_var(s2v)
       end // end of [S2ZEvar]
-    | _(*non-s2var*) => s2e0
+    | v (*non-s2var*) => (s2zexp_view_free (v); s2e0)
   end // end of [S2EVar]
-| _ (*non-S2EVar*) => s2e0 // HX: should be removed eventually!
+| v (*non-S2EVar*) => (s2exp_node_view_free (v); s2e0) // HX: should be removed eventually!
 //
 end // end of [s2exp_mhnfize_flag]
 
@@ -738,17 +757,15 @@ s2explst_mhnfize_flag
   (s2es0, flag) = let
 in
 //
-case+ s2es0 of
-| list_nil
-    () => list_nil()
+case+ glist_view(s2es0) of
+| ~GLnil() => glist_nil()
   // list_nil
-| list_cons
-    (s2e, s2es) => let
+| ~GLcons(s2e, s2es) => let
     val flag0 = flag
     val s2e = s2exp_mhnfize_flag(s2e, flag)
     val s2es = s2explst_mhnfize_flag(s2es, flag)
   in
-    if flag > flag0 then list_cons(s2e, s2es) else s2es0
+    if flag > flag0 then glist_cons(s2e, s2es) else s2es0
   end // end of [list_cons]
 //
 end // end of [s2explst_mhnfize_flag]
@@ -760,17 +777,15 @@ s2explstlst_mhnfize_flag
   (s2ess0, flag) = let
 in
 //
-case+ s2ess0 of
-| list_nil
-    () => list_nil()
+case+ glist_view(s2ess0) of
+| ~GLnil() => glist_nil()
   // list_nil
-| list_cons
-    (s2es, s2ess) => let
+| ~GLcons(s2es, s2ess) => let
     val flag0 = flag
     val s2es = s2explst_mhnfize_flag (s2es, flag)
     val s2ess = s2explstlst_mhnfize_flag (s2ess, flag)
   in
-    if flag > flag0 then list_cons (s2es, s2ess) else s2ess0
+    if flag > flag0 then glist_cons(s2es, s2ess) else s2ess0
   end // end of [list_cons]
 //
 end // end of [s2explstlst_mhnfize_flag]
@@ -793,10 +808,7 @@ s2explstlst_mhnfize(s2ess) = let
 end // end of [s2explstlst_mhnfize]
 
 (* ****** ****** *)
-//
-implement
-s2hnf2exp(s2f) = $UN.cast{s2exp}(s2f)
-//
+
 implement
 s2exp2hnf(s2e) = let
 //
@@ -805,171 +817,110 @@ s2exp_hnfize(s2e) in $UN.cast{s2hnf}(s2f)
 //
 end // end of [s2exp2hnf]
 //
-implement
-s2exp2hnf_cast(s2e) = $UN.cast{s2hnf}(s2e)
-//
 (* ****** ****** *)
 //
 extern
 fun
-s2hnf_syneq_exn
-  (s2f1: s2hnf, s2f2: s2hnf): void
+s2hnf_syneq_aux
+  (s2f1: s2hnf, s2f2: s2hnf): bool
 and
-s2exp_syneq_exn
-  (s2e1: s2exp, s2e2: s2exp): void
+s2exp_syneq_aux
+  (s2e1: s2exp, s2e2: s2exp): bool
 //
 extern
 fun
-s2hnflst_syneq_exn
-  (xs1: s2hnflst, xs2: s2hnflst): void
+s2hnflst_syneq_aux
+  (xs1: s2hnflst, xs2: s2hnflst): bool
 and
-s2explst_syneq_exn
-  (xs1: s2explst, xs2: s2explst): void
+s2explst_syneq_aux
+  (xs1: s2explst, xs2: s2explst): bool
 //
 extern
 fun
-s2explstlst_syneq_exn
-  (xss1: s2explstlst, xss2: s2explstlst): void
-// end of [s2explstlst_syneq_exn]
-//
-(* ****** ****** *)
-//
-exception SYNEQexn of ()
+s2explstlst_syneq_aux
+  (xss1: s2explstlst, xss2: s2explstlst): bool
+// end of [s2explstlst_syneq_aux]
 //
 (* ****** ****** *)
 
 implement
 s2hnf_syneq
-  (s2f1, s2f2) =
-(
-try let
-//
-val () =
-  s2hnf_syneq_exn(s2f1, s2f2)
-//
-in
-  true
-end with
-  | ~SYNEQexn((*void*)) => false
-) (* end of [s2hnf_syneq] *)
+  (s2f1, s2f2) = s2hnf_syneq_aux(s2f1, s2f2)
 
 implement
 s2exp_syneq
-  (s2e1, s2e2) =
-(
-try let
-//
-val () =
-  s2exp_syneq_exn(s2e1, s2e2)
-//
-in
-  true
-end with
-  | ~SYNEQexn((*void*)) => false
-) (* end of [s2exp_syneq] *)
+  (s2e1, s2e2) = s2exp_syneq_aux(s2e1, s2e2)
 
 (* ****** ****** *)
 
 implement
 s2explst_syneq
-  (xs1, xs2) =
-(
-try let
-//
-val () =
-  s2explst_syneq_exn(xs1, xs2)
-//
-in
-  true
-end with
-  | ~SYNEQexn((*void*)) => false
-) (* end of [s2explst_syneq] *)
+  (xs1, xs2) = s2explst_syneq_aux(xs1, xs2)
 
 (* ****** ****** *)
 
 implement
-s2exp_syneq_exn
+s2exp_syneq_aux
   (s2e10, s2e20) = let
   val s2f10 = s2exp2hnf (s2e10)
   and s2f20 = s2exp2hnf (s2e20)
 in
-  s2hnf_syneq_exn (s2f10, s2f20)
-end // end of [s2exp_syneq_exn]
+  s2hnf_syneq_aux (s2f10, s2f20)
+end // end of [s2exp_syneq_aux]
 
 implement
-s2hnflst_syneq_exn
+s2hnflst_syneq_aux
   (xs1, xs2) = let
 in
 //
-case+ (xs1, xs2) of
-| (list_cons(x1, xs1),
-   list_cons(x2, xs2)) => let
-    val () = s2hnf_syneq_exn(x1, x2) in s2hnflst_syneq_exn(xs1, xs2)
-  end // end of [cons, cons]
-| (list_nil(), list_nil()) => ()
-| (_, _) => $raise (SYNEQexn)
+case+ glist_view (xs1) of
+| ~GLcons(x1, xs1) => (
+  case+ glist_view (xs2) of
+  | ~GLcons(x2, xs2) =>
+      if s2hnf_syneq_aux(x1, x2) then s2hnflst_syneq_aux(xs1, xs2) else false
+  | ~GLnil() => false
+  ) // end of [cons, _]
+| ~GLnil() => (
+  case+ glist_view (xs2) of ~GLnil() => true | ~GLcons(_, _) => false
+  ) // end of [nil, _]
 //
-end // end of [s2hnflst_syneq_exn]
+end // end of [s2hnflst_syneq_aux]
 
 implement
-s2explst_syneq_exn
+s2explst_syneq_aux
   (xs1, xs2) = let
-//
-(*
-val () =
-println! ("s2explst_syneq_exn")
-*)
-//
 in
 //
-case+
-(xs1, xs2)
-of (*case+*)
-| (
-   list_cons(x1, xs1)
-  ,
-   list_cons(x2, xs2)
-  ) => let
-    val () =
-    s2exp_syneq_exn(x1, x2)
-  in
-    s2explst_syneq_exn(xs1, xs2)
-  end // end of [cons, cons]
-| (list_nil(), list_nil()) => ()
+case+ glist_view (xs1) of
+| ~GLcons(x1, xs1) => (
+  case+ glist_view (xs2) of
+  | ~GLcons(x2, xs2) =>
+      if s2exp_syneq_aux(x1, x2) then s2explst_syneq_aux(xs1, xs2) else false
+  | ~GLnil() => false
+  ) // end of [cons, _]
+| ~GLnil() => (
+  case+ glist_view (xs2) of ~GLnil() => true | ~GLcons(_, _) => false
+  ) // end of [nil, _]
 //
-| (_(*s2explst*), _(*s2explst*)) => $raise (SYNEQexn)
-//
-end // end of [s2explst_syneq_exn]
+end // end of [s2explst_syneq_aux]
 
 implement
-s2explstlst_syneq_exn
+s2explstlst_syneq_aux
   (xss1, xss2) = let
-//
-(*
-val () =
-println! ("s2explstlst_syneq_exn")
-*)
-//
 in
 //
-case+
-(xss1, xss2)
-of (*case+*)
-| (
-   list_cons(xs1, xss1)
-  ,
-   list_cons(xs2, xss2)
-  ) => let
-    val () =
-    s2explst_syneq_exn(xs1, xs2)
-  in
-    s2explstlst_syneq_exn(xss1, xss2)
-  end // end of [cons, cons]
-| (list_nil(), list_nil()) => ()
+case+ glist_view (xss1) of
+| ~GLcons(xs1, xss1) => (
+  case+ glist_view (xss2) of
+  | ~GLcons(xs2, xss2) =>
+      if s2explst_syneq_aux(xs1, xs2) then s2explstlst_syneq_aux(xss1, xss2) else false
+  | ~GLnil() => false
+  ) // end of [cons, _]
+| ~GLnil() => (
+  case+ glist_view (xss2) of ~GLnil() => true | ~GLcons(_, _) => false
+  ) // end of [nil, _]
 //
-| (_(*s2explstlst*), _(*s2explstlst*)) => $raise (SYNEQexn)
-//
-end // end of [s2explstlst_syneq_exn]
+end // end of [s2explstlst_syneq_aux]
 
 (* ****** ****** *)
 //
@@ -977,444 +928,354 @@ fun
 s2eff_syneq
 (
   s2fe1: s2eff, s2fe2: s2eff
-) : bool =
-(
-try let
-//
-val () =
-  s2eff_syneq_exn (s2fe1, s2fe2)
-//
-in
-  true
-end with
-  | ~SYNEQexn((*void*)) => false
-) (* end of [s2eff_syneq_exn] *)
-//
-and
-s2eff_syneq_exn
-(
-  s2fe1: s2eff, s2fe2: s2eff
-) : void = let
+) : bool = let
 in
 //
-case+
-(s2fe1, s2fe2)
-of (* case+ *)
-| (
-   S2EFFset(xs1)
-  ,
-   S2EFFset(xs2)
-  ) =>
-    if ~(xs1=xs2)
-      then $raise (SYNEQexn)
-    // end of [if]
-  // end of [S2EFFset, S2EFFset]
+case+ s2eff_view (s2fe1) of
+| ~S2EFFset(xs1) => (
+  case+ s2eff_view (s2fe2) of
+  | ~S2EFFset(xs2) => (xs1 = xs2)
+  | v => (s2eff_view_free (v); false)
+  ) // end of [S2EFFset, _]
 //
-| (
-   S2EFFexp(s2e1)
-  ,
-   S2EFFexp(s2e2)
-  ) => s2exp_syneq_exn(s2e1, s2e2)
+| ~S2EFFexp(s2e1) => (
+  case+ s2eff_view (s2fe2) of
+  | ~S2EFFexp(s2e2) => s2exp_syneq_aux(s2e1, s2e2)
+  | v => (s2eff_view_free (v); false)
+  ) // end of [S2EFFexp, _]
 //
-| (
-   S2EFFadd(s2fe11, s2fe12)
-  ,
-   S2EFFadd(s2fe21, s2fe22)
-  ) =>
-  {
-    val () = s2eff_syneq_exn(s2fe11, s2fe21)
-    val () = s2eff_syneq_exn(s2fe21, s2fe22)
-  } // end of [S2EFFadd, S2EFFadd]
+| ~S2EFFadd(s2fe11, s2fe12) => (
+  case+ s2eff_view (s2fe2) of
+  | ~S2EFFadd(s2fe21, s2fe22) =>
+    ( // HX: the second test is the one of ATS1
+      if s2eff_syneq(s2fe11, s2fe21)
+        then s2eff_syneq(s2fe21, s2fe22) else false
+    ) // end of [S2EFFadd, S2EFFadd]
+  | v => (s2eff_view_free (v); false)
+  ) // end of [S2EFFadd, _]
 //
-| (_(*s2eff*), _(*s2eff*)) => $raise (SYNEQexn)
-//
-end // end of [s2eff_syneq_exn]
+end // end of [s2eff_syneq]
 //
 (* ****** ****** *)
 
+extern
 fun
 s2lab_syneq
-(
-  s2l1: s2lab, s2l2: s2lab
-) : bool =
-(
-//
-try let
-//
-val () =
-  s2lab_syneq_exn(s2l1, s2l2)
-//
-in true end with ~SYNEQexn() => false
-//
-) (* end of [s2lab_syneq] *)
+  (s2l1: s2lab, s2l2: s2lab): bool
+extern
+fun
+s2lablst_syneq
+  (s2ls1: s2lablst, s2ls2: s2lablst): bool
+extern
+fun
+labs2explst_syneq_aux
+  (ls2es1: labs2explst, ls2es2: labs2explst): bool
 
-and
+implement
+s2lab_syneq
+(
+  s2l1, s2l2
+) = let
+in
+//
+case+ s2lab_view (s2l1) of
+| ~S2LABlab(l1) => (
+  case+ s2lab_view (s2l2) of
+  | ~S2LABlab(l2) => (l1 = l2)
+  | ~S2LABind(_) => false
+  )
+| ~S2LABind(ind1) => (
+  case+ s2lab_view (s2l2) of
+  | ~S2LABlab(_) => false
+  | ~S2LABind(ind2) => s2explst_syneq_aux(ind1, ind2)
+  )
+//
+end // end of [s2lab_syneq]
+
+implement
 s2lablst_syneq
 (
-  s2ls1: s2lablst, s2ls2: s2lablst
-) : bool =
-(
-//
-try let
-//
-val () =
-  s2lablst_syneq_exn(s2ls1, s2ls2)
-//
-in true end with ~SYNEQexn() => false
-//
-) (* end of [s2lablst_syneq] *)
-
-and
-s2lab_syneq_exn
-(
-  s2l1: s2lab, s2l2: s2lab
-) : void = let
+  s2ls1, s2ls2
+) = let
 in
 //
-case+ s2l1 of
-| S2LABlab l1 => (
-  case+ s2l2 of
-  | S2LABlab(l2) =>
-      if ~(l1=l2)
-        then $raise (SYNEQexn)
-      // end of [if]
-    // end of [S2LABlab]
-  | S2LABind(_) => $raise (SYNEQexn)
+case+ glist_view (s2ls1) of
+| ~GLcons(s2l1, s2ls1) => (
+  case+ glist_view (s2ls2) of
+  | ~GLcons(s2l2, s2ls2) =>
+      if s2lab_syneq(s2l1, s2l2) then s2lablst_syneq(s2ls1, s2ls2) else false
+  | ~GLnil() => false
   )
-| S2LABind(ind1) => (
-  case+ s2l2 of
-  | S2LABlab(_) => $raise (SYNEQexn)
-  | S2LABind(ind2) => s2explst_syneq_exn(ind1, ind2)
+| ~GLnil() => (
+  case+ glist_view (s2ls2) of ~GLnil() => true | ~GLcons(_, _) => false
   )
 //
-end // end of [s2lab_syneq_exn]
+end // end of [s2lablst_syneq]
 
-and
-s2lablst_syneq_exn
+implement
+labs2explst_syneq_aux
 (
-  s2ls1: s2lablst, s2ls2: s2lablst
-) : void = let
+  ls2es1, ls2es2
+) = let
 in
 //
-case+
-(s2ls1, s2ls2)
-of (* case+ *)
-| (
-   list_cons(s2l1, s2ls1)
-  ,
-   list_cons(s2l2, s2ls2)
-  ) => let
-    val () =
-      s2lab_syneq_exn(s2l1, s2l2)
-    // end of [val]
-  in
-    s2lablst_syneq_exn(s2ls1, s2ls2)
-  end
-| (list_nil(), list_nil()) => ()
-//
-| (_(*s2lablst*), _(*s2lablst*)) => $raise (SYNEQexn)
-//
-end // end of [s2lablst_syneq_exn]
-
-and
-labs2explst_syneq_exn
-(
-  ls2es1: labs2explst, ls2es2: labs2explst
-) : void = let
-in
-//
-case+
-(
- ls2es1,ls2es2
-) of // case+
-| (
-   list_cons(ls2e1, ls2es1)
-  ,
-   list_cons(ls2e2, ls2es2)
-  ) => let
-    val SLABELED(l1, _(*opt*), s2e1) = ls2e1
-    val SLABELED(l2, _(*opt*), s2e2) = ls2e2
-  in
-    if (l1 = l2) then let
-      val () = s2exp_syneq_exn(s2e1, s2e2)
+case+ glist_view (ls2es1) of
+| ~GLcons(ls2e1, ls2es1) => (
+  case+ glist_view (ls2es2) of
+  | ~GLcons(ls2e2, ls2es2) => let
+      val l1 = labs2exp_lab (ls2e1)
+      val s2e1 = labs2exp_elt (ls2e1)
+      val l2 = labs2exp_lab (ls2e2)
+      val s2e2 = labs2exp_elt (ls2e2)
     in
-      labs2explst_syneq_exn(ls2es1, ls2es2)
-    end else $raise (SYNEQexn)
-  end // end of [cons, cons]
-| (list_nil(), list_nil()) => ()
-| (_(*ls2es1*), _(*ls2es2*)) => $raise (SYNEQexn)
+      if (l1 = l2) then
+        (if s2exp_syneq_aux(s2e1, s2e2) then labs2explst_syneq_aux(ls2es1, ls2es2) else false)
+      else false
+    end // end of [cons, cons]
+  | ~GLnil() => false
+  )
+| ~GLnil() => (
+  case+ glist_view (ls2es2) of ~GLnil() => true | ~GLcons(_, _) => false
+  )
 //
-end // end of [labs2explst_syneq_exn]
+end // end of [labs2explst_syneq_aux]
 
 (* ****** ****** *)
 
 implement
-s2hnf_syneq_exn
+s2hnf_syneq_aux
   (s2f10, s2f20) = let
 //
 val s2e10 = s2hnf2exp(s2f10)
 and s2e20 = s2hnf2exp(s2f20)
-val s2en10 = s2e10.s2exp_node
-and s2en20 = s2e20.s2exp_node
-//
-(*
-val () =
-println!
-  ("s2hnf_syneq_exn: s2e10 = ", s2e10)
-val () =
-println!
-  ("s2hnf_syneq_exn: s2e20 = ", s2e20)
-*)
 //
 in
 //
-case s2en10 of
+if $UT.eqref_type(s2e10, s2e20) then true else
 //
-| _ when $UT.eqref_type(s2e10, s2e20) => ()
+case+ s2exp_node_view (s2e10.s2exp_node()) of
 //
-| S2Eint i1 => (
-  case+ s2en20 of
-  | S2Eint i2 =>
-    if i1 != i2 then $raise (SYNEQexn)
-  | S2Eintinf i2 =>
-    if ~eq_int_intinf(i1, i2) then $raise (SYNEQexn)
-  | _ (* non-integer *) => $raise (SYNEQexn)
+| ~S2Eint i1 => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eint i2 => if i1 != i2 then false else true
+  | ~S2Eintinf i2 => if ~eq_int_intinf(i1, i2) then false else true
+  | v (* non-integer *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eint] *)
-| S2Eintinf i1 => (
-  case+ s2en20 of
-  | S2Eint i2 =>
-    if ~eq_intinf_int(i1, i2) then $raise (SYNEQexn)
-  | S2Eintinf i2 =>
-    if ~eq_intinf_intinf(i1, i2) then $raise (SYNEQexn)
-  | _ (* non-integer *) => $raise (SYNEQexn)
+| ~S2Eintinf i1 => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eint i2 => if ~eq_intinf_int(i1, i2) then false else true
+  | ~S2Eintinf i2 => if ~eq_intinf_intinf(i1, i2) then false else true
+  | v (* non-integer *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eintinf] *)
 //
-| S2Ecst(s2c1) => (
-  case+ s2en20 of
-  | S2Ecst(s2c2) =>
-    if s2c1 != s2c2 then $raise (SYNEQexn)
-  | _ (* non-S2Ecst *) => $raise (SYNEQexn)
+| ~S2Ecst(s2c1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Ecst(s2c2) => if s2c1 != s2c2 then false else true
+  | v (* non-S2Ecst *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Ecst] *)
 //
-| S2Eextype
+| ~S2Eextype
   (name1, s2ess1) => (
-  case+ s2en20 of
-  | S2Eextype
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eextype
       (name2, s2ess2) => (
     if name1 = name2 then
-      s2explstlst_syneq_exn(s2ess1, s2ess2) else $raise(SYNEQexn)
+      s2explstlst_syneq_aux(s2ess1, s2ess2) else false
     ) // end of [S2Eextype]
-  | _ (* non-S2Eextype *) => $raise (SYNEQexn)
+  | v (* non-S2Eextype *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eextype] *)
-| S2Eextkind
+| ~S2Eextkind
   (name1, s2ess1) => (
-  case+ s2en20 of
-  | S2Eextkind
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eextkind
       (name2, s2ess2) => (
     if name1 = name2 then
-      s2explstlst_syneq_exn(s2ess1, s2ess2) else $raise(SYNEQexn)
+      s2explstlst_syneq_aux(s2ess1, s2ess2) else false
     ) // end of [S2Eextkind]
-  | _ (* non-S2Eextkind *) => $raise (SYNEQexn)
+  | v (* non-S2Eextkind *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eextkind] *)
 //
-| S2Evar(s2v1) => (
-  case+ s2en20 of
-  | S2Evar(s2v2) =>
-    if s2v1 != s2v2 then $raise (SYNEQexn)
-  | _ (* non-S2Evar *) => $raise (SYNEQexn)
+| ~S2Evar(s2v1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Evar(s2v2) => if s2v1 != s2v2 then false else true
+  | v (* non-S2Evar *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Evar] *)
 //
-| S2EVar(s2V1) => (
-  case+ s2en20 of
-  | S2EVar(s2V2) =>
-    if s2V1 != s2V2 then $raise (SYNEQexn)
-  | _ (* non-S2EVar *) => $raise (SYNEQexn)
+| ~S2EVar(s2V1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2EVar(s2V2) => if s2V1 != s2V2 then false else true
+  | v (* non-S2EVar *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2EVar] *)
 //
-| S2Edatcontyp
+| ~S2Edatcontyp
     (d2c1, arg1) => (
-  case+ s2en20 of
-  | S2Edatcontyp
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Edatcontyp
       (d2c2, arg2) => (
     if (d2c1 = d2c2)
-      then s2explst_syneq_exn(arg1, arg2)
-      else $raise(SYNEQexn)
+      then s2explst_syneq_aux(arg1, arg2)
+      else false
     ) // end of [S2Edatcontyp]
-  | _ (* non-S2Edatcontyp *) => $raise (SYNEQexn)
+  | v (* non-S2Edatcontyp *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Edatcontyp] *)
-| S2Edatconptr
+| ~S2Edatconptr
     (d2c1, rt1, _) => (
-  case+ s2en20 of
-  | S2Edatconptr
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Edatconptr
       (d2c2, rt2, _) =>
     (
     if (d2c1 = d2c2)
-      then s2exp_syneq_exn(rt1, rt2)
-      else $raise (SYNEQexn)
+      then s2exp_syneq_aux(rt1, rt2)
+      else false
     ) // end of [S2Edatconptr]
-  | _ (* non-S2Edatconptr *) => $raise (SYNEQexn)
+  | v (* non-S2Edatconptr *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Edatconptr] *)
 //
-| S2Esizeof(s2e1) => (
-  case+ s2en20 of
-  | S2Esizeof(s2e2) =>
-    s2exp_syneq_exn(s2e1, s2e2)
-  | _ (*non-S2Esizeof*) => $raise (SYNEQexn)
+| ~S2Esizeof(s2e1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Esizeof(s2e2) =>
+    s2exp_syneq_aux(s2e1, s2e2)
+  | v (*non-S2Esizeof*) => (s2exp_node_view_free (v); false)
   )
 //
-(*
-| S2Eeff(s2fe1) => (
-  case+ s2en20 of
-  | S2Eeff(s2fe2) =>
-    (
-      s2eff_syneq_exn(s2fe1, s2fe2)
-    )
-  | _ (* non-S2Eeff *) => $raise (SYNEQexn)
-  ) (* end of [S2Eeff] *)
-*)
-//
-| S2Eeqeq
+| ~S2Eeqeq
     (s2e11, s2e12) =>
   (
-  case+ s2en20 of
-  | S2Eeqeq
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eeqeq
       (s2e21, s2e22) =>
-    {
-      val () = s2exp_syneq_exn(s2e11, s2e21)
-      val () = s2exp_syneq_exn(s2e12, s2e22)
-    } // end of [S2Eeqeq]
-  | _ (* non-S2Eeqeq *) => $raise (SYNEQexn)
+    (
+      if s2exp_syneq_aux(s2e11, s2e21)
+        then s2exp_syneq_aux(s2e12, s2e22) else false
+    ) // end of [S2Eeqeq]
+  | v (* non-S2Eeqeq *) => (s2exp_node_view_free (v); false)
   ) (* end of[S2Eeqeq] *)
 //
-| S2Eproj
+| ~S2Eproj
     (s2e1, _, s2ls1) =>
   (
-  case+ s2en20 of
-  | S2Eproj
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eproj
       (s2e2, _, s2ls2) =>
-    {
-      val () = s2exp_syneq_exn(s2e1, s2e2)
-      val () = s2lablst_syneq_exn(s2ls1, s2ls2)
-    } // end of [S2Eproj]
-  | _ (* non-S2Eproj *) => $raise (SYNEQexn)
+    (
+      if s2exp_syneq_aux(s2e1, s2e2)
+        then s2lablst_syneq(s2ls1, s2ls2) else false
+    ) // end of [S2Eproj]
+  | v (* non-S2Eproj *) => (s2exp_node_view_free (v); false)
   ) (* end of[S2Eproj] *)
 //
-| S2Eapp
+| ~S2Eapp
     (s2e11, s2es12) =>
   (
-  case+ s2en20 of
-  | S2Eapp
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eapp
       (s2e21, s2es22) =>
-    {
-      val () = s2exp_syneq_exn(s2e11, s2e21)
-      val () = s2explst_syneq_exn(s2es12, s2es22)
-    } // end of [S2Eapp]
-  | _ (* non-S2Eapp *) => $raise (SYNEQexn)
+    (
+      if s2exp_syneq_aux(s2e11, s2e21)
+        then s2explst_syneq_aux(s2es12, s2es22) else false
+    ) // end of [S2Eapp]
+  | v (* non-S2Eapp *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eapp] *)
 //
-| S2Efun
+| ~S2Efun
   (
     fc1, lin1, s2fe1, npf1, s2es1_arg, s2e1_res
   ) => (
-  case+ s2en20 of
-  | S2Efun
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Efun
     (
       fc2, lin2, s2fe2, npf2, s2es2_arg, s2e2_res
-    ) => {
-      val () =
-        if fc1 != fc2 then $raise (SYNEQexn)
-      val () =
-        if lin1 != lin2 then $raise (SYNEQexn)
-      val () = s2eff_syneq_exn (s2fe1, s2fe2)
-      val () =
-        if npf1 != npf2 then $raise (SYNEQexn)
-      val () = s2explst_syneq_exn (s2es1_arg, s2es2_arg)
-      val () = s2exp_syneq_exn (s2e1_res, s2e2_res)
-    } // end of [S2Efun]
-  | _ (* non-S2Efun *) => $raise (SYNEQexn)
+    ) => (
+      if fc1 != fc2 then false
+      else if lin1 != lin2 then false
+      else if ~s2eff_syneq (s2fe1, s2fe2) then false
+      else if npf1 != npf2 then false
+      else if ~s2explst_syneq_aux (s2es1_arg, s2es2_arg) then false
+      else s2exp_syneq_aux (s2e1_res, s2e2_res)
+    ) // end of [S2Efun]
+  | v (* non-S2Efun *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Efun] *)
 //
-| S2Etop
+| ~S2Etop
     (knd1, s2e1) => (
-  case+ s2en20 of
-  | S2Etop
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Etop
       (knd2, s2e2) =>
     (
     if knd1 = knd2
-      then s2exp_syneq_exn(s2e1, s2e2)
-      else $raise(SYNEQexn)
+      then s2exp_syneq_aux(s2e1, s2e2)
+      else false
     ) // end of [S2Etop]
-  | _ (* non-S2Etop *) => $raise (SYNEQexn)
+  | v (* non-S2Etop *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Etop] *)
 //
-| S2Ewithout(s2e1) =>
+| ~S2Ewithout(s2e1) =>
   (
-  case+ s2en20 of
-  | S2Ewithout(s2e2) => s2exp_syneq_exn(s2e1, s2e2)
-  | _ (* non-S2Ewithout *) => $raise (SYNEQexn)
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Ewithout(s2e2) => s2exp_syneq_aux(s2e1, s2e2)
+  | v (* non-S2Ewithout *) => (s2exp_node_view_free (v); false)
   ) // end of [S2Ewithout]
 //
-| S2Etyarr
+| ~S2Etyarr
     (s2e1_elt, s2es1_int) =>
   (
-  case+ s2en20 of
-  | S2Etyarr
-      (s2e2_elt, s2es2_int) => {
-      val () =
-        s2exp_syneq_exn(s2e1_elt, s2e2_elt)
-      val () =
-        s2explst_syneq_exn(s2es1_int, s2es2_int)
-    } // end of [S2Etyarr]
-  | _ (* non-S2Etyarr *) => $raise (SYNEQexn)
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Etyarr
+      (s2e2_elt, s2es2_int) => (
+      if s2exp_syneq_aux(s2e1_elt, s2e2_elt)
+        then s2explst_syneq_aux(s2es1_int, s2es2_int) else false
+    ) // end of [S2Etyarr]
+  | v (* non-S2Etyarr *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Etyarr] *)
 //
-| S2Etyrec
+| ~S2Etyrec
     (knd1, npf1, ls2es1) =>
   (
-  case+ s2en20 of
-  | S2Etyrec
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Etyrec
       (knd2, npf2, ls2es2) =>
-    {
-      val () =
-        if knd1 != knd2 then $raise (SYNEQexn)
-      val () =
-        if npf1 != npf2 then $raise (SYNEQexn)
-      val () = labs2explst_syneq_exn (ls2es1, ls2es2)
-    } // end of [S2Etyrec]
-  | _ (* non-S2Etyrec *) => $raise (SYNEQexn)
+    (
+      // HX: [!=] on tyreckind is [eq_tyreckind_tyreckind] (pats_staexp2.sats)
+      if knd1 != knd2 then false
+      else if npf1 != npf2 then false
+      else labs2explst_syneq_aux (ls2es1, ls2es2)
+    ) // end of [S2Etyrec]
+  | v (* non-S2Etyrec *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Etyrec] *)
 //
-| S2Einvar(s2e1) =>
+| ~S2Einvar(s2e1) =>
   (
-  case+ s2en20 of
-  | S2Einvar(s2e2) =>
-      s2exp_syneq_exn(s2e1, s2e2)
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Einvar(s2e2) =>
+      s2exp_syneq_aux(s2e1, s2e2)
     // end of [S2Einvar]
-  | _ (* non-S2Einvar *) => $raise (SYNEQexn)
+  | v (* non-S2Einvar *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Einvar] *)
 //
-| S2Erefarg
+| ~S2Erefarg
     (knd1, s2e1) => (
-  case+ s2en20 of
-  | S2Erefarg
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Erefarg
       (knd2, s2e2) => (
     if knd1 = knd2
-      then s2exp_syneq_exn(s2e1, s2e2)
-      else $raise(SYNEQexn)
+      then s2exp_syneq_aux(s2e1, s2e2)
+      else false
     ) // end of [S2Erefarg]
-  | _ (* non-S2Erefarg *) => $raise (SYNEQexn)
+  | v (* non-S2Erefarg *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Erefarg] *)
 //
-| S2Evararg(s2e1) =>
+| ~S2Evararg(s2e1) =>
   (
-  case+ s2en20 of
-  | S2Evararg(s2e2) => s2exp_syneq_exn(s2e1, s2e2)
-  | _ (* non-S2Evararg *) => $raise (SYNEQexn)
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Evararg(s2e2) => s2exp_syneq_aux(s2e1, s2e2)
+  | v (* non-S2Evararg *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Evararg] *)
 //
-| _ (* rest-of-s2exp *) => $raise (SYNEQexn)
+| v (* rest-of-s2exp *) => (s2exp_node_view_free (v); false)
 //
-end // end of [s2hnf_syneq_exn]
+end // end of [s2hnf_syneq_aux]
+
+
 
 (* ****** ****** *)
 //
@@ -1436,103 +1297,126 @@ labs2explst_syneq_env
 (* ****** ****** *)
 
 local
-
+//
+// HX: the environments are linear lists (as in ATS1), traversed in place
+//
 fun
 aux0
 (
-  env1: s2varlst
-, env2: s2varlst
+  env1: !s2varlst_vt
+, env2: !s2varlst_vt
 , s2v10: s2var, s2v20: s2var
 ) : bool = (
 //
 case+ env1 of
-| list_nil() =>
+| list_vt_nil() =>
     aux1_0(env1, env2, s2v10, s2v20)
-| list_cons
-    (s2v1, env1) =>
-  (
-    if s2v1 = s2v10
-      then aux1_t (env1, env2, s2v10, s2v20)
-      else aux1_f (env1, env2, s2v10, s2v20)
-    // end of [if]
-  ) (* end of [list_cons] *)
+| @list_vt_cons
+    (s2v1, env1_tl) => let
+    val ans = (
+      if s2v1 = s2v10
+        then aux1_t (env1_tl, env2, s2v10, s2v20)
+        else aux1_f (env1_tl, env2, s2v10, s2v20)
+      // end of [if]
+    ) : bool
+    prval () = fold@ (env1)
+  in
+    ans
+  end (* end of [list_vt_cons] *)
 //
 ) (* end of [aux0] *)
 
 and
 aux1_0
 (
-  env1: s2varlst
-, env2: s2varlst
+  env1: !s2varlst_vt
+, env2: !s2varlst_vt
 , s2v10: s2var, s2v20: s2var
 ) : bool = (
 //
 case+ env2 of
-| list_nil() =>
+| list_vt_nil() =>
     if s2v10=s2v20 then true else false
-  // end of [list_nil]
-| list_cons(s2v2, env2) =>
-  (
-    if s2v2 = s2v20
-      then false else aux1_0(env1, env2, s2v10, s2v20)
-    // end of [if]
-  ) (* end of [list_cons] *)
+  // end of [list_vt_nil]
+| @list_vt_cons(s2v2, env2_tl) => let
+    val ans = (
+      if s2v2 = s2v20
+        then false else aux1_0(env1, env2_tl, s2v10, s2v20)
+      // end of [if]
+    ) : bool
+    prval () = fold@ (env2)
+  in
+    ans
+  end (* end of [list_vt_cons] *)
 //
 ) (* end of [aux1_0] *)
 
 and
 aux1_t
 (
-  env1: s2varlst
-, env2: s2varlst
+  env1: !s2varlst_vt
+, env2: !s2varlst_vt
 , s2v10: s2var, s2v20: s2var
 ) : bool = (
 //
 case+ env2 of
-| list_nil() => false
-| list_cons(s2v2, env2) =>
-    if s2v2 = s2v20 then true else false
-  // end of [list_cons]
+| list_vt_nil() => false
+| @list_vt_cons(s2v2, env2_tl) => let
+    val ans = (if s2v2 = s2v20 then true else false): bool
+    prval () = fold@ (env2)
+  in
+    ans
+  end (* end of [list_vt_cons] *)
 //
 ) (* end of [aux1_t] *)
 
 and
 aux1_f
 (
-  env1: s2varlst
-, env2: s2varlst
+  env1: !s2varlst_vt
+, env2: !s2varlst_vt
 , s2v10: s2var, s2v20: s2var
 ) : bool = (
 //
 case+ env2 of
-| list_nil () =>
+| list_vt_nil () =>
     aux2_0 (env1, env2, s2v10, s2v20)
-| list_cons (s2v2, env2) =>
-    if s2v2 = s2v20
-      then false else aux0(env1, env2, s2v10, s2v20)
-    // end of [if]
+| @list_vt_cons (s2v2, env2_tl) => let
+    val ans = (
+      if s2v2 = s2v20
+        then false else aux0(env1, env2_tl, s2v10, s2v20)
+      // end of [if]
+    ) : bool
+    prval () = fold@ (env2)
+  in
+    ans
+  end (* end of [list_vt_cons] *)
 //
 ) (* end of [aux1_f] *)
 
 and
 aux2_0
 (
-  env1: s2varlst
-, env2: s2varlst
+  env1: !s2varlst_vt
+, env2: !s2varlst_vt
 , s2v10: s2var, s2v20: s2var
 ) : bool = (
 //
 case+ env1 of
-| list_nil() =>
+| list_vt_nil() =>
     if s2v10=s2v20 then true else false
-  // end of [list_nil]
-| list_cons
-    (s2v1, env1) =>
-  (
-    if s2v1 = s2v10
-      then false else aux2_0(env1, env2, s2v10, s2v20)
-    // end of [if]
-  ) (* end of [list_cons] *)
+  // end of [list_vt_nil]
+| @list_vt_cons
+    (s2v1, env1_tl) => let
+    val ans = (
+      if s2v1 = s2v10
+        then false else aux2_0(env1_tl, env2, s2v10, s2v20)
+      // end of [if]
+    ) : bool
+    prval () = fold@ (env1)
+  in
+    ans
+  end (* end of [list_vt_cons] *)
 //
 ) (* end of [aux2_0] *)
 
@@ -1542,14 +1426,7 @@ implement
 s2var_syneq_env
 (
   env1, env2, s2v10, s2v20
-) = let
-//
-val env1 = $UN.linlst2lst(env1)
-and env2 = $UN.linlst2lst(env2)
-//
-in
-  aux0 (env1, env2, s2v10, s2v20)
-end // end of [s2var_syneq_env]
+) = aux0 (env1, env2, s2v10, s2v20)
 
 end // end of [local]
 
@@ -1558,13 +1435,25 @@ end // end of [local]
 local
 
 fun
+auxenv_loop
+(
+  s2vs: s2varlst, env: s2varlst_vt
+) : s2varlst_vt =
+(
+case+ glist_view (s2vs) of
+| ~GLnil() => env
+| ~GLcons(s2v, s2vs) =>
+    auxenv_loop (s2vs, list_vt_cons (s2v, env))
+) (* end of [auxenv_loop] *)
+
+fun
 auxenv
 (
   env: !s2varlst_vt, s2vs: s2varlst
 ) : s2varlst_vt = let
-  val env2 = list_vt_copy(env)
+  val env2 = list_vt_copy<s2var>(env)
 in
-  list_reverse_append2_vt<s2var>(s2vs, env2)
+  auxenv_loop (s2vs, env2) // HX: reverse_append of ATS1
 end // end of [auxenv]
 
 in (* in-of-local *)
@@ -1577,64 +1466,54 @@ s2hnf_syneq_env
 //
 val s2e10 = s2hnf2exp (s2f10)
 and s2e20 = s2hnf2exp (s2f20)
-val s2en10 = s2e10.s2exp_node
-and s2en20 = s2e20.s2exp_node
-//
-(*
-val () =
-println!
-  ("s2hnf_syneq_env: s2e10 = ", s2e10)
-val () =
-println!
-  ("s2hnf_syneq_env: s2e20 = ", s2e20)
-*)
 //
 in
 //
-case+ s2en10 of
+case+ s2exp_node_view (s2e10.s2exp_node()) of
 //
-| S2Eint(i1) => (
-  case+ s2en20 of
-  | S2Eint(i2) =>
+| ~S2Eint(i1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eint(i2) =>
     if i1 = i2 then true else false
-  | S2Eintinf i2 =>
+  | ~S2Eintinf i2 =>
     if eq_int_intinf(i1, i2) then true else false
-  | _ (*non-integer*) => false
+  | v (*non-integer*) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eint] *)
-| S2Eintinf(i1) =>
+| ~S2Eintinf(i1) =>
   (
-  case+ s2en20 of
-  | S2Eint(i2) =>
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eint(i2) =>
     if eq_intinf_int(i1, i2) then true else false
-  | S2Eintinf(i2) =>
+  | ~S2Eintinf(i2) =>
     if eq_intinf_intinf(i1, i2) then true else false
-  | _ (*non-integer*) => false
+  | v (*non-integer*) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eintinf] *)
 //
-| S2Ecst(s2c1) => (
-  case+ s2en20 of
-  | S2Ecst(s2c2) =>
-    if s2c1 = s2c2 then true else false | _ => false
+| ~S2Ecst(s2c1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Ecst(s2c2) =>
+    if s2c1 = s2c2 then true else false
+  | v => (s2exp_node_view_free (v); false)
   ) (* end of [S2Ecst] *)
 //
-| S2Eextype
+| ~S2Eextype
     (name1, s2ess1) =>
   (
-  case+ s2en20 of
-  | S2Eextype
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eextype
       (name2, s2ess2) => (
     if name1 = name2
       then (
         s2explstlst_syneq_env(env1, env2, s2ess1, s2ess2)
       ) else false
     ) // end of [S2Eextype]
-  | _ (* non-S2Eextype *) => false
+  | v (* non-S2Eextype *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eextype] *)
-| S2Eextkind
+| ~S2Eextkind
     (name1, s2ess1) =>
   (
-  case+ s2en20 of
-  | S2Eextkind
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eextkind
       (name2, s2ess2) =>
     (
     if name1 = name2
@@ -1642,49 +1521,50 @@ case+ s2en10 of
         s2explstlst_syneq_env(env1, env2, s2ess1, s2ess2)
       ) else false
     ) // end of [S2Eextkind]
-  | _ (* non-S2Eextkind *) => false
+  | v (* non-S2Eextkind *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eextkind] *)
 //
-| S2Evar(s2v1) => (
-  case+ s2en20 of
-  | S2Evar(s2v2) =>
+| ~S2Evar(s2v1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Evar(s2v2) =>
     s2var_syneq_env(env1, env2, s2v1, s2v2)
-  | _ (* non-S2Evar *) => false
+  | v (* non-S2Evar *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Evar] *)
 //
-| S2EVar(s2V1) => (
-  case+ s2en20 of
-  | S2EVar(s2V2) =>
-    if s2V1 = s2V2 then true else false | _ => false
+| ~S2EVar(s2V1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2EVar(s2V2) =>
+    if s2V1 = s2V2 then true else false
+  | v => (s2exp_node_view_free (v); false)
   ) (* end of [S2EVar] *)
 //
-| S2Edatcontyp
+| ~S2Edatcontyp
     (d2c1, arg1) => (
-  case+ s2en20 of
-  | S2Edatcontyp
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Edatcontyp
       (d2c2, arg2) => (
     if (d2c1 = d2c2)
       then s2explst_syneq_env(env1, env2, arg1, arg2)
       else false
     // end of [if]
     ) // end of [S2Edatcontyp]
-  | _ (* non-S2Edatcontyp *) => false
+  | v (* non-S2Edatcontyp *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Edatcontyp] *)
-| S2Edatconptr
+| ~S2Edatconptr
     (d2c1, rt1, _) => (
-  case+ s2en20 of
-  | S2Edatconptr
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Edatconptr
       (d2c2, rt2, _) => (
     if (d2c1 = d2c2)
       then s2exp_syneq_env(env1, env2, rt1, rt2) else false
     ) // end of [S2Edatconptr]
-  | _ (* non-S2Edatconptr *) => false
+  | v (* non-S2Edatconptr *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Edatconptr] *)
 //
-| S2Eeqeq
+| ~S2Eeqeq
     (s2e11, s2e12) => (
-  case+ s2en20 of
-  | S2Eeqeq
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eeqeq
       (s2e21, s2e22) => let
       val syneq =
         s2exp_syneq_env(env1, env2, s2e11, s2e21)
@@ -1695,14 +1575,14 @@ case+ s2en10 of
         else false
       // end of [if]
     end // end of [S2Eeqeq]
-  | _ (* non-S2Eeqeq *) => false
+  | v (* non-S2Eeqeq *) => (s2exp_node_view_free (v); false)
   ) (* end of[S2Eeqeq] *)
 //
-| S2Eproj
+| ~S2Eproj
     (s2e1, _, s2ls1) =>
   (
-  case+ s2en20 of
-  | S2Eproj
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eproj
       (s2e2, _, s2ls2) => let
       val syneq =
         s2exp_syneq_env(env1, env2, s2e1, s2e2)
@@ -1710,14 +1590,14 @@ case+ s2en10 of
     in
       if syneq then s2lablst_syneq(s2ls1, s2ls2) else false
     end // end of [S2Eproj]
-  | _ (* non-S2Eproj *) => false
+  | v (* non-S2Eproj *) => (s2exp_node_view_free (v); false)
   ) (* end of[S2Eproj] *)
 //
-| S2Eapp
+| ~S2Eapp
     (s2e11, s2es12) =>
   (
-  case+ s2en20 of
-  | S2Eapp
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eapp
       (s2e21, s2es22) => let
       val syneq =
         s2exp_syneq_env(env1, env2, s2e11, s2e21)
@@ -1726,32 +1606,33 @@ case+ s2en10 of
         s2explst_syneq_env(env1, env2, s2es12, s2es22) else false
       // end of [if]
     end // end of [S2Eapp]
-  | _ (* non-S2Eapp *) => false
+  | v (* non-S2Eapp *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eapp] *)
 //
-| S2Elam
+| ~S2Elam
     (s2vs1, s2e1) =>
  (
-  case+ s2en20 of
-  | S2Elam
-      (s2vs2, s2e2) => syneq where
-    {
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Elam
+      (s2vs2, s2e2) => let
       val env1 = auxenv(env1, s2vs1)
       val env2 = auxenv(env2, s2vs2)
       val syneq =
         s2exp_syneq_env (env1, env2, s2e1, s2e2)
       // end of [val]
       val () = list_vt_free(env1) and () = list_vt_free(env2)
-    } // end of [S2Elam]
-  | _ (* non-S2Elam *) => false
+    in
+      syneq
+    end // end of [S2Elam]
+  | v (* non-S2Elam *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Elam] *)
 //
-| S2Efun
+| ~S2Efun
   (
     fc1, lin1, s2fe1, npf1, s2es1_arg, s2e1_res
   ) => (
-  case+ s2en20 of
-  | S2Efun
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Efun
     (
       fc2, lin2, s2fe2, npf2, s2es2_arg, s2e2_res
     ) => let
@@ -1773,32 +1654,32 @@ case+ s2en10 of
         s2exp_syneq_env(env1, env2, s2e1_res, s2e2_res) else false
       // end of [if]
     end // end of [S2Efun]
-  | _ (* non-S2Efun *) => false
+  | v (* non-S2Efun *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Efun] *)
 //
-| S2Etop
+| ~S2Etop
     (knd1, s2e1) => (
-  case+ s2en20 of
-  | S2Etop
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Etop
       (knd2, s2e2) => (
     if knd1 = knd2 then
       s2exp_syneq_env(env1, env2, s2e1, s2e2) else false
     ) // end of [S2Etop]
-  | _ (* non-S2Etop *) => false
+  | v (* non-S2Etop *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Etop] *)
 //
-| S2Ewithout(s2e1) =>
+| ~S2Ewithout(s2e1) =>
   (
-  case+ s2en20 of
-  | S2Ewithout (s2e2) => s2exp_syneq_env(env1, env2, s2e1, s2e2)
-  | _ (* non-S2Ewithout *) => false
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Ewithout (s2e2) => s2exp_syneq_env(env1, env2, s2e1, s2e2)
+  | v (* non-S2Ewithout *) => (s2exp_node_view_free (v); false)
   ) // end of [S2Ewithout]
 //
-| S2Etyarr
+| ~S2Etyarr
     (s2e1_elt, s2es1_int) =>
   (
-  case+ s2en20 of
-  | S2Etyarr
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Etyarr
       (s2e2_elt, s2es2_int) => let
       val syneq =
         s2exp_syneq_env(env1, env2, s2e1_elt, s2e2_elt)
@@ -1808,14 +1689,14 @@ case+ s2en10 of
         else false
       // end of [if]
     end // [S2Etyarr]
-  | _ (* non-S2Etyarr *) => false
+  | v (* non-S2Etyarr *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Etyarr] *)
 //
-| S2Etyrec
+| ~S2Etyrec
     (knd1, npf1, ls2es1) =>
   (
-  case+ s2en20 of
-  | S2Etyrec
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Etyrec
       (knd2, npf2, ls2es2) => let
       val syneq =
         (if knd1 = knd2 then true else false): bool
@@ -1827,20 +1708,20 @@ case+ s2en10 of
         else false
       // end of [if]
     end // [S2Etyrec]
-  | _ (* non-S2Etyrec *) => false
+  | v (* non-S2Etyrec *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Etyrec] *)
 //
-| S2Einvar(s2e1) => (
-  case+ s2en20 of
-  | S2Einvar (s2e2) => s2exp_syneq_env (env1, env2, s2e1, s2e2)
-  | _ (* non-S2Einvar *) => false
+| ~S2Einvar(s2e1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Einvar (s2e2) => s2exp_syneq_env (env1, env2, s2e1, s2e2)
+  | v (* non-S2Einvar *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Einvar] *)
 //
-| S2Eexi
+| ~S2Eexi
     (s2vs1, s2ps1, s2e1) =>
   (
-  case+ s2en20 of
-  | S2Eexi
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Eexi
       (s2vs2, s2ps2, s2e2) => let
       val env1 = auxenv(env1, s2vs1)
       val env2 = auxenv(env2, s2vs2)
@@ -1856,14 +1737,14 @@ case+ s2en10 of
     in
       syneq
     end // end of [S2Eexi]
-  | _ (* non-S2Eexi *) => false
+  | v (* non-S2Eexi *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Eexi] *)
 //
-| S2Euni
+| ~S2Euni
     (s2vs1, s2ps1, s2e1) =>
   (
-  case+ s2en20 of
-  | S2Euni
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Euni
       (s2vs2, s2ps2, s2e2) => let
       val env1 = auxenv(env1, s2vs1)
       val env2 = auxenv(env2, s2vs2)
@@ -1879,27 +1760,27 @@ case+ s2en10 of
     in
       syneq
     end // end of [S2Euni]
-  | _ (* non-S2Euni *) => false
+  | v (* non-S2Euni *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Euni] *)
 //
-| S2Erefarg
+| ~S2Erefarg
     (knd1, s2e1) => (
-  case+ s2en20 of
-  | S2Erefarg
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Erefarg
       (knd2, s2e2) => (
     if knd1 = knd2
       then s2exp_syneq_env(env1, env2, s2e1, s2e2) else false
     ) // end of [S2Erefarg]
-  | _ (* non-S2Erefarg *) => false
+  | v (* non-S2Erefarg *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Erefarg] *)
 //
-| S2Evararg(s2e1) => (
-  case+ s2en20 of
-  | S2Evararg(s2e2) => s2exp_syneq_env(env1, env2, s2e1, s2e2)
-  | _ (* non-S2Evararg *) => false
+| ~S2Evararg(s2e1) => (
+  case+ s2exp_node_view (s2e20.s2exp_node()) of
+  | ~S2Evararg(s2e2) => s2exp_syneq_env(env1, env2, s2e1, s2e2)
+  | v (* non-S2Evararg *) => (s2exp_node_view_free (v); false)
   ) (* end of [S2Evararg] *)
 //
-| _ (* rest-of-s2exp *) => false
+| v (* rest-of-s2exp *) => (s2exp_node_view_free (v); false)
 //
 end // end of [s2hnf_syneq_env]
 
@@ -1925,21 +1806,21 @@ s2explst_syneq_env
   (env1, env2, s2es1, s2es2) =
 (
 //
-case+ s2es1 of
-| list_nil() =>
+case+ glist_view (s2es1) of
+| ~GLnil() =>
   (
-    case+ s2es2 of
-    | list_nil() => true
-    | list_cons(_, _) => false
+    case+ glist_view (s2es2) of
+    | ~GLnil() => true
+    | ~GLcons(_, _) => false
   )
-| list_cons
+| ~GLcons
     (s2e1, s2es1) =>
   (
-    case+ s2es2 of
-    | list_nil
+    case+ glist_view (s2es2) of
+    | ~GLnil
         ((*void*)) => false
       // list_nil
-    | list_cons
+    | ~GLcons
         (s2e2, s2es2) =>
       (
         if s2exp_syneq_env(env1, env2, s2e1, s2e2)
@@ -1956,21 +1837,21 @@ s2explstlst_syneq_env
   (env1, env2, s2ess1, s2ess2) =
 (
 //
-case+ s2ess1 of
-| list_nil() =>
+case+ glist_view (s2ess1) of
+| ~GLnil() =>
   (
-    case+ s2ess2 of
-    | list_nil() => true
-    | list_cons(_, _) => false
+    case+ glist_view (s2ess2) of
+    | ~GLnil() => true
+    | ~GLcons(_, _) => false
   )
-| list_cons
+| ~GLcons
     (s2es1, s2ess1) =>
   (
-    case+ s2ess2 of
-    | list_nil
+    case+ glist_view (s2ess2) of
+    | ~GLnil
         ((*void*)) => false
       // list_nil
-    | list_cons
+    | ~GLcons
         (s2es2, s2ess2) =>
       (
         if s2explst_syneq_env(env1, env2, s2es1, s2es2)
@@ -1989,27 +1870,30 @@ labs2explst_syneq_env
 ) = let
 in
 //
-case+
-(
- ls2es1,ls2es2
-) of // case+
-| (list_cons(ls2e1, ls2es1),
-   list_cons(ls2e2, ls2es2)) => let
-    val SLABELED(l1, _(*opt*), s2e1) = ls2e1
-    val SLABELED(l2, _(*opt*), s2e2) = ls2e2
-  in
-    if (l1 = l2) then let
-      val syneq =
-        s2exp_syneq_env(env1, env2, s2e1, s2e2)
-      // end of [val]
+case+ glist_view (ls2es1) of
+| ~GLcons(ls2e1, ls2es1) => (
+  case+ glist_view (ls2es2) of
+  | ~GLcons(ls2e2, ls2es2) => let
+      val l1 = labs2exp_lab (ls2e1)
+      val s2e1 = labs2exp_elt (ls2e1)
+      val l2 = labs2exp_lab (ls2e2)
+      val s2e2 = labs2exp_elt (ls2e2)
     in
-      if syneq
-        then labs2explst_syneq_env(env1, env2, ls2es1, ls2es2)
-        else false
-    end else false
-  end // end of [cons, cons]
-| (list_nil(), list_nil()) => true
-| (_(*ls2es1*), _(*ls2es2*)) => false
+      if (l1 = l2) then let
+        val syneq =
+          s2exp_syneq_env(env1, env2, s2e1, s2e2)
+        // end of [val]
+      in
+        if syneq
+          then labs2explst_syneq_env(env1, env2, ls2es1, ls2es2)
+          else false
+      end else false
+    end // end of [cons, cons]
+  | ~GLnil() => false
+  )
+| ~GLnil() => (
+  case+ glist_view (ls2es2) of ~GLnil() => true | ~GLcons(_, _) => false
+  )
 //
 end // end of [labs2explst_syneq_env]
 
@@ -2050,6 +1934,7 @@ s2explst_syneq2
   val () = list_vt_free(env1) and () = list_vt_free(env2)
 } (* end of [s2explst_syneq2] *)
 //
+
 (* ****** ****** *)
 
 local
@@ -2060,8 +1945,8 @@ s2exp_prenexize
   knd: int // 0/1: exi/uni
 , s2e0: s2exp
 , flag: &int >> int
-, s2vs_res: &s2varlst_vt
-, s2ps_res: &s2explst_vt
+, s2vs_res: &s2varlst_vt >> _
+, s2ps_res: &s2explst_vt >> _
 ) : s2exp = let
 //
 val s2e0 = s2exp_hnfize(s2e0)
@@ -2069,10 +1954,9 @@ val s2e0 = s2exp_hnfize(s2e0)
 in
 //
 case+
-s2e0.s2exp_node
-of (* case+ *)
+s2exp_node_view(s2e0.s2exp_node()) of (* case+ *)
 //
-| S2Eexi (
+| ~S2Eexi (
     s2vs, s2ps, s2e_body
   ) => (
     if knd = 0 then
@@ -2081,7 +1965,7 @@ of (* case+ *)
       knd, s2vs, s2ps, s2e_body, flag, s2vs_res, s2ps_res
     ) else s2e0 // end of [if]
   ) (* end of [S2Eexi] *)
-| S2Euni (
+| ~S2Euni (
     s2vs, s2ps, s2e_body
   ) => (
     if knd > 0 then
@@ -2091,7 +1975,7 @@ of (* case+ *)
     ) else s2e0 // end of [if]
   ) (* end of [S2Euni] *)
 //
-| S2Eat (s2e1, s2e2) => let
+| ~S2Eat (s2e1, s2e2) => let
     val
     flag0 = flag
     val s2e1 =
@@ -2125,7 +2009,7 @@ of (* case+ *)
     // end of [if]
   end // end of [S2Etyrec]
 *)
-| _ (*non-s2exp*) => s2e0 // end of [_]
+| v (*non-s2exp*) => (s2exp_node_view_free (v); s2e0) // end of [_]
 //
 end // end of [s2exp_prenexize]
 
@@ -2135,8 +2019,8 @@ s2exp_prenexize_work
   knd: int
 , s2vs: s2varlst, s2ps: s2explst, s2e_body: s2exp
 , flag: &int >> int
-, s2vs_res: &s2varlst_vt
-, s2ps_res: &s2explst_vt
+, s2vs_res: &s2varlst_vt >> _
+, s2ps_res: &s2explst_vt >> _
 ) : s2exp = let
   var sub = stasub_make_nil ()
   val s2vs = stasub_extend_svarlst (sub, s2vs)
@@ -2157,15 +2041,15 @@ s2explst_prenexize
   knd: int
 , s2es0: s2explst
 , flag: &int >> int
-, s2vs_res: &s2varlst_vt
-, s2ps_res: &s2explst_vt
+, s2vs_res: &s2varlst_vt >> _
+, s2ps_res: &s2explst_vt >> _
 ) : s2explst = let
 in
 //
-case+ s2es0 of
-| list_nil() =>
-  list_nil((*void*))
-| list_cons(s2e, s2es) => let
+case+ glist_view(s2es0) of
+| ~GLnil() =>
+  glist_nil((*void*))
+| ~GLcons(s2e, s2es) => let
     val
     flag0 = flag
     val s2e =
@@ -2175,7 +2059,7 @@ case+ s2es0 of
       s2explst_prenexize(knd, s2es, flag, s2vs_res, s2ps_res)
     // end of [val]
   in
-    if flag > flag0 then list_cons (s2e, s2es) else s2es0
+    if flag > flag0 then glist_cons(s2e, s2es) else s2es0
   end // end of [cons]
 //
 end // end of [s2explst_prenexize]
@@ -2186,30 +2070,32 @@ labs2explst_prenexize
   knd: int
 , ls2es0: labs2explst
 , flag: &int >> int
-, s2vs_res: &s2varlst_vt
-, s2ps_res: &s2explst_vt
+, s2vs_res: &s2varlst_vt >> _
+, s2ps_res: &s2explst_vt >> _
 ) : labs2explst = let
 in
 //
-case+ ls2es0 of
-| list_nil() =>
-  list_nil((*void*))
-| list_cons(ls2e, ls2es) => let
+case+ glist_view(ls2es0) of
+| ~GLnil() =>
+  glist_nil((*void*))
+| ~GLcons(ls2e, ls2es) => let
     val
     flag0 = flag
+    val l = labs2exp_lab (ls2e)
+    val name = labs2exp_nam (ls2e)
     val
-    SLABELED(l, name, s2e) = ls2e
+    s2e = labs2exp_elt (ls2e)
     val s2e =
       s2exp_prenexize(knd, s2e, flag, s2vs_res, s2ps_res)
     // end of [val]
     val ls2e = (
-      if flag > flag0 then SLABELED(l, name, s2e) else ls2e
+      if flag > flag0 then labs2exp_new (l, name, s2e) else ls2e
     ) : labs2exp // end of [val]
     val ls2es =
       labs2explst_prenexize(knd, ls2es, flag, s2vs_res, s2ps_res)
     // end of [val]
   in
-    if flag > flag0 then list_cons (ls2e, ls2es) else ls2es0
+    if flag > flag0 then glist_cons(ls2e, ls2es) else ls2es0
   end // end of [list_cons]
 //
 end // end of [labs2explst_prenexize]
@@ -2232,7 +2118,7 @@ s2exp_absuni(s2e) = let
   and s2ps = list_vt_reverse(s2ps_res)
 //
 in
-  (s2e, s2vs, s2ps)
+  @(s2e, s2vs, s2ps)
 end // end of [s2exp_absuni]
 
 implement
@@ -2251,7 +2137,7 @@ s2exp_opnexi (s2e) = let
   and s2ps = list_vt_reverse(s2ps_res)
 //
 in
-  (s2e, s2vs, s2ps)
+  @(s2e, s2vs, s2ps)
 end // end of [s2exp_opnexi]
 
 end // end of [local]

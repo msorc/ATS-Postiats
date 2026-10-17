@@ -383,16 +383,23 @@ end // end of [sknode_get_sknodelen]
 
 local
 
+//
+// HX-2026-10: no GC
+// a sknodelst is a malloc'ed array of pointers;
+// it is freed (via ATS_MFREE) along with its node
+//
 assume
 sknodelst_type
-  (key:t0p, itm:vt0p, n:int) = arrayref (ptr, n)
+  (key:t0p, itm:vt0p, n:int) = ptr
 // end of [sknodelst_type]
 
 in (* in of [local] *)
 
 implement{}
 sknodelst_make (n) = let
-  val asz = i2sz(n) in arrayref_make_elt<ptr> (asz, nullp)
+  val asz = i2sz(n)
+in
+  $UN.castvwtp0{ptr}(arrayptr_make_elt<ptr> (asz, nullp))
 end // end of [sknodelst]
 
 implement{}
@@ -400,14 +407,14 @@ sknodelst_get_at
   {key,itm}{i}
   (nxa, i) = let
   typedef T = sknodeGt0 (key, itm, i)
-  val nx0 = $effmask_ref (arrayref_get_at (nxa, i)) in $UN.cast{T}(nx0)
+  val nx0 = $UN.ptr0_get_at_int<ptr> (nxa, i) in $UN.cast{T}(nx0)
 end // end of [sknodelst_get_at]
 
 implement{}
 sknodelst_set_at
   {key,itm}{i}
   (nxa, i, nx0) = let
-  val nx0 = $UN.cast{ptr} (nx0) in $effmask_ref (arrayref_set_at (nxa, i, nx0))
+  val nx0 = $UN.cast{ptr} (nx0) in $UN.ptr0_set_at_int<ptr> (nxa, i, nx0)
 end // end of [sknodelst_set_at]
 
 end // end of [local]
@@ -972,6 +979,9 @@ val p_i = p2tr2ptr (pt)
 val () = linmap_freelin$clear<itm> (!p_i)
 prval () = fpf (pf)
 //
+val () =
+$extfcall
+  (void, "ATS_MFREE", sknode_get_sknodelst<key,itm> (nx))
 val () = $extfcall (void, "ATS_MFREE", nx)
 //
 in

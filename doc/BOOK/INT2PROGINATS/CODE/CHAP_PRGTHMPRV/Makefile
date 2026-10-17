@@ -14,23 +14,14 @@ ATSCCFLAGS=-O2
 
 ######
 
-all:: misc
-all:: matget
 all:: ifact
 all:: ifact23
-all:: test_fastexp
 
 ######
 
-misc: misc.dats; $(PATSCC) $(ATSCCFLAGS) -o $@ $<
-regress:: misc; ./$<
-cleanall:: ; $(RMF) misc
 
 ######
 
-matget: matget.dats; $(PATSCC) $(ATSCCFLAGS) -o $@ $<
-regress:: matget; ./$<
-cleanall:: ; $(RMF) matget
 
 ######
 
@@ -44,11 +35,6 @@ cleanall:: ; $(RMF) ifact23
 
 ######
 
-test_fastexp: \
-  fastexp.sats fastexp.dats test_fastexp.dats ; \
-  $(PATSCC) $(ATSCCFLAGS) -o $@ fastexp.dats test_fastexp.dats
-regress:: test_fastexp; ./$<
-cleanall:: ; $(RMF) test_fastexp
 
 ######
 

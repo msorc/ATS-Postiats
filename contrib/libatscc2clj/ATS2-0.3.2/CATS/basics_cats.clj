@@ -175,6 +175,10 @@
 (defmacro
  ATSSELboxrec[xs i] `(ATSCCget_at ~xs ~i)
 )
+;; HX-2026-10: flat records
+(defmacro
+ ATSSELfltrec[xs i] `(ATSCCget_at ~xs ~i)
+)
 ;;
 ;; ****** ****** ;;
 ;;

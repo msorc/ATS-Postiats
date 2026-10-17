@@ -73,21 +73,15 @@ staload _(*anon*) =
 
 (* ****** ****** *)
 //
-#define nil0 list_nil
-#define cons0 list_cons
 //
-typedef
-list0 (a:t@ype) = List0 (a)
+// HX-2026-10: no GC
+// the lists are linear (they are consumed by sorting)
 //
-(* ****** ****** *)
-
-#define list0_length list_length
-#define list0_reverse list_reverse
-
-(* ****** ****** *)
-
+vtypedef
+list0 (a:t@ype) = List0_vt (a)
+//
 typedef lte (a:t@ype) = (a, a) -> bool
-
+//
 (* ****** ****** *)
 
 fun{
@@ -97,17 +91,17 @@ a:t@ype
 ) : list0 a =
 (
   case+ xs of
-  | nil0 () => ys
-  | cons0 (x, xs1) => (
+  | ~list_vt_nil () => ys
+  | ~list_vt_cons (x, xs1) => (
     case+ ys of
-    | nil0 () => xs
-    | cons0 (y, ys1) =>
+    | ~list_vt_nil () => list_vt_cons (x, xs1)
+    | ~list_vt_cons (y, ys1) =>
         if x \lte y then
-          cons0{a}(x, merge<a> (xs1, ys, lte))
+          list_vt_cons{a}(x, merge<a> (xs1, list_vt_cons (y, ys1), lte))
         else
-          cons0{a}(y, merge<a> (xs, ys1, lte))
+          list_vt_cons{a}(y, merge<a> (list_vt_cons (x, xs1), ys1, lte))
         // end of [if]
-    ) // end of [cons0]
+    ) // end of [list_vt_cons]
 ) (* end of [merge] *)
 
 (* ****** ****** *)
@@ -119,13 +113,13 @@ a:t@ype
   xs: list0 a, lte: lte a
 ) : list0 a = let
 //
-val n = list0_length (xs)
+val n = list_vt_length (xs)
 //
 fun msort
 (
   xs: list0 a, n: int, lte: lte a
 ) : list0 a =
-  if n >= 2 then split (xs, n, lte, n/2, nil0) else xs
+  if n >= 2 then split (xs, n, lte, n/2, list_vt_nil) else xs
 //
 and split
 (
@@ -135,13 +129,14 @@ and split
 if
 i > 0
 then let
-  val-cons0 (x, xs) = xs
+  val-~list_vt_cons (x, xs) = xs
 in
-  split (xs, n, lte, i-1, cons0{a}(x, xsf))
+  split (xs, n, lte, i-1, list_vt_cons{a}(x, xsf))
 end // end of [then]
 else let
-  val xsf = list0_reverse (xsf) // make sorting stable!
-  val xsf = msort (xsf, n/2, lte) and xs = msort (xs, n-n/2, lte)
+  val xsf = list_vt_reverse (xsf) // make sorting stable!
+  val xsf = msort (xsf, n/2, lte)
+  val xs = msort (xs, n-n/2, lte)
 in
   merge<a> (xsf, xs, lte)
 end // end of [else]
@@ -152,6 +147,34 @@ in
   msort (xs, n, lte)
 end // end of [mergesort]
 
+(* ****** ****** *)
+//
+fun{
+a:t@ype
+} print_list0
+(
+  xs: !list0 a
+) : void = let
+//
+fun
+loop
+{n:int}
+(
+  xs: !list_vt(a, n), i: int
+) : void =
+(
+case+ xs of
+| list_vt_nil () => ()
+| list_vt_cons (x, xs1) =>
+  (
+    if i > 0 then print! (", "); print_val<a> (x); loop (xs1, i+1)
+  )
+)
+//
+in
+  loop (xs, 0)
+end // end of [print_list0]
+//
 (* ****** ****** *)
 //
 extern 
@@ -167,45 +190,37 @@ main_js ((*void*)) =
 //
 val xs =
 (
-cons0 (5,
-cons0 (3,
-cons0 (4,
-cons0 (6,
-cons0 (8,
-cons0 (0,
-cons0 (7,
-cons0 (1,
-cons0 (9,
-cons0 (2,
-nil0()))))))))))
-) : list0 (int)
+list_vt_cons{int}(5, list_vt_cons{int}(3, list_vt_cons{int}(4, list_vt_cons{int}(6, list_vt_cons{int}(8, list_vt_cons{int}(0, list_vt_cons{int}(7, list_vt_cons{int}(1, list_vt_cons{int}(9, list_vt_cons{int}(2, list_vt_nil()))))))))))
+) : list0(int)
 //
-val () = println! ("xs = ", xs)
-val () = println! ("mergesort(xs) = ", mergesort<int> (xs, lam (x, y) => x <= y))
+val () = print! ("xs = ")
+val () = print_list0<int> (xs)
+val () = println! ()
+val ys = mergesort<int> (xs, lam (x, y) => x <= y)
+val () = print! ("mergesort(xs) = ")
+val () = print_list0<int> (ys)
+val () = println! ()
+val () = list_vt_free (ys)
 //
 (* ****** ****** *)
 //
 val xs =
 (
-cons0 ("5",
-cons0 ("3",
-cons0 ("4",
-cons0 ("6",
-cons0 ("8",
-cons0 ("0",
-cons0 ("7",
-cons0 ("1",
-cons0 ("9",
-cons0 ("2",
-nil0()))))))))))
-) : list0 (string)
+list_vt_cons{string}("5", list_vt_cons{string}("3", list_vt_cons{string}("4", list_vt_cons{string}("6", list_vt_cons{string}("8", list_vt_cons{string}("0", list_vt_cons{string}("7", list_vt_cons{string}("1", list_vt_cons{string}("9", list_vt_cons{string}("2", list_vt_nil()))))))))))
+) : list0(string)
 //
 implement
 print_val<string>
   (x) = print! ("\"", x, "\"")
 //
-val () = println! ("xs = ", xs)
-val () = println! ("mergesort(xs) = ", mergesort<string> (xs, lam (x, y) => x <= y))
+val () = print! ("xs = ")
+val () = print_list0<string> (xs)
+val () = println! ()
+val ys = mergesort<string> (xs, lam (x, y) => x <= y)
+val () = print! ("mergesort(xs) = ")
+val () = print_list0<string> (ys)
+val () = println! ()
+val () = list_vt_free (ys)
 //
 } (* end of [main_js] *)
 //
@@ -220,7 +235,7 @@ eval(fs.readFileSync('./libatscc2js/CATS/basics_cats.js').toString());
 eval(fs.readFileSync('./libatscc2js/CATS/integer_cats.js').toString());
 eval(fs.readFileSync('./libatscc2js/CATS/string_cats.js').toString());
 //
-eval(fs.readFileSync('./libatscc2js/DATS/list_dats.js').toString());
+eval(fs.readFileSync('./libatscc2js/DATS/list_vt_dats.js').toString());
 //
 eval(fs.readFileSync('./libatscc2js/CATS/Node.js/basics_cats.js').toString());
 eval(fs.readFileSync('./libatscc2js/CATS/Node.js/fprint_cats.js').toString());

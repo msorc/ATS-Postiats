@@ -53,8 +53,8 @@ bin_atscc2js
 bin_atscc2js: \
 $(SOURCES_DATS); \
 $(PATSCC) \
-  -O2 -DATS_MEMALLOC_GCBDW -o bin/atscc2js \
-  $(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS) -lgc
+  -O2 -DATS_MEMALLOC_LIBC -o bin/atscc2js \
+  $(SOURCES_DATS) $(SOURCES_SATS) $(SOURCES_CATS)
 #
 ######
 #

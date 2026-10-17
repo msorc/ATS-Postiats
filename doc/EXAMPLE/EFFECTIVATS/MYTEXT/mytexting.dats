@@ -14,9 +14,6 @@ ATEXTING_targetloc
 "share/atspre_staload.hats"
 #include
 "share/HATS\
-/atspre_staload_libats_ML.hats"
-#include
-"share/HATS\
 /atslib_staload_libats_libc.hats"
 //
 (* ****** ****** *)
@@ -25,6 +22,8 @@ ATEXTING_targetloc
 "{$ATEXTING}/mylibies.hats"
 //
 #staload $ATEXTING
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 #staload $ATEXTING_TEXTDEF
 //
 #include
@@ -65,13 +64,13 @@ __tagging__
 ) : atext = let
 //
 val-
-cons0
-(x0, _) = txtlst
+~GLcons
+(x0, _) = glist_view(txtlst)
 //
 val x0 =
 atext_make_string
 (
-  x0.atext_loc, atext_strngfy(x0)
+  x0.atext_loc(), atext_strngfy(x0)
 )
 //
 val
@@ -86,7 +85,7 @@ txtlst =
 $list{atext}(t_beg, x0, t_end)
 //
 in
-  atext_make(loc, TEXTlist(g0ofg1(txtlst)))
+  atext_make(loc, atext_node_TEXTlist(glist_make_list_vt<atext>(txtlst)))
 end // end of [__tagging__]
 
 in (* in-of-local *)
@@ -96,7 +95,7 @@ in (* in-of-local *)
 val () =
 the_atextmap_insert
 ( "para"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<p>", "</p>", xs)
@@ -108,7 +107,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "filename"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<tt>", "</tt>", xs)
@@ -120,7 +119,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "command"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<em>", "</em>", xs)
@@ -132,7 +131,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "emphasis"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<em>", "</em>", xs)
@@ -144,7 +143,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "sub"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<sub>", "</sub>", xs)
@@ -154,7 +153,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "sup"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<sup>", "</sup>", xs)
@@ -166,7 +165,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "stacode"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<span style=\"color: #0000F0;\">", "</span>", xs)
@@ -178,7 +177,7 @@ the_atextmap_insert
 val () =
 the_atextmap_insert
 ( "dyncode"
-, TEXTDEFfun
+, atextdef_TEXTDEFfun
   (
     lam(loc, xs) =>
     __tagging__(loc, "<span style=\"color: #F00000;\">", "</span>", xs)
@@ -355,13 +354,13 @@ val () =
 the_atextmap_insert
 (
   "thePage_style"
-, TEXTDEFfun(lam(loc, xs) => __thePage_style__(loc, xs))
+, atextdef_TEXTDEFfun(lam(loc, xs) => __thePage_style__(loc, xs))
 )
 val () =
 the_atextmap_insert
 (
   "thePage_script"
-, TEXTDEFfun(lam(loc, xs) => __thePage_script__(loc, xs))
+, atextdef_TEXTDEFfun(lam(loc, xs) => __thePage_script__(loc, xs))
 )
 //
 end // end of [local]
@@ -372,7 +371,7 @@ local
 
 val
 def0 =
-TEXTDEFfun
+atextdef_TEXTDEFfun
 (
   lam(loc, xs) => atext_make_nil(loc)
 ) (* TEXTDEFfun *)

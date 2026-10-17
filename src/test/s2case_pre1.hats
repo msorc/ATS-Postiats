@@ -1,0 +1,36 @@
+(* the prelude of the chunks of the cases of the level-2 test (ATS1): see s2case_pre.hats *)
+#define ATS_DYNLOADFLAG 0
+staload "libc/SATS/stdio.sats"
+staload UN = "prelude/SATS/unsafe.sats"
+staload _(*list*) = "prelude/DATS/list.dats"
+staload _(*list_vt*) = "prelude/DATS/list_vt.dats"
+staload SYM = "pats_symbol.sats"
+staload FIL = "pats_filename.sats"
+staload LOC = "pats_location.sats"
+staload LAB = "pats_label.sats"
+staload ERR = "pats_error.sats"
+staload GLOB = "pats_global.sats"
+staload INT = "pats_intinf.sats"
+staload CNTR = "pats_counter.sats"
+staload STMP = "pats_stamp.sats"
+staload EFF = "pats_effect.sats"
+staload UT = "pats_utils.sats"
+staload "pats_basics.sats"
+staload "pats_syntax.sats"
+staload "pats_staexp1.sats"
+staload "pats_staexp2.sats"
+staload "pats_staexp2_util.sats"
+staload "pats_stacst2.sats"
+staload "pats_staexp2_solve.sats"
+staload "pats_staexp2_error.sats"
+staload "pats_namespace.sats"
+
+
+macdef dd_out = stdout_ref
+
+#include "s2glue1_pre.hats"
+#include "s2common1.hats"
+#include "s2glue1_mid.hats"
+#include "s2compat1_gen.hats"
+#include "s2common2.hats"
+#include "s2glue1_post.hats"

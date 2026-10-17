@@ -52,16 +52,14 @@
 
 (* ****** ****** *)
 
-#if(SYMMAP_AVLTREE)
 #include "./pats_symmap_avltree.hats"
-#endif // end of [SYMMAP_AVLTREE]
 
 (* ****** ****** *)
 
-#if(SYMMAP_HTLINPRB)
-#include "./pats_symmap_htlinprb.hats" // HX: hashtable for experiment
-#endif // end of [SYMMAP_HTLINPRB]
-  
+(*
+** HX-2026-10: not ported (a disabled experiment):
+** #include "./pats_symmap_htlinprb.hats"
+*)
 (* ****** ****** *)
 
 (* end of [pats_symmap.dats] *)

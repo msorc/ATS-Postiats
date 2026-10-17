@@ -31,25 +31,35 @@
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: April, 2012
 //
-(* ****** ****** *)
 //
-staload
-ATSPRE =
-"./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_deref.dats, see PORTING.md, "Level 3 translation, group 4")
 //
 (* ****** ****** *)
-//
-staload
-LAB = "./pats_label.sats"
-macdef
-prerr_label = $LAB.prerr_label
-//
-overload = with $LAB.eq_label_label
-//
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+#include "./mylibies.hats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
 (* ****** ****** *)
 
 staload
 LOC = "./pats_location.sats"
+typedef loc_t = $LOC.location
 
 (* ****** ****** *)
 
@@ -86,11 +96,11 @@ auxerr_pfobj
   val () = prerr "] failed to turn up a result."
   val () = prerr_newline ()
 in
-  the_trans3errlst_add (T3E_pfobj_search_none (loc0, s2l))
+  the_trans3errlst_add (trans3err_T3E_pfobj_search_none (loc0, s2l))
 end // end of [auxerr_pfobj]
 
 fun
-auxmain .<>.
+auxmain
 (
   loc0: loc_t
 , pfobj: pfobj
@@ -108,7 +118,7 @@ auxmain .<>.
   var linrest: int = 0
   and sharing: int = 0
   val
-  (s2e_sel, s2ps) =
+  @(s2e_sel, s2ps) =
   s2exp_get_dlablst_linrest_sharing
     (loc0, s2e_elt, d3ls, linrest, sharing)
   // end of [val]
@@ -121,31 +131,28 @@ in
 if
 islin
 then let
-  val s2t_elt = s2e_elt.s2exp_srt
-  var ctxtopt: s2ctxtopt = None(*void*)
+  var ctxtopt: s2ctxtopt = gopt_none((*void*))
   val s2e_sel =
     s2exp_get_dlablst_context (loc0, s2e_elt, d3ls, ctxtopt)
   // end of [val]
-  val isctx = (
-    case+ ctxtopt of Some _ => true | None _ => false
-  ) : bool // end of [val]
+  val isctx = gopt_is_some (ctxtopt)
   val () =
   if ~isctx then {
     val () = prerr_error3_loc (loc0)
     val () = prerr ": the linear component cannot taken out."
     val () = prerr_newline ()
-    val () = the_trans3errlst_add (T3E_s2addr_deref_context(loc0, s2e_elt, d3ls))
+    val () = the_trans3errlst_add (trans3err_T3E_s2addr_deref_context(loc0, s2e_elt, d3ls))
   } // end of [val]
 //
   val () = d2var_inc_linval (d2vw)
   val () = let
     val s2e_sel = s2exp_topize (1, s2e_sel)
     val s2e_elt = (
-      case+ ctxtopt of
-      | Some (ctxt) => s2ctxt_hrepl (ctxt, s2e_sel) | None () => s2e_elt
+      case+ gopt_view (ctxtopt) of
+      | ~GOsome (ctxt) => s2ctxt_hrepl (ctxt, s2e_sel) | ~GOnone () => s2e_elt
     ) : s2exp // end of [val]
     val s2e = s2exp_hrepl (s2e_ctx, s2e_elt)
-    val () = d2var_set_type (d2vw, Some (s2e))
+    val () = d2var_set_type (d2vw, gopt_some (s2e))
   in
     // nothing
   end // end of [val]
@@ -185,24 +192,6 @@ end // end of [local]
 local
 
 fun
-auxerr_nonderef
-(
-  loc0: loc_t, d3e: d3exp
-) : void = let
-//
-val () =
-prerr_error3_loc (loc0)
-val () =
-prerrln!
-(
-": the dynamic expression cannot be dereferenced."
-) (* println! *)
-//
-in
-  the_trans3errlst_add(T3E_d3exp_nonderef(d3e))
-end // end of [auxerr_nonderef]
-
-fun
 auxerr_reflinsel
 (
   loc0: loc_t
@@ -212,15 +201,14 @@ auxerr_reflinsel
 val () =
 prerr_error3_loc (loc0)
 val () =
-prerrln!
 (
-": the linear component cannot taken out."
+prerr ": the linear component cannot taken out."; prerr_newline ()
 ) (* println! *)
 //
 in
 //
 the_trans3errlst_add
-  (T3E_d3exp_deref_reflinsel (d3e, d3ls))
+  (trans3err_T3E_d3exp_deref_reflinsel (d3e, d3ls))
 //
 end // end of [auxerr_reflinsel]
 
@@ -276,7 +264,7 @@ case+ opt of
     var linrest: int = 0
     and sharing: int = 0
     val
-    (s2e_sel, s2ps) =
+    @(s2e_sel, s2ps) =
     s2exp_get_dlablst_linrest_sharing
       (loc0, s2e, d3ls, linrest, sharing)
     (* end of [val] *)
@@ -308,19 +296,11 @@ aux3
 //
 // HX: [d3ls] is ignored!!!
 //
-val opt =
-  un_s2exp_lazy_t0ype_type(s2f0)
+// HX-2026-10: no GC
+// nonlinear [lazy] is no longer supported
 //
 in
-//
-case+ opt of
-| ~None_vt() =>
-    aux4 (loc0, s2f0, d2sym, d3e, d3ls)
-  // end of [None_vt]
-| ~Some_vt(s2e) =>
-    d3exp_lazyeval (loc0, s2e, 0(*lin*), d3e)
-  // end of [Some_vt]
-//
+  aux4 (loc0, s2f0, d2sym, d3e, d3ls)
 end // end of [aux3]
 
 and
@@ -341,41 +321,36 @@ case+ opt of
 | ~Some_vt(s2e) =>
     d3exp_lazyeval (loc0, s2e, 1(*lin*), d3e)
   // end of [Some_vt]
-(*
-| ~None_vt((*void*)) => let
-     val () = auxerr_nonderef (loc0, d3e) in d3exp_errexp (loc0)
-  end // end of [None_vt]
-*)
 //
 | ~None_vt((*void*)) => let
 //
-    val loc_arg = d3e.d3exp_loc
+    val loc_arg = d3e.d3exp_loc ()
     val d2e_top = d2exp_top(loc0)
 //
     val s2e_arg = d3exp_get_type(d3e)
     val d2e_arg = d2exp_top2(loc_arg, s2e_arg)
-    val d2es_arg = list_sing(d2e_arg)
+    val d2es_arg = glist_sing(d2e_arg)
 //
-    val d2a = D2EXPARGdyn (~1(*npf*), loc_arg, d2es_arg)
-    val d2as = list_sing(d2a)
+    val d2a = d2exparg_D2EXPARGdyn (~1(*npf*), loc_arg, d2es_arg)
+    val d2as = glist_sing(d2a)
 //
     val d3e_app =
       d2exp_trup_applst_sym(d2e_top, d2sym, d2as)
     // end of [val]
   in
     case+
-    d3e_app.d3exp_node
+    d3exp_node_view (d3e_app.d3exp_node ())
     of (* case+ *)
-    | D3Eapp_dyn
+    | ~D3Eapp_dyn
         (d3e_fun, npf, _) => let
         val s2f =
           d3exp_get_type(d3e_app)
         // end of [val]
-        val d3es_arg = list_sing(d3e)
+        val d3es_arg = glist_sing(d3e)
       in
         d3exp_app_dyn(loc0, s2f, d3e_fun, npf, d3es_arg)
       end // end of [D3Eappdyn]
-    | _(*non-D3Eappdyn*) => d3e_app
+    | v (*non-D3Eappdyn*) => (d3exp_node_view_free (v); d3e_app)
   end // end of [None_vt]
 //
 end // end of [aux4]
@@ -387,44 +362,11 @@ d2exp_trup_deref
 (
   loc0, d2sym, d2rt, d2ls
 ) = let
-(*
-val () =
-println!
-(
-  "d2exp_trup_deref: d2rt = ", d2rt
-) (* end of [val] *)
-*)
 val d3rt = d2exp_trup (d2rt)
 val d3ls = d2lablst_trup (d2ls)
 val ()   = d3exp_open_and_add (d3rt)
 val s2e0 = d3exp_get_type (d3rt)
 val s2f0 = s2exp2hnf_cast (s2e0)
-//
-(*
-val () =
-(
-//
-if
-d3lablst_is_overld (d3ls)
-then
-{
-//
-val () =
-prerr_error3_loc (loc0) 
-val () =
-prerrln!
-(
-": overloaded dot-symbol should be applied."
-) (* end of [val] *)
-//
-val () =
-the_trans3errlst_add
-  (T3E_d2exp_deref_overld(loc0, d2rt, d3ls))
-//
-} (* end of [if] *)
-//
-) (* end of [val] *)
-*)
 //
 in
   aux1 (loc0, s2f0, d2sym, d3rt, d3ls)

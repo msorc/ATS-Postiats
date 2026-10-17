@@ -4,6 +4,8 @@ dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -147,7 +149,7 @@ PATSCONTRIB/kernelats\
 
 %{
 
-implement main () = ()
+implement main0 () = ()
 
 %}
 

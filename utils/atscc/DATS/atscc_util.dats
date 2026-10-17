@@ -63,11 +63,11 @@ in
 //
 if
 strptr2ptr(def) > 0
-then strptr2string(def)
+then (def)
 else let
 //
 prval() =
- strptr_free_null(def) in ATSOPT_DEFAULT
+ strptr_free_null(def) in string0_copy(ATSOPT_DEFAULT)
 //
 end (* end of [if] *)
 // end of [if]
@@ -223,9 +223,9 @@ in
 //
 if
 strptr2ptr (def) > 0
-then strptr2string (def)
+then (def)
 else let
-  prval () = strptr_free_null(def) in ATSCCOMP_DEFAULT
+  prval () = strptr_free_null(def) in string0_copy(ATSCCOMP_DEFAULT)
 end // end of [else]
 //
 end // end of [atsccomp_get]
@@ -244,21 +244,21 @@ in
 //
 case+ cas of
 //
-| list_cons
-    (ca, cas) =>
+| list_vt_cons
+    (ca, cas1) =>
   (
   case+ ca of
   | CAatsccomp
       (opt) => (
       if issome(opt)
-        then unsome(opt)
-        else atsccomp_get2(cas)
+        then string0_copy(unsome(opt))
+        else atsccomp_get2(cas1)
       // end of [if]
     ) (* end of [CAatsccomp] *)
-  | _ (*void*) => atsccomp_get2(cas)
-  ) (* end of [list_cons] *)
+  | _ (*void*) => atsccomp_get2(cas1)
+  ) (* end of [list_vt_cons] *)
 //
-| list_nil() => atsccomp_get()
+| list_vt_nil() => atsccomp_get()
 //
 end // end of [atsccomp_get2]
 

@@ -34,13 +34,11 @@ fact : int -> int =
 //
 (* ****** ****** *)
 
-val
-fact = ref<int->int>($UNSAFE.cast(0))
-val () =
-!fact :=
-(
-  lam (x:int):int => if x > 0 then x * !fact(x-1) else 1
-) (* end of [val] *)
+(*
+HX-2026-10:
+recursion through a reference is no longer
+shown here as [ref] is no longer available
+*)
 
 (* ****** ****** *)
 

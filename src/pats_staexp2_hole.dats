@@ -25,6 +25,7 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -33,9 +34,21 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_staexp2_hole.dats, see PORTING.md)
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload
@@ -45,48 +58,24 @@ typedef stamp = $STMP.stamp
 
 (* ****** ****** *)
 
+staload "./pats_basics.sats"
+staload "./pats_staexp1.sats"
 staload "./pats_staexp2.sats"
 
 (* ****** ****** *)
 
-typedef
-s2hole_struct = @{
-  s2hole_srt= s2rt
-, s2hole_stamp= stamp // uniqueness
-} // end of [s2hole_struct]
-
-(* ****** ****** *)
-
-local
-
-assume s2hole_type = ref (s2hole_struct)
-
-in (* in of [local] *)
-
 implement
 s2hole_make_srt (s2t) = let
   val stamp = $STMP.s2hole_stamp_make ()
-  val (pfgc, pfat | p) = ptr_alloc<s2hole_struct> ()
-  prval () = free_gc_elim {s2hole_struct?} (pfgc)
-//
-  val () = p->s2hole_srt := s2t
-  val () = p->s2hole_stamp := stamp
-//
 in
-  ref_make_view_ptr (pfat | p)
+  s2hole_new (s2t, stamp)
 end // end of [s2hole_make_srt]
 
 implement
-s2hole_get_srt (s2h) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (s2h) in p->s2hole_srt
-end // end of [s2hole_get_srt]
+s2hole_get_srt (s2h) = $effmask_all (s2hole_srt (s2h))
 
 implement
-s2hole_get_stamp (s2h) = $effmask_ref let
-  val (vbox pf | p) = ref_get_view_ptr (s2h) in p->s2hole_stamp
-end // end of [s2hole_get_stamp]
-
-end // end of [local]
+s2hole_get_stamp (s2h) = $effmask_all (s2hole_stamp (s2h))
 
 (* ****** ****** *)
 

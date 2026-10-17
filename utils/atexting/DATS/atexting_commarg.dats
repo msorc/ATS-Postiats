@@ -43,28 +43,17 @@ staload UN = $UNSAFE
 
 (* ****** ****** *)
 //
-staload
-"libats/ML/SATS/basis.sats"
 //
-staload
-"libats/ML/SATS/list0.sats"
-staload _ =
-"libats/ML/DATS/list0.dats"
 //
-staload
-"libats/ML/SATS/string.sats"
-staload _ =
-"libats/ML/DATS/string.dats"
 //
-staload
-"libats/ML/SATS/option0.sats"
-staload _ =
-"libats/ML/DATS/option0.dats"
 //
 (* ****** ****** *)
 //
 staload
 "./../SATS/atexting.sats"
+//
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
 //
 (* ****** ****** *)
 
@@ -73,9 +62,9 @@ argv_getopt_at
   {n:int}{i:nat}
 (
   n: int n, argv: !argv(n), i: int i
-) : option0(string) =
+) : gopt(string) =
 (
-  if i < n then Some0(argv[i]) else None0()
+  if i < n then gopt_some(argv[i]) else gopt_none()
 ) (* end of [argv_getopt_at] *)
 
 (* ****** ****** *)
@@ -97,6 +86,28 @@ is_nsharp
 (
   x0: string
 ) : bool = (x0 = "--nsharp")
+// HX-2026-10: (it used to come from libats/ML)
+fun
+string_is_prefix
+  (x0: string, x1: string): bool = let
+//
+fun
+loop(i: int, n: int): bool =
+  if i < n
+    then (
+      if $UN.ptr0_get<char>(ptr_add<char>(string2ptr(x0), i))
+       = $UN.ptr0_get<char>(ptr_add<char>(string2ptr(x1), i))
+        then loop(i+1, n) else false
+    ) (* end of [then] *)
+    else true
+//
+val n0 = sz2i(string_length(x0))
+val n1 = sz2i(string_length(x1))
+//
+in
+  if n0 <= n1 then loop(0, n0) else false
+end // end of [string_is_prefix]
+//
 fun
 is_nsharp_eq
 (
@@ -142,7 +153,7 @@ fun
 aftereq_get_arg
 (
   x0: string
-) : option0(string) = let
+) : gopt(string) = let
 //
 #define NUL '\000'
 //
@@ -150,7 +161,7 @@ fun
 aux
 (
   p: ptr
-) : option0(string) = let
+) : gopt(string) = let
 //
 val c =
   $UN.ptr0_get<char>(p)
@@ -161,9 +172,9 @@ in
 if
 c = '='
 then (
-  Some0(string_copy($UN.cast{string}(p1)))
+  gopt_some(the_garena_strdup($UN.cast{string}(p1)))
 ) else (
-  if c != NUL then aux(p1) else None0(*void*)
+  if c != NUL then aux(p1) else gopt_none((*void*))
 ) (* end of [if] *)
 //
 end // end of [aux]
@@ -228,21 +239,21 @@ case+ 0 of
 | _ when
     (arg = "-h") => let
     val res =
-    cons_vt(CAhelp(arg), res)
+    cons_vt(commarg_CAhelp(arg), res)
   in
     aux(i+1, argv, res)
   end // end of [rest-of-kind]
 | _ when
     (arg = "--help") => let
     val res =
-    cons_vt(CAhelp(arg), res)
+    cons_vt(commarg_CAhelp(arg), res)
   in
     aux(i+1, argv, res)
   end // end of [rest-of-kind]    
 //
 | _(* rest *) => let
     val res =
-    cons_vt(CAgitem(arg), res)
+    cons_vt(commarg_CAgitem(arg), res)
     // end of [val]
   in
     aux(i+1, argv, res)
@@ -264,7 +275,7 @@ aux_nsharp
   val opt =
     argv_getopt_at(n, argv, i+1)
   val res =
-    list_vt_cons(CAnsharp(arg, opt), res)
+    list_vt_cons(commarg_CAnsharp(arg, opt), res)
   // end of [val]
 in
   aux(i+2, argv, res)  
@@ -280,7 +291,7 @@ aux_nsharp_eq
   var arg = argv[i]
   val opt = aftereq_get_arg(arg)
   val res =
-    list_vt_cons(CAnsharp(arg, opt), res)
+    list_vt_cons(commarg_CAnsharp(arg, opt), res)
   // end of [val]
 in
   aux(i+1, argv, res)  
@@ -297,7 +308,7 @@ aux_inpfil
   val opt =
     argv_getopt_at(n, argv, i+1)
   val res =
-    list_vt_cons(CAinpfil(arg, opt), res)
+    list_vt_cons(commarg_CAinpfil(arg, opt), res)
   // end of [val]
 in
   aux(i+2, argv, res)  
@@ -313,7 +324,7 @@ aux_inpfil_eq
   var arg = argv[i]
   val opt = aftereq_get_arg(arg)
   val res =
-    list_vt_cons(CAinpfil(arg, opt), res)
+    list_vt_cons(commarg_CAinpfil(arg, opt), res)
   // end of [val]
 in
   aux(i+1, argv, res)  
@@ -330,7 +341,7 @@ aux_outfil
   val opt =
     argv_getopt_at(n, argv, i+1)
   val res =
-    list_vt_cons(CAoutfil(arg, opt), res)
+    list_vt_cons(commarg_CAoutfil(arg, opt), res)
   // end of [val]
 in
   aux(i+2, argv, res)  
@@ -346,20 +357,20 @@ aux_outfil_eq
   var arg = argv[i]
   val opt = aftereq_get_arg(arg)
   val res =
-    list_vt_cons(CAoutfil(arg, opt), res)
+    list_vt_cons(commarg_CAoutfil(arg, opt), res)
   // end of [val]
 in
   aux(i+1, argv, res)  
 end // end of [aux_outfil_eq]
 //
 val
-arg0 = CAgitem(argv[0])
+arg0 = commarg_CAgitem(argv[0])
 //
 val res =
   aux(1, argv, list_vt_sing(arg0))
 //
 in
-  list0_of_list_vt(list_vt_reverse(res))
+  glist_make_list_vt(list_vt_reverse(res))
 end // end of [commarglst_parse]
 
 end // end of [local]
@@ -385,6 +396,16 @@ CODEGEN2
 #include
 "./atexting_fprint_commarg.hats"
 //
+// HX-2026-10: (for the optional arguments)
+implement
+fprint_val<gopt(string)>
+  (out, opt) =
+(
+case+ gopt_view(opt) of
+| ~GOnone() => fprint(out, "None()")
+| ~GOsome(x) => fprint!(out, "Some(", x, ")")
+)
+//
 implement
 fprint_val<commarg> = fprint_commarg
 //
@@ -393,7 +414,7 @@ fprint_commarg(out, x) = fprint_commarg_<>(out, x)
 implement
 fprint_commarglst
   (out, xs) =
-  fprint_list_sep<commarg>(out, $UN.cast{List0(commarg)}(xs), ", ")
+  fprint_glist_sep<commarg>(out, xs, ", ")
 //
 #endif // #ifdef
 

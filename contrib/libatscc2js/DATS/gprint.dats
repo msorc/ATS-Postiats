@@ -25,6 +25,9 @@ LIBATSCC_targetloc
 //
 (* ****** ****** *)
 
+#staload "./../basics_js.sats"
+#staload "./../SATS/integer.sats"
+#staload "./../SATS/arrayref.sats"
 #staload "./../SATS/gprint.sats"
 
 (* ****** ****** *)

@@ -63,7 +63,7 @@ if
 !(libatscc2r34.is.loaded)
 )
 {
-  sys.source("./libatscc2r34/libatscc2r34_all.R")
+  sys.source("./libatscc2r34/libatscc2r34_all.R", envir = globalenv())
 }
 ######
 %} // end of [%{^]

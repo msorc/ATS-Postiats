@@ -15,6 +15,8 @@ PATSOLVE_targetloc
 (* ****** ****** *)
 //
 #staload
+"libats/SATS/arena.sats"
+#staload
 "{$PATSOLVE}/SATS/patsolve_cnstrnt.sats"
 #staload
 "{$PATSOLVE}/SATS/patsolve_parsing.sats"

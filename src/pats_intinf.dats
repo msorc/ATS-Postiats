@@ -38,7 +38,7 @@
 (* ****** ****** *)
 
 #if
-C3NSTRINTKND="intknd"
+C3NSTRINTKND = "intknd"
 #then
 //
 #include "./pats_intinf_int.hats"

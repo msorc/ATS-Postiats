@@ -121,45 +121,12 @@ println! ("gfact<double>(100) = ", gfact<double>(100))
 //
 (* ****** ****** *)
 //
-#define
-HX_INTINF_targetloc
-"$PATSHOME/contrib\
-/atscntrb/atscntrb-hx-intinf"
 //
-(* ****** ****** *)
+// HX-2026-10: no GC
+// [gfact<intinf>] is no longer shown here as the
+// nonlinear [intinf] (intinf_t) has been removed:
+// a linear number cannot be used with [gnumber]
 //
-staload _(*T*) =
-"{$HX_INTINF}/DATS/intinf_t.dats"
-staload _(*VT*) =
-"{$HX_INTINF}/DATS/intinf_vt.dats"
-//
-staload
-GINTINF =
-"{$HX_INTINF}/DATS/gintinf_t.dats"
-//
-(* ****** ****** *)
-//
-typedef
-intinf = $GINTINF.intinf
-//
-overload
-print with $GINTINF.print_intinf
-//
-(* ****** ****** *)
-//
-val () =
-println!
-(
-"gfact<intinf>(10) = ", gfact<intinf>(10)
-) (* println! *)
-//
-val () =
-println! ("gfact<intinf>(34) = ", gfact<intinf>(34))
-val () =
-println! ("gfact<intinf>(100) = ", gfact<intinf>(100))
-//
-(* ****** ****** *)
-
 implement main0((*void*)) = ()
 
 (* ****** ****** *)

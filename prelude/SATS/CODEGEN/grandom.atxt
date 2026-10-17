@@ -50,10 +50,6 @@ fun{} grandom_double(): double
 //
 #atscode_separator()
 //
-fun{a:t0p}
-grandom_list
-  {n:nat}(n: int(n)): list(a, n)
-//
 fun{a:vt0p}
 grandom_list_vt
   {n:nat}(n: int(n)): list_vt(a, n)
@@ -63,19 +59,12 @@ grandom_list_vt
 fun{a:vt0p}
 grandom_arrayptr
   {n:int}(asz: size_t(n)): arrayptr(a, n)
-fun{a:vt0p}
-grandom_arrayref
-  {n:int}(asz: size_t(n)): arrayref(a, n)
-//
-fun{a:vt0p}
-grandom_arrszref(asz: size_t): arrszref(a)
-//
 #atscode_separator()
 
 #atscode_eof_strsub("\#thisfilename$")\
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "grandom_atxt.txt")
 %}\

@@ -81,17 +81,7 @@ void *atsruntime_realloc_undef (void *ptr, size_t bsz) ;
 /* ****** ****** */
 
 #ifdef ATS_MEMALLOC_GCBDW
-//
-#define ATS_MEMALLOC_FLAG
-//
-#include "pats_ccomp_memalloc_gcbdw.h"
-//
-#define ATS_MINIT atsruntime_minit_gcbdw
-#define ATS_MFREE atsruntime_mfree_gcbdw
-#define ATS_MALLOC atsruntime_malloc_gcbdw_exn
-#define ATS_CALLOC atsruntime_calloc_gcbdw_exn
-#define ATS_REALLOC atsruntime_realloc_gcbdw_exn
-//
+#error "ATS_MEMALLOC_GCBDW is no longer supported: heap memory is managed linearly"
 #endif // end of [ATS_MEMALLOC_GCBDW]
 
 /* ****** ****** */

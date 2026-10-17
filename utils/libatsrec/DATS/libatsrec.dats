@@ -17,8 +17,6 @@ UN =
 #staload
 "prelude/SATS/string.sats"
 #staload
-"prelude/SATS/stream.sats"
-#staload
 "prelude/SATS/stream_vt.sats"
 //
 (* ****** ****** *)
@@ -31,10 +29,6 @@ UN =
 //
 (* ****** ****** *)
 //
-#staload
-"libats/ML/SATS/basis.sats"
-#staload
-"libats/ML/SATS/gvalue.sats"
 //
 (* ****** ****** *)
 //
@@ -677,54 +671,117 @@ case+ xs of
 (* ****** ****** *)
 //
 implement
-streamize_fileref_gvhashtbl_0
-  (inp) =
+atsrec_free
+  (kvs) =
 (
-streamize_fileref_gvhashtbl_cap
-  (inp, 8(*default*))
-)
+case+ kvs of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(kv, kvs) =>
+  (strptr_free(kv.0); strptr_free(kv.1); atsrec_free(kvs))
+) (* end of [atsrec_free] *)
+//
+implement
+atsrec_search
+  (kvs, key) =
+(
+case+ kvs of
+| list_vt_nil() => None_vt()
+| @list_vt_cons(kv, kvs1) => let
+    val res =
+    (
+      if
+      ($UN.strptr2string(kv.0) = key)
+      then Some_vt(strptr1_copy(kv.1))
+      else atsrec_search(kvs1, key)
+    ) : Option_vt(Strptr1)
+  in
+    fold@(kvs); res
+  end // end of [list_vt_cons]
+) (* end of [atsrec_search] *)
+//
+implement
+fprint_atsrec
+  (out, kvs) = let
+//
+fun
+loop
+(
+  kvs: !atsrec, i: int
+) : void =
+(
+case+ kvs of
+| list_vt_nil() => ()
+| @list_vt_cons(kv, kvs1) => let
+    val () =
+      if i > 0 then fprint_string(out, "; ")
+    // end of [val]
+    val () =
+    fprint!
+    ( out
+    , $UN.strptr2string(kv.0)
+    , "->", $UN.strptr2string(kv.1))
+    val () = loop(kvs1, i+1)
+  in
+    fold@(kvs)
+  end // end of [list_vt_cons]
+) (* end of [loop] *)
+//
+in
+  loop(kvs, 0)
+end // end of [fprint_atsrec]
 //
 (* ****** ****** *)
 //
+local
+//
+fun
+linenumlst2atsrec
+(
+  gx: linenumlst_vt
+) : atsrec = let
+//
+var res: atsrec = list_vt_nil()
+val p_res = addr@(res)
+//
 implement
-streamize_fileref_gvhashtbl_cap
-  (inp, cap) =
+process_key_value<>
+  (key, value) =
+{
+  val kvs = $UN.ptr0_get<atsrec>(p_res)
+  val kvs = list_vt_cons(@(key, value), kvs)
+  val ((*void*)) = $UN.ptr0_set<atsrec>(p_res, kvs)
+}
+//
+val () = process_linenumlst<>(gx)
+//
+in
+  list_vt_reverse(res)
+end // end of [linenumlst2atsrec]
+//
+in (* in-of-local *)
+//
+implement
+streamize_fileref_atsrec
+  (inp) =
   auxmain(gxs) where
 {
 //
 vtypedef
 gx = linenumlst_vt
+//
 fun
 auxmain
 (
   gxs: stream_vt(gx)
-) : stream_vt(gvhashtbl) = $ldelay
+) : stream_vt(atsrec) = $ldelay
 (
 case+ !gxs of
 | ~stream_vt_nil
     () => stream_vt_nil(*void*)
 | ~stream_vt_cons
-    (gx, gxs) => let
-//
-    val obj =
-    gvhashtbl_make_nil(cap)
-//
-    local
-    implement
-    process_key_value<>
-      (key, value) =
-    {
-      val k = strptr2string(key)
-      val v = strptr2string(value)
-      val () = obj[k] := GVstring(v)
-    }
-    in
-    val () = process_linenumlst<>(gx)
-    end // end of [local]
-//
-  in
-    stream_vt_cons(obj, auxmain(gxs))
-  end // end of [stream_vt_cons]
+    (gx, gxs) =>
+    stream_vt_cons(linenumlst2atsrec(gx), auxmain(gxs))
+  // end of [stream_vt_cons]
 , (~gxs) // for freeing the generated stream
 )
 //
@@ -737,7 +794,9 @@ stream_vt_imap_fun
 //
 val gxs = lines_grouping(lns)
 //
-} (* end of [streamize_fileref_gvhashtbl] *)
+} (* end of [streamize_fileref_atsrec] *)
+//
+end // end of [local]
 //
 (* ****** ****** *)
 

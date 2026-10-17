@@ -32,10 +32,23 @@
 // Start Time: April, 2013
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_emit2.dats, see PORTING.md, "ccomp group A (emit)")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
 
 staload
 UN = "prelude/SATS/unsafe.sats"
 
+(* ****** ****** *)
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -47,14 +60,11 @@ LOC = "./pats_location.sats"
 
 (* ****** ****** *)
 
-staload
-S2E = "./pats_staexp2.sats"
+staload "./pats_avlmap.sats"
+staload "./pats_staexp2.sats"
 staload
 S2UT = "./pats_staexp2_util.sats"
-staload
-D2E = "./pats_dynexp2.sats"
-typedef d2var = $D2E.d2var
-typedef d2varlst = $D2E.d2varlst
+staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
 
@@ -63,7 +73,7 @@ staload "./pats_hidynexp.sats"
 
 (* ****** ****** *)
 
-staload "pats_ccomp.sats"
+staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
 
@@ -75,11 +85,11 @@ funval_isbot
 in
 //
 case+
-  pmv.primval_node of
-| PMVcst (d2c) =>
-    $S2UT.s2exp_fun_isbot ($D2E.d2cst_get_type (d2c))
+  primval_node_view (pmv.primval_node ()) of
+| ~PMVcst (d2c) =>
+    $S2UT.s2exp_fun_isbot (d2cst_get_type (d2c))
   // end of [PMVcst]
-| _ => false // end of [_]
+| v => (primval_node_view_free (v); false) // end of [_]
 //
 end // end of [funval_isbot]
 
@@ -92,10 +102,10 @@ fun aux_funval
 ) : void = let
 in
 //
-case+ pmv_fun.primval_node of
+case+ primval_node_view (pmv_fun.primval_node ()) of
 //
-| PMVcst (d2c) => let
-    val isfun = $D2E.d2cst_is_fundec (d2c)
+| ~PMVcst (d2c) => let
+    val isfun = d2cst_is_fundec (d2c)
   in
     if isfun
       then emit_d2cst (out, d2c)
@@ -103,28 +113,19 @@ case+ pmv_fun.primval_node of
     // end of [if]
   end // end of [PMVcst]
 //
-| PMVfunlab (flab) => emit_funlab (out, flab)
-| PMVcfunlab (knd, flab) => emit_funlab (out, flab)
+| ~PMVfunlab (flab) => emit_funlab (out, flab)
+| ~PMVcfunlab (knd, flab) => emit_funlab (out, flab)
 //
-| PMVtmpltcst _ => emit_primval (out, pmv_fun)
-| PMVtmpltvar _ => emit_primval (out, pmv_fun)
+| ~PMVtmpltcst _ => emit_primval (out, pmv_fun)
+| ~PMVtmpltvar _ => emit_primval (out, pmv_fun)
 //
-| PMVtmpltcstmat _ => emit_primval (out, pmv_fun)
-| PMVtmpltvarmat _ => emit_primval (out, pmv_fun)
+| ~PMVtmpltcstmat _ => emit_primval (out, pmv_fun)
+| ~PMVtmpltvarmat _ => emit_primval (out, pmv_fun)
 //
-| _(*funval*) => aux_funval2 (out, pmv_fun, hse_fun, isclo)
+| v (*funval*) => (
+    primval_node_view_free (v); aux_funval2 (out, pmv_fun, hse_fun, isclo)
+  ) (* end of [funval] *)
 //
-(*
-| _ => let
-    val loc = pmv_fun.primval_loc
-    val () = prerr_interror_loc (loc)
-    val () = prerrln! (": emit_prmvfun: pmv_fun = ", pmv_fun)
-    val () = prerrln! (": emit_prmvfun: hse_fun = ", hse_fun)
-    val () = assertloc (false)
-  in
-    // nothing
-  end // end of [_]
-*)
 end // end of [aux_funval]
 
 and aux_funval2
@@ -133,22 +134,20 @@ and aux_funval2
 , pmv_fun: primval, hse_fun: hisexp, isclo: &bool
 ) : void = let
 //
-(*
-val () = println! ("aux_funval2: pmv_fun = ", pmv_fun)
-val () = println! ("aux_funval2: hse_fun = ", hse_fun)
-*)
-//
-val-HSEfun
+val-~HSEfun
 (
   fc, hses_arg, hse_res
-) = hse_fun.hisexp_node
+) = hisexp_node_view (hse_fun.hisexp_node ())
 //
 val () = emit_text (out, "ATSfunclo")
 //
 val () =
 (
 case+ fc of
-| FUNCLOfun _ => () | FUNCLOclo _ => isclo := true
+| FUNCLOfun () => ()
+| FUNCLOcloptr () => isclo := true
+| FUNCLOclo0 () => isclo := true
+| FUNCLOcloref () => isclo := true
 ) : void // end of [val]
 val () =
 (
@@ -164,7 +163,7 @@ val () = emit_LPAREN (out)
 //
 val hses_arg = (
 if isclo
-  then list_cons (hisexp_cloptr, hses_arg)
+  then glist_cons<hisexp> (hisexp_cloptr, hses_arg)
   else (hses_arg)
 ) : hisexplst // end of [val]
 val () = emit_hisexplst_sep (out, hses_arg, ", ")
@@ -192,27 +191,27 @@ fun auxflab
   val opt = funlab_get_funent (flab)
 in
 //
-case+ opt of
-| Some (fent) => let
+case+ gopt_view (opt) of
+| ~GOsome (fent) => let
     val d2es =
       funent_eval_d2envlst (fent)
     // end of [val]
   in
     emit_d2envlst (out, d2es, 0(*i*))
   end (* end of [Some] *)
-| None ((*void*)) => (0)
+| ~GOnone ((*void*)) => (0)
 //
 end // end of [auxflab]
 //
 in (* in of [let] *)
 //
 case+
-pmv_fun.primval_node of
+primval_node_view (pmv_fun.primval_node ()) of
 //
-| PMVfunlab (flab) => auxflab (out, flab)
-| PMVcfunlab (knd, flab) => auxflab (out, flab)
+| ~PMVfunlab (flab) => auxflab (out, flab)
+| ~PMVcfunlab (knd, flab) => auxflab (out, flab)
 //
-| _ => (0)
+| v => (primval_node_view_free (v); 0)
 //
 end // end of [aux_funenv]
 
@@ -225,8 +224,7 @@ emit_fparamlst
 ) : void = let
 in
 //
-case+ pmvs of
-| list_cons _ => let
+if glist_is_cons (pmvs) then let
     val () =
     if (n > 0) then
       emit_text (out, ", ")
@@ -234,7 +232,7 @@ case+ pmvs of
   in
     emit_primvalist (out, pmvs)
   end (* end of [list_cons] *)
-| list_nil ((*void*)) => ()
+else ()
 //
 end // end of [emit_fparamlst]
 
@@ -247,59 +245,17 @@ fun emit_freeaft_fun
 in
 //
 case+
-  pmv.primval_node of
-| PMVrefarg
+  primval_node_view (pmv.primval_node ()) of
+| ~PMVrefarg
     (knd, freeknd, pmv) =>
   if freeknd > 0 then
   (
     emit_text (out, "ATSINSfreeclo(");
     emit_primval (out, pmv); emit_text (out, ") ;\n")
   ) (* end of [PMVrefarg] *)
-| _ => ()
+| v => primval_node_view_free (v)
 //
 end // end of [emit_freeaft_fun]
-
-(* ****** ****** *)
-
-(*
-//
-// HX-2014-03-02:
-// no support for auto-freeing of funarg
-// as it may interfere with tail-recursion
-//
-fun
-emit_freeaft_funarg
-(
-  out: FILEref, pmvs: primvalist
-) : void = let
-in
-//
-case+ pmvs of
-//
-| list_nil () => ()
-//
-| list_cons
-    (pmv, pmvs) => let
-    val () = (
-      case+
-        pmv.primval_node of
-      | PMVrefarg (
-          knd, freeknd, pmv
-        ) when freeknd > 0 =>
-        {
-          val () =
-          emit_text (out, "ATSINSfreeclo(")
-          val () = emit_primval (out, pmv)
-          val () = emit_text (out, ") ;\n")
-        } (* end of [PMVrefarg] *)
-      | _ (*non-refarg*) => ()
-    ) : void // end of [val]
-  in
-    emit_freeaft_funarg (out, pmvs)
-  end // end of [list_cons]
-//
-end // end of [emit_freeaft_funarg]
-*)
 
 in (* in of [local] *)
 
@@ -307,15 +263,9 @@ implement
 emit_instr_fcall
   (out, ins) = let
 //
-val loc0 = ins.instr_loc
-val-INSfcall
-  (tmp, pmv_fun, hse_fun, pmvs_arg) = ins.instr_node
-(*
-val () = (
-  println! ("emit_instr_fcall: pmv_fun = ", pmv_fun);
-  println! ("emit_instr_fcall: hse_fun = ", hse_fun);
-) // end of [val]
-*)
+val loc0 = ins.instr_loc ()
+val-~INSfcall
+  (tmp, pmv_fun, hse_fun, pmvs_arg) = instr_node_view (ins.instr_node ())
 val noret = tmpvar_is_void (tmp)
 val noret =
 (
@@ -337,7 +287,7 @@ val () = aux_funval (out, pmv_fun, hse_fun, isclo)
 val pmvs_arg =
 (
 if isclo
-  then list_cons (pmv_fun, pmvs_arg) else (pmvs_arg)
+  then glist_cons<primval> (pmv_fun, pmvs_arg) else (pmvs_arg)
 ) : primvalist // end of [val]
 //
 val () = emit_LPAREN (out)
@@ -348,10 +298,6 @@ val () = emit_RPAREN (out)
 val () = emit_text (out, ") ;\n")
 //
 val () = emit_freeaft_fun (out, pmv_fun)
-//
-(*
-val () = emit_freeaft_funarg (out, pmvs_arg)
-*)
 //
 in
   // nothing
@@ -374,8 +320,11 @@ emit_text
 val () =
 (
 if ntl <= 1
-  then fprintf(out, "apy%i", @(i))
-  else fprintf(out, "a%ipy%i", @(ntl, i))
+  then (emit_text(out, "apy"); fprint_int(out, i))
+  else (
+    emit_text(out, "a"); fprint_int(out, ntl);
+    emit_text(out, "py"); fprint_int(out, i)
+  ) (* end of [else] *)
 // end of [if]
 ) : void // end of [val]
 //
@@ -395,15 +344,14 @@ aux1lst
 ) : void = let
 in
 //
-case+ pmvs of
-| list_nil
-    ((*void*)) => ()
-| list_cons
-    (pmv, pmvs) =>
-  (
-    aux1(out, ntl, pmv, i);
-    aux1lst(out, ntl, pmvs, i+1)
-  ) (* end of [list_cons] *)
+if glist_is_cons (pmvs) then let
+  val pmv = glist_head<primval> (pmvs)
+  val pmvs = glist_tail<primval> (pmvs)
+in
+  aux1(out, ntl, pmv, i);
+  aux1lst(out, ntl, pmvs, i+1)
+end (* end of [list_cons] *)
+else ()
 //
 end // end of [aux1lst]
 
@@ -424,16 +372,22 @@ val () =
 (
 if
 (ntl <= 1)
-then fprintf(out, "arg%i", @(i))
-else fprintf(out, "a%irg%i", @(ntl, i))
+then (emit_text(out, "arg"); fprint_int(out, i))
+else (
+  emit_text(out, "a"); fprint_int(out, ntl);
+  emit_text(out, "rg"); fprint_int(out, i)
+) (* end of [else] *)
 // end of [if]
 ) : void // end of [val]
 val () =
 (
 if
 (ntl <= 1)
-then fprintf(out, ", apy%i", @(i))
-else fprintf(out, ", a%ipy%i", @(ntl, i))
+then (emit_text(out, ", apy"); fprint_int(out, i))
+else (
+  emit_text(out, ", a"); fprint_int(out, ntl);
+  emit_text(out, "py"); fprint_int(out, i)
+) (* end of [else] *)
 // end of [if]
 ) : void // end of [val]
 //
@@ -451,16 +405,14 @@ aux2lst
 ) : void = let
 in
 //
-case+ pmvs of
-| list_nil
-    ((*void*)) => ()
-  // list_nil
-| list_cons
-    (pmv, pmvs) =>
-  (
-    aux2(out, ntl, pmv, i);
-    aux2lst(out, ntl, pmvs, i+1)
-  ) (* end of [list_cons] *)
+if glist_is_cons (pmvs) then let
+  val pmv = glist_head<primval> (pmvs)
+  val pmvs = glist_tail<primval> (pmvs)
+in
+  aux2(out, ntl, pmv, i);
+  aux2lst(out, ntl, pmvs, i+1)
+end (* end of [list_cons] *)
+else ()
 //
 end // end of [aux2lst]
 
@@ -493,12 +445,12 @@ implement
 emit_instr_fcall2
   (out, ins) = let
 //
-val-
+val-~
 INSfcall2
 (
   tmp, flab
 , ntl, hse_fun, pmvs_arg
-) = ins.instr_node
+) = instr_node_view (ins.instr_node ())
 //
 val () =
 emit_text
@@ -528,13 +480,13 @@ emit_instr_extfcall
   (out, ins) = let
 //
 val
-loc0 = ins.instr_loc
+loc0 = ins.instr_loc ()
 //
-val-
+val-~
 INSextfcall
 ( tmp
 , fun_name
-, pmvs_arg) = ins.instr_node
+, pmvs_arg) = instr_node_view (ins.instr_node ())
 //
 val noret = tmpvar_is_void(tmp)
 //
@@ -573,13 +525,13 @@ implement
 emit_instr_extmcall
   (out, ins) = let
 //
-val loc0 = ins.instr_loc
-val-
+val loc0 = ins.instr_loc ()
+val-~
 INSextmcall
 ( tmp
 , pmv_obj
 , mtd_name
-, pmvs_arg) = ins.instr_node
+, pmvs_arg) = instr_node_view (ins.instr_node ())
 //
 val noret = tmpvar_is_void(tmp)
 //
@@ -624,26 +576,15 @@ implement
 emit_funenvlst
   (out, d2es) = let
 //
-(*
-val () =
-fprintln!
-( stdout_ref
-, "emit_funenvlst: d2es = ", d2es)
-*)
-//
 fun loop
 ( out: FILEref
 , d2es: d2envlst, sep: string, i: int
 ) : int = let
 in
 //
-case+ d2es of
-| list_nil
-    ((*void*)) => (i)
-  // list_nil
-//
-| list_cons
-    (d2e, d2es) => let
+if glist_is_cons (d2es) then let
+    val d2e = glist_head<d2env> (d2es)
+    val d2es = glist_tail<d2env> (d2es)
     val
     hse = d2env_get_type(d2e)
     val () =
@@ -651,10 +592,11 @@ case+ d2es of
       then emit_text(out, sep)
     // end of [val]
     val () = emit_hisexp(out, hse)
-    val () = fprintf(out, " env%i", @(i))
+    val () = (emit_text(out, " env"); fprint_int(out, i))
   in
     loop(out, d2es, sep, i+1)
   end (* end of [list_cons] *)
+else (i) // end of [list_nil]
 //
 end (* end of [loop] *)
 //
@@ -672,27 +614,21 @@ loop
   out: FILEref, n: int
 , hses: hisexplst, sep: string, i: int
 ) : void = let
-(*
-val () =
-println! ("emit_funarglst: loop")
-*)
 in
 //
-case+ hses of
-| list_nil
-    ((*void*)) => ()
-  // list_nil
-| list_cons
-    (hse, hses) => let
+if glist_is_cons (hses) then let
+    val hse = glist_head<hisexp> (hses)
+    val hses = glist_tail<hisexp> (hses)
     val () =
     if n > 0
       then emit_text(out, sep)
     // end of [val]
     val () = emit_hisexp(out, hse)
-    val () = fprintf(out, " arg%i", @(i))
+    val () = (emit_text(out, " arg"); fprint_int(out, i))
   in
     loop(out, n+1, hses, sep, i+1)
   end // end of [list_cons]
+else () // end of [list_nil]
 //
 end // end of [loop]
 //

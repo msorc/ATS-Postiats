@@ -36,20 +36,17 @@ staload "./SATS/PLarray.sats"
 
 (* ****** ****** *)
 //
-staload "./SATS/list.sats"
-staload _ = "./DATS/list.dats"
 //
 (* ****** ****** *)
 //
-staload "./SATS/option.sats"
-staload _ = "./DATS/option.dats"
 //
 (* ****** ****** *)
 //
-staload "./SATS/stream.sats"
+staload "./SATS/list_vt.sats"
+staload _ = "./DATS/list_vt.dats"
+//
 staload "./SATS/stream_vt.sats"
 //
-staload _ = "./DATS/stream.dats"
 staload _ = "./DATS/stream_vt.dats"
 //
 (* ****** ****** *)
@@ -75,8 +72,6 @@ staload "./SATS/qlistref.sats"
 //
 // HX: un-indexed list
 //
-staload "./SATS/ML/list0.sats"
-staload _(*anon*) = "./DATS/ML/list0.dats"
 //
 (* ****** ****** *)
 

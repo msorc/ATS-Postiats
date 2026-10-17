@@ -9,6 +9,13 @@ PATSOPT=$(PATSHOME)/bin/patsopt
 
 ######
 
+#
+# HX-2026-10: no GC
+# The syntax is now encoded in the global arena (see
+# SATS/atexting.spec); the fprint_*.hats below were adapted by
+# hand to that encoding (the codegen2 output would match on the
+# original datatypes), so they should not be regenerated as is.
+#
 all::
 
 ######

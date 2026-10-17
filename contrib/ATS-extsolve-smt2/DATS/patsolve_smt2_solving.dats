@@ -34,6 +34,11 @@ PATSOLVE_targetloc "./../ATS-extsolve"
 (* ****** ****** *)
 //
 #staload
+"libats/SATS/arena.sats"
+#staload
+_(*anon*) = "libats/DATS/arena.dats"
+//
+#staload
 "{$PATSOLVE}/SATS/patsolve_cnstrnt.sats"
 #staload
 "{$PATSOLVE}/SATS/patsolve_parsing.sats"
@@ -48,79 +53,90 @@ PATSOLVE_targetloc "./../ATS-extsolve"
 (* ****** ****** *)
 //
 implement
-fprint_val<s2cst> = fprint_s2cst
-implement
-fprint_val<s2var> = fprint_s2var
-implement
-fprint_val<s2Var> = fprint_s2Var
-implement
-fprint_val<s2exp> = fprint_s2exp
-implement
-fprint_val<s3itm> = fprint_s3itm
-//
-implement
-fprint_val<form> = fprint_form
-implement
-fprint_val<solvercmd> = fprint_solvercmd
-//
-(* ****** ****** *)
-//
-implement
-print_solvercmd(x0) =
-  fprint_solvercmd(stdout_ref, x0)
-implement
-prerr_solvercmd(x0) =
-  fprint_solvercmd(stderr_ref, x0)
-//
-implement
 fprint_solvercmd
-  (out, x0) = (
+  (ar, out, x0) =
+(
 //
 case+ x0 of
+//
 | SOLVERCMDpop() =>
     fprint! (out, "SOLVERCMDpop()")
 | SOLVERCMDpush() =>
     fprint! (out, "SOLVERCMDpush()")
 //
 | SOLVERCMDassert(fml) =>
-    fprint! (out, "SOLVERCMDassert(", fml, ")")
+  (
+    fprint(out, "SOLVERCMDassert(");
+    fprint_form(ar, out, fml); fprint(out, ")")
+  )
+//
 | SOLVERCMDchecksat() =>
     fprint! (out, "SOLVERCMDchecksat()")
 //
 | SOLVERCMDecholoc(loc) =>
-    fprint! (out, "SOLVERCMDecholoc(", loc, ")")
+  (
+    fprint(out, "SOLVERCMDecholoc(");
+    fprint_location(ar, out, loc); fprint(out, ")")
+  )
 //
 | SOLVERCMDpopenv(s2vs) =>
-    fprint! (out, "SOLVERCMDpopenv(", s2vs, ")")
+  (
+    fprint(out, "SOLVERCMDpopenv(");
+    fprint_s2varlst(ar, out, s2vs); fprint(out, ")")
+  )
 | SOLVERCMDpushenv((*void*)) =>
     fprint! (out, "SOLVERCMDpushenv()")
 //
 | SOLVERCMDpopenv2() =>
     fprint! (out, "SOLVERCMDpopenv2()")
 | SOLVERCMDpushenv2(s2vs) =>
-    fprint! (out, "SOLVERCMDpushenv2(", s2vs, ")")
+  (
+    fprint(out, "SOLVERCMDpushenv2(");
+    fprint_s2varlst(ar, out, s2vs); fprint(out, ")")
+  )
 //
 ) (* end of [fprint_solvercmd] *)
-//
+
 (* ****** ****** *)
 
 implement
 solvercmdlst_reverse
-  (xs) = let
+  {l}(xs) = let
 //
-vtypedef xs = List_vt(solvercmd)
-vtypedef ys = List0_vt(solvercmd)
-vtypedef res = List0_vt(solvercmd)
+vtypedef xs = solvercmdlst(l)
+//
+fun
+free
+(
+  ys: xs
+) : void =
+(
+case+ ys of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(y, ys) =>
+  (
+    case+ y of
+    | ~SOLVERCMDpop() => free(ys)
+    | ~SOLVERCMDpush() => free(ys)
+    | ~SOLVERCMDassert _ => free(ys)
+    | ~SOLVERCMDchecksat() => free(ys)
+    | ~SOLVERCMDecholoc _ => free(ys)
+    | ~SOLVERCMDpopenv _ => free(ys)
+    | ~SOLVERCMDpushenv() => free(ys)
+    | ~SOLVERCMDpopenv2() => free(ys)
+    | ~SOLVERCMDpushenv2 _ => free(ys)
+  )
+) (* end of [free] *)
 //
 fun
 loop
 (
-  xs: xs, ys: ys, res: res
-) : res = (
+  xs: xs, ys: xs, res: xs
+) : xs = (
 //
 case+ xs of
 | ~list_vt_nil() => let
-    val () = list_vt_free(ys) in res
+    val () = free(ys) in res
   end // end of [list_vt_nil]
 | ~list_vt_cons(x, xs) =>
   (
@@ -131,9 +147,9 @@ case+ xs of
       in
         loop(xs, ys, res)
       end // end of [SOLVERCMDpopenv]
-    | SOLVERCMDpushenv _ => let
+    | ~SOLVERCMDpushenv() => let
         val-~list_vt_cons(y, ys) = ys
-        val- SOLVERCMDpopenv(s2vs) = y
+        val-~SOLVERCMDpopenv(s2vs) = y
         val res = list_vt_cons(SOLVERCMDpushenv2(s2vs), res)
       in
         loop(xs, ys, res)
@@ -142,7 +158,6 @@ case+ xs of
   )
 //
 ) (* end of [loop] *)
-//
 in
   loop(xs, list_vt_nil(), list_vt_nil())
 end // end of [solvercmdlst_reverse]
@@ -151,171 +166,128 @@ end // end of [solvercmdlst_reverse]
 //
 extern
 fun
-c3nstr_solve_main 
-  (env: !smtenv, c3t: c3nstr): void
+c3nstr_solve_main{l:addr}
+  (ar: !arena(l), env: !smtenv(l), c3t: c3nstr(l)): void
 //
 (* ****** ****** *)
 //
 extern
 fun
-c3nstr_solve_errmsg
-  (c3t: c3nstr, unsolved: uint): int
-//
-implement 
-c3nstr_solve_errmsg
-  (c3t, unsolved) = 0 where
-{
-//
-val () = (
-//
-if
-unsolved = 0u
-then let
-  val out = stderr_ref
-  val loc = c3t.c3nstr_loc
-  val c3tk = c3t.c3nstr_kind
-in
-//
-case+ c3tk of
-| C3TKmain() =>
-  (
-    fprintln! (out, "UnsolvedConstraint(main)@", loc, ":", c3t)
-  )
-| C3TKtermet_isnat() =>
-  (
-    fprintln! (out, "UnsolvedConstraint(termet_isnat)@", loc, ":", c3t)
-  )
-| C3TKtermet_isdec() =>
-  (
-    fprintln! (out, "UnsolvedConstraint(termet_isdec)@", loc, ":", c3t)
-  )
-| _(*rest-of-C3TK*) =>
-  (
-    fprintln! (out, "UnsolvedConstraint(unclassified)@", loc, ":", c3t)
-  )
-//
-end // end of [then]
-//
-) (* end of [val] *)
-//
-} (* end of [c3nstr_solve_errmsg] *)
-//
-(* ****** ****** *)
-
-extern
-fun
-c3nstr_solve_prop
+c3nstr_solve_prop{l:addr}
 (
-  env: !smtenv, loc0: loc_t, s2p: s2exp
+  ar: !arena(l), env: !smtenv(l), loc0: loc_t(l), s2p: s2exp(l)
 ) : void // end-of-function
-
-(* ****** ****** *)
-
-extern
-fun
-c3nstr_solve_itmlst
-(
-  env: !smtenv, loc0: loc_t, s3is: s3itmlst
-) : void // end-of-function
-
-(* ****** ****** *)
-
-extern
-fun
-c3nstr_solve_itmlst_cnstr
-(
-  env: !smtenv
-, loc0: loc_t, s3is: s3itmlst, c3t: c3nstr
-) : void // end-of-function
-
-(* ****** ****** *)
-
-extern
-fun
-c3nstr_solve_itmlst_disj
-(
-  env: !smtenv
-, loc0: loc_t, s3is: s3itmlst, s3iss: s3itmlstlst
-) : void // end-of-function
-
-(* ****** ****** *)
 //
 extern
 fun
-c3nstr_solve_solverify
-  (env: !smtenv, loc0: loc_t, s2e_prop: s2exp): void
+c3nstr_solve_itmlst{l:addr}
+(
+  ar: !arena(l), env: !smtenv(l), loc0: loc_t(l), s3is: s3itmlst(l)
+) : void // end-of-function
+//
+extern
+fun
+c3nstr_solve_itmlst_cnstr{l:addr}
+(
+  ar: !arena(l), env: !smtenv(l)
+, loc0: loc_t(l), s3is: s3itmlst(l), c3t: c3nstr(l)
+) : void // end-of-function
+//
+extern
+fun
+c3nstr_solve_itmlst_disj{l:addr}
+(
+  ar: !arena(l), env: !smtenv(l)
+, loc0: loc_t(l), s3is: s3itmlst(l), s3iss: s3itmlstlst(l)
+) : void // end-of-function
+//
+extern
+fun
+c3nstr_solve_solverify{l:addr}
+(
+  ar: !arena(l), env: !smtenv(l), loc0: loc_t(l), s2e_prop: s2exp(l)
+) : void // end-of-function
 //
 (* ****** ****** *)
 
 implement
 c3nstr_solve_prop
 (
-  env, loc0, s2p0
+  ar, env, loc0, s2p0
 ) = let
 //
 val s2p0 =
-  formula_make_s2exp (env, s2p0)
+  formula_make_s2exp (ar, env, s2p0)
 //
 in
-  smtenv_solve_formula (env, loc0, s2p0)
+  smtenv_solve_formula (ar, env, loc0, s2p0)
 end // end of [c3nstr_solve_prop]
 
 (* ****** ****** *)
 
 implement
 c3nstr_solve_itmlst
-  (env, loc0, s3is) = let
+  (ar, env, loc0, s3is0) = let
+in
 //
-(*
-val () =
-println!
-  ("c3str_solve_itmlst: s3is = ", s3is)
-*)
+if
+alist_is_nil(s3is0)
+then ()
+else let
+//
+val s3i = alist_head(ar, s3is0)
+val s3is = alist_tail(ar, s3is0)
 //
 in
 //
-case+ s3is of
-| list_nil
-    ((*void*)) => ()
-  // end of [list_nil]
-| list_cons
-    (s3i, s3is) =>
+case+
+s3itm_view(ar, s3i)
+of // case+
+//
+| ~S3ITMsvar(s2v) => let
+    val () = smtenv_add_s2var(ar, env, s2v)
+  in
+    c3nstr_solve_itmlst(ar, env, loc0, s3is)
+  end // end of [S3ITMsvar]
+//
+| ~S3ITMhypo(h3p) => let
+    val () = smtenv_add_h3ypo(ar, env, h3p)
+  in
+    c3nstr_solve_itmlst(ar, env, loc0, s3is)
+  end // end of [S3ITMhypo]
+//
+| ~S3ITMsVar(s2V) =>
+    c3nstr_solve_itmlst(ar, env, loc0, s3is)
+//
+| ~S3ITMcnstr(c3t) =>
+    c3nstr_solve_itmlst_cnstr(ar, env, loc0, s3is, c3t)
+//
+| ~S3ITMcnstr_ref
+    (loc_ref, opt) =>
   (
-  case+ s3i of
-  | S3ITMsvar(s2v) => let
-      val () = smtenv_add_s2var(env, s2v)
-    in
-      c3nstr_solve_itmlst(env, loc0, s3is)
-    end // end of [S3ITMsvar]
-  | S3ITMhypo(h3p) => let
-      val () = smtenv_add_h3ypo(env, h3p)
-    in
-      c3nstr_solve_itmlst(env, loc0, s3is)
-    end // end of [S3ITMhypo]
-  | S3ITMsVar(s2V) =>
-      c3nstr_solve_itmlst(env, loc0, s3is)
-  | S3ITMcnstr(c3t) =>
-      c3nstr_solve_itmlst_cnstr(env, loc0, s3is, c3t)
-  | S3ITMcnstr_ref
-      (loc_ref, opt) =>
-    (
-      case+ opt of
-      | None() => ()
-      | Some(c3t) =>
-        c3nstr_solve_itmlst_cnstr(env, loc_ref, s3is, c3t)
-    ) (* end of [S3ITMcnstr] *)
-  | S3ITMdisj(s3iss_disj) =>
-    (
-      c3nstr_solve_itmlst_disj(env, loc0, s3is, s3iss_disj)
-    ) (* end of [S3ITMdisj] *)
-  | S3ITMsolassert(s2e_prop) => let
-      val () =
-        smtenv_add_s2exp(env, s2e_prop)
-      // end of [val]
-    in
-      c3nstr_solve_itmlst(env, loc0, s3is)
-    end // end of [S3ITMsolassert]
-  ) // end of [list_cons]
+    case+
+    c3nstropt_view(ar, opt)
+    of // case+
+    | ~C3NSTRnone() => ()
+    | ~C3NSTRsome(c3t) =>
+        c3nstr_solve_itmlst_cnstr(ar, env, loc_ref, s3is, c3t)
+      // end of [Some]
+  ) (* end of [S3ITMcnstr_ref] *)
+//
+| ~S3ITMdisj(s3iss_disj) =>
+  (
+    c3nstr_solve_itmlst_disj(ar, env, loc0, s3is, s3iss_disj)
+  ) (* end of [S3ITMdisj] *)
+//
+| ~S3ITMsolassert(s2e_prop) => let
+    val () =
+      smtenv_add_s2exp(ar, env, s2e_prop)
+    // end of [val]
+  in
+    c3nstr_solve_itmlst(ar, env, loc0, s3is)
+  end // end of [S3ITMsolassert]
+//
+end // end of [else]
 //
 end // end of [c3nstr_solve_itmlst]
 
@@ -323,19 +295,16 @@ end // end of [c3nstr_solve_itmlst]
 
 implement
 c3nstr_solve_itmlst_cnstr
-  (env, loc0, s3is, c3t) = () where
+  (ar, env, loc0, s3is, c3t) = () where
 {
-  val (pf|()) = smtenv_push (env)
 //
-  val ans1 =
-    c3nstr_solve_main (env, c3t)
-  // end of [val]
+val (pf|()) = smtenv_push (env)
 //
-  val ((*void*)) = smtenv_pop (pf | env)
+val () = c3nstr_solve_main (ar, env, c3t)
 //
-  val ans2 =
-    c3nstr_solve_itmlst (env, loc0, s3is)
-  // end of [val]
+val ((*void*)) = smtenv_pop (pf | ar, env)
+//
+val () = c3nstr_solve_itmlst (ar, env, loc0, s3is)
 //
 } (* end of [c3nstr_solve_itmlst_cnstr] *)
 
@@ -344,28 +313,24 @@ c3nstr_solve_itmlst_cnstr
 implement
 c3nstr_solve_itmlst_disj
 (
-  env, loc0, s3is0, s3iss(*disj*)
+  ar, env, loc0, s3is0, s3iss(*disj*)
 ) = let
-(*
-val () = (
-  println! ("c3nstr_solve_itmlst_disj: s3iss = ...")
-) (* end of [val] *)
-*)
 in
 //
-case+ s3iss of
-| list_nil
-    ((*void*)) => ()
-  // end of [list_nil]
-| list_cons
-    (s3is, s3iss) => let
-    val (pf|()) = smtenv_push (env)
-    val s3is1 = list_append (s3is, s3is0)
-    val ans = c3nstr_solve_itmlst (env, loc0, s3is1)
-    val ((*void*)) = smtenv_pop (pf | env)
-  in
-    c3nstr_solve_itmlst_disj (env, loc0, s3is0, s3iss)
-  end // end of [list_cons]
+if
+alist_is_nil(s3iss)
+then ()
+else let
+  val s3is = alist_head(ar, s3iss)
+  val (pf|()) = smtenv_push (env)
+  val s3is1 = alist_append (ar, s3is, s3is0)
+  val () = c3nstr_solve_itmlst (ar, env, loc0, s3is1)
+  val ((*void*)) = smtenv_pop (pf | ar, env)
+in
+  c3nstr_solve_itmlst_disj
+    (ar, env, loc0, s3is0, alist_tail(ar, s3iss))
+  // c3nstr_solve_itmlst_disj
+end // end of [else]
 //
 end // end of [c3nstr_solve_itmlst_disj]
 
@@ -373,111 +338,74 @@ end // end of [c3nstr_solve_itmlst_disj]
 
 implement
 c3nstr_solve_solverify
-  (env, loc0, s2e_prop) = let
+  (ar, env, loc0, s2e_prop) = let
 //
 val s2e_prop =
-  formula_make_s2exp (env, s2e_prop)
+  formula_make_s2exp (ar, env, s2e_prop)
 //
 in
-  smtenv_solve_formula (env, loc0, s2e_prop)
+  smtenv_solve_formula (ar, env, loc0, s2e_prop)
 end // end of [c3nstr_solve_solverify]
 
 (* ****** ****** *)
 
 implement
 c3nstr_solve_main
-  (env, c3t) = let
+  (ar, env, c3t) = let
 //
 val
-loc0 = c3t.c3nstr_loc
+loc0 = c3nstr_get_loc(ar, c3t)
 //
 in
 //
 case+
-c3t.c3nstr_node
+c3nstr_node_view
+  (ar, c3nstr_get_node(ar, c3t))
 of (* case+ *)
-| C3NSTRprop(s2p) =>
-    c3nstr_solve_prop(env, loc0, s2p)
-  // end of [C3NSTRprop]
-| C3NSTRitmlst(s3is) =>
-    c3nstr_solve_itmlst(env, loc0, s3is)
-  // end of [C3NSTRitmlst]
-| C3NSTRsolverify(s2e_prop) =>
-    c3nstr_solve_solverify(env, loc0, s2e_prop)
+//
+| ~C3NSTRprop(s2p) =>
+    c3nstr_solve_prop(ar, env, loc0, s2p)
+//
+| ~C3NSTRitmlst(s3is) =>
+    c3nstr_solve_itmlst(ar, env, loc0, s3is)
+//
+| ~C3NSTRsolverify(s2e_prop) =>
+    c3nstr_solve_solverify(ar, env, loc0, s2e_prop)
 //
 end // end of [c3nstr_solve_main]
 
 (* ****** ****** *)
-(*
-//
-fun
-emit_pop
-  (out: FILEref) = fprintln! (out, "(pop)")
-//
-fun
-emit_push
-  (out: FILEref) = fprintln! (out, "(push)")
-//
-*)
-(* ****** ****** *)
 
 implement
 c3nstr_smt2_solve
-  (out, c3t0) = () where
+  (ar, tbls, out, c3t0) = () where
 {
 //
 val env = smtenv_create()
 //
 val (pfpush|()) = smtenv_push(env)
-//
-val ((*solved*)) = c3nstr_solve_main(env, c3t0)
-//
-val ((*popped*)) = smtenv_pop(pfpush | env)
+val ((*solved*)) = c3nstr_solve_main(ar, env, c3t0)
+val ((*popped*)) = smtenv_pop(pfpush | ar, env)
 //
 val cmds = smtenv_destroy(env)
 val cmds = solvercmdlst_reverse(cmds)
 //
-(*
-//
-local
-//
-val
-out = stdout_ref
-//
-implement
-fprint_list$sep<>
-  (out) = fprint_newline(out)
-//
-in
-//
-val ((*void*)) =
-  fprintln! (out, cmds)
-val ((*void*)) =
-  fprintln!(out, "length(cmds) = ", length(cmds))
-//
-end // end of [local]
-//
-*)
-//
 val () =
 emit_preamble(out)
-//
 val () =
 (
 if the_constraint_real() > 0
   then emit_preamble_real(out)
-)
+) (* end of [val] *)
 //
-val () = emit_the_s2cstmap(out)
+val () = emit_the_s2cstmap(ar, tbls, out)
 //
 val () = fprintln! (out, ";;")
 val () = fprintln! (out, ";;ATS-constraints")
 val () = fprintln! (out, ";;generated during typechecking")
 val () = fprintln! (out, ";;")
 //
-val () = emit_solvercmdlst (out, $UN.list_vt2t(cmds))
-//
-val ((*freed*)) = list_vt_free(cmds)
+val () = emit_solvercmdlst (ar, out, cmds)
 //
 } (* end of [c3nstr_smt2_solve] *)
 

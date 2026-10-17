@@ -127,12 +127,6 @@ EStream_map
 (
 xs: EStream(a), fopr: cfun(a, b)
 ) : EStream(b) = "mac#%" // end-of-fun
-fun
-EStream_map_method
-  {a:t0p}{b:t0p}
-(
-xs: EStream(a), TYPE(b))(fopr: cfun(a, b)
-) : EStream(b) = "mac#%" // end-of-fun
 //
 fun
 Property_map
@@ -140,19 +134,11 @@ Property_map
 (
 xs: Property(a), fopr: cfun(a, b)
 ) : Property(b) = "mac#%" // end-of-fun
-fun
-Property_map_method
-  {a:t0p}{b:t0p}
-(
-xs: Property(a), TYPE(b))(fopr: cfun(a, b)
-) : Property(b) = "mac#%" // end-of-fun
 //
 (*
 overload map with EStream_map
 overload map with Property_map
 *)
-overload .map with EStream_map_method
-overload .map with Property_map_method
 //
 (* ****** ****** *)
 //
@@ -174,17 +160,10 @@ EStream_filter
 (
 xs: EStream(a), test: cfun(a, bool)
 ) : EStream(a) = "mac#%" // end-of-fun
-fun
-EStream_filter_method
-  {a:t0p}
-(
-xs: EStream(a))(test: cfun(a, bool)
-) : EStream(a) = "mac#%" // end-of-fun
 //
 (*
 overload filter with EStream_filter
 *)
-overload .filter with EStream_filter_method
 //
 (* ****** ****** *)
 //
@@ -206,17 +185,10 @@ EStream_scan
 (
 xs: EStream(b), ini: a, fopr: cfun(a, b, a)
 ) : Property(a) = "mac#%" // end-of-function
-fun
-EStream_scan_method
-  {a:t0p}{b:t0p}
-(
-xs: EStream(b), _: TYPE(a))(ini: a, fopr: cfun(a, b, a)
-) : Property(a) = "mac#%" // end-of-function
 //
 (*
 overload scan with EStream_scan
 *)
-overload .scan with EStream_scan_method
 //
 (* ****** ****** *)
 //
@@ -265,12 +237,6 @@ EStream_flatMap
 (
 xs: EStream(a), fopr: cfun(a, EStream(b))
 ) : EStream(b) = "mac#%" // end-of-function
-fun
-EStream_flatMap_method
-  {a:t0p}{b:t0p}
-(
-  EStream(a), TYPE(b))(fopr: cfun(a, EStream(b))
-) : EStream(b) = "mac#%" // end-of-function
 //
 fun
 Property_flatMap
@@ -278,19 +244,11 @@ Property_flatMap
 (
 xs: Property(a), fopr: cfun(a, EStream(b))
 ) : EStream(b) = "mac#%" // end-of-function
-fun
-Property_flatMap_method
-  {a:t0p}{b:t0p}
-(
-xs: Property(a), _: TYPE(b))(fopr: cfun(a, EStream(b))
-) : EStream(b) = "mac#%" // end-of-function
 //
 (*
 overload flatMap with EStream_flatMap
 overload flatMap with Property_flatMap
 *)
-overload .flatMap with EStream_flatMap_method
-overload .flatMap with Property_flatMap_method
 //
 (* ****** ****** *)
 //
@@ -348,19 +306,11 @@ EStream_onValue
 fun
 Property_onValue
   {a:t0p}(Property(a), cfun(a, void)): void = "mac#%"
-fun
-EStream_onValue_method
-  {a:t0p}(EStream(a))(cfun(a, void)): void = "mac#%"
-fun
-Property_onValue_method
-  {a:t0p}(Property(a))(cfun(a, void)): void = "mac#%"
 //
 (*
 overload onValue with EStream_onValue
 overload onValue with Property_onValue
 *)
-overload .onValue with EStream_onValue_method
-overload .onValue with Property_onValue_method
 //
 (* ****** ****** *)
 //
@@ -370,19 +320,11 @@ EStream_subscribe
 fun
 Property_subscribe
   {a:t0p}(Property(a), cfun(Event, void)): void = "mac#%"
-fun
-EStream_subscribe_method
-  {a:t0p}(EStream(a))(cfun(Event, void)): void = "mac#%"
-fun
-Property_subscribe_method
-  {a:t0p}(Property(a))(cfun(Event, void)): void = "mac#%"
 //
 (*
 overload subscribe with EStream_subscribe
 overload subscribe with Property_subscribe
 *)
-overload .subscribe with EStream_subscribe_method
-overload .subscribe with Property_subscribe_method
 //
 (* ****** ****** *)
 //
@@ -400,21 +342,11 @@ fun
 Property_doAction
   {a:t0p}
   (xs: Property(a), f: cfun(a, void)): Property(a) = "mac#%"
-fun
-EStream_doAction_method
-  {a:t0p}
-  (xs: EStream(a))(f: cfun(a, void)): EStream(a) = "mac#%"
-fun
-Property_doAction_method
-  {a:t0p}
-  (xs: Property(a))(f: cfun(a, void)): Property(a) = "mac#%"
 //
 (*
 overload doAction with EStream_doAction
 overload doAction with Property_doAction
 *)
-overload .doAction with EStream_doAction_method
-overload .doAction with Property_doAction_method
 //
 (* ****** ****** *)
 //

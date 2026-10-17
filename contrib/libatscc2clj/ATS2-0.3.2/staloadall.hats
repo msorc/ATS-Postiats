@@ -42,12 +42,13 @@ staload _(*anon*) = "./DATS/intrange.dats"
 //
 (* ****** ****** *)
 //
-staload "./SATS/list.sats"
 staload "./SATS/CLJlist.sats"
 //
 (* ****** ****** *)
 //
-staload "./SATS/stream.sats"
+staload "./SATS/list_vt.sats"
+staload _ = "./DATS/list_vt.dats"
+//
 staload "./SATS/stream_vt.sats"
 //
 (* ****** ****** *)
@@ -60,11 +61,9 @@ staload "./SATS/reference.sats"
 //
 (* ****** ****** *)
 //
-staload _(*anon*) = "./DATS/list.dats"
 //
 staload _(*anon*) = "./DATS/CLJlist.dats"
 //
-staload _(*anon*) = "./DATS/stream.dats"
 //
 (* ****** ****** *)
 //
@@ -73,8 +72,6 @@ staload "./SATS/qlistref.sats" // list-based queue
 //
 (* ****** ****** *)
 
-staload "./SATS/ML/list0.sats" // un-indexed list
-staload _ = "./DATS/ML/list0.dats" // un-indexed list
 
 (* ****** ****** *)
 

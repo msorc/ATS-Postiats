@@ -1,0 +1,47 @@
+######
+#
+# Libatsdoc: the library of the programs that atsdoc generates
+#
+######
+
+atsdoc (../utils/atsdoc) turns a .atxt file into an ATS2 program and a text; the
+program, linked with libatsdoc, puts the "atexts" that the placeholders stand for
+in theAtextMap and prints the text with the placeholders replaced (fprint_filsub).
+The interface is SATS/libatsdoc_atext.sats (atext_strcst, atext_strsub,
+atext_apptxt2/3, atext_appstr2/3, atext_concatxt, atext_concatxtsep, atext_newline,
+atext_strptr, atext_filepath, theAtextMap_insert_str, theAtextMap_search,
+fprint_atext, fprint_strsub, fprint_filsub, file2strptr, tostring_fprint, ...) and
+SATS/libatsdoc_symbol.sats.
+
+It is written in ATS2 without GC: an atext is a handle into the global arena
+(libatsdoc_atext.spec, utils/arenagen) that is never freed, a list of atexts is a
+glist (atext_concatxt_vt takes a list_vt), and the strings that are given to the
+constructors are copied into the arena. The differences from the ATS1 version are
+listed at the top of SATS/libatsdoc_atext.sats and in src/PORTING.md ("atsdoc and
+libatsdoc"). libatsdoc.a needs nothing but libats/arena and libc (the table of the
+symbols is in C, CATS/libatsdoc_symbol.cats): it can be linked with libatsopt.a and
+libatsynmark.a (-latsynmark -latsdoc -latsopt -lgmp).
+
+######
+
+Building (ATS1 is not needed):
+
+  make                  # BUILD/libatsdoc.a
+  make install          # copies it to $(PATSHOME)/ccomp/atslib/lib (`make -C ../utils/atsdoc` does it)
+  make check            # typechecks the files
+  make gen              # regenerates the arena encoding of the atext tree (python3)
+
+Using it (the pipeline of the .atxt files):
+
+  atsdoc --outcode X_atxt.dats -i X.atxt > X_atxt.txt
+  patscc -DATS_MEMALLOC_LIBC -o X_atxt.exe X_atxt.dats -latsdoc
+  ./X_atxt.exe > X
+
+[dynload "libatsdoc/dynloadall.dats"] (or a call of libatsdoc_dynloadall(), whose
+name does not depend on any path) initializes the library. The name of the function
+that the dynload statement calls contains the path of dynloadall.dats, so the
+programs have to be compiled with the PATSHOME that libatsdoc.a was built with.
+
+The tests are in ../utils/atsdoc/TEST (make -C ../utils/atsdoc test).
+
+######

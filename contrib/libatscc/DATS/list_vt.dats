@@ -136,4 +136,15 @@ prval () = lemma_list_vt_param(ys)
 //
 (* ****** ****** *)
 
+implement
+list_vt_free
+  {a}(xs) =
+(
+case+ xs of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(_, xs) => list_vt_free(xs)
+) (* end of [list_vt_free] *)
+
+(* ****** ****** *)
+
 (* end of [list_vt.dats] *)

@@ -50,7 +50,19 @@
 //
 /* ****** ****** */
 //
+// HX-2026-10:
+// The generated code accesses the same object through
+// structurally identical struct types of different names
+// (e.g., a constructor cell is made and matched at sites
+// that use different postiats_tysum_N); so these types are
+// declared may_alias for the access to be well-defined under
+// strict aliasing.
+//
+#if defined(__GNUC__)
+#define ATSstruct struct __attribute__((__may_alias__))
+#else
 #define ATSstruct struct
+#endif
 //
 /* ****** ****** */
 /*

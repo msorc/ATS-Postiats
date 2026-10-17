@@ -194,8 +194,10 @@ end // end of [local]
 
 local
 
+var title: string = "book1"
 val
-title_ref = ref<string>("book1")
+title_ref =
+ref_make_viewptr{string}(view@title | addr@title)
 
 in
 //

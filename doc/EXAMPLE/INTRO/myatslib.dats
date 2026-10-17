@@ -26,9 +26,6 @@ in(**)end
 
 (* ****** ****** *)
 
-local
-#include "libats/ML/DATS/filebas.dats"
-in(**)end
 
 (* ****** ****** *)
 

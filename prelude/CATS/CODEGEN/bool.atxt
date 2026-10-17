@@ -193,5 +193,5 @@ atspre_bool_tostring (
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "bool_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "bool_atxt.txt")
 %}\

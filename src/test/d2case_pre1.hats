@@ -1,0 +1,37 @@
+(* the prelude of the chunks of the cases of the level-2 dynamic test (ATS1): see d2case_pre.hats *)
+#define ATS_DYNLOADFLAG 0
+staload ATSPRE = "pats_atspre.dats"
+staload "libc/SATS/stdio.sats"
+staload UN = "prelude/SATS/unsafe.sats"
+staload SYM = "pats_symbol.sats"
+staload FIL = "pats_filename.sats"
+staload LOC = "pats_location.sats"
+staload LAB = "pats_label.sats"
+staload ERR = "pats_error.sats"
+staload GLOB = "pats_global.sats"
+staload INT = "pats_intinf.sats"
+staload CNTR = "pats_counter.sats"
+staload STMP = "pats_stamp.sats"
+staload EFF = "pats_effect.sats"
+staload UT = "pats_utils.sats"
+staload "pats_basics.sats"
+staload "pats_syntax.sats"
+staload "pats_lexing.sats"
+staload "pats_staexp1.sats"
+staload "pats_dynexp1.sats"
+staload "pats_staexp2.sats"
+staload "pats_staexp2_util.sats"
+staload "pats_stacst2.sats"
+staload "pats_staexp2_solve.sats"
+staload "pats_staexp2_error.sats"
+staload "pats_dynexp2.sats"
+
+
+macdef dd_out = stdout_ref
+
+#include "d2compat1_hand.hats"
+#include "d2common1.hats"
+#include "d2compat1_hand2.hats"
+#include "d2compat1_gen.hats"
+#include "d2common2.hats"
+#include "d2compat1_hand3.hats"

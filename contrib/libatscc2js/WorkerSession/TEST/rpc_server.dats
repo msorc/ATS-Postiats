@@ -31,16 +31,17 @@ WORKERSESSION_CHANPOS 1
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC (the arguments form a JSarray)
 fun
-list0_add
+JSarray_add
 (
-  xs: list0(int)
-) : int =
-(
-  case+ xs of
-  | list0_nil() => 0
-  | list0_cons(x, xs) => x + list0_add(xs)
-)
+  xs: JSarray(int)
+) : int = loop(0, 0) where
+{
+  val n = JSarray_length(xs)
+  fun loop(i: int, res: int): int =
+    if i < n then loop(i+1, res + JSarray_get_at(xs, i)) else res
+}
 //
 (* ****** ****** *)
 //
@@ -57,13 +58,13 @@ implement
 rpc_server_cont(ch, f) = chanpos_close(ch)
 *)
 //
-typedef ARG = list0(int) and RES = int
+typedef ARG = JSarray(int) and RES = int
 //
 in
 //
 val ((*void*)) =
 $CHANNEL.rpc_server<ARG><RES>
-  ($UN.cast{chanpos()}(0), lam(xs) => list0_add(xs))
+  ($UN.cast{chanpos()}(0), lam(xs) => JSarray_add(xs))
 //
 end // end of [local]
 //

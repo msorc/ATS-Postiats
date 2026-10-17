@@ -197,32 +197,6 @@ cleanall:: ; $(RMF) listmap_dats.py
 ######
 #
 all:: \
-twice_dats.py
-twice_dats.py: \
-  twice.dats ; \
-  $(PATSOPT) -d $< | $(ATSCC2PY) -o $@
-#
-test_twice:: twice_dats.py ; $(PYTHON) $<
-#
-regress:: test_twice
-cleanall:: ; $(RMF) twice_dats.py
-#
-######
-#
-all:: \
-queens_comb_dats.py
-queens_comb_dats.py: \
-  queens_comb.dats ; \
-  $(PATSOPT) -d $< | $(ATSCC2PY) -o $@
-#
-test_queens_comb:: queens_comb_dats.py ; $(PYTHON) $<
-#
-regress:: test_queens_comb
-cleanall:: ; $(RMF) queens_comb_dats.py
-#
-######
-#
-all:: \
 queens_simple_dats.py
 queens_simple_dats.py: \
   queens_simple.dats ; \
@@ -263,20 +237,6 @@ cleanall:: ; $(RMF) refcount_dats.py
 ######
 #
 all:: \
-sieve_lazy_dats.py
-sieve_lazy_dats.py: \
-  sieve_lazy.dats ; \
-  $(PATSOPT) -d $< | $(ATSCC2PY) -o $@ -i
-#
-test_sieve_lazy:: \
-  sieve_lazy_dats.py ; $(PYTHON) sieve_lazy_dats.py
-#
-regress:: test_sieve_lazy
-cleanall:: ; $(RMF) sieve_lazy_dats.py
-#
-######
-#
-all:: \
 sieve_llazy_dats.py
 sieve_llazy_dats.py: \
   sieve_llazy.dats ; \
@@ -298,6 +258,7 @@ testall:: cleanall
 
 ######
 #
+libatscc2py3:: ; mkdir -p libatscc2py3
 libatscc2py3:: ; \
 $(CPF) \
 $(LIBATSCC2PY3)/output/libatscc2py3_all.py libatscc2py3/.

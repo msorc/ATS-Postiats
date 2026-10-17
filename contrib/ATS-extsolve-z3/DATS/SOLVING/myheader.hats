@@ -23,6 +23,8 @@ PATSOLVE_targetloc "./../../ATS-extsolve"
 (* ****** ****** *)
 //
 #staload
+"libats/SATS/arena.sats"
+#staload
 "{$PATSOLVE}/SATS/patsolve_cnstrnt.sats"
 //
 (* ****** ****** *)

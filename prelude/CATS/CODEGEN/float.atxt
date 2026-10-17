@@ -565,5 +565,5 @@ end // end of [fun_cmp_int_g0float_decl]
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "float_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "float_atxt.txt")
 %}\

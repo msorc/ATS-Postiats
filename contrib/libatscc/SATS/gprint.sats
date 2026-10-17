@@ -83,23 +83,16 @@ fun{} gprint_list$beg(): void
 fun{} gprint_list$end(): void
 fun{} gprint_list$sep(): void
 //
+// HX-2026-10: for linear lists (borrowed)
+//
 fun{a:t0p}
-gprint_list (xs: List(a)): void
+gprint_list (xs: !List0_vt(a)): void
 //
 overload gprint with gprint_list of 100
 //
 (* ****** ****** *)
 
-fun{} gprint_listlist$beg1(): void
-fun{} gprint_listlist$end1(): void
-fun{} gprint_listlist$sep1(): void
-//
-fun{} gprint_listlist$beg2(): void
-fun{} gprint_listlist$end2(): void
-fun{} gprint_listlist$sep2(): void
-//
-fun{a:t0p}
-gprint_listlist (xss: List(List(a))): void
+
 
 (* ****** ****** *)
 //

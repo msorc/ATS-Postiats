@@ -604,10 +604,68 @@ overload reverse with list_vt_reverse
 
 #atscode_separator()
 
+#atscode_separator()
+//
+// HX-2026-10: no GC
+// these list-constructing functions used to be
+// declared in [list.sats]; they produce linear lists
+//
+fun{x:t0p}
+list_make_sing(x: x):<!wrt> list_vt(x, 1)
+fun{x:t0p}
+list_make_pair(x1: x, x2: x):<!wrt> list_vt(x, 2)
+
+#atscode_separator()
+
+fun{x:t0p}
+list_make_elt
+  {n:nat} (n: int n, x: x):<!wrt> list_vt(x, n)
+// end of [list_make_elt]
+
+#atscode_separator()
+
+fun{}
+list_make_intrange
+  {l,r:int | l <= r}
+  (l: int l, r: int r):<!wrt> list_vt(intBtw(l, r), r-l)
+// end of [list_make_intrange]
+
+#atscode_separator()
+
+fun
+{a:vt0p}
+list_make_array
+  {n:int} (
+  A: &(@[INV(a)][n]) >> @[a?!][n], n: size_t(n)
+) :<!wrt> list_vt(a, n) // endfun
+
+#atscode_separator()
+//
+symintr list
+//
+fun
+{a:vt0p}
+list_make_arrpsz
+  {n:int}
+  (psz: arrpsz(INV(a), n)):<!wrt> list_vt(a, n)
+//
+overload list with list_make_arrpsz
+//
+#atscode_separator()
+//
+fun{
+a:vt0p
+} list_tabulate{n:nat}(n: int(n)): list_vt(a, n)
+//
+fun{a:vt0p} list_tabulate$fopr(index: intGte(0)): (a)
+//
+
+#atscode_separator()
+
 #atscode_eof_strsub("\#thisfilename$")\
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "list_vt_atxt.txt")
 %}\

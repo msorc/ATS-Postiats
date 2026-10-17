@@ -34,6 +34,7 @@ UN = "prelude/SATS/unsafe.sats"
 //
 (* ****** ****** *)
 //
+staload "./../../basics_js.sats" // HX-2026-10: for cfun_free
 staload "./../SATS/channel.sats"
 //
 (* ****** ****** *)
@@ -104,11 +105,11 @@ in
 //
 chanpos0_recv{a}
 ( chp
-, lam(chp, e) =>
+, llam(chp, e) =>
   chanpos0_send{b}
   ( chp
   , fopr(chmsg_parse<a>(e))
-  , lam(chp) => rpc_server_cont(chp, fopr)
+  , llam(chp) => rpc_server_cont(chp, fopr)
   )
 )
 //
@@ -154,7 +155,7 @@ chanpos1_append
 fserv1
 (
   $UN.castvwtp0{chanpos(ss1)}(chp)
-, $UN.castvwtp0{chpcont0_nil}(lam(chp:chanpos(ss2)) =<cloref1> fserv2(chp, k0))
+, $UN.castvwtp0{chpcont0_nil}(llam(chp:chanpos(ss2)) =<lincloptr1> fserv2(chp, k0))
 ) (* end of [fserv1] *)
 //
 ) (* end of [chanpos1_append] *)
@@ -175,7 +176,7 @@ chanpos0_recv
   {int}
 (
   chp0
-, lam(chp0, tag0) => let
+, llam(chp0, tag0) => let
     val tag0 =
       chmsg_parse<int>(tag0)
     // end of [val]
@@ -210,12 +211,12 @@ tag0 of
 | 0 =>
   chanpos0_send{int}
   (
-    chp0, tag0, lam(chp0) => fserv0($UN.castvwtp0(chp0), k0)
+    chp0, tag0, llam(chp0) => fserv0($UN.castvwtp0(chp0), k0)
   ) (* end of [0] *)
 | _ =>
   chanpos0_send{int}
   (
-    chp0, tag0, lam(chp0) => fserv1($UN.castvwtp0(chp0), k0)
+    chp0, tag0, llam(chp0) => fserv1($UN.castvwtp0(chp0), k0)
   ) (* end of [1] *)
 //
 end // end of [chanpos1_choose_disj]]
@@ -244,7 +245,7 @@ chanpos0_recv
   {int}
 (
   chp0
-, lam(chp0, tag0) => let
+, llam(chp0, tag0) => let
     val tag0 =
       chmsg_parse<int>(tag0)
     // end of [val]
@@ -253,7 +254,7 @@ chanpos0_recv
     // end of [val]
   in
     case+ tag0 of
-    | 0 => k0($UN.castvwtp0(chp0))
+    | 0 => (k0($UN.castvwtp0(chp0)); cfun_free(k0))
     | _ => fserv($UN.castvwtp0(chp0), k0)
   end // end of [lam]
 ) (* end of [chanpos0_recv] *)
@@ -286,11 +287,11 @@ in
 case+
 tag0 of
 | 0 =>
-  chanpos0_send{int}(chp0, tag0, $UN.cast{chpcont0()}(k0))
+  chanpos0_send{int}(chp0, tag0, $UN.castvwtp0{chpcont0()}(k0))
 | _ =>
   chanpos0_send{int}
   (
-    chp0, tag0, lam(chp0) => fserv($UN.castvwtp0(chp0), k0)
+    chp0, tag0, llam(chp0) => fserv($UN.castvwtp0(chp0), k0)
   ) (* end of [1] *)
 //
 end // end of [chanpos1_option_disj]]
@@ -338,7 +339,7 @@ chanpos0_recv
   {int}
 (
   chp0
-, lam(chp0, tag0) => let
+, llam(chp0, tag0) => let
     val tag0 =
       chmsg_parse<int>(tag0)
     // end of [val]
@@ -347,8 +348,8 @@ chanpos0_recv
     // end of [val]
   in
     case+ tag0 of
-    | 0 => k0($UN.castvwtp0(chp0))
-    | _ => fserv($UN.castvwtp0(chp0), lam(chp) => loop($UN.castvwtp0(chp), k0, fserv))
+    | 0 => (k0($UN.castvwtp0(chp0)); cfun_free(k0))
+    | _ => fserv($UN.castvwtp0(chp0), llam(chp) => loop($UN.castvwtp0(chp), k0, fserv))
   end // end of [lam]
 ) (* end of [chanpos0_recv] *)
 //
@@ -405,13 +406,13 @@ in
 case+
 tag0 of
 | 0 =>
-  chanpos0_send{int}(chp0, tag0, $UN.cast{chpcont0()}(k0))
+  chanpos0_send{int}(chp0, tag0, $UN.castvwtp0{chpcont0()}(k0))
 | _ =>
   chanpos0_send{int}
   (
     chp0, tag0
-  , lam(chp0) =>
-      fserv($UN.castvwtp0(chp0), lam(chp) => loop($UN.castvwtp0(chp), k0, fserv))
+  , llam(chp0) =>
+      fserv($UN.castvwtp0(chp0), llam(chp) => loop($UN.castvwtp0(chp), k0, fserv))
     // end of [lam]
   ) (* end of [1] *)
 //

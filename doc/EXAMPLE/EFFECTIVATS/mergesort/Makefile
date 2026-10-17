@@ -19,46 +19,34 @@ include $(PATSHOME)/share/atsmake-post.mk
 
 all:: mergesort
 mergesort: ; $(PATSCC) -tcats mergesort.dats
+regress:: mergesort
 
-all:: \
-mergesort_list
-mergesort_list: \
-  mergesort_list.dats ; $(PATSCC2) -DATS_MEMALLOC_LIBC -o $@ $^
-regress:: mergesort_list ; ./$<
-cleanall:: ; $(RMF) mergesort_list
 
-all:: \
-mergesort_array
-mergesort_array: \
-  mergesort_array.dats ; $(PATSCC2) -DATS_MEMALLOC_LIBC -o $@ $^
-regress:: mergesort_array ; ./$<
-cleanall:: ; $(RMF) mergesort_array
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSHOMEQ="$(PATSHOME)"
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 
 INPATH :=
 INPATH += -I$(PATSHOME)/src
-INPATH += -IATS $(PATSHOME) -IATS $(ATSHOME)
+INPATH += -IATS $(PATSHOME)
 
 LDPATH :=
-LDPATH += -L$(PATSHOME)/utils/libatsopt
-LDPATH += -L$(PATSHOME)/utils/libatsynmark
+LDPATH += -L$(PATSHOME)/ccomp/atslib/lib
 
 LIBRARY :=
-LIBRARY := -latsynmark -latsdoc -latsopt -lats -lgmp
+LIBRARY := -latsynmark -latsdoc -latslib -latsopt -lgmp
 
 ######
 #
 main.exe: \
 main_atxt.dats ; \
-$(ATSCC) \
-  -D_ATS_GCATS \
+$(PATSCC) \
+  -DATS_MEMALLOC_LIBC \
   $(INPATH) -o $@ $< $(LDPATH) $(LIBRARY)
 #
 main_atxt.dats: main.atxt; \

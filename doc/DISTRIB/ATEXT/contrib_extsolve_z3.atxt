@@ -6,6 +6,8 @@ dynload
 staload
 "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 extern
 fun
 comment(x: string): atext
@@ -92,7 +94,7 @@ out
 ,
 "\
 #\n\
-echo \"The \${ATSHOME}/contrib/ATS-extsolve-z3 files have been copied.\"\n\
+echo \"The \\${ATSHOME}/contrib/ATS-extsolve-z3 files have been copied.\"\n\
 #\n\
 # end of the automatically generated script\n\
 #\n\
@@ -162,7 +164,6 @@ ATS/contrib/ATS-extsolve-z3
 #packfilename("SATS/patsolve_z3_solving.sats")
 //
 #packfilename("DATS/patsolve_z3_main.dats")
-#packfilename("DATS/patsolve_z3_mylib.dats")
 #packfilename("DATS/patsolve_z3_commarg.dats")
 #packfilename("DATS/patsolve_z3_solving.dats")
 //
@@ -175,7 +176,7 @@ ATS/contrib/ATS-extsolve-z3
 (* ****** ****** *)
 
 %{
-implement main (argc, argv) = ()
+implement main0 (argc, argv) = ()
 %}
 
 (* ****** ****** *)

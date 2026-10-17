@@ -17,6 +17,21 @@ ATS_DYNLOADNAME "catsparse_all_dynload"
 (* ****** ****** *)
 
 local #include "./DATS/catsparse_mylib.dats" in (*nothing*) end
+(* ****** ****** *)
+//
+// HX-2026-10: the arena encoding of the syntax
+//
+local
+#include "share/atspre_staload.hats"
+staload UN = "prelude/SATS/unsafe.sats"
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
+staload "./SATS/catsparse.sats"
+staload "./SATS/catsparse_parsing.sats"
+in
+#include "./DATS/catsparse_gen.hats"
+#include "./DATS/catsparse_parsing_gen.hats"
+end // end of [local]
 
 (* ****** ****** *)
 //

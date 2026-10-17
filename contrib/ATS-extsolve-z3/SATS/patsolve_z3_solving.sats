@@ -36,12 +36,22 @@ $PATSHOME/contrib\
 #staload "{$SMT_LIBZ3}/SATS/z3.sats"
 //
 #staload
+"libats/SATS/arena.sats"
+#staload
 "{$PATSOLVE}/SATS/patsolve_cnstrnt.sats"
 //
 (* ****** ****** *)
 //
+// HX-2026-10: no GC
+// The constraints are kept in an arena (see
+// ATS-extsolve); every function that looks into them
+// takes the arena borrowed (ar: !arena(l)).
+//
+(* ****** ****** *)
+//
 fun
-c3nstr_z3_solve(c3nstr): void
+c3nstr_z3_solve
+  {l:addr}(ar: !arena(l), c3t: c3nstr(l)): void
 //
 (* ****** ****** *)
 //
@@ -99,11 +109,13 @@ fun sort_mk_abstract(name: string): sort
 
 (* ****** ****** *)
 //
-fun sort_error (s2rt): sort
+fun
+sort_error{l:addr}(ar: !arena(l), s2t: s2rt(l)): sort
 //
 (* ****** ****** *)
 //
-fun sort_make_s2rt (s2rt): sort
+fun
+sort_make_s2rt{l:addr}(ar: !arena(l), s2t: s2rt(l)): sort
 //
 (* ****** ****** *)
 
@@ -271,43 +283,51 @@ formula_fdapp_list(fd: func_decl, args: formlst): form
 //
 (* ****** ****** *)
 
-absvtype smtenv_vtype = ptr
-vtypedef smtenv = smtenv_vtype
+absvtype smtenv_vtype(l:addr) = ptr
+vtypedef smtenv(l:addr) = smtenv_vtype(l)
 
 (* ****** ****** *)
 //
 fun
-smtenv_create(): smtenv
+smtenv_create{l:addr}(): smtenv(l)
 fun
-smtenv_destroy(env: smtenv): void
+smtenv_destroy{l:addr}(ar: !arena(l), env: smtenv(l)): void
+//
+(* ****** ****** *)
+//
+// HX:
+// the payload of a s2var is a stack of formulas
+//
+fun
+s2var_pop_payload
+  {l:addr}(ar: !arena(l), s2v: s2var(l)): form
+fun
+s2var_top_payload
+  {l:addr}(ar: !arena(l), s2v: s2var(l)): form
+fun
+s2var_push_payload
+  {l:addr}(ar: !arena(l), s2v: s2var(l), x: form): void
 //
 (* ****** ****** *)
 //
 fun
-s2var_pop_payload(s2var): form
+smtenv_add_s2var{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2v: s2var(l)): void
 fun
-s2var_top_payload(s2var): form
+smtenv_add_s2exp{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2e: s2exp(l)): void
 fun
-s2var_push_payload(s2var, form): void
+smtenv_add_h3ypo{l:addr}
+  (ar: !arena(l), env: !smtenv(l), h3p: h3ypo(l)): void
 //
 (* ****** ****** *)
 //
 fun
-smtenv_add_s2var
-  (env: !smtenv, s2v: s2var): void
+formula_error_s2cst
+  {l:addr}(ar: !arena(l), s2c0: s2cst(l)): form
 fun
-smtenv_add_s2exp
-  (env: !smtenv, s2e: s2exp): void
-fun
-smtenv_add_h3ypo
-  (env: !smtenv, h3p: h3ypo): void
-//
-(* ****** ****** *)
-//
-fun
-formula_error_s2cst(s2c0: s2cst): form
-fun
-formula_error_s2exp(s2e0: s2exp): form
+formula_error_s2exp
+  {l:addr}(ar: !arena(l), s2e0: s2exp(l)): form
 //
 overload formula_error with formula_error_s2cst
 overload formula_error with formula_error_s2exp
@@ -315,73 +335,65 @@ overload formula_error with formula_error_s2exp
 (* ****** ****** *)
 //
 fun
-formula_make_s2cst
-  (env: !smtenv, s2c: s2cst): form
+formula_make_s2cst{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2c: s2cst(l)): form
 fun
-formula_make_s2cst_fresh
-  (env: !smtenv, s2c: s2cst): form
+formula_make_s2cst_fresh{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2c: s2cst(l)): form
 //
 fun
-formula_make_s2var
-  (env: !smtenv, s2v: s2var): form
+formula_make_s2var{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2v: s2var(l)): form
 fun
-formula_make_s2var_fresh
-  (env: !smtenv, s2v: s2var): form
+formula_make_s2var_fresh{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2v: s2var(l)): form
 //
 fun
-formula_make_s2Var_fresh
-  (env: !smtenv, s2V: s2Var, s2t: s2rt): form
+formula_make_s2Var_fresh{l:addr}
+(
+  ar: !arena(l), env: !smtenv(l), s2V: s2Var(l), s2t: s2rt(l)
+) : form // end-of-function
 //
 (* ****** ****** *)
 //
 fun
-formula_make_s2exp
-  (env: !smtenv, s2e: s2exp): form
+formula_make_s2exp{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2e: s2exp(l)): form
 fun
-formulas_make_s2explst
-  (env: !smtenv, s2es: s2explst): formlst
+formulas_make_s2explst{l:addr}
+  (ar: !arena(l), env: !smtenv(l), s2es: s2explst(l)): formlst
 fun
-formulas_make_labs2explst
-  (env: !smtenv, ls2es: labs2explst): formlst
-//
-fun
-formula_make_s2cst_s2explst
-  (env: !smtenv, s2c: s2cst, s2es: s2explst): form
+formulas_make_labs2explst{l:addr}
+  (ar: !arena(l), env: !smtenv(l), ls2es: labs2explst(l)): formlst
 //
 (* ****** ****** *)
 //
-datatype
-s2cinterp =
+typedef fopr0 = () -> form
+typedef fopr1 = (form) -> form
+typedef fopr2 = (form, form) -> form
 //
-  | S2CINTnone of ()
-  | S2CINTsome of (ptr)
+// HX-2026-10:
+// [S2CINTbuiltin_list] stands for an uninterpreted
+// function whose declaration is made from the sort of the
+// constant (it used to carry a closure)
 //
-  | S2CINTbuiltin_0 of (() -> form)
-  | S2CINTbuiltin_1 of (form -> form)
-  | S2CINTbuiltin_2 of ((form, form) -> form)
-//
-  | S2CINTbuiltin_list of ((formlst) -<cloref1> form)
-//
-//
-(* ****** ****** *)
-//
-fun print_s2cinterp (s2cinterp): void
-and prerr_s2cinterp (s2cinterp): void
-fun fprint_s2cinterp : fprint_type(s2cinterp)
-//
-overload print with print_s2cinterp
-overload prerr with prerr_s2cinterp
-overload fprint with fprint_s2cinterp
+#include "./patsolve_z3_solving_gen.hats"
 //
 (* ****** ****** *)
 //
 fun
-s2cst_get_s2cinterp(s2cst): s2cinterp
+fprint_s2cinterp{l:addr}
+  (ar: !arena(l), out: FILEref, x: s2cinterp(l)): void
+//
+(* ****** ****** *)
 //
 fun
-s2cfun_initize_s2cinterp(s2cst): void
+s2cst_get_s2cinterp
+  {l:addr}(ar: !arena(l), s2c: s2cst(l)): s2cinterp(l)
 //
-fun the_s2cinterp_initize((*void*)): void
+fun
+s2cfun_initize_s2cinterp
+  {l:addr}(ar: !arena(l), s2c: s2cst(l)): void
 //
 (* ****** ****** *)
 
@@ -390,15 +402,16 @@ absview smtenv_push_v
 (* ****** ****** *)
 //
 fun
-smtenv_pop (smtenv_push_v | !smtenv): void
+smtenv_pop{l:addr}
+  (pf: smtenv_push_v | ar: !arena(l), env: !smtenv(l)): void
 //
 fun
-smtenv_push (env: !smtenv): (smtenv_push_v | void)
+smtenv_push{l:addr}(env: !smtenv(l)): (smtenv_push_v | void)
 //
 (* ****** ****** *)
 //
 fun
-smtenv_solve_formula(!smtenv, form): Z3_lbool
+smtenv_solve_formula{l:addr}(env: !smtenv(l), x: form): int
 // 
 (* ****** ****** *)
 

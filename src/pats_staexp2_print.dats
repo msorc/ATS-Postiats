@@ -25,12 +25,30 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: May, 2011
 //
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_staexp2_print.dats, see PORTING.md)
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload UT = "./pats_utils.sats"
@@ -54,6 +72,9 @@ macdef fprint_stamp = $STMP.fprint_stamp
 //
 staload SYM = "./pats_symbol.sats"
 macdef fprint_symbol = $SYM.fprint_symbol
+//
+staload LAB = "./pats_label.sats"
+staload FIL = "./pats_filename.sats"
 //
 (* ****** ****** *)
 //
@@ -83,13 +104,13 @@ fprint_s2rtbas (out, x) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ x of
-| S2RTBASpre (sym) => {
+case+ s2rtbas_view(x) of
+| ~S2RTBASpre (sym) => {
     val () = prstr "S2RTBASpre("
     val () = fprint_symbol (out, sym)
     val () = prstr ")"
   } // end of [S2RTBASpre]
-| S2RTBASimp (knd, sym) => {
+| ~S2RTBASimp (knd, sym) => {
     val () = prstr "S2RTBASimp("
     val () = fprint_int (out, knd)
     val () = prstr "; "
@@ -99,7 +120,7 @@ case+ x of
     val () = if pol < 0 then prstr "-"
     val () = prstr ")"
   } // end of [S2RTBASimp]
-| S2RTBASdef (s2td) => {
+| ~S2RTBASdef (s2td) => {
     val () = prstr "S2RTBASdef("
     val () = fprint_s2rtdat (out, s2td)
     val () = prstr ")"
@@ -122,31 +143,31 @@ macdef prstr (s) = fprint_string (out, ,(s))
 //
 in
 //
-case+ x of
-| S2RTbas (s2tb) => {
+case+ s2rt_viewof(x) of
+| ~S2RTbas (s2tb) => {
     val () = prstr "S2RTbas("
     val () = fprint_s2rtbas (out, s2tb)
     val () = prstr ")"
   }
-| S2RTfun (s2ts, s2t) => {
+| ~S2RTfun (s2ts, s2t) => {
     val () = prstr "S2RTfun("
     val () = fprint_s2rtlst (out, s2ts)
     val () = prstr "; "
     val () = fprint_s2rt (out, s2t)
     val () = prstr ")"
   }
-| S2RTtup (s2ts) => {
+| ~S2RTtup (s2ts) => {
     val () = prstr "S2RTtup("
     val () = fprint_s2rtlst (out, s2ts)
     val () = prstr ")"
   }
-| S2RTVar _ => {
+| ~S2RTVar _ => {
     val () = prstr "S2RTVar("
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
 //
-| S2RTerr () => prstr "S2RTerr()"
+| ~S2RTerr () => prstr "S2RTerr()"
 //
 end // end of [fprint_s2rt]
 //
@@ -159,7 +180,7 @@ prerr_s2rtlst (xs) = fprint_s2rtlst (stderr_ref, xs)
 //
 implement
 fprint_s2rtlst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_s2rt)
+  (out, xs) = $UT.fprintlst<s2rt> (out, xs, ", ", fprint_s2rt)
 // end of [fprint_s2rtlst]
 //
 (* ****** ****** *)
@@ -174,33 +195,33 @@ fprint_s2itm (out, x) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ x of
-| S2ITMvar (s2v) => {
+case+ s2itm_view(x) of
+| ~S2ITMvar (s2v) => {
     val () = prstr "S2ITMvar("
     val () = fprint_s2var (out, s2v)
     val () = prstr ")"
   }
-| S2ITMcst (s2cs) => {
+| ~S2ITMcst (s2cs) => {
     val () = prstr "S2ITMcst("
     val () = fprint_s2cstlst (out, s2cs)
     val () = prstr ")"
   }
-| S2ITMe1xp (e1xp) => {
+| ~S2ITMe1xp (e1xp) => {
     val () = prstr "S2ITMe1xp("
     val () = fprint_e1xp (out, e1xp)
     val () = prstr ")"
   }
-| S2ITMdatconptr (d2c) => {
+| ~S2ITMdatconptr (d2c) => {
     val () = prstr "S2ITMdatconptr("
     val () = fprint_d2con (out, d2c)
     val () = prstr ")"
   }
-| S2ITMdatcontyp (d2c) => {
+| ~S2ITMdatcontyp (d2c) => {
     val () = prstr "S2ITMdatcontyp("
     val () = fprint_d2con (out, d2c)
     val () = prstr ")"
   }
-| S2ITMfilenv (fenv) => {
+| ~S2ITMfilenv (fenv) => {
     val () = prstr "S2ITMfilenv("
     val () = $FIL.fprint_filename_full (out, filenv_get_name fenv)
     val () = prstr ")"
@@ -225,15 +246,15 @@ macdef prstr (s) = fprint_string (out, ,(s))
 //
 in
 //
-case+ knd of
-| TYRECKINDbox () => fprint_string (out, "box")
-| TYRECKINDbox_lin () => fprint_string (out, "boxlin")
-| TYRECKINDflt0 () => fprint_string (out, "flt0")
-| TYRECKINDflt1 (stmp) =>
+case+ tyreckind_view(knd) of
+| ~TYRECKINDbox () => fprint_string (out, "box")
+| ~TYRECKINDbox_lin () => fprint_string (out, "boxlin")
+| ~TYRECKINDflt0 () => fprint_string (out, "flt0")
+| ~TYRECKINDflt1 (stmp) =>
   (
     prstr "flt1("; fprint_stamp (out, stmp); prstr ")"
   ) // end of [TYRECKINDflt1]
-| TYRECKINDflt_ext (name) => fprintf (out, "fltext(%s)", @(name))
+| ~TYRECKINDflt_ext (name) => (fprint_string (out, "fltext("); fprint_string (out, name); fprint_string (out, ")"))
 //
 end // end of [fprint_tyreckind]
 //
@@ -261,81 +282,81 @@ fprint_s2exp (out, x) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ x.s2exp_node of
+case+ s2exp_node_view(x.s2exp_node()) of
 //
-| S2Eint (x) => {
+| ~S2Eint (x) => {
     val () = prstr "S2Eint("
     val () = fprint_int (out, x)
     val () = prstr ")"
   }
-| S2Eintinf (x) => {
+| ~S2Eintinf (x) => {
     val () = prstr "S2Eintinf("
     val () = fprint_intinf (out, x)
     val () = prstr ")"
   }
 //
-| S2Efloat (rep) => {
+| ~S2Efloat (rep) => {
     val () = prstr "S2Efloat("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
-| S2Estring (str) => {
+| ~S2Estring (str) => {
     val () = prstr "S2Estring("
     val () = fprint_string (out, str)
     val () = prstr ")"
   }
 //
-| S2Ecst (s2c) => {
+| ~S2Ecst (s2c) => {
     val () = prstr "S2Ecst("
     val () = fprint_s2cst (out, s2c)
     val () = prstr ")"
   } (* end of [S2Ecst] *)
 //
-| S2Eextype
+| ~S2Eextype
     (name, s2ess) => {
     val () = prstr "S2Eextype("
     val () = fprint_string (out, name)
     val () = (
-      case+ s2ess of
-      | list_nil () => ()
-      | list_cons _ => let
+      case+ glist_view(s2ess) of
+      | ~GLnil() => ()
+      | ~GLcons(_, _) => let
           val () = prstr ("; ") in fprint_s2explstlst (out, s2ess)
         end // end of [list_cons]
     ) : void // end of [val]
     val () = prstr ")"
   } (* end of [S2Eextype] *)
-| S2Eextkind
+| ~S2Eextkind
     (name, s2ess) => {
     val () = prstr "S2Eextkind("
     val () = fprint_string (out, name)
     val () = (
-      case+ s2ess of
-      | list_nil () => ()
-      | list_cons _ => let
+      case+ glist_view(s2ess) of
+      | ~GLnil() => ()
+      | ~GLcons(_, _) => let
           val () = prstr ("; ") in fprint_s2explstlst (out, s2ess)
         end // end of [list_cons]
     ) : void // end of [val]
     val () = prstr ")"
   } (* end of [S2Eextype] *)
 //
-| S2Evar (x) => {
+| ~S2Evar (x) => {
     val () = prstr "S2Evar("
     val () = fprint_s2var (out, x)
     val ((*closing*)) = prstr ")"
   } (* end of [S2Evar] *)
-| S2EVar (X) => {
+| ~S2EVar (X) => {
     val () = prstr "S2EVar("
     val () = fprint_s2Var (out, X)
     val ((*closing*)) = prstr ")"
   } (* end of [S2EVar] *)
 //
-| S2Ehole (s2h) => {
+| ~S2Ehole (s2h) => {
     val () = prstr "S2Ehole("
     val () = fprint_s2hole (out, s2h)
     val ((*closing*)) = prstr ")"
   } (* end of [S2Ehole] *)
 //
-| S2Edatcontyp
+| ~S2Edatcontyp
     (d2c, arg) => {
     val () = prstr "S2Edatcontyp("
     val () = fprint_d2con (out, d2c)
@@ -343,7 +364,7 @@ case+ x.s2exp_node of
     val () = fprint_s2explst (out, arg)
     val ((*closing*)) = prstr ")"
   } // end of [S2Edatcontyp]
-| S2Edatconptr
+| ~S2Edatconptr
     (d2c, rt, arg) => {
     val () = prstr "S2Edatconptr("
     val () = fprint_d2con (out, d2c)
@@ -354,7 +375,7 @@ case+ x.s2exp_node of
     val ((*closing*)) = prstr ")"
   } // end of [S2Edatconptr]
 //
-| S2Eat
+| ~S2Eat
     (s2e1, s2e2) => {
     val () = prstr "S2Eat("
     val () = fprint_s2exp (out, s2e1)
@@ -362,18 +383,18 @@ case+ x.s2exp_node of
     val () = fprint_s2exp (out, s2e2)
     val () = prstr ")"
   } (* end of [S2Eat] *)
-| S2Esizeof (s2e) => {
+| ~S2Esizeof (s2e) => {
     val () = prstr "S2Esizeof("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   } // end of [S2Esizeof]
 //
-| S2Eeff (s2fe) => {
+| ~S2Eeff (s2fe) => {
     val () = prstr "S2Eeff("
     val () = fprint_s2eff (out, s2fe)
     val () = prstr ")"
   } (* end of [S2Eeff] *)
-| S2Eeqeq
+| ~S2Eeqeq
     (s2e1, s2e2) => {
     val () = prstr "S2Eeqeq("
     val () = fprint_s2exp (out, s2e1)
@@ -382,7 +403,7 @@ case+ x.s2exp_node of
     val () = prstr ")"
   } (* end of [S2Eeqeq] *)
 //
-| S2Eproj
+| ~S2Eproj
   (
     s2ae, s2te, s2ls
   ) => {
@@ -395,7 +416,7 @@ case+ x.s2exp_node of
     val () = prstr ")"
   } // end of [S2Eproj]
 //
-| S2Eapp
+| ~S2Eapp
   (
     s2e_fun, s2es_arg
   ) => {
@@ -406,7 +427,7 @@ case+ x.s2exp_node of
     val () = prstr ")"
   } // end of [S2Eapp]
 //
-| S2Elam
+| ~S2Elam
   (
     s2vs_arg, s2e_body
   ) => {
@@ -417,19 +438,19 @@ case+ x.s2exp_node of
     val () = prstr ")"
   } // end of [S2Elam]
 //
-| S2Efun
+| ~S2Efun
   (
     fc, lin, s2fe, npf, s2es_arg, s2e_res
   ) => {
     val () = prstr "S2Efun("
     val () = fprint_funclo (out, fc)
     val () = prstr "; "
-    val () = fprintf (out, "lin=%i", @(lin))
+    val () = (fprint_string (out, "lin="); fprint_int (out, lin))
     val () = prstr "; "
     val () = prstr "eff="
     val () = fprint_s2eff (out, s2fe)
     val () = prstr "; "
-    val () = fprintf (out, "npf=%i", @(npf))
+    val () = (fprint_string (out, "npf="); fprint_int (out, npf))
     val () = prstr "; "
     val () = fprint_s2explst (out, s2es_arg)
     val () = prstr "; "
@@ -437,7 +458,7 @@ case+ x.s2exp_node of
     val () = prstr ")"
   } (* end of [S2Efun] *)
 //
-| S2Emetfun
+| ~S2Emetfun
   (
     opt, s2es_met, s2e_body
   ) => {
@@ -445,16 +466,16 @@ case+ x.s2exp_node of
     val () = fprint_s2explst (out, s2es_met)
     val () = prstr "; "
     val () = (
-      case+ opt of
-      | Some stamp => $STMP.fprint_stamp (out, stamp)
-      | None () => ()
+      case+ gopt_view(opt) of
+      | ~GOsome(stamp) => $STMP.fprint_stamp (out, stamp)
+      | ~GOnone() => ()
     ) // end of [val]
     val () = prstr "; "
     val () = fprint_s2exp (out, s2e_body)
     val () = prstr ")"
   } (* end of [S2Emetfun] *)
 //
-| S2Emetdec
+| ~S2Emetdec
     (s2es1, s2es2) => {
     val () = prstr "S2Emetdec(("
     val () = fprint_s2explst (out, s2es1)
@@ -463,21 +484,21 @@ case+ x.s2exp_node of
     val () = prstr "))"
   } (* end of [S2Emetdec] *)
 //
-| S2Etop
+| ~S2Etop
     (knd, s2e) => {
     val () = prstr "S2Etop("
-    val () = fprintf (out, "knd=%i", @(knd))
+    val () = (fprint_string (out, "knd="); fprint_int (out, knd))
     val () = prstr "; "
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   } // end of [S2Etop]
-| S2Ewithout (s2e) => {
+| ~S2Ewithout (s2e) => {
     val () = prstr "S2Ewithout("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   }
 //
-| S2Etyarr
+| ~S2Etyarr
   (
     s2e_elt, s2es_dim
   ) => {
@@ -487,26 +508,26 @@ case+ x.s2exp_node of
     val () = fprint_s2explst (out, s2es_dim)
     val () = prstr ")"
   } // end of [S2Etyarr]
-| S2Etyrec
+| ~S2Etyrec
   (
     knd, npf, ls2es
   ) => {
     val () = prstr "S2Etyrec("
     val () = fprint_tyreckind (out, knd)
     val () = prstr "; "
-    val () = fprintf (out, "npf=%i", @(npf))
+    val () = (fprint_string (out, "npf="); fprint_int (out, npf))
     val () = prstr "; "
     val () = fprint_labs2explst (out, ls2es)
     val () = prstr ")"
   } // end of [S2Etyrec]
 //
-| S2Einvar (s2e) => {
+| ~S2Einvar (s2e) => {
     val () = prstr "S2Einvar("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   } // end of [S2Einvar]
 //
-| S2Erefarg (knd, s2e) =>
+| ~S2Erefarg (knd, s2e) =>
   { // knd=0/1:val/ref
     val () = prstr "S2Erefarg("
     val () = fprint_int (out, knd)
@@ -515,13 +536,13 @@ case+ x.s2exp_node of
     val () = prstr ")"
   } (* end of [S2Erefarg] *)
 //
-| S2Evararg (s2e) => {
+| ~S2Evararg (s2e) => {
     val () = prstr "S2Evararg("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   } // end of [S2Evararg]
 //
-| S2Eexi (
+| ~S2Eexi (
     s2vs, s2ps, s2e
   ) => {
     val () = prstr "S2Eexi("
@@ -532,7 +553,7 @@ case+ x.s2exp_node of
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   } (* end of [S2Eexi] *)
-| S2Euni (
+| ~S2Euni (
     s2vs, s2ps, s2e
   ) => {
     val () = prstr "S2Euni("
@@ -544,7 +565,7 @@ case+ x.s2exp_node of
     val ((*closing*)) = prstr ")"
   } (* end of [S2Euni] *)
 //
-| S2Ewthtype
+| ~S2Ewthtype
     (s2e, ws2es) => {
     val () = prstr "S2Ewth("
     val () = fprint_s2exp (out, s2e)
@@ -553,7 +574,7 @@ case+ x.s2exp_node of
     val ((*closing*)) = prstr ")"
   } (* end of [S2Ewthtype] *)
 //
-| S2Eerrexp((*void*)) => prstr "S2Eerrexp()"
+| ~S2Eerrexp((*void*)) => prstr "S2Eerrexp()"
 //
 (*
 | _ => prstr "S2E...(...)"
@@ -570,7 +591,7 @@ prerr_s2explst (xs) = fprint_s2explst (stderr_ref, xs)
 
 implement
 fprint_s2explst
-  (out, xs) = $UT.fprintlst (out, xs, ", ", fprint_s2exp)
+  (out, xs) = $UT.fprintlst<s2exp> (out, xs, ", ", fprint_s2exp)
 // end of [fprint_s2explst]
 
 (* ****** ****** *)
@@ -580,11 +601,11 @@ fprint_s2expopt
   (out, opt) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
-  case+ opt of
-  | Some (s2e) => (
+  case+ gopt_view(opt) of
+  | ~GOsome(s2e) => (
       prstr "Some("; fprint_s2exp (out, s2e); prstr ")"
     ) // end of [Some]
-  | None () => prstr "None()"
+  | ~GOnone() => prstr "None()"
 end // end of [fprint_s2expopt]
 
 implement
@@ -596,7 +617,7 @@ prerr_s2expopt (opt) = fprint_s2expopt (stderr_ref, opt)
 
 implement
 fprint_s2explstlst
-  (out, xss) = $UT.fprintlst (out, xss, "; ", fprint_s2explst)
+  (out, xss) = $UT.fprintlst<s2explst> (out, xss, "; ", fprint_s2explst)
 // end of [fprint_s2explstlst]
 
 (* ****** ****** *)
@@ -606,21 +627,22 @@ fprint_s2explstopt
   (out, opt) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
-  case+ opt of
-  | Some (s2es) => (
+  case+ gopt_view(opt) of
+  | ~GOsome(s2es) => (
       prstr "Some("; fprint_s2explst (out, s2es); prstr ")"
     ) // end of [Some]
-  | None () => ()
+  | ~GOnone() => ()
 end // end of [fprint_s2explstopt]
 
 (* ****** ****** *)
 
 extern
-fun fprint_labs2exp : fprint_type (labs2exp)
+fun fprint_labs2exp (out: FILEref, x: labs2exp): void
 
 implement
 fprint_labs2exp (out, x) = {
-  val SLABELED (l, name, s2e) = x
+  val l = labs2exp_lab (x)
+  val s2e = labs2exp_elt (x)
   val () = $LAB.fprint_label (out, l)
   val () = fprint_string (out, "=")
   val () = fprint_s2exp (out, s2e)
@@ -628,7 +650,7 @@ fprint_labs2exp (out, x) = {
 
 implement
 fprint_labs2explst (out, xs) =
-  $UT.fprintlst (out, xs, ", ", fprint_labs2exp)
+  $UT.fprintlst<labs2exp> (out, xs, ", ", fprint_labs2exp)
 // end of [fprint_labs2explst]
 
 (* ****** ****** *)
@@ -642,9 +664,9 @@ fun loop (
 ) : void = let
 in
 //
-case+ xs of
-| WTHS2EXPLSTnil () => ()
-| WTHS2EXPLSTcons_invar
+case+ wths2explst_view(xs) of
+| ~WTHS2EXPLSTnil () => ()
+| ~WTHS2EXPLSTcons_invar
     (k, x, xs) => let
     val () = if i > 0
       then fprint_string (out, ", ")
@@ -656,7 +678,7 @@ case+ xs of
   in
     loop (out, xs, i + 1)
   end // end of [WTHS2EXPLSTcons_invar]
-| WTHS2EXPLSTcons_trans
+| ~WTHS2EXPLSTcons_trans
     (k, x, xs) => let
     val () = if i > 0
       then fprint_string (out, ", ")
@@ -668,9 +690,9 @@ case+ xs of
   in
     loop (out, xs, i + 1)
   end // end of [WTHS2EXPLSTcons_trans]
-| WTHS2EXPLSTcons_none (xs) => let
+| ~WTHS2EXPLSTcons_none (xs) => let
     val () = if i > 0 then fprint_string (out, ", ")
-    val () = fprintf (out, "none()", @())
+    val () = fprint_string (out, "none()")
   in
     loop (out, xs, i + 1)
   end // end of [WTHS2EXPLSTcons_none]
@@ -689,15 +711,15 @@ fprint_s2lab
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ s2l of
-| S2LABlab (lab) => {
+case+ s2lab_view(s2l) of
+| ~S2LABlab (lab) => {
     val () = prstr "S2LABlab("
     val () = $LAB.fprint_label (out, lab)
     val () = prstr ")"
   }
-| S2LABind (ind) => {
+| ~S2LABind (ind) => {
     val () = prstr "S2LABind("
-    val () = $UT.fprintlst (out, ind, ", ", fprint_s2exp)
+    val () = $UT.fprintlst<s2exp> (out, ind, ", ", fprint_s2exp)
     val () = prstr ")"
   }
 //
@@ -710,7 +732,7 @@ prerr_s2lab (x) = fprint_s2lab (stderr_ref, x)
 
 implement
 fprint_s2lablst
-  (out, xs) = $UT.fprintlst (out, xs, " ,", fprint_s2lab)
+  (out, xs) = $UT.fprintlst<s2lab> (out, xs, " ,", fprint_s2lab)
 // end of [fprint_s2lablst]
 
 (* ****** ****** *)
@@ -721,20 +743,20 @@ fprint_s2eff
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ s2fe of
-| S2EFFset
+case+ s2eff_view(s2fe) of
+| ~S2EFFset
     (efs) => {
     val () = prstr "S2EFFset("
     val () = $EFF.fprint_effset (out, efs)
     val () = prstr ")"
   } // end of [S2EFFset]
-| S2EFFexp
+| ~S2EFFexp
     (s2e) => {
     val () = prstr "S2EFFexp("
     val () = fprint_s2exp (out, s2e)
     val () = prstr ")"
   } // end of [S2EFFexp]
-| S2EFFadd
+| ~S2EFFadd
     (s2fe1, s2fe2) => {
     val () = prstr "S2EFFadd("
     val () = fprint_s2eff (out, s2fe1)
@@ -754,14 +776,14 @@ prerr_s2eff (x) = fprint_s2eff (stderr_ref, x)
 
 implement
 fprint_s2qua (out, s2q) = {
-  val () = fprint_s2varlst (out, s2q.s2qua_svs)
+  val () = fprint_s2varlst (out, s2q.s2qua_svs())
   val () = fprint_string (out, "; ")
-  val () = fprint_s2explst (out, s2q.s2qua_sps)
+  val () = fprint_s2explst (out, s2q.s2qua_sps())
 } // end of [fprint_s2qua]
 
 implement
 fprint_s2qualst (out, s2qs) =
-  $UT.fprintlst (out, s2qs, "; ", fprint_s2qua)
+  $UT.fprintlst<s2qua> (out, s2qs, "; ", fprint_s2qua)
 // end of [fprint_s2qualst]
 
 implement
@@ -776,18 +798,18 @@ fprint_s2rtext (out, x) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ x of
-| S2TEsrt (s2t) => {
+case+ s2rtext_view(x) of
+| ~S2TEsrt (s2t) => {
     val () = prstr "S2TEsrt("
     val () = fprint_s2rt (out, s2t)
     val () = prstr ")"
   }
-| S2TEsub _ => {
+| ~S2TEsub _ => {
     val () = prstr "S2TEsub("
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
-| S2TEerr () => prstr "S2TEerr()"
+| ~S2TEerr () => prstr "S2TEerr()"
 //
 end // end of [fprint_s2rtext]
 
@@ -798,10 +820,10 @@ fprint_s2exparg (out, s2a) = let
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ s2a.s2exparg_node of
-| S2EXPARGone () => prstr "S2EXPARGone()"
-| S2EXPARGall () => prstr "S2EXPARGall()"
-| S2EXPARGseq (s2es) => {
+case+ s2exparg_node_view(s2a.s2exparg_node()) of
+| ~S2EXPARGone () => prstr "S2EXPARGone()"
+| ~S2EXPARGall () => prstr "S2EXPARGall()"
+| ~S2EXPARGseq (s2es) => {
     val () = prstr "S2EXPARGseq("
     val () = fprint_s2explst (out, s2es)
     val () = prstr ")"
@@ -811,7 +833,7 @@ end // end of [fprint_s2exparg]
 
 implement
 fprint_s2exparglst (out, xs) =
-  $UT.fprintlst (out, xs, ", ", fprint_s2exparg)
+  $UT.fprintlst<s2exparg> (out, xs, ", ", fprint_s2exparg)
 // end of [fprint_s2exparglst]
 
 (* ****** ****** *)
@@ -822,15 +844,15 @@ fprint_sp2at
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ sp2t.sp2at_node of
-| SP2Tcon (s2c, s2vs) => {
+case+ sp2at_node_view(sp2t.sp2at_node()) of
+| ~SP2Tcon (s2c, s2vs) => {
     val () = prstr "SP2Tcon("
     val () = fprint_s2cst (out, s2c)
     val () = prstr "; "
     val () = fprint_s2varlst (out, s2vs)
     val () = prstr ")"
   } // end of [SP2Tcon]
-| SP2Terr () => prstr "SP2Terr()"
+| ~SP2Terr () => prstr "SP2Terr()"
 //
 end // end of [fprint_sp2at]
 

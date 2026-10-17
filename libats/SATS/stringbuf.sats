@@ -198,7 +198,7 @@ stringbuf_insert_val(sbf: !stringbuf, x: a): int
 (* ****** ****** *)
 
 fun{a:t0p}
-stringbuf_insert_list(sbf: !stringbuf, x: List(a)): int
+stringbuf_insert_list(sbf: !stringbuf, x: !List_vt(a)): int
 
 (* ****** ****** *)
 //

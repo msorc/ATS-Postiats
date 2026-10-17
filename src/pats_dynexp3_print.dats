@@ -33,8 +33,26 @@
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_dynexp3_print.dats, see PORTING.md, "Level 3 trees (dynexp3)")
+//
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
 staload UT = "./pats_utils.sats"
 staload _(*anon*) = "./pats_utils.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
@@ -56,6 +74,7 @@ macdef fprint_d0ynq = $SYN.fprint_d0ynq
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 staload "./pats_dynexp3.sats"
@@ -68,20 +87,20 @@ fprint_p3at
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ p3t0.p3at_node of
+case+ p3at_node_view(p3t0.p3at_node()) of
 //
-| P3Tany (d2v) => {
+| ~P3Tany (d2v) => {
     val () = prstr "P3Tany("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   }
-| P3Tvar (d2v) => {
+| ~P3Tvar (d2v) => {
     val () = prstr "P3Tvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   }
 //
-| P3Tcon (
+| ~P3Tcon (
     pck, d2c, npf, p3ts
   ) => {
     val () = prstr "P3Tcon("
@@ -95,30 +114,30 @@ case+ p3t0.p3at_node of
     val () = prstr ")"
   } // end of [P3Tcon]
 //
-| P3Tint (i) =>
-    fprintf (out, "P3Tint(%i)", @(i))
-| P3Tintrep (s) =>
-    fprintf (out, "P3Tintrep(%s)", @(s))
+| ~P3Tint (i) =>
+    (prstr "P3Tint("; fprint_int (out, i); prstr ")")
+| ~P3Tintrep (s) =>
+    (prstr "P3Tintrep("; fprint_string (out, s); prstr ")")
 //
-| P3Tbool (b) => let
+| ~P3Tbool (b) => let
     val name = if b then "true" else "false"
   in
-    fprintf (out, "P3Tbool(%s)", @(name))
+    (prstr "P3Tbool("; fprint_string (out, name); prstr ")")
   end // end of [P3Tbool]
-| P3Tchar (c) =>
-    fprintf (out, "P3Tchar(%c)", @(c))
-| P3Tfloat (rep) =>
-    fprintf (out, "P3Tfloat(%s)", @(rep))
-| P3Tstring (str) =>
-    fprintf (out, "P3Tstring(%s)", @(str))
+| ~P3Tchar (c) =>
+    (prstr "P3Tchar("; fprint_char (out, c); prstr ")")
+| ~P3Tfloat (rep) =>
+    (prstr "P3Tfloat("; fprint_string (out, rep); prstr ")")
+| ~P3Tstring (str) =>
+    (prstr "P3Tstring("; fprint_string (out, str); prstr ")")
 //
-| P3Ti0nt (i) => prstr "P3Ti0nt(...)"
-| P3Tf0loat (f) => prstr "P3Tf0loat(...)"
+| ~P3Ti0nt (i) => prstr "P3Ti0nt(...)"
+| ~P3Tf0loat (f) => prstr "P3Tf0loat(...)"
 //
-| P3Tempty () => prstr "P3Tempty()"
+| ~P3Tempty () => prstr "P3Tempty()"
 //
-| P3Trec _ => prstr "P3Trec(...)"
-| P3Tlst (
+| ~P3Trec _ => prstr "P3Trec(...)"
+| ~P3Tlst (
     lin, s2e_elt, p3ts
   ) => {
     val () = prstr "P3Tlst("
@@ -130,7 +149,7 @@ case+ p3t0.p3at_node of
     val () = prstr ")"
   }
 //
-| P3Trefas (d2v, p3t) => {
+| ~P3Trefas (d2v, p3t) => {
     val () = prstr "P3Trefas("
     val () = fprint_d2var (out, d2v)
     val () = prstr " -> "
@@ -138,7 +157,7 @@ case+ p3t0.p3at_node of
     val () = prstr ")"
   } // end of [P3Trefas]
 //
-| P3Texist (s2vs, p3t) => {
+| ~P3Texist (s2vs, p3t) => {
     val () = prstr "P3Texist("
     val () = fprint_s2varlst (out, s2vs)
     val () = prstr "; "
@@ -146,13 +165,13 @@ case+ p3t0.p3at_node of
     val () = prstr ")"
   } // end of [P3Texist]
 //
-| P3Tvbox (d2v) => {
+| ~P3Tvbox (d2v) => {
     val () = prstr "P3Tvbox("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   } // end of [P3Tvbox]
 //
-| P3Tann (p3t, s2e) => {
+| ~P3Tann (p3t, s2e) => {
     val () = prstr "P3Tann("
     val () = fprint_p3at (out, p3t)
     val () = prstr " : "
@@ -160,7 +179,7 @@ case+ p3t0.p3at_node of
     val () = prstr ")"
   } // end of [P3Tann]
 //
-| P3Terrpat ((*void*)) => prstr "P3Terr()"
+| ~P3Terrpat ((*void*)) => prstr "P3Terr()"
 // end of [p3at_node]
 end // end of [fprint_p3at]
 
@@ -173,7 +192,7 @@ prerr_p3at (p3t) = fprint_p3at (stderr_ref, p3t)
 
 implement
 fprint_p3atlst (out, xs) =
-  $UT.fprintlst (out, xs, ", ", fprint_p3at)
+  $UT.fprintlst<p3at> (out, xs, ", ", fprint_p3at)
 // end of [fprint_p3atlst]
 
 (* ****** ****** *)
@@ -184,89 +203,89 @@ fprint_d3exp
   macdef prstr (s) = fprint_string (out, ,(s))
 in
 //
-case+ d3e0.d3exp_node of
+case+ d3exp_node_view(d3e0.d3exp_node()) of
 //
-| D3Ecst (d2c) => {
+| ~D3Ecst (d2c) => {
     val () = prstr "D3Ecst("
     val () = fprint_d2cst (out, d2c)
     val () = prstr ")"
   }
-| D3Evar (d2v) => {
+| ~D3Evar (d2v) => {
     val () = prstr "D3Evar("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   }
 //
-| D3Eint (i) => {
+| ~D3Eint (i) => {
     val () = prstr "D3Eint("
     val () = fprint_int (out, i)
     val () = prstr ")"
   }
-| D3Eintrep (rep) => {
+| ~D3Eintrep (rep) => {
     val () = prstr "D3Eintrep("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
-| D3Ebool (b) => {
+| ~D3Ebool (b) => {
     val () = prstr "D3Ebool("
     val () = fprint_bool (out, b)
     val () = prstr ")"
   }
-| D3Echar (c) => {
+| ~D3Echar (c) => {
     val () = prstr "D3Echar("
     val () = fprint_char (out, c)
     val () = prstr ")"
   }
-| D3Efloat (rep) => {
+| ~D3Efloat (rep) => {
     val () = prstr "D3Efloat("
     val () = fprint_string (out, rep)
     val () = prstr ")"
   }
-| D3Estring (str) => {
+| ~D3Estring (str) => {
     val () = prstr "D3Estring("
     val () = fprint_string (out, str)
     val () = prstr ")"
   }
 //
-| D3Ei0nt (tok) => {
+| ~D3Ei0nt (tok) => {
     val () = prstr "D3Ei0nt("
     val () = $SYN.fprint_i0nt (out, tok)
     val () = prstr ")"
   }
-| D3Ef0loat (tok) => {
+| ~D3Ef0loat (tok) => {
     val () = prstr "D3Ef0loat("
     val () = $SYN.fprint_f0loat (out, tok)
     val () = prstr ")"
   }
 //
-| D3Ecstsp (csp) => {
+| ~D3Ecstsp (csp) => {
     val () = prstr "D3Ecstsp("
     val () = $SYN.fprint_cstsp (out, csp)
     val () = prstr ")"
   }
 //
-| D3Etyrep (s2e) => {
+| ~D3Etyrep (s2e) => {
     val () = prstr "D3Etyrep("
     val () = fprint_s2exp (out, s2e) // $tyrep(...)
     val () = prstr ")"
   }
 //
-| D3Eliteral (d3e) => {
+| ~D3Eliteral (d3e) => {
     val () = prstr "D3Eliteral("
     val () = fprint_d3exp (out, d3e) // int, float, string
     val () = prstr ")"
   }
 //
-| D3Etop () => prstr "D3Etop()"
-| D3Eempty () => prstr "D3Eempty()"
+| ~D3Etop () => prstr "D3Etop()"
+| ~D3Eempty () => prstr "D3Eempty()"
 //
-| D3Eextval
+| ~D3Eextval
     (name) => {
     val () = prstr "D3Eextval("
     val () = fprint_string (out, name)
     val ((*closing*)) = prstr ")"
   }
-| D3Eextfcall
+| ~D3Eextfcall
     (_fun, _arg) => {
     val () = prstr "D3Eextfcall("
     val () = fprint_string (out, _fun)
@@ -274,7 +293,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_d3explst (out, _arg)
     val ((*closing*)) = prstr ")"
   }
-| D3Eextmcall
+| ~D3Eextmcall
     (_obj, _mtd, _arg) => {
     val () = prstr "D3Eextmcall("
     val () = fprint_d3exp (out, _obj)
@@ -285,7 +304,7 @@ case+ d3e0.d3exp_node of
     val ((*closing*)) = prstr ")"
   }
 //
-| D3Econ (
+| ~D3Econ (
     d2c, npf, d3es
   ) => {
     val () = prstr "D3Econ("
@@ -297,14 +316,14 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Etmpcst (d2c, _) => {
+| ~D3Etmpcst (d2c, _) => {
     val () = prstr "D3Etmpcst("
     val () = fprint_d2cst (out, d2c)
     val () = prstr "; "
     val () = prstr "..."
     val () = prstr ")"
   }
-| D3Etmpvar (d2v, _) => {
+| ~D3Etmpvar (d2v, _) => {
     val () = prstr "D3Etmpvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr "; "
@@ -312,25 +331,25 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Efoldat (d3e) => {
+| ~D3Efoldat (d3e) => {
     val () = prstr "D3Efoldat("
     val () = fprint_d3exp (out, d3e)
     val () = prstr ")"
   }
-| D3Efreeat (d3e) => {
+| ~D3Efreeat (d3e) => {
     val () = prstr "D3Efreeat("
     val () = fprint_d3exp (out, d3e)
     val () = prstr ")"
   }
 //
-| D3Elet _ => prstr "D3Elet(...)"
+| ~D3Elet _ => prstr "D3Elet(...)"
 //
-| D3Eapp_sta (d3e) => {
+| ~D3Eapp_sta (d3e) => {
     val () = prstr "D3Eapp_sta("
     val () = fprint_d3exp (out, d3e)
     val () = prstr ")"
   }
-| D3Eapp_dyn (
+| ~D3Eapp_dyn (
     d3e, npf, d3es
   ) => {
     val () = prstr "D3Eapp_dyn("
@@ -343,7 +362,7 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   } // end of [D3Eapp_dyn]
 //
-| D3Eitem
+| ~D3Eitem
     (d2i, t2mas) => {
     val () = prstr "D3Eitem("
     val () = fprint_d2itm (out, d2i)
@@ -352,7 +371,7 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Eif (
+| ~D3Eif (
     _cond, _then, _else
   ) => {
     val () = prstr "D3Eif("
@@ -363,7 +382,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_d3exp (out, _else)
     val () = prstr ")"
   }
-| D3Esif (
+| ~D3Esif (
     _cond, _then, _else
   ) => {
     val () = prstr "D3Esif("
@@ -375,22 +394,22 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Ecase _ => {
+| ~D3Ecase _ => {
     val () = prstr "D3Ecase("
     val () = prstr "..."
     val () = prstr ")"
   }
-| D3Escase _ => {
+| ~D3Escase _ => {
     val () = prstr "D3Escase("
     val () = prstr "..."
     val () = prstr ")"
   }
 //
-| D3Eifcase _ => {
+| ~D3Eifcase _ => {
     val () = prstr "D3Eifcase(...)"
   } (* [D3Eifcase] *)
 //
-| D3Elst (
+| ~D3Elst (
     lin, s2e, d3es
   ) => {
     val () = prstr "D3Elst("
@@ -401,7 +420,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_d3explst (out, d3es)
     val () = prstr ")"
   } // end of [D3Elst]
-| D3Etup (
+| ~D3Etup (
     knd, npf, d3es
   ) =>  {
     val () = prstr "D3Etup("
@@ -412,14 +431,14 @@ case+ d3e0.d3exp_node of
     val () = fprint_d3explst (out, d3es)
     val () = prstr ")"
   } // end of [D3Etup]
-| D3Erec _ => prstr "D3Erec(...)"
-| D3Eseq (d3es) => {
+| ~D3Erec _ => prstr "D3Erec(...)"
+| ~D3Eseq (d3es) => {
     val () = prstr "D3Eseq("
     val () = fprint_d3explst (out, d3es)
     val () = prstr ")"
   } // end of [D3Eseq]
 //
-| D3Eselab (d3e, d3ls) => {
+| ~D3Eselab (d3e, d3ls) => {
     val () = prstr "D3Eselab("
     val () = fprint_d3exp (out, d3e)
     val () = prstr "; "
@@ -427,13 +446,13 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Eptrofvar
+| ~D3Eptrofvar
     (d2v) => {
     val () = prstr "D3Eptrofvar("
     val () = fprint_d2var (out, d2v)
     val () = prstr ")"
   }
-| D3Eptrofsel
+| ~D3Eptrofsel
     (d3e, s2rt, d3ls) => {
     val () = prstr "D3Eptrofsel("
     val () = fprint_d3exp (out, d3e)
@@ -443,7 +462,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
-| D3Eviewat
+| ~D3Eviewat
     (d3e, d3ls) => {
     val () = prstr "D3Eviewat("
     val () = fprint_d3exp (out, d3e)
@@ -452,7 +471,7 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Erefarg (
+| ~D3Erefarg (
     refval, freeknd, d3e
   ) => {
     val () = prstr "D3Erefarg("
@@ -464,7 +483,7 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Esel_var (d2v, s2rt, d3ls) => {
+| ~D3Esel_var (d2v, s2rt, d3ls) => {
     val () = prstr "D3Esel_var("
     val () = fprint_d2var (out, d2v)
     val () = prstr "; "
@@ -473,7 +492,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
-| D3Esel_ptr (d3e, s2rt, d3ls) => {
+| ~D3Esel_ptr (d3e, s2rt, d3ls) => {
     val () = prstr "D3Esel_ptr("
     val () = fprint_d3exp (out, d3e)
     val () = prstr "; "
@@ -482,7 +501,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
-| D3Esel_ref (d3e, s2rt, d3ls) => {
+| ~D3Esel_ref (d3e, s2rt, d3ls) => {
     val () = prstr "D3Esel_ref("
     val () = fprint_d3exp (out, d3e)
     val () = prstr "; "
@@ -492,17 +511,17 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Eassgn_var _ => prstr "D3Eassgn_var(...)"
-| D3Eassgn_ptr _ => prstr "D3Eassgn_ptr(...)"
-| D3Eassgn_ref _ => prstr "D3Eassgn_ref(...)"
+| ~D3Eassgn_var _ => prstr "D3Eassgn_var(...)"
+| ~D3Eassgn_ptr _ => prstr "D3Eassgn_ptr(...)"
+| ~D3Eassgn_ref _ => prstr "D3Eassgn_ref(...)"
 //
-| D3Exchng_var _ => prstr "D3Exchng_var(...)"
-| D3Exchng_ptr _ => prstr "D3Exchng_ptr(...)"
-| D3Exchng_ref _ => prstr "D3Exchng_ref(...)"
+| ~D3Exchng_var _ => prstr "D3Exchng_var(...)"
+| ~D3Exchng_ptr _ => prstr "D3Exchng_ptr(...)"
+| ~D3Exchng_ref _ => prstr "D3Exchng_ref(...)"
 //
-| D3Eviewat_assgn _ => prstr "D3Eviewat_assgn(...)"
+| ~D3Eviewat_assgn _ => prstr "D3Eviewat_assgn(...)"
 //
-| D3Earrpsz
+| ~D3Earrpsz
     (s2e, d3es, asz) => {
     val () = prstr "D3Earrpsz("
     val () = fprint_s2exp (out, s2e)
@@ -512,7 +531,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_int (out, asz)
     val () = prstr ")"
   }
-| D3Earrinit
+| ~D3Earrinit
   (
     s2e_elt, d3e_asz, d3es_elt
   ) => {
@@ -525,12 +544,12 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   } // end of [D3Earrinit]
 //
-| D3Eraise(d3e) => {
+| ~D3Eraise(d3e) => {
     val () = prstr "D3Eraise("
     val () = fprint_d3exp(out, d3e)
     val () = prstr ")"
   }
-| D3Eeffmask
+| ~D3Eeffmask
     (s2fe, d3e) => {
     val () = prstr "D3Eraise("
     val () = fprint_s2eff (out, s2fe)
@@ -539,13 +558,13 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Evararg(d3es) => {
+| ~D3Evararg(d3es) => {
     val () = prstr "D3Evararg("
     val () = fprint_d3explst(out, d3es)
     val ((*closing*)) = prstr ")"
   }
 //
-| D3Evcopyenv
+| ~D3Evcopyenv
     (knd, d2v) => {
     val () = prstr "D3Evcopyenv("
     val () = fprint_int (out, knd)
@@ -554,14 +573,14 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Etempenver(d2vs) =>
+| ~D3Etempenver(d2vs) =>
   {
     val () = prstr "D3Etempenver("
     val () = fprint_d2varlst (out, d2vs)
     val () = prstr ")"
   }
 //
-| D3Eann_type
+| ~D3Eann_type
     (d3e, ann) => {
     val () = prstr "D3Eann_type("
     val () = fprint_d3exp (out, d3e)
@@ -570,7 +589,7 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Elam_dyn (
+| ~D3Elam_dyn (
     lin, npf, _arg, _body
   ) => {
     val () = prstr "D3Elam_dyn("
@@ -585,8 +604,8 @@ case+ d3e0.d3exp_node of
     val () = fprint_d3exp (out, _body)
     val () = prstr ")"
   } // end of [D3Elam_dyn]
-| D3Elaminit_dyn _ => prstr "D3Elaminit_dyn(...)"
-| D3Elam_sta (
+| ~D3Elaminit_dyn _ => prstr "D3Elaminit_dyn(...)"
+| ~D3Elam_sta (
     s2vs, s2ps, _body
   ) => {
     val () = prstr "D3Elam_sta("
@@ -597,7 +616,7 @@ case+ d3e0.d3exp_node of
     val () = fprint_d3exp (out, _body)
     val () = prstr ")"
   }
-| D3Elam_met
+| ~D3Elam_met
     (_met, _body) => {
     val () = prstr "D3Elam_met("
     val () = fprint_s2explst (out, _met)
@@ -606,7 +625,7 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Efix
+| ~D3Efix
     (knd, d2v, d3e) => {
     val () = prstr "D3Efix("
     val () = fprint_int (out, knd)
@@ -617,19 +636,19 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Edelay (d3e) => {
+| ~D3Edelay (d3e) => {
     val () = prstr "D3Edelay("
     val () = fprint_d3exp (out, d3e)
     val () = prstr ")"
   }
-| D3Eldelay (d3e, opt) => {
+| ~D3Eldelay (d3e, opt) => {
     val () = prstr "D3Eldelay("
     val () = fprint_d3exp (out, d3e)
     val () = prstr "; "
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
-| D3Elazyeval (lin, d3e) => {
+| ~D3Elazyeval (lin, d3e) => {
     val () = prstr "D3Elazyeval("
     val () = fprint_int (out, lin)
     val () = prstr "; "
@@ -637,29 +656,31 @@ case+ d3e0.d3exp_node of
     val () = prstr ")"
   }
 //
-| D3Eloop _ => {
+| ~D3Eloop _ => {
     val () = prstr "D3Eloop("
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
-| D3Eloopexn (knd) => {
-    val () = fprintf (out, "D3Eloopexn(%i)", @(knd))
+| ~D3Eloopexn (knd) => {
+    val () = prstr "D3Eloopexn("
+    val () = fprint_int (out, knd)
+    val () = prstr ")"
   }
 //
-| D3Etrywith _ => {
+| ~D3Etrywith _ => {
     val () = prstr "D3Etrywith("
     val () = fprint_string (out, "...")
     val () = prstr ")"
   }
 //
-| D3Esolverify
+| ~D3Esolverify
     (s2e_prop) => {
     val () = prstr "D3Esolverify("
     val () = fprint_s2exp (out, s2e_prop)
     val () = prstr ")"
   }
 //
-| D3Eerrexp ((*void*)) => prstr "D3Eerrexp()"
+| ~D3Eerrexp ((*void*)) => prstr "D3Eerrexp()"
 //
 (*
 | _ => {
@@ -680,7 +701,7 @@ prerr_d3exp (x) = fprint_d3exp (stderr_ref, x)
 
 implement
 fprint_d3explst (out, xs) =
-  $UT.fprintlst (out, xs, ", ", fprint_d3exp)
+  $UT.fprintlst<d3exp> (out, xs, ", ", fprint_d3exp)
 // end of [fprint_d3explst]
 
 (* ****** ****** *)
@@ -693,47 +714,47 @@ macdef prstr (s) = fprint_string (out, ,(s))
 //
 in
 //
-case+ d3c0.d3ecl_node of
+case+ d3ecl_node_view(d3c0.d3ecl_node()) of
 //
-| D3Cnone _ => prstr "D3Cnone()"
-| D3Clist _ => prstr "D3Clist(...)"
+| ~D3Cnone _ => prstr "D3Cnone()"
+| ~D3Clist _ => prstr "D3Clist(...)"
 //
 // HX: needed for compiling abstract types
 //
-| D3Csaspdec _ => prstr "D3Csaspdec(...)"
-| D3Creassume _ => prstr "D3Creassume(...)"
+| ~D3Csaspdec _ => prstr "D3Csaspdec(...)"
+| ~D3Creassume _ => prstr "D3Creassume(...)"
 //
-| D3Cextype _ => prstr "D3Cextype(...)"
-| D3Cextvar _ => prstr "D3Cextvar(...)"
-| D3Cextcode _ => prstr "D3Cextcode(...)"
+| ~D3Cextype _ => prstr "D3Cextype(...)"
+| ~D3Cextvar _ => prstr "D3Cextvar(...)"
+| ~D3Cextcode _ => prstr "D3Cextcode(...)"
 //
-| D3Cdatdecs _ => prstr "D3Cdatdecs(...)"
-| D3Cexndecs _ => prstr "D3Cexndecs(...)"
-| D3Cdcstdecs _ => prstr "D3Cdcstdecs(...)"
+| ~D3Cdatdecs _ => prstr "D3Cdatdecs(...)"
+| ~D3Cexndecs _ => prstr "D3Cexndecs(...)"
+| ~D3Cdcstdecs _ => prstr "D3Cdcstdecs(...)"
 //
-| D3Cimpdec _ => prstr "D3Cimpdec(...)"
+| ~D3Cimpdec _ => prstr "D3Cimpdec(...)"
 //
-| D3Cfundecs _ => prstr "D3Cfundecs(...)"
+| ~D3Cfundecs _ => prstr "D3Cfundecs(...)"
 //
-| D3Cvaldecs _ => prstr "D3Cvaldecs(...)"
-| D3Cvaldecs_rec _ => prstr "D3Cvaldecs(...)"
+| ~D3Cvaldecs _ => prstr "D3Cvaldecs(...)"
+| ~D3Cvaldecs_rec _ => prstr "D3Cvaldecs(...)"
 //
-| D3Cvardecs _ => prstr "D3Cvardecs(...)"
-| D3Cprvardecs _ => prstr "D3Cprvardecs(...)"
+| ~D3Cvardecs _ => prstr "D3Cvardecs(...)"
+| ~D3Cprvardecs _ => prstr "D3Cprvardecs(...)"
 //
-| D3Cinclude _ => prstr "D3Cinclude(...)"
+| ~D3Cinclude _ => prstr "D3Cinclude(...)"
 //
-| D3Cstaload _ => prstr "D3Cstaload(...)"
-| D3Cstaloadloc _ => prstr "D3Cstaloadloc(...)"
+| ~D3Cstaload _ => prstr "D3Cstaload(...)"
+| ~D3Cstaloadloc _ => prstr "D3Cstaloadloc(...)"
 //
-| D3Cdynload (cfil) =>
+| ~D3Cdynload (cfil) =>
   {
     val () = prstr "D3Cdynload("
     val () = $FIL.fprint_filename_full (out, cfil)
     val () = prstr ")"
   }
 //
-| D3Clocal _ => prstr "D3Clocal(...)"
+| ~D3Clocal _ => prstr "D3Clocal(...)"
 //
 end // end of [fprint_d3ecl]
 

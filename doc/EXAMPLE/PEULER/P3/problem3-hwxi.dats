@@ -28,9 +28,12 @@ HX_INTINF_targetloc
 "$PATSHOME/contrib\
 /atscntrb/atscntrb-hx-intinf"
 //
-#staload "{$HX_INTINF}/SATS/intinf_t.sats"
 //
-#staload _(*anon*) = "{$HX_INTINF}/DATS/intinf_t.dats"
+// HX-2026-10: no GC
+// the multiple-precision integers are linear
+//
+#staload "{$HX_INTINF}/SATS/intinf_vt.sats"
+//
 #staload _(*anon*) = "{$HX_INTINF}/DATS/intinf_vt.dats"
 //
 (* ****** ****** *)
@@ -88,7 +91,7 @@ extern prfun P3aux1_ft3 {n:nat}
 extern
 fun P3aux1_fun
   {n:nat | n >= 2}
-  (n: intinf n): [p:pos] (P3aux1 (n, p) | int p) = "P3aux1_fun"
+  (n: !intinf n): [p:pos] (P3aux1 (n, p) | int p) = "P3aux1_fun"
 //
 (* ****** ****** *)
 
@@ -103,13 +106,13 @@ P3aux1_fun {n} (n) = let
 //
 fun loop{p:pos}
 (
-  n: intinf n, p: int p
+  n: !intinf n, p: int p
 ) : intGt(0) = let
   val isgte = compare (n, p * p) >= 0
 in
 //
 if isgte then let
-  val r = n \nmod p
+  val r = nmod_intinf1_int (n, p)
 in
   if r = 0 then p else loop (n, p+1)
 end else 1 // end of [if]
@@ -155,7 +158,7 @@ fun
 mydiv
 {n:nat}{p:pos}
 (
-  n: intinf n, p: int p
+  n: !intinf n, p: int p
 ) : [q:int]
 (
   DIV (n, p, q) | intinf q
@@ -169,7 +172,7 @@ mydiv
 ) = (pf | q) where
 {
 //
-val q = div_intinf_int (n, p)
+val q = div_intinf1_int (n, p)
 //
 prval pf =
 __assert () where
@@ -184,7 +187,7 @@ __assert () where
 fun P3main
   { n:int |
     n >= 2 } // .<n>.
-  (n: intinf n)
+  (n: !intinf n)
 : [p:int] (P3 (n, p) | int p) = let
   val [p1:int]
     (pf_P3aux1 | p1) = P3aux1_fun (n)
@@ -217,6 +220,7 @@ if p1 >= 2 then let
     lemma (pf1_mul, pf_mul)
   end // end of [val]
   val (pf2_P3 | p2) = P3main (n2)
+  val () = intinf_free (n2)
   prval pf_P3 = P3_ft2 (pf_mul, pf1_P3, pf2_P3)
 in
   (pf_P3 | max (p1, p2))
@@ -244,11 +248,13 @@ main0 () =
   val N1 = 13195
   val N11 = intinf_make_int (N1)
   val (pf_P3 | p) = P3main (N11)
+  val () = intinf_free (N11)
   val () = println! "The largest prime factor of [" N1 "] is [" p "]."
 //
   val N2 = 600851475143L
   val N21 = intinf_make_lint (N2)
   val (pf_P3 | p) = P3main (N21)
+  val () = intinf_free (N21)
   val () = assertloc (p = 6857)
   val () = println! "The largest prime factor of [" N2 "] is [" p "]."
 //

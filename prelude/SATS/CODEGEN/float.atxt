@@ -459,6 +459,6 @@ macdef g0f2f (x) = g0float2float (,(x))
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "float_atxt.txt")
 %}\

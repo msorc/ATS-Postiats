@@ -1,12 +1,14 @@
 %{
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
-staload TIME = "libc/SATS/time.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 //
 dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 //
 %}\
 %{
@@ -98,49 +100,22 @@ RMF=rm -f
 
 ######
 #
-#make_entry("arith_overflow")
 #make_entry("coinflip")
 #make_entry("ferryman")
 #make_entry("fibver_loop")
 #make_entry("fibver_trec")
 #make_entry("matrixops")
 #
-#make2_entry("DTW0", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("LCS0", "-DATS_MEMALLOC_LIBC", "")
 #
-#make2_entry("absreimpl", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("autodiff", "-DATS_MEMALLOC_GCBDW -O2", "-lm -lgc")
-#make2_entry("fib_memo", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 #make2_entry("fourslot", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("foreach_getline", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("hanoi", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("intsqrt_cps", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("intsqrt_prf", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("lambda_cal1", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("lambda_cal2", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("monad_list", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("monad_maybe", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("monad_state", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("morse_enum", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("memoization", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("myfixptcomb", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("mysendmailist", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("passwdgen", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("queens_lazy", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("queens_loop", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("queens_comb", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("queens_lincomb", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("randerlin", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("readdirall", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("sieve", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("sllist_mapfree", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("stdlib_bsearch", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("strmat", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("tempfunctor", "-DATS_MEMALLOC_LIBC", "")
-#make2_entry("totient", "-DATS_MEMALLOC_LIBC", "-lm")
 #make2_entry("treap_man", "-DATS_MEMALLOC_LIBC", "")
 #make2_entry("wclines", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
-#make2_entry("word-chain", "-DATS_MEMALLOC_LIBC", "-L$(PATSLIB) -latslib")
 #
 ######
 
@@ -156,5 +131,5 @@ cleanall:: clean
 \
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
 %}\

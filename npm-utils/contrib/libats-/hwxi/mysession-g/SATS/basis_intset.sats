@@ -205,31 +205,35 @@ intset_ncomplement
 //
 (* ****** ****** *)
 //
+//
+// HX-2026-10: no GC
+// [fwork] is a (borrowed) flat closure
+//
 fun{}
-intset_foreach_cloref
+intset_foreach_clo
   {n:int}{xs:iset}
 (
   xs: intset(n, xs)
-, fwork: (natLt(n)) -<cloref1> void
+, fwork: &((natLt(n)) -<clo1> void)
 ) : void // end-of-function
 //
 fun{}
-intset2_foreach_cloref
+intset2_foreach_clo
   {n:int}{xs1,xs2:iset}
 (
   xs1: intset(n, xs1)
 , xs2: intset(n, xs2)
-, fwork: (natLt(n), natLt(n)) -<cloref1> void
+, fwork: &((natLt(n), natLt(n)) -<clo1> void)
 ) : void // end-of-function
 //
 (* ****** ****** *)
 //
 fun{}
-cintset_foreach_cloref
+cintset_foreach_clo
   {n:int}{xs:iset}
 (
   n: int(n), xs: intset(n, xs)
-, fwork: (natLt(n)) -<cloref1> void
+, fwork: &((natLt(n)) -<clo1> void)
 ) : void // end-of-function
 //
 (* ****** ****** *)

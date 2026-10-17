@@ -170,5 +170,5 @@ a onerous burden for the programmer programming in languages like C.
 #comment(" end of [chap_funtypes.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "chap_funtypes_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "chap_funtypes_atxt.txt")
 %}

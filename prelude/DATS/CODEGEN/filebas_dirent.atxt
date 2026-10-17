@@ -87,6 +87,6 @@ end // end of [streamize_dirname_fname]
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "filebas_dirent_atxt.txt")
 %}\

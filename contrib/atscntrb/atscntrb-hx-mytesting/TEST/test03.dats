@@ -47,8 +47,9 @@ val () =
 $STDLIB.srandom
   ($UNSAFE.cast2uint($TIME.time_get()))
 //
-val xs = randgen_list<int> (10)
+val xs = randgen_list_vt<int> (10)
 val () = fprintln! (out, "xs = ", xs)
+val ((*freed*)) = list_vt_free (xs)
 //
 val xs =
   randgen_list_vt<double> (10)

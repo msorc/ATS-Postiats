@@ -40,7 +40,6 @@ UN =
 //
 (* ****** ****** *)
 //
-#staload "./../SATS/list.sats"
 #staload "./../SATS/list_vt.sats"
 //
 (* ****** ****** *)

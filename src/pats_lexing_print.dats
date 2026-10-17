@@ -33,266 +33,271 @@
 //
 (* ****** ****** *)
 
-staload "./pats_lexing.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
 
-#define c2i int_of_char
+staload "libats/SATS/arena.sats"
+
+(* ****** ****** *)
+
+staload "./pats_lexing.sats"
 
 (* ****** ****** *)
 
 implement
 fprint_token
-  (out, tok) = case+ tok.token_node of
+  (out, tok) = case+ token_node_view (tok.token_node()) of
 //
-  | T_AT () => fprintf (out, "AT()", @())
-  | T_BACKSLASH () => fprintf (out, "BACKSLASH()", @())
-  | T_BANG () => fprintf (out, "BANG()", @())
-  | T_BAR () => fprintf (out, "BAR()", @())
-  | T_BQUOTE () => fprintf (out, "BQUOTE()", @())
-  | T_COLON () => fprintf (out, "COLON()", @())
-  | T_DOLLAR () => fprintf (out, "DOLLAR()", @())
-  | T_DOT () => fprintf (out, "DOT()", @())
-  | T_EQ () => fprintf (out, "EQ()", @())
-  | T_HASH () => fprintf (out, "HASH()", @())
-  | T_TILDE () => fprintf (out, "TILDE()", @())
-  | T_DOTINT (x) => fprintf (out, "DOTINT(%i)", @(x))
-  | T_DOTDOT () => fprintf (out, "DOTDOT()", @())
-  | T_DOTDOTDOT () => fprintf (out, "DOTDOTDOT()", @())
-  | T_EQGT () => fprintf (out, "EQGT()", @())
-  | T_EQLT () => fprintf (out, "EQLT()", @())
-  | T_EQLTGT () => fprintf (out, "EQLTGT()", @())
-  | T_EQSLASHEQGT () => fprintf (out, "EQSLASHEQGT()", @())
-  | T_EQGTGT () => fprintf (out, "EQGTGT()", @())
-  | T_EQSLASHEQGTGT () => fprintf (out, "EQSLASHEQGTGT()", @())
+  | ~T_AT () => fprint_string(out, "AT()")
+  | ~T_BACKSLASH () => fprint_string(out, "BACKSLASH()")
+  | ~T_BANG () => fprint_string(out, "BANG()")
+  | ~T_BAR () => fprint_string(out, "BAR()")
+  | ~T_BQUOTE () => fprint_string(out, "BQUOTE()")
+  | ~T_COLON () => fprint_string(out, "COLON()")
+  | ~T_DOLLAR () => fprint_string(out, "DOLLAR()")
+  | ~T_DOT () => fprint_string(out, "DOT()")
+  | ~T_EQ () => fprint_string(out, "EQ()")
+  | ~T_HASH () => fprint_string(out, "HASH()")
+  | ~T_TILDE () => fprint_string(out, "TILDE()")
+  | ~T_DOTINT (x) => (fprint_string(out, "DOTINT("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_DOTDOT () => fprint_string(out, "DOTDOT()")
+  | ~T_DOTDOTDOT () => fprint_string(out, "DOTDOTDOT()")
+  | ~T_EQGT () => fprint_string(out, "EQGT()")
+  | ~T_EQLT () => fprint_string(out, "EQLT()")
+  | ~T_EQLTGT () => fprint_string(out, "EQLTGT()")
+  | ~T_EQSLASHEQGT () => fprint_string(out, "EQSLASHEQGT()")
+  | ~T_EQGTGT () => fprint_string(out, "EQGTGT()")
+  | ~T_EQSLASHEQGTGT () => fprint_string(out, "EQSLASHEQGTGT()")
 //
-  | T_LT () => fprintf (out, "LT()", @())
-  | T_GT () => fprintf (out, "GT()", @())
-  | T_GTLT () => fprintf (out, "GTLT()", @())
+  | ~T_LT () => fprint_string(out, "LT()")
+  | ~T_GT () => fprint_string(out, "GT()")
+  | ~T_GTLT () => fprint_string(out, "GTLT()")
 //
-  | T_DOTLT () => fprintf (out, "DOTLT()", @())
-  | T_GTDOT () => fprintf (out, "GTDOT()", @())
+  | ~T_DOTLT () => fprint_string(out, "DOTLT()")
+  | ~T_GTDOT () => fprint_string(out, "GTDOT()")
 //
-  | T_DOTLTGTDOT () =>
-      fprintf (out, "DOTLTGTDOT()", @())
-  | T_MINUSGT () => fprintf (out, "MINUSGT()", @())
-  | T_MINUSLT () => fprintf (out, "MINUSLT()", @())
-  | T_MINUSLTGT () => fprintf (out, "MINUSLTGT()", @())
-  | T_COLONLT () => fprintf (out, "COLONLT()", @())
+  | ~T_DOTLTGTDOT () =>
+      fprint_string(out, "DOTLTGTDOT()")
+  | ~T_MINUSGT () => fprint_string(out, "MINUSGT()")
+  | ~T_MINUSLT () => fprint_string(out, "MINUSLT()")
+  | ~T_MINUSLTGT () => fprint_string(out, "MINUSLTGT()")
+  | ~T_COLONLT () => fprint_string(out, "COLONLT()")
 //
-  | T_ABSTYPE (x) =>
-      fprintf (out, "ABSTYPE(%i)", @(x))
+  | ~T_ABSTYPE (x) =>
+      (fprint_string(out, "ABSTYPE("); fprint_int(out, x); fprint_string(out, ")"))
     // end of [T_ABSTYPE]
 //
-  | T_ASSUME () => fprintf (out, "ASSUME()", @())
-  | T_REASSUME () => fprintf (out, "REASSUME()", @())
+  | ~T_ASSUME () => fprint_string(out, "ASSUME()")
+  | ~T_REASSUME () => fprint_string(out, "REASSUME()")
 //
-  | T_AS () => fprintf (out, "AS()", @())
-  | T_AND () => fprintf (out, "AND()", @())
-  | T_BEGIN () => fprintf (out, "BEGIN()", @())
-  | T_CASE (x) => fprintf (out, "CASE(...)", @())
-  | T_CLASSDEC () => fprintf (out, "CLASSDEC()", @())
-  | T_DATASORT () => fprintf (out, "DATASORT()", @())
-  | T_DATATYPE (x) => fprintf (out, "DATATYPE(%i)", @(x))
-  | T_DO () => fprintf (out, "DO()", @())
-  | T_ELSE () => fprintf (out, "ELSE()", @())
-  | T_END () => fprintf (out, "END()", @())
-  | T_EXCEPTION () => fprintf (out, "EXCEPTION()", @())
-  | T_EXTERN () => fprintf (out, "EXTERN()", @())
-  | T_EXTYPE () => fprintf (out, "EXTYPE()", @())
-  | T_EXTVAR () => fprintf (out, "EXTVAR()", @())
+  | ~T_AS () => fprint_string(out, "AS()")
+  | ~T_AND () => fprint_string(out, "AND()")
+  | ~T_BEGIN () => fprint_string(out, "BEGIN()")
+  | ~T_CASE (x) => fprint_string(out, "CASE(...)")
+  | ~T_CLASSDEC () => fprint_string(out, "CLASSDEC()")
+  | ~T_DATASORT () => fprint_string(out, "DATASORT()")
+  | ~T_DATATYPE (x) => (fprint_string(out, "DATATYPE("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_DO () => fprint_string(out, "DO()")
+  | ~T_ELSE () => fprint_string(out, "ELSE()")
+  | ~T_END () => fprint_string(out, "END()")
+  | ~T_EXCEPTION () => fprint_string(out, "EXCEPTION()")
+  | ~T_EXTERN () => fprint_string(out, "EXTERN()")
+  | ~T_EXTYPE () => fprint_string(out, "EXTYPE()")
+  | ~T_EXTVAR () => fprint_string(out, "EXTVAR()")
 //
-  | T_FIX (x) => fprintf (out, "FIX(%i)", @(x))
-  | T_FIXITY (x) => fprintf (out, "FIXITY(...)", @())
-  | T_FOR () => fprintf (out, "FOR()", @())
-  | T_FORSTAR () => fprintf (out, "FORSTAR()", @())
-  | T_FUN (x) => fprintf (out, "FUN(...)", @())
+  | ~T_FIX (x) => (fprint_string(out, "FIX("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_FIXITY (x) => fprint_string(out, "FIXITY(...)")
+  | ~T_FOR () => fprint_string(out, "FOR()")
+  | ~T_FORSTAR () => fprint_string(out, "FORSTAR()")
+  | ~T_FUN (x) => fprint_string(out, "FUN(...)")
 //
-  | T_IF () => fprintf (out, "IF()", @())
-  | T_IFCASE () => fprintf (out, "IFCASE()", @())
+  | ~T_IF () => fprint_string(out, "IF()")
+  | ~T_IFCASE () => fprint_string(out, "IFCASE()")
 //
-  | T_IMPLEMENT (k) => fprintf (out, "IMPLEMENT(%i)", @(k))
-  | T_IMPORT () => fprintf (out, "IMPORT()", @())
-  | T_IN () => fprintf (out, "IN()", @())
-  | T_LAM (x) => fprintf (out, "LAM(%i)", @(x))
-  | T_LET () => fprintf (out, "LET()", @())
-  | T_LOCAL () => fprintf (out, "LOCAL()", @())
-  | T_MACDEF (x) => fprintf (out, "MACDEF(%i)", @(x))
-  | T_NONFIX () => fprintf (out, "NONFIX()", @())
-  | T_OF () => fprintf (out, "OF()", @())
-  | T_OP () => fprintf (out, "OP()", @())
-  | T_REC () => fprintf (out, "REC()", @())
+  | ~T_IMPLEMENT (k) => (fprint_string(out, "IMPLEMENT("); fprint_int(out, k); fprint_string(out, ")"))
+  | ~T_IMPORT () => fprint_string(out, "IMPORT()")
+  | ~T_IN () => fprint_string(out, "IN()")
+  | ~T_LAM (x) => (fprint_string(out, "LAM("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_LET () => fprint_string(out, "LET()")
+  | ~T_LOCAL () => fprint_string(out, "LOCAL()")
+  | ~T_MACDEF (x) => (fprint_string(out, "MACDEF("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_NONFIX () => fprint_string(out, "NONFIX()")
+  | ~T_OF () => fprint_string(out, "OF()")
+  | ~T_OP () => fprint_string(out, "OP()")
+  | ~T_REC () => fprint_string(out, "REC()")
 (*
-  | T_REFAT () => fprintf (out, "REFAT()", @())
+  | ~T_REFAT () => fprint_string(out, "REFAT()")
 *)
-  | T_SIF () => fprintf (out, "SIF()", @())
-  | T_SCASE () => fprintf (out, "SCASE()", @())
-  | T_SORTDEF () => fprintf (out, "SORTDEF()", @())
-  | T_STACST () => fprintf (out, "STACST()", @())
-  | T_STADEF () => fprintf (out, "STADEF()", @())
-  | T_STATIC () => fprintf (out, "STATIC()", @())
+  | ~T_SIF () => fprint_string(out, "SIF()")
+  | ~T_SCASE () => fprint_string(out, "SCASE()")
+  | ~T_SORTDEF () => fprint_string(out, "SORTDEF()")
+  | ~T_STACST () => fprint_string(out, "STACST()")
+  | ~T_STADEF () => fprint_string(out, "STADEF()")
+  | ~T_STATIC () => fprint_string(out, "STATIC()")
 (*
-  | T_STAVAR () => fprintf (out, "STAVAR()", @())
-*)
-//
-  | T_SYMELIM () => fprintf (out, "SYMELIM()", @())
-  | T_SYMINTR () => fprintf (out, "SYMINTR()", @())
-  | T_SYMLOAD () => fprintf (out, "SYMLOAD()", @())
-//
-  | T_THEN () => fprintf (out, "THEN()", @())
-  | T_TKINDEF () =>  fprintf (out, "TKINDEF()", @())
-  | T_TRY () => fprintf (out, "TRY()", @())
-  | T_TYPE (x) => fprintf (out, "TYPE(%i)", @(x))
-  | T_TYPEDEF (x) => fprintf (out, "TYPEDEF(%i)", @(x))
-  | T_VAL (x) => fprintf (out, "VAL(...)", @())
-  | T_VAR (x) => fprintf (out, "VAR(%i)", @(x))
-  | T_WHEN () => fprintf (out, "WHEN()", @())
-  | T_WHERE () => fprintf (out, "WHERE()", @())
-  | T_WHILE () => fprintf (out, "WHILE()", @())
-  | T_WHILESTAR () => fprintf (out, "WHILESTAR()", @())
-  | T_WITH () => fprintf (out, "WITH()", @())
-  | T_WITHTYPE (x) => fprintf (out, "WITHTYPE(%i)", @(x))
-//
-  | T_ADDRAT () => fprintf (out, "ADDRAT()", @()) // addr@
-  | T_FOLDAT () => fprintf (out, "FOLDAT()", @()) // fold@
-  | T_FREEAT () => fprintf (out, "FREEAT()", @()) // free@
-  | T_VIEWAT () => fprintf (out, "VIEWAT()", @()) // view@
-//
-  | T_DLRDELAY (x) => fprintf (out, "DLRDELAY(%i)", @(x))
-//
-  | T_DLRARRPSZ () => fprintf (out, "DLRARRPSZ()", @())
-//
-  | T_DLRTYREP () => fprintf (out, "DLRTYREP()", @())
-  | T_DLRD2CTYPE () => fprintf (out, "DLRD2CTYPE()", @())
-//
-  | T_DLREFFMASK () => fprintf (out, "DLREFFMASK()", @())
-  | T_DLREFFMASK_ARG (x) => fprintf (out, "DLREFFMASK(%i)", @(x))
-//
-  | T_DLREXTERN () => fprintf (out, "DLREXTERN()", @())
-  | T_DLREXTKIND () => fprintf (out, "DLREXTKIND()", @())
-  | T_DLREXTYPE () => fprintf (out, "DLREXTYPE()", @())
-  | T_DLREXTYPE_STRUCT () => fprintf (out, "DLREXTYPE_STRUCT()", @())
-//
-  | T_DLREXTVAL () => fprintf (out, "DLREXTVAL()", @())
-  | T_DLREXTFCALL () => fprintf (out, "DLREXTFCALL()", @())
-  | T_DLREXTMCALL () => fprintf (out, "DLREXTMCALL()", @())
-//
-  | T_DLRLITERAL () => fprintf (out, "DLRLITERAL()", @())
-//
-  | T_DLRMYFILENAME () => fprintf (out, "DLRMYFILENAME()", @())
-  | T_DLRMYLOCATION () => fprintf (out, "DLRMYLOCATION()", @())
-  | T_DLRMYFUNCTION () => fprintf (out, "DLRMYFUNCTION()", @())
-//
-  | T_DLRLST (x) => fprintf (out, "DLRLST(%i)", @(x))
-  | T_DLRREC (x) => fprintf (out, "DLRREC(%i)", @(x))
-  | T_DLRTUP (x) => fprintf (out, "DLRTUP(%i)", @(x))
-//
-  | T_DLRBREAK () => fprintf (out, "DLRBREAK()", @())
-  | T_DLRCONTINUE () => fprintf (out, "DLRCONTINUE()", @())
-//
-  | T_DLRRAISE () => fprintf (out, "DLRRAISE()", @())
-//
-  | T_DLRVARARG () => fprintf (out, "DLRVARARG()", @())
-//
-  | T_DLRVCOPYENV (x) => fprintf (out, "DLRVCOPYENV(%i)", @(x))
-//
-  | T_DLRSHOWTYPE () => fprintf (out, "DLRSHOWTYPE()", @())
-//
-  | T_DLRTEMPENVER () => fprintf (out, "DLRTEMPENVER()", @())
-//
-  | T_DLRSOLASSERT () => fprintf (out, "DLRSOLASSERT()", @())
-  | T_DLRSOLVERIFY () => fprintf (out, "DLRSOLVERIFY()", @())
-//
-  | T_SRPIF () => fprintf (out, "SRPIF()", @())
-  | T_SRPIFDEF () => fprintf (out, "SRPIFDEF()", @())
-  | T_SRPIFNDEF () => fprintf (out, "SRPIFNDEF()", @())
-  | T_SRPTHEN () => fprintf (out, "SRPTHEN()", @())
-  | T_SRPELSE () => fprintf (out, "SRPELSE()", @())
-  | T_SRPELIF () => fprintf (out, "SRPELIF()", @())
-  | T_SRPELIFDEF () => fprintf (out, "SRPELIFDEF()", @())
-  | T_SRPELIFNDEF () => fprintf (out, "SRPELIFNDEF()", @())
-  | T_SRPENDIF () => fprintf (out, "SRPENDIF()", @())
-//
-  | T_SRPERROR () => fprintf (out, "SRPERROR()", @())
-  | T_SRPPRERR () => fprintf (out, "SRPPRERR()", @())
-  | T_SRPPRINT () => fprintf (out, "SRPPRINT()", @())
-//
-  | T_SRPASSERT () => fprintf (out, "SRPASSERT()", @())
-//
-  | T_SRPUNDEF () => fprintf (out, "SRPUNDEF()", @())
-  | T_SRPDEFINE () => fprintf (out, "SRPDEFINE()", @())
-//
-  | T_SRPINCLUDE () => fprintf (out, "SRPINCLUDE()", @())
-//
-  | T_SRPSTALOAD () => fprintf (out, "SRPSTALOAD()", @())
-  | T_SRPDYNLOAD () => fprintf (out, "SRPDYNLOAD()", @())
-//
-  | T_SRPREQUIRE () => fprintf (out, "SRPREQUIRE()", @())
-//
-  | T_SRPPRAGMA () => fprintf (out, "SRPPRAGMA()", @())
-  | T_SRPCODEGEN2 () => fprintf (out, "SRPCODEGEN2()", @())
-  | T_SRPCODEGEN3 () => fprintf (out, "SRPCODEGEN3()", @())
-//
-  | T_IDENT_alp (x) => fprintf (out, "IDENT_alp(%s)", @(x))
-  | T_IDENT_sym (x) => fprintf (out, "IDENT_sym(%s)", @(x))
-  | T_IDENT_arr (x) => fprintf (out, "IDENT_arr(%s)", @(x))
-  | T_IDENT_tmp (x) => fprintf (out, "IDENT_tmp(%s)", @(x))
-  | T_IDENT_dlr (x) => fprintf (out, "IDENT_dlr(%s)", @(x))
-  | T_IDENT_srp (x) => fprintf (out, "IDENT_srp(%s)", @(x))
-  | T_IDENT_ext (x) => fprintf (out, "IDENT_ext(%s)", @(x))
-//
-  | T_INT (base, rep, sfx) =>
-      fprintf (out, "INT(%i; %s)", @(base, rep))
-  | T_CHAR (x) => fprintf (out, "CHAR(%c)", @(x))
-  | T_FLOAT (base, rep, sfx) =>
-      fprintf (out, "FLOAT(%i; %s)", @(base, rep))
-//
-  | T_CDATA _ => fprintf (out, "CDATA(...)", @())
-  | T_STRING (x) => fprintf (out, "STRING(%s)", @(x))
-//
-(*
-  | T_LABEL (knd, x) => fprintf (out, "LABEL(%i; %s)", @(knd, x))
+  | ~T_STAVAR () => fprint_string(out, "STAVAR()")
 *)
 //
-  | T_COMMA () => fprintf (out, "COMMA()", @())
-  | T_SEMICOLON () => fprintf (out, "SEMICOLON()", @())
+  | ~T_SYMELIM () => fprint_string(out, "SYMELIM()")
+  | ~T_SYMINTR () => fprint_string(out, "SYMINTR()")
+  | ~T_SYMLOAD () => fprint_string(out, "SYMLOAD()")
 //
-  | T_LPAREN () => fprintf (out, "LPAREN()", @())
-  | T_RPAREN () => fprintf (out, "RPAREN()", @())
-  | T_LBRACKET () => fprintf (out, "LBRACKET()", @())
-  | T_RBRACKET () => fprintf (out, "RBRACKET()", @())
-  | T_LBRACE () => fprintf (out, "LBRACE()", @())
-  | T_RBRACE () => fprintf (out, "RBRACE()", @())
+  | ~T_THEN () => fprint_string(out, "THEN()")
+  | ~T_TKINDEF () =>  fprint_string(out, "TKINDEF()")
+  | ~T_TRY () => fprint_string(out, "TRY()")
+  | ~T_TYPE (x) => (fprint_string(out, "TYPE("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_TYPEDEF (x) => (fprint_string(out, "TYPEDEF("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_VAL (x) => fprint_string(out, "VAL(...)")
+  | ~T_VAR (x) => (fprint_string(out, "VAR("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_WHEN () => fprint_string(out, "WHEN()")
+  | ~T_WHERE () => fprint_string(out, "WHERE()")
+  | ~T_WHILE () => fprint_string(out, "WHILE()")
+  | ~T_WHILESTAR () => fprint_string(out, "WHILESTAR()")
+  | ~T_WITH () => fprint_string(out, "WITH()")
+  | ~T_WITHTYPE (x) => (fprint_string(out, "WITHTYPE("); fprint_int(out, x); fprint_string(out, ")"))
 //
-  | T_ATLPAREN () => fprintf (out, "ATLPAREN()", @())
-  | T_QUOTELPAREN () => fprintf (out, "QUOTELPAREN()", @())
-  | T_ATLBRACKET () => fprintf (out, "ATLBRACKET()", @())
-  | T_QUOTELBRACKET () => fprintf (out, "QUOTELBRACKET()", @())
-  | T_HASHLBRACKET () => fprintf (out, "HASHLBRACKET()", @())
-  | T_ATLBRACE () => fprintf (out, "ATLBRACE()", @())
-  | T_QUOTELBRACE () => fprintf (out, "QUOTELBRACE()", @())
+  | ~T_ADDRAT () => fprint_string(out, "ADDRAT()") // addr@
+  | ~T_FOLDAT () => fprint_string(out, "FOLDAT()") // fold@
+  | ~T_FREEAT () => fprint_string(out, "FREEAT()") // free@
+  | ~T_VIEWAT () => fprint_string(out, "VIEWAT()") // view@
 //
-  | T_BQUOTELPAREN () => fprintf (out, "BQUOTELPAREN()", @())
-  | T_COMMALPAREN () => fprintf (out, "COMMALPAREN()", @())
-  | T_PERCENTLPAREN () => fprintf (out, "PERCENTLPAREN()", @())
+  | ~T_DLRDELAY (x) => (fprint_string(out, "DLRDELAY("); fprint_int(out, x); fprint_string(out, ")"))
 //
-  | T_EXTCODE (knd, x) => fprintf (out, "EXTCODE(%i, %s)", @(knd, x))
+  | ~T_DLRARRPSZ () => fprint_string(out, "DLRARRPSZ()")
 //
-  | T_COMMENT_line () => fprintf (out, "COMMENT_line()", @())
-  | T_COMMENT_block () => fprintf (out, "COMMENT_block()", @())
-  | T_COMMENT_rest () => fprintf (out, "COMMENT_rest()", @())
+  | ~T_DLRTYREP () => fprint_string(out, "DLRTYREP()")
+  | ~T_DLRD2CTYPE () => fprint_string(out, "DLRD2CTYPE()")
 //
-  | T_ERR () => fprintf (out, "ERR()", @())
-  | T_EOF () => fprintf (out, "EOF()", @())
+  | ~T_DLREFFMASK () => fprint_string(out, "DLREFFMASK()")
+  | ~T_DLREFFMASK_ARG (x) => (fprint_string(out, "DLREFFMASK("); fprint_int(out, x); fprint_string(out, ")"))
 //
-  | T_NONE () => fprintf (out, "NONE()", @())
+  | ~T_DLREXTERN () => fprint_string(out, "DLREXTERN()")
+  | ~T_DLREXTKIND () => fprint_string(out, "DLREXTKIND()")
+  | ~T_DLREXTYPE () => fprint_string(out, "DLREXTYPE()")
+  | ~T_DLREXTYPE_STRUCT () => fprint_string(out, "DLREXTYPE_STRUCT()")
+//
+  | ~T_DLREXTVAL () => fprint_string(out, "DLREXTVAL()")
+  | ~T_DLREXTFCALL () => fprint_string(out, "DLREXTFCALL()")
+  | ~T_DLREXTMCALL () => fprint_string(out, "DLREXTMCALL()")
+//
+  | ~T_DLRLITERAL () => fprint_string(out, "DLRLITERAL()")
+//
+  | ~T_DLRMYFILENAME () => fprint_string(out, "DLRMYFILENAME()")
+  | ~T_DLRMYLOCATION () => fprint_string(out, "DLRMYLOCATION()")
+  | ~T_DLRMYFUNCTION () => fprint_string(out, "DLRMYFUNCTION()")
+//
+  | ~T_DLRLST (x) => (fprint_string(out, "DLRLST("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_DLRREC (x) => (fprint_string(out, "DLRREC("); fprint_int(out, x); fprint_string(out, ")"))
+  | ~T_DLRTUP (x) => (fprint_string(out, "DLRTUP("); fprint_int(out, x); fprint_string(out, ")"))
+//
+  | ~T_DLRBREAK () => fprint_string(out, "DLRBREAK()")
+  | ~T_DLRCONTINUE () => fprint_string(out, "DLRCONTINUE()")
+//
+  | ~T_DLRRAISE () => fprint_string(out, "DLRRAISE()")
+//
+  | ~T_DLRVARARG () => fprint_string(out, "DLRVARARG()")
+//
+  | ~T_DLRVCOPYENV (x) => (fprint_string(out, "DLRVCOPYENV("); fprint_int(out, x); fprint_string(out, ")"))
+//
+  | ~T_DLRSHOWTYPE () => fprint_string(out, "DLRSHOWTYPE()")
+//
+  | ~T_DLRTEMPENVER () => fprint_string(out, "DLRTEMPENVER()")
+//
+  | ~T_DLRSOLASSERT () => fprint_string(out, "DLRSOLASSERT()")
+  | ~T_DLRSOLVERIFY () => fprint_string(out, "DLRSOLVERIFY()")
+//
+  | ~T_SRPIF () => fprint_string(out, "SRPIF()")
+  | ~T_SRPIFDEF () => fprint_string(out, "SRPIFDEF()")
+  | ~T_SRPIFNDEF () => fprint_string(out, "SRPIFNDEF()")
+  | ~T_SRPTHEN () => fprint_string(out, "SRPTHEN()")
+  | ~T_SRPELSE () => fprint_string(out, "SRPELSE()")
+  | ~T_SRPELIF () => fprint_string(out, "SRPELIF()")
+  | ~T_SRPELIFDEF () => fprint_string(out, "SRPELIFDEF()")
+  | ~T_SRPELIFNDEF () => fprint_string(out, "SRPELIFNDEF()")
+  | ~T_SRPENDIF () => fprint_string(out, "SRPENDIF()")
+//
+  | ~T_SRPERROR () => fprint_string(out, "SRPERROR()")
+  | ~T_SRPPRERR () => fprint_string(out, "SRPPRERR()")
+  | ~T_SRPPRINT () => fprint_string(out, "SRPPRINT()")
+//
+  | ~T_SRPASSERT () => fprint_string(out, "SRPASSERT()")
+//
+  | ~T_SRPUNDEF () => fprint_string(out, "SRPUNDEF()")
+  | ~T_SRPDEFINE () => fprint_string(out, "SRPDEFINE()")
+//
+  | ~T_SRPINCLUDE () => fprint_string(out, "SRPINCLUDE()")
+//
+  | ~T_SRPSTALOAD () => fprint_string(out, "SRPSTALOAD()")
+  | ~T_SRPDYNLOAD () => fprint_string(out, "SRPDYNLOAD()")
+//
+  | ~T_SRPREQUIRE () => fprint_string(out, "SRPREQUIRE()")
+//
+  | ~T_SRPPRAGMA () => fprint_string(out, "SRPPRAGMA()")
+  | ~T_SRPCODEGEN2 () => fprint_string(out, "SRPCODEGEN2()")
+  | ~T_SRPCODEGEN3 () => fprint_string(out, "SRPCODEGEN3()")
+//
+  | ~T_IDENT_alp (x) => (fprint_string(out, "IDENT_alp("); fprint_string(out, x); fprint_string(out, ")"))
+  | ~T_IDENT_sym (x) => (fprint_string(out, "IDENT_sym("); fprint_string(out, x); fprint_string(out, ")"))
+  | ~T_IDENT_arr (x) => (fprint_string(out, "IDENT_arr("); fprint_string(out, x); fprint_string(out, ")"))
+  | ~T_IDENT_tmp (x) => (fprint_string(out, "IDENT_tmp("); fprint_string(out, x); fprint_string(out, ")"))
+  | ~T_IDENT_dlr (x) => (fprint_string(out, "IDENT_dlr("); fprint_string(out, x); fprint_string(out, ")"))
+  | ~T_IDENT_srp (x) => (fprint_string(out, "IDENT_srp("); fprint_string(out, x); fprint_string(out, ")"))
+  | ~T_IDENT_ext (x) => (fprint_string(out, "IDENT_ext("); fprint_string(out, x); fprint_string(out, ")"))
+//
+  | ~T_INT (base, rep, sfx) =>
+      (fprint_string(out, "INT("); fprint_int(out, base); fprint_string(out, "; "); fprint_string(out, rep); fprint_string(out, ")"))
+  | ~T_CHAR (x) => (fprint_string(out, "CHAR("); fprint_char(out, x); fprint_string(out, ")"))
+  | ~T_FLOAT (base, rep, sfx) =>
+      (fprint_string(out, "FLOAT("); fprint_int(out, base); fprint_string(out, "; "); fprint_string(out, rep); fprint_string(out, ")"))
+//
+  | ~T_CDATA _ => fprint_string(out, "CDATA(...)")
+  | ~T_STRING (x) => (fprint_string(out, "STRING("); fprint_string(out, x); fprint_string(out, ")"))
+//
 (*
-  | _ => fprintf (out, "TOKEN()", @())
+  | ~T_LABEL (knd, x) => (fprint_string(out, "LABEL("); fprint_int(out, knd); fprint_string(out, "; "); fprint_string(out, x); fprint_string(out, ")"))
+*)
+//
+  | ~T_COMMA () => fprint_string(out, "COMMA()")
+  | ~T_SEMICOLON () => fprint_string(out, "SEMICOLON()")
+//
+  | ~T_LPAREN () => fprint_string(out, "LPAREN()")
+  | ~T_RPAREN () => fprint_string(out, "RPAREN()")
+  | ~T_LBRACKET () => fprint_string(out, "LBRACKET()")
+  | ~T_RBRACKET () => fprint_string(out, "RBRACKET()")
+  | ~T_LBRACE () => fprint_string(out, "LBRACE()")
+  | ~T_RBRACE () => fprint_string(out, "RBRACE()")
+//
+  | ~T_ATLPAREN () => fprint_string(out, "ATLPAREN()")
+  | ~T_QUOTELPAREN () => fprint_string(out, "QUOTELPAREN()")
+  | ~T_ATLBRACKET () => fprint_string(out, "ATLBRACKET()")
+  | ~T_QUOTELBRACKET () => fprint_string(out, "QUOTELBRACKET()")
+  | ~T_HASHLBRACKET () => fprint_string(out, "HASHLBRACKET()")
+  | ~T_ATLBRACE () => fprint_string(out, "ATLBRACE()")
+  | ~T_QUOTELBRACE () => fprint_string(out, "QUOTELBRACE()")
+//
+  | ~T_BQUOTELPAREN () => fprint_string(out, "BQUOTELPAREN()")
+  | ~T_COMMALPAREN () => fprint_string(out, "COMMALPAREN()")
+  | ~T_PERCENTLPAREN () => fprint_string(out, "PERCENTLPAREN()")
+//
+  | ~T_EXTCODE (knd, x) => (fprint_string(out, "EXTCODE("); fprint_int(out, knd); fprint_string(out, ", "); fprint_string(out, x); fprint_string(out, ")"))
+//
+  | ~T_COMMENT_line () => fprint_string(out, "COMMENT_line()")
+  | ~T_COMMENT_block () => fprint_string(out, "COMMENT_block()")
+  | ~T_COMMENT_rest () => fprint_string(out, "COMMENT_rest()")
+//
+  | ~T_ERR () => fprint_string(out, "ERR()")
+  | ~T_EOF () => fprint_string(out, "EOF()")
+//
+  | ~T_NONE () => fprint_string(out, "NONE()")
+(*
+  | _ => fprint_string(out, "TOKEN()")
 *)
 //
 (* end of [fprint_token] *)
 
 implement print_token (tok) = fprint_token (stdout_ref, tok)
+implement prerr_token (tok) = fprint_token (stderr_ref, tok)
 
 (* ****** ****** *)
 

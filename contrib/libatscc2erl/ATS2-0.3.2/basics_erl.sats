@@ -74,7 +74,7 @@ atom2string(x: atom): string = "mac#%"
 (* ****** ****** *)
 //
 fun
-whereis(name: atom): Option(pid) = "mac#%"
+whereis(name: atom): Option_vt(pid) = "mac#%"
 //
 fun
 register(name: atom, pid: pid): void = "mac#%"

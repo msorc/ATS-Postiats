@@ -7,7 +7,7 @@
 ######
 
 { stdenv
-, ats
+, ats2
 , gmp
 , autoconf
 , automake
@@ -23,22 +23,18 @@ stdenv.mkDerivation rec {
     (toString path) != (toString ../.git)
   ) ../.;
 
-  ATSHOME = "${ats}/lib/ats-anairiats-${ats.version}";
-
-  ATSHOMERELOC = "ATS-${ats.version}";
+  # ATS1 is not needed: the stage-0 compiler is an installed ATS2 (nixpkgs' ats2)
+  STAGE0HOME = "${ats2}/lib/ats2-postiats-${ats2.version}";
 
   configurePhase = ''
     patchShebangs doc/DISTRIB/ATS-Postiats/autogen.sh
     export PATSHOME=$PWD
-    make -f codegen/Makefile_atslib
   '';
  
   buildPhase = ''
-    make -C src all
-    make -C src CBOOT
-    make -C src/CBOOT/libc
-    make -C src/CBOOT/libats
-    make -C src/CBOOT/prelude
+    make -C src PATSOPT=${ats2}/bin/patsopt STAGE0HOME=$STAGE0HOME all
+    make -C src CBOOT PATSOPT=$PWD/src/patsopt
+    make -f Makefile_devl bin_atsdoc  # (atspackaging uses atsdoc to generate the packaging scripts)
     make -C doc/DISTRIB atspackaging
     make -C doc/DISTRIB atspacktarzvcf
   '';

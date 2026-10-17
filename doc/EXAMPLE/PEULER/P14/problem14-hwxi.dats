@@ -31,10 +31,20 @@ $PATSHOME/contrib\
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: no GC
+// the table is a malloc'ed array freed at the end
+//
 val
 theTable =
-arrayref_make_elt<int>(i2sz(N), ~1)
-val ((*void*)) = (theTable[1] := 0)
+$UNSAFE.castvwtp0{ptr}(arrayptr_make_elt<int>(i2sz(N), ~1))
+//
+macdef
+theTable_get(i) = $UNSAFE.ptr0_get_at_int<int>(theTable, ,(i))
+macdef
+theTable_set(i, x) = $UNSAFE.ptr0_set_at_int<int>(theTable, ,(i), ,(x))
+//
+val ((*void*)) = theTable_set(1, 0)
 
 (* ****** ****** *)
 
@@ -49,7 +59,7 @@ fun eval
       extern prfun __assert (): [0 <= n; n < N] void
     }
   in
-    saved := theTable[n1]
+    saved := theTable_get(n1)
   end // end of [val]
 in
   if saved >= 0 then c + saved
@@ -79,12 +89,15 @@ val () = for*
   (i := 2; i < N; i := i+1) let
   val () = mpz_set_ulint (x, g0i2u(i))
   val c = eval (x, 0)
-  val () = theTable[i] := c
+  val () = theTable_set(i, c)
 in
   if :(i: int i) => c > cmax then (imax := i; cmax := c)
 end // end of [val]
 //
 val () = mpz_clear (x)
+//
+val () =
+arrayptr_free($UNSAFE.castvwtp0{arrayptr(int,N)}(theTable))
 //
 val ans = imax
 val () = assertloc (ans = 837799)

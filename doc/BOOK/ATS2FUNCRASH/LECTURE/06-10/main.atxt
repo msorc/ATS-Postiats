@@ -174,7 +174,7 @@ present. If a different name is needed, please replace the symbol
 When doing co-programming with ATS and PHP, one often wants to include
 some PHP code in ATS source so that the included code can be directly
 pasted into the PHP code generated from the ATS source. The code
-written between #dyncode("\%{^") and #dyncode("\%}") is considered
+written between #dyncode("\\\%{^") and #dyncode("\\\%}") is considered
 external, where the symbol #dyncode("^") means that the code is to be
 pasted near the beginning of the generated code. If the symbol
 #dyncode("^") is omitted or replaced with #dyncode("$"), the code is
@@ -214,6 +214,6 @@ url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FU
 #comment(" end of [main.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "main_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
 

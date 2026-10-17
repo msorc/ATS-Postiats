@@ -273,6 +273,6 @@ fprint_val<ptr>(out, p) = fprint_ptr(out, p)
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "pointer_atxt.txt")
 %}\

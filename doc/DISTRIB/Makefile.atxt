@@ -1,12 +1,14 @@
 %{
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
-staload TIME = "libc/SATS/time.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 //
 dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
+//
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
 //
 %}\
 %{
@@ -29,7 +31,7 @@ SCRIPT/%s.bash\n\
 SCRIPT/%s.bash: %s_atxt.exe ; ./$< > $@
 %s_atxt.dats: ATEXT/%s.atxt ; \\
   $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
-%s_atxt.exe: %s_atxt.dats ; $(ATSCC) $(INCLATS) $(GCFLAG) -o $@ $< -latsdoc
+%s_atxt.exe: %s_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
 clean:: ; $(RMF) %s_atxt.exe
 cleanall:: ; $(RMF) HTML/%s.html
 cleanall:: ; $(RMF) SCRIPT/%s.bash
@@ -43,22 +45,18 @@ end // end of [make_entry]
 %}\
 ######
 #
-#
 # This Makefile is automatically generated
 # from executing the following command-line:
 #
 # make -f Makefile.gen
 #
-#
 ######
 
-ATSHOMEQ="$(ATSHOME)"
 
 ######
 
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSOPT=$(ATSHOMEQ)/bin/atsopt
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 
 ######
 
@@ -66,13 +64,10 @@ PATSHOMEQ="$(PATSHOME)"
 
 ######
 
-INCLATS:=-IATS $(ATSHOMEQ)
+INCLATS:=-IATS $(PATSHOMEQ)
 
 ######
-#
-GCFLAG=
-#
-# GCFLAG=-D_ATS_GCATS
+PATSCCFLAGS=-DATS_MEMALLOC_LIBC
 #
 ######
 
@@ -95,11 +90,6 @@ all_script::
 
 ######
 
-#make_entry("patsopt_src")
-#make_entry("patsopt_src_cboot")
-
-######
-
 #make_entry("ccomp_atslib")
 #make_entry("ccomp_runtime")
 
@@ -110,14 +100,9 @@ all_script::
 ######
 
 #make_entry("atslib_libats")
-#make_entry("atslib_libats_ML")
 #make_entry("atslib_libats_libc")
-#make_entry("atslib_libats_ATS1")
-#make_entry("atslib_libats_ATS2")
-#make_entry("atslib_libats_BUCS320")
 
 ######
-#
 #make_entry("contrib_atscntrb")
 #
 ######
@@ -132,7 +117,6 @@ all_script::
 #make_entry("contrib_ats2cpp")
 
 ######
-#
 #make_entry("contrib_extsolve")
 #make_entry("contrib_extsolve_z3")
 #make_entry("contrib_extsolve_smt2")
@@ -171,7 +155,6 @@ all_script::
 #make_entry("npm_utils_contrib_libats_hwxi")
 
 ######
-#
 #make_entry("patscontrib_JNI")
 #
 #make_entry("patscontrib_glib")
@@ -199,7 +182,6 @@ all_script::
 #make_entry("patscontrib_kernelats")
 #
 ######
-#
 atspackaging:: srcget_home
 atspackaging:: srcget_share
 #
@@ -217,11 +199,9 @@ atspackaging:: srcget_utils_atscc
 atspackaging:: srcget_utils_myatscc
 #
 ######
-#
 # atspackaging:: srcget_utils_libatsopt
 #
 ######
-#
 atspackaging:: srcget_contrib_ats2cpp
 #
 atspackaging:: srcget_contrib_extsolve
@@ -252,7 +232,6 @@ atspackaging:: srcget_doc_example
 atspackaging:: srcget_npm_utils_contrib
 #
 ######
-#
 atspackaging:: srcget_dist_cleanup
 #
 atspackaging:: ; (cd ATS-Postiats && ./autogen.sh)
@@ -272,7 +251,6 @@ srcget_home:: ; $(CPF) ../../CHANGES-contrib $(ATSDIST)/
 \#srcget_home:: ; $(CPF) ../../bin/patsopt_env.sh.in $(ATSDIST)/bin/
 
 ######
-#
 srcget_share:: ; \\
   $(CPF) ../../share/Makefile.gen $(ATSDIST)/share/.
 srcget_share:: ; \\
@@ -280,15 +258,11 @@ srcget_share:: ; \\
 srcget_share:: ; \\
   $(CPF) ../../share/atspre_staload.hats $(ATSDIST)/share/.
 srcget_share:: ; \\
-  $(CPF) ../../share/atspre_staload_libats_ML.hats $(ATSDIST)/share/.
-srcget_share:: ; \\
   $(CPF) ../../share/H/pats_atslib.h $(ATSDIST)/share/H/.
 srcget_share:: ; \\
   $(CPF) ../../share/HATS/atspre_define_pkgreloc.hats $(ATSDIST)/share/HATS/.
 srcget_share:: ; \\
   $(CPF) ../../share/HATS/atspre_staload_prelude.hats $(ATSDIST)/share/HATS/.
-srcget_share:: ; \\
-  $(CPF) ../../share/HATS/atspre_staload_libats_ML.hats $(ATSDIST)/share/HATS/.
 srcget_share:: ; \\
   $(CPF) ../../share/HATS/atslib_staload_libats_libc.hats $(ATSDIST)/share/HATS/.
 #
@@ -297,25 +271,25 @@ srcget_share:: ; $(CPF) ../../share/atsmake-post.mk $(ATSDIST)/share/.
 #
 ######
 
-srcget_patsrc:: SCRIPT/patsopt_src.bash ; bash $<
-srcget_patsrc_cboot:: SCRIPT/patsopt_src_cboot.bash ; bash $<
+#
+# The compiler sources (ATS2, no GC): everything of src/ but the tests and the porting notes;
+# the bootstrap bundle needs `make -C ../../src CBOOT` first (no generated C is kept in git)
+srcget_patsrc:: ; \\
+  mkdir -p $(ATSDIST)/src && \\
+  cd ../../src && for f in Makefile README mylibies.hats *.sats *.dats *.hats *.cats *.spec *.c; do \\
+    [ -f $$f ] && cp -f $$f ../doc/DISTRIB/$(ATSDIST)/src/ ; done ; true
+srcget_patsrc_cboot:: ; \\
+  mkdir -p $(ATSDIST)/src/CBOOT && \\
+  cd ../../src/CBOOT && cp -Rf Makefile README mkboot.sh modules.mk *.c gmpknd intknd inc \\
+    ../../doc/DISTRIB/$(ATSDIST)/src/CBOOT/
 
 ######
-#
 srcget_atslib:: srcget_atslib_prelude
 srcget_atslib_prelude:: SCRIPT/atslib_prelude.bash ; bash $<
 srcget_atslib:: srcget_atslib_libats
 srcget_atslib_libats:: SCRIPT/atslib_libats.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_ML
-srcget_atslib_libats_ML:: SCRIPT/atslib_libats_ML.bash ; bash $<
 srcget_atslib:: srcget_atslib_libats_libc
 srcget_atslib_libats_libc:: SCRIPT/atslib_libats_libc.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_ATS1
-srcget_atslib_libats_ATS1:: SCRIPT/atslib_libats_ATS1.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_ATS2
-srcget_atslib_libats_ATS2:: SCRIPT/atslib_libats_ATS2.bash ; bash $<
-srcget_atslib:: srcget_atslib_libats_BUCS320
-srcget_atslib_libats_BUCS320:: SCRIPT/atslib_libats_BUCS320.bash ; bash $<
 #
 srcget_contrib_atscntrb:: SCRIPT/contrib_atscntrb.bash ; bash $<
 #
@@ -331,7 +305,6 @@ srcget_utils_atscc:: SCRIPT/utils_atscc.bash ; bash $<
 srcget_utils_myatscc:: SCRIPT/utils_myatscc.bash ; bash $<
 
 ######
-#
 # srcget_utils_libatsopt:: SCRIPT/utils_libatsopt.bash ; bash $<
 #
 ######
@@ -339,7 +312,6 @@ srcget_utils_myatscc:: SCRIPT/utils_myatscc.bash ; bash $<
 srcget_contrib_ats2cpp:: SCRIPT/contrib_ats2cpp.bash ; bash $<
 
 ######
-#
 srcget_contrib_extsolve:: SCRIPT/contrib_extsolve.bash ; bash $<
 srcget_contrib_extsolve_z3:: SCRIPT/contrib_extsolve_z3.bash ; bash $<
 srcget_contrib_extsolve_smt2:: SCRIPT/contrib_extsolve_smt2.bash ; bash $<
@@ -364,7 +336,6 @@ srcget_contrib_libatscc2clj:: SCRIPT/contrib_libatscc2clj.bash ; bash $<
 srcget_contrib_libatscc2r34:: SCRIPT/contrib_libatscc2r34.bash ; bash $<
 #
 ######
-#
 srcget_doc_example:: srcget_doc_example_misc
 srcget_doc_example:: srcget_doc_example_pcpv
 srcget_doc_example:: srcget_doc_example_intro
@@ -388,15 +359,12 @@ srcget_npm_utils_contrib_libats_hwxi:: \
 SCRIPT/npm_utils_contrib_libats_hwxi.bash; bash $<
 
 ######
-#
 srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/*_?ats.js
 srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/ML/*_?ats.js
 srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/Bacon.js/*_?ats.js
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/BUCS320/parcomb/*_?ats.js
 #
 srcget_dist_cleanup:: ; \
 rm -rf ATS-Postiats/contrib/libatscc2py3/ATS2-0.3.2/output/__pycache__
@@ -424,9 +392,6 @@ srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libsdl2/TEST/DATA/*.png
 srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libcairo/TEST/DATA/*.png
-#
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/npm-utils/contrib/libats-/hwxi/OpenSCAD/TEST/output/*.stl
 #
 ######
 
@@ -463,7 +428,6 @@ srcget_patscontrib:: srcget_patscontrib_OpenSSL
 srcget_patscontrib_OpenSSL:: SCRIPT/patscontrib_OpenSSL.bash ; bash $<
 
 ######
-#
 # srcget_patscontrib:: srcget_patscontrib_HTML-emscripten
 # srcget_patscontrib_HTML-emscripten:: SCRIPT/patscontrib_HTML-emscripten.bash ; bash $<
 # srcget_patscontrib:: srcget_patscontrib_HTML-emscripten_canvas-2d
@@ -492,7 +456,6 @@ PACKNAME=ATS2-Postiats-$(PATSVER)
 # atspacktarzvcf: atspacktarzvcf_int
 # atspacktarzvcf: atspacktarzvcf_gmp
 ######
-#
 PACKNAMEgmp=ATS2-Postiats-gmp-$(PATSVER)
 #
 atspacktarzvcf_gmp:: ; $(RMRF) $(PACKNAMEgmp)
@@ -507,7 +470,6 @@ atspacktarzvcf_gmp_up:: ; \\
 scp $(PACKNAMEgmp).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(PACKNAMEgmp).tgz
 #
 ######
-#
 PACKNAMEint=ATS2-Postiats-int-$(PATSVER)
 #
 atspacktarzvcf_int:: ; $(RMRF) $(PACKNAMEint)
@@ -521,7 +483,6 @@ atspacktarzvcf_int_up:: ; \
 scp $(PACKNAMEint).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(PACKNAMEint).tgz
 #
 ######
-#
 CONTRIBNAME=ATS2-Postiats-contrib-0.3.13
 CONTRIBNAME=ATS2-Postiats-contrib-$(PATSVER)
 #
@@ -546,5 +507,5 @@ cleanall:: clean
 \
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
 %}\

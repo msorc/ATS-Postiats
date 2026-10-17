@@ -1,0 +1,57 @@
+######
+#
+# arenagen
+#
+######
+#
+# HX-2026-10: no GC
+#
+# A nonlinear datatype (one with constructors that take
+# arguments) is no longer supported. Shared (nonlinear) data
+# can instead be kept in an arena (see libats/SATS/arena.sats).
+# Given a specification of some algebraic types, [arenagen]
+# generates their encoding in an arena:
+#
+#   python3 arenagen.py sats example.spec > example_arena.sats
+#   python3 arenagen.py dats example.spec > example_arena.dats
+#
+# For each type T, this gives a handle type T(l) (nonlinear,
+# indexed by the arena), a linear view datavtype T_view(l)
+# whose constructors are the given ones (for pattern matching),
+# and the functions T_encode, T_view, T_view_free, T_tag, T_CON
+# (an allocating shortcut for each constructor CON), T_is_CON
+# (for a type with several constructors) and T_get_F (for each
+# named field F of a single-constructor type).
+#
+# With --global, the global arena is used instead: the handle
+# types are not indexed, the functions take no arena, and each
+# named field F of a single-constructor type T can be accessed
+# as x.F (an overload of T_get_F). The data lives until the
+# program exits; this suits compiler-like tools.
+#
+# Also (with --global): a line `record R (f: T, g: U)` is a flat record
+# (no tag, no view): R_new(..), f(x) and x.f(); lines starting with
+# `typedef`/`vtypedef` are copied to the sats; `--compact dats` emits
+# non-template field accessors (30x less C, fields are words). See
+# src2/pats_syntax.spec, src2/PORTING.md ("Arena AST"), port_ats1.py
+# and spec_from_sats.py (helpers to port an ATS1 AST).
+#
+# See doc/EXAMPLE/LINHEAP/POS_arena.dats for an example.
+#
+######
+#
+# port_parser.py (HX-2026-10): a first pass for porting the ATS1 parsers
+# src/pats_parsing_{p0at,dynexp,decl}.dats to src2/ (token cases to if-chains,
+# template arguments). See src2/PORTING.md, "Parser, phase 2".
+#
+#
+# HX-2026-10: with --compact a field of type double (arenagen.py, DWORD) is stored by value
+# (src2/pats_staexp1.spec, [V1ALfloat]); the other field types are still cast through lint.
+# port_ats1.py: see src2/PORTING.md, "Level 1" (L1-8).
+#
+# HX-2026-10: in a `record R (a: T, mut b: U)` a field declared [mut] also gets a setter
+# `set_b(x, v)` (the record is a cell of the arena and stays at its address): this is how the
+# mutable parts of s2cst, s2var, s2Var, d2con, ... are modelled in src2/pats_staexp2.spec
+# (PORTING.md, "Level 2"). Only records may have [mut] fields.
+# A line `viewfn T NAME` of a spec renames the function T_view (x) to NAME (the datavtype stays T_view):
+# s2rt_view of src/pats_staexp2.sats is a constant (the sort of views), see src2/pats_staexp2.spec.

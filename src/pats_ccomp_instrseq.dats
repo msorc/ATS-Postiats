@@ -33,46 +33,53 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_ccomp_instrseq.dats, see PORTING.md, "ccomp core modules")
 //
 (* ****** ****** *)
 
-staload LQ = "libats/SATS/linqueue_lst.sats"
-staload _(*anon*) = "libats/DATS/linqueue_lst.dats"
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
+staload LOC = "./pats_location.sats"
+
+(* ****** ****** *)
+
+staload "./pats_staexp2.sats"
+staload "./pats_dynexp2.sats"
+staload "./pats_histaexp.sats"
+staload "./pats_hidynexp.sats"
 
 (* ****** ****** *)
 
 staload "./pats_ccomp.sats"
 
 (* ****** ****** *)
-
+//
+// HX-2026-10: the queue of ATS1 ([linqueue_lst]) is a reversed linear list:
+// [instrseq_add] conses, [instrseq_get_free] reverses (insertion order kept)
+//
 datavtype
-instrseq =
-INSTRSEQ of ($LQ.QUEUE1 (instr))
+instrseq = INSTRSEQ of (List0_vt(instr))
 assume instrseq_vtype = instrseq
 
 (* ****** ****** *)
-//
-macdef
-LQ_queue_initize =
-  $LQ.queue_initialize{instr}
-macdef
-LQ_queue_uninitize =
-  $LQ.queue_uninitialize<instr>
-//
-(* ****** ****** *)
 
 implement
-instrseq_make_nil
-  () = res where {
-  val res = INSTRSEQ(?)
-  val+INSTRSEQ (!p_xs) = res
-  val () =
-    LQ_queue_initize (!p_xs)
-  // end of [val]
-  prval ((*folded*)) = fold@ (res)
-} // end of [instrseq_make_nil]
+instrseq_make_nil () = INSTRSEQ (list_vt_nil ())
 
 (* ****** ****** *)
 
@@ -82,8 +89,8 @@ instrseq_add
 in
 //
 case+ res of
-| INSTRSEQ (!p_xs) => let
-    val () = $LQ.queue_insert (!p_xs, x) in fold@ (res)
+| @INSTRSEQ (xs) => let
+    val () = xs := list_vt_cons (x, xs) in fold@ (res)
   end // end of [INSTRSEQ]
 //
 end // end of [instrseq_add]
@@ -131,12 +138,9 @@ instrseq_addlst
   (res, xs) = let
 in
 //
-case+ xs of
-| list_cons
-    (x, xs) => let
-    val () = instrseq_add (res, x) in instrseq_addlst (res, xs)
-  end // end of [list_cons]
-| list_nil () => ()
+if glist_is_cons (xs) then let
+  val () = instrseq_add (res, glist_head (xs)) in instrseq_addlst (res, glist_tail (xs))
+end else ()
 //
 end // end of [instrseq_addlst]
 
@@ -195,11 +199,9 @@ end // end of [local]
 implement
 instrseq_get_free
   (res) = let
-  val+INSTRSEQ(!p_xs) = res
-  val xs = LQ_queue_uninitize (!p_xs)
-  val ((*freed*)) = free@ (res)
+  val ~INSTRSEQ (xs) = res
 in
-  list_of_list_vt (xs)
+  glist_make_list_vt (list_vt_reverse (xs))
 end // end of [instrseq_get_free]
 
 (* ****** ****** *)

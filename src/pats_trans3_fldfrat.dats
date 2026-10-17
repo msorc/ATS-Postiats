@@ -33,27 +33,38 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_fldfrat.dats, see PORTING.md,
+// "Level 3 translation, group 3 (p2at/selab/fldfrat/lvalres)")
 //
 (* ****** ****** *)
 
-staload
-UN = "prelude/SATS/unsafe.sats"
+#include "share/atspre_staload.hats"
 
 (* ****** ****** *)
-//
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
+(* ****** ****** *)
+
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
-//
 implement
-prerr_FILENAME<>
-  ((*void*)) = prerr "pats_trans3_fldfrat"
-//
+prerr_FILENAME<> ((*void*)) = prerr "pats_trans3_fldfrat"
+
 (* ****** ****** *)
 
 staload
 LOC = "./pats_location.sats"
+typedef loc_t = $LOC.location
 
 (* ****** ****** *)
 
@@ -84,34 +95,30 @@ auxck_free
 ) : int = let
 in
 //
-case+ s2es of
+case+ glist_view(s2es) of
 //
-| list_nil
+| ~GLnil
     ((*void*)) => nerr
-  // list_nil
+  // GLnil
 //
-| list_cons
+| ~GLcons
     (s2e, s2es) => let
-(*
-    val () = (
-      println! ("auxck_free: s2e = ", s2e)
-    ) // end of [val]
-*)
     var nerr: int = nerr
     val islin = s2exp_is_lin2 (s2e)
     val () = if islin then let
       val () = nerr := nerr + 1
       val () = prerr_error3_loc (loc0)
       val () = prerr ": [free@] operation cannot be performed"
-      val () = prerrln!
-        (": a linear component of the type [", s2e, "] may be abandoned.")
-      // end of [val]
+      val () = prerr ": a linear component of the type ["
+      val () = prerr_s2exp (s2e)
+      val () = prerr "] may be abandoned."
+      val () = prerr_newline ()
     in
       // nothing
     end // end of [val]
   in
     auxck_free (loc0, s2es, nerr)
-  end // end of [list_cons]
+  end // end of [GLcons]
 //
 end // end of [auxck_free]
 
@@ -122,35 +129,21 @@ auxfind
 ) : s2explst = let
 in
 //
-case+ s2ls of
-| list_nil
-    ((*void*)) => list_nil()
-  // end of [list_nil]
-| list_cons
+case+ glist_view(s2ls) of
+| ~GLnil
+    ((*void*)) => glist_nil()
+  // end of [GLnil]
+| ~GLcons
     (s2l, s2ls) => let
-(*
-    val () =
-      println! ("auxfind: s2l = ", s2l)
-    // end of [val]
-*)
     val opt = pfobj_search_atview (s2l)
     val s2e_elt = (
       case+ opt of
       | ~Some_vt(pfobj) => let
-          val+~PFOBJ
+          val ~PFOBJ
           (
             d2v, s2e_ctx, s2e_elt, _(*s2l*)
           ) = pfobj // end of [val]
-(*
-//
-// HX-2012-08-10:
-// s2e_ctx is assumed to be of the form []@L for some L
-//
-          val s2e_out = s2exp_without (s2e_elt)
-          val s2e = s2exp_hrepl (s2e_ctx, s2e_out)
-          val () = d2var_set_type (d2v, Some(s2e))
-*)
-          val () = d2var_set_type(d2v, None(*void*))
+          val () = d2var_set_type(d2v, gopt_none((*void*)))
         in
           s2e_elt
         end // end of [Some_vt]
@@ -158,8 +151,8 @@ case+ s2ls of
     ) : s2exp // end of [val]
     val s2es_elt = auxfind (loc0, s2ls)
   in
-    list_cons (s2e_elt, s2es_elt)
-  end // end of [list_cons]
+    glist_cons (s2e_elt, s2es_elt)
+  end // end of [GLcons]
 //
 end // end of [auxfind]
 
@@ -170,39 +163,39 @@ auxmain
 , opknd: int // 0/1 free/fold
 , s2as: s2exparglst, d2e: d2exp
 ) : d3exp = let
-  val loc = d2e.d2exp_loc
+  val loc = d2e.d2exp_loc()
   val d3e = d2exp_trup (d2e)
   val () = d3exp_open_and_add d3e
   val s2e_ptr = d3exp_get_type (d3e)
 in
 //
 case+
-s2e_ptr.s2exp_node
+s2exp_node_view(s2e_ptr.s2exp_node())
 of (* case+ *)
-| S2Edatconptr
+| ~S2Edatconptr
     (d2c, _(*rt*), arg) => let
     val s2es_elt = auxfind (loc0, arg)
     val s2e_dcon = d2con_get_type (d2c)
     var err: int = 0
-    val (s2e_dcon, s2ps) =
+    val @(s2e_dcon, s2ps) =
       s2exp_uni_instantiate_sexparglst (s2e_dcon, s2as, err)
     // end of [val]
     val () = trans3_env_add_proplst_vt (loc0, s2ps)
     val locarg = $LOC.location_leftmost (loc)
-    val (s2e_dcon, s2ps) =
+    val @(s2e_dcon, s2ps) =
       s2exp_uni_instantiate_all (s2e_dcon, locarg, err)
     // HX: [err] is not used
     val () = trans3_env_add_proplst_vt (loc0, s2ps)
-    val-S2Efun (
+    val-~S2Efun (
       fc, lin, s2fe, nof, s2es_arg, s2e_res
-    ) = s2e_dcon.s2exp_node // end of [val]
+    ) = s2exp_node_view(s2e_dcon.s2exp_node()) // end of [val]
 //
     val () =
     if opknd = 0 then let
       val nerr = auxck_free(loc0, s2es_elt, 0(*nerr*))
     in
       if nerr > 0 then
-        the_trans3errlst_add(T3E_d3exp_freeat(loc0, d3e))
+        the_trans3errlst_add(trans3err_T3E_d3exp_freeat(loc0, d3e))
       // end of [if]
     end // end of [val]
 //
@@ -216,10 +209,11 @@ of (* case+ *)
       if err > 0 then let
         val () = prerr_error3_loc(loc)
         val () = prerr ": [fold@] operation cannot be formed"
-        val () = prerrln! ": some argument types are mismatched."
+        val () = prerr ": some argument types are mismatched."
+        val () = prerr_newline ()
         val () = prerr_the_staerrlst()
       in
-        the_trans3errlst_add(T3E_d3exp_foldat(loc0, d3e))
+        the_trans3errlst_add(trans3err_T3E_d3exp_foldat(loc0, d3e))
       end // end of [if]
     end // end of [val]
     val () =
@@ -234,16 +228,17 @@ of (* case+ *)
         val () =
           prerr ": [fold@] operation cannot be formed"
         val () =
-          prerrln! (": the type of the dynamic expression cannot be changed.")
-        // end of [val]
+          prerr ": the type of the dynamic expression cannot be changed."
+        val () = prerr_newline ()
       in
-        the_trans3errlst_add(T3E_d3exp_foldat(loc0, d3e))
+        the_trans3errlst_add(trans3err_T3E_d3exp_foldat(loc0, d3e))
       end (* end of [if] *)
     end // end of [val]
   in
     d3e
   end // end of [S2Edatconptr]
-| _ (*non-S2Edatconptr*) => let
+| v (*non-S2Edatconptr*) => let
+    val () = s2exp_node_view_free (v)
     val () = prerr_error3_loc(loc)
     val () =
     if opknd = 0 then
@@ -253,9 +248,8 @@ of (* case+ *)
     if opknd > 0 then
       prerr ": [fold@] operation cannot be performed"
     // end of [if]
-    val () =
-      prerrln! (": unfolded datatype constructor is expected.")
-    // end of [val]
+    val () = prerr ": unfolded datatype constructor is expected."
+    val () = prerr_newline ()
   in
     d3exp_errexp (loc0)
   end // end of [non-S2Edatconptr]
@@ -269,8 +263,8 @@ d2exp_trup_foldat
   (d2e0) = let
 //
 val
-loc0 = d2e0.d2exp_loc
-val-D2Efoldat(s2as, d2e) = d2e0.d2exp_node
+loc0 = d2e0.d2exp_loc()
+val-~D2Efoldat(s2as, d2e) = d2exp_node_view(d2e0.d2exp_node())
 //
 val d3e = auxmain(loc0, 1(*opknd*), s2as, d2e)
 //
@@ -282,8 +276,8 @@ implement
 d2exp_trup_freeat
   (d2e0) = let
 //
-val loc0 = d2e0.d2exp_loc
-val-D2Efreeat(s2as, d2e) = d2e0.d2exp_node
+val loc0 = d2e0.d2exp_loc()
+val-~D2Efreeat(s2as, d2e) = d2exp_node_view(d2e0.d2exp_node())
 //
 val err =
 the_effenv_check_wrt(loc0)
@@ -291,7 +285,7 @@ the_effenv_check_wrt(loc0)
 val () =
 if (err > 0) then
 (
-the_trans3errlst_add(T3E_d2exp_trup_wrt(loc0))
+the_trans3errlst_add(trans3err_T3E_d2exp_trup_wrt(loc0))
 ) // end of [if] // end of [val]
 //
 val d3e = auxmain(loc0, 0(*opknd*), s2as, d2e)

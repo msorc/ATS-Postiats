@@ -1,0 +1,83 @@
+src/: the compiler patsopt (ATS2 sources, no GC)
+================================================
+
+The compiler is written in ATS2 and compiles itself: ATS1 is not needed to build it.
+Any ATS2 compiler can be the first one (stage 0); a bundle of generated C code is the
+alternative when there is none (see CBOOT/README). The notes of the port from ATS1 are
+in PORTING.md ("src2" there is this directory). The tools built on these modules (atsdoc,
+libatsdoc, libatsynmark, pats2xhtml) and the .atxt templates of the repository need no ATS1 either (see utils/atsdoc).
+
+Prerequisites: a C compiler, GNU make, python3 (generates the arena encodings of the
+syntax trees, utils/arenagen), libgmp (without it: C3NSTRINTKND=intknd). PATSHOME
+defaults to the root of the repository; the prelude, share/ and the C run-time are read
+from there.
+
+Building
+--------
+
+    make -C src PATSOPT=<stage-0 patsopt> [STAGE0HOME=<its PATSHOME>] [-j N]   # ./patsopt and ./libatsopt.a
+    make -C src check                  # typecheck every module (needs only patsopt)
+    make -C src test                   # check + unit tests + md5 suites of test/ (no ATS1; no -j; ~6 minutes)
+    make -C src CBOOT                  # generate the bootstrap C bundle in CBOOT/ (CBOOT/README)
+    make -C src clean | cleanall | cleanboot
+
+`make -f Makefile_devl all` (repository root) does the above and then builds bin/patscc, bin/myatscc and
+ccomp/atslib/lib/libatsopt.a and libatslib.a, with the same variables (PATSOPT=, STAGE0HOME=, C3NSTRINTKND=).
+Without PATSOPT the stage-0 compiler is $PATSHOME/bin/patsopt if it exists (an earlier build), else patsopt of the PATH.
+`make -C src test` needs bin/patscc and bin/patsopt in the PATH (build them with Makefile_devl first).
+
+Getting the first patsopt
+-------------------------
+
+(a) Any ATS2 compiler as stage 0.
+
+  * A compiler built from this repository (bin/patsopt of an earlier build, a release built from these sources):
+
+        make -C src PATSOPT=/path/to/patsopt          # PATSHOME = this repository
+
+  * An installed ATS2 release (tested: ats2-postiats-0.4.2, Arch/Debian package):
+
+        make -C src PATSOPT=/usr/lib/ats2-postiats-0.4.2/bin/patsopt STAGE0HOME=/usr/lib/ats2-postiats-0.4.2
+
+    That compiler cannot read the prelude of this repository (the prelude without GC has no list.sats, which every
+    ATS2 up to 0.4.2 loads itself), so with STAGE0HOME the stage-0 compiler runs with ITS OWN prelude and C run-time
+    and only libats/{SATS,DATS,CATS}/arena.* (the arena of the sources) is added from this repository (directory
+    stage0/, `-IATS`). `-O2` is replaced by `-O2 -fno-strict-aliasing` in this mode: the C code that ATS2 0.4.2 generates for
+    the compiler is not safe with strict aliasing under gcc 16 (the stage-1 compiler is then wrong). Once this
+    stage-1 patsopt exists, rebuild with it (`make -C src cleanall; make -C src PATSOPT=$PWD/patsopt`) to get the
+    stage-2 compiler, which is the normal one (stage 2 and stage 3 are bit-identical).
+
+(b) The bootstrap C bundle: `make -C src CBOOT` (run with a working patsopt) generates the C code of the whole compiler in
+    CBOOT/; `make -C CBOOT` links a patsopt from it with a C compiler and gmp only (CBOOT/README).
+    The bundle is not kept in git: it is part of the release tarballs.
+
+Source conventions
+------------------
+
+The no-GC rules of the repository apply to the compiler itself (see CLAUDE.md): linear heap data only, the shared
+syntax trees live in arenas (libats/arena) generated from the pats_*.spec files by utils/arenagen/arenagen.py
+(the generated pats_*_gen*.hats are not in git; `make -C src check` or the build makes them).
+When you add a module add it to the lists of src/Makefile (SATS/DATS and the group lists) and to the dynload list in pats_main.dats.
+
+The ATS1 sources
+----------------
+
+The old compiler sources (ATS1) are in the git history (the commit before "src2 renamed to src"). The differential harness
+of test/ (the *dump1.sh scripts, `make *compare`, drvfiles/drvopt) compares against an ATS1 build of the old sources:
+check them out into a separate directory, build them with ATS1 as before (ATSHOME, ATSHOMERELOC=ATS-0.2.12, make GCFLAG=-D_ATS_NGC
+C3NSTRINTKND=gmpknd patsopt), and point ATS1REF at that directory:
+
+    git worktree add /tmp/ats1src <commit before the swap>
+    (cd /tmp/ats1src/src && ATSHOME=... make GCFLAG=-D_ATS_NGC C3NSTRINTKND=gmpknd patsopt)
+    make -C src/test s2compare ATS1REF=/tmp/ats1src/src
+
+The ATS1 objects only link at the path where they were built (their C names embed the source path); without ATS1REF
+the ATS1 side of those targets stops with a message. The md5 suites (`make -C src test`) never need ATS1: they
+check against recorded md5 sums of the ATS1 output.
+
+Some md5 files (t1cases.md5, t2cases.md5, t3cases.md5, toolcases.md5 line 1) are md5 sums of outputs that contain the path of the
+test files relative to the repository (src/test/...), and the output order depends on it: they are tied to the directory name
+src/test. They were regenerated from the ATS1 output after the rename (src2 -> src): `make -C src/test t1compare t2compare
+t3filescompare ATS1REF=...` rewrites the first three from the ATS1 output (and checks ATS1 == ATS2), and for toolcases.md5 line 1
+`sh toolcases.sh ./tooldump1` (the ATS1 driver, built by `ATS1REF=... sh comdump1.sh tooldump1`) prints it.
+

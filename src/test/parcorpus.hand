@@ -1,0 +1,1373 @@
+s0exp	
+s0exp	(
+s0exp	)
+s0exp	(a
+s0exp	(a,
+s0exp	(a | b
+s0exp	(a | b | c)
+s0exp	(| a)
+s0exp	(a, b | )
+s0exp	@(a, b)
+s0exp	@(a | b)
+s0exp	@(a, b
+s0exp	'(a, b)
+s0exp	'(a | b)
+s0exp	@{x = a, y = b}
+s0exp	@{x = a | y = b}
+s0exp	@{x = a, y}
+s0exp	'{x = a, y = b}
+s0exp	@{
+s0exp	$tup(a, b)
+s0exp	$tup_t(a | b, c)
+s0exp	$tup_vt(a, b
+s0exp	$rec{x = a}
+s0exp	$rec_t{x = a | y = b}
+s0exp	$rec_vt{x = a, y = b}
+s0exp	$rec(x)
+s0exp	$extype_struct "foo" of {x = int, y = char}
+s0exp	$extype_struct "foo" of {x = int | y = char}
+s0exp	$extype_struct "foo" {x = int}
+s0exp	$extype_struct of {}
+s0exp	$extype "foo"
+s0exp	$extype "foo" a b (c)
+s0exp	$extkind "foo" a b
+s0exp	$extype
+s0exp	@[a][n]
+s0exp	@[a][n, m]
+s0exp	@[a][
+s0exp	@[a]
+s0exp	-<>
+s0exp	-<fun1>
+s0exp	-<lin,prf>
+s0exp	-<cloptr1> a
+s0exp	-<
+s0exp	{a:int} a
+s0exp	{a:int | a > 0} a
+s0exp	{a:int | a > 0; a < 5} a
+s0exp	{a,b:int | a > b} (a, b)
+s0exp	{a:int}{b:int} a
+s0exp	{
+s0exp	{a:}
+s0exp	{a:int
+s0exp	[a:int | a > 0] a
+s0exp	[a:int] a
+s0exp	#[a:int] a
+s0exp	[
+s0exp	lam (a: int) => a
+s0exp	lam (a: int)(b) : int => a
+s0exp	lam a => a
+s0exp	lam (a: int) a
+s0exp	lam => a
+s0exp	lam (a: int) =>
+s0exp	a : int
+s0exp	a : int : type
+s0exp	a :
+s0exp	op +
+s0exp	op
+s0exp	$list.t
+s0exp	$LIST.t(a)
+s0exp	$LIST.
+s0exp	$LIST
+s0exp	$LIST:t
+s0exp	123
+s0exp	'a'
+s0exp	1.5
+s0exp	"str"
+s0exp	-> a
+s0exp	a -> b -> c
+s0exp	a <> b >< c
+s0exp	a ! b ~ c @ d \ e < f > g
+s0exp	a \ b c
+s0exp	a ~ ~ ~
+s0exp	ref@ a
+s0exp	&& a
+s0exp	`
+s0exp	a "unclosed
+s0exp	a 'x
+s0exp	a (* unclosed
+s0exp	a 0x
+s0exp	a 1e
+s0exp	a 09
+s0exp	)(
+s0exp	}{
+s0exp	a } b
+s0exp	a ] b
+s0exp	a ,
+s0exp	a , b
+s0exp	a | b
+s0exp	a ; b
+s0exp	a = b
+s0exp	a => b
+s0exp	then
+s0exp	if a then b
+atms0exp	(a, b | c)
+atms0exp	a b
+atms0exp	{a}
+atms0exp	
+atms0exp	(
+s0rt	
+s0rt	type
+s0rt	int -> int
+s0rt	(int, bool) -> type
+s0rt	(int, bool
+s0rt	(,)
+s0rt	(int,)
+s0rt	$LIST.t0ype
+s0rt	$LIST.
+s0rt	$LIST
+s0rt	t@ype
+s0rt	viewt@ype
+s0rt	prop
+s0rt	view
+s0rt	vt@ype
+s0rt	\ a
+s0rt	->
+s0rt	-> ->
+s0rt	int int
+s0rt	(int)
+s0rt	()
+s0rt	a ) b
+s0rt	{a:int | a > 0}
+s0rt	@(a)
+s0rtext	int
+s0rtext	{a:int | a >= 0}
+s0rtext	{a:int | a >= 0; a < 10}
+s0rtext	{a:int | a >= 0 | a < 10}
+s0rtext	{a:int}
+s0rtext	{a:int |}
+s0rtext	{a | b}
+s0rtext	{a:{b:int | b > 0} | a > 0}
+s0rtext	{a:int | a > 0
+s0rtext	{
+s0rtext	{a:int | a > 0 b}
+s0quaseq	
+s0quaseq	a:int
+s0quaseq	a,b:int
+s0quaseq	a,b:int | a > b
+s0quaseq	a:int, b:int
+s0quaseq	a:int; b:int
+s0quaseq	a:int | a > 0; b:int | b < 0
+s0quaseq	a > 0
+s0quaseq	a > 0 | b
+s0quaseq	a >
+s0quaseq	a,
+s0quaseq	a,:int
+s0quaseq	,
+s0quaseq	:
+s0quaseq	a:
+s0quaseq	a:int |
+s0quaseq	| a
+s0quaseq	a:int | | b
+s0qua	a
+s0qua	a:int
+s0qua	a, b: int
+s0qua	a b
+s0qua	
+q0margseq	{a:int}
+q0margseq	{a:int}{b}
+q0margseq	{a:int} {b:type} x
+q0margseq	{a:int
+q0margseq	{}
+q0margseq	
+s0exparg	..
+s0exparg	...
+s0exparg	a, b
+s0exparg	a, 
+s0exparg	
+s0exparg	.
+s0vararg	..
+s0vararg	...
+s0vararg	a, b: int
+s0vararg	a: int, b
+s0vararg	a,
+s0vararg	
+s0vararg	a
+labs0exp	x = a
+labs0exp	x as "y" = a
+labs0exp	1 = a
+labs0exp	x
+labs0exp	x =
+labs0exp	= a
+labs0exp	x as = a
+labs0exp	x as 3 = a
+labs0exp	
+p0rec	
+p0rec	1
+p0rec	(a)
+p0rec	(a + 1)
+p0rec	(a +)
+p0rec	(a + b)
+p0rec	(a
+p0rec	(
+p0rec	()
+p0rec	a
+l0ab	a
+l0ab	1
+l0ab	=
+l0ab	
+l0ab	"a"
+i0de	a
+i0de	=
+i0de	>
+i0de	<
+i0de	@
+i0de	\
+i0de	!
+i0de	~
+i0de	->
+i0de	-<>
+i0de	><
+i0de	+
+i0de	$a
+i0de	a!
+i0de	1
+i0de	
+i0de	(
+i0dext	a!
+i0dext	a
+i0dext	!
+i0dext	
+i0de_dlr	$a
+i0de_dlr	a
+i0de_dlr	$
+i0de_dlr	
+si0de	@
+si0de	!
+si0de	<
+si0de	>
+si0de	~
+si0de	->
+si0de	\
+si0de	=
+si0de	&
+si0de	a
+si0de	
+s0rtid	\
+s0rtid	->
+s0rtid	-<>
+s0rtid	@
+s0rtid	a
+s0rtid	+
+s0rtq	$a.
+s0rtq	$a
+s0rtq	a.
+s0rtq	
+s0taq	$a.
+s0taq	$a:
+s0taq	$a
+s0taq	a
+s0taq	
+sqi0de	a
+sqi0de	$a.b
+sqi0de	$a.
+sqi0de	$a
+sqi0de	
+e0xp	
+e0xp	1
+e0xp	a
+e0xp	a b
+e0xp	a b c d
+e0xp	(a, b)
+e0xp	(a, b
+e0xp	()
+e0xp	(,)
+e0xp	%(a)
+e0xp	%(a
+e0xp	%()
+e0xp	if a then b
+e0xp	if a then b else c
+e0xp	if a b then c d else e f
+e0xp	if a then
+e0xp	if then b
+e0xp	if a b
+e0xp	if a then b else
+e0xp	'c'
+e0xp	1.5e3
+e0xp	"s"
+e0xp	"s" "t"
+e0xp	a "s" 'c' 1 1.0
+e0xp	~a
+e0xp	a + b
+e0xp	a >= b
+e0xp	then
+e0xp	else
+e0xp	)
+e0xpseq	
+e0xpseq	a, b
+e0xpseq	a b, c
+e0xpseq	a,
+e0xpseq	, a
+e0xpseq	a, , b
+e0xpseq	if a then b, c
+datsdef	a
+datsdef	a = 1
+datsdef	a = "s"
+datsdef	a = 'c'
+datsdef	a = 1.5
+datsdef	a = b
+datsdef	a = (1)
+datsdef	a =
+datsdef	= 1
+datsdef	
+datsdef	1
+datsdef	a b
+extnamopt	= "x"
+extnamopt	=
+extnamopt	= 1
+extnamopt	
+extnamopt	"x"
+colonwith	:
+colonwith	:<>
+colonwith	:<fun1>
+colonwith	:<!wrt,~ref>
+colonwith	:<fun1
+colonwith	:<fun1,>
+colonwith	:< >
+colonwith	:<1>
+colonwith	:<cloref1,!exn>
+colonwith	a
+colonwith	
+e0fftaglst	
+e0fftaglst	fun
+e0fftaglst	!wrt
+e0fftaglst	~ref
+e0fftaglst	1
+e0fftaglst	cloref1, fun
+e0fftaglst	!
+e0fftaglst	~
+e0fftaglst	!1
+e0fftaglst	a, , b
+e0fftaglst	a,
+witht0ype	
+witht0ype	withtype a
+witht0ype	withtype
+witht0ype	withprop a
+witht0ype	withview a
+witht0ype	withviewtype a
+witht0ype	a
+s0arg	a
+s0arg	a: int
+s0arg	a:
+s0arg	:
+s0arg	
+s0arg	1
+s0marg	a
+s0marg	(a)
+s0marg	(a, b: int)
+s0marg	(a: int, b)
+s0marg	()
+s0marg	(a
+s0marg	(a,)
+s0marg	1
+s0marg	
+a0srt	int
+a0srt	a: int
+a0srt	a:
+a0srt	a: int -> int
+a0srt	
+a0srt	(a)
+a0msrt	(int)
+a0msrt	(a: int, b: bool)
+a0msrt	(int, bool
+a0msrt	()
+a0msrt	a
+a0msrt	(a:)
+a0msrt	
+d0atsrtconseq	
+d0atsrtconseq	A
+d0atsrtconseq	| A
+d0atsrtconseq	A | B
+d0atsrtconseq	A of int | B of (int, bool)
+d0atsrtconseq	A of | B
+d0atsrtconseq	A | | B
+d0atsrtconseq	A of int -> int
+d0atsrtconseq	1
+d0atsrtconseq	| 
+ofs0rtopt	of int
+ofs0rtopt	of
+ofs0rtopt	int
+ofs0rtopt	
+colons0rtopt	: int
+colons0rtopt	:
+colons0rtopt	int
+eqs0expopt	= a
+eqs0expopt	=
+eqs0expopt	a
+eqs0expopt	
+ofs0expopt	of a
+ofs0expopt	of
+colons0expopt	: a
+colons0expopt	:
+tmps0expseq	a
+tmps0expseq	a, b
+tmps0expseq	a b, c
+tmps0expseq	a >, b
+tmps0expseq	>
+tmps0expseq	a,
+tmps0expseq	
+i0nt	1
+i0nt	0x1F
+i0nt	1u
+i0nt	a
+i0nt	
+s0tring	"a"
+s0tring	"a\nb"
+s0tring	1
+s0tring	
+d0ecl_dyn	#prerr "x"
+d0ecl_dyn	#prerr
+d0ecl_dyn	#pragma(foo, bar)
+d0ecl_dyn	#pragma(foo
+d0ecl_dyn	#pragma
+d0ecl_dyn	#if 1 #then val x = 1 #elifdef X #then val y = 2 #elifndef Y #then val z = 3 #else val w = 4 #endif
+d0ecl_dyn	#if 1 #then val x = 1 #elif 2 #then val y = 2 #endif
+d0ecl_dyn	#ifdef X #then val x = 1 #endif
+d0ecl_dyn	#ifndef X #then val x = 1 #elifdef Y #endif
+d0ecl_dyn	macdef f {a} (x) = x
+d0ecl_dyn	macdef f {a (x) = x
+d0ecl_dyn	macdef rec f (x, y) = x and g {n} (z) = y
+d0exp	@{x = 1 | y = 2}
+d0exp	$rec{x = 1 | y = 2}
+d0exp	@{x = 1, y = 2}
+d0exp	@{x = 1 |
+p0at	@{x = a | y = b}
+p0at	$rec{x = a | y = b}
+p0at	@{x = a | y
+d0exp	a[1][2]
+d0exp	a[1][2
+d0exp	a[1][
+d0exp	a[1]
+d0exp	a[]
+d0exp	$effmask {wrt} x
+d0exp	$effmask {wrt x
+d0exp	$effmask {wrt}
+d0exp	$effmask_all x
+d0exp	$effmask_wrt (x)
+d0exp	'[1, 2]
+d0exp	'[1, 2
+d0exp	'[
+d0exp	$lst[int](1, 2)
+d0exp	$lst[int(1, 2)
+d0exp	$lst_vt[int](1)
+d0exp	$arrpsz[int](1, 2)
+d0exp	$arrpsz{int}(1, 2)
+d0exp	$arrpsz{int}(1, 2
+d0exp	$arrpsz{int}
+d0exp	$arrpsz
+d0exp	$arrpsz(
+d0exp	$d2ctype(foo)
+d0exp	$d2ctype(foo<int>)
+d0exp	$d2ctype(
+d0exp	$d2ctype(foo
+d0exp	$d2ctype()
+d0exp	$d2ctype(12)
+S0Ed2ctype	foo<int>
+S0Ed2ctype	foo<>
+S0Ed2ctype	foo<int,bool>
+S0Ed2ctype	$A.foo
+S0Ed2ctype	foo<
+S0Ed2ctype	<
+S0Ed2ctype	
+s0exp	$d2ctype(foo)
+s0exp	$d2ctype(foo<int>)
+s0exp	$d2ctype(foo<int>) -> int
+s0exp	$d2ctype(
+s0exp	$d2ctype(1)
+a0typ	x: int
+a0typ	int
+a0typ	!int
+a0typ	x:
+a0typ	:
+d0cstarg	(int, int)
+d0cstarg	{n:int}
+d0cstarg	(x: int, y: !int)
+d0cstarg	(pf: int | x: int)
+d0cstarg	(
+d0cstarg	{
+e0xndec	E of int
+e0xndec	{n:int} E of int n
+e0xndec	E
+e0xndec	E of
+e0xndec	of
+d0atconseq	A | B of int | C of (int, bool) | {n:nat} D (int n) : t(n)
+d0atconseq	| A | B
+d0atconseq	A of
+d0atconseq	{n:nat} A
+d0atdecseq	t = A | B of int
+d0atdecseq	t(a:type) = A | B(a) and u = C
+d0atdecseq	t = 
+d0atdecseq	= A
+d0cstdecseq	f: int -> int
+d0cstdecseq	f (x: int): int = "mac#f"
+d0cstdecseq	f {n:int} (x: int n): int n and g: int
+d0cstdecseq	f :<> int = "ext#f"
+d0cstdecseq	f
+d0cstdecseq	
+e0xndecseq	A of int and B
+e0xndecseq	A of int and
+d0ecl_dyn	extern fun f: int -> int = "mac#f"
+d0ecl_dyn	extern fun f(x: int): int
+d0ecl_dyn	fun f(x: int): int = x
+d0ecl_dyn	fun{a:t@ype} f(x: a): a = x
+d0ecl_dyn	fun f(x: int): int = x and g(y: int): int = y
+d0ecl_dyn	fun f(x: int): int = x withtype int -> int
+d0ecl_dyn	fun f(x: int): int = x andxx
+d0ecl_dyn	val x = 1
+d0ecl_dyn	val x: int = 1
+d0ecl_dyn	val+ x = 1
+d0ecl_dyn	val- x = 1 and y = 2
+d0ecl_dyn	val rec x = 1
+d0ecl_dyn	val
+d0ecl_dyn	val x
+d0ecl_dyn	val x =
+d0ecl_dyn	var x: int = 1
+d0ecl_dyn	var x: int with pf = 1
+d0ecl_dyn	var x = 1 and y: int
+d0ecl_dyn	implement f(x) = x
+d0ecl_dyn	implement{a} f<a>(x) = x
+d0ecl_dyn	implement f<int>(x: int): int = x
+d0ecl_dyn	implement f{n}(x) = x
+d0ecl_dyn	implement f<int,>(x) = x
+d0ecl_dyn	implement f<
+d0ecl_dyn	implement
+d0ecl_dyn	primplement f(x) = x
+d0ecl_dyn	staload "foo.sats"
+d0ecl_dyn	staload X = "foo.sats"
+d0ecl_dyn	staload $X
+d0ecl_dyn	staload _ = "foo.dats"
+d0ecl_dyn	staload X = {$X}
+d0ecl_dyn	staload {
+d0ecl_dyn	#staload "foo.sats"
+d0ecl_dyn	staload
+d0ecl_dyn	dynload "foo.dats"
+d0ecl_dyn	dynload 1
+d0ecl_dyn	#include "foo.hats"
+d0ecl_dyn	#include
+d0ecl_dyn	#require foo
+d0ecl_dyn	#define F(x) x
+d0ecl_dyn	#undef F
+d0ecl_dyn	#assert 1
+d0ecl_dyn	#error "x"
+d0ecl_dyn	#print "x"
+d0ecl_dyn	#codegen2 foo
+d0ecl_dyn	local val x = 1 in val y = x end
+d0ecl_dyn	local val x = 1 in val y = x
+d0ecl_dyn	local val x = 1
+d0ecl_dyn	local
+d0ecl_dyn	infixl 50 +
+d0ecl_dyn	infixr 50 + -
+d0ecl_dyn	infix (+) 50 *
+d0ecl_dyn	infixl
+d0ecl_dyn	postfix 60 !
+d0ecl_dyn	prefix 60 ~
+d0ecl_dyn	nonfix f g
+d0ecl_dyn	symintr f g
+d0ecl_dyn	symelim f
+d0ecl_dyn	overload + with f
+d0ecl_dyn	overload f with g of 10
+d0ecl_dyn	overload [] with f
+d0ecl_dyn	overload with
+d0ecl_dyn	overload + with
+d0ecl_dyn	datatype t = A | B
+d0ecl_dyn	datatype t = A | B withtype u = int
+d0ecl_dyn	datatype t = A and u = B withtype v = int
+d0ecl_dyn	datatype t = 
+d0ecl_dyn	dataviewtype t = A
+d0ecl_dyn	datavtype t = A of int
+d0ecl_dyn	dataprop p = P
+d0ecl_dyn	dataview v = V
+d0ecl_dyn	exception E of int
+d0ecl_dyn	exception
+d0ecl_dyn	abstype t
+d0ecl_dyn	abstype t = ptr
+d0ecl_dyn	abstype t(a:type) = ptr
+d0ecl_dyn	absprop p
+d0ecl_dyn	absvtype t
+d0ecl_dyn	absview v
+d0ecl_dyn	abst@ype t
+d0ecl_dyn	abstflat t = int
+d0ecl_dyn	typedef t = int
+d0ecl_dyn	typedef t(a:type) = a
+d0ecl_dyn	vtypedef t = int
+d0ecl_dyn	stadef n = 1
+d0ecl_dyn	sortdef s = int
+d0ecl_dyn	stacst c: int
+d0ecl_dyn	assume t = int
+d0ecl_dyn	reassume t
+d0ecl_dyn	extern val x: int = "mac#x"
+d0ecl_dyn	extern vtypedef t = int
+d0ecl_dyn	extern
+d0ecl_dyn	static fun f(): int = 1
+d0ecl_dyn	%{^ x %}
+d0ecl_dyn	%{$ x %}
+d0ecl_dyn	%{ x
+d0ecl_dyn	$extype "x" = int
+d0ecl_dyn	$extvar "x" = 1
+d0ecl_dyn	classdec c
+d0ecl_dyn	classdec c : t
+d0ecl_dyn	praxi f: int
+d0ecl_dyn	prfun f(x: int): int = x
+d0ecl_dyn	prval x = 1
+d0ecl_dyn	prvar x = 1
+d0ecl_dyn	castfn f(x: int):<> int
+d0ecl_dyn	macrodef f(x) = x
+d0ecl_dyn	1
+d0ecl_dyn	;
+d0ecl_dyn	)
+d0ecl_sta	stadef n = 1
+d0ecl_sta	val x = 1
+d0ecl_sta	fun f: int -> int
+d0ecl_sta	fun f(x: int): int
+d0ecl_sta	praxi f: int
+d0ecl_sta	prfun f(x: int): int
+d0ecl_sta	dataprop p = P
+d0ecl_sta	abstype t
+d0ecl_sta	typedef t = int
+d0ecl_sta	extern fun f: int
+d0ecl_sta	extern praxi f: int
+d0ecl_sta	extern prval x: int
+d0ecl_sta	castfn f: int -> int
+d0ecl_sta	macdef f = 1
+d0ecl_sta	local abstype t in typedef u = t end
+d0ecl_sta	implement f() = 1
+d0ecl_sta	exception E of int
+d0ecl_sta	#define N 1
+d0ecl_sta	#include "x.sats"
+d0ecl_sta	staload "x.sats"
+d0ecl_sta	#if 1 #then fun f: int #else fun g: int #endif
+d0ecl_sta	%{# x %}
+d0ecl_sta	assume t = int
+d0ecl_sta	symintr f
+d0ecl_sta	overload f with g
+d0ecl_sta	val f: int
+d0ecl_sta	val x: int = 1
+d0ecl_sta	var x: int
+d0ecl_sta	dynload "x.dats"
+d0ecl_sta	lam
+d0ecl_sta	datatype t = A
+d0ecl_sta	sortdef s = int
+d0ecl_sta	stacst c: int
+d0ecl_sta	absview v
+d0ecl_sta	datasort s = A | B of int
+d0ecl	val x = 1
+d0ecl	staload "x"
+d0ecl	
+d0ecl	stadef n = 1
+p0at	x
+p0at	_
+p0at	1
+p0at	'c'
+p0at	"s"
+p0at	1.5
+p0at	op +
+p0at	$A.foo
+p0at	$A.
+p0at	Foo(x, y)
+p0at	Foo(x | y)
+p0at	Foo{n}(x)
+p0at	Foo{n}{m}(x)
+p0at	Foo{}(x)
+p0at	Foo{n(x)
+p0at	Foo{n:int}
+p0at	(x, y)
+p0at	(x | y)
+p0at	(x, y | z)
+p0at	(x,
+p0at	()
+p0at	@(x, y)
+p0at	'(x, y)
+p0at	$tup(x, y)
+p0at	$tup_vt(x | y)
+p0at	@{x = a, y = b}
+p0at	'{x = a, y = b}
+p0at	$rec{x = a}
+p0at	@{x = a, ...}
+p0at	@{...}
+p0at	@{x}
+p0at	@{x =
+p0at	$lst(x, y)
+p0at	$lst_vt(x, y)
+p0at	$lst(
+p0at	$lst
+p0at	~x
+p0at	@x
+p0at	x as y
+p0at	x : int
+p0at	x as
+p0at	x :
+p0at	[n] x
+p0at	[n:int] x
+p0at	[n, m] x
+p0at	[
+p0at	[n
+p0at	{n} x
+p0at	Foo{
+p0at	=
+p0at	)
+p0at	
+p0at	x y z
+p0at	x (y) {n}
+p0at	x {n:int}
+p0at	x {
+p0at	x {n
+p0at	x {..}
+p0at	x {n:int | n > 0}
+p0at	- 1
+p0at	~
+p0at	@
+p0at	'[x]
+p0at	x@y
+labp0at	x = y
+labp0at	...
+labp0at	x
+labp0at	x =
+labp0at	= y
+labp0at	1 = y
+f0arg1	x
+f0arg1	(x, y)
+f0arg1	{n:int}
+f0arg1	{n:int | n > 0}
+f0arg1	{
+f0arg1	.<n>.
+f0arg1	.<>.
+f0arg1	.<n,m>.
+f0arg1	.<n
+f0arg1	.<
+f0arg1	(
+f0arg1	
+f0arg2	x
+f0arg2	(x, y)
+f0arg2	{n}
+f0arg2	{n, m}
+f0arg2	{n:int}
+f0arg2	{..}
+f0arg2	{...}
+f0arg2	{
+f0arg2	{n
+f0arg2	{n:int}
+d0exp	x
+d0exp	f x
+d0exp	f(x)
+d0exp	f(x, y)
+d0exp	f(x | y)
+d0exp	f(x, y | z)
+d0exp	f()
+d0exp	f{n}(x)
+d0exp	f{n}{m}(x)
+d0exp	f<int>(x)
+d0exp	f<int,bool>(x)
+d0exp	f<>(x)
+d0exp	f<int
+d0exp	f<
+d0exp	f{
+d0exp	f(
+d0exp	f(x
+d0exp	f(x,
+d0exp	f(|
+d0exp	1 + 2 * 3
+d0exp	a + b + c
+d0exp	a :: b
+d0exp	!x
+d0exp	~x
+d0exp	&x
+d0exp	@x
+d0exp	!x.y
+d0exp	x.y
+d0exp	x.1
+d0exp	x.y.z
+d0exp	x.
+d0exp	x.[i]
+d0exp	x.[i, j]
+d0exp	x[1]
+d0exp	x[1, 2]
+d0exp	x->y
+d0exp	x->
+d0exp	x->y->z
+d0exp	x.y := 1
+d0exp	x := y
+d0exp	if x then y else z
+d0exp	if x then y
+d0exp	if x then
+d0exp	if x
+d0exp	if
+d0exp	if x then y else
+d0exp	if (x) then y else z
+d0exp	if x then if y then a else b else c
+d0exp	if [n:int] => x then y else z
+d0exp	if (x : int) => z then y else z
+d0exp	if [n] =<> x then y
+d0exp	if [n, m] =< fun, lin > x then y
+d0exp	sif x then y else z
+d0exp	sif x then y
+d0exp	sif [n] => x then y else z
+d0exp	case x of | y => z
+d0exp	case+ x of | y => z
+d0exp	case- x of | y => z | w => v
+d0exp	case x of y => z
+d0exp	case x of
+d0exp	case x
+d0exp	case x of | y
+d0exp	case x of | y =>
+d0exp	case x of | y => z | 
+d0exp	case x of | y when z => w
+d0exp	case x of | y when z as p => w
+d0exp	case x of | y when z && w => v
+d0exp	case x of | y =>> z
+d0exp	case x of | y =/=> z
+d0exp	case x of | y =/=>> z
+d0exp	case [n:int] => x of | y => z
+d0exp	case+ [n:int] =< prf > x of | y => z
+d0exp	scase x of | A() => y
+d0exp	scase+ x of | A(a) => y | B(b, c) => z
+d0exp	scase x of | A => y
+d0exp	scase x of
+d0exp	scase x of | A( => y
+d0exp	ifcase | x => y | z => w
+d0exp	ifcase | x => y | _ => w
+d0exp	ifcase
+d0exp	ifcase | x
+d0exp	ifcase | x =>
+d0exp	ifcase [n:int] => | x => y
+d0exp	lam x => y
+d0exp	lam (x) => y
+d0exp	lam (x: int): int => y
+d0exp	lam (x: int):<cloref1> int => y
+d0exp	lam {n:int} (x: int n): int n => y
+d0exp	lam (x) =<cloref1> y
+d0exp	lam (x) =<> y
+d0exp	lam
+d0exp	lam x
+d0exp	lam x =>
+d0exp	lam@ (x) => y
+d0exp	llam (x) => y
+d0exp	llam@ (x) => y
+d0exp	fix f (x) => y
+d0exp	fix f (x: int): int => y
+d0exp	fix@ f (x) => y
+d0exp	fix
+d0exp	fix f
+d0exp	fix f (x)
+d0exp	fix f (x) =>
+d0exp	let in x end
+d0exp	let val x = 1 in x end
+d0exp	let val x = 1 in x
+d0exp	let val x = 1 in x; y end
+d0exp	let val x = 1 val y = 2 in x end
+d0exp	let val x = 1 in end
+d0exp	let in end
+d0exp	let
+d0exp	let val x = 1
+d0exp	let val x = in x end
+d0exp	begin x end
+d0exp	begin x; y end
+d0exp	begin end
+d0exp	begin x
+d0exp	begin
+d0exp	(x; y)
+d0exp	(x; y; z)
+d0exp	(x; y | z)
+d0exp	(x;)
+d0exp	(;)
+d0exp	(x, y)
+d0exp	(x, y | z)
+d0exp	(x | y)
+d0exp	(x |)
+d0exp	(| y)
+d0exp	(
+d0exp	)
+d0exp	()
+d0exp	@(x, y)
+d0exp	'(x, y)
+d0exp	$tup(x, y)
+d0exp	$tup_vt(x | y)
+d0exp	@{x = a, y = b}
+d0exp	'{x = a, y = b}
+d0exp	$rec{x = a}
+d0exp	$rec_vt{x = a | y = b}
+d0exp	@{x = a, y}
+d0exp	@{}
+d0exp	@{
+d0exp	@{x
+d0exp	@{x =
+d0exp	$lst(x, y)
+d0exp	$lst_vt(x)
+d0exp	$lst{int}(x)
+d0exp	$list(x, y)
+d0exp	$list_vt(x, y)
+d0exp	$list{int}(x, y)
+d0exp	$list(
+d0exp	$ldelay x
+d0exp	$delay x
+d0exp	$ldelay (x, y)
+d0exp	$ldelay (x, y, z)
+d0exp	$delay(x)
+d0exp	$delay
+d0exp	$raise x
+d0exp	$raise
+d0exp	$showtype x
+d0exp	$tempenver(x)
+d0exp	$tempenver x
+d0exp	$solver_assert(x)
+d0exp	$solver_verify(int)
+d0exp	$solver_verify(
+d0exp	$vcopyenv_v(x)
+d0exp	$vcopyenv_vt(x)
+d0exp	$vcopyenv_v
+d0exp	$vararg(x, y)
+d0exp	$vararg
+d0exp	$break
+d0exp	$continue
+d0exp	$myfilename
+d0exp	$mylocation
+d0exp	$myfunction
+d0exp	$extval(int, "x")
+d0exp	$extval(int)
+d0exp	$extval(
+d0exp	$extfcall(int, "f", x, y)
+d0exp	$extfcall(int, "f")
+d0exp	$extfcall(int)
+d0exp	$extmcall(int, x, "m", y)
+d0exp	$extmcall(int, x, "m")
+d0exp	$extmcall(int, x)
+d0exp	$tyrep(int)
+d0exp	$tyrep(
+d0exp	$literal(x)
+d0exp	$literal
+d0exp	fold@ x
+d0exp	fold@ (x, y)
+d0exp	free@ x
+d0exp	free@ (x, y)
+d0exp	fold@
+d0exp	view@ x
+d0exp	addr@ x
+d0exp	view@
+d0exp	addr@
+d0exp	(x : int)
+d0exp	x : int
+d0exp	x : 
+d0exp	[x]
+d0exp	[1, 2]
+d0exp	{n}
+d0exp	{n:int}
+d0exp	{n, m}
+d0exp	{}
+d0exp	{
+d0exp	x where { val y = 1 }
+d0exp	x where { }
+d0exp	x where { val y = 1
+d0exp	x where val y = 1 end
+d0exp	x where
+d0exp	x where { val y = 1 } where { val z = 2 }
+d0exp	x where y
+d0exp	while x y
+d0exp	while* {n:int} .<n>. (x:int): (y:int) => x y
+d0exp	while x
+d0exp	while
+d0exp	for x; y; z w
+d0exp	for* {n:int} (x:int): (y:int) => x; y; z w
+d0exp	for x; y z
+d0exp	for x; y; z
+d0exp	for
+d0exp	try x with | y => z
+d0exp	try x with y => z
+d0exp	try x with
+d0exp	try x
+d0exp	try
+d0exp	try [n:int] => x with | y => z
+d0exp	try x; y with | z => w
+d0exp	$effmask_all x
+d0exp	$effmask_ntm x
+d0exp	$effmask_exn x
+d0exp	$effmask_ref x
+d0exp	$effmask_wrt x
+d0exp	$effmask_all
+d0exp	@[int][3]()
+d0exp	@[int][3](1, 2, 3)
+d0exp	@[int][n]
+d0exp	@[int](1)
+d0exp	@[int][3][4](1)
+d0exp	@[int][
+d0exp	@[int
+d0exp	@[
+d0exp	#[n] x
+d0exp	#[n:int | n > 0] x
+d0exp	#[
+d0exp	#[n
+d0exp	[n] x
+d0exp	[n:int] x
+d0exp	.<n>. x
+d0exp	%(x)
+d0exp	%(
+d0exp	`(x)
+d0exp	,(x)
+d0exp	`(
+d0exp	,(
+d0exp	,x
+d0exp	`x
+d0exp	%x
+d0exp	op +
+d0exp	op
+d0exp	op +(x)
+d0exp	$A.f
+d0exp	$A.f(x)
+d0exp	$A.f<int>(x)
+d0exp	$A.B.f
+d0exp	$A.
+d0exp	$A
+d0exp	$
+d0exp	1
+d0exp	'c'
+d0exp	"s"
+d0exp	1.5
+d0exp	1u
+d0exp	"s" "t"
+d0exp	{x}
+d0exp	{x}{y}
+d0exp	x{n}
+d0exp	x{n}{m}
+d0exp	x{n:int}
+d0exp	x<n>
+d0exp	x<n><m>
+d0exp	x < y
+d0exp	x > y
+d0exp	x <> y
+d0exp	x >< y
+d0exp	x = y
+d0exp	x == y
+d0exp	x =< y
+d0exp	=
+d0exp	=>
+d0exp	,
+d0exp	;
+d0exp	|
+d0exp	end
+d0exp	in
+d0exp	then
+d0exp	else
+d0exp	of
+d0exp	with
+d0exp	when
+d0exp	:
+d0exp	:=
+d0exp	.
+d0exp	->
+d0exp	
+d0exp	x y z
+d0exp	x y z w
+d0exp	f x y
+d0exp	f (x) (y)
+d0exp	f (x) y
+d0exp	x \f y
+d0exp	\f
+d0exp	x `f y
+d0exp	f x of y
+d0exp	if x then y else z where { val w = 1 }
+d0exp	let val x = 1 in x end where { val y = 2 }
+d0exp	lam (x) => x where { val y = 1 }
+d0exp	case x of | y => z where { val w = 1 }
+d0exp	case x of | y => z where { val w = 1 } | a => b
+d0exp	$effmask{wrt,ntm} x
+d0exp	$effmask{} x
+d0exp	$effmask{wrt
+d0exp	$effmask
+d0exp	$effmask x
+d0exp	x.<n>.
+d0exp	x.1.2
+d0exp	x.lab.1
+d0exp	x.[1].lab
+d0exp	@(x)
+d0exp	@()
+d0exp	@(x |)
+d0exp	@(
+d0exp	@
+d0exp	&
+d0exp	'
+d0exp	~
+d0exp	!
+d0exp	!x.y
+d0exp	!x.[1]
+d0exp	!x->y
+d0exp	!(x)
+d0exp	! x
+d0exp	~ x
+d0exp	~ (x, y)
+d0exp	@ x
+d0exp	& x
+d0exp	f !x
+d0exp	f ~x
+d0exp	f &x
+d0exp	f @x
+d0exp	f x.y
+d0exp	f x.1
+d0exp	f x[1]
+d0exp	f x->y
+d0exp	f !x y
+d0exp	f ~x y
+d0exp	f x, y
+d0exp	f (x, y) (z, w)
+d0exp	f {x} (y)
+d0exp	f (y) {x}
+d0exp	f (y) {x} (z)
+d0exp	f (y); z
+d0exp	f (y), z
+d0exp	f (y) | z
+d0exp	f (y) = z
+d0exp	f (y) => z
+d0exp	f (y) : t
+d0exp	f (y) as z
+d0exp	f (y) of z
+d0exp	fun f () = 1
+d0exp	val x = 1
+d0exp	var x = 1
+d0exp	implement f () = 1
+d0exp	local in end
+d0exp	datatype t = A
+d0exp	staload "x"
+d0exp	typedef t = int
+d0exp	#if
+d0exp	#then
+d0exp	#endif
+d0exp	%{
+d0exp	%{ x %}
+d0exp	%{^ x %}
+labd0exp	x = y
+labd0exp	x
+labd0exp	x =
+labd0exp	= y
+labd0exp	1 = y
+labd0exp	x = y z
+labd0exp	... 
+d0ynq	$A.
+d0ynq	$A.$B.
+d0ynq	$A
+d0ynq	$A:
+d0ynq	$A.$B:
+d0ynq	x
+d0ynq	
+d0ynq	$
+d0ynq	$A.B
+di0de	x
+di0de	+
+di0de	\
+di0de	!
+di0de	=
+di0de	>
+di0de	<
+di0de	~
+di0de	<>
+di0de	><
+di0de	@
+di0de	&
+di0de	1
+di0de	(
+di0de	
+di0de	op
+di0de	$A
+dqi0de	x
+dqi0de	$A.x
+dqi0de	$A.$B.x
+dqi0de	$A.
+dqi0de	$A.+
+dqi0de	$A.1
+dqi0de	+
+dqi0de	
+tmpqi0de	x
+tmpqi0de	x<int>
+tmpqi0de	x<int,bool>
+tmpqi0de	x<>
+tmpqi0de	$A.x<int>
+tmpqi0de	$A.x
+tmpqi0de	x<int><bool>
+tmpqi0de	x<
+tmpqi0de	x<int
+tmpqi0de	x<int,
+tmpqi0de	x<;>
+tmpqi0de	<
+tmpqi0de	
+tmpqi0de	x<int;bool>
+tmpqi0de	x<a;b,c>
+tmpqi0de	x<a,b;c>
+arrqi0de	x[
+arrqi0de	x
+arrqi0de	$A.x[
+arrqi0de	$A.x
+arrqi0de	+
+arrqi0de	
+pi0de	x
+pi0de	+
+pi0de	1
+pi0de	$A
+pi0de	(
+pi0de	
+eqd0expopt	= x
+eqd0expopt	= 
+eqd0expopt	x
+eqd0expopt	
+eqd0expopt	= x y
+d0expsemiseq	x; y
+d0expsemiseq	x; y;
+d0expsemiseq	
+d0expsemiseq	;
+d0expsemiseq	x y; z
+d0expsemiseq	x;; y
+d0expsemiseq	x, y
+d0expsemiseq	x; )
+i0fclseq	| x => y | z => w
+i0fclseq	| x => y
+i0fclseq	x => y
+i0fclseq	| x
+i0fclseq	| x =>
+i0fclseq	|
+i0fclseq	
+i0fclseq	| x => y | z
+i0fclseq	| x => y z => w
+c0lauseq	| x => y | z => w
+c0lauseq	x => y | z => w
+c0lauseq	x => y
+c0lauseq	| x => y | z
+c0lauseq	| x =>
+c0lauseq	| x
+c0lauseq	| 
+c0lauseq	
+c0lauseq	| x when y => z
+c0lauseq	| x when y and z => w
+c0lauseq	| x when y as p and z => w
+c0lauseq	| x when => w
+c0lauseq	| x when y => 
+c0lauseq	| x =>> y
+c0lauseq	| x =/=> y
+c0lauseq	| x =/=>> y
+c0lauseq	| x ==> y
+sc0lauseq	| A() => x | B(a) => y
+sc0lauseq	A() => x
+sc0lauseq	| A(a, b) => x
+sc0lauseq	| $S.A(a) => x
+sc0lauseq	| A => x
+sc0lauseq	| A(a) x
+sc0lauseq	| A(a =>
+sc0lauseq	| A(a)
+sc0lauseq	| A(a) =>
+sc0lauseq	|
+sc0lauseq	
+q0marg	{n:int}
+q0marg	{n:int}{m:int}
+q0marg	{n}
+q0marg	{n:int | n > 0}
+q0marg	{
+q0marg	x
+d0eclseq_sta	val x = 1 val y = 2
+d0eclseq_sta	fun f: int -> int praxi g: int
+d0eclseq_sta	val x = 1 ; val y = 2
+d0eclseq_sta	val x = 1 ; ;
+d0eclseq_sta	val x = ; val y = 2
+d0eclseq_sta	
+d0eclseq_dyn	val x = 1 val y = 2
+d0eclseq_dyn	val x = 1 ; val y = 2
+d0eclseq_dyn	val x = 1 ; ;
+d0eclseq_dyn	val x = ; val y = 2
+d0eclseq_dyn	val x = 1 )
+d0eclseq_dyn	
+d0atsrtdecseq	s = A | B of int
+d0atsrtdecseq	s = A and t = B
+d0atsrtdecseq	s = 
+d0atsrtdecseq	s
+d0atsrtdecseq	
+s0rtdefseq	s = int
+s0rtdefseq	s = int and t = bool
+s0rtdefseq	s = {a: int | a > 0}
+s0rtdefseq	s
+s0rtdefseq	
+s0taconseq	t
+s0taconseq	t(a:type)
+s0taconseq	t(a:type) = a
+s0taconseq	t = int
+s0taconseq	t and u
+s0taconseq	
+s0tacstseq	c: int
+s0tacstseq	c: int = "x"
+s0tacstseq	c(a:type): int
+s0tacstseq	c: int and d: bool
+s0tacstseq	c
+s0tacstseq	
+s0expdefseq	t = int
+s0expdefseq	t(a:type) = a
+s0expdefseq	t(a:type): type = a
+s0expdefseq	t = int and u = bool
+s0expdefseq	t
+s0expdefseq	
+m0acdef	f = x
+m0acdef	f (x) = x
+m0acdef	f (x, y) = x
+m0acdef	f {n} (x) = x
+m0acdef	f {n} = x
+m0acdef	f
+m0acdef	f (x
+m0acdef	f (x) =
+m0acdef	
+TOPdyn	val x = 1 val y = 2
+TOPdyn	val x = 1 )) val y = 2
+TOPdyn	val x = ( val y = 2
+TOPdyn	fun f( = 1 fun g() = 2
+TOPdyn	)
+TOPdyn	val
+TOPdyn	val x = 1 +
+TOPdyn	staload "x" val x
+TOPdyn	local val x = 1 in val y = 2
+TOPdyn	local val x = 1 in val y = 2 val z = 
+TOPdyn	implement f() = 1 implement
+TOPdyn	1 2 3 val x = 1
+TOPdyn	val x = 1 ; val y = 2 ; ;; val z = 3
+TOPdyn	val x = 1 abc val y = 2
+TOPdyn	val x = 1 }} val y = 2 }
+TOPdyn	val x = 1 %{ garbage val y = 2
+TOPdyn	val x = 1 "garbage val y = 2
+TOPdyn	val x = 1 (* garbage val y = 2
+TOPdyn	val x = 1 'a val y = 2
+TOPdyn	val x = 1 0x val y = 2
+TOPdyn	val x = 1 1e val y = 2
+TOPdyn	
+TOPdyn	;
+TOPdyn	// comment
+TOPdyn	(* comment *)
+TOPdyn	#include "x" #include "y"
+TOPdyn	#if 1 #then val x = 1 #endif val y = 2
+TOPdyn	#if 1 #then val x = 1 val y = 2
+TOPdyn	#endif
+TOPdyn	#else
+TOPdyn	#then
+TOPdyn	extern fun f: int -> int val y = 2
+TOPdyn	extern fun f val y = 2
+TOPdyn	datatype t = A | B val y = 2
+TOPdyn	datatype t = A | val y = 2
+TOPdyn	datatype t = | val y = 2
+TOPdyn	fun f(x: int): int = if x then 1 else val y = 2
+TOPdyn	fun f(x: int): int = let val z = 1 in val y = 2
+TOPdyn	fun f(x: int): int = case x of | 1 => 2 | val y = 2
+TOPsta	stadef n = 1 stadef m = 2
+TOPsta	stadef n = stadef m = 2
+TOPsta	fun f: int -> int fun g: int
+TOPsta	fun f: int -> int val x
+TOPsta	)
+TOPsta	typedef t = ( typedef u = int
+TOPsta	
+TOPsta	praxi f: int prfun g(): int
+TOPsta	dataprop p = P | Q praxi f: int
+TOPsta	local abstype t in typedef u = t end typedef v = int
+TOPsta	#if 1 #then fun f: int #endif
+TOPsta	#if 1 #then fun f: int
+TOPsta	val x = 1
+d0exp	while* {n:int} .<n>. (x:int): (y:int) => x y
+d0exp	while* .<>. (x:int) => x y
+d0exp	while* .<n> (x:int) => x y
+d0exp	while* .<n,m>. (x:int) => x y
+d0exp	while* .<> (x:int): => x y
+d0exp	for* {n:int} .<n>. (x:int): (y:int) => x; y; z w
+d0exp	for* .<n>. (x:int) => x; y; z w
+d0exp	for* (x:int) => x; y; z w
+d0exp	if [n:int] (x:int) y then z
+d0exp	if [n:int] (x:int) => y then z else w
+d0exp	if [n:int] (x:int): [m:int] (y:int) => y then z else w
+d0exp	sif [n:int] (x:int) y then z else w
+d0exp	ifcase [n:int] (x:int) | y => z
+d0exp	case [n:int] (x:int) y of | z => w
+d0exp	try [n:int] (x:int) y with | z => w

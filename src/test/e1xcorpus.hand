@@ -1,0 +1,83 @@
+TOPdyn	#define A 1#print A
+TOPdyn	#define A 1 + 2 * 3#print A#print (A - 1)
+TOPdyn	#define A 10 - 4 - 3#print A
+TOPdyn	#define A ~3#print A#print (~A)
+TOPdyn	#define A 7 / 2#print A#print (A * 2)
+TOPdyn	#define A 1.5#define B 2.25#print (A + B)#print (A - B)#print (A * B)#print (A / B)#print (~A)
+TOPdyn	#define A 1.5#print (A < 2.5)#print (A <= 1.5)#print (A > 2.5)#print (A >= 1.5)
+TOPdyn	#define A 1#define B 2#print (A < B)#print (A <= B)#print (A > B)#print (A >= B)#print (A == B)#print (A != B)#print (A <> B)#print (A = B)
+TOPdyn	#define S "abc"#define T "abd"#print (S + T)#print (S < T)#print (S <= T)#print (S > T)#print (S >= T)#print (S == T)#print (S != T)
+TOPdyn	#define S ""#define T "x"#print (S && T)#print (T && T)#print (S || T)#print (S || S)#print (T || S)
+TOPdyn	#define A 0#define B 5#print (A && B)#print (B && B)#print (A || B)#print (A || A)#print (B || A)
+TOPdyn	#print (1 + "a")#print ("a" - "b")#print (1.5 + 1)#print (1 < 1.5)#print ('a' + 'b')#print (1.5 == 1.5)
+TOPdyn	#print ('a' == 'a')#print ('a' < 'b')#print (~"a")#print (~'a')#print ("a" * "b")#print ("a" / 2)
+TOPdyn	#print (1 << 2)#print (1 >> 2)#print (<< (1, 2))
+TOPdyn	#print (+ (1, 2))#print (+ (1))#print (+ (1, 2, 3))#print (+ ())#print (~ (1, 2))#print (defined (1, 2))
+TOPdyn	#print (defined (X))#define X 1#print (defined (X))#print (undefined (X))#undef X#print (defined (X))#print (undefined (X))#print (X)
+TOPdyn	#print (defined (1))#print (undefined (1))#print (defined ("a"))#print (defined (f(1)))
+TOPdyn	#define X#print X#print (defined (X))#define Y ()#print Y#define Z (1, 2)#print Z#print (Z + 1)
+TOPdyn	#define f(x) x + 1#print (f(3))#print (f(f(2)))#print (f(1, 2))#print (f())#print (f)
+TOPdyn	#define f(x, y) x - y#print (f(10, 3))#print (f(10))#print (f(3, 10, 5))#define g(x) f(x, x)#print (g(5))
+TOPdyn	#define fact(n) if n <= 1 then 1 else n * fact(n - 1)#print (fact(5))#print (fact(10))#print (fact(0))
+TOPdyn	#define loop(n) loop(n)#print (loop(1))
+TOPdyn	#define loop(n) 1 + loop(n)#print (loop(1))
+TOPdyn	#define a b#define b a#print a
+TOPdyn	#define X Y#print X#define Y 3#print X
+TOPdyn	#define X 1#define Y X + 1#define X 10#print Y
+TOPdyn	#if 1 #then#print "one"#endif
+TOPdyn	#if 0 #then#print "one"#else#print "two"#endif
+TOPdyn	#if 0 #then#print "one"#elif 1 #then#print "two"#else#print "three"#endif
+TOPdyn	#if 0 #then#print "one"#elif 0 #then#print "two"#else#print "three"#endif
+TOPdyn	#if 0 #then#print "one"#elif 0 #then#print "two"#endif
+TOPdyn	#ifdef X #then#print "X"#else#print "noX"#endif#define X 1#ifdef X #then#print "X"#else#print "noX"#endif
+TOPdyn	#ifndef X #then#print "noX"#else#print "X"#endif#define X 1#ifndef X #then#print "noX"#else#print "X"#endif
+TOPdyn	#ifdef (1 + 1) #then#print "x"#endif
+TOPdyn	#ifndef 1 #then#print "x"#endif
+TOPdyn	#if undefinedvar #then#print "x"#endif
+TOPdyn	#if (1 + "a") #then#print "x"#else#print "y"#endif
+TOPdyn	#if "a" #then#print "x"#endif#if "" #then#print "x"#else#print "y"#endif#if 0.0 #then#print "x"#else#print "y"#endif#if 0.5 #then#print "x"#else#print "y"#endif
+TOPdyn	#if '\0' #then#print "x"#else#print "y"#endif#if 'a' #then#print "x"#else#print "y"#endif
+TOPdyn	#if 1 #then#if 0 #then#print "a"#else#print "b"#endif#else#print "c"#endif
+TOPdyn	#define N 3#if N > 2 && N < 5 #then#print "in"#else#print "out"#endif#if N == 3 || X #then#print "or"#endif
+TOPdyn	#define N 3#if N > 2 && undefinedvar #then#print "in"#endif
+TOPdyn	#define N 3#if defined(N) && N > 2 #then#print "in"#endif
+TOPdyn	#define N 3#print %(N + 1)#define M %(N + 1)#define N 10#print M#print N
+TOPdyn	#define M %(1 + "a")#print M
+TOPdyn	#define M %(undefinedvar)#print M
+TOPdyn	#print (if 1 then 2 else 3)#print (if 0 then 2 else 3)#print (if 0 then 2)#print (if "a" then 2 else 3)#print (if (1 + "a") then 2 else 3)
+TOPdyn	#define C if 1 then 2 else 3#print C
+TOPdyn	#define A (1)#print A#define A ((1))#print A#define A (1, (2))#print A
+TOPdyn	#print ()#print (1)
+TOPdyn	#print 1(2)#print "a"(2)#print (f)(1)#print (1)(2)
+TOPdyn	#define f(x) (x)#print (f(3))#print f(3)#print f 3
+TOPdyn	#define f(x) g(x)#print (f(3))#define g(y) y * 2#print (f(3))
+TOPdyn	#define f(x, g) g(x)#define h(y) y + 1#print (f(3, h))
+TOPdyn	#define f(x) x#define x 5#print (f(1))#print (f(x))
+TOPdyn	#define pi 3.14159#define r 2.0#print (pi * r * r)#print (pi < 4.0)
+TOPdyn	#define big 2147483647#print (big + 1)#print (big * 2)#print (~big - 1)
+TOPdyn	#define big 4294967296#print big#define h 0xFF#print h#print (h + 1)#define o 0777#print o
+TOPdyn	#define s "a\\nb"#print s#print (s + s)
+TOPdyn	#define c 'x'#print c#define c '\\n'#print c
+TOPdyn	#define f(x) x#undef f#print (f(1))
+TOPdyn	#undef nothing#print nothing
+TOPdyn	#define A 1#define B 2#define C 3#define D (A + B) * C#print D#print (D - A - B - C)
+TOPdyn	#define a 1 b 2#print a
+TOPdyn	#define a b c#print a
+TOPdyn	#define t(x) if x then 1 else 0#print (t(1))#print (t(0))#print (t(""))#print (t("a"))#print (t(1 + "a"))
+TOPdyn	#define ge(a, b) a >= b#print (ge(1, 2))#print (ge("b", "a"))#print (ge(1.5, 1.4))
+TOPdyn	#define max(a, b) if a > b then a else b#print (max(3, 4))#print (max(4, 3))#print (max("a", "b"))
+TOPdyn	#define fib(n) if n < 2 then n else fib(n - 1) + fib(n - 2)#print (fib(10))
+TOPdyn	#define ack(m, n) if m == 0 then n + 1 else if n == 0 then ack(m - 1, 1) else ack(m - 1, ack(m, n - 1))#print (ack(2, 2))
+TOPdyn	#define compose(f, g, x) f(g(x))#define inc(x) x + 1#define dbl(x) x * 2#print (compose(inc, dbl, 5))
+TOPdyn	#define e %(1)#print e#define e2 %(e + 1)#print e2#print %(e2 + e2)
+TOPdyn	#define e %(f(1))#define f(x) x#print e
+TOPdyn	#error "stop"
+TOPdyn	#assert 1
+TOPdyn	#assert 0
+TOPdyn	#print "a"#prerr "b"#print 1#prerr 2
+TOPdyn	#define x_ 1#define _x 2#print (x_ + _x)#define x' 3#print x'
+TOPdyn	#define ATS_VERSION 5#if ATS_VERSION >= 5 #then#print "new"#else#print "old"#endif
+TOPdyn	#define A 1#define B (1 + 1)#define C (B + B)#define D (C + C)#define E (D + D)#define F (E + E)#print F
+TOPdyn	#define f1(x) x#define f2(x) f1(f1(x))#define f3(x) f2(f2(x))#define f4(x) f3(f3(x))#define f5(x) f4(f4(x))#print (f5(1))
+TOPdyn	#define d0 1#define d1 d0#define d2 d1#define d3 d2#define d4 d3#define d5 d4#define d6 d5#define d7 d6#define d8 d7#define d9 d8#print d9
+TOPdyn	#define c0 1#define c1 c0 + 0#define c2 c1 + 0#define c3 c2 + 0#define c4 c3 + 0#define c5 c4 + 0#define c6 c5 + 0#define c7 c6 + 0#define c8 c7 + 0#define c9 c8 + 0#print c9

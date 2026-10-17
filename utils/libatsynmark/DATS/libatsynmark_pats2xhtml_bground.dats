@@ -11,13 +11,20 @@
 
 (* ****** ****** *)
 
-#define ATS_DYNLOADFLAG 0
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+#define ATS_DYNLOADFLAG 0 // no initialization
 
 (* ****** ****** *)
 //
 // Finding the declaration of a given declname
 //
 (* ****** ****** *)
+//
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
 //
 staload "./../SATS/libatsynmark.sats"
 //

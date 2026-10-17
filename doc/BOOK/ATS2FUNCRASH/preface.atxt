@@ -52,5 +52,5 @@ Have fun as programming is meant to be fun!
 #comment(" end of [preface.atxt] ")
 
 %{
-implement main () = fprint_filsub (stdout_ref, "preface_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "preface_atxt.txt")
 %}

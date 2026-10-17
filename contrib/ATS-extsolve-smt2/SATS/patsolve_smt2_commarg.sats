@@ -27,7 +27,7 @@ ATS_PACKNAME "PATSOLVE_SMT2_COMMARG"
 //
 (* ****** ****** *)
 
-datatype
+datavtype
 commarg =
 //
   | CAhelp of (string)
@@ -45,8 +45,6 @@ commarg =
 
 (* ****** ****** *)
 //
-typedef
-commarglst = List0(commarg)
 vtypedef
 commarglst_vt = List0_vt(commarg)
 //
@@ -55,7 +53,7 @@ commarglst_vt = List0_vt(commarg)
 fun
 fprint_commarg
 (
-  out: FILEref, ca: commarg
+  out: FILEref, ca: !commarg
 ) : void // end-of-fun
 //
 overload fprint with fprint_commarg

@@ -43,18 +43,6 @@
 (* ****** ****** *)
 //
 local
-#include "./myatscc_loc_t.dats"
-in (* nothing *) end // endlocal
-//
-local
-#include "./myatscc_lexer.dats"
-in (* nothing *) end // endlocal
-//
-local
-#include "./myatscc_parser.dats"
-in (* nothing *) end // endlocal
-//
-local
 #include "./myatscc_evaler.dats"
 in (* nothing *) end // endlocal
 //
@@ -64,16 +52,12 @@ in (* nothing *) end // endlocal
 //
 (* ****** ****** *)
 //
+// HX: for libats (no need to link -latslib)
+//
 local
-#include "./myatscc_libats.dats"
+#include "prelude/DATS/filebas.dats"
 in (* nothing *) end // endlocal
 //
-(* ****** ****** *)
-
-#include
-"share/HATS\
-/atspre_staload_libats_ML.hats"
-
 (* ****** ****** *)
 
 #staload "./../SATS/myatscc.sats"
@@ -111,18 +95,15 @@ end // end of [comarg_parse]
 (* ****** ****** *)
 //
 implement
-the_name_i_env_initize
+myatscc_arglst
   {n}(argc, argv) = let
-//
-vtypedef
-res = List0_vt(gvalue)
 //
 fun
 loop
 {i:nat | i <= n}
 (
- i: int(i), argv: !argv(n), res: res
-) : res =
+ i: int(i), argv: !argv(n), res: arglst
+) : arglst =
 (
 if
 (i < argc)
@@ -130,99 +111,31 @@ then let
   val arg = argv[i]
 in
   if comarg_parse(arg) = 0
-    then let
-      val arg = GVstring(arg)
-      val res = cons_vt(arg, res)
-    in
-      loop(i+1, argv, res)
-    end // end of [then]
+    then
+    loop(i+1, argv, list_vt_cons(string0_copy(arg), res))
     else loop(i+1, argv, res)
+  // end of [if]
 end // end of [then]
 else res (* end of [else] *)
 )
 //
-val arg = GVstring(argv[0])
-val res = list_vt_sing(arg)
-val res = loop(1, argv, res)
+val res =
+list_vt_cons(string0_copy(argv[0]), list_vt_nil())
 //
 in
+  list_vt_reverse(loop(1, argv, res))
+end // end of [myatscc_arglst]
 //
-the_name_i_env_initset
-  (list0_of_list_vt(list_vt_reverse(res)))
-//
-end // end of [the_name_i_env_initize]
-//
-(* ****** ****** *)
-//
-(*
-HX: see
-myatscc_get_def.dats
-*)
-(*
 implement
-myatscc_get_def
-  ((*void*)) = MYATSCCDEF_def
-*)
-//
-(* ****** ****** *)
-
-local
-
-val
-the_gcflag = ref<int>(0)
-
-in (* in-of-local *)
-
-fun
-the_gcflag_set
-  (gcflag: int) =
+myatscc_arglst_free
+  (args) =
 (
-  the_gcflag[] := gcflag
-)
-
-implement
-MYATSCCDEF_def_get
-  ((*void*)) = let
-//
-val gcflag = the_gcflag[]
-//
-in
-//
-ifcase
-| gcflag = 0 => MYATSCCDEF_def
-| gcflag > 0 => MYATSCCDEF_GC_def
-| _(* else *) => MYATSCCDEF_def
-//
-end // end of [MYATSCCDEF_def_get]
-
-end // end of [local]
-
-(* ****** ****** *)
-//
-implement
-myatscc_evaldef
-  ((*void*)) = let
-//
-val
-def = myatscc_getdef()
-//
-val
-toks = string_tokenize(def)
-val
-toks = tokenlst_tokenize(toks)
-//
-val
-exps = myexpseq_parse(toks)
-//
-(*
-val () =
-exps.foreach()
-  (lam(exp) => println!(exp))
-*)
-//
-in
-  myexpseq_stringize(g0ofg1(exps))
-end // end of [myatscc_evaldef]
+case+ args of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(x, args) =>
+    (strptr_free(x); myatscc_arglst_free(args))
+  // end of [list_vt_cons]
+) (* end of [myatscc_arglst_free] *)
 //
 (* ****** ****** *)
 //
@@ -273,8 +186,6 @@ println!("The following options are supported:")
 val () =
 println!("  -h/--help: for printing the help message")
 val () =
-println!("  --gc/--gcbdw: for malloc/free via Boehm-GC")
-val () =
 println!("  --dry/--dryrun: for command generation only")
 }
 //
@@ -285,77 +196,75 @@ end // end of [myatscc_usage]
 (* ****** ****** *)
 
 implement
-main(argc, argv) =
-myatscc_main(argc, argv) where
-{
-//
-(*
-val () =
-println!("Hello from [myatscc]!")
-*)
+main(argc, argv) = let
 //
 val done =
   myatscc_usage(argc, argv)
 //
-val ((*void*)) =
-  if done > 0 then exit(0)
-//
-val ((*void*)) =
-  the_myexpfun_map_initize((*void*))
-val ((*void*)) =
-  the_name_i_env_initize(argc, argv)
-//
-} (* end of [main] *)
+in
+  if done > 0 then 0 else myatscc_main(argc, argv)
+end (* end of [main] *)
 
 (* ****** ****** *)
 
 local
 //
-typedef
-state = @{
-//
-dryrun= int
-,
-gcflag= int
-//
-} (* state *)
-//
 #staload
 "libats/libc/SATS/stdlib.sats"
 //
+//
+// HX-2026-10:
+// [pfx] is a prefix of [str]
+//
 fun
-state_initset
+string_is_prefix
+(
+  pfx: string, str: string
+) : bool = let
+//
+fun
+loop
+(
+  p1: ptr, p2: ptr
+) : bool = let
+  val c1 = $UN.ptr0_get<char>(p1)
+in
+  if
+  isneqz(c1)
+  then
+  (
+    if c1 = $UN.ptr0_get<char>(p2)
+      then loop(ptr0_succ<char>(p1), ptr0_succ<char>(p2)) else false
+    // end of [if]
+  )
+  else true
+end // end of [loop]
+//
+in
+  loop(string2ptr(pfx), string2ptr(str))
+end // end of [string_is_prefix]
+//
+fun
+dryrun_test
 {n:int}
 {i:nat|i <= n}
 (
   i: int(i)
 , argc: int(n)
 , argv: !argv(n)
-, state: &state >> _
-) : void =
+) : bool =
 (
 if
 (i < argc)
-then let
-//
-val () =
-if
-string_is_prefix
-("--gc", argv[i])
 then
-(state.gcflag := state.gcflag + 1)
-//
-val () =
+(
 if
 string_is_prefix
 ("--dry", argv[i])
-then
-(state.dryrun := state.dryrun + 1)
-//
-in
-  state_initset(i+1, argc, argv, state)
-end // end of [then]
-else () // end of [else]
+then true
+else dryrun_test(i+1, argc, argv)
+)
+else false // end of [else]
 )
 //
 in (* in-of-local *)
@@ -366,42 +275,30 @@ myatscc_main
   argc, argv
 ) = res where {
 //
-var
-state: state
-val () =
-state.gcflag := 0
-val () =
-state.dryrun := 0
+val dryrun =
+  dryrun_test(1, argc, argv)
 //
-var res: int = 0
+val args =
+  myatscc_arglst(argc, argv)
 //
-var gcflag: bool = false
-var dryrun: bool = false
+val def =
+  myatscc_getdef(args)
+val command =
+  myatscc_evaldef($UN.strptr2string(def), args)
 //
-val ((*void*)) =
-state_initset(1, argc, argv, state)
+val command0 = $UN.strptr2string(command)
 //
-val ((*void*)) =
+val res =
 (
-the_gcflag_set(state.gcflag)
-)
+  if dryrun
+    then (println!(command0); 0)
+    else system(command0)
+  // end of [if]
+) : int // end of [val]
 //
-val ((*void*)) =
-(
-if
-dryrun
-then () else (
-if state.dryrun > 0 then dryrun := true
-) (* end of [if] *)
-) (* end of [val] *)
-//
-val command = myatscc_evaldef()
-//
-val ((*void*)) =
-if dryrun then println! (command) else ()
-//
-val ((*void*)) =
-  if ~(dryrun) then (res := system(command))
+val () = strptr_free(command)
+val () = strptr_free(def)
+val () = myatscc_arglst_free(args)
 //
 } // end of [myatscc_main]
 

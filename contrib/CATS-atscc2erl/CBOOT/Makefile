@@ -43,7 +43,7 @@ all::
 # atscc2erl
 # atscc2erl: ; \
 # $(PATSCC) -O2 -o $@ \
-#   $(SOURCES_DATS_C) $(SOURCES_CATS) -DATS_MEMALLOC_GCBDW -lgc
+#   $(SOURCES_DATS_C) $(SOURCES_CATS) -DATS_MEMALLOC_LIBC
 #
 ######
 #

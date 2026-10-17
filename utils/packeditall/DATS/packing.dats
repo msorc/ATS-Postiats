@@ -90,7 +90,7 @@ if nread > 0
     val () = if n > nwrit then nerr := nerr + 1
 //
     val ret =
-      EVP_DigestUpdate (ctx, $UN.cast{arrayref(uchar,nw)}(p), nwrit)
+      EVP_DigestUpdate (ctx, $UN.cast(p), nwrit)
     val () = if ret = 0(*fail*) then nerr := nerr + 1
 //
     prval () = fpf (pf)
@@ -131,7 +131,7 @@ val () = pack_fprint_sep (out)
 val (
 ) = fprint_mdval
 (
-  out, $UN.cast{arrayref(uchar,mdlen)}(addr@mdval), mdlen
+  out, $UN.cast(addr@mdval), mdlen
 ) (* end of [val] *)
 val () = fprint_newline (out)
 //

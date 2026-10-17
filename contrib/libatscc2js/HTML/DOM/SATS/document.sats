@@ -57,7 +57,7 @@ $extval(theDocument, "document")
 
 abstype Element_type
 typedef Element = Element_type
-typedef Elemopt = Option(Element)
+vtypedef Elemopt = Option_vt(Element)
 
 (* ****** ****** *)
 //

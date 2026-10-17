@@ -270,7 +270,7 @@ ordset: ordset.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
 ######
 
 sieve_lazy: sieve_lazy.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_GCBDW -O2 -o $@ $< -lgc
+  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o $@ $<
 
 sieve_llazy: sieve_llazy_dats.c ; \
   $(PATSCC) -cleanaft -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o $@ $<

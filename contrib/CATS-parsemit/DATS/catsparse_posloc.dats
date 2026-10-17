@@ -13,6 +13,8 @@
 //
 (* ****** ****** *)
 
+staload "libats/SATS/arena.sats"
+staload _ = "libats/DATS/arena.dats"
 staload "./../SATS/catsparse.sats"
 
 (* ****** ****** *)
@@ -78,9 +80,12 @@ end // end of [position_incby_char]
   
 (* ****** ****** *)
 
-assume
-location_type =
-'{
+//
+// HX-2026-10: no GC
+// a location is a (flat) record in the global arena
+//
+typedef
+locrec = @{
   fil= fil_t
 , beg_ntot= int // beginning char position
 , beg_nrow= int
@@ -88,18 +93,44 @@ location_type =
 , end_ntot= int // finishing char position
 , end_nrow= int
 , end_ncol= int
-} (* end of [location_type] *)
-
+} (* end of [locrec] *)
+//
+assume location_type = ptr
+//
+extern
+fun
+location_make_rec(x: &locrec): loc_t
+implement
+location_make_rec
+  (x) = p where
+{
+  val p = the_garena_alloc(sizeof<locrec>)
+  val () = arena_store<locrec>(p, x)
+} (* end of [location_make_rec] *)
+//
+macdef
+LOC(loc) = arena_load<locrec>(,(loc))
+//
 (* ****** ****** *)
 
+local
+//
+var
+loc0: locrec
+val () = loc0.fil := filename_dummy
+val () = loc0.beg_ntot := ~1
+val () = loc0.beg_nrow := ~1
+val () = loc0.beg_ncol := ~1
+val () = loc0.end_ntot := ~1
+val () = loc0.end_nrow := ~1
+val () = loc0.end_ncol := ~1
+//
+in (* in-of-local *)
+//
 implement
-location_dummy =
-'{
-  fil= filename_dummy
-, beg_ntot= ~1, beg_nrow= ~1
-, beg_ncol= ~1, end_ntot= ~1
-, end_nrow= ~1, end_ncol= ~1
-} (* end of [location_dummy] *)
+location_dummy = location_make_rec(loc0)
+//
+end // end of [local]
 
 (* ****** ****** *)
 
@@ -107,7 +138,7 @@ implement
 fprint_location
   (out, loc) = let
 //
-val fil = loc.fil
+val fil = (LOC(loc)).fil
 val ((*void*)) = fprint_filename (out, fil)
 //
 in
@@ -120,20 +151,20 @@ implement
 fprint_locrange
   (out, loc) = () where {
 //
-val () = fprint_int (out, loc.beg_ntot+1)
+val () = fprint_int (out, (LOC(loc)).beg_ntot+1)
 val () = fprint_string (out, "(line=")
-val () = fprint_int (out, loc.beg_nrow+1)
+val () = fprint_int (out, (LOC(loc)).beg_nrow+1)
 val () = fprint_string (out, ", offs=")
-val () = fprint_int (out, loc.beg_ncol+1)
+val () = fprint_int (out, (LOC(loc)).beg_ncol+1)
 val () = fprint_string (out, ")")
 //
 val () = fprint_string (out, " -- ")
 //
-val () = fprint_int (out, loc.end_ntot+1)
+val () = fprint_int (out, (LOC(loc)).end_ntot+1)
 val () = fprint_string (out, "(line=")
-val () = fprint_int (out, loc.end_nrow+1)
+val () = fprint_int (out, (LOC(loc)).end_nrow+1)
 val () = fprint_string (out, ", offs=")
-val () = fprint_int (out, loc.end_ncol+1)
+val () = fprint_int (out, (LOC(loc)).end_ncol+1)
 val () = fprint_string (out, ")")
 //
 } (* end of [fprint_locrange] *)
@@ -154,16 +185,18 @@ end // end of [location_make_pos_pos]
 
 implement
 location_make_fil_pos_pos
-  (fil, p1, p2) =
-'{
-  fil= fil
-, beg_ntot= p1.pos_ntot
-, beg_nrow= p1.pos_nrow
-, beg_ncol= p1.pos_ncol
-, end_ntot= p2.pos_ntot
-, end_nrow= p2.pos_nrow
-, end_ncol= p2.pos_ncol
-} (* end of [location_make_fil_pos_pos] *)
+  (fil, p1, p2) = let
+var x: locrec
+val () = x.fil := fil
+val () = x.beg_ntot := p1.pos_ntot
+val () = x.beg_nrow := p1.pos_nrow
+val () = x.beg_ncol := p1.pos_ncol
+val () = x.end_ntot := p2.pos_ntot
+val () = x.end_nrow := p2.pos_nrow
+val () = x.end_ncol := p2.pos_ncol
+in
+  location_make_rec(x)
+end (* end of [location_make_fil_pos_pos] *)
 
 (* ****** ****** *)
 
@@ -173,7 +206,7 @@ fun
 is_none
 (
   loc: loc_t
-) : bool = (loc.beg_ntot < 0)
+) : bool = ((LOC(loc)).beg_ntot < 0)
 
 fun
 auxmain
@@ -187,34 +220,40 @@ auxmain
   var end_nrow: int and end_ncol: int
 //
   val () =
-  if loc1.beg_ntot <= loc2.beg_ntot
+  if (LOC(loc1)).beg_ntot <= (LOC(loc2)).beg_ntot
     then begin
-      beg_ntot := loc1.beg_ntot;
-      beg_nrow := loc1.beg_nrow; beg_ncol := loc1.beg_ncol
+      beg_ntot := (LOC(loc1)).beg_ntot;
+      beg_nrow := (LOC(loc1)).beg_nrow; beg_ncol := (LOC(loc1)).beg_ncol
     end // end of [then]
     else begin
-      beg_ntot := loc2.beg_ntot;
-      beg_nrow := loc2.beg_nrow; beg_ncol := loc2.beg_ncol
+      beg_ntot := (LOC(loc2)).beg_ntot;
+      beg_nrow := (LOC(loc2)).beg_nrow; beg_ncol := (LOC(loc2)).beg_ncol
     end // end of [else]
   // end of [if]
 //
   val () =
-  if loc1.end_ntot >= loc2.end_ntot
+  if (LOC(loc1)).end_ntot >= (LOC(loc2)).end_ntot
     then begin
-      end_ntot := loc1.end_ntot; 
-      end_nrow := loc1.end_nrow; end_ncol := loc1.end_ncol
+      end_ntot := (LOC(loc1)).end_ntot; 
+      end_nrow := (LOC(loc1)).end_nrow; end_ncol := (LOC(loc1)).end_ncol
     end // end of [then]
     else begin
-      end_ntot := loc2.end_ntot; 
-      end_nrow := loc2.end_nrow; end_ncol := loc2.end_ncol
+      end_ntot := (LOC(loc2)).end_ntot; 
+      end_nrow := (LOC(loc2)).end_nrow; end_ncol := (LOC(loc2)).end_ncol
     end // end of [else]
   // end of [if]
 //
-in '{
-  fil= loc1.fil
-, beg_ntot= beg_ntot, beg_nrow= beg_nrow, beg_ncol= beg_ncol
-, end_ntot= end_ntot, end_nrow= end_nrow, end_ncol= end_ncol
-} end // end of [auxmain]
+  var x: locrec
+  val () = x.fil := (LOC(loc1)).fil
+  val () = x.beg_ntot := beg_ntot
+  val () = x.beg_nrow := beg_nrow
+  val () = x.beg_ncol := beg_ncol
+  val () = x.end_ntot := end_ntot
+  val () = x.end_nrow := end_nrow
+  val () = x.end_ncol := end_ncol
+in
+  location_make_rec(x)
+end // end of [auxmain]
 
 in (* in of [local] *)
 

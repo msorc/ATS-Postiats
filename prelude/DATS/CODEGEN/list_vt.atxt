@@ -103,7 +103,7 @@ prerr_list_vt(xs) =
 implement
 {}(*tmp*)
 fprint_list_vt$sep
-  (out) = fprint_list$sep<(*none*)>(out)
+  (out) = fprint_string(out, ", ")
 //
 implement
 {a}(*tmp*)
@@ -336,31 +336,25 @@ end // end of [list_vt_getref_at]
 implement
 {a}(*tmp*)
 list_vt_get_at
-  {n} (xs, i) = x where
-{
+  {n} (xs, i) = let
 //
-var xs = __ref (xs) where
-{
-  extern
-  castfn __ref
-    (xs: !list_vt(a, n)):<> list_vt(a, n)
-  // castfn
-} // end of [val]
+fun
+loop
+{n:int}
+{i:nat | i < n} .<i>.
+(
+  xs: !list_vt(a, n), i: int(i)
+) :<> a =
+(
+case+ xs of
+| list_vt_cons(x, xs1) =>
+    if i > 0 then loop(xs1, i-1) else x
+  // end of [list_vt_cons]
+) (* end of [loop] *)
 //
-val pi =
-list_vt_getref_at<a>(xs, i)
-//
-val+list_cons(x, _) =
-  $UN.ptr1_get<List1(a)>(p2tr2ptr(pi))
-//
-prval() =
-__unref(xs) where
-{
-  extern
-  praxi __unref(xs: list_vt(a, n)): void
-} // end of [prval]
-//
-} // end of [list_vt_get_at]
+in
+  loop(xs, i)
+end // end of [list_vt_get_at]
 
 implement
 {a}(*tmp*)
@@ -489,8 +483,14 @@ __assert(xs) where
 //
 implement
 {a}(*tmp*)
-list_vt_copy(xs) =
-  list_copy<a>($UN.list_vt2t(xs))
+list_vt_copy(xs) = let
+//
+implement
+list_vt_copylin$copy<a>(x) = x
+//
+in
+  list_vt_copylin<a>(xs)
+end // end of [list_vt_copy]
 //
 #atscode_separator()
 
@@ -1633,10 +1633,218 @@ val ((*freed*)) = arrayptr_free{ptr}(A0)
 
 #atscode_separator()
 
+#atscode_separator()
+//
+// HX-2026-10: no GC
+// these list-constructing functions used to be
+// declared in [list.sats]; they produce linear lists
+//
+implement
+{x}(*tmp*)
+list_make_sing(x) =
+list_vt_cons{x}(x, list_vt_nil())
+implement
+{x}(*tmp*)
+list_make_pair(x1, x2) =
+list_vt_cons{x}(x1, list_vt_cons{x}(x2, list_vt_nil()))
+//
+#atscode_separator()
+
+implement
+{x}(*tmp*)
+list_make_elt
+  {n} (n, x) = let
+//
+fun loop
+  {i:nat | i <= n} .<i>.
+(
+  i: int i, x: x, res: list_vt(x, n-i)
+) :<> list_vt(x, n) =
+(
+  if (i > 0)
+    then loop(pred(i), x, list_vt_cons(x, res)) else res
+  // end of [if]
+) // end of [loop]
+//
+in
+  loop(n, x, list_vt_nil())
+end // end of [list_make_elt]
+
+#atscode_separator()
+
+implement
+{}(*tmp*)
+list_make_intrange
+  {l0,r} (l0, r) = let
+//
+typedef elt = intBtw(l0, r)
+vtypedef res(l:int) = list_vt(elt, r-l)
+//
+fun
+loop
+{
+  l:int
+| l0 <= l; l <= r
+} .<r-l>.
+(
+  l: int l, r: int r
+, res: &ptr? >> res(l)
+) :<!wrt> void =
+(
+//
+if
+(l < r)
+then let
+  val () = res :=
+    list_vt_cons{elt}{0}(l, _)
+  val+list_vt_cons(_, res1) = res
+  val () = loop(l+1, r, res1)
+  prval ((*folded*)) = fold@(res)
+in
+  // nothing
+end else (res := list_vt_nil())
+//
+) (* end of [loop] *)
+//
+var res: ptr
+val ((*void*)) = $effmask_wrt(loop(l0, r, res))
+//
+in
+  res
+end // end of [list_make_intrange]
+
+#atscode_separator()
+
+implement
+{a}(*tmp*)
+list_make_array
+  {n}(A, n0) = let
+//
+prval() = lemma_array_param(A)
+//
+vtypedef res(n:int) = list_vt(a, n)
+//
+fun
+loop
+{l:addr}
+{n:nat} .<n>.
+(
+  pf: !array_v(a, l, n) >> array_v(a?!, l, n)
+| p0: ptr l
+, n0: size_t n
+, res: &ptr? >> res(n)
+) :<!wrt> void = (
+//
+if
+(n0 > 0)
+then let
+  prval
+  (
+    pf1, pf2
+  ) = array_v_uncons{a}(pf)
+//
+  val () = res :=
+    list_vt_cons{a}{0}(_, _)
+  // end of [val]
+  val+list_vt_cons(x, res1) = res
+//
+  val () = x := !p0
+  val p1 = ptr1_succ<a>(p0)
+  val () =
+    loop(pf2 | p1, pred(n0), res1)
+  // end of [val]
+  prval () =
+    pf := array_v_cons{a?!}(pf1, pf2)
+  // end of [prval]
+  prval ((*folded*)) = fold@ (res)
+in
+  // nothing
+end // end of [then]
+else let
+  prval () = array_v_unnil(pf)
+  prval () = pf := array_v_nil()
+in
+  res := list_vt_nil((*void*))
+end // end of [else]
+//
+) (* end of [loop] *)
+//
+var
+res: ptr // uninitialized
+//
+val ((*void*)) =
+  loop(view@(A) | addr@(A), n0, res)
+//
+in
+  res
+end // end of [list_make_array]
+
+#atscode_separator()
+
+implement
+{a}(*tmp*)
+list_make_arrpsz
+  {n}(ASZ) = let
+//
+var
+asz: size_t
+//
+val A0 =
+arrpsz_get_ptrsize
+  (ASZ, asz)
+//
+val p0 = arrayptr2ptr(A0)
+//
+prval
+pfarr = arrayptr_takeout(A0)
+val res = list_make_array(!p0, asz)
+prval() = arrayptr_addback(pfarr | A0)
+//
+in
+//
+let val () = arrayptr_free(A0) in res end
+//
+end // end of [list_make_arrpsz]
+
+#atscode_separator()
+
+implement
+{x}(*tmp*)
+list_tabulate
+  (n) = let
+//
+fun loop
+  {n:int}
+  {i:nat | i <= n}
+  .<n-i>. (
+  n: int n, i: int i
+, res: &ptr? >> list_vt(x, n-i)
+) : void =
+  if n > i then let
+    val x =
+      list_tabulate$fopr<x>(i)
+    val () = res :=
+      list_vt_cons{x}{0}(x, _(*?*))
+    val+list_vt_cons
+      (_, res1) = res // res1 = res.1
+    val () = loop(n, succ(i), res1)
+    prval ((*folded*)) = fold@ (res)
+  in
+    // nothing
+  end else (res := list_vt_nil)
+//
+in
+//
+let var res: ptr; val () = loop(n, 0, res) in res end
+//
+end // end of [list_tabulate]
+
+#atscode_separator()
+
 #atscode_eof_strsub("\#thisfilename$")\
 
 %{
 implement
-main (argc, argv) =
+main0 (argc, argv) =
   fprint_filsub (stdout_ref, "list_vt_atxt.txt")
 %}\

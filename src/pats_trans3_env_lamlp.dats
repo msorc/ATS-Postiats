@@ -33,9 +33,27 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_trans3_env_lamlp.dats, see PORTING.md, "Type-checking environment (trans3_env)")
 //
+
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload "./pats_basics.sats"
+
 (* ****** ****** *)
 
 staload "./pats_errmsg.sats"
@@ -44,6 +62,8 @@ implement prerr_FILENAME<> () = prerr "pats_trans3_env_lamlp"
 
 (* ****** ****** *)
 
+staload "./pats_avlmap.sats"
+staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
 staload "./pats_dynexp3.sats"
 
@@ -54,107 +74,80 @@ staload "./pats_trans3_env.sats"
 
 (* ****** ****** *)
 
+#include "./pats_trans3_env.hats"
+
+(* ****** ****** *)
+
 local
 
-assume
-lamlpenv_push_v = unit_v
-
-val the_lamlplst = ref<lamlplst_vt> (list_vt_nil)
+val the_lamlplst = gcell_make<lamlplst> (glist_nil ())
 
 in // in of [local]
 
 implement
 the_lamlpenv_top
   ((*void*)) = let
-  val (
-    vbox pf | pp
-  ) = ref_get_view_ptr (the_lamlplst)
+  val xs = gcell_get<lamlplst> (the_lamlplst)
 in
-  case+ !pp of
-  | list_vt_cons (x, _) => let
-      prval () = fold@ (!pp) in Some_vt x
-    end // end of [list_vt_cons]
-  | list_vt_nil () => let
-      prval () = fold@ (!pp) in None_vt ()
-    end // end of [list_vt_nil]
+  case+ glist_view (xs) of
+  | ~GLcons (x, _) => Some_vt x
+  | ~GLnil () => None_vt ()
 end // end of [the_lamlpenv_push_top]
 
 (* ****** ****** *)
 
-implement
-the_lamlpenv_get_funarg
-  ((*void*)) = let
-//
-fun loop (
-  xs: !lamlplst_vt
+fun
+get_funarg_loop (
+  xs: lamlplst
 ) : Option_vt (p3atlst) = let
 in
 //
-case+ xs of
-| list_vt_cons
-    (x, !p_xs) => (
-  case+ x of
-  | LAMLPlam (p3ts) =>
-      (fold@ (xs); Some_vt (p3ts))
-  | LAMLPloop0 _ => let
-      val res = loop (!p_xs) in fold@ (xs); res
-    end // end of [LAMLPloop0]
-  | LAMLPloop1 _ => let
-      val res = loop (!p_xs) in fold@ (xs); res
-    end // end of [LAMLPloop1]
+case+ glist_view (xs) of
+| ~GLcons (x, xs) => (
+  case+ lamlp_view (x) of
+  | ~LAMLPlam (p3ts) => Some_vt (p3ts)
+  | ~LAMLPloop0 _ => get_funarg_loop (xs)
+  | ~LAMLPloop1 _ => get_funarg_loop (xs)
   ) // end of [list_vt_cons]
-| list_vt_nil () => (fold@ (xs); None_vt ())
+| ~GLnil () => None_vt ()
 //
-end // end of [loop]
-//
-  val (vbox pf | pp) = ref_get_view_ptr (the_lamlplst)
-//
-in
-  $effmask_ref (loop (!pp))
-end // end of [the_lamlpenv_get_funarg]
+end // end of [get_funarg_loop]
+
+implement
+the_lamlpenv_get_funarg
+  ((*void*)) = get_funarg_loop (gcell_get<lamlplst> (the_lamlplst))
+// end of [the_lamlpenv_get_funarg]
 
 (* ****** ****** *)
 
 implement
 the_lamlpenv_pop
-  (pfpush | (*none*)) = let
-  prval () = unit_v_elim (pfpush)
-  val (vbox pf | pp) =
-    ref_get_view_ptr (the_lamlplst)
-  val-~list_vt_cons (_, xs) = !pp in !pp := xs
+  ((*none*)) = let
+  val xs = gcell_get<lamlplst> (the_lamlplst)
+  val () = assertloc (glist_is_cons (xs))
+in
+  gcell_set<lamlplst> (the_lamlplst, glist_tail (xs))
 end // end of [the_lamlpenv_push_pop]
 
 (* ****** ****** *)
 
 implement
-the_lamlpenv_push_lam (p3ts) = let
-  val (vbox pf | pp) = ref_get_view_ptr (the_lamlplst)
-  val () = !pp := list_vt_cons (LAMLPlam (p3ts), !pp)
-  prval pfpush = unit_v ()
-in
-  (pfpush | ())
-end // end of [the_lamlpenv_push_lam]
+the_lamlpenv_push_lam (p3ts) =
+  gcell_set<lamlplst> (the_lamlplst, glist_cons (lamlp_LAMLPlam (p3ts), gcell_get<lamlplst> (the_lamlplst)))
+// end of [the_lamlpenv_push_lam]
 
 (* ****** ****** *)
 
 implement
-the_lamlpenv_push_loop0 () = let
-  val (vbox pf | pp) = ref_get_view_ptr (the_lamlplst)
-  val () = !pp := list_vt_cons (LAMLPloop0 (), !pp)
-  prval pfpush = unit_v ()
-in
-  (pfpush | ())
-end // end of [the_lamlpenv_push_loop0]
+the_lamlpenv_push_loop0 () =
+  gcell_set<lamlplst> (the_lamlplst, glist_cons (lamlp_LAMLPloop0 (), gcell_get<lamlplst> (the_lamlplst)))
+// end of [the_lamlpenv_push_loop0]
 
 implement
 the_lamlpenv_push_loop1
-  (i2nv, lbis, post) = let
-  val (vbox pf | pp) = ref_get_view_ptr (the_lamlplst)
-  val () = !pp := list_vt_cons (LAMLPloop1 (i2nv, lbis, post), !pp)
-  prval pfpush = unit_v ()
-in
-  (pfpush | ())
-end // end of [the_lamlpenv_push_loop1]
+  (i2nv, lbis, post) =
+  gcell_set<lamlplst> (the_lamlplst, glist_cons (lamlp_LAMLPloop1 (i2nv, lbis, post), gcell_get<lamlplst> (the_lamlplst)))
+// end of [the_lamlpenv_push_loop1]
 
 (* ****** ****** *)
 

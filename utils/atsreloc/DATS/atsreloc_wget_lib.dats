@@ -72,5 +72,26 @@ in (*in-of-local *)
 end // end of [local]
 //
 (* ****** ****** *)
+//
+// HX-2026-10:
+// jsonats has non-template functions now
+//
+#define
+LIBATSHWXI_targetloc
+"$PATSHOME\
+/npm-utils/contrib/libats-/hwxi"
+//
+#staload
+_ = "libats/DATS/stringbuf.dats"
+#staload
+_ = "{$HX_CSTREAM}/DATS/cstream_tokener.dats"
+//
+#include
+"{$LIBATSHWXI}/jsonats/mylibies.hats"
+#include
+"{$LIBATSHWXI}/jsonats/mylibies_link.hats"
+//
+//
+(* ****** ****** *)
 
 (* end of [atsreloc_wget_lib.dats] *)

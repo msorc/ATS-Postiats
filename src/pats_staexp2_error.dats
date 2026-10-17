@@ -25,6 +25,7 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -33,9 +34,22 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_staexp2_error.dats, see PORTING.md)
+// The list is kept in a cell of the global arena as a [glist] (the length in another).
 //
+(* ****** ****** *)
+
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -54,8 +68,13 @@ macdef print_location = $LOC.print_location
 
 (* ****** ****** *)
 
+staload "./pats_staexp1.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_error.sats"
+
+(* ****** ****** *)
+
+#include "./pats_staexp2_error_gen_dats.hats"
 
 (* ****** ****** *)
 
@@ -64,46 +83,54 @@ local
 #define MAXLEN 100
 #assert (MAXLEN > 0)
 
-val the_length = ref<int> (0)
-val the_staerrlst = ref<staerrlst_vt> (list_vt_nil)
+typedef staerrlst = glist (staerr)
+
+val the_length = let
+  val p = the_garena_alloc (sizeof<int>)
+  val () = $UN.ptr0_set<int> (p, 0)
+in
+  p
+end // end of [val]
+
+val the_staerrlst = let
+  val p = the_garena_alloc (sizeof<staerrlst>)
+  val () = $UN.ptr0_set<staerrlst> (p, glist_nil ())
+in
+  p
+end // end of [val]
 
 in // in of [local]
 
 implement
 the_staerrlst_clear
   () = () where {
-  val () = !the_length := 0
-  val () = () where {
-    val (vbox pf | p) = ref_get_view_ptr (the_staerrlst)
-    val () = list_vt_free (!p)
-    val () = !p := list_vt_nil ()
-  } // end of [val]
+  val () = $UN.ptr0_set<int> (the_length, 0)
+  val () = $UN.ptr0_set<staerrlst> (the_staerrlst, glist_nil ())
 } // end of [the_staerrlst_clear]
 
 implement
 the_staerrlst_add
   (err) = () where {
   val n = let
-    val (vbox pf | p) = ref_get_view_ptr (the_length)
-    val n = !p
-    val () = !p := n + 1
+    val n = $UN.ptr0_get<int> (the_length)
+    val () = $UN.ptr0_set<int> (the_length, n + 1)
   in n end // end of [val]
   val () = if n < MAXLEN then let
-    val (vbox pf | p) = ref_get_view_ptr (the_staerrlst)
+    val xs = $UN.ptr0_get<staerrlst> (the_staerrlst)
   in
-    !p := list_vt_cons (err, !p)
+    $UN.ptr0_set<staerrlst> (the_staerrlst, glist_cons (err, xs))
   end // end of [val]
 } // end of [the_staerrlst_add]
 
 implement
 the_staerrlst_get
   (n) = xs where {
-  val () = n := !the_length
-  val () = !the_length := 0
-  val (vbox pf | p) = ref_get_view_ptr (the_staerrlst)
-  val xs = !p
-  val xs = list_vt_reverse (xs)
-  val () = !p := list_vt_nil ()
+  val () = n := $UN.ptr0_get<int> (the_length)
+  val () = $UN.ptr0_set<int> (the_length, 0)
+  val xs = $UN.ptr0_get<staerrlst> (the_staerrlst)
+  val xs = glist_reverse (xs)
+  val xs = glist_listize (xs)
+  val () = $UN.ptr0_set<staerrlst> (the_staerrlst, glist_nil ())
 } // end of [the_staerrlst_get]
 
 end // end of [local]
@@ -218,17 +245,11 @@ fn prerr_staerr_s2Var_s2exp_solve (
   val s2t1 =
     s2Var_get_srt (s2V1)
   // end of [val]
-  val s2t2 = s2e2.s2exp_srt
+  val s2t2 = s2exp_srt (s2e2)
 in
   prerr_error3_loc (loc);
   prerr ": mismatch of sorts in unification:\n";
-(*
-  prerr "The sVar of variable is: "; prerr_s2Var (s2V1); prerr_newline ();
-*)
   prerr "The sort of variable is: "; prerr_s2rt (s2t1); prerr_newline ();
-(*
-  prerr "The sexp of solution is: "; pprerr_s2exp (s2e2); prerr_newline ();
-*)
   prerr "The sort of solution is: "; prerr_s2rt (s2t2); prerr_newline ();
 end // end of [prerr_staerr_s2Var_s2exp_solve]
 
@@ -245,24 +266,31 @@ in
 case+ xs of
 | ~list_vt_cons
     (x, xs) => let
-    val () = (case+ x of
+    val () = (case+ staerr_view (x) of
 //
-    | STAERR_funclo_equal (loc, fc1, fc2) => prerr_staerr_funclo_equal (loc, fc1, fc2)
-    | STAERR_clokind_equal (loc, knd1, knd2) => prerr_staerr_clokind_equal (loc, knd1, knd2)
-    | STAERR_linearity_equal (loc, lin1, lin2) => prerr_staerr_linearity_equal (loc, lin1, lin2)
-    | STAERR_pfarity_equal (loc, npf1, npf2) => prerr_staerr_pfarity_equal (loc, npf1, npf2)
+    | ~STAERR_funclo_equal (loc, fc1, fc2) => prerr_staerr_funclo_equal (loc, fc1, fc2)
+    | ~STAERR_clokind_equal (loc, knd1, knd2) => prerr_staerr_clokind_equal (loc, knd1, knd2)
+    | ~STAERR_linearity_equal (loc, lin1, lin2) => prerr_staerr_linearity_equal (loc, lin1, lin2)
+    | ~STAERR_pfarity_equal (loc, npf1, npf2) => prerr_staerr_pfarity_equal (loc, npf1, npf2)
 //
-    | STAERR_s2eff_subeq (loc, s2fe1, s2fe2) => prerr_staerr_s2eff_subeq (loc, s2fe1, s2fe2)
+    | ~STAERR_s2eff_subeq (loc, s2fe1, s2fe2) => prerr_staerr_s2eff_subeq (loc, s2fe1, s2fe2)
 //
-    | STAERR_boxity_equal (loc, knd1, knd2) => prerr_staerr_boxity_equal (loc, knd1, knd2)
-    | STAERR_tyreckind_equal (loc, knd1, knd2) => prerr_staerr_tyreckind_equal (loc, knd1, knd2)
+    | ~STAERR_boxity_equal (loc, knd1, knd2) => prerr_staerr_boxity_equal (loc, knd1, knd2)
+    | ~STAERR_tyreckind_equal (loc, knd1, knd2) => prerr_staerr_tyreckind_equal (loc, knd1, knd2)
 //
-    | STAERR_s2exp_equal (loc, s2e1, s2e2) => prerr_staerr_s2exp_equal (loc, s2e1, s2e2)
-    | STAERR_s2exp_tyleq (loc, s2e1, s2e2) => prerr_staerr_s2exp_tyleq (loc, s2e1, s2e2)
+    | ~STAERR_s2exp_equal (loc, s2e1, s2e2) => prerr_staerr_s2exp_equal (loc, s2e1, s2e2)
+    | ~STAERR_s2exp_tyleq (loc, s2e1, s2e2) => prerr_staerr_s2exp_tyleq (loc, s2e1, s2e2)
 //
-    | STAERR_s2Var_s2exp_solve (loc, s2V1, s2e2) => prerr_staerr_s2Var_s2exp_solve (loc, s2V1, s2e2)
+    | ~STAERR_s2Var_s2exp_solve (loc, s2V1, s2e2) => prerr_staerr_s2Var_s2exp_solve (loc, s2V1, s2e2)
 //
-    | _ => ()
+    | ~STAERR_label_equal (_, _, _) => ()
+    | ~STAERR_stamp_equal (_, _, _) => ()
+    | ~STAERR_refval_equal (_, _, _) => ()
+    | ~STAERR_s2zexp_merge (_, _, _) => ()
+    | ~STAERR_s2explst_length (_, _) => ()
+    | ~STAERR_labs2explst_length (_, _) => ()
+    | ~STAERR_wths2explst_shape (_, _, _) => ()
+    | ~STAERR_s2exp_linearity (_, _) => ()
     ) : void // end of [case] // end of [val]
   in
     loop (xs)

@@ -25,12 +25,24 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
 // Authoremail: gmhwxi AT gmail DOT com
 // Start Time: May, 2011
 //
+(* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_staexp2_util.sats, see PORTING.md)
+// Implemented in pats_staexp2_util1.dats (this slice) and in pats_staexp2_util2.dats,
+// pats_staexp2_util3.dats, pats_staexp2_szexp.dats, pats_staexp2_skexp.dats,
+// pats_staexp2_ctxt.dats (the declarations are grouped as in ATS1).
+//
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+
 (* ****** ****** *)
 
 staload "./pats_basics.sats"
@@ -71,7 +83,7 @@ fun s2rt_npf_lin_prf_prgm_boxed_labs2explst (
 //
 fun
 s2cst_select_locs2explstlst
-  (s2cs: s2cstlst, arg: List (locs2explst)): s2cstlst
+  (s2cs: s2cstlst, arg: locs2explstlst): s2cstlst
 // end of [s2cst_select_locs2explstlst]
 //
 (* ****** ****** *)
@@ -100,7 +112,7 @@ fun s2eff_contain_s2eff (s2fe1: s2eff, s2fe2: s2eff): bool
 (* ****** ****** *)
 
 absvtype
-stasub_vtype // for static subst
+stasub_vtype = ptr // for static subst
 vtypedef stasub = stasub_vtype
 
 (* ****** ****** *)
@@ -119,9 +131,9 @@ fprint_stasub (out: FILEref, sub: !stasub): void
 (* ****** ****** *)
 
 fun stasub_add
-  (sub: &stasub, s2v: s2var, s2f: s2exp): void
+  (sub: &stasub >> _, s2v: s2var, s2f: s2exp): void
 fun stasub_addlst
-  (sub: &stasub, s2vs: s2varlst, s2fs: s2explst): int(*err*)
+  (sub: &stasub >> _, s2vs: s2varlst, s2fs: s2explst): int(*err*)
 // end of [stasub_addlst]
 
 (* ****** ****** *)
@@ -132,10 +144,6 @@ fun stasub_find
 
 (* ****** ****** *)
 //
-(*
-fun stasub_get_domain (sub: !stasub): List_vt (s2var)
-*)
-//
 fun
 stasub_occurcheck (sub: !stasub, s2V: s2Var): bool
 //
@@ -143,7 +151,7 @@ stasub_occurcheck (sub: !stasub, s2V: s2Var): bool
 
 fun
 stasub_extend_svarlst
-  (sub: &stasub, s2vs: s2varlst): s2varlst_vt
+  (sub: &stasub >> _, s2vs: s2varlst): s2varlst_vt
 // end of [stasub_extend_svarlst]
 
 (* ****** ****** *)
@@ -202,7 +210,7 @@ fun s2exp_linkrem (s2e: s2exp): s2exp
 (* ****** ****** *)
 //
 fun s2exp_topize_0 (s2e: s2exp): s2exp
-and s2exp_topize_1 (s2e: s2exp): s2exp
+fun s2exp_topize_1 (s2e: s2exp): s2exp
 fun s2exp_topize (knd: int, s2e: s2exp): s2exp
 //
 (* ****** ****** *)
@@ -325,7 +333,7 @@ fun s2exp_freevars (s2e: s2exp): s2varset_vt
 
 fun
 s2Var_occurcheck_s2exp
-  (s2V0: s2Var, s2e: s2exp) : (int, s2cstlst, s2varlst, s2Varlst)
+  (s2V0: s2Var, s2e: s2exp) : @(int, s2cstlst, s2varlst, s2Varlst)
 // end of [s2Var_occurcheck_s2exp]
 
 (* ****** ****** *)

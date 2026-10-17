@@ -8,8 +8,6 @@
 
 %{
 //
-dynload "libatsdoc/dynloadall.dats"
-//
 #include "utils/atsdoc/HATS/xhtmlatxt.hats"
 //
 %}
@@ -190,5 +188,5 @@ to be used with proper justification.
 </html>
 
 %{
-implement main () = fprint_filsub (stdout_ref, "tempaccman_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "tempaccman_atxt.txt")
 %}

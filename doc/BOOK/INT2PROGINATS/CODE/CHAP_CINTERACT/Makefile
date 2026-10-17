@@ -27,11 +27,6 @@ distclean:: cleanall
 
 ######
 
-all:: misc
-misc: misc_dats.c; \
-$(PATSCC) -DATS_MEMALLOC_LIBC $(ATSCCFLAGS) -o $@ $<
-regress:: misc; ./misc
-cleanall:: ; $(RMF) misc
 
 ######
 
@@ -63,17 +58,9 @@ cleanall:: ; $(RMF) strcmp
 
 ######
 
-all:: ArrayCopyFromList
-ArrayCopyFromList: ArrayCopyFromList_dats.c ; $(PATSCC) $(ATSCCFLAGS) -o $@ $^
-regress:: ArrayCopyFromList; ./ArrayCopyFromList
-cleanall:: ; $(RMF) ArrayCopyFromList
 
 ######
 
-all:: StaticAllocList
-StaticAllocList: StaticAllocList_dats.c ; $(PATSCC) $(ATSCCFLAGS) -o $@ $^
-regress:: StaticAllocList; ./StaticAllocList
-cleanall:: ; $(RMF) StaticAllocList
 
 ######
 

@@ -6,10 +6,9 @@
 
 ######
 
-ATSHOMEQ="$(ATSHOME)"
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSDOC=$(ATSHOMEQ)/bin/atsdoc
-#LIBATSDOC=$(ATSHOMEQ)/libatsdoc
+PATSCC=$(PATSHOMEQ)/bin/patscc
+ATSDOC=$(PATSHOMEQ)/bin/atsdoc
+#LIBATSDOC=$(PATSHOMEQ)/ccomp/atslib/lib
 
 ######
 
@@ -86,7 +85,7 @@ main.db:: preface.db
 #
 preface.exe: \
 preface_atxt.dats; \
-$(ATSCC) -D_ATS_NGC -o $@ preface_atxt.dats -latsdoc
+$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ preface_atxt.dats -latsdoc
 #
 preface_atxt.dats: \
 preface.atxt; $(ATSDOC) --outcode $@ -i preface.atxt > preface_atxt.txt

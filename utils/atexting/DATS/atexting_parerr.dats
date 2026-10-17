@@ -42,10 +42,6 @@
 //
 (* ****** ****** *)
 //
-staload
-"libats/ML/SATS/basis.sats"
-staload
-"libats/ML/SATS/list0.sats"
 //
 (* ****** ****** *)
 
@@ -56,13 +52,14 @@ staload UN = $UNSAFE
 staload
 "./../SATS/atexting.sats"
 //
+#staload "libats/SATS/arena.sats" // HX-2026-10
+#staload _ = "libats/DATS/arena.dats"
+//
 (* ****** ****** *)
 //
 implement
 parerr_make
-  (loc, node) = '{
-  parerr_loc=loc, parerr_node=node
-} (* end of [parerr_make] *)
+  (loc, node) = parerr_PARERR(loc, node) (* end of [parerr_make] *)
 //
 (* ****** ****** *)
 //
@@ -112,8 +109,8 @@ fprint_parerr_node: fprint_type(parerr_node)
 implement
 fprint_parerr(out, x0) =
 {
-  val () = fprint(out, x0.parerr_loc)
-  val () = fprint_parerr_node(out, x0.parerr_node)
+  val () = fprint(out, x0.parerr_loc())
+  val () = fprint_parerr_node(out, x0.parerr_node())
 }
 //
 implement
@@ -121,14 +118,14 @@ fprint_parerr_node
   (out, node) = let
 in
 //
-case+ node of
-| PARERR_SQUOTE(loc0) =>
+case+ parerr_node_view(node) of
+| ~PARERR_SQUOTE(loc0) =>
     fprintln! (out, ": the single-quote at (", loc0, ") is not closed.")
-| PARERR_DQUOTE(loc0) =>
+| ~PARERR_DQUOTE(loc0) =>
     fprintln! (out, ": the double-quote at (", loc0, ") is not closed.")
-| PARERR_FUNARG(loc0) =>
+| ~PARERR_FUNARG(loc0) =>
     fprintln! (out, ": the funarg starting at (", loc0, ") is not closed.")
-| PARERR_EXTCODE(loc0) =>
+| ~PARERR_EXTCODE(loc0) =>
     fprintln! (out, ": the ext-code starting at (", loc0, ") is not closed.")
 //
 end // end of [fprint_parerr_node]

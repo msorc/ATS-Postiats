@@ -15,8 +15,6 @@ LIBATSCC2CLJ=\
 $(PATSHOME)/contrib/libatscc2clj/ATS2-0.3.2
 #
 ######
-
-######
 #
 JAVA=java
 #
@@ -113,24 +111,6 @@ rtfind2_dats.clj ; $(CLOJURE2) $<
 cleanall:: ; $(RMF) rtfind2_dats.clj
 #
 ######
-#
-all:: \
-twice_dats.clj
-regress:: \
-twice_dats.clj ; $(CLOJURE2) $<
-cleanall:: ; $(RMF) twice_dats.clj
-#
-######
-
-all:: \
-queens_comb_dats.clj
-regress:: \
-queens_comb
-queens_comb: \
-queens_comb_dats.clj ; $(CLOJURE2) $<
-cleanall:: ; $(RMF) queens_comb_dats.clj
-
-######
 
 all:: \
 queens_simple_dats.clj
@@ -161,15 +141,6 @@ weekday_dats.clj
 regress:: \
 weekday_dats.clj ; $(CLOJURE2) $<
 cleanall:: ; $(RMF) weekday_dats.clj
-#
-######
-#
-all:: \
-sieve_lazy_dats.clj
-test_sieve_lazy:: \
-sieve_lazy_dats.clj ; $(CLOJURE2) $<
-regress:: test_sieve_lazy
-cleanall:: ; $(RMF) sieve_lazy_dats.clj
 #
 ######
 #

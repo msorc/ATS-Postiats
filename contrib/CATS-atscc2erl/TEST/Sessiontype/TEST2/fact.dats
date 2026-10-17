@@ -107,7 +107,7 @@ SERVICE_FACT = $extval(atom, "'SERVICE_FACT'")
 implement
 service_fact() =
 chansrvc2_create
-  (lam(n, chp) => chanposneg_link(chp, channeg_fact(n)))
+  (lam(n, chp) =<cloptr1> chanposneg_link(chp, channeg_fact(n)))
 //
 (* ****** ****** *)
 //

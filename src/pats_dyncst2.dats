@@ -33,12 +33,26 @@
 //
 (* ****** ****** *)
 //
-staload
-ATSPRE = "./pats_atspre.dats"
+// HX-2026-10: no GC (ATS2 port of src/pats_dyncst2.dats, see PORTING.md, "Level 2 translation (trans2)")
+// A [d2cstref] is a cell of the global arena: the symbol (word 0) and the constant, null if not found yet (word 1).
 //
 (* ****** ****** *)
 
+#include "share/atspre_staload.hats"
+
+(* ****** ****** *)
+
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
 staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 //
@@ -63,68 +77,34 @@ staload "./pats_trans2_env.sats"
 
 (* ****** ****** *)
 
-abstype d2cstnul (l:addr)
-typedef d2cstnul = [l:agez] d2cstnul (l)
+assume d2cstref_type = ptr
 
-extern
-castfn d2cstnul_none (x: ptr null):<> d2cstnul (null)
-
-extern
-castfn d2cstnul_some (x: d2cst):<> [l:agz] d2cstnul (l)
-extern
-castfn d2cstnul_unsome {l:agz} (x: d2cstnul l):<> d2cst
-
-extern
-fun d2cstnul_is_null {l:addr}
-  (x: d2cstnul (l)): bool (l==null) = "atspre_ptr_is_null"
-// end of [d2cstnul_is_null]
-extern
-fun d2cstnul_isnot_null {l:addr}
-  (x: d2cstnul (l)): bool (l > null) = "atspre_ptr_isnot_null"
-// end of [d2cstnul_isnot_null]
+(* ****** ****** *)
+//
+// the cell: the symbol (word 0) and the constant, null if not found yet (word 1)
+//
+fn d2cstref_get_sym
+  (r: d2cstref): symbol = $UN.cast{symbol}($UN.ptr0_get<ptr>(r))
+// end of [d2cstref_get_sym]
 
 (* ****** ****** *)
 
-local
-
-typedef
-symd2cst_struct = @{
-  sym= symbol, cst= d2cstnul
-} // end of [symd2cst_struct]
-
-assume d2cstref_type = ref (symd2cst_struct)
-
-in (* in of [local] *)
-
-fun d2cstref_get_sym
-  (r: d2cstref): symbol = let
-  val (vbox pf | p) = ref_get_view_ptr (r) in p->sym
-end // end of [d2cstref_get_sym]
-
-(* ****** ****** *)
-
-fun d2cstref_get_cstnul
-  (r: d2cstref): d2cstnul = let
-  val (vbox pf | p) = ref_get_view_ptr (r) in p->cst
-end // end of [d2cstref_get_cstnul]
-fun d2cstref_set_cstnul
-  (r: d2cstref, d2c: d2cstnul): void = let
-  val (vbox pf | p) = ref_get_view_ptr (r) in p->cst := d2c
-end // end of [d2cstref_set_cstnul]
+fn d2cstref_get_cstnul
+  (r: d2cstref): ptr = $UN.ptr0_get<ptr>(ptr0_add_guint<byte>(r, i2sz(8)))
+fn d2cstref_set_cstnul
+  (r: d2cstref, d2c: ptr): void = $UN.ptr0_set<ptr>(ptr0_add_guint<byte>(r, i2sz(8)), d2c)
 
 (* ****** ****** *)
 
 implement
 d2cstref_make (name) = let
   val id = $SYM.symbol_make_string (name)
-  val (pfgc, pfat | p) = ptr_alloc<symd2cst_struct> ()
-  prval () = free_gc_elim (pfgc)
-  val () = (p->sym := id; p->cst := d2cstnul_none (null))
+  val p = the_garena_alloc (i2sz(16))
+  val () = $UN.ptr0_set<ptr> (p, $UN.cast{ptr}(id))
+  val () = $UN.ptr0_set<ptr> (ptr0_add_guint<byte>(p, i2sz(8)), the_null_ptr)
 in
-  ref_make_view_ptr (pfat | p)
+  p
 end  // end of [d2cstref_make]
-
-end // end of [local]
 
 (* ****** ****** *)
 
@@ -137,11 +117,11 @@ fn auxerr
   val () = prerr ": d2cstref_get_cst"
   val () = prerrln! (": the pervasive dynamic constant [", id, "] is not available.")
 in
-  $ERR.abort_interr{d2cst}((*reachable*))
+  $ERR.abort_interr<d2cst>((*reachable*))
 end (* end of [auxerr] *)
 //
 val d2c = d2cstref_get_cstnul (r)
-val isnul = d2cstnul_is_null (d2c)
+val isnul = ptr_is_null (d2c)
 //
 in
 //
@@ -154,18 +134,18 @@ in
 //
 case+ ans of
 | ~Some_vt (s2i) => (
-  case+ s2i of
-  | D2ITMcst (d2c) => let
-      val () = d2cstref_set_cstnul (r, d2cstnul_some (d2c))
+  case+ d2itm_view (s2i) of
+  | ~D2ITMcst (d2c) => let
+      val () = d2cstref_set_cstnul (r, $UN.cast{ptr}(d2c))
     in
       d2c
     end // end of [D2ITMcst]
-  | _ => auxerr (id)
+  | v => (d2itm_view_free (v); auxerr (id))
   ) // end of [Some_vt]
 | ~None_vt ((*void*)) => auxerr (id)
 //
 end // end of [then]
-else d2cstnul_unsome (d2c)
+else $UN.cast{d2cst}(d2c)
 //
 end // end of [d2cstref_get_cst]
 

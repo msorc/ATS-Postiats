@@ -25,6 +25,7 @@
 ** 02110-1301, USA.
 *)
 
+
 (* ****** ****** *)
 //
 // Author: Hongwei Xi
@@ -32,14 +33,27 @@
 // Start Time: April, 2011
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC (ATS2 port of src/pats_effect.dats)
+//
+(* ****** ****** *)
 
-staload ERR = "./pats_error.sats"
+#include "share/atspre_staload.hats"
+#include "./pats_assert.hats"
 
 (* ****** ****** *)
 
-staload "./pats_errmsg.sats"
-staload _(*anon*) = "./pats_errmsg.dats"
-implement prerr_FILENAME<> () = prerr "pats_effect"
+staload UN = "prelude/SATS/unsafe.sats"
+
+(* ****** ****** *)
+
+staload "libats/SATS/arena.sats"
+staload _(*arena*) = "libats/DATS/arena.dats"
+
+(* ****** ****** *)
+
+staload ERR = "./pats_error.sats"
+staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
@@ -65,18 +79,23 @@ assume effect_t0ype = uint
 //
 (* ****** ****** *)
 
-implement effect_ntm = (uint_of)EFFntm
-implement effect_exn = (uint_of)EFFexn
-implement effect_ref = (uint_of)EFFref
-implement effect_wrt = (uint_of)EFFwrt
+fn effect_of_int (x: int): effect = $UN.cast{effect} (g0int2uint_int_uint(x))
+fn int_of_effect (x: effect): int = g0uint2int_uint_int ($UN.cast{uint} (x))
+
+(* ****** ****** *)
+
+implement effect_ntm = effect_of_int (EFFntm)
+implement effect_exn = effect_of_int (EFFexn)
+implement effect_ref = effect_of_int (EFFref)
+implement effect_wrt = effect_of_int (EFFwrt)
 
 implement
-effectlst_all = '[
-  effect_ntm, effect_exn, effect_ref, effect_wrt
-] // end of [effectlst_all]
+effectlst_all =
+  glist_cons (effect_ntm, glist_cons (effect_exn, glist_cons (effect_ref, glist_sing (effect_wrt))))
+// end of [effectlst_all]
 
 implement
-eq_effect_effect (eff1, eff2) = eq_uint_uint (eff1, eff2)
+eq_effect_effect (eff1, eff2) = g0uint_eq ($UN.cast{uint} (eff1), $UN.cast{uint} (eff2))
 
 (* ****** ****** *)
 
@@ -84,7 +103,7 @@ implement
 effect_get_name
   (eff) = let
 //
-val eff = int_of(eff)
+val eff = int_of_effect (eff)
 //
 in
   case+ eff of
@@ -93,7 +112,7 @@ in
   | EFFref => "ref"
   | EFFwrt => "wrt"
   | _ => let
-      val () = assertloc (false) in $ERR.abort_interr((*deadcode*))
+      val () = assertloc (false) in $ERR.abort_interr<string>((*deadcode*))
     end // end of [_]
 end // end of [effect_get_name]
 
@@ -102,58 +121,89 @@ end // end of [effect_get_name]
 implement
 fprint_effect (out, x) = fprint_string (out, effect_get_name (x))
 
+implement
+print_effect (x) = fprint_effect (stdout_ref, x)
+implement
+prerr_effect (x) = fprint_effect (stderr_ref, x)
+
+implement
+fprint_effectlst (out, xs) = let
+  fun loop (out: FILEref, xs: glist(effect), i: int): void =
+    case+ glist_view (xs) of
+    | ~GLcons (x, xs1) => (
+        (if i > 0 then fprint_string (out, ", ")); fprint_effect (out, x); loop (out, xs1, i+1)
+      )
+    | ~GLnil () => ()
+in
+  loop (out, xs, 0)
+end // end of [fprint_effectlst]
+
 (* ****** ****** *)
 
 assume effset_t0ype = uint
 
 (* ****** ****** *)
-//
-implement effset_nil = uint_of_int (0) // 0U
-implement effset_all = uint_of_int (~1) // 1...1U
-//
-implement effset_ntm = (1u << effect_ntm)
-implement effset_exn = (1u << effect_exn)
-implement effset_ref = (1u << effect_ref)
-implement effset_wrt = (1u << effect_wrt)
-//
-implement effset_sing (x) = (1u << x)
-//
-implement eq_effset_effset (efs1, efs2) = eq_uint_uint (efs1, efs2)
-//
+
+fn effset_of_uint (x: uint): effset = $UN.cast{effset} (x)
+fn uint_of_effset (x: effset): uint = $UN.cast{uint} (x)
+
+fn eff_bit (x: effect): uint = g0uint_lsl_uint (1u, $UN.cast{intGte(0)} (int_of_effect (x)))
+
 (* ****** ****** *)
 
-implement effset_add (xs, x) = xs lor (1u << x)
-implement effset_del (xs, x) = xs land ~(1u << x)
+implement effset_nil = effset_of_uint (g0int2uint_int_uint (0)) // 0U
+implement effset_all = effset_of_uint (g0uint_lnot_uint (g0int2uint_int_uint (0))) // 1...1U
+
+implement effset_ntm = effset_of_uint (eff_bit (effect_ntm))
+implement effset_exn = effset_of_uint (eff_bit (effect_exn))
+implement effset_ref = effset_of_uint (eff_bit (effect_ref))
+implement effset_wrt = effset_of_uint (eff_bit (effect_wrt))
+
+implement effset_sing (x) = effset_of_uint (eff_bit (x))
+
+implement
+eq_effset_effset (efs1, efs2) = g0uint_eq (uint_of_effset (efs1), uint_of_effset (efs2))
 
 (* ****** ****** *)
 
 implement
-effset_isnil (xs) = eq_effect_effect (xs, effset_nil)
+effset_add (xs, x) = effset_of_uint (g0uint_lor_uint (uint_of_effset (xs), eff_bit (x)))
 implement
-effset_isall (xs) = eq_effect_effect (xs, effset_all)
+effset_del (xs, x) =
+  effset_of_uint (g0uint_land_uint (uint_of_effset (xs), g0uint_lnot_uint (eff_bit (x))))
+
+(* ****** ****** *)
+
+implement
+effset_isnil (xs) = g0uint_eq (uint_of_effset (xs), g0int2uint_int_uint (0))
+implement
+effset_isall (xs) = g0uint_eq (uint_of_effset (xs), g0uint_lnot_uint (g0int2uint_int_uint (0)))
+
 implement
 effset_isfin (xs) = // finite
-  (xs land (1u << MAX_EFFECT_NUMBER)) \eq_uint_uint 0u
+  g0uint_eq (g0uint_land_uint (uint_of_effset (xs), g0uint_lsl_uint (1u, MAX_EFFECT_NUMBER)), 0u)
 // end of [effset_isfin]
 implement
 effset_iscof (xs) = // cofinite
-  (xs land (1u << MAX_EFFECT_NUMBER)) \lt_uint_uint 0u
+  g0uint_lt (g0uint_land_uint (uint_of_effset (xs), g0uint_lsl_uint (1u, MAX_EFFECT_NUMBER)), 0u)
 // end of [effset_iscof]
 
 (* ****** ****** *)
 
 implement
-effset_ismem (xs, x) = (xs land (1u << x)) > 0u
+effset_ismem (xs, x) = g0uint_gt (g0uint_land_uint (uint_of_effset (xs), eff_bit (x)), 0u)
 
 implement
 effset_supset
-  (xs1, xs2) = eq_uint_uint (~xs1 land xs2, 0u)
-// end of [effset_supset]
+  (xs1, xs2) = (
+  g0uint_eq (g0uint_land_uint (g0uint_lnot_uint (uint_of_effset (xs1)), uint_of_effset (xs2)), 0u)
+) // end of [effset_supset]
 
 implement
 effset_subset
-  (xs1, xs2) = eq_uint_uint (xs1 land ~xs2, 0u)
-// end of [effset_subset]
+  (xs1, xs2) = (
+  g0uint_eq (g0uint_land_uint (uint_of_effset (xs1), g0uint_lnot_uint (uint_of_effset (xs2))), 0u)
+) // end of [effset_subset]
 
 implement
 effset_is_inter (xs1, xs2) =
@@ -161,18 +211,16 @@ effset_is_inter (xs1, xs2) =
 // end of [effset_is_inter]
 
 implement
-effset_cmpl (xs) = lnot_uint (xs)
-
+effset_cmpl (xs) = effset_of_uint (g0uint_lnot_uint (uint_of_effset (xs)))
 implement
 effset_diff
-  (xs1, xs2) = (xs1) land effset_cmpl(xs2)
+  (xs1, xs2) = effset_inter (xs1, effset_cmpl (xs2))
 // end of [effset_diff]
 
 implement
-effset_inter (xs1, xs2) = xs1 land xs2
-
+effset_inter (xs1, xs2) = effset_of_uint (g0uint_land_uint (uint_of_effset (xs1), uint_of_effset (xs2)))
 implement
-effset_union (xs1, xs2) = (xs1) lor (xs2)
+effset_union (xs1, xs2) = effset_of_uint (g0uint_lor_uint (uint_of_effset (xs1), uint_of_effset (xs2)))
 
 (* ****** ****** *)
 
@@ -182,38 +230,35 @@ fprint_effset
 //
 fun loop (
   out: FILEref
-, efs: effset, n: uint, i: uint, k: &int
+, efs: effset, n: int, i: int, k: int
 ) : void = let
 in
 //
 if i < n then let
+  val eff = $UN.cast{effect} (g0int2uint_int_uint (i))
   val isint =
-    effset_is_inter (efs, effset_sing (i))
-  val () = if isint then {
-    val () = if (k > 0) then fprint_string (out, ", ")
-    val () = k := k + 1
-    val () = fprint_effect (out, i)
-  } // end of [if] // end of [val]
+    effset_is_inter (efs, effset_sing (eff))
+  val k1 = (
+    if isint then let
+      val () = if (k > 0) then fprint_string (out, ", ")
+      val () = fprint_effect (out, eff)
+    in k + 1 end else k
+  ) : int
 in
-  loop (out, efs, n, i+1u, k)
+  loop (out, efs, n, i+1, k1)
 end // end of [if]
 //
 end // end of [loop]
 //
-var k: int = 0
-//
 in
 //
-case+ 0 of
-| _ when
-    effset_isnil(efs) => fprint_string (out, "0")
-| _ when
-    effset_isall(efs) => fprint_string (out, "1")
-| _ => (
-    fprint_string (out, "[");
-    loop (out, efs, (uint_of)MAX_EFFECT_NUMBER, 0u, k);
-    fprint_string (out, "]");
-  ) (* end of [_] *)
+if effset_isnil(efs) then fprint_string (out, "0")
+else if effset_isall(efs) then fprint_string (out, "1")
+else (
+  fprint_string (out, "[");
+  loop (out, efs, MAX_EFFECT_NUMBER, 0, 0);
+  fprint_string (out, "]");
+) (* end of [if] *)
 //
 end // end of [fprint_effset]
 

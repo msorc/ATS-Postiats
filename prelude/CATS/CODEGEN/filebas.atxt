@@ -371,5 +371,5 @@ atspre_fileref_get_line_string_main2
 
 %{
 implement
-main (argc, argv) = fprint_filsub (stdout_ref, "filebas_atxt.txt")
+main0 (argc, argv) = fprint_filsub (stdout_ref, "filebas_atxt.txt")
 %}\
