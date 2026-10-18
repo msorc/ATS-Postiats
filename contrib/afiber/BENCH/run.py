@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # MS-2026-10: run bench_ats and bench_go, median of REPS runs.
 #   python3 run.py        one-worker suite: afiber vs Go GOMAXPROCS=1 and default
-#                         (env BEFORE=/path/to/old/binary adds a "before M:N" column;
+#                         (env BEFORE=/path/to/old/binary adds a column of an earlier library, titled
+#                          BEFORE_LABEL (default "afiber before"), "-" where that binary lacks a benchmark;
 #                          bench_ats_1n, built by `make bench_ats_1n`, adds the 1:N-build column)
 #                          bench_ats_single, built by `make bench_ats_single`, adds the SINGLE-build column)
 #   python3 run.py mn     M:N suite: afiber workers N vs Go GOMAXPROCS=N
@@ -55,20 +56,28 @@ if os.path.exists(os.path.join(here, "bench_ats_1n")):
     CFG.append(("afiber 1:N build", ["./bench_ats_1n"], {}))
 if os.path.exists(os.path.join(here, "bench_ats_single")):
     CFG.append(("afiber SINGLE build", ["./bench_ats_single"], {}))
-if os.environ.get("BEFORE"):
-    CFG.append(("afiber before M:N", [os.environ["BEFORE"]], {}))
+if os.environ.get("BEFORE"): # a binary of an earlier library, for the before/after of a change
+    CFG.append((os.environ.get("BEFORE_LABEL", "afiber before"), [os.environ["BEFORE"]], {}))
 CFG += [
         ("go P=1", ["./bench_go"], {"GOMAXPROCS": "1"}),
         ("go P=%d" % os.cpu_count(), ["./bench_go"], {})]
 GO1 = [c[0] for c in CFG].index("go P=1")
 def run(cmd, env, name, n):
-    out = subprocess.run(cmd + [name, str(n)], cwd=here, env={**os.environ, **env},
-                         capture_output=True, text=True, check=True).stdout.split()
-    return int(out[1]), int(out[2]), (float(out[4]) if len(out) > 4 else None)
+    # None when the binary does not know the benchmark (an older BEFORE= binary): "-" in the table
+    try:
+        out = subprocess.run(cmd + [name, str(n)], cwd=here, env={**os.environ, **env},
+                             capture_output=True, text=True, check=True).stdout.split()
+        return int(out[1]), int(out[2]), (float(out[4]) if len(out) > 4 else None)
+    except (subprocess.CalledProcessError, IndexError, ValueError):
+        return None
 res = {}
 for name, n in B:
     for cname, cmd, env in CFG:
         r = [run(cmd, env, name, n) for _ in range(REPS)]
+        if any(x is None for x in r):
+            res[name, cname] = None
+            print(name, cname, "n/a", file=sys.stderr)
+            continue
         ops = r[0][0]
         ns = statistics.median(x[1] for x in r)
         res[name, cname] = (ops, ns, r[0][2] if name != "mem" else statistics.median(x[2] for x in r), min(x[1] for x in r))
@@ -78,10 +87,10 @@ print("|---|---:|" + "---:|" * (len(CFG) + 1))
 for name, n in B:
     if name == "mem": continue
     ops = res[name, CFG[0][0]][0]
-    row = [res[name, c[0]][1] / ops for c in CFG]
-    print("| %s | %d | " % (name, ops) + " | ".join("%.1f" % v for v in row) + " | %.2fx %s |" % (
+    row = [res[name, c[0]][1] / ops if res[name, c[0]] else None for c in CFG]
+    print("| %s | %d | " % (name, ops) + " | ".join("%.1f" % v if v is not None else "-" for v in row) + " | %.2fx %s |" % (
         max(row[0]/row[GO1], row[GO1]/row[0]), "slower" if row[0] > row[GO1] else "faster"))
 print()
 print("| memory (parked fibers) | tasks | " + " | ".join(c[0] + " KB/task" for c in CFG) + " |")
 print("|---|---:|" + "---:|" * len(CFG))
-print("| mem | %d | " % res["mem", CFG[0][0]][0] + " | ".join("%.2f" % res["mem", c[0]][2] for c in CFG) + " |")
+print("| mem | %d | " % res["mem", CFG[0][0]][0] + " | ".join("%.2f" % res["mem", c[0]][2] if res["mem", c[0]] else "-" for c in CFG) + " |")
