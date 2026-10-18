@@ -45,7 +45,7 @@ programs under the no-GC rules: `main0`, `glist` for lists of atexts, `ref_make_
 `%s`) and `string_of_strptr`. A string argument of a placeholder keeps the ATS1 meaning of `\X`: write `\\X` for a backslash that must reach the output.
 Do not `dynload "libatsdoc/dynloadall.dats"` twice in one module (the helper hats files already do). `make -C utils/atsdoc genall` (about 30 s; `GENARGS=doc/DISTRIB`
 or `GENARGS=prelude` for a part) regenerates the text of every template and compares its md5 sum with `utils/atsdoc/TEST/genall.md5` (the sums are those of the ATS1 toolchain
-for 369 templates, and for 4 EFFECTIVATS documents they equal the tracked `main.html`; the other 29 are sums of the new output only: the 22 `Makefile*.atxt` of the DOCUGEN/CODEGEN/DISTRIB directories differ from ATS1 in the lines that name the compiler, and the 6 libcairo tutorial chapters and `PwTP-bool-vs-prop` never ran with ATS1).
+for 368 templates, and for 4 EFFECTIVATS documents they equal the tracked `main.html`; the other 30 are sums of the new output only: the 22 `Makefile*.atxt` of the DOCUGEN/CODEGEN/DISTRIB directories differ from ATS1 in the lines that name the compiler, `doc/DISTRIB/ATEXT/atslib_libats.atxt` packs the `afiber` files added after the port, and the 6 libcairo tutorial chapters and `PwTP-bool-vs-prop` never ran with ATS1).
 
 ## Tests
 
