@@ -1533,12 +1533,15 @@ atscntrb_afiber_waitq_wake_all
 ** [locked] is the mutex itself (the fast path is one atomic exchange);
 ** [lock] only guards [q] and [nwait]. A fiber that finds the mutex taken
 ** spins briefly, then parks on [q]. No wake-up is lost: a waiter does
-** exchange-sees-1 and then nwait++ (both seq-cst), the unlocker does
-** store-0 and then load-nwait (seq-cst), so at least one of them sees the
-** other: either the waiter's next exchange succeeds, or the unlocker sees
-** nwait > 0. In the latter case the waiter is already in [q] when [lock]
-** is released (the park pushes before the switch), so the unlocker, which
-** takes [lock], finds it. The woken fiber re-tries the exchange and may
+** nwait++ and then the exchange (both seq-cst), the unlocker does store-0
+** and then load-nwait (seq-cst), so at least one of them sees the other:
+** if the unlocker reads 0, its store precedes the waiter's exchange, which
+** then takes the mutex; otherwise the unlocker sees nwait > 0 and takes
+** [lock], which the waiter holds until it is in [q] and off its stack (the
+** park pushes before the switch, and releases [lock] after it), so a
+** parked waiter is found. The order matters: a waiter that looked first
+** and announced after could park on a mutex just freed by an unlocker
+** that saw nwait == 0. The woken fiber re-tries the exchange and may
 ** lose to a barging fiber: the mutex is not FIFO under contention.
 */
 typedef
@@ -1590,16 +1593,18 @@ atscntrb_afiber_mutex_lock
     }
   }
   atscntrb_afiber__spin_lock(&(m->lock)) ;
+  // announce first, then look: an unlocker that reads nwait == 0 is ordered
+  // before the exchange below, which then sees its 0 (see the comment above)
+  __atomic_add_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
   for ( ; ; ) {
     if (atscntrb_afiber__mt()) {
       if (!__atomic_exchange_n(&(m->locked), 1, __ATOMIC_SEQ_CST)) break ;
     } else {
       if (!m->locked) { m->locked = 1 ; break ; }
     }
-    __atomic_add_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
     atscntrb_afiber_waitq_park((atstype_ptr)&(m->q), (atstype_ptr)&(m->lock)) ;
-    __atomic_sub_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
   }
+  __atomic_sub_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
   atscntrb_afiber__spin_unlock(&(m->lock)) ;
 } // end of [atscntrb_afiber_mutex_lock]
 
