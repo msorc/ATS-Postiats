@@ -113,6 +113,16 @@ clean:: ; $(RMF) contrib_atscntrb_atxt.exe
 cleanall:: ; $(RMF) HTML/contrib_atscntrb.html
 cleanall:: ; $(RMF) SCRIPT/contrib_atscntrb.bash
 
+all_script:: \
+SCRIPT/contrib_afiber.bash
+SCRIPT/contrib_afiber.bash: contrib_afiber_atxt.exe ; ./$< > $@
+contrib_afiber_atxt.dats: ATEXT/contrib_afiber.atxt ; \
+  $(CAT) $< | $(ATSDOC) --prefix __datatok --outcode $@ > /dev/null
+contrib_afiber_atxt.exe: contrib_afiber_atxt.dats ; $(PATSCC) $(INCLATS) $(PATSCCFLAGS) -o $@ $< -latsdoc
+clean:: ; $(RMF) contrib_afiber_atxt.exe
+cleanall:: ; $(RMF) HTML/contrib_afiber.html
+cleanall:: ; $(RMF) SCRIPT/contrib_afiber.bash
+
 #
 ######
 
@@ -571,6 +581,7 @@ atspackaging:: srcget_ccomp_runtime
 #
 atspackaging:: srcget_atslib
 atspackaging:: srcget_contrib_atscntrb
+atspackaging:: srcget_contrib_afiber
 #
 atspackaging:: srcget_utils_emacs
 atspackaging:: srcget_utils_atscc
@@ -670,6 +681,7 @@ srcget_atslib:: srcget_atslib_libats_libc
 srcget_atslib_libats_libc:: SCRIPT/atslib_libats_libc.bash ; bash $<
 #
 srcget_contrib_atscntrb:: SCRIPT/contrib_atscntrb.bash ; bash $<
+srcget_contrib_afiber:: SCRIPT/contrib_afiber.bash ; bash $<
 #
 ######
 

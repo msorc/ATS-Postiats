@@ -1,9 +1,9 @@
-(* HX-2026-10: afiberchan ping-pong over two capacity-1 channels *)
+(* MS-2026-10: afiberchan ping-pong over two capacity-1 channels *)
 #include "share/atspre_staload.hats"
-staload "libats/SATS/afiber.sats"
-staload _ = "libats/DATS/afiber.dats"
-staload "libats/SATS/afiberchan.sats"
-staload _ = "libats/DATS/afiberchan.dats"
+staload "contrib/afiber/SATS/afiber.sats"
+staload _ = "contrib/afiber/DATS/afiber.dats"
+staload "contrib/afiber/SATS/afiberchan.sats"
+staload _ = "contrib/afiber/DATS/afiberchan.dats"
 
 var the_cnt: int = 0
 val the_cnt_ref = ref_make_viewptr{int}(view@ the_cnt | addr@ the_cnt)

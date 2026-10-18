@@ -1,9 +1,9 @@
-(* HX-2026-10: afiberchan try operations and close, single fiber *)
+(* MS-2026-10: afiberchan try operations and close, single fiber *)
 #include "share/atspre_staload.hats"
-staload "libats/SATS/afiber.sats"
-staload _ = "libats/DATS/afiber.dats"
-staload "libats/SATS/afiberchan.sats"
-staload _ = "libats/DATS/afiberchan.dats"
+staload "contrib/afiber/SATS/afiber.sats"
+staload _ = "contrib/afiber/DATS/afiber.dats"
+staload "contrib/afiber/SATS/afiberchan.sats"
+staload _ = "contrib/afiber/DATS/afiberchan.dats"
 
 implement main0 () = {
   val ch = chan_make<int> (2)

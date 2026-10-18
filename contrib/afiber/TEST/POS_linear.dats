@@ -1,9 +1,9 @@
-(* HX-2026-10: afiberchan with linear payloads (strptr, datavtype) *)
+(* MS-2026-10: afiberchan with linear payloads (strptr, datavtype) *)
 #include "share/atspre_staload.hats"
-staload "libats/SATS/afiber.sats"
-staload _ = "libats/DATS/afiber.dats"
-staload "libats/SATS/afiberchan.sats"
-staload _ = "libats/DATS/afiberchan.dats"
+staload "contrib/afiber/SATS/afiber.sats"
+staload _ = "contrib/afiber/DATS/afiber.dats"
+staload "contrib/afiber/SATS/afiberchan.sats"
+staload _ = "contrib/afiber/DATS/afiberchan.dats"
 
 datavtype node = NODE of (int, strptr)
 

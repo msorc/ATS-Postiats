@@ -121,11 +121,12 @@ ae41a4387869d0e1b8880d99509d2e4c  plain  doc/BOOK/INT2PROGINATS/INTPROGINATS-201
 199dbec7ae967fc15cd5dffcace5bd4e  plain  doc/BOOK/INT2PROGINATS/INTPROGINATS-2013-03-24/CHAPTER_VVTINTRO/main.atxt
 1e9c48f4b55fabb6e40f2c7348e1df02  plain  doc/BOOK/INT2PROGINATS/INTPROGINATS-2013-03-24/preface.atxt
 17827ab1cefd54d51ab94a712b8ca760  plain  doc/BOOK/INT2PROGINATS/preface.atxt
-270b26009cc15fd287aec58afa1b9f6b  plain  doc/DISTRIB/ATEXT/atslib_libats.atxt
+b20de8f5a35cca21d67fbb29194c2e18  plain  doc/DISTRIB/ATEXT/atslib_libats.atxt
 8d3ddef6bff98db1b24ee614929c6eba  plain  doc/DISTRIB/ATEXT/atslib_libats_libc.atxt
 e00ff21afa4a9730b21393870d8a6a8e  plain  doc/DISTRIB/ATEXT/atslib_prelude.atxt
 604b4b5b6b21c763d8719563115cfd3c  plain  doc/DISTRIB/ATEXT/ccomp_atslib.atxt
 73e5755671b778c793eea8593a5a44e7  plain  doc/DISTRIB/ATEXT/ccomp_runtime.atxt
+e23fe5a7e5e777a6ec0b661e1b6df9b7  plain  doc/DISTRIB/ATEXT/contrib_afiber.atxt
 b96f9f4fb47617a62204b943876eff9e  plain  doc/DISTRIB/ATEXT/contrib_ats2cpp.atxt
 7f2511dbccf48eb1f2be0676aaa2574d  plain  doc/DISTRIB/ATEXT/contrib_atscc2clj.atxt
 56de118887117d68e2709f231007bd5c  plain  doc/DISTRIB/ATEXT/contrib_atscc2js.atxt
@@ -169,7 +170,7 @@ e12588009ed4828d2e57e4e67882ae1a  plain  doc/DISTRIB/ATEXT/utils_atscc.atxt
 a35734f0c5b1ba7d00c9119fbaa960c8  plain  doc/DISTRIB/ATEXT/utils_emacs.atxt
 ab942f06739e64e880a5f690822e9a71  plain  doc/DISTRIB/ATEXT/utils_libatsopt.atxt
 8933e19964f28e6143706717b228da15  plain  doc/DISTRIB/ATEXT/utils_myatscc.atxt
-9de84901e2ff7a492711163180bb4b49  plain  doc/DISTRIB/Makefile.atxt
+c27dab4b536a48cba3bb192b3f193219  plain  doc/DISTRIB/Makefile.atxt
 e57ab924aa41c29e90711696df443af2  plain  doc/EXAMPLE/ATSLIB/Makefile.atxt
 0d620c3ed649b764270cd866050b1249  plain  doc/EXAMPLE/EFFECTIVATS/PwTP-bool-vs-prop/main.atxt
 5e37c7eb74a1368a1ef0825ae7287332  plain  doc/EXAMPLE/EFFECTIVATS/Readers-and-Writers/main.atxt
