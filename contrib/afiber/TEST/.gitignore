@@ -1,0 +1,6 @@
+# the test binaries have no extension; keep the sources, the Makefile and this file
+*
+!*.*
+!Makefile
+*_?ats.c
+*.out

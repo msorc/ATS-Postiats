@@ -108,7 +108,8 @@ atscntrb_afiberchan_ring_push
   (atstype_ptr r0)
 {
   atscntrb_afiberchan_ring *r = (atscntrb_afiberchan_ring*)r0 ;
-  size_t i = (r->head + r->n) % r->cap ;
+  size_t i = r->head + r->n ;
+  if (i >= r->cap) i -= r->cap ;
   r->n += 1 ;
   return (atstype_ptr)(r->data + i * r->tsz) ;
 } // end of [atscntrb_afiberchan_ring_push]
@@ -123,7 +124,8 @@ atscntrb_afiberchan_ring_pop
 {
   atscntrb_afiberchan_ring *r = (atscntrb_afiberchan_ring*)r0 ;
   size_t i = r->head ;
-  r->head = (r->head + 1) % r->cap ;
+  r->head += 1 ;
+  if (r->head == r->cap) r->head = 0 ;
   r->n -= 1 ;
   return (atstype_ptr)(r->data + i * r->tsz) ;
 } // end of [atscntrb_afiberchan_ring_pop]

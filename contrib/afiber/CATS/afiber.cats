@@ -32,8 +32,11 @@
 ** MS-2026-10:
 ** afiber: stackful cooperative fibers (green threads)
 ** on one OS thread, with no GC. Each fiber owns an mmap'd
-** C stack (with a guard page) and is switched with ucontext.
+** C stack (with a guard page) and is switched by hand on x86-64 (ucontext elsewhere).
 ** The scheduler is one weak global shared by every unit.
+** The stacks of finished fibers are recycled through a free list
+** (ATSCNTRB_AFIBER_STACK_CACHE: 0 = unbounded, n = at most n cached
+** stacks); cached stacks are not returned to the OS.
 ** The head of the exception-frame chain (setjmp/longjmp) is
 ** saved and restored per fiber at every switch.
 */
@@ -48,10 +51,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <time.h>
-#include <ucontext.h>
 #include <sys/mman.h>
+
+/* ****** ****** */
+
+/*
+** MS-2026-10:
+** x86-64: a hand-written register switch (no signal-mask system call);
+** elsewhere, or with -DATSCNTRB_AFIBER_UCONTEXT: ucontext.
+*/
+#if defined(__x86_64__) && !defined(ATSCNTRB_AFIBER_UCONTEXT)
+#define ATSCNTRB_AFIBER_ASM 1
+#else
+#include <ucontext.h>
+#endif
 
 /* ****** ****** */
 
@@ -65,12 +81,17 @@
 
 #ifdef ATSCNTRB_AFIBER_ASAN
 #include <sanitizer/common_interface_defs.h>
+#include <sanitizer/asan_interface.h>
 #endif
 
 /* ****** ****** */
 
 #ifndef ATSCNTRB_AFIBER_STACKSZ
 #define ATSCNTRB_AFIBER_STACKSZ (256*1024)
+#endif
+
+#ifndef ATSCNTRB_AFIBER_STACK_CACHE
+#define ATSCNTRB_AFIBER_STACK_CACHE 0
 #endif
 
 /* ****** ****** */
@@ -89,7 +110,11 @@ enum {
 typedef
 struct atscntrb_afiber_s
 {
+#ifdef ATSCNTRB_AFIBER_ASM
+  void *sp ; // the saved stack pointer while not running
+#else
   ucontext_t ctx ;
+#endif
   void *stack ; // the whole mmap'd region (guard page included); NULL for main
   size_t stacksz ;
   void *stack_lo ; // above the guard page
@@ -120,6 +145,8 @@ struct {
   atscntrb_afiber_q runq ;
   atscntrb_afiber_t *sleepq ; // singly linked, ascending deadline
   atscntrb_afiber_t *reap ; // a dead detached fiber whose stack is no longer in use
+  void *stack_cache ; // free list of default-size stacks, linked through the word at stack_lo
+  long ncached ;
   long nlive ; // fibers not yet dead, main excluded
   long nextid ;
   int inited ;
@@ -211,18 +238,64 @@ atscntrb_afiber_stacksz_default()
 /* ****** ****** */
 
 ATSinline()
+size_t
+atscntrb_afiber__stack_usable
+  (size_t usable)
+{
+#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
+  return usable ;
+#else
+  size_t page = (size_t)sysconf(_SC_PAGESIZE) ;
+  usable = (usable + page - 1) / page * page ;
+  if (usable < 2*page) usable = 2*page ;
+  return usable ;
+#endif
+} // end of [atscntrb_afiber__stack_usable]
+
+// the size of the whole region for a usable size (guard page included)
+ATSinline()
+size_t
+atscntrb_afiber__stack_total
+  (size_t usable)
+{
+#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
+  return usable ;
+#else
+  return (size_t)sysconf(_SC_PAGESIZE) + usable ;
+#endif
+} // end of [atscntrb_afiber__stack_total]
+
+ATSinline()
 void
 atscntrb_afiber__stack_alloc
   (atscntrb_afiber_t *f, size_t usable)
 {
+  atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
+  usable = atscntrb_afiber__stack_usable(usable) ;
+  if (s->stack_cache
+      && usable == atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ)) {
+    void *lo = s->stack_cache ;
+    s->stack_cache = *(void**)lo ;
+    s->ncached -= 1 ;
+    f->stack_lo = lo ;
+    f->stack_usable = usable ;
+#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
+    f->stack = lo ;
+#else
+    f->stack = (char*)lo - (size_t)sysconf(_SC_PAGESIZE) ;
+#endif
+    f->stacksz = atscntrb_afiber__stack_total(usable) ;
+    return ;
+  }
 #ifdef ATSCNTRB_AFIBER_STACK_MALLOC
   f->stack = ATS_MALLOC(usable) ;
   f->stacksz = usable ;
   f->stack_lo = f->stack ;
   f->stack_usable = usable ;
 #else
+  {
   size_t page = (size_t)sysconf(_SC_PAGESIZE) ;
-  size_t total ;
+  size_t total = page + usable ;
   int flags = MAP_PRIVATE | MAP_ANONYMOUS ;
   void *base ;
 #ifdef MAP_NORESERVE
@@ -231,9 +304,6 @@ atscntrb_afiber__stack_alloc
 #ifdef MAP_STACK
   flags |= MAP_STACK ;
 #endif
-  usable = (usable + page - 1) / page * page ;
-  if (usable < 2*page) usable = 2*page ;
-  total = page + usable ;
   base = mmap((void*)0, total, PROT_READ|PROT_WRITE, flags, -1, 0) ;
   if (base == MAP_FAILED) atscntrb_afiber__fatal("mmap for a fiber stack failed") ;
   if (mprotect(base, page, PROT_NONE) != 0) atscntrb_afiber__fatal("mprotect for a guard page failed") ;
@@ -241,6 +311,7 @@ atscntrb_afiber__stack_alloc
   f->stacksz = total ;
   f->stack_lo = (char*)base + page ;
   f->stack_usable = usable ;
+  }
 #endif
 } // end of [atscntrb_afiber__stack_alloc]
 
@@ -250,11 +321,23 @@ atscntrb_afiber__free
   (atscntrb_afiber_t *f)
 {
   if (f->stack) {
-#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
-    ATS_MFREE(f->stack) ;
-#else
-    munmap(f->stack, f->stacksz) ;
+    atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
+    if (f->stacksz == atscntrb_afiber__stack_total
+          (atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ))
+        && (ATSCNTRB_AFIBER_STACK_CACHE == 0 || s->ncached < (long)(ATSCNTRB_AFIBER_STACK_CACHE))) {
+#ifdef ATSCNTRB_AFIBER_ASAN
+      __asan_unpoison_memory_region(f->stack_lo, f->stack_usable) ;
 #endif
+      *(void**)f->stack_lo = s->stack_cache ;
+      s->stack_cache = f->stack_lo ;
+      s->ncached += 1 ;
+    } else {
+#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
+      ATS_MFREE(f->stack) ;
+#else
+      munmap(f->stack, f->stacksz) ;
+#endif
+    }
   }
   ATS_MFREE(f) ;
 } // end of [atscntrb_afiber__free]
@@ -275,6 +358,43 @@ atscntrb_afiber__resumed()
 #endif
   if (s->reap) { atscntrb_afiber__free(s->reap) ; s->reap = (atscntrb_afiber_t*)0 ; }
 } // end of [atscntrb_afiber__resumed]
+
+#ifdef ATSCNTRB_AFIBER_ASM
+/*
+** saves the callee-saved registers and the fp control words on the
+** current stack, stores rsp in *save_sp, loads new_sp and undoes it
+*/
+static
+__attribute__((naked, noinline, used))
+void
+atscntrb_afiber__swap
+  (void **save_sp, void *new_sp)
+{
+  __asm__ volatile (
+    "pushq %rbp\n\t"
+    "pushq %rbx\n\t"
+    "pushq %r12\n\t"
+    "pushq %r13\n\t"
+    "pushq %r14\n\t"
+    "pushq %r15\n\t"
+    "subq $8, %rsp\n\t"
+    "stmxcsr (%rsp)\n\t"
+    "fnstcw 4(%rsp)\n\t"
+    "movq %rsp, (%rdi)\n\t"
+    "movq %rsi, %rsp\n\t"
+    "ldmxcsr (%rsp)\n\t"
+    "fldcw 4(%rsp)\n\t"
+    "addq $8, %rsp\n\t"
+    "popq %r15\n\t"
+    "popq %r14\n\t"
+    "popq %r13\n\t"
+    "popq %r12\n\t"
+    "popq %rbx\n\t"
+    "popq %rbp\n\t"
+    "ret\n\t"
+  ) ;
+} // end of [atscntrb_afiber__swap]
+#endif // ifdef ATSCNTRB_AFIBER_ASM
 
 ATSinline()
 void
@@ -297,7 +417,11 @@ atscntrb_afiber__switch_to
   __sanitizer_start_switch_fiber
     (from->state == ATSCNTRB_AFIBER_DEAD ? (void**)0 : &(from->asan_fake_stack), next->stack_lo, next->stack_usable) ;
 #endif
+#ifdef ATSCNTRB_AFIBER_ASM
+  atscntrb_afiber__swap(&(from->sp), next->sp) ;
+#else
   if (swapcontext(&(from->ctx), &(next->ctx)) != 0) atscntrb_afiber__fatal("swapcontext failed") ;
+#endif
   atscntrb_afiber__resumed() ;
 } // end of [atscntrb_afiber__switch_to]
 
@@ -382,11 +506,26 @@ atscntrb_afiber__create
   atscntrb_afiber_t *f = ATS_MALLOC(sizeof(atscntrb_afiber_t)) ;
   memset(f, 0, sizeof(atscntrb_afiber_t)) ;
   atscntrb_afiber__stack_alloc(f, stacksz) ;
+#ifdef ATSCNTRB_AFIBER_ASM
+  {
+    uintptr_t top = ((uintptr_t)f->stack_lo + f->stack_usable) & ~(uintptr_t)15 ;
+    uint64_t *p = (uint64_t*)top ;
+    unsigned int mxcsr ; unsigned short fcw ;
+    __asm__ volatile ("stmxcsr %0" : "=m"(mxcsr)) ;
+    __asm__ volatile ("fnstcw %0" : "=m"(fcw)) ;
+    p[-1] = 0 ; // null return address: backtraces end here
+    p[-2] = (uint64_t)(uintptr_t)&atscntrb_afiber__trampoline ;
+    p[-3] = 0 ; p[-4] = 0 ; p[-5] = 0 ; p[-6] = 0 ; p[-7] = 0 ; p[-8] = 0 ; // rbp rbx r12-r15
+    p[-9] = ((uint64_t)fcw << 32) | (uint64_t)mxcsr ; // mxcsr at +0, fcw at +4
+    f->sp = (void*)(top - 72) ;
+  }
+#else
   if (getcontext(&(f->ctx)) != 0) atscntrb_afiber__fatal("getcontext failed") ;
   f->ctx.uc_stack.ss_sp = f->stack_lo ;
   f->ctx.uc_stack.ss_size = f->stack_usable ;
   f->ctx.uc_link = (ucontext_t*)0 ;
   makecontext(&(f->ctx), atscntrb_afiber__trampoline, 0) ;
+#endif
   f->entry = entry ;
   f->env = env ;
   f->detached = detached ;
