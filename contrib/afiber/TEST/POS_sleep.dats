@@ -1,7 +1,7 @@
 #include "share/atspre_staload.hats"
 staload UN = "prelude/SATS/unsafe.sats"
-staload "libats/SATS/afiber.sats"
-staload _ = "libats/DATS/afiber.dats"
+staload "contrib/afiber/SATS/afiber.sats"
+staload _ = "contrib/afiber/DATS/afiber.dats"
 
 var the_log: int = 0
 val the_log_ref = ref_make_viewptr{int}(view@ the_log | addr@ the_log)

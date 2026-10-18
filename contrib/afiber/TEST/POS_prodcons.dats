@@ -1,9 +1,9 @@
-(* HX-2026-10: afiberchan 3 producers, 2 consumers *)
+(* MS-2026-10: afiberchan 3 producers, 2 consumers *)
 #include "share/atspre_staload.hats"
-staload "libats/SATS/afiber.sats"
-staload _ = "libats/DATS/afiber.dats"
-staload "libats/SATS/afiberchan.sats"
-staload _ = "libats/DATS/afiberchan.dats"
+staload "contrib/afiber/SATS/afiber.sats"
+staload _ = "contrib/afiber/DATS/afiber.dats"
+staload "contrib/afiber/SATS/afiberchan.sats"
+staload _ = "contrib/afiber/DATS/afiberchan.dats"
 
 var the_sum: int = 0
 val the_sum_ref = ref_make_viewptr{int}(view@ the_sum | addr@ the_sum)

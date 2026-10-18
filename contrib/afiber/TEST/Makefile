@@ -1,5 +1,5 @@
 #
-# HX-2026-10: afiber tests
+# MS-2026-10: afiber tests
 # POS_*.dats must compile and run; NEG_consume_*.dats must be rejected
 # with "needs to be consumed", NEG_uaf_*.dats with "is no longer available".
 # To add a test: append it to POSTESTS (channel tests will go there).

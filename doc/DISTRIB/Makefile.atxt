@@ -104,6 +104,7 @@ all_script::
 
 ######
 #make_entry("contrib_atscntrb")
+#make_entry("contrib_afiber")
 #
 ######
 
@@ -193,6 +194,7 @@ atspackaging:: srcget_ccomp_runtime
 #
 atspackaging:: srcget_atslib
 atspackaging:: srcget_contrib_atscntrb
+atspackaging:: srcget_contrib_afiber
 #
 atspackaging:: srcget_utils_emacs
 atspackaging:: srcget_utils_atscc
@@ -292,6 +294,7 @@ srcget_atslib:: srcget_atslib_libats_libc
 srcget_atslib_libats_libc:: SCRIPT/atslib_libats_libc.bash ; bash $<
 #
 srcget_contrib_atscntrb:: SCRIPT/contrib_atscntrb.bash ; bash $<
+srcget_contrib_afiber:: SCRIPT/contrib_afiber.bash ; bash $<
 #
 ######
 

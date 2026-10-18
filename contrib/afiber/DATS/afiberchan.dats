@@ -1,34 +1,35 @@
-(***********************************************************************)
+(* ******************************************************************* *)
 (*                                                                     *)
-(*                         Applied Type System                         *)
+(*                         ATS/contrib/afiber                          *)
 (*                                                                     *)
-(***********************************************************************)
+(* ******************************************************************* *)
 
 (*
-** ATS/Postiats - Unleashing the Potential of Types!
-** Copyright (C) 2011-2014 Hongwei Xi, ATS Trustful Software, Inc.
-** All rights reserved
+** Copyright (C) 2026 Mikhail Sorochan
 **
-** ATS is free software;  you can  redistribute it and/or modify it under
-** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
-** Free Software Foundation; either version 3, or (at  your  option)  any
-** later version.
-** 
-** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
-** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
-** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
-** for more details.
-** 
-** You  should  have  received  a  copy of the GNU General Public License
-** along  with  ATS;  see the  file COPYING.  If not, please write to the
-** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
-** 02110-1301, USA.
+** Permission is hereby granted, free of charge, to any person obtaining a
+** copy of this software and associated documentation files (the "Software"),
+** to deal in the Software without restriction, including without limitation
+** the rights to use, copy, modify, merge, publish, distribute, sublicense,
+** and/or sell copies of the Software, and to permit persons to whom the
+** Software is furnished to do so, subject to the following stated conditions:
+**
+** The above copyright notice and this permission notice shall be included in
+** all copies or substantial portions of the Software.
+**
+** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+** OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+** FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+** THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+** LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+** FROM OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+** IN THE SOFTWARE.
 *)
 
 
 (* ****** ****** *)
 //
-// HX-2026-10:
+// MS-2026-10:
 // afiberchan: bounded linear channels between fibers
 //
 (* ****** ****** *)
@@ -38,26 +39,26 @@ UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 
-staload "libats/SATS/afiber.sats"
-staload "libats/SATS/afiberchan.sats"
+staload "contrib/afiber/SATS/afiber.sats"
+staload "contrib/afiber/SATS/afiberchan.sats"
 
 (* ****** ****** *)
 //
-// the ring buffer (libats/CATS/afiberchan.cats)
+// the ring buffer (contrib/afiber/CATS/afiberchan.cats)
 //
 extern
 fun ring_make
-  (cap: size_t, tsz: size_t): ptr = "mac#atslib_afiberchan_ring_make"
+  (cap: size_t, tsz: size_t): ptr = "mac#atscntrb_afiberchan_ring_make"
 extern
-fun ring_free (r: ptr): void = "mac#atslib_afiberchan_ring_free"
+fun ring_free (r: ptr): void = "mac#atscntrb_afiberchan_ring_free"
 extern
-fun ring_size (r: ptr): size_t = "mac#atslib_afiberchan_ring_size"
+fun ring_size (r: ptr): size_t = "mac#atscntrb_afiberchan_ring_size"
 extern
-fun ring_is_full (r: ptr): bool = "mac#atslib_afiberchan_ring_is_full"
+fun ring_is_full (r: ptr): bool = "mac#atscntrb_afiberchan_ring_is_full"
 extern
-fun ring_push (r: ptr): ptr = "mac#atslib_afiberchan_ring_push"
+fun ring_push (r: ptr): ptr = "mac#atscntrb_afiberchan_ring_push"
 extern
-fun ring_pop (r: ptr): ptr = "mac#atslib_afiberchan_ring_pop"
+fun ring_pop (r: ptr): ptr = "mac#atscntrb_afiberchan_ring_pop"
 //
 (* ****** ****** *)
 //
@@ -265,7 +266,7 @@ case+ opt of
 | ~Some_vt(x0) => let
     prval () = $UN.cast2void(x0)
     val () =
-    fprintln! (stderr_ref, "libats/afiberchan: [chan_send]: the channel is closed.")
+    fprintln! (stderr_ref, "afiberchan: [chan_send]: the channel is closed.")
   in
     assertloc(false)
   end // end of [Some_vt]
