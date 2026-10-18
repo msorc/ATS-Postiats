@@ -11,7 +11,8 @@
 # CFLAGS_EXTRA is appended to the patscc flags of [all] and [leakcheck]:
 #   make regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_UCONTEXT
 # [regress_variants] runs the suite with the fallback builds (ucontext
-# switch, malloc'd stacks, a bounded stack cache).
+# switch, malloc'd stacks, a bounded stack cache, the one-worker mode
+# -DATSCNTRB_AFIBER_SINGLE without the M:N tests, the swapped head).
 #
 ######
 
@@ -71,6 +72,7 @@ $(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_STACK_MALLOC && \
 $(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_STACK_CACHE=8 && \
 $(MAKE) cleanall regress MNFLAGS= && \
 $(MAKE) cleanall regress MNFLAGS="-pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_ -DATSCNTRB_AFIBER_UCONTEXT" && \
+$(MAKE) cleanall regress MNFLAGS= CFLAGS_EXTRA=-DATSCNTRB_AFIBER_SINGLE && \
 $(MAKE) cleanall
 
 ######

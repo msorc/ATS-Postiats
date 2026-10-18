@@ -119,6 +119,8 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 ** record (this file defines the getter); then fibers can migrate.
 ** ATSCNTRB_AFIBER_SWAPHEAD: the runtime's global head is swapped at
 ** every switch (one worker only).
+** ATSCNTRB_AFIBER_SINGLE (given with -D): one worker for good, the M:N
+** branches are compiled out; afiber_workers_start(n > 1) is fatal.
 */
 #if defined(_ATS_CCOMP_RUNTIME_TRYWITH_NONE_) && !defined(_ATS_CCOMP_EXCEPTION_NONE_)
 #define ATSCNTRB_AFIBER_MN 1
@@ -128,6 +130,12 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 #endif
 #if !defined(ATSCNTRB_AFIBER_CANMN)
 #define ATSCNTRB_AFIBER_SWAPHEAD 1
+#endif
+
+#ifdef ATSCNTRB_AFIBER_SINGLE
+#define ATSCNTRB_AFIBER_ONEWORKER(s) 1
+#else
+#define ATSCNTRB_AFIBER_ONEWORKER(s) ((s)->nworkers <= 1)
 #endif
 
 #ifndef _ATS_CCOMP_EXCEPTION_NONE_
@@ -368,12 +376,16 @@ atscntrb_afiber_worker_t*
 atscntrb_afiber__cw()
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
+#ifdef ATSCNTRB_AFIBER_SINGLE
+  return &(s->w0) ;
+#else
   if (s->nworkers <= 1) return &(s->w0) ;
   {
     atscntrb_afiber_worker_t *w = atscntrb_afiber__tls_get() ;
     if (!w) atscntrb_afiber__fatal("this thread is not an afiber worker") ;
     return w ;
   }
+#endif
 } // end of [atscntrb_afiber__cw]
 
 /* ****** ****** */
@@ -386,7 +398,11 @@ ATSinline()
 int
 atscntrb_afiber__mt()
 {
+#ifdef ATSCNTRB_AFIBER_SINGLE
+  return 0 ;
+#else
   return atscntrb_afiber__sched.nworkers > 1 ;
+#endif
 } // end of [atscntrb_afiber__mt]
 
 ATSinline()
@@ -682,7 +698,7 @@ atscntrb_afiber__wake
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
   atscntrb_afiber__setstate(f, ATSCNTRB_AFIBER_RUNNABLE) ;
-  if (__builtin_expect(s->nworkers <= 1, 1)) { atscntrb_afiber__q_push(&(s->runq), f) ; return ; }
+  if (__builtin_expect(ATSCNTRB_AFIBER_ONEWORKER(s), 1)) { atscntrb_afiber__q_push(&(s->runq), f) ; return ; }
   atscntrb_afiber__wake_mt(s, f) ;
 } // end of [atscntrb_afiber__wake]
 
@@ -708,7 +724,7 @@ atscntrb_afiber__pick_slow
   (atscntrb_afiber_worker_t *w)
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
-  int mt = (s->nworkers > 1) ;
+  int mt = !ATSCNTRB_AFIBER_ONEWORKER(s) ;
   int kickmain = 0, more = 0 ;
   atscntrb_afiber_t *next ;
   if (mt) atscntrb_afiber__spin_lock(&(s->lock)) ;
@@ -736,7 +752,7 @@ atscntrb_afiber__pick
   (atscntrb_afiber_worker_t *w)
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
-  if (__builtin_expect(s->nworkers <= 1 && !s->sleepq, 1)) // one worker, nobody sleeps
+  if (__builtin_expect(ATSCNTRB_AFIBER_ONEWORKER(s) && !s->sleepq, 1)) // one worker, nobody sleeps
     return atscntrb_afiber__q_pop(&(s->runq)) ;
   return atscntrb_afiber__pick_slow(w) ;
 } // end of [atscntrb_afiber__pick]
@@ -765,7 +781,7 @@ atscntrb_afiber__finish_dead
   atscntrb_afiber__spin_unlock(&(f->lock)) ;
   // [f] may be freed by the joiner from here on
   if (j) atscntrb_afiber__wake(j) ;
-  else if (det) { if (s->nworkers <= 1) w->reap = f ; else atscntrb_afiber__free(f) ; }
+  else if (det) { if (ATSCNTRB_AFIBER_ONEWORKER(s)) w->reap = f ; else atscntrb_afiber__free(f) ; }
   if (left == 0) {
     atscntrb_afiber__spin_lock(&(s->main.lock)) ;
     if (atscntrb_afiber__getstate(&(s->main)) == ATSCNTRB_AFIBER_WAITALL) atscntrb_afiber__wake(&(s->main)) ;
@@ -924,7 +940,7 @@ atscntrb_afiber__schedule()
       }
       atscntrb_afiber__switch_to(w, next) ; return ;
     }
-    if (s->nworkers > 1) { // nothing to run: park on the idle context
+    if (!ATSCNTRB_AFIBER_ONEWORKER(s)) { // nothing to run: park on the idle context
       atscntrb_afiber__switch_to(w, &(w->idle)) ; return ;
     }
     if (s->sleepq) {
@@ -1051,7 +1067,7 @@ atscntrb_afiber__trampoline()
   // the fiber may be on another thread now
   w = atscntrb_afiber__cw() ;
   f = w->current ;
-  if (atscntrb_afiber__sched.nworkers <= 1) {
+  if (ATSCNTRB_AFIBER_ONEWORKER(&atscntrb_afiber__sched)) {
     atscntrb_afiber__setstate(f, ATSCNTRB_AFIBER_DEAD) ;
     atscntrb_afiber__finish_dead(w, f) ;
   } else {
@@ -1105,7 +1121,7 @@ atscntrb_afiber_yield()
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
   atscntrb_afiber_worker_t *w = atscntrb_afiber__cw() ;
-  if (s->nworkers <= 1) { // queue the fiber first: exact FIFO order
+  if (ATSCNTRB_AFIBER_ONEWORKER(s)) { // queue the fiber first: exact FIFO order
     atscntrb_afiber__wake(w->current) ;
     atscntrb_afiber__schedule() ;
   } else {
@@ -1223,7 +1239,7 @@ atscntrb_afiber_sleep_ns
   if (ns == 0) { atscntrb_afiber_yield() ; return ; }
   f->deadline_ns = atscntrb_afiber_clock_ns() + ns ;
   atscntrb_afiber__setstate(f, ATSCNTRB_AFIBER_SLEEPING) ;
-  if (s->nworkers <= 1) {
+  if (ATSCNTRB_AFIBER_ONEWORKER(s)) {
     atscntrb_afiber__sleep_insert(s, f) ;
   } else { // the fiber joins the sleep list once it has switched off its stack
     w->post_kind = ATSCNTRB_AFIBER_POST_SLEEP ;
@@ -1276,6 +1292,9 @@ atscntrb_afiber_workers_start
   pthread_attr_t attr ;
   if (n < 1) atscntrb_afiber__fatal("afiber_workers_start: n < 1") ;
   if (n == 1) return ;
+#ifdef ATSCNTRB_AFIBER_SINGLE
+  atscntrb_afiber__fatal("afiber_workers_start(n > 1): compiled with -DATSCNTRB_AFIBER_SINGLE") ;
+#endif
 #ifndef ATSCNTRB_AFIBER_CANMN
   atscntrb_afiber__fatal("afiber_workers_start(n > 1): compile with -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_ (and -pthread)") ;
 #endif

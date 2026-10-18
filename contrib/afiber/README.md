@@ -48,8 +48,10 @@ fiber); a stack overflow hits the guard page. Default-size stacks are
 recycled through a free list, unbounded unless
 `-DATSCNTRB_AFIBER_STACK_CACHE=n` is given; cached stacks are not returned
 to the OS. All units of a program must use the same `ATSCNTRB_AFIBER_*`
-settings. `make -C TEST regress_variants` runs the tests with the ucontext,
-malloc'd-stack and bounded-cache builds. `BENCH/` has afiber vs Go
+settings. `-DATSCNTRB_AFIBER_SINGLE` is for programs that never start workers:
+it compiles the M:N paths out and restores the pre-M:N one-worker cost
+(`afiber_workers_start(n > 1)` is then fatal). `make -C TEST regress_variants`
+runs the tests with the ucontext, malloc'd-stack, bounded-cache and SINGLE builds. `BENCH/` has afiber vs Go
 benchmarks (`make -C BENCH bench`). If main returns while fibers are
 suspended they are discarded; an uncaught exception in a fiber ends the
 process; a deadlock (every fiber parked) aborts with a message.
