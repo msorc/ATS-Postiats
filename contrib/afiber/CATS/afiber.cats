@@ -66,6 +66,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -141,6 +142,9 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 #define ATSCNTRB_AFIBER_STACKSZ (256*1024)
 #endif
 
+// MS-2026-10: the size of a cache line, for the layout of the scheduler and the workers
+#define ATSCNTRB_AFIBER_LINE 64
+
 #ifndef ATSCNTRB_AFIBER_STACK_CACHE
 #define ATSCNTRB_AFIBER_STACK_CACHE 0
 #endif
@@ -204,41 +208,67 @@ struct {
   atscntrb_afiber_t *tail ;
 } atscntrb_afiber_q ; // a FIFO; also the object behind [afiber_waitq]
 
+/*
+** MS-2026-10: the layout is by cache lines. Each group below is an
+** anonymous struct aligned (and so padded) to a line: no two groups
+** share a line, and the workers (an array) never share one either.
+*/
 typedef
 struct atscntrb_afiber_worker_s
 {
-  int id ; // 0: the main thread
-  atscntrb_afiber_t *current ; // the fiber (or the idle context) running on this thread
-  atscntrb_afiber_t *prev ; // for the ASan [finish] call after a switch
-  atscntrb_afiber_t idle ; // the idle context (workers > 1)
-  int post_kind ;
-  void *post_arg ;
-  atscntrb_afiber_t *reap ; // one worker: a dead detached fiber whose stack is no longer in use
-  void *stack_cache ; // free list of default-size stacks, linked through the word at stack_lo
-  long ncached ;
-  pthread_t thr ;
-  pthread_mutex_t mu ; // the idle wait of this worker
-  pthread_cond_t cv ;
-  int waiting ; // 1 while the worker sleeps (or is about to) in the idle wait
-} atscntrb_afiber_worker_t ;
+  struct { // written by the owning thread on every switch
+    int id ; // 0: the main thread
+    atscntrb_afiber_t *current ; // the fiber (or the idle context) running on this thread
+    atscntrb_afiber_t *prev ; // for the ASan [finish] call after a switch
+    int post_kind ;
+    void *post_arg ;
+    atscntrb_afiber_t *reap ; // one worker: a dead detached fiber whose stack is no longer in use
+    void *stack_cache ; // free list of default-size stacks, linked through the word at stack_lo
+    long ncached ;
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  struct { // read by every kick, written by the idling worker
+    int waiting ; // 1 while the worker sleeps (or is about to) in the idle wait
+    pthread_mutex_t mu ; // the idle wait of this worker
+    pthread_cond_t cv ;
+    pthread_t thr ;
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  atscntrb_afiber_t idle __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ; // the idle context (workers > 1), cold
+} __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) atscntrb_afiber_worker_t ;
 
 typedef
 struct {
-  atscntrb_afiber_t main ; // the main thread's own context, id 0
+  struct { // the sched lock and what it protects
+    int lock ; // the sched lock: runq, sleepq, mainslot
+    atscntrb_afiber_q runq ;
+    atscntrb_afiber_t *sleepq ; // singly linked, ascending deadline
+    atscntrb_afiber_t *mainslot ; // main, made runnable, for worker 0 (workers > 1)
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  struct { // the wake-ups
+    int nidle ; // workers in the idle wait
+    unsigned rr ; // round robin for the wake-ups
+    int stop ;
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  struct { // bumped on every spawn and every death
+    long nlive ; // fibers not yet dead, main excluded
+    long nextid ;
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  struct { // read-mostly: written only at start and stop
+    int nworkers ;
+    atscntrb_afiber_worker_t *wk ; // workers 1..nworkers-1, when started (line-aligned)
+    int inited ;
+    void *wk_raw ; // the block [wk] was rounded up from (cold)
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  atscntrb_afiber_t main __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ; // the main thread's own context, id 0
   atscntrb_afiber_worker_t w0 ; // worker 0 (the main thread)
-  atscntrb_afiber_worker_t *wk ; // workers 1..nworkers-1, when started
-  int nworkers ;
-  int lock ; // the sched lock: runq, sleepq, mainslot
-  atscntrb_afiber_q runq ;
-  atscntrb_afiber_t *sleepq ; // singly linked, ascending deadline
-  atscntrb_afiber_t *mainslot ; // main, made runnable, for worker 0 (workers > 1)
-  int nidle ; // workers in the idle wait
-  int stop ;
-  unsigned rr ; // round robin for the wake-ups
-  long nlive ; // fibers not yet dead, main excluded
-  long nextid ;
-  int inited ;
 } atscntrb_afiber_sched_t ;
+
+#if __STDC_VERSION__ >= 201112L
+_Static_assert(offsetof(atscntrb_afiber_sched_t, lock) % ATSCNTRB_AFIBER_LINE == 0, "afiber: sched.lock is not line-aligned") ;
+_Static_assert(offsetof(atscntrb_afiber_sched_t, nidle) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sched.nidle shares lock's line") ;
+_Static_assert(offsetof(atscntrb_afiber_sched_t, nlive) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sched.nlive shares lock's line") ;
+_Static_assert(offsetof(atscntrb_afiber_sched_t, nworkers) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sched.nworkers shares lock's line") ;
+_Static_assert(sizeof(atscntrb_afiber_worker_t) % ATSCNTRB_AFIBER_LINE == 0, "afiber: worker size is not a multiple of a line") ;
+#endif
 
 /* ****** ****** */
 
@@ -1252,7 +1282,9 @@ atscntrb_afiber_workers_start
   if (s->nworkers > 1) atscntrb_afiber__fatal("afiber_workers_start: the workers are already started") ;
   if (atscntrb_afiber__tls_get() != &(s->w0) || s->w0.current != &(s->main))
     atscntrb_afiber__fatal("afiber_workers_start: main only") ;
-  s->wk = ATS_MALLOC((size_t)(n-1) * sizeof(atscntrb_afiber_worker_t)) ;
+  // MS-2026-10: over-allocate and round up: the workers sit on their own lines whatever ATS_MALLOC is
+  s->wk_raw = ATS_MALLOC((size_t)(n-1) * sizeof(atscntrb_afiber_worker_t) + ATSCNTRB_AFIBER_LINE) ;
+  s->wk = (atscntrb_afiber_worker_t*)(((uintptr_t)s->wk_raw + (ATSCNTRB_AFIBER_LINE-1)) & ~(uintptr_t)(ATSCNTRB_AFIBER_LINE-1)) ;
   memset(s->wk, 0, (size_t)(n-1) * sizeof(atscntrb_afiber_worker_t)) ;
   atscntrb_afiber__worker_init(&(s->w0), 0) ;
   // the idle context of worker 0: a small stack, entered by a switch
@@ -1332,7 +1364,7 @@ atscntrb_afiber_workers_stop()
   __tsan_destroy_fiber(s->w0.idle.tsan_fiber) ;
 #endif
   memset(&(s->w0.idle), 0, sizeof(s->w0.idle)) ;
-  ATS_MFREE(s->wk) ; s->wk = (atscntrb_afiber_worker_t*)0 ;
+  ATS_MFREE(s->wk_raw) ; s->wk_raw = (void*)0 ; s->wk = (atscntrb_afiber_worker_t*)0 ;
   s->mainslot = (atscntrb_afiber_t*)0 ;
   s->nidle = 0 ; s->stop = 0 ;
   s->nworkers = 1 ;
