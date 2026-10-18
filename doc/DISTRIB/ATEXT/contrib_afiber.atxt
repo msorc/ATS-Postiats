@@ -152,6 +152,7 @@ packfilesynop(x) = atext_nil()
 #packfilename_r("SATS")
 #packfilename_r("DATS")
 #packfilename_r("TEST")
+#packfilename_r("BENCH")
 
 (* ****** ****** *)
 
