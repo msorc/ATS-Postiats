@@ -107,6 +107,11 @@ The ATSLIB/libats library\
 
 (* ****** ****** *)
 
+#packfilename("CATS/afiber.cats")
+#packfilename("CATS/afiberchan.cats")
+
+(* ****** ****** *)
+
 #packfilename("CATS/hashfun.cats")
 
 (* ****** ****** *)
@@ -395,6 +400,16 @@ The ATSLIB/libats library\
 #packfilename("SATS/athread.sats")
 #packfilename("DATS/athread.dats")
 #packfilename("DATS/athread_posix.dats")
+
+(* ****** ****** *)
+
+(*
+** Stackful cooperative fibers (green threads)
+*)
+#packfilename("SATS/afiber.sats")
+#packfilename("DATS/afiber.dats")
+#packfilename("SATS/afiberchan.sats")
+#packfilename("DATS/afiberchan.dats")
 
 (* ****** ****** *)
 

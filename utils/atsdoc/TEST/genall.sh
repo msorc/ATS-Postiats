@@ -25,7 +25,8 @@
 # libcairo TUTORIAL and doc/EXAMPLE/EFFECTIVATS/PwTP-bool-vs-prop excepted: ATS1 could not run them
 # either, so their sums are those of the new output, see src/PORTING.md; the 21
 # Makefile.atxt of the DOCUGEN, CODEGEN and DISTRIB directories excepted: their text
-# now names patscc, see src/PORTING.md "atsdoc corpus adaptation").
+# now names patscc, see src/PORTING.md "atsdoc corpus adaptation"; doc/DISTRIB/ATEXT/
+# atslib_libats.atxt excepted too: it packs the afiber files added in 2026-10).
 #
 # The runs happen in the directories of the templates: the programs they leave (*_atxt.*) are
 # ignored by git (`sh genall.sh clean`), but a few tracked, generated programs (the *_atxt.dats of
