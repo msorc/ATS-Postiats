@@ -204,7 +204,8 @@ fun afiber_waitq_wake_all
 //
 (* ****** ****** *)
 //
-// a parking mutex (a fiber that waits lets its worker run others)
+// a parking mutex (a fiber that waits lets its worker run others);
+// it spins briefly, then parks, and it is not FIFO under contention
 //
 absvtype
 afiber_mutex_vtype = ptr

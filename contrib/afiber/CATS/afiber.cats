@@ -1509,11 +1509,24 @@ atscntrb_afiber_waitq_wake_all
 
 /*
 ** a parking mutex between fibers
+**
+** MS-2026-10:
+** [locked] is the mutex itself (the fast path is one atomic exchange);
+** [lock] only guards [q] and [nwait]. A fiber that finds the mutex taken
+** spins briefly, then parks on [q]. No wake-up is lost: a waiter does
+** exchange-sees-1 and then nwait++ (both seq-cst), the unlocker does
+** store-0 and then load-nwait (seq-cst), so at least one of them sees the
+** other: either the waiter's next exchange succeeds, or the unlocker sees
+** nwait > 0. In the latter case the waiter is already in [q] when [lock]
+** is released (the park pushes before the switch), so the unlocker, which
+** takes [lock], finds it. The woken fiber re-tries the exchange and may
+** lose to a barging fiber: the mutex is not FIFO under contention.
 */
 typedef
 struct {
-  int lock ;
-  int locked ;
+  int lock ;    // guards q and nwait
+  int locked ;  // atomic 0/1: the fast path
+  int nwait ;   // fibers parked (or about to park) on q; written under [lock], read atomically
   atscntrb_afiber_q q ;
 } atscntrb_afiber_mutex_t ;
 
@@ -1532,7 +1545,7 @@ atscntrb_afiber_mutex_free
   (atstype_ptr m0)
 {
   atscntrb_afiber_mutex_t *m = (atscntrb_afiber_mutex_t*)m0 ;
-  if (m->locked || m->q.head) atscntrb_afiber__fatal("afiber_mutex_free: the mutex is in use") ;
+  if (m->locked || m->nwait != 0 || m->q.head) atscntrb_afiber__fatal("afiber_mutex_free: the mutex is in use") ;
   ATS_MFREE(m) ;
 } // end of [atscntrb_afiber_mutex_free]
 
@@ -1542,9 +1555,32 @@ atscntrb_afiber_mutex_lock
   (atstype_ptr m0)
 {
   atscntrb_afiber_mutex_t *m = (atscntrb_afiber_mutex_t*)m0 ;
+  if (!atscntrb_afiber__mt()) {
+    if (!m->locked) { m->locked = 1 ; return ; }
+  } else {
+    int i, j ;
+    if (!__atomic_exchange_n(&(m->locked), 1, __ATOMIC_ACQUIRE)) return ;
+    for (i = 0 ; i < 4 ; i += 1) {
+      for (j = 0 ; j < 30 ; j += 1) {
+#if defined(__x86_64__) || defined(__i386__)
+        __asm__ volatile ("pause" ::: "memory") ;
+#endif
+      }
+      if (!__atomic_load_n(&(m->locked), __ATOMIC_RELAXED)
+          && !__atomic_exchange_n(&(m->locked), 1, __ATOMIC_ACQUIRE)) return ;
+    }
+  }
   atscntrb_afiber__spin_lock(&(m->lock)) ;
-  while (m->locked) atscntrb_afiber_waitq_park((atstype_ptr)&(m->q), (atstype_ptr)&(m->lock)) ;
-  m->locked = 1 ;
+  for ( ; ; ) {
+    if (atscntrb_afiber__mt()) {
+      if (!__atomic_exchange_n(&(m->locked), 1, __ATOMIC_SEQ_CST)) break ;
+    } else {
+      if (!m->locked) { m->locked = 1 ; break ; }
+    }
+    __atomic_add_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
+    atscntrb_afiber_waitq_park((atstype_ptr)&(m->q), (atstype_ptr)&(m->lock)) ;
+    __atomic_sub_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
+  }
   atscntrb_afiber__spin_unlock(&(m->lock)) ;
 } // end of [atscntrb_afiber_mutex_lock]
 
@@ -1554,10 +1590,13 @@ atscntrb_afiber_mutex_unlock
   (atstype_ptr m0)
 {
   atscntrb_afiber_mutex_t *m = (atscntrb_afiber_mutex_t*)m0 ;
-  atscntrb_afiber__spin_lock(&(m->lock)) ;
-  m->locked = 0 ;
-  atscntrb_afiber_waitq_wake_one((atstype_ptr)&(m->q)) ;
-  atscntrb_afiber__spin_unlock(&(m->lock)) ;
+  if (!atscntrb_afiber__mt()) m->locked = 0 ;
+  else __atomic_store_n(&(m->locked), 0, __ATOMIC_SEQ_CST) ;
+  if (__atomic_load_n(&(m->nwait), __ATOMIC_SEQ_CST) > 0) {
+    atscntrb_afiber__spin_lock(&(m->lock)) ;
+    atscntrb_afiber_waitq_wake_one((atstype_ptr)&(m->q)) ;
+    atscntrb_afiber__spin_unlock(&(m->lock)) ;
+  }
 } // end of [atscntrb_afiber_mutex_unlock]
 
 /* ****** ****** */
