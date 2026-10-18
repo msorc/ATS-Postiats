@@ -2,8 +2,10 @@
 
 Stackful cooperative green threads for ATS2, with no GC (MIT license).
 
-A fiber owns a C stack (mmap'd, with a guard page) and is switched with
-`ucontext`; all fibers run on one OS thread and are scheduled cooperatively
+A fiber owns a C stack (mmap'd, with a guard page) and is switched by a
+small assembly routine on x86-64 (`ucontext` elsewhere, or with
+`-DATSCNTRB_AFIBER_UCONTEXT`); all fibers run on one OS thread and are
+scheduled cooperatively
 (round-robin at `afiber_yield`, parked by `afiber_join`, `afiber_sleep_*`,
 the wait queues and the channels). Exceptions work inside a fiber: the
 handler chain is saved and restored at every switch. Every function of the
@@ -37,8 +39,14 @@ staload _ = "contrib/afiber/DATS/afiberchan.dats"
 ```
 or `#include "contrib/afiber/mylibies.hats"`. Compile with
 `patscc -D_GNU_SOURCE -DATS_MEMALLOC_LIBC ...` (`_GNU_SOURCE` or
-`_XOPEN_SOURCE=700` for `makecontext`). The default stack is 256 KiB
-(`-DATSCNTRB_AFIBER_STACKSZ=...`, or `afiber_spawn_sz` per fiber); a stack
-overflow hits the guard page. If main returns while fibers are suspended
-they are discarded; an uncaught exception in a fiber ends the process; a
-deadlock (every fiber parked) aborts with a message.
+`_XOPEN_SOURCE=700` for `makecontext` in the ucontext build). The default
+stack is 256 KiB (`-DATSCNTRB_AFIBER_STACKSZ=...`, or `afiber_spawn_sz` per
+fiber); a stack overflow hits the guard page. Default-size stacks are
+recycled through a free list, unbounded unless
+`-DATSCNTRB_AFIBER_STACK_CACHE=n` is given; cached stacks are not returned
+to the OS. All units of a program must use the same `ATSCNTRB_AFIBER_*`
+settings. `make -C TEST regress_variants` runs the tests with the ucontext,
+malloc'd-stack and bounded-cache builds. `BENCH/` has afiber vs Go
+benchmarks (`make -C BENCH bench`). If main returns while fibers are
+suspended they are discarded; an uncaught exception in a fiber ends the
+process; a deadlock (every fiber parked) aborts with a message.

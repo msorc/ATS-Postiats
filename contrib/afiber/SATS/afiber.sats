@@ -42,6 +42,10 @@
 // are discarded: end main with [afiber_run_until_done].
 // A stack overflow hits a guard page (SIGSEGV): pass a
 // larger size to [afiber_spawn_sz] for deep recursion.
+// Default-size stacks are recycled through a free list
+// ([afiber_spawn_sz] with another size is not cached).
+// The same ATSCNTRB_AFIBER_* compile-time settings must be
+// used in every unit of a program.
 //
 (* ****** ****** *)
 

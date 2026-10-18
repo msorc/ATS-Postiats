@@ -189,11 +189,33 @@ channel, one item recovered from `chan_unref`), `POS_trysend`. NEG tests
 
 Everything in the design above is implemented and verified:
 
-- `make -C contrib/afiber/TEST all regress`: 10 POS tests pass, 3 NEG tests
+- `make -C contrib/afiber/TEST all regress`: 11 POS tests pass, 3 NEG tests
   are rejected with the expected messages.
-- `make -C contrib/afiber/TEST leakcheck`: all 10 pass under
-  AddressSanitizer with no leak or error reports (the only output is ASan's
-  standard one-line warning about makecontext).
+- `make -C contrib/afiber/TEST leakcheck`: all 11 pass under
+  AddressSanitizer with no leak or error reports (before the asm switch the
+  only output was ASan's one-line warning about makecontext; on x86-64 it no
+  longer occurs).
+- `make -C contrib/afiber/TEST regress_variants` runs the suite with
+  `-DATSCNTRB_AFIBER_UCONTEXT`, `-DATSCNTRB_AFIBER_STACK_MALLOC` and
+  `-DATSCNTRB_AFIBER_STACK_CACHE=8`, so the fallbacks stay exercised.
+- x86-64 asm switch: a static naked `atscntrb_afiber__swap` saves
+  rbx/rbp/r12-r15/rsp plus MXCSR and the x87 control word (no signal mask,
+  no system call); `__create` builds the initial frame by hand and the
+  trampoline is entered by `ret`. `-DATSCNTRB_AFIBER_UCONTEXT`, or a
+  non-x86-64 target, keeps the ucontext path (untested elsewhere).
+- Stack free list: default-size stacks are recycled instead of
+  `munmap`ped; unbounded by default, `ATSCNTRB_AFIBER_STACK_CACHE=n` bounds
+  it; other sizes (`afiber_spawn_sz`) are not cached. Cached stacks keep
+  their dirty pages, so RSS stays at the high-water mark; under ASan the
+  shadow of a stack is unpoisoned when it is cached.
+- `BENCH/`: afiber vs Go benchmarks (`make -C contrib/afiber/BENCH bench`,
+  the tables and their reading are in `BENCH/README.md`). Against Go with
+  `GOMAXPROCS=1` on 2026-10-18: yield 16 ns vs 68, channel ping-pong 30 ns
+  vs 144, buffered pipe 14 ns vs 35, sieve 2.7x faster; spawn 640 ns vs 290
+  and a one-shot chain of 30000 fibers 6x slower, both the cost of a fresh
+  `mmap`+`mprotect`+2 page faults per stack that the free list cannot
+  cover; 4.2 KB vs 2.7 KB resident per parked fiber. Before the asm switch
+  and the free list: yield 500 ns, ping-pong 530 ns, spawn 14.9 µs.
 - `make -C doc -f Makefile_test testall` passes with the test directory
   included; `make -C src check` is unaffected (no compiler change).
 - A two-unit program (spawn in one `.dats`, yield in another) confirmed
@@ -225,11 +247,14 @@ Everything in the design above is implemented and verified:
 - No fiber-aware I/O: a blocking `read`/`accept` blocks the whole OS
   thread. Needs `poll`/`epoll` bindings, `O_NONBLOCK`, and a readiness
   poller in `schedule()` (the sleep list is the natural place to add it).
-- `swapcontext` costs one `sigprocmask` system call per switch and
-  `ucontext` is deprecated by POSIX (present in glibc and macOS, absent in
-  musl). The switch is isolated in `atscntrb_afiber__switch_to`,
-  `atscntrb_afiber__create` and the trampoline for a later asm or
-  `_setjmp`/`_longjmp` fast path. Only Linux/glibc/x86-64 has been tested.
+- aarch64 asm is a follow-up; other targets use ucontext (deprecated by
+  POSIX, absent in musl). Only Linux/glibc/x86-64 has been tested.
+- Intel CET shadow stacks (`glibc.cpu.x86_shstk`, opt-in) fault on a
+  `ret`-based switch: use the ucontext build there.
+- All units of a program must be built with the same
+  `ATSCNTRB_AFIBER_UCONTEXT` / `STACK_CACHE` / `STACK_MALLOC` settings,
+  because the weak scheduler global embeds the fiber record.
+- Cached stacks are not returned to the OS before exit.
 - No type-level yield information: nothing stops a yield inside a critical
   section. Option D above (one effect bit in `src/`) would provide it.
 - No `afiber_mutex` (a parking one is ten lines on `afiber_waitq`), no
