@@ -19,19 +19,33 @@ func report(name string, n int, t0 time.Time) {
 	fmt.Println(name, n, time.Since(t0).Nanoseconds())
 }
 
+// spawnBatch runs b empty goroutines to completion.
+func spawnBatch(b int) {
+	var wg sync.WaitGroup
+	wg.Add(b)
+	for i := 0; i < b; i++ {
+		go func() { sink++; wg.Done() }()
+	}
+	wg.Wait()
+}
+
+// benchSpawn: steady state, after one untimed warm-up batch of 10000.
 func benchSpawn(n int) {
+	spawnBatch(10000)
 	t0 := time.Now()
 	for k := n; k > 0; {
 		b := min(k, 10000)
-		var wg sync.WaitGroup
-		wg.Add(b)
-		for i := 0; i < b; i++ {
-			go func() { sink++; wg.Done() }()
-		}
-		wg.Wait()
+		spawnBatch(b)
 		k -= b
 	}
 	report("spawn", n, t0)
+}
+
+// benchSpawnCold: exactly one batch of n, no warm-up.
+func benchSpawnCold(n int) {
+	t0 := time.Now()
+	spawnBatch(n)
+	report("spawn_cold", n, t0)
 }
 
 func benchYield(n int) {
@@ -311,6 +325,8 @@ func main() {
 	switch os.Args[1] {
 	case "spawn":
 		benchSpawn(n)
+	case "spawn_cold":
+		benchSpawnCold(n)
 	case "yield":
 		benchYield(n)
 	case "pingpong":

@@ -3,13 +3,14 @@
 #   python3 run.py        one-worker suite: afiber vs Go GOMAXPROCS=1 and default
 #                         (env BEFORE=/path/to/old/binary adds a "before M:N" column;
 #                          bench_ats_1n, built by `make bench_ats_1n`, adds the 1:N-build column)
+#                          bench_ats_single, built by `make bench_ats_single`, adds the SINGLE-build column)
 #   python3 run.py mn     M:N suite: afiber workers N vs Go GOMAXPROCS=N
 import os, statistics, subprocess, sys
 here = os.path.dirname(os.path.abspath(__file__))
 MN = len(sys.argv) > 1 and sys.argv[1] == "mn"
 REPS = int(os.environ.get("REPS", "5" if MN else "7"))
 NCPU = os.cpu_count()
-NS = sorted(set(n for n in (1, 2, 4, 8, NCPU) if n <= NCPU))
+NS = sorted(set(n for n in (1, 2, 4, 8, 16, NCPU) if n <= NCPU))
 def run_mn(cmd, env, name, n, w):
     out = subprocess.run(cmd + [name, str(n)] + ([str(w)] if cmd[0] == "./bench_ats" else []),
                          cwd=here, env={**os.environ, **env}, capture_output=True, text=True,
@@ -47,11 +48,13 @@ if MN:
     for name, n, desc in MB:
         print("| %s | " % name + " | ".join("%.2f" % (res[name, "afiber", w][1] / res[name, "go", w][1]) for w in NS) + " |")
     sys.exit(0)
-B = [("spawn", 200000), ("yield", 500000), ("pingpong", 500000), ("pipe", 5000000),
+B = [("spawn", 200000), ("spawn_cold", 10000), ("yield", 500000), ("pingpong", 500000), ("pipe", 5000000),
      ("fanin", 5000000), ("chain", 30000), ("sieve", 1500), ("mem", 30000)]
 CFG = [("afiber", ["./bench_ats"], {})]
 if os.path.exists(os.path.join(here, "bench_ats_1n")):
     CFG.append(("afiber 1:N build", ["./bench_ats_1n"], {}))
+if os.path.exists(os.path.join(here, "bench_ats_single")):
+    CFG.append(("afiber SINGLE build", ["./bench_ats_single"], {}))
 if os.environ.get("BEFORE"):
     CFG.append(("afiber before M:N", [os.environ["BEFORE"]], {}))
 CFG += [

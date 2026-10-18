@@ -41,11 +41,17 @@ fun report (name: string, n: int, t0: ullint): void =
   println! (name, " ", n, " ", afiber_clock_ns () - t0)
 
 (* ---- spawn: N empty fibers, spawned in batches of 10000 ---- *)
+(* bench_spawn: steady state. One untimed warm-up batch of 10000 first, so the stacks are
+   already on the free list (mmap + mprotect paid) and the timed batches only reuse them.
+   bench_spawn_cold: exactly one batch of n fibers with no warm-up, every fiber pays a fresh
+   stack (mmap + mprotect + page faults). *)
 fun spawn_batch (i: int, b: int): void =
   if i < b then
     (afiber_spawn_detached (llam () => the_sink_ref[] := the_sink_ref[] + 1);
      spawn_batch (i+1, b))
 fun bench_spawn (n: int): void = let
+  val () = spawn_batch (0, 10000)
+  val () = afiber_run_until_done ()
   val t0 = afiber_clock_ns ()
   fun loop (k: int): void =
     if k > 0 then let
@@ -55,6 +61,11 @@ fun bench_spawn (n: int): void = let
     in loop (k - b) end
   val () = loop (n)
 in report ("spawn", n, t0) end
+fun bench_spawn_cold (n: int): void = let
+  val t0 = afiber_clock_ns ()
+  val () = spawn_batch (0, n)
+  val () = afiber_run_until_done ()
+in report ("spawn_cold", n, t0) end
 
 (* ---- yield: 2 fibers, n yields each ---- *)
 fun yielder (n: int): void =
@@ -308,6 +319,7 @@ implement main0 {n} (argc, argv) = let
   val () = if w > 1 then afiber_workers_start (w)
   val () =
   if name = "spawn" then bench_spawn (n)
+  else if name = "spawn_cold" then bench_spawn_cold (n)
   else if name = "yield" then bench_yield (n)
   else if name = "pingpong" then bench_pingpong (n)
   else if name = "pipe" then bench_prod ("pipe", 1, n)

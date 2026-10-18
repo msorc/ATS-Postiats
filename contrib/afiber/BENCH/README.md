@@ -5,6 +5,8 @@ of this suite is in `results.md` and is up to 19% slower on channel ping-pong.)
 
 `bench.dats` (afiber + afiberchan) and `go/bench.go` run the same eight workloads;
 `make bench` builds both and prints the tables (median of 7 runs, `run.py`).
+`spawn` is measured after one untimed warm-up batch (stacks already on the free list); `spawn_cold` is the first
+batch alone (10000 fibers on fresh stacks).
 Channels have the same capacity on both sides (1 for ping-pong/chain/sieve, 128 for pipe/fanin);
 afiber has no unbuffered channel, so Go uses capacity 1 too.
 
@@ -76,7 +78,7 @@ of stacks and a channel ring without division:
 ## M:N benchmarks (afiber workers vs Go GOMAXPROCS)
 
 `make benchmn` builds `bench_ats` with `-pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_` and runs five workloads
-for N = 1, 2, 4, 8 and ncpu, afiber with `afiber_workers_start(N)` and Go with `GOMAXPROCS=N` (median of 5, `REPS=`
+for N = 1, 2, 4, 8, 16 (the physical core count here) and ncpu, afiber with `afiber_workers_start(N)` and Go with `GOMAXPROCS=N` (median of 5, `REPS=`
 to change). One benchmark by hand: `./bench_ats mn_pingpong 1600000 4`, `GOMAXPROCS=4 ./bench_go mn_pingpong 1600000`
 (`NAME TOTAL [WORKERS]`). The workloads are `mn_pingpong` (16 pairs), `mn_pipeline` (source, 8 stages, sink),
 `mn_cpu` (64 fibers of pure compute, yield per 1000 steps), `mn_spawn` (spawn+join batches of 1000) and `mn_mutex`
