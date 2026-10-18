@@ -23,6 +23,8 @@ prelude and of libats can block inside a fiber.
   `chan_tryrecv`, `chan_close`, `chan_unref` (the last owner gets the
   unreceived items back as a `List_vt(T)`). Linear values move through.
 - `TEST/`: `make -C TEST testall` (and `leakcheck` with AddressSanitizer).
+- `doc/PLAN.md`: the options analysis, the design, and the status (what is
+  implemented, departures from the plan, open items).
 
 ## Use
 

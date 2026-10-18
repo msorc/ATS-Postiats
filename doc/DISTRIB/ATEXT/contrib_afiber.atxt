@@ -147,6 +147,7 @@ packfilesynop(x) = atext_nil()
 
 #packfilename("README.md")
 #packfilename("mylibies.hats")
+#packfilename_r("doc")
 #packfilename_r("CATS")
 #packfilename_r("SATS")
 #packfilename_r("DATS")
