@@ -183,7 +183,106 @@ channel, one item recovered from `chan_unref`), `POS_trysend`. NEG tests
 (must be rejected by the type checker): `NEG_consume_unjoined`,
 `NEG_uaf_join_twice`, `NEG_uaf_chan_unref`.
 
+## Phase 3: M:N (option E), design (2026-10-18)
+
+Fibers run on `n` OS threads ("workers"); worker 0 is the program's main
+thread, workers 1..n-1 are pthreads started by `afiber_workers_start(n)`.
+Without that call (or with `n <= 1`) the scheduler behaves as the 1:N one:
+same FIFO order, same deterministic output, same tests. Still a library;
+no change to `src/`.
+
+### Facts that shape it
+
+- The `try` macro (`ATStrywith_try`, `pats_ccomp_exception.h`) caches
+  `framep = my_atsexnframe_getref()` for the whole `try` block. A fiber
+  that yields inside a `try` can resume on another worker, so the head
+  can be neither a process global (two workers run fibers at once) nor a
+  `__thread` variable (the cached pointer would name the old thread's
+  head). It must be a field of the fiber record. The generated `main`
+  unit includes `pats_ccomp_runtime_trywith.c` unless
+  `_ATS_CCOMP_RUNTIME_TRYWITH_NONE_` is defined; with that macro,
+  `afiber.cats` supplies (as weak, identical definitions in every unit)
+  `my_atsexnframe_getref` returning `&(current fiber)->exnframe` and a copy
+  of `atsruntime_raise`. Then the switch no longer swaps the head. Without
+  the macro, the switch swaps the global head as before and
+  `afiber_workers_start(n > 1)` is fatal ("compile with
+  -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_"). Before the scheduler exists the
+  getter initialises it (main thread, main fiber); a thread that is not a
+  worker gets a `__thread` fallback head (it cannot use fiber operations).
+- The compiler may keep the address of a `__thread` variable across a
+  call, and a fiber may come back on another thread. Scheduler code reads
+  its worker only through a `noinline` getter with an
+  `asm volatile("" ::: "memory")` and re-reads it after every switch. User
+  code must not keep `errno` (or other TLS) across a blocking afiber call.
+- A fiber that parks is not saved until the switch has happened: it must
+  not become visible to another worker before that. Every hand-off is a
+  **post-switch action** stored in the worker and run by the context that
+  lands (`__resumed`): release a spinlock (park), make the previous fiber
+  runnable (yield), finish a dead fiber (mark DEAD, wake the joiner or
+  free a detached fiber, decrement `nlive`). The 1:N `reap` slot was the
+  first such action.
+- An idle worker cannot wait on the stack of the fiber it just left
+  (another worker may resume it). Each worker has an **idle context**: the
+  native pthread stack for workers 1..n-1, and for worker 0 a small mmap'd
+  stack created by `afiber_workers_start`. A worker with nothing to run
+  switches to it; the idle loop picks work or waits. In single-worker mode
+  there is no idle context: the scheduler sleeps on the current stack as
+  before.
+- The main fiber is pinned to worker 0 (main-thread-only libraries,
+  `exit` from the main thread). It sits in the shared FIFO like any fiber
+  (so 1-worker order is unchanged); another worker that pops it moves it
+  to worker 0's `main slot` and wakes worker 0; worker 0 looks at its main
+  slot before the queue.
+
+### Shape
+
+- Scheduler (weak global): the main fiber record; the worker array
+  (`nworkers`, worker 0 embedded); the run queue and the sleep list under
+  one spinlock (the "sched lock"); idling through a pthread mutex + condvar
+  with an atomic `nidle` count (a pusher pushes, then reads `nidle`; a
+  worker going idle increments `nidle`, then re-checks the queue; both with
+  seq_cst atomics, so no lost wake-up); `nlive` and `nextid` atomics; a
+  stop flag.
+- Worker: index, `current`, `prev` (ASan), the idle context, the post
+  actions, its pthread, its own stack free list (no lock; a stack can be
+  born on one worker and cached on another).
+- Fiber record: add a spinlock for the join/detach/death hand-off.
+- Idle: with no sleepers and every other worker idle and nothing queued:
+  "deadlock: every fiber is blocked". With sleepers: a timed wait until
+  the earliest deadline (CLOCK_MONOTONIC condvar).
+- Spinlocks: test-and-test-and-set with `__atomic` builtins, `pause`, and
+  `sched_yield()` after a number of spins.
+- `nworkers == 1` keeps the fast path: no condvar, no idle context.
+
+### API changes
+
+- `afiber_workers_start(n: int)`: main only, once, before or after
+  spawning; `n` counts the main thread. `afiber_workers_stop()`: main only,
+  after `afiber_run_until_done`; joins the threads and frees the idle
+  stacks (for leak checkers). `afiber_nworkers()`, `afiber_worker_id()`
+  (0 on the main thread), `afiber_ncpu()`.
+- `afiber_spin` (linear handle) with an unindexed proof view
+  `afiber_locked_v`: `make`, `free`, `lock: (afiber_locked_v | void)`,
+  `unlock (afiber_locked_v | ...)`.
+- Wait queues are protected by a spinlock the caller holds:
+  `afiber_waitq_park (pf: !afiber_locked_v | q, lk)` releases `lk` after
+  the switch and returns with `lk` held again (condvar style);
+  `wake_one`, `wake_all`, `is_empty` take `!afiber_locked_v`.
+- `afiber_mutex` (parking, fiber-level): `make`, `free`, `lock`, `unlock`,
+  built on a spin + a waitq.
+- Channels: a spinlock field in `chan_struct`; every operation runs under
+  it (including `rfcnt` changes).
+- Programs that use workers are compiled with `-pthread
+  -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_` (and `-D_GNU_SOURCE`).
+
+### Not in this phase
+
+Per-worker run queues with work stealing (the global FIFO is the simple
+first step), TSan fiber annotations, fiber-aware I/O.
+
 ## Status (2026-10-18)
+
+The 1:N implementation first; the M:N phase is under "M:N" below.
 
 ### Implemented
 
@@ -224,6 +323,38 @@ Everything in the design above is implemented and verified:
 - Packaging: `doc/DISTRIB/ATEXT/contrib_afiber.atxt` copies README,
   `mylibies.hats`, `doc`, CATS, SATS, DATS and TEST into the distribution.
 
+### M:N (2026-10-18, branch `afiber-mn`)
+
+Implemented as designed in "Phase 3" above:
+
+- `CATS/afiber.cats`: worker records, post-switch actions (unlock, yield,
+  sleep, dead), idle contexts, main slot, idle condvars with the
+  `nidle` protocol, deadlock detection across workers, per-worker stack
+  caches, weak `my_atsexnframe_getref`/`atsruntime_raise` under
+  `_ATS_CCOMP_RUNTIME_TRYWITH_NONE_`, `afiber_spin`, `afiber_mutex`,
+  `afiber_workers_start/stop`, `afiber_nworkers`, `afiber_worker_id`,
+  `afiber_ncpu`. With one worker the hot paths skip the locks (a
+  spinlock is a plain store) and the FIFO order is unchanged.
+- Channels lock a spinlock of their own; wait queues take the caller's
+  lock and its proof `afiber_locked_v`.
+- Tests: `POS_mn_counter`, `POS_mn_chan`, `POS_mn_join`, `POS_mn_exn`,
+  `POS_mn_sleep`, `POS_mn_many`, `POS_mn_main` (4 workers each);
+  `make -C TEST stress` (STRESSN runs each, plain and on one CPU) and
+  `stress16` (16 workers). `regress`, `leakcheck` (ASan) and
+  `regress_variants` (with a no-M:N and a ucontext+M:N run) pass, and
+  `stress` with 100 runs and `stress16` with 50 runs passed.
+- Departures: fiber `state` is a relaxed atomic (TSan found the mixed
+  accesses); small TSan fiber annotations (`__SANITIZE_THREAD__` only); a
+  constructor initialises the scheduler so worker 0 is the main thread;
+  `afiber_workers_stop` is fatal while fibers are alive and returns the
+  scheduler to one worker; M:N is also allowed with
+  `_ATS_CCOMP_EXCEPTION_NONE_` (untested); `POS_mn_many` keeps under
+  5000 live fibers at a time (100000 live stacks exceed
+  `vm.max_map_count`: two mappings per stack).
+- Cost in one-worker mode: yield 16 -> 17 ns, ping-pong 30 -> 35 ns,
+  pipe 14.1 -> 15.4 ns, sieve 43 -> 50 ms (the channel spinlock and the
+  park post action). The M:N benchmarks are in `BENCH/`.
+
 ### Departures from the plan
 
 - Location and license: planned as `libats/afiber*` (GPL header of
@@ -257,15 +388,18 @@ Everything in the design above is implemented and verified:
 - Cached stacks are not returned to the OS before exit.
 - No type-level yield information: nothing stops a yield inside a critical
   section. Option D above (one effect bit in `src/`) would provide it.
-- No `afiber_mutex` (a parking one is ten lines on `afiber_waitq`), no
+- No
   rendezvous (capacity 0) channels, no `select` over several channels, no
   session-typed endpoints, no structured-concurrency scope.
 - Stack overflow is a silent SIGSEGV on the guard page; a `sigaltstack`
   handler with a message is a possible improvement. Fibers cannot be
   cancelled; an uncaught exception in a fiber ends the process.
-- One OS thread only. M:N scheduling (option E) needs atomics (no
-  `stdatomic` binding yet), a per-thread exception-frame head, and a
-  thread-safe global arena.
+- M:N: one global run queue under one spinlock (no per-worker queues,
+  no work stealing); the main fiber waits for worker 0 even when other
+  workers are idle; the global arena and plain `ref`s are not
+  thread-safe; `errno`/TLS must not be kept across a blocking call;
+  ThreadSanitizer cannot follow a `try` that migrates (it keeps
+  `jmp_buf`s per thread), so `POS_mn_exn` does not run under TSan.
 - Without GNU C (`__attribute__((weak))`) the scheduler falls back to one
   instance per compilation unit, which is wrong for programs that spawn in
   one unit and yield in another.

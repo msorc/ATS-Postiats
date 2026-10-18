@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -168,6 +169,136 @@ func benchMem(n int) {
 	fmt.Println("mem", n, time.Since(t0).Nanoseconds(), "rss_kb_per_task", float64(r1-r0)/float64(n))
 }
 
+// ---- M:N workloads (run with GOMAXPROCS=N; same work as the afiber side) ----
+
+func benchMnPingpong(total int) {
+	const P = 16
+	n := total / (2 * P)
+	t0 := time.Now()
+	var wg sync.WaitGroup
+	wg.Add(2 * P)
+	for p := 0; p < P; p++ {
+		c1, c2 := make(chan int, 1), make(chan int, 1)
+		go func() {
+			for k := 0; k < n; k++ {
+				c1 <- k
+				<-c2
+			}
+			wg.Done()
+		}()
+		go func() {
+			for k := 0; k < n; k++ {
+				x := <-c1
+				c2 <- x
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	report("mn_pingpong", 2*n*P, t0)
+}
+
+func benchMnPipeline(n0 int) {
+	const K = 8
+	per := n0 / K
+	n := per * K
+	t0 := time.Now()
+	a, b := make(chan int, 128), make(chan int, 128)
+	var wg sync.WaitGroup
+	wg.Add(K + 1)
+	go func() {
+		for k := n; k > 0; k-- {
+			a <- k
+		}
+		wg.Done()
+	}()
+	for i := 0; i < K; i++ {
+		go func() {
+			for j := 0; j < per; j++ {
+				b <- <-a + 1
+			}
+			wg.Done()
+		}()
+	}
+	s := 0
+	for i := 0; i < n; i++ {
+		s += <-b
+	}
+	sink = s
+	wg.Wait()
+	report("mn_pipeline", n, t0)
+}
+
+var acc atomic.Uint64
+
+func lcg(x uint64) uint64 { return x*6364136223846793005 + 1442695040888963407 }
+
+func benchMnCpu(total int) {
+	const K = 64
+	iters := total / K
+	t0 := time.Now()
+	var wg sync.WaitGroup
+	wg.Add(K)
+	for k := 1; k <= K; k++ {
+		go func(x uint64) {
+			for i := 0; i < iters; i++ {
+				if i%1000 == 999 {
+					runtime.Gosched()
+				}
+				x = lcg(x)
+			}
+			acc.Add(x)
+			wg.Done()
+		}(uint64(k))
+	}
+	wg.Wait()
+	report("mn_cpu", K*iters, t0)
+}
+
+func benchMnSpawn(n int) {
+	var cnt atomic.Int64
+	t0 := time.Now()
+	for k := n; k > 0; {
+		b := min(k, 1000)
+		var wg sync.WaitGroup
+		wg.Add(b)
+		for i := 0; i < b; i++ {
+			go func() { cnt.Add(1); wg.Done() }()
+		}
+		wg.Wait()
+		k -= b
+	}
+	if int(cnt.Load()) != n {
+		panic("mn_spawn")
+	}
+	report("mn_spawn", n, t0)
+}
+
+func benchMnMutex(total int) {
+	const F = 32
+	per := total / F
+	t0 := time.Now()
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	cnt := 0
+	wg.Add(F)
+	for i := 0; i < F; i++ {
+		go func() {
+			for k := 0; k < per; k++ {
+				mu.Lock()
+				cnt++
+				mu.Unlock()
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	if cnt != per*F {
+		panic("mn_mutex")
+	}
+	report("mn_mutex", per*F, t0)
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: bench NAME [N]")
@@ -194,6 +325,16 @@ func main() {
 		benchSieve(n)
 	case "mem":
 		benchMem(n)
+	case "mn_pingpong":
+		benchMnPingpong(n)
+	case "mn_pipeline":
+		benchMnPipeline(n)
+	case "mn_cpu":
+		benchMnCpu(n)
+	case "mn_spawn":
+		benchMnSpawn(n)
+	case "mn_mutex":
+		benchMnMutex(n)
 	default:
 		fmt.Fprintln(os.Stderr, "unknown benchmark")
 		os.Exit(1)
