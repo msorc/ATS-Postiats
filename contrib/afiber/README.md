@@ -72,7 +72,7 @@ Without it `afiber_workers_start (n > 1)` aborts with a message. All
 fibers share one FIFO; the main fiber stays on the main thread. A fiber
 may resume on another OS thread after any call that can block: do not
 keep `errno` or other thread-local state across one. Shared data needs a
-channel, an `afiber_mutex` or an `afiber_spin`; the global arena of
+channel, an `afiber_mutex` (not FIFO under contention: it spins briefly before parking) or an `afiber_spin`; the global arena of
 `libats/arena` is not thread-safe. Tests: `make -C TEST stress`,
 `make -C TEST stress16`. Without `afiber_workers_start` nothing changes:
 one thread, FIFO order, deterministic.

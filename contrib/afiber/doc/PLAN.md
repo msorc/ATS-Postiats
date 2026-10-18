@@ -355,6 +355,29 @@ Implemented as designed in "Phase 3" above:
   pipe 14.1 -> 15.4 ns, sieve 43 -> 50 ms (the channel spinlock and the
   park post action). The M:N benchmarks are in `BENCH/`.
 
+### Step 1 of the speed-up plan (2026-10-18)
+
+Measured diagnosis and tables: `BENCH/results.md` (before: `BENCH/results_step0.md`). Landed on `afiber-mn`:
+
+- 96a839698 scheduler and worker fields on separate cache lines (64-byte aligned groups, static asserts): 6-39% on the
+  lock-bound M:N workloads (ping-pong N=2 249 -> 164 ns), no change at one worker.
+- e5669fc12 mutex fast path (one atomic exchange) and a 4x30 `pause` spin before parking: `mn_mutex` N=4 82 -> 22 ns
+  (Go 79), N=32 2731 -> 545 ns. The mutex is no longer FIFO under contention (a woken fiber retries and may lose to a barger).
+- fbd59b06a `ATSCNTRB_AFIBER_SINGLE`: compiles the M:N paths out; restores the pre-M:N one-worker cost (yield 14.7 ns,
+  ping-pong 29.8, pipe 13.5).
+- bb131d93d, a4f2cf9be BENCH: `spawn` after a warm-up batch (136 ns steady state), `spawn_cold` row (10.4 us), N=16 column,
+  SINGLE column, "-" for a benchmark a `BEFORE=` binary lacks.
+- 7723c22ae, f555d9e7e the mutex lost wake-up and its test. Review found that the first slow path looked at `locked`
+  before it announced itself in `nwait`, so an unlock between the look and the announcement saw no waiter and the waiter
+  parked for good (with two fibers it ends in the "deadlock" fatal; the 32-fiber stress tests did not catch it). The
+  slow path now announces (`nwait++`) before it looks. `POS_mn_mutex2` (two fibers on two workers) is a guard, not a
+  reproducer: it did not reproduce the old bug in 800 runs because the spin hides the window.
+
+Corrected diagnosis: the M:N collapse is not cross-thread wake-ups of idle workers (only 1,429 futex calls for 400,000
+messages) but the one spinlock `s->lock` of the global run queue, taken twice per message per side and bouncing between
+cores (7.8 cycles per instruction at N=4, 75% of the time in `pick_slow` and `wake_mt` spinning on it). The one-worker
+"spawn is 2x slower than Go" was the first batch of fresh stacks averaged into the steady state.
+
 ### Departures from the plan
 
 - Location and license: planned as `libats/afiber*` (GPL header of
@@ -394,8 +417,11 @@ Implemented as designed in "Phase 3" above:
 - Stack overflow is a silent SIGSEGV on the guard page; a `sigaltstack`
   handler with a message is a possible improvement. Fibers cannot be
   cancelled; an uncaught exception in a fiber ends the process.
-- M:N: one global run queue under one spinlock (no per-worker queues,
-  no work stealing); the main fiber waits for worker 0 even when other
+- M:N: one global run queue under one spinlock is the measured bottleneck (profile in `BENCH/README.md`): at N>=2
+  everything that touches the scheduler loses to Go (ping-pong 1.6x at N=2, 65x at N=32). Next steps: step A, per-worker
+  run queues with a `runnext` slot and work stealing (expected: ping-pong at N>=2 near its N=1 cost, `mn_cpu` scaling to the
+  core count), and step D, a stack slab (one syscall per stack instead of two: chain ~11 -> ~6 us, opt-in no-guard mode for
+  ~1 us). The mutex is no longer FIFO under contention. Also open: the main fiber waits for worker 0 even when other
   workers are idle; the global arena and plain `ref`s are not
   thread-safe; `errno`/TLS must not be kept across a blocking call;
   ThreadSanitizer cannot follow a `try` that migrates (it keeps
