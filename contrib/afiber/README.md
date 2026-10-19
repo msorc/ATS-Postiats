@@ -77,8 +77,11 @@ Compile every unit with `-pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_
 -D_GNU_SOURCE`: the macro keeps the generated program from including the
 runtime's exception-frame head (a process global), and afiber supplies
 one per fiber, so a fiber can move between threads inside a `try`.
-Without it `afiber_workers_start (n > 1)` aborts with a message. All
-fibers share one FIFO; the main fiber stays on the main thread. A fiber
+Without it `afiber_workers_start (n > 1)` aborts with a message. Each
+worker has its own run queue (a `runnext` slot and a ring, as in Go's
+scheduler) and idle workers steal half of a busy one's ring; a global
+FIFO takes the overflow and the sleepers. The main fiber stays on the
+main thread. A fiber
 may resume on another OS thread after any call that can block: do not
 keep `errno` or other thread-local state across one. Shared data needs a
 channel, an `afiber_mutex` (not FIFO under contention: it spins briefly before parking) or an `afiber_spin`; the global arena of

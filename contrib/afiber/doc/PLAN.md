@@ -396,6 +396,29 @@ cores (7.8 cycles per instruction at N=4, 75% of the time in `pick_slow` and `wa
 - The tests moved with the package (`contrib/afiber/TEST`) instead of
   `doc/EXAMPLE/AFIBER`.
 
+### M:N step A: per-worker run queues (2026-10-19, branch `afiber-mn`)
+
+The one global FIFO under `s->lock` (taken by every `wake` and every `pick`) is replaced, for N >= 2 workers, by
+Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`); the one-worker paths are untouched.
+
+- Each worker owns a local queue: `runnext` (one fiber, the last one woken: a woken fiber runs on the waker's worker, so a
+  channel ping-pong stays on one core) and a ring of 256 slots (`head` moved by CAS, `tail` written by the owner only).
+  `wake` puts the fiber in `runnext` (the fiber it evicts goes to the ring tail); a yielder goes to the ring tail, after its
+  switch (post action `POST_YIELD` -> `wake_yield`), so it never runs straight back. A full ring moves half of itself to the
+  global FIFO.
+- `pick(w)`: main slot (worker 0), `runq_get`, global FIFO (and the expired sleepers; it takes 1/N of the FIFO into the
+  ring so the lock is not taken per fiber), then one stealing round (half of a victim's ring). A `runnext` is stolen only in
+  the last round of a spinning worker, after 3 us, and if the victim still has nothing else in its ring.
+- Wake-ups: a producer pushes, fences, reads `nidle`; it wakes a worker only if none is already `spinning`
+  (`nspinning`, claimed by CAS 0 -> 1; the woken worker is flagged). A flagged (or newly dry) worker spins up to 4 rounds of
+  `pick`; the last spinner that finds work wakes the next idle worker. A worker that gives up announces itself (`nidle++`),
+  looks again (relaxed scan of the global FIFO, the main slot, the sleep deadline `sleep_dl`, every ring and `runnext`) and
+  only then waits: one of the two sides sees the other, so no wake-up is lost.
+- Main never enters a ring (it is pinned to worker 0 through `mainslot`, under `s->lock`); sleepers stay on `sleepq` under
+  `s->lock`, with the earliest deadline mirrored in `sleep_dl` for lock-free checks.
+- Tests: `POS_mn_steal` (2000 children of one spawner run on at least two workers), `POS_mn_yieldfair` (8 fibers yielding
+  10000 times each all get to run).
+
 ### Gaps and open items
 
 - No fiber-aware I/O: a blocking `read`/`accept` blocks the whole OS
@@ -417,12 +440,12 @@ cores (7.8 cycles per instruction at N=4, 75% of the time in `pick_slow` and `wa
 - Stack overflow is a silent SIGSEGV on the guard page; a `sigaltstack`
   handler with a message is a possible improvement. Fibers cannot be
   cancelled; an uncaught exception in a fiber ends the process.
-- M:N: one global run queue under one spinlock is the measured bottleneck (profile in `BENCH/README.md`): at N>=2
-  everything that touches the scheduler loses to Go (ping-pong 1.6x at N=2, 65x at N=32). Next steps: step A, per-worker
-  run queues with a `runnext` slot and work stealing (expected: ping-pong at N>=2 near its N=1 cost, `mn_cpu` scaling to the
-  core count), and step D is done: a stack slab (`ATSCNTRB_AFIBER_STACK_SLAB`, one syscall per fresh stack, opt-in
-  `ATSCNTRB_AFIBER_NOGUARD` for none), the page size cached, the fiber record in the top of its own stack (chain
-  ~11 -> ~7 us, ~3 us without guard; steady spawn 138 -> ~88 ns). The mutex is no longer FIFO under contention. Also open: the main fiber waits for worker 0 even when other
+- M:N: the one global run queue under one spinlock was the measured bottleneck (profile in `BENCH/README.md`): step A
+  (per-worker run queues with a `runnext` slot and work stealing, above) removes it from the common path; the global FIFO
+  remains for ring overflow, sleepers and main. Step D is done too: a stack slab (`ATSCNTRB_AFIBER_STACK_SLAB`, one syscall
+  per fresh stack, opt-in `ATSCNTRB_AFIBER_NOGUARD` for none), the page size cached, the fiber record in the top of its own
+  stack (chain ~11 -> ~7 us, ~3 us without guard; steady spawn 138 -> ~88 ns). The measurements of both are in
+  `BENCH/results.md`. The mutex is no longer FIFO under contention. Also open: the main fiber waits for worker 0 even when other
   workers are idle; the global arena and plain `ref`s are not
   thread-safe; `errno`/TLS must not be kept across a blocking call;
   ThreadSanitizer cannot follow a `try` that migrates (it keeps

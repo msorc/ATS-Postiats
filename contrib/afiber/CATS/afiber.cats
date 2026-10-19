@@ -153,6 +153,9 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 // MS-2026-10: the size of a cache line, for the layout of the scheduler and the workers
 #define ATSCNTRB_AFIBER_LINE 64
 
+// MS-2026-10: the slots of the local run queue of a worker (a power of two)
+#define ATSCNTRB_AFIBER_RINGSZ 256
+
 #ifndef ATSCNTRB_AFIBER_STACK_CACHE
 #define ATSCNTRB_AFIBER_STACK_CACHE 0
 #endif
@@ -247,6 +250,14 @@ struct atscntrb_afiber_worker_s
     void *stack_cache ; // free list of default-size stacks (address of the lowest usable byte), linked through the last word of the region
     long ncached ;
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  struct { // the local run queue: [tail] is written by the owner only, [head] by thieves (CAS) and the owner
+    atscntrb_afiber_t *runnext ; // the fiber to run next (atomic; a thief may take it)
+    unsigned head ;              // atomic
+    unsigned tail ;              // atomic store by the owner, atomic load by thieves
+    int spinning ;               // 1 while this worker spins looking for work (set by the kicker or itself)
+    unsigned rnd ;               // xorshift state: where the next stealing round starts
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  atscntrb_afiber_t *ring[ATSCNTRB_AFIBER_RINGSZ] __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ; // the slots, accessed with relaxed atomics
   struct { // read by every kick, written by the idling worker
     int waiting ; // 1 while the worker sleeps (or is about to) in the idle wait
     pthread_mutex_t mu ; // the idle wait of this worker
@@ -263,15 +274,18 @@ struct atscntrb_afiber_worker_s
 typedef
 struct {
   struct { // the sched lock and what it protects
-    int lock ; // the sched lock: runq, sleepq, mainslot
-    atscntrb_afiber_q runq ;
+    int lock ; // the sched lock: runq, runqn, sleepq, mainslot, sleep_dl
+    atscntrb_afiber_q runq ; // workers > 1: the overflow of the local run queues, expired sleepers
     atscntrb_afiber_t *sleepq ; // singly linked, ascending deadline
     atscntrb_afiber_t *mainslot ; // main, made runnable, for worker 0 (workers > 1)
+    unsigned long long sleep_dl ; // workers > 1: the earliest sleep deadline, ~0 if nobody sleeps (stored under the lock, read atomically)
+    long runqn ; // workers > 1: the length of runq
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
   struct { // the wake-ups
     int nidle ; // workers in the idle wait
     unsigned rr ; // round robin for the wake-ups
     int stop ;
+    int nspinning ; // workers looking for work (spinning); at most one is woken at a time
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
   struct { // bumped on every spawn and every death
     long nlive ; // fibers not yet dead, main excluded
@@ -292,6 +306,13 @@ _Static_assert(offsetof(atscntrb_afiber_sched_t, lock) % ATSCNTRB_AFIBER_LINE ==
 _Static_assert(offsetof(atscntrb_afiber_sched_t, nidle) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sched.nidle shares lock's line") ;
 _Static_assert(offsetof(atscntrb_afiber_sched_t, nlive) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sched.nlive shares lock's line") ;
 _Static_assert(offsetof(atscntrb_afiber_sched_t, nworkers) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sched.nworkers shares lock's line") ;
+_Static_assert(offsetof(atscntrb_afiber_worker_t, runnext) == ATSCNTRB_AFIBER_LINE, "afiber: the run queue shares a line with the first worker group") ;
+_Static_assert(offsetof(atscntrb_afiber_worker_t, ring) / ATSCNTRB_AFIBER_LINE != offsetof(atscntrb_afiber_worker_t, runnext) / ATSCNTRB_AFIBER_LINE, "afiber: ring shares runnext's line") ;
+_Static_assert(offsetof(atscntrb_afiber_worker_t, ring) % ATSCNTRB_AFIBER_LINE == 0, "afiber: ring is not line-aligned") ;
+_Static_assert((ATSCNTRB_AFIBER_RINGSZ & (ATSCNTRB_AFIBER_RINGSZ-1)) == 0, "afiber: RINGSZ is not a power of two") ;
+_Static_assert(offsetof(atscntrb_afiber_sched_t, sleep_dl) / ATSCNTRB_AFIBER_LINE == offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: sleep_dl is not on the lock's line") ;
+_Static_assert(offsetof(atscntrb_afiber_sched_t, runqn) / ATSCNTRB_AFIBER_LINE == offsetof(atscntrb_afiber_sched_t, lock) / ATSCNTRB_AFIBER_LINE, "afiber: runqn is not on the lock's line") ;
+_Static_assert(offsetof(atscntrb_afiber_sched_t, nspinning) / ATSCNTRB_AFIBER_LINE == offsetof(atscntrb_afiber_sched_t, nidle) / ATSCNTRB_AFIBER_LINE, "afiber: nspinning is not on nidle's line") ;
 _Static_assert(sizeof(atscntrb_afiber_worker_t) % ATSCNTRB_AFIBER_LINE == 0, "afiber: worker size is not a multiple of a line") ;
 #endif
 
@@ -702,16 +723,25 @@ atscntrb_afiber__free
 // (both sides with sequentially consistent ordering): one of the two
 // sees the other, so a wake-up cannot be lost.
 //
+// MS-2026-10: at most one worker is woken at a time (Go's [wakep]): the
+// kicker takes [nspinning] from 0 to 1 and flags the worker it wakes
+// ([spinning]); that worker searches for work (it "spins"), and the
+// last spinner that finds some wakes the next idle worker, so the work
+// propagates without a wake-up per fiber.
+//
 ATSinline()
 int
 atscntrb_afiber__signal_worker
-  (atscntrb_afiber_worker_t *w)
+  (atscntrb_afiber_worker_t *w, int spin)
 {
   int r ;
   if (!__atomic_load_n(&(w->waiting), __ATOMIC_SEQ_CST)) return 0 ;
   pthread_mutex_lock(&(w->mu)) ;
   r = w->waiting ;
-  if (r) { __atomic_store_n(&(w->waiting), 0, __ATOMIC_SEQ_CST) ; pthread_cond_signal(&(w->cv)) ; }
+  if (r) {
+    if (spin) __atomic_store_n(&(w->spinning), 1, __ATOMIC_RELAXED) ;
+    __atomic_store_n(&(w->waiting), 0, __ATOMIC_SEQ_CST) ; pthread_cond_signal(&(w->cv)) ;
+  }
   pthread_mutex_unlock(&(w->mu)) ;
   return r ;
 } // end of [atscntrb_afiber__signal_worker]
@@ -724,22 +754,33 @@ atscntrb_afiber__worker_at
   return (i == 0) ? &(s->w0) : &(s->wk[i-1]) ;
 } // end of [atscntrb_afiber__worker_at]
 
-// wake one idle worker; [only0]: only worker 0 can use the work (main)
-ATSinline()
+/*
+** wake one idle worker. [only0]: only worker 0 can use the work (main).
+** Otherwise nothing is done if somebody is already looking for work.
+*/
+static
+__attribute__((noinline))
 void
 atscntrb_afiber__kick
   (atscntrb_afiber_sched_t *s, int only0)
 {
+  int tries ;
   __atomic_thread_fence(__ATOMIC_SEQ_CST) ;
   if (__atomic_load_n(&(s->nidle), __ATOMIC_SEQ_CST) <= 0) return ;
-  if (only0) { atscntrb_afiber__signal_worker(&(s->w0)) ; return ; }
-  {
-    int n = s->nworkers ;
-    int i0 = (int)(__atomic_fetch_add(&(s->rr), 1, __ATOMIC_RELAXED) % (unsigned)n) ;
-    int k ;
+  if (only0) { atscntrb_afiber__signal_worker(&(s->w0), 0) ; return ; }
+  for (tries = 0; tries < 2; tries += 1) {
+    int e = 0, n, i0, k ;
+    if (__atomic_load_n(&(s->nspinning), __ATOMIC_SEQ_CST) != 0) return ;
+    if (!__atomic_compare_exchange_n(&(s->nspinning), &e, 1, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)) return ;
+    n = s->nworkers ;
+    i0 = (int)(__atomic_fetch_add(&(s->rr), 1, __ATOMIC_RELAXED) % (unsigned)n) ;
     for (k = 0; k < n; k += 1) {
-      if (atscntrb_afiber__signal_worker(atscntrb_afiber__worker_at(s, (i0 + k) % n))) return ;
+      if (atscntrb_afiber__signal_worker(atscntrb_afiber__worker_at(s, (i0 + k) % n), 1)) return ;
     }
+    // nobody was waiting (the idlers were being woken): give the claim back, and look once more
+    __atomic_sub_fetch(&(s->nspinning), 1, __ATOMIC_SEQ_CST) ;
+    __atomic_thread_fence(__ATOMIC_SEQ_CST) ;
+    if (__atomic_load_n(&(s->nidle), __ATOMIC_SEQ_CST) <= 0) return ;
   }
 } // end of [atscntrb_afiber__kick]
 
@@ -752,14 +793,210 @@ atscntrb_afiber__kick_all
   int k ;
   __atomic_thread_fence(__ATOMIC_SEQ_CST) ;
   if (__atomic_load_n(&(s->nidle), __ATOMIC_SEQ_CST) <= 0) return ;
-  for (k = 0; k < s->nworkers; k += 1) atscntrb_afiber__signal_worker(atscntrb_afiber__worker_at(s, k)) ;
+  for (k = 0; k < s->nworkers; k += 1) atscntrb_afiber__signal_worker(atscntrb_afiber__worker_at(s, k), 0) ;
 } // end of [atscntrb_afiber__kick_all]
+
+/* ****** ****** */
+//
+// MS-2026-10: the global FIFO with workers: [runq] (and its length) under
+// the sched lock; the head is stored atomically (it is read without the
+// lock to see whether there is anything to take)
+//
+ATSinline()
+void
+atscntrb_afiber__glob_push
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_t *f)
+{
+  f->next = (atscntrb_afiber_t*)0 ;
+  if (s->runq.tail) s->runq.tail->next = f ; else __atomic_store_n(&(s->runq.head), f, __ATOMIC_RELAXED) ;
+  s->runq.tail = f ;
+  s->runqn += 1 ;
+} // end of [atscntrb_afiber__glob_push]
+
+ATSinline()
+atscntrb_afiber_t*
+atscntrb_afiber__glob_pop
+  (atscntrb_afiber_sched_t *s)
+{
+  atscntrb_afiber_t *f = s->runq.head ;
+  if (f) {
+    __atomic_store_n(&(s->runq.head), f->next, __ATOMIC_RELAXED) ;
+    if (!f->next) s->runq.tail = (atscntrb_afiber_t*)0 ;
+    f->next = (atscntrb_afiber_t*)0 ;
+    s->runqn -= 1 ;
+  }
+  return f ;
+} // end of [atscntrb_afiber__glob_pop]
+
+/* ****** ****** */
+//
+// MS-2026-10: the local run queue of a worker (Go's runq): a ring of
+// RINGSZ slots with [runnext] in front of it. The owner is the only one
+// to write [tail] and the slots at [tail]; [head] moves by CAS (by the
+// owner when it takes the oldest, by a thief when it takes half). The
+// owner writes slot [t] only when [t - head < RINGSZ] for a head it has
+// loaded: a thief that read the slots [h, t) cannot see them overwritten
+// before its CAS on head decides, and after it they are the thief's.
+//
+#define ATSCNTRB_AFIBER_RMASK (ATSCNTRB_AFIBER_RINGSZ - 1)
+
+ATSinline()
+void
+atscntrb_afiber__cpu_relax()
+{
+#if defined(__x86_64__) || defined(__i386__)
+  __asm__ volatile ("pause" ::: "memory") ;
+#endif
+} // end of [atscntrb_afiber__cpu_relax]
+
+// the ring is full: move half of it and [f] to the global FIFO (false: a thief was faster, retry)
+static
+__attribute__((noinline))
+int
+atscntrb_afiber__runq_putslow
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w, atscntrb_afiber_t *f, unsigned h, unsigned t)
+{
+  atscntrb_afiber_t *batch[ATSCNTRB_AFIBER_RINGSZ/2 + 1] ;
+  unsigned n = (t - h) / 2, i ;
+  if (n != ATSCNTRB_AFIBER_RINGSZ/2) return 0 ; // the head moved
+  for (i = 0; i < n; i += 1) batch[i] = __atomic_load_n(&(w->ring[(h + i) & ATSCNTRB_AFIBER_RMASK]), __ATOMIC_RELAXED) ;
+  if (!__atomic_compare_exchange_n(&(w->head), &h, h + n, 0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) return 0 ;
+  batch[n] = f ;
+  atscntrb_afiber__spin_lock(&(s->lock)) ;
+  for (i = 0; i <= n; i += 1) atscntrb_afiber__glob_push(s, batch[i]) ;
+  atscntrb_afiber__spin_unlock(&(s->lock)) ;
+  atscntrb_afiber__kick(s, 0) ;
+  return 1 ;
+} // end of [atscntrb_afiber__runq_putslow]
+
+/*
+** owner only: queue [f]. [next]: it goes to [runnext] and the fiber
+** that was there (if any) is queued at the tail instead.
+*/
+ATSinline()
+void
+atscntrb_afiber__runq_put
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w, atscntrb_afiber_t *f, int next)
+{
+  if (next) {
+    f = __atomic_exchange_n(&(w->runnext), f, __ATOMIC_ACQ_REL) ;
+    if (!f) return ;
+  }
+  for ( ; ; ) {
+    unsigned h = __atomic_load_n(&(w->head), __ATOMIC_ACQUIRE) ;
+    unsigned t = w->tail ; // only the owner writes it
+    if (t - h < ATSCNTRB_AFIBER_RINGSZ) {
+      __atomic_store_n(&(w->ring[t & ATSCNTRB_AFIBER_RMASK]), f, __ATOMIC_RELAXED) ;
+      __atomic_store_n(&(w->tail), t + 1, __ATOMIC_RELEASE) ;
+      return ;
+    }
+    if (atscntrb_afiber__runq_putslow(s, w, f, h, t)) return ;
+  }
+} // end of [atscntrb_afiber__runq_put]
+
+// owner only: the next fiber of the local queue, or NULL
+ATSinline()
+atscntrb_afiber_t*
+atscntrb_afiber__runq_get
+  (atscntrb_afiber_worker_t *w)
+{
+  atscntrb_afiber_t *f ;
+  if (__atomic_load_n(&(w->runnext), __ATOMIC_RELAXED)) {
+    f = __atomic_exchange_n(&(w->runnext), (atscntrb_afiber_t*)0, __ATOMIC_ACQ_REL) ; // a thief may have taken it
+    if (f) return f ;
+  }
+  for ( ; ; ) {
+    unsigned h = __atomic_load_n(&(w->head), __ATOMIC_ACQUIRE) ;
+    unsigned t = w->tail ;
+    if (t == h) return (atscntrb_afiber_t*)0 ;
+    f = __atomic_load_n(&(w->ring[h & ATSCNTRB_AFIBER_RMASK]), __ATOMIC_RELAXED) ;
+    if (__atomic_compare_exchange_n(&(w->head), &h, h + 1, 0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) return f ;
+  }
+} // end of [atscntrb_afiber__runq_get]
+
+// busy-wait about [ns] nanoseconds
+static
+__attribute__((noinline))
+void
+atscntrb_afiber__spin_ns
+  (unsigned long long ns)
+{
+  unsigned long long t0 = atscntrb_afiber_clock_ns() ;
+  while (atscntrb_afiber_clock_ns() - t0 < ns) atscntrb_afiber__cpu_relax() ;
+} // end of [atscntrb_afiber__spin_ns]
+
+/*
+** [thief] (its ring is empty) takes half of the ring of [victim]: one
+** fiber is returned to run now, the others go to the ring of [thief].
+** [steal_runnext]: with an empty ring, take [runnext] too, but only after
+** a short wait, and if the victim still has nothing else (Go's rule: a
+** fiber that just handed a message to its partner gets to run it itself).
+*/
+static
+__attribute__((noinline))
+atscntrb_afiber_t*
+atscntrb_afiber__runq_steal
+  (atscntrb_afiber_worker_t *victim, atscntrb_afiber_worker_t *thief, int steal_runnext)
+{
+  for ( ; ; ) {
+    unsigned h = __atomic_load_n(&(victim->head), __ATOMIC_ACQUIRE) ;
+    unsigned t = __atomic_load_n(&(victim->tail), __ATOMIC_ACQUIRE) ;
+    unsigned n = t - h, i, tt ;
+    n = n - n/2 ;
+    if (n == 0) {
+      atscntrb_afiber_t *rn ;
+      if (!steal_runnext) return (atscntrb_afiber_t*)0 ;
+      rn = __atomic_load_n(&(victim->runnext), __ATOMIC_RELAXED) ;
+      if (!rn) return (atscntrb_afiber_t*)0 ;
+      atscntrb_afiber__spin_ns(3000) ;
+      if (__atomic_load_n(&(victim->head), __ATOMIC_ACQUIRE) != __atomic_load_n(&(victim->tail), __ATOMIC_ACQUIRE)) continue ; // it has work in the ring now
+      if (__atomic_compare_exchange_n(&(victim->runnext), &rn, (atscntrb_afiber_t*)0, 0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) return rn ;
+      return (atscntrb_afiber_t*)0 ; // the owner took it (or replaced it)
+    }
+    if (n > ATSCNTRB_AFIBER_RINGSZ/2) continue ; // inconsistent read
+    tt = thief->tail ;
+    for (i = 0; i < n; i += 1)
+      __atomic_store_n(&(thief->ring[(tt + i) & ATSCNTRB_AFIBER_RMASK]),
+        __atomic_load_n(&(victim->ring[(h + i) & ATSCNTRB_AFIBER_RMASK]), __ATOMIC_RELAXED), __ATOMIC_RELAXED) ;
+    if (!__atomic_compare_exchange_n(&(victim->head), &h, h + n, 0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) continue ;
+    n -= 1 ;
+    {
+      atscntrb_afiber_t *f = __atomic_load_n(&(thief->ring[(tt + n) & ATSCNTRB_AFIBER_RMASK]), __ATOMIC_RELAXED) ;
+      if (n > 0) __atomic_store_n(&(thief->tail), tt + n, __ATOMIC_RELEASE) ;
+      return f ;
+    }
+  }
+} // end of [atscntrb_afiber__runq_steal]
+
+// one round over the other workers, from a random one; the first hit is returned
+static
+__attribute__((noinline))
+atscntrb_afiber_t*
+atscntrb_afiber__steal_round
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w, int steal_runnext)
+{
+  int n = s->nworkers, k, i0 ;
+  unsigned x = w->rnd ;
+  x ^= x << 13 ; x ^= x >> 17 ; x ^= x << 5 ;
+  w->rnd = x ;
+  i0 = (int)(x % (unsigned)n) ;
+  for (k = 0; k < n; k += 1) {
+    atscntrb_afiber_worker_t *v = atscntrb_afiber__worker_at(s, (i0 + k) % n) ;
+    atscntrb_afiber_t *f ;
+    if (v == w) continue ;
+    f = atscntrb_afiber__runq_steal(v, w, steal_runnext) ;
+    if (f) return f ;
+  }
+  return (atscntrb_afiber_t*)0 ;
+} // end of [atscntrb_afiber__steal_round]
 
 /* ****** ****** */
 
 /*
 ** make [f] runnable. With workers, main goes to the main slot of
-** worker 0; the other fibers go to the shared FIFO.
+** worker 0 (it runs only there, never in a ring); the other fibers go
+** to [runnext] of the worker that wakes them (the fiber it replaces is
+** queued behind its ring).
 */
 static
 __attribute__((noinline))
@@ -767,12 +1004,15 @@ void
 atscntrb_afiber__wake_mt
   (atscntrb_afiber_sched_t *s, atscntrb_afiber_t *f)
 {
-  int tomain ;
-  tomain = (f == &(s->main)) ;
-  atscntrb_afiber__spin_lock(&(s->lock)) ;
-  if (tomain) s->mainslot = f ; else atscntrb_afiber__q_push(&(s->runq), f) ;
-  atscntrb_afiber__spin_unlock(&(s->lock)) ;
-  atscntrb_afiber__kick(s, tomain) ;
+  if (f == &(s->main)) {
+    atscntrb_afiber__spin_lock(&(s->lock)) ;
+    __atomic_store_n(&(s->mainslot), f, __ATOMIC_RELAXED) ;
+    atscntrb_afiber__spin_unlock(&(s->lock)) ;
+    atscntrb_afiber__kick(s, 1) ;
+    return ;
+  }
+  atscntrb_afiber__runq_put(s, atscntrb_afiber__cw(), f, 1) ;
+  atscntrb_afiber__kick(s, 0) ;
 } // end of [atscntrb_afiber__wake_mt]
 
 // (the one worker case is the hot path of the one-worker scheduler)
@@ -787,6 +1027,24 @@ atscntrb_afiber__wake
   atscntrb_afiber__wake_mt(s, f) ;
 } // end of [atscntrb_afiber__wake]
 
+/*
+** a fiber that yields (workers > 1), after its switch: it goes to the
+** tail of the ring of [w], not to [runnext] (that would run it straight
+** back); main goes to the main slot.
+*/
+static
+__attribute__((noinline))
+void
+atscntrb_afiber__wake_yield
+  (atscntrb_afiber_worker_t *w, atscntrb_afiber_t *f)
+{
+  atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
+  atscntrb_afiber__setstate(f, ATSCNTRB_AFIBER_RUNNABLE) ;
+  if (f == &(s->main)) { atscntrb_afiber__wake_mt(s, f) ; return ; }
+  atscntrb_afiber__runq_put(s, w, f, 0) ;
+  atscntrb_afiber__kick(s, 0) ;
+} // end of [atscntrb_afiber__wake_yield]
+
 // the sleep list is ascending in deadline; the caller holds the sched lock (workers > 1)
 ATSinline()
 void
@@ -799,8 +1057,8 @@ atscntrb_afiber__sleep_insert
 } // end of [atscntrb_afiber__sleep_insert]
 
 /*
-** the next fiber for worker [w], or NULL (expired sleepers are
-** moved to the run queue first)
+** one worker: the next fiber for worker [w], or NULL (expired sleepers
+** are moved to the run queue first)
 */
 static
 __attribute__((noinline))
@@ -809,27 +1067,102 @@ atscntrb_afiber__pick_slow
   (atscntrb_afiber_worker_t *w)
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
-  int mt = !ATSCNTRB_AFIBER_ONEWORKER(s) ;
-  int kickmain = 0, more = 0 ;
-  atscntrb_afiber_t *next ;
-  if (mt) atscntrb_afiber__spin_lock(&(s->lock)) ;
   if (s->sleepq) {
     unsigned long long now = atscntrb_afiber_clock_ns() ;
     while (s->sleepq && s->sleepq->deadline_ns <= now) {
       atscntrb_afiber_t *f = s->sleepq ; s->sleepq = f->next ;
       atscntrb_afiber__setstate(f, ATSCNTRB_AFIBER_RUNNABLE) ;
-      if (mt && f == &(s->main)) { s->mainslot = f ; kickmain = 1 ; }
-      else atscntrb_afiber__q_push(&(s->runq), f) ;
+      atscntrb_afiber__q_push(&(s->runq), f) ;
     }
   }
-  if (mt && w->id == 0 && s->mainslot) { next = s->mainslot ; s->mainslot = (atscntrb_afiber_t*)0 ; }
-  else next = atscntrb_afiber__q_pop(&(s->runq)) ;
-  if (mt) more = (s->runq.head != (atscntrb_afiber_t*)0) ;
-  if (mt) atscntrb_afiber__spin_unlock(&(s->lock)) ;
-  if (kickmain) atscntrb_afiber__kick(s, 1) ;
-  if (more) atscntrb_afiber__kick(s, 0) ;
-  return next ;
+  return atscntrb_afiber__q_pop(&(s->runq)) ;
 } // end of [atscntrb_afiber__pick_slow]
+
+/*
+** MS-2026-10: workers > 1, the global part of [pick]: under the sched
+** lock move the expired sleepers to the global FIFO, then take the
+** first of the FIFO (or main, for worker 0), and some more of it for
+** the ring of [w] (Go's globrunqget: about 1/nworkers of what is there,
+** at most half a ring), so the lock is not taken once per fiber.
+*/
+static
+__attribute__((noinline))
+atscntrb_afiber_t*
+atscntrb_afiber__pick_global
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w)
+{
+  int kickmain = 0, more = 0, moved = 0 ;
+  atscntrb_afiber_t *f ;
+  atscntrb_afiber__spin_lock(&(s->lock)) ;
+  if (s->sleepq) {
+    unsigned long long now = atscntrb_afiber_clock_ns() ;
+    if (s->sleepq->deadline_ns <= now) {
+      while (s->sleepq && s->sleepq->deadline_ns <= now) {
+        atscntrb_afiber_t *g = s->sleepq ; s->sleepq = g->next ;
+        atscntrb_afiber__setstate(g, ATSCNTRB_AFIBER_RUNNABLE) ;
+        if (g == &(s->main)) { __atomic_store_n(&(s->mainslot), g, __ATOMIC_RELAXED) ; kickmain = 1 ; }
+        else atscntrb_afiber__glob_push(s, g) ;
+      }
+      __atomic_store_n(&(s->sleep_dl), s->sleepq ? s->sleepq->deadline_ns : ~0ULL, __ATOMIC_RELAXED) ;
+    }
+  }
+  if (w->id == 0 && s->mainslot) {
+    f = s->mainslot ; __atomic_store_n(&(s->mainslot), (atscntrb_afiber_t*)0, __ATOMIC_RELAXED) ;
+  } else {
+    long len = s->runqn ;
+    f = atscntrb_afiber__glob_pop(s) ;
+    if (f && s->runqn > 0) {
+      long n = len / (long)s->nworkers ; // the share of this worker, besides [f]
+      unsigned h = __atomic_load_n(&(w->head), __ATOMIC_ACQUIRE) ;
+      unsigned t = w->tail ;
+      if (n > (long)(ATSCNTRB_AFIBER_RINGSZ/2)) n = ATSCNTRB_AFIBER_RINGSZ/2 ;
+      if (n > s->runqn) n = s->runqn ;
+      while (n > 0 && t - h < ATSCNTRB_AFIBER_RINGSZ) {
+        atscntrb_afiber_t *g = atscntrb_afiber__glob_pop(s) ;
+        __atomic_store_n(&(w->ring[t & ATSCNTRB_AFIBER_RMASK]), g, __ATOMIC_RELAXED) ;
+        t += 1 ; n -= 1 ; moved = 1 ;
+      }
+      if (moved) __atomic_store_n(&(w->tail), t, __ATOMIC_RELEASE) ;
+    }
+    more = (s->runq.head != (atscntrb_afiber_t*)0) ;
+  }
+  atscntrb_afiber__spin_unlock(&(s->lock)) ;
+  if (kickmain) atscntrb_afiber__kick(s, 1) ;
+  if (more || moved) atscntrb_afiber__kick(s, 0) ;
+  return f ;
+} // end of [atscntrb_afiber__pick_global]
+
+/*
+** workers > 1: the next fiber for [w], or NULL: main (worker 0 only),
+** the local queue, the global FIFO and the sleepers, one stealing round.
+** [last]: the stealing round may take a [runnext] too.
+*/
+static
+__attribute__((noinline))
+atscntrb_afiber_t*
+atscntrb_afiber__pick_mt
+  (atscntrb_afiber_worker_t *w, int last)
+{
+  atscntrb_afiber_sched_t *s = &atscntrb_afiber__sched ;
+  atscntrb_afiber_t *f ;
+  if (w->id == 0 && __atomic_load_n(&(s->mainslot), __ATOMIC_RELAXED)) {
+    atscntrb_afiber__spin_lock(&(s->lock)) ;
+    f = s->mainslot ; __atomic_store_n(&(s->mainslot), (atscntrb_afiber_t*)0, __ATOMIC_RELAXED) ;
+    atscntrb_afiber__spin_unlock(&(s->lock)) ;
+    if (f) return f ;
+  }
+  f = atscntrb_afiber__runq_get(w) ;
+  if (f) return f ;
+  {
+    unsigned long long dl = __atomic_load_n(&(s->sleep_dl), __ATOMIC_RELAXED) ;
+    if (__atomic_load_n(&(s->runq.head), __ATOMIC_RELAXED)
+        || (dl != ~0ULL && dl <= atscntrb_afiber_clock_ns())) {
+      f = atscntrb_afiber__pick_global(s, w) ;
+      if (f) return f ;
+    }
+  }
+  return atscntrb_afiber__steal_round(s, w, last) ;
+} // end of [atscntrb_afiber__pick_mt]
 
 ATSinline()
 atscntrb_afiber_t*
@@ -837,9 +1170,12 @@ atscntrb_afiber__pick
   (atscntrb_afiber_worker_t *w)
 {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
-  if (__builtin_expect(ATSCNTRB_AFIBER_ONEWORKER(s) && !s->sleepq, 1)) // one worker, nobody sleeps
-    return atscntrb_afiber__q_pop(&(s->runq)) ;
-  return atscntrb_afiber__pick_slow(w) ;
+  if (__builtin_expect(ATSCNTRB_AFIBER_ONEWORKER(s), 1)) {
+    if (__builtin_expect(!s->sleepq, 1)) // one worker, nobody sleeps
+      return atscntrb_afiber__q_pop(&(s->runq)) ;
+    return atscntrb_afiber__pick_slow(w) ;
+  }
+  return atscntrb_afiber__pick_mt(w, 0) ;
 } // end of [atscntrb_afiber__pick]
 
 /* ****** ****** */
@@ -887,7 +1223,9 @@ atscntrb_afiber__run_post
   case ATSCNTRB_AFIBER_POST_UNLOCK:
     atscntrb_afiber__spin_unlock((int*)a) ; break ;
   case ATSCNTRB_AFIBER_POST_YIELD:
-    atscntrb_afiber__wake((atscntrb_afiber_t*)a) ; break ;
+    if (ATSCNTRB_AFIBER_ONEWORKER(atscntrb_afiber__sched_get())) atscntrb_afiber__wake((atscntrb_afiber_t*)a) ;
+    else atscntrb_afiber__wake_yield(w, (atscntrb_afiber_t*)a) ;
+    break ;
   case ATSCNTRB_AFIBER_POST_SLEEP:
     {
       atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
@@ -895,6 +1233,7 @@ atscntrb_afiber__run_post
       atscntrb_afiber__spin_lock(&(s->lock)) ;
       atscntrb_afiber__sleep_insert(s, (atscntrb_afiber_t*)a) ;
       newhead = (s->sleepq == (atscntrb_afiber_t*)a) ;
+      if (newhead) __atomic_store_n(&(s->sleep_dl), ((atscntrb_afiber_t*)a)->deadline_ns, __ATOMIC_RELAXED) ;
       atscntrb_afiber__spin_unlock(&(s->lock)) ;
       if (newhead) atscntrb_afiber__kick_all(s) ;
     }
@@ -1046,42 +1385,94 @@ atscntrb_afiber__schedule()
 /* ****** ****** */
 
 /*
+** MS-2026-10: after the announcement of an idle worker: is there work
+** that [pick] could take? Relaxed loads are enough (the announcement and
+** the producers' pushes are ordered by the seq-cst fences). Main counts
+** for worker 0 only. A [runnext] counts: its owner will run it, unless
+** a stealing round with [last] takes it first.
+*/
+static
+__attribute__((noinline))
+int
+atscntrb_afiber__peek_work
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w)
+{
+  int k, n = s->nworkers ;
+  unsigned long long dl = __atomic_load_n(&(s->sleep_dl), __ATOMIC_RELAXED) ;
+  if (__atomic_load_n(&(s->runq.head), __ATOMIC_RELAXED)) return 1 ;
+  if (w->id == 0 && __atomic_load_n(&(s->mainslot), __ATOMIC_RELAXED)) return 1 ;
+  if (dl != ~0ULL && dl <= atscntrb_afiber_clock_ns()) return 1 ;
+  for (k = 0; k < n; k += 1) {
+    atscntrb_afiber_worker_t *v = atscntrb_afiber__worker_at(s, k) ;
+    if (__atomic_load_n(&(v->head), __ATOMIC_RELAXED) != __atomic_load_n(&(v->tail), __ATOMIC_RELAXED)) return 1 ;
+    if (__atomic_load_n(&(v->runnext), __ATOMIC_RELAXED)) return 1 ;
+  }
+  return 0 ;
+} // end of [atscntrb_afiber__peek_work]
+
+/*
 ** the idle loop of a worker, on its idle context: run what there
 ** is, else wait on the condition variable of the worker (until the
 ** earliest sleep deadline, if there is one). All workers idle with
 ** nothing queued and nobody sleeping is a deadlock.
+**
+** MS-2026-10: a worker that ran dry, or that was woken by a kick
+** ([spinning] is set), first spins: up to 4 rounds of [pick] (each with
+** a stealing round; the last one may take a [runnext]). A spinner that
+** finds work, and was the last one, wakes the next idle worker (Go's
+** resetspinning). Only then it announces itself ([nidle]), looks once
+** more (the work may have been pushed before the announcement) and waits.
 */
 ATSinline()
 void
 atscntrb_afiber__idle_loop()
 {
+  int recheck = 0 ; // the last look found work that [pick] did not take: take a [runnext] too
   for ( ; ; ) {
     atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
     atscntrb_afiber_worker_t *w = atscntrb_afiber__cw() ;
-    atscntrb_afiber_t *next ;
-    int has, anyq, hasleep, stop ;
-    unsigned long long dl = 0 ;
+    atscntrb_afiber_t *next = (atscntrb_afiber_t*)0 ;
+    int spin, rounds, r, stop ;
+    unsigned long long dl ;
     if (w->id != 0 && __atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE)) return ;
-    next = atscntrb_afiber__pick(w) ;
-    if (next) { atscntrb_afiber__switch_to(w, next) ; continue ; }
+    spin = __atomic_load_n(&(w->spinning), __ATOMIC_RELAXED) ; // set by the kicker, who has counted it
+    if (!spin && 2 * __atomic_load_n(&(s->nspinning), __ATOMIC_RELAXED) < s->nworkers - __atomic_load_n(&(s->nidle), __ATOMIC_RELAXED)) {
+      __atomic_add_fetch(&(s->nspinning), 1, __ATOMIC_SEQ_CST) ;
+      __atomic_store_n(&(w->spinning), 1, __ATOMIC_RELAXED) ;
+      spin = 1 ;
+    }
+    rounds = spin ? 4 : 1 ;
+    for (r = 0; r < rounds; r += 1) {
+      next = atscntrb_afiber__pick_mt(w, recheck || (spin && r == rounds - 1)) ;
+      if (next) break ;
+      if (r + 1 < rounds) { int j ; for (j = 0; j < 30; j += 1) atscntrb_afiber__cpu_relax() ; }
+    }
+    if (spin) {
+      __atomic_store_n(&(w->spinning), 0, __ATOMIC_RELAXED) ;
+      if (__atomic_sub_fetch(&(s->nspinning), 1, __ATOMIC_SEQ_CST) == 0 && next) atscntrb_afiber__kick(s, 0) ;
+    }
+    if (next) { recheck = 0 ; atscntrb_afiber__switch_to(w, next) ; continue ; }
     pthread_mutex_lock(&(w->mu)) ;
     __atomic_store_n(&(w->waiting), 1, __ATOMIC_SEQ_CST) ;
     __atomic_add_fetch(&(s->nidle), 1, __ATOMIC_SEQ_CST) ;
     __atomic_thread_fence(__ATOMIC_SEQ_CST) ;
-    atscntrb_afiber__spin_lock(&(s->lock)) ;
-    anyq = (s->runq.head != (atscntrb_afiber_t*)0) || (s->mainslot != (atscntrb_afiber_t*)0) ;
-    has = (s->runq.head != (atscntrb_afiber_t*)0) || (w->id == 0 && s->mainslot != (atscntrb_afiber_t*)0) ;
-    hasleep = (s->sleepq != (atscntrb_afiber_t*)0) ;
-    if (hasleep) dl = s->sleepq->deadline_ns ;
-    atscntrb_afiber__spin_unlock(&(s->lock)) ;
+    if (atscntrb_afiber__peek_work(s, w)) { // announce, then look: there is work, go and take it
+      __atomic_store_n(&(w->waiting), 0, __ATOMIC_SEQ_CST) ;
+      __atomic_sub_fetch(&(s->nidle), 1, __ATOMIC_SEQ_CST) ;
+      pthread_mutex_unlock(&(w->mu)) ;
+      recheck = 1 ;
+      continue ;
+    }
+    recheck = 0 ;
+    dl = __atomic_load_n(&(s->sleep_dl), __ATOMIC_RELAXED) ;
     stop = __atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE) ;
-    if (!has && !stop) {
-      if (!anyq && !hasleep
+    if (!stop) {
+      if (dl == ~0ULL && !__atomic_load_n(&(s->mainslot), __ATOMIC_RELAXED)
           && __atomic_load_n(&(s->nidle), __ATOMIC_SEQ_CST) == s->nworkers)
         atscntrb_afiber__fatal("deadlock: every fiber is blocked") ;
       while (__atomic_load_n(&(w->waiting), __ATOMIC_SEQ_CST)
              && !__atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE)) {
-        if (hasleep) {
+        if (dl != ~0ULL) {
           struct timespec ts ;
           ts.tv_sec = (time_t)(dl / 1000000000ULL) ;
           ts.tv_nsec = (long)(dl % 1000000000ULL) ;
@@ -1218,8 +1609,8 @@ atscntrb_afiber_yield()
     atscntrb_afiber__wake(w->current) ;
     atscntrb_afiber__schedule() ;
   } else {
-    atscntrb_afiber_t *next = atscntrb_afiber__pick(w) ;
-    if (!next) return ;
+    atscntrb_afiber_t *next = atscntrb_afiber__pick_mt(w, 0) ;
+    if (!next) return ; // nothing else to run: the yield is a no-op
     w->post_kind = ATSCNTRB_AFIBER_POST_YIELD ;
     w->post_arg = w->current ;
     atscntrb_afiber__switch_to(w, next) ;
@@ -1373,6 +1764,8 @@ atscntrb_afiber__worker_init
   pthread_cond_init(&(w->cv), &ca) ;
   pthread_condattr_destroy(&ca) ;
   w->waiting = 0 ;
+  w->runnext = (atscntrb_afiber_t*)0 ; w->head = 0 ; w->tail = 0 ; w->spinning = 0 ; // MS-2026-10
+  w->rnd = 2463534242u ^ ((unsigned)id * 0x9E3779B9u) ; if (!w->rnd) w->rnd = 1 ;
 } // end of [atscntrb_afiber__worker_init]
 
 ATSinline()
@@ -1409,7 +1802,13 @@ atscntrb_afiber_workers_start
     atscntrb_afiber__worker_init(&(s->wk[i-1]), i) ;
     s->wk[i-1].current = &(s->wk[i-1].idle) ;
   }
-  s->stop = 0 ; s->nidle = 0 ;
+  s->stop = 0 ; s->nidle = 0 ; s->nspinning = 0 ;
+  { // MS-2026-10: what the one-worker phase left in the global FIFO and the sleep list
+    atscntrb_afiber_t *g ;
+    s->runqn = 0 ;
+    for (g = s->runq.head; g; g = g->next) s->runqn += 1 ;
+    s->sleep_dl = s->sleepq ? s->sleepq->deadline_ns : ~0ULL ;
+  }
   __atomic_thread_fence(__ATOMIC_SEQ_CST) ;
   s->nworkers = n ;
   pthread_attr_init(&attr) ;
@@ -1459,6 +1858,10 @@ atscntrb_afiber_workers_stop()
     atscntrb_afiber__fatal("afiber_workers_stop: main only") ;
   if (__atomic_load_n(&(s->nlive), __ATOMIC_SEQ_CST) != 0)
     atscntrb_afiber__fatal("afiber_workers_stop: fibers are still alive") ;
+  for (i = 0; i < n; i += 1) { // MS-2026-10: no live fiber, so no local queue holds one
+    atscntrb_afiber_worker_t *v = atscntrb_afiber__worker_at(s, i) ;
+    if (v->head != v->tail || v->runnext) atscntrb_afiber__fatal("afiber_workers_stop: a run queue is not empty") ;
+  }
   __atomic_store_n(&(s->stop), 1, __ATOMIC_SEQ_CST) ;
   for (i = 1; i < n; i += 1) {
     atscntrb_afiber_worker_t *w = &(s->wk[i-1]) ;
@@ -1481,7 +1884,8 @@ atscntrb_afiber_workers_stop()
   memset(&(s->w0.idle), 0, sizeof(s->w0.idle)) ;
   ATS_MFREE(s->wk_raw) ; s->wk_raw = (void*)0 ; s->wk = (atscntrb_afiber_worker_t*)0 ;
   s->mainslot = (atscntrb_afiber_t*)0 ;
-  s->nidle = 0 ; s->stop = 0 ;
+  s->nidle = 0 ; s->stop = 0 ; s->nspinning = 0 ;
+  s->sleep_dl = ~0ULL ; s->runqn = 0 ;
   s->nworkers = 1 ;
 } // end of [atscntrb_afiber_workers_stop]
 
