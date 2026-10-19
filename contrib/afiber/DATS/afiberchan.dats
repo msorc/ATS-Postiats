@@ -72,6 +72,7 @@ CHAN of
 , buf=ptr // the ring buffer
 , sendq=afiber_waitq
 , recvq=afiber_waitq
+, lock=afiber_spin // protects all of the above, and the wait queues
 } (* end of [chan_struct] *)
 //
 (* ****** ****** *)
@@ -97,6 +98,7 @@ val () = ch.closed := false
 val () = ch.buf := ring_make (i2sz(cap), sizeof<a>)
 val () = ch.sendq := afiber_waitq_make ()
 val () = ch.recvq := afiber_waitq_make ()
+val () = ch.lock := afiber_spin_make ()
 //
 in
   fold@(chan); chan
@@ -109,7 +111,9 @@ implement
 chan_ref (chan) = let
 //
 val@CHAN(ch) = chan
+val (pf | ()) = afiber_spin_lock (ch.lock)
 val () = ch.rfcnt := ch.rfcnt + 1
+val () = afiber_spin_unlock (pf | ch.lock)
 prval () = fold@(chan)
 //
 in
@@ -146,6 +150,7 @@ chan_unref (chan) = let
 //
 val@CHAN(ch) = chan
 //
+val (pf | ()) = afiber_spin_lock (ch.lock)
 val rfcnt = ch.rfcnt
 //
 in
@@ -153,16 +158,20 @@ in
 if
 rfcnt <= 1
 then let
+  // the last owner: nobody else can reach the channel
+  val () = afiber_spin_unlock (pf | ch.lock)
   val xs = chan_buf_drain<a>(ch.buf, list_vt_nil())
   val () = ring_free (ch.buf)
   val () = afiber_waitq_free (ch.sendq)
   val () = afiber_waitq_free (ch.recvq)
+  val () = afiber_spin_free (ch.lock)
   val () = free@(chan)
 in
   xs
 end // end of [then]
 else let
   val () = ch.rfcnt := rfcnt - 1
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
   prval () = $UN.cast2void(chan)
 in
@@ -182,7 +191,12 @@ chan_unref_type (chan) =
 implement
 {}(*tmp*)
 chan_rfcnt{a}(chan) = let
-  val@CHAN(ch) = chan; val n = ch.rfcnt; prval () = fold@(chan) in n
+  val@CHAN(ch) = chan
+  val (pf | ()) = afiber_spin_lock (ch.lock)
+  val n = ch.rfcnt
+  val () = afiber_spin_unlock (pf | ch.lock)
+  prval () = fold@(chan)
+in n
 end // end of [chan_rfcnt]
 
 implement
@@ -194,13 +208,23 @@ end // end of [chan_capacity]
 implement
 {a}(*tmp*)
 chan_size (chan) = let
-  val@CHAN(ch) = chan; val n = ring_size (ch.buf); prval () = fold@(chan) in sz2i(n)
+  val@CHAN(ch) = chan
+  val (pf | ()) = afiber_spin_lock (ch.lock)
+  val n = ring_size (ch.buf)
+  val () = afiber_spin_unlock (pf | ch.lock)
+  prval () = fold@(chan)
+in sz2i(n)
 end // end of [chan_size]
 
 implement
 {}(*tmp*)
 chan_is_closed{a}(chan) = let
-  val@CHAN(ch) = chan; val b = ch.closed; prval () = fold@(chan) in b
+  val@CHAN(ch) = chan
+  val (pf | ()) = afiber_spin_lock (ch.lock)
+  val b = ch.closed
+  val () = afiber_spin_unlock (pf | ch.lock)
+  prval () = fold@(chan)
+in b
 end // end of [chan_is_closed]
 
 implement
@@ -208,9 +232,11 @@ implement
 chan_close{a}(chan) = let
 //
 val@CHAN(ch) = chan
+val (pf | ()) = afiber_spin_lock (ch.lock)
 val () = ch.closed := true
-val () = afiber_waitq_wake_all (ch.recvq)
-val () = afiber_waitq_wake_all (ch.sendq)
+val () = afiber_waitq_wake_all (pf | ch.recvq)
+val () = afiber_waitq_wake_all (pf | ch.sendq)
+val () = afiber_spin_unlock (pf | ch.lock)
 prval () = fold@(chan)
 //
 in
@@ -225,26 +251,30 @@ chan_send_opt
   (chan, x0) = let
 //
 val@CHAN(ch) = chan
+val (pf | ()) = afiber_spin_lock (ch.lock)
 //
 in
 //
 if
 ch.closed
 then let
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan) in Some_vt(x0)
 end // end of [then]
 else (
 if
 ring_is_full (ch.buf)
 then let
-  val () = afiber_waitq_park (ch.sendq)
+  val () = afiber_waitq_park (pf | ch.sendq, ch.lock)
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
 in
   chan_send_opt<a>(chan, x0)
 end // end of [then]
 else let
   val () = $UN.ptr0_set<a>(ring_push (ch.buf), x0)
-  val _ = afiber_waitq_wake_one (ch.recvq)
+  val _ = afiber_waitq_wake_one (pf | ch.recvq)
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
 in
   None_vt()
@@ -280,6 +310,7 @@ implement
 chan_recv (chan) = let
 //
 val@CHAN(ch) = chan
+val (pf | ()) = afiber_spin_lock (ch.lock)
 //
 in
 //
@@ -287,7 +318,8 @@ if
 ring_size (ch.buf) > i2sz(0)
 then let
   val x0 = $UN.ptr0_get<a>(ring_pop (ch.buf))
-  val _ = afiber_waitq_wake_one (ch.sendq)
+  val _ = afiber_waitq_wake_one (pf | ch.sendq)
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
 in
   Some_vt(x0)
@@ -296,10 +328,12 @@ else (
 if
 ch.closed
 then let
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan) in None_vt()
 end // end of [then]
 else let
-  val () = afiber_waitq_park (ch.recvq)
+  val () = afiber_waitq_park (pf | ch.recvq, ch.lock)
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
 in
   chan_recv<a>(chan)
@@ -316,17 +350,20 @@ chan_trysend
   (chan, x0) = let
 //
 val@CHAN(ch) = chan
+val (pf | ()) = afiber_spin_lock (ch.lock)
 //
 in
 //
 if
 ch.closed || ring_is_full (ch.buf)
 then let
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan) in Some_vt(x0)
 end // end of [then]
 else let
   val () = $UN.ptr0_set<a>(ring_push (ch.buf), x0)
-  val _ = afiber_waitq_wake_one (ch.recvq)
+  val _ = afiber_waitq_wake_one (pf | ch.recvq)
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
 in
   None_vt()
@@ -339,6 +376,7 @@ implement
 chan_tryrecv (chan) = let
 //
 val@CHAN(ch) = chan
+val (pf | ()) = afiber_spin_lock (ch.lock)
 //
 in
 //
@@ -346,12 +384,14 @@ if
 ring_size (ch.buf) > i2sz(0)
 then let
   val x0 = $UN.ptr0_get<a>(ring_pop (ch.buf))
-  val _ = afiber_waitq_wake_one (ch.sendq)
+  val _ = afiber_waitq_wake_one (pf | ch.sendq)
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan)
 in
   Some_vt(x0)
 end // end of [then]
 else let
+  val () = afiber_spin_unlock (pf | ch.lock)
   prval () = fold@(chan) in None_vt()
 end // end of [else]
 //

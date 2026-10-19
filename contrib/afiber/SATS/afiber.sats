@@ -30,15 +30,15 @@
 (* ****** ****** *)
 //
 // MS-2026-10:
-// afiber: stackful cooperative fibers (green threads)
-// on one OS thread, with no GC.
+// afiber: stackful fibers (green threads) with no GC,
+// scheduled cooperatively on one OS thread, or on several
+// ([afiber_workers_start]).
 //
 // A fiber handle [afiber_vt] is linear: it must be joined
 // or detached. Spawning never switches; [afiber_yield],
 // [afiber_join], [afiber_sleep_*] and the wait queues do.
-// Exceptions work within a fiber (the handler chain is per
-// fiber); an uncaught exception ends the process, as with
-// athread. If main returns while fibers are suspended, they
+// An uncaught exception ends the process, as with athread.
+// If main returns while fibers are suspended, they
 // are discarded: end main with [afiber_run_until_done].
 // A stack overflow hits a guard page (SIGSEGV): pass a
 // larger size to [afiber_spawn_sz] for deep recursion.
@@ -46,6 +46,27 @@
 // ([afiber_spawn_sz] with another size is not cached).
 // The same ATSCNTRB_AFIBER_* compile-time settings must be
 // used in every unit of a program.
+//
+// One worker (the default): the main thread runs every fiber,
+// switching only at the calls above; the order is FIFO and
+// deterministic, nothing is a data race, and the handler chain
+// of exceptions is swapped at every switch.
+//
+// M:N: [afiber_workers_start(n)] makes n-1 more OS threads run
+// fibers from one shared FIFO. Compile every unit with
+//   -pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_ -D_GNU_SOURCE
+// (the flag makes the exception-frame head a field of the fiber,
+// so that a fiber can migrate inside a [try]; without it
+// [afiber_workers_start] with n > 1 is fatal). The main fiber stays
+// on worker 0 (the main thread). A fiber may resume on another thread
+// after any call that can block: do not keep thread-local state
+// (errno, a lock owned by thread, __thread variables) across one.
+// Fibers share memory: protect shared data with [afiber_mutex],
+// a channel, or an [afiber_spin] (which must not be held across a
+// call that blocks, except through [afiber_waitq_park]).
+// The global arena of libats/arena and plain [ref]s are not
+// thread-safe. Call [afiber_workers_stop] after
+// [afiber_run_until_done] to join the threads and free their data.
 //
 (* ****** ****** *)
 
@@ -130,7 +151,36 @@ fun afiber_stacksz_default ((*void*)): size_t = "mac#%"
 //
 (* ****** ****** *)
 //
-// wait queues: the parking primitive (in place of condvars)
+// M:N scheduling
+//
+fun afiber_workers_start (n: int): void = "mac#%" // main only, once; n counts the main thread
+fun afiber_workers_stop ((*void*)): void = "mac#%" // main only, no live fiber
+fun afiber_nworkers ((*void*)): int = "mac#%"
+fun afiber_worker_id ((*void*)): int = "mac#%" // 0 on the main thread
+fun afiber_ncpu ((*void*)): int = "mac#%"
+//
+(* ****** ****** *)
+//
+// spinlocks: for short critical sections; never block while held
+//
+absvtype
+afiber_spin_vtype = ptr
+vtypedef afiber_spin = afiber_spin_vtype
+//
+absview afiber_locked_v // some spinlock is held by this fiber
+//
+fun afiber_spin_make ((*void*)): afiber_spin = "mac#%"
+fun afiber_spin_free (lk: afiber_spin): void = "mac#%" // fatal if held
+//
+fun afiber_spin_lock
+  (lk: !afiber_spin): (afiber_locked_v | void) = "mac#%"
+fun afiber_spin_unlock
+  (pf: afiber_locked_v | lk: !afiber_spin): void = "mac#%"
+//
+(* ****** ****** *)
+//
+// wait queues: the parking primitive (in place of condvars).
+// A queue is protected by a spinlock that the caller holds.
 //
 absvtype
 afiber_waitq_vtype = ptr
@@ -139,11 +189,32 @@ vtypedef afiber_waitq = afiber_waitq_vtype
 fun afiber_waitq_make ((*void*)): afiber_waitq = "mac#%"
 fun afiber_waitq_free (q: afiber_waitq): void = "mac#%" // fatal if a fiber is parked
 //
-fun afiber_waitq_is_empty (q: !afiber_waitq): bool = "mac#%"
+fun afiber_waitq_is_empty
+  (pf: !afiber_locked_v | q: !afiber_waitq): bool = "mac#%"
 //
-fun afiber_waitq_park (q: !afiber_waitq): void = "mac#%" // returns when woken
-fun afiber_waitq_wake_one (q: !afiber_waitq): bool = "mac#%"
-fun afiber_waitq_wake_all (q: !afiber_waitq): void = "mac#%"
+// [park] queues the fiber, releases [lk] once the fiber has switched
+// off its stack, and takes [lk] again before it returns (so a woken
+// fiber must re-check its condition)
+fun afiber_waitq_park
+  (pf: !afiber_locked_v | q: !afiber_waitq, lk: !afiber_spin): void = "mac#%"
+fun afiber_waitq_wake_one
+  (pf: !afiber_locked_v | q: !afiber_waitq): bool = "mac#%"
+fun afiber_waitq_wake_all
+  (pf: !afiber_locked_v | q: !afiber_waitq): void = "mac#%"
+//
+(* ****** ****** *)
+//
+// a parking mutex (a fiber that waits lets its worker run others);
+// it spins briefly, then parks, and it is not FIFO under contention
+//
+absvtype
+afiber_mutex_vtype = ptr
+vtypedef afiber_mutex = afiber_mutex_vtype
+//
+fun afiber_mutex_make ((*void*)): afiber_mutex = "mac#%"
+fun afiber_mutex_free (m: afiber_mutex): void = "mac#%" // fatal if locked
+fun afiber_mutex_lock (m: !afiber_mutex): void = "mac#%"
+fun afiber_mutex_unlock (m: !afiber_mutex): void = "mac#%"
 //
 (* ****** ****** *)
 

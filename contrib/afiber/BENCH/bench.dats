@@ -15,7 +15,23 @@ static long bench_rss_kb(void) {
   while (fgets(l, sizeof l, f)) if (!strncmp(l, "VmRSS:", 6)) { v = atol(l+6); break; }
   fclose(f); return v;
 }
+static unsigned long bench_lcg(unsigned long x) { return x * 6364136223846793005UL + 1442695040888963407UL; }
+static unsigned long bench_acc = 0;
+static void bench_acc_xor(unsigned long x) { __atomic_fetch_xor(&bench_acc, x, __ATOMIC_RELAXED); }
+static long bench_count = 0;
+static void bench_count_atomic(void) { __atomic_fetch_add(&bench_count, 1, __ATOMIC_RELAXED); }
+static void bench_count_plain(void) { bench_count++; }
+static long bench_count_get(void) { return bench_count; }
 %}
+extern fun lcg (x: ulint): ulint = "mac#bench_lcg"
+extern fun acc_xor (x: ulint): void = "mac#bench_acc_xor"
+extern fun count_atomic (): void = "mac#bench_count_atomic"
+extern fun count_plain (): void = "mac#bench_count_plain"
+extern fun count_get (): lint = "mac#bench_count_get"
+extern fun mx_make (): ptr = "mac#atscntrb_afiber_mutex_make"
+extern fun mx_lock (m: ptr): void = "mac#atscntrb_afiber_mutex_lock"
+extern fun mx_unlock (m: ptr): void = "mac#atscntrb_afiber_mutex_unlock"
+extern fun mx_free (m: ptr): void = "mac#atscntrb_afiber_mutex_free"
 extern fun rss_kb (): lint = "mac#bench_rss_kb"
 
 var the_sink: int = 0
@@ -25,11 +41,17 @@ fun report (name: string, n: int, t0: ullint): void =
   println! (name, " ", n, " ", afiber_clock_ns () - t0)
 
 (* ---- spawn: N empty fibers, spawned in batches of 10000 ---- *)
+(* bench_spawn: steady state. One untimed warm-up batch of 10000 first, so the stacks are
+   already on the free list (mmap + mprotect paid) and the timed batches only reuse them.
+   bench_spawn_cold: exactly one batch of n fibers with no warm-up, every fiber pays a fresh
+   stack (mmap + mprotect + page faults). *)
 fun spawn_batch (i: int, b: int): void =
   if i < b then
     (afiber_spawn_detached (llam () => the_sink_ref[] := the_sink_ref[] + 1);
      spawn_batch (i+1, b))
 fun bench_spawn (n: int): void = let
+  val () = spawn_batch (0, 10000)
+  val () = afiber_run_until_done ()
   val t0 = afiber_clock_ns ()
   fun loop (k: int): void =
     if k > 0 then let
@@ -39,6 +61,11 @@ fun bench_spawn (n: int): void = let
     in loop (k - b) end
   val () = loop (n)
 in report ("spawn", n, t0) end
+fun bench_spawn_cold (n: int): void = let
+  val t0 = afiber_clock_ns ()
+  val () = spawn_batch (0, n)
+  val () = afiber_run_until_done ()
+in report ("spawn_cold", n, t0) end
 
 (* ---- yield: 2 fibers, n yields each ---- *)
 fun yielder (n: int): void =
@@ -186,12 +213,113 @@ in
   println! ("mem ", n, " ", afiber_clock_ns () - t0, " rss_kb_per_task ", (g0int2float_lint_double (r1 - r0) / g0int2float_int_double (n)))
 end
 
+(* ================= M:N benchmarks: usage NAME N W (W workers) ================= *)
+
+(* ---- mn_pingpong: 16 independent pairs, n round trips each ---- *)
+fun spawn_pairs {n:nat} (p: int, n: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
+  if p > 0 then let
+    val c1 = chan_make<int> (1)
+    val c2 = chan_make<int> (1)
+    val a1 = chan_ref<int> (c1) val a2 = chan_ref<int> (c2)
+    val b1 = chan_ref<int> (c1) val b2 = chan_ref<int> (c2)
+    val () = (chan_unref_type<int> (c1); chan_unref_type<int> (c2))
+    val fa = afiber_spawn (llam () => (ping (a1, a2, 0, n);
+      chan_unref_type<int> (a1); chan_unref_type<int> (a2)))
+    val fb = afiber_spawn (llam () => (pong (b1, b2, 0, n);
+      chan_unref_type<int> (b1); chan_unref_type<int> (b2)))
+  in spawn_pairs (p-1, n, list_vt_cons (fa, list_vt_cons (fb, fs))) end
+  else fs
+fun bench_mn_pingpong (total: int): void = let
+  val P = 16
+  val n = total / (2 * P)
+  val t0 = afiber_clock_ns ()
+  val fs = spawn_pairs (P, n, list_vt_nil ())
+  val () = join_all (fs)
+in report ("mn_pingpong", 2 * n * P, t0) end
+
+(* ---- mn_pipeline: 1 source -> cap 128 -> 8 stages -> cap 128 -> main ---- *)
+fun stage (a: !chan_vt(int), b: !chan_vt(int), per: int): void =
+  if per > 0 then let
+    val-~Some_vt(x) = chan_recv<int> (a)
+    val () = chan_send<int> (b, x + 1)
+  in stage (a, b, per-1) end
+fun spawn_stages {n:nat} (a: !chan_vt(int), b: !chan_vt(int), k: int, per: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
+  if k > 0 then let
+    val x = chan_ref<int> (a)
+    val y = chan_ref<int> (b)
+    val f = afiber_spawn (llam () => (stage (x, y, per); chan_unref_type<int> (x); chan_unref_type<int> (y)))
+  in spawn_stages (a, b, k-1, per, list_vt_cons (f, fs)) end else fs
+fun bench_mn_pipeline (n0: int): void = let
+  val K = 8
+  val per = n0 / K
+  val n = per * K
+  val t0 = afiber_clock_ns ()
+  val a = chan_make<int> (128)
+  val b = chan_make<int> (128)
+  val src = chan_ref<int> (a)
+  val fsrc = afiber_spawn (llam () => (produce (src, n); chan_unref_type<int> (src)))
+  val fs = spawn_stages (a, b, K, per, list_vt_cons (fsrc, list_vt_nil ()))
+  val s = consume (b, n, 0)
+  val () = the_sink_ref[] := s
+  val () = join_all (fs)
+  val () = (chan_unref_type<int> (a); chan_unref_type<int> (b))
+in report ("mn_pipeline", n, t0) end
+
+(* ---- mn_cpu: 64 fibers, each iters LCG steps, yielding every 1000 ---- *)
+fun cpu_work (i: int, iters: int, x: ulint): ulint =
+  if i < iters then let
+    val () = if i mod 1000 = 999 then afiber_yield ()
+  in cpu_work (i+1, iters, lcg (x)) end else x
+fun spawn_cpu {n:nat} (k: int, iters: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
+  if k > 0 then let
+    val f = afiber_spawn (llam () => acc_xor (cpu_work (0, iters, g0int2uint_int_ulint (k))))
+  in spawn_cpu (k-1, iters, list_vt_cons (f, fs)) end else fs
+fun bench_mn_cpu (total: int): void = let
+  val K = 64
+  val iters = total / K
+  val t0 = afiber_clock_ns ()
+  val () = join_all (spawn_cpu (K, iters, list_vt_nil ()))
+in report ("mn_cpu", K * iters, t0) end
+
+(* ---- mn_spawn: batches of 1000 joinable fibers, each bumps an atomic counter ---- *)
+fun spawn_cnt {n:nat} (k: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
+  if k > 0 then spawn_cnt (k-1, list_vt_cons (afiber_spawn (llam () => count_atomic ()), fs)) else fs
+fun bench_mn_spawn (n: int): void = let
+  val t0 = afiber_clock_ns ()
+  fun loop (k: int): void =
+    if k > 0 then let
+      val b = min (k, 1000)
+      val () = join_all (spawn_cnt (b, list_vt_nil ()))
+    in loop (k - b) end
+  val () = loop (n)
+  val () = assertloc (count_get () = g0int2int_int_lint (n))
+in report ("mn_spawn", n, t0) end
+
+(* ---- mn_mutex: 32 fibers increment one counter under a mutex ---- *)
+fun mutex_work (m: ptr, k: int): void =
+  if k > 0 then (mx_lock (m); count_plain (); mx_unlock (m); mutex_work (m, k-1))
+fun spawn_mutex {n:nat} (m: ptr, k: int, per: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
+  if k > 0 then spawn_mutex (m, k-1, per, list_vt_cons (afiber_spawn (llam () => mutex_work (m, per)), fs))
+  else fs
+fun bench_mn_mutex (total: int): void = let
+  val F = 32
+  val per = total / F
+  val t0 = afiber_clock_ns ()
+  val m = mx_make ()
+  val () = join_all (spawn_mutex (m, F, per, list_vt_nil ()))
+  val () = assertloc (count_get () = g0int2int_int_lint (per * F))
+  val () = mx_free (m)
+in report ("mn_mutex", per * F, t0) end
+
 implement main0 {n} (argc, argv) = let
   val () = if argc < 2 then (prerrln! ("usage: bench NAME [N]"); exit (1))
   val name = (if argc >= 2 then argv[1] else "") : string
   val n = (if argc >= 3 then g0string2int (argv[2]) else 0) : int
-in
+  val w = (if argc >= 4 then g0string2int (argv[3]) else 1) : int
+  val () = if w > 1 then afiber_workers_start (w)
+  val () =
   if name = "spawn" then bench_spawn (n)
+  else if name = "spawn_cold" then bench_spawn_cold (n)
   else if name = "yield" then bench_yield (n)
   else if name = "pingpong" then bench_pingpong (n)
   else if name = "pipe" then bench_prod ("pipe", 1, n)
@@ -199,5 +327,12 @@ in
   else if name = "chain" then bench_chain (n)
   else if name = "sieve" then bench_sieve (n)
   else if name = "mem" then bench_mem (n)
-  else (prerrln! ("unknown benchmark: ", name, " argc=", argc); exit (1))
+  else if name = "mn_pingpong" then bench_mn_pingpong (n)
+  else if name = "mn_pipeline" then bench_mn_pipeline (n)
+  else if name = "mn_cpu" then bench_mn_cpu (n)
+  else if name = "mn_spawn" then bench_mn_spawn (n)
+  else if name = "mn_mutex" then bench_mn_mutex (n)
+  else (prerrln! ("unknown benchmark: ", name, " argc=", argc); $extfcall(void, "exit", 1))
+in
+  if w > 1 then afiber_workers_stop ()
 end

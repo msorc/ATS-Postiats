@@ -38,6 +38,10 @@
 // current fiber while the channel is full, [chan_recv] while
 // it is empty; [chan_close] wakes every parked fiber, after
 // which sending fails and receiving drains then gives None.
+// With several workers (M:N) every operation runs under a spinlock
+// of the channel, and the reference count is changed under it: a
+// channel can be shared by fibers on different threads. The last
+// [chan_unref] frees the channel after releasing the lock.
 //
 %{#
 #include "contrib/afiber/CATS/afiberchan.cats"
