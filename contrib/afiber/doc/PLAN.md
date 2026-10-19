@@ -378,6 +378,41 @@ messages) but the one spinlock `s->lock` of the global run queue, taken twice pe
 cores (7.8 cycles per instruction at N=4, 75% of the time in `pick_slow` and `wake_mt` spinning on it). The one-worker
 "spawn is 2x slower than Go" was the first batch of fresh stacks averaged into the steady state.
 
+### Step 2 of the speed-up plan (2026-10-19)
+
+Steps A and D of the plan. Tables and commentary: `BENCH/results.md` (before: `BENCH/results_step1.md`). Landed on `afiber-mn`:
+
+- 331c12449 step D, stack slab: `ATSCNTRB_AFIBER_STACK_SLAB` (default 32: one `mmap` per 32 default-size stacks, one `mprotect`
+  per carved stack for its guard page), opt-in `ATSCNTRB_AFIBER_NOGUARD` (no syscall per stack, an overflow is silent
+  corruption), the page size cached, the fiber record in the top 128 bytes of its own stack region (no `malloc`/`free` per
+  spawn), the free-list link moved from the lowest word of the stack to the last word of the region (the second page fault per
+  fiber in `chain` was that write: 2.1 -> 1.07 faults per fiber). `mmap` calls for 30,000 fibers 30,008 -> 946, `mprotect`
+  30,003 unchanged (3 with NOGUARD). New test `POS_slab`; `regress_variants` has NOGUARD and SLAB=1 builds (7 builds).
+- 1ea3a8447 step A, per-worker run queues (the design is in "M:N step A" below): `runnext` plus a 256-slot ring per worker,
+  work stealing, `nspinning`, announce-then-look-again before sleeping. New tests `POS_mn_steal`, `POS_mn_yieldfair`;
+  ThreadSanitizer builds of the M:N tests report nothing.
+- 7f0f800a9 the BENCH binaries depend on the library sources.
+- 5d434af3b `ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS` (default 3000): measured at 3000/500/0 ns at N=4 and 16 on mn_pipeline,
+  mn_pingpong, mn_spawn and mn_cpu, no difference beyond noise; the default stays.
+
+Numbers (idle Ryzen 9 5950X, step 1 -> step 2). One worker: `spawn` 136 -> 88 ns, `spawn_cold` 10.5 -> 6.8 us (Go 734 ns:
+9.2x slower, was 13.4x), `chain` 10.9 -> 7.1 us (Go 1.70 us: 4.2x slower, was 6.4x), memory 4.17 -> 4.03 KB per parked fiber;
+yield, ping-pong, pipe, fan-in and sieve unchanged within noise. M:N: `mn_pingpong` N=2/4/8/16/32 164/326/413/641/1018 ->
+21.8/10.9/5.7/5.1/5.3 ns (faster than Go at every N, 0.12 to 0.33 of its time); `mn_cpu` speedup at N=8/16/32
+3.71x/1.75x/1.35x -> 7.73x/13.96x/19.84x (Go 6.27x/3.26x/2.87x); `mn_spawn` N=2..32 510/817/1554/1659/2079 ->
+346/444/508/516/726 ns (Go 234-288); `mn_pipeline` 140/251/408/353/511 -> 132/302/416/393/448 (not improved); `mn_mutex`
+10.3/22.4/180/454/545 -> 11.0/36.5/207/446/530 (unchanged).
+
+Remaining costs (profile of `mn_pipeline` at N=4): 51% of the cycles in `chan_send_opt` and 37% in `chan_recv` (the channel's
+own spinlock, producer and consumer on different cores), 5.6 cycles per instruction, 2,695 `sched_yield` and 5,922 futex calls
+per 1M items; the scheduler functions together are under 8%. `mn_spawn` at N>=2: the main fiber is pinned to worker 0, a join
+parks it and the child's death wakes it with a futex. Next: (G) the channel (lock-free or contention-tolerant buffer, a
+spinlock that does not `sched_yield` after 100 spins), (H) main on any worker, (I) the mutex at N>=8.
+
+Verification: `make -C contrib/afiber/TEST cleanall regress leakcheck` (22 tests, ASan clean), `regress_variants` (7 builds),
+`stress stress16` (10 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers), `make -C doc -f Makefile_test testall`
+exit 0.
+
 ### Departures from the plan
 
 - Location and license: planned as `libats/afiber*` (GPL header of
@@ -440,13 +475,14 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
 - Stack overflow is a silent SIGSEGV on the guard page; a `sigaltstack`
   handler with a message is a possible improvement. Fibers cannot be
   cancelled; an uncaught exception in a fiber ends the process.
-- M:N: the one global run queue under one spinlock was the measured bottleneck (profile in `BENCH/README.md`): step A
-  (per-worker run queues with a `runnext` slot and work stealing, above) removes it from the common path; the global FIFO
-  remains for ring overflow, sleepers and main. Step D is done too: a stack slab (`ATSCNTRB_AFIBER_STACK_SLAB`, one syscall
-  per fresh stack, opt-in `ATSCNTRB_AFIBER_NOGUARD` for none), the page size cached, the fiber record in the top of its own
-  stack (chain ~11 -> ~7 us, ~3 us without guard; steady spawn 138 -> ~88 ns). The measurements of both are in
-  `BENCH/results.md`. The mutex is no longer FIFO under contention. Also open: the main fiber waits for worker 0 even when other
-  workers are idle; the global arena and plain `ref`s are not
+- M:N: the one global run queue under one spinlock was the measured bottleneck (profile in `BENCH/README.md`); step A
+  (per-worker run queues with a `runnext` slot and work stealing) and step D (stack slab) are done, see "Step 2" above and
+  `BENCH/results.md`: ping-pong 164..1018 -> 5..22 ns at N=2..32 (faster than Go), `mn_cpu` 19.8x at N=32, `chain` ~11 -> ~7 us.
+  The global FIFO remains for ring overflow, sleepers and main. Open: the channel's own spinlock (51% + 37% of the cycles of
+  `mn_pipeline` at N=4, 302 ns per item against Go's 100; the scheduler is under 8%); the main fiber is pinned to worker 0 and
+  waits for it even when other workers are idle (`mn_spawn` at N>=2 is 346-726 ns against 136 at N=1 and Go's 234-288);
+  the mutex at N>=8 (207-530 ns against Go's ~60). The mutex is no longer FIFO under contention. Also open: the global arena
+  and plain `ref`s are not
   thread-safe; `errno`/TLS must not be kept across a blocking call;
   ThreadSanitizer cannot follow a `try` that migrates (it keeps
   `jmp_buf`s per thread), so `POS_mn_exn` does not run under TSan.

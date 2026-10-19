@@ -1,7 +1,7 @@
 # afiber vs Go benchmarks
 
-(The tables below are the one-worker numbers measured before M:N. The current numbers, after step 1 of the
-speed-up plan, are in `results.md`; the M:N run before step 1 (the library at 4552ac427, up to 19% slower on channel
+(The tables below are the one-worker numbers measured before M:N. The current numbers, after step 2 of the
+speed-up plan, are in `results.md`; the run after step 1 is `results_step1.md`; the M:N run before step 1 (the library at 4552ac427, up to 19% slower on channel
 ping-pong at one worker) is in `results_step0.md`.)
 
 `bench.dats` (afiber + afiberchan) and `go/bench.go` run the same eight workloads;
@@ -89,7 +89,7 @@ to change). One benchmark by hand: `./bench_ats mn_pingpong 1600000 4`, `GOMAXPR
 `make bench` also builds with the M:N flags; with `make bench_ats_1n` (the library without
 `_ATS_CCOMP_RUNTIME_TRYWITH_NONE_`), `make bench_ats_single` (`-DATSCNTRB_AFIBER_SINGLE`) and `BEFORE=<binary>`
 (`BEFORE_LABEL=` names its column) `python3 run.py` adds columns for the 1:N build, the SINGLE build and a binary of the
-previous library; a benchmark the `BEFORE=` binary lacks prints "-". Numbers: `results.md` (after step 1), `results_step0.md` (before it); the older one-worker
+previous library; a benchmark the `BEFORE=` binary lacks prints "-". Numbers: `results.md` (after step 2), `results_step1.md` (after step 1), `results_step0.md` (before it); the older one-worker
 numbers: `results_1n.md`.
 
 ### Reading the M:N numbers (2026-10-18, 16-core/32-thread Ryzen 9 5950X; the figures in the bullets are from `results_step0.md`, before step 1)
@@ -115,8 +115,8 @@ numbers: `results_1n.md`.
   that passed 100 rounds. `mn_cpu` stops scaling for the same reason (a yield at N>1 takes the lock twice), and the
   mutex had two layers of it: its own spinlock plus the global queue on every park and wake. Go has a run queue per P,
   a `runnext` slot that runs the just-woken goroutine on the same P (a ping-pong pair stays on one thread), work
-  stealing, and wakes a P only when one is idle and nobody is spinning, so the common case takes no shared lock.
-* **What was done (step 1) and what is next.** Step 1 (commits listed in `results.md`), measured there:
+  stealing, and wakes a P only when one is idle and nobody is spinning, so the common case takes no shared lock. Step A (below) gave afiber the same design and removed this cause; the pipeline's remaining cost is the channel's own lock (51% of cycles in `chan_send_opt`, 37% in `chan_recv` at N=4), not the scheduler (under 8%).
+* **What was done (steps 1 and 2) and what is next.** Step 1 (commits listed in `results_step1.md`), measured there:
   - mutex fast path (one atomic exchange) and a 4x30 `pause` spin before parking, as `sync.Mutex` does: `mn_mutex`
     N=4 82 -> 22 ns (Go 79), N=32 2731 -> 545; the mutex is no longer FIFO under contention. Still 3-9x slower than Go
     from N=8, where a failed spin parks through the global queue;
@@ -126,11 +126,26 @@ numbers: `results_1n.md`.
     29.8, pipe 13.5 ns, the pre-M:N cost; the default build is unchanged against before step 1;
   - benchmark hygiene: warm-up for `spawn`, the `spawn_cold` row, an N=16 column, the SINGLE column.
 
-  Next, in order of payoff. **Step A**, per-worker run queues with a `runnext` slot and work stealing: removes the
-  global lock from the common path (a woken fiber goes to the waker's `runnext`, yield pushes to the local ring,
-  `pick` steals only when dry). Expected, not measured: ping-pong at N>=2 near its N=1 cost (~30-60 ns), `mn_cpu`
-  scaling to the core count, `mn_spawn` flat near 200 ns. **Step D**, a stack slab (one `mmap` for k stacks, each guard
-  `mprotect`ed on first use): one syscall per stack instead of two, chain ~11 -> ~6 us per fiber, `spawn_cold` about
-  halved, no change to the steady state; an opt-in no-guard mode (silent overflow) would take chain to ~1 us. Until step A,
-  M:N pays off for coarse-grained compute fibers (about 10 us or more between scheduler calls) and loses for
-  fine-grained communication: use `afiber_workers_start` only for the first.
+  Step 1 measured the cause above; step 2 (commits and tables in `results.md`) removed it. **Step A**, per-worker run queues
+  (`runnext` slot, 256-slot ring, stealing, Go's wakep/spinning rules; `ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS`, default 3000, was tried
+  at 3000/500/0 ns at N=4 and 16 with no difference beyond noise): the global lock is off the common path. `mn_pingpong`
+  N=2/4/8/16/32 164/326/413/641/1018 -> 21.8/10.9/5.7/5.1/5.3 ns, faster than Go at every N (0.12 to 0.33 of Go's time), 5.7x
+  scaling at N=16; `mn_cpu` speedup at N=8/16/32 3.71x/1.75x/1.35x -> 7.73x/13.96x/19.84x (Go 6.27x/3.26x/2.87x); `mn_spawn`
+  N=2..32 510/817/1554/1659/2079 -> 346/444/508/516/726 ns (Go 234-288). **Step D**, a stack slab (one `mmap` per 32 stacks,
+  one `mprotect` per carved stack, `ATSCNTRB_AFIBER_NOGUARD` for none), the fiber record in its own stack, the free-list link
+  moved off the lowest page: one-worker `spawn` 136 -> 88 ns, `spawn_cold` 10.5 -> 6.8 us (Go 734 ns: 9.2x slower, was 13.4x),
+  `chain` 10.9 -> 7.1 us (Go 1.70: 4.2x slower, was 6.4x), memory 4.17 -> 4.03 KB per parked fiber; yield, ping-pong, pipe,
+  fan-in and sieve unchanged within noise.
+
+  Not improved, and the scheduler is no longer why: `mn_pipeline` (140/251/408/353/511 -> 132/302/416/393/448 ns, Go ~100). Its
+  profile at N=4: 51% of the cycles in `chan_send_opt` and 37% in `chan_recv`, the channel's own spinlock taken by producer and
+  consumer on different cores for every item (5.6 cycles per instruction, 2,695 `sched_yield` and 5,922 futex calls per 1M
+  items); all scheduler functions together are under 8%. `mn_spawn` at N>=2 is held up by the main fiber being pinned to
+  worker 0 (a join parks main, worker 0 idles, the child's death wakes it with a futex); `mn_mutex` is unchanged (N=8..32 207-530
+  ns against Go ~60: the `locked` word bouncing between the two L3 complexes, and the park/wake through the wait queue).
+
+  Next, in order of expected payoff (not measured yet): **G**, the channel: a lock-free or contention-tolerant buffer and a
+  spinlock that does not `sched_yield` after 100 spins when the holder is on another core (`mn_pipeline` at N>=2 near Go's 100
+  ns); **H**, main on any worker, or the benchmark's joins not pinned to main (`mn_spawn` near its N=1 value of 136 ns);
+  **I**, the mutex at N>=8. M:N now pays off for fine-grained communication between independent streams (ping-pong) and
+  compute fibers; a single producer/consumer chain through a channel (the pipeline) still loses to one worker.
