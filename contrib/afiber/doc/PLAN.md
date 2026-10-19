@@ -532,8 +532,9 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
   and spinlock backoff; Go's mutex, "Step 3" above) are done, see `BENCH/results.md`: ping-pong 164..1018 -> 5..22 ns at
   N=2..32 (faster than Go), `mn_cpu` 19.2x at N=32, `chain` ~11 -> ~7 us, `mn_mutex` 14-30 ns at N>=2 (Go 28-73),
   `mn_pipeline` 94-252 ns (Go ~100). The global FIFO remains for ring overflow, sleepers and main. Open: the
-  main fiber is pinned to worker 0 and waits for it even when other workers are idle (`mn_spawn` at N>=2 is 356-726 ns
-  against 135 at N=1 and Go's 203-292); `mn_pipeline` at N>=4 is 1.3x to 2.3x slower than Go because all fibers share two
+  main fiber is pinned to worker 0 (`mn_spawn` at N>=2 was 356-726 ns against 135 at N=1 and Go's 203-292 because worker 0
+  slept while main was parked): pinned, but worker 0 spins (and steals) up to `ATSCNTRB_AFIBER_MAIN_SPIN_NS` = 200 us while
+  main is parked and other workers are busy, then sleeps as before (measured: worker 0 reached that point in about 0.03% of the joins of `mn_spawn`, its ring is never dry, and main's thread is busy ~95% of the wall time, so `mn_spawn` did not change: its cost is main's own spawn/join under contention with the thieves, not wake-up latency); `mn_pipeline` at N>=4 is 1.3x to 2.3x slower than Go because all fibers share two
   channel locks (direct hand-off to a parked receiver is not done); the mutex is not FIFO under contention in the normal
   mode, a waiter that waited 1 ms switches it to FIFO hand-off. Also open: the global arena
   and plain `ref`s are not

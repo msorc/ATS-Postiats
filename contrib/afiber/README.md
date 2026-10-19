@@ -85,7 +85,7 @@ Without it `afiber_workers_start (n > 1)` aborts with a message. Each
 worker has its own run queue (a `runnext` slot and a ring, as in Go's
 scheduler) and idle workers steal half of a busy one's ring; a global
 FIFO takes the overflow and the sleepers. The main fiber stays on the
-main thread. A fiber
+main thread (worker 0 keeps looking for work for up to 200 us while main is parked and the others are busy, instead of sleeping). A fiber
 may resume on another OS thread after any call that can block: do not
 keep `errno` or other thread-local state across one. Shared data needs a
 channel, an `afiber_mutex` (not FIFO under contention: it spins briefly before parking, and only one woken waiter competes at a time, as in Go; after a waiter has waited 1 ms it hands the lock over in FIFO order, the starvation mode) or an `afiber_spin`; the global arena of
