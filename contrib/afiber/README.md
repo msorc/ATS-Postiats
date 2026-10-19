@@ -29,7 +29,16 @@ prelude and of libats can block inside a fiber.
   unreceived items back as a `List_vt(T)`). Linear values move through. A channel is one
   cache-line aligned C object (lock, ring header and wait queues on the first
   line), so that a producer and a consumer on different cores move one line
-  and one slot.
+  and one slot. The common paths are one C call to lock and take the slot and one
+  to wake and unlock (step J); `chan_recv_ref`/`chan_tryrecv_ref`
+  (`x: &T? >> opt(T,b)`, no `Some_vt` node, so no malloc and free per item: use
+  them in hot loops) are `chan_recv`/`chan_tryrecv` without the allocation.
+  `chan_recv_batch<T>(ch, n)` waits for an item, then takes up to `n` under one
+  lock acquisition (nil only when the channel is closed and drained);
+  `chan_send_list<T>(ch, xs)` sends a list in order under one lock acquisition
+  (it releases the lock while it is parked on a full channel) and returns the
+  items that were not sent because the channel is closed. FIFO order holds across
+  batches and single operations.
 - `TEST/`: `make -C TEST testall` (and `leakcheck` with AddressSanitizer).
 - `doc/PLAN.md`: the options analysis, the design, and the status (what is
   implemented, departures from the plan, open items).

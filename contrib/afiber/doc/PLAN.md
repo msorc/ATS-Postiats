@@ -460,6 +460,27 @@ cycles in `chan_send_opt`, 44% in `chan_recv`); `mn_spawn` at N>=2 is the main f
 worker, (G2) direct hand-off to a parked receiver (Go copies the value straight to the receiver) and/or fewer lock
 acquisitions per item for the pipeline at N>=4, (J) the +1.4 ns one-worker ping-pong regression.
 
+Steps J and G2 (channel; MS-2026-10): J. The generated C showed that the accessor calls were not the cost (all are
+`ATSinline` and gcc folds them); what each `chan_recv` paid was the `Some_vt` node: one malloc and one free per item (perf,
+ping-pong: `malloc`+`cfree` 28% of the cycles), and, after a park, one unlock and lock more (`park` returns with the lock
+held, the ATS side unlocked and the retry locked again). Now the common paths are `send_begin` (lock, closed/full check,
+push, return the slot) + `send_end` (wake a receiver, unlock), likewise `recv_begin`/`recv_end` and the `try` forms; the
+retry after a park is `send_recheck`/`recv_recheck` under the lock still held. The `afiber_locked_v` view is threaded
+through a dataview (`sendb_v`/`recvb_v`) indexed by the returned slot (NULL: full/empty, lock held; 1: refused, lock
+released; else: a slot, lock held), so the proof discipline is unchanged. New API (SATS): `chan_recv_ref`/`chan_tryrecv_ref`
+(no node), `chan_recv_batch`/`chan_send_list` (one lock acquisition per batch). `BENCH/bench.dats` receives with
+`chan_recv_ref` now (Go does not allocate either); it also has a hand-run `mn_pipeline_batch` (stages use the batch API,
+not in `run.py`). One worker, before -> after (idle machine): ping-pong 37.0 -> 29.2 ns (SINGLE 32.2 -> 23.8), pipe
+15.5 -> 8.1, fan-in 15.8 -> 8.3, sieve 39.5 -> 35.8 us per prime. M:N `mn_pipeline` N=2/4/8/16: 94.8/135/185/202 ->
+78/108/155/157 ns; `mn_pingpong` 22.9/11.8/6.6/6.9 -> 19.4/10.6/6.2/5.0. With the batch API in the stages
+(`mn_pipeline_batch`, source and sink still per item) 24/48/78/83 ns (N=2/4/8/16; 26 at N=1): 2x to 2.4x better than per
+item, but still not scaling past N=2. perf stat at N=4: 1.89e9 cycles / 4.95e8 instructions before (IPC 0.26), 1.08e9 /
+3.06e8 after (IPC 0.28): the pipeline is bound by the cache-line transfers of the two channel locks, not by instructions.
+Not done (G2 proper): direct hand-off needs the receiver's slot pointer in the fiber record (the scheduler's struct) or a
+lock-free ring; waking the receiver only when the buffer was empty before the push is NOT valid with several parked
+receivers (a second parked receiver would sleep on a non-empty buffer), so the wake keeps the `recvq.head` test. Next: a
+lock-free (or per-end locked) ring so that the producer and the consumer touch different lines.
+
 Verification: `make -C contrib/afiber/TEST cleanall regress leakcheck` (24 tests, ASan clean), `regress_variants` (7 builds),
 `stress stress16` (12 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers), `make -C doc -f Makefile_test testall`
 exit 0; ThreadSanitizer builds of the M:N tests touched report nothing.
