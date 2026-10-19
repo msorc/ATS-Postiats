@@ -26,7 +26,10 @@ prelude and of libats can block inside a fiber.
   reference-counted bounded channels. `chan_make<T>(cap)`, `chan_ref`,
   `chan_send`/`chan_recv` (park while full/empty), `chan_trysend`/
   `chan_tryrecv`, `chan_close`, `chan_unref` (the last owner gets the
-  unreceived items back as a `List_vt(T)`). Linear values move through.
+  unreceived items back as a `List_vt(T)`). Linear values move through. A channel is one
+  cache-line aligned C object (lock, ring header and wait queues on the first
+  line), so that a producer and a consumer on different cores move one line
+  and one slot.
 - `TEST/`: `make -C TEST testall` (and `leakcheck` with AddressSanitizer).
 - `doc/PLAN.md`: the options analysis, the design, and the status (what is
   implemented, departures from the plan, open items).

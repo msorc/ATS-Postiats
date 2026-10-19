@@ -163,10 +163,16 @@ wrapper; `afiber_yield`, `afiber_join`, `afiber_detach`, `afiber_get_id`,
 `chan_size`, `chan_is_closed`, `chan_close` (idempotent, wakes everyone),
 `chan_send_opt` (`Some_vt(x)` back if closed), `chan_send` (fatal if
 closed), `chan_recv` (`None_vt` once closed and drained), `chan_trysend`,
-`chan_tryrecv`. The record is a `datavtype` with the capacity, the
-reference count, the closed flag, the buffer and two wait queues. The
-buffer is a C ring buffer of `cap` slots of `sizeof(a)` bytes; values move
-in and out with `$UN.ptr0_set<a>`/`$UN.ptr0_get<a>`. Loops re-check the
+`chan_tryrecv`. Since step G (MS-2026-10) `chan_vtype` is the pointer to one
+C object (`atscntrb_afiberchan_t`, 64-byte aligned, one allocation): the
+first cache line holds the spinlock, the closed flag, the ring `head` and
+`n`, the two embedded wait queues and the reference count; the second line
+has the read-mostly `cap` and `tsz`; the `cap` slots of `sizeof(a)` bytes
+follow. A send on one core and a receive on another so move the first line
+and one slot, not the six separate allocations of the first version. The
+ATS code calls small C accessors (`chan_c_lock`, `chan_c_push`, ...); the
+values move in and out with `$UN.ptr0_set<a>`/`$UN.ptr0_get<a>` on the
+slot pointers. Loops re-check the
 state after every wakeup, so wake-ups may be spurious.
 
 ### Tests: `TEST/`
@@ -270,7 +276,7 @@ no change to `src/`.
   `wake_one`, `wake_all`, `is_empty` take `!afiber_locked_v`.
 - `afiber_mutex` (parking, fiber-level): `make`, `free`, `lock`, `unlock`,
   built on a spin + a waitq.
-- Channels: a spinlock field in `chan_struct`; every operation runs under
+- Channels: a spinlock in the channel object; every operation runs under
   it (including `rfcnt` changes).
 - Programs that use workers are compiled with `-pthread
   -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_` (and `-D_GNU_SOURCE`).
@@ -422,8 +428,9 @@ exit 0.
 - The channel buffer was planned on `libats/deqarray`. Because template
   implementations are not visible transitively, a user staloading only the
   channel module could not compile; the buffer is a small C ring buffer in
-  `CATS/afiberchan.cats` instead, and the package depends on nothing but
-  the prelude.
+  `CATS/afiberchan.cats` instead (since step G the whole channel object,
+  with the lock and the wait queues, is that C struct), and the package
+  depends on nothing but the prelude.
 - `-D_ATS_CCOMP_EXCEPTION_NONE_` does not build with the stock runtime at
   all (`pats_ccomp_runtime.c` references the exception type), so the guard
   in `afiber.cats` is checked with a plain C syntax-only compile, not with
@@ -478,8 +485,8 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
 - M:N: the one global run queue under one spinlock was the measured bottleneck (profile in `BENCH/README.md`); step A
   (per-worker run queues with a `runnext` slot and work stealing) and step D (stack slab) are done, see "Step 2" above and
   `BENCH/results.md`: ping-pong 164..1018 -> 5..22 ns at N=2..32 (faster than Go), `mn_cpu` 19.8x at N=32, `chain` ~11 -> ~7 us.
-  The global FIFO remains for ring overflow, sleepers and main. Open: the channel's own spinlock (51% + 37% of the cycles of
-  `mn_pipeline` at N=4, 302 ns per item against Go's 100; the scheduler is under 8%); the main fiber is pinned to worker 0 and
+  The global FIFO remains for ring overflow, sleepers and main. Step G is done (see "Step G" below): `mn_pipeline` at N=4 302 -> ~142 ns per item. Open: direct hand-off to a parked
+  receiver (not done); the remaining `mn_pipeline` cost at N>=8 is contention on the two channel locks (8 stages on 2 channels); the main fiber is pinned to worker 0 and
   waits for it even when other workers are idle (`mn_spawn` at N>=2 is 346-726 ns against 136 at N=1 and Go's 234-288);
   the mutex at N>=8 was 207-530 ns against Go's ~60 (step I: the state word with locked/woken/starving bits and the waiter count, as in Go's sync.Mutex; N=8..32 about 24 ns, one park per ~170 lock/unlock pairs). The mutex is not FIFO under contention in the normal mode; a waiter that waited 1 ms switches it to a FIFO hand-off (starvation mode). Also open: the global arena
   and plain `ref`s are not
@@ -489,3 +496,18 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
 - Without GNU C (`__attribute__((weak))`) the scheduler falls back to one
   instance per compilation unit, which is wrong for programs that spawn in
   one unit and yield in another.
+
+### Step G: one compact channel object, spinlock backoff (MS-2026-10)
+
+- `CATS/afiberchan.cats`: the channel is one aligned C struct (layout in "Channels" above); the ATS `chan_vtype` is the
+  pointer to it (no `datavtype` box, no other allocation). `wake_one` on an empty wait queue is a test of `head` on the
+  line the sender already owns.
+- `atscntrb_afiber__spin_lock` (all our locks: channel, mutex, scheduler): `pause` with exponential backoff (1, 2, ... up
+  to `ATSCNTRB_AFIBER_SPIN_MAXR` = 256 pauses per round) for `ATSCNTRB_AFIBER_SPIN_PAUSES` = 2000 pauses in all, and only
+  then `sched_yield` in the loop (the holder may be preempted). `-DATSCNTRB_AFIBER_SPIN_OLD` restores 100 pauses then yield.
+  Measured at N=4 (ns per item, 1M items): old layout + old policy 286; compact layout + old policy 297 (the layout alone
+  does not help while the waiters yield); compact layout + new policy 142. A longer spin (1024 per round, 100,000 in all)
+  is a little faster on a free machine (134) but 30 times slower with 4 workers pinned to one CPU, so it was not kept.
+  `sched_yield` calls per 1M items at N=4: 2,398 -> 56; futex calls 4,079 -> ~2,100-3,000.
+- Not done: direct hand-off (a parked receiver gets the value stored in its slot, the sender makes it runnable): the
+  remaining cost is the contention on the lock, which a hand-off does not remove, and N=4 is already near Go's 100.

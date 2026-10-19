@@ -449,16 +449,36 @@ atscntrb_afiber__mt()
 #endif
 } // end of [atscntrb_afiber__mt]
 
+/*
+** MS-2026-10 (step G): the holder of a lock of ours (channel, mutex,
+** scheduler) is a running thread and holds it for tens of ns. The
+** waiter spins with [pause], the count doubling up to 256 per round,
+** for ATSCNTRB_AFIBER_SPIN_PAUSES pauses (a few us) before the first
+** [sched_yield] (a syscall that costs more than the wait, and that can
+** deschedule the spinner for a time slice); after that it yields in
+** the loop (the holder may be preempted). -DATSCNTRB_AFIBER_SPIN_OLD
+** brings back the old policy (100 pauses, then yield) for comparison.
+*/
+#ifndef ATSCNTRB_AFIBER_SPIN_MAXR
+#define ATSCNTRB_AFIBER_SPIN_MAXR 256
+#endif
+#ifndef ATSCNTRB_AFIBER_SPIN_PAUSES
+#define ATSCNTRB_AFIBER_SPIN_PAUSES 2000
+#endif
 ATSinline()
 void
 atscntrb_afiber__spin_lock
   (int *p)
 {
   unsigned n = 0 ;
+#ifndef ATSCNTRB_AFIBER_SPIN_OLD
+  unsigned r = 1, i ;
+#endif
   if (!atscntrb_afiber__mt()) { *p = 1 ; return ; }
   for ( ; ; ) {
     if (!__atomic_load_n(p, __ATOMIC_RELAXED)
         && !__atomic_exchange_n(p, 1, __ATOMIC_ACQUIRE)) return ;
+#ifdef ATSCNTRB_AFIBER_SPIN_OLD
     n += 1 ;
     if (n < 100) {
 #if defined(__x86_64__) || defined(__i386__)
@@ -467,6 +487,21 @@ atscntrb_afiber__spin_lock
     } else {
       sched_yield() ;
     }
+#else
+    if (n < ATSCNTRB_AFIBER_SPIN_PAUSES) {
+      for (i = 0 ; i < r ; i++) {
+#if defined(__x86_64__) || defined(__i386__)
+        __asm__ volatile ("pause" ::: "memory") ;
+#elif defined(__aarch64__)
+        __asm__ volatile ("isb" ::: "memory") ;
+#endif
+      }
+      n += r ;
+      if (r < ATSCNTRB_AFIBER_SPIN_MAXR) r <<= 1 ;
+    } else {
+      sched_yield() ;
+    }
+#endif
   }
 } // end of [atscntrb_afiber__spin_lock]
 
