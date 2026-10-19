@@ -59,7 +59,7 @@
 typedef
 struct {
   /* the first line: hot */
-  int lock ; // the spinlock (it must be the first member: see [lock_ptr] uses)
+  int lock ; // the spinlock
   int closed ;
   size_t head ; // the oldest item
   size_t n ; // the number of items
@@ -219,14 +219,16 @@ ATSinline()
 void
 atscntrb_afiberchan_park_recv (atstype_ptr c0)
 {
-  atscntrb_afiber_waitq_park((atstype_ptr)&(((atscntrb_afiberchan_t*)c0)->recvq), c0) ;
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atscntrb_afiber_waitq_park((atstype_ptr)&(c->recvq), (atstype_ptr)&(c->lock)) ;
 }
 
 ATSinline()
 void
 atscntrb_afiberchan_park_send (atstype_ptr c0)
 {
-  atscntrb_afiber_waitq_park((atstype_ptr)&(((atscntrb_afiberchan_t*)c0)->sendq), c0) ;
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atscntrb_afiber_waitq_park((atstype_ptr)&(c->sendq), (atstype_ptr)&(c->lock)) ;
 }
 
 ATSinline()
