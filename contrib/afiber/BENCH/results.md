@@ -1,68 +1,76 @@
-# Benchmark results after step 2 of the speed-up plan (one worker and M:N)
+# Benchmark results after step 3 of the speed-up plan (one worker and M:N)
 
-Measured 2026-10-19 about 09:00 local, on: AMD Ryzen 9 5950X (16 cores, 32 threads, `nproc` = 32),
+Measured 2026-10-19 about 12:20 local, on: AMD Ryzen 9 5950X (16 cores, 32 threads, `nproc` = 32),
 Linux 7.1.13-2-MANJARO, gcc 16.2.1 `-O2 -pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_`, go 1.27.0. Median of 7 runs for the
 one-worker suite, 5 for the M:N suite. The machine was idle. All numbers are from this one machine, the same one as
-`results_step1.md`. N = 32 means 32 hardware threads (16 physical cores with SMT), not 32 cores.
+`results_step2.md`. N = 32 means 32 hardware threads (16 physical cores with SMT), not 32 cores.
 
-The run after step 1 is in `results_step1.md` (before it: `results_step0.md`); "step 1" below is the library at 0988553ec,
-built as the `BEFORE=` binary of the one-worker suite (column "afiber step 1"; the step-1 M:N numbers are those of
-`results_step1.md`). Step 2 of the plan in `doc/PLAN.md` (steps A and D) is these commits on `afiber-mn`:
+The run after step 2 is in `results_step2.md` (then `results_step1.md`, `results_step0.md`); "step 2" below is the library at
+b8c12e43e, built as the `BEFORE=` binary of the one-worker suite (column "afiber step 2"; the step-2 M:N numbers are those of
+`results_step2.md`). Step 3 of the plan in `doc/PLAN.md` (steps G and I) is these commits on `afiber-mn`:
 
-- 331c12449 step D, stack slab: `ATSCNTRB_AFIBER_STACK_SLAB` (default 32: one `mmap` per 32 default-size stacks; each carved stack
-  pays one `mprotect` for its guard page instead of `mmap` + `mprotect`), `ATSCNTRB_AFIBER_NOGUARD` (opt-in, no guard page: no
-  syscall per stack from the slab, an overflow is silent corruption), `sysconf(_SC_PAGESIZE)` cached, the fiber record in the
-  top 128 bytes of its own stack region (no `malloc`/`free` per spawn), the stack free-list link moved from the lowest word of
-  the stack to the last word of the region. The second page fault per fiber in `chain` was that link write at the lowest page:
-  faults per fiber 2.1 -> 1.07. `mmap` calls for 30,000 fibers 30,008 -> 946; `mprotect` 30,003 unchanged (3 with NOGUARD).
-  New test `POS_slab`; `regress_variants` has NOGUARD and SLAB=1 builds (7 builds).
-- 1ea3a8447 step A, per-worker run queues: a `runnext` slot and a 256-slot ring per worker (Go's runq), a woken fiber goes to
-  the waker's `runnext`, a yielder to the ring tail, `pick` = main slot -> `runnext` -> ring -> global FIFO -> one stealing round,
-  `runnext` stolen only in the last of 4 spinning rounds after a 3 us wait, `nspinning` (at most one idle worker woken per kick),
-  announce-then-look-again before an idle worker sleeps. The global scheduler lock is off the common path. New tests
-  `POS_mn_steal`, `POS_mn_yieldfair`; ThreadSanitizer builds of the M:N tests report nothing.
-- 7f0f800a9 BENCH Makefile: the binaries depend on the library sources (they were stale after a library change).
-- 5d434af3b `ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS` (default 3000): the `runnext` wait is a knob. Measured at 3000/500/0 ns, N=4 and
-  N=16: mn_pipeline 276/259/278 and 382/377/344 ns, mn_pingpong 11.0/11.2/11.2 and 5.5/6.0/7.5, mn_spawn 454/462/420 and
-  556/644/475, mn_cpu the same: no difference beyond noise, the default stays.
+- df816db98 step I, the mutex: `afiber_mutex` is Go's `sync.Mutex` state machine adapted to fibers. One atomic word: bit 0
+  locked, bit 1 woken (a waiter is awake and competing, so unlock wakes nobody else), bit 2 starving (after 1 ms of waiting the
+  lock is handed to the head of the wait queue, FIFO), the waiter count in bits 3 and up. The wait queue is the semaphore; its
+  internal spinlock guards only the queue. Fast path: one CAS. Slow path: 4x30 `pause` while held and not starving, then park.
+  The lost-wake-up argument is now a single CAS (announce and look in one word). Before, every unlock woke one waiter, the woken
+  fibers lost to spinning bargers and re-parked by the dozen (a fiber switch each), and the internal spinlock was contended by
+  all threads. After: at N=8 and N=32, 500,000 operations took about 495,000 slow-path entries but only about 2,900 parks (0.6%).
+  New test `POS_mn_mutex32` (32 fibers x 50,000, a yield every 1000th inside the lock and two 2 ms holders, so starvation mode is
+  entered and left; the longest wait seen 2-9 ms).
+- af6d5bded step G, the channel: one 64-byte-aligned C object (`atscntrb_afiberchan_t` in `CATS/afiberchan.cats`): the first line
+  holds the lock, the closed flag, the ring head and count, both wait queues and the refcount; the second line the read-mostly
+  capacity and slot size; the slots are in the same allocation. Before, the lock, the ring header, the data and the two wait queues
+  were separate mallocs, and a send on one core with a receive on another transferred 4-5 cache lines each. The ATS side
+  (`DATS/afiberchan.dats`) is `assume chan_vtype(a) = ptr` with small C accessors; the API in `SATS/afiberchan.sats` is unchanged.
+  Also the shared spinlock (`atscntrb_afiber__spin_lock`, used by channels, the mutex queue and the scheduler lock) now spins with
+  `pause` and doubling backoff (up to `ATSCNTRB_AFIBER_SPIN_MAXR` = 256 per round) for `ATSCNTRB_AFIBER_SPIN_PAUSES` = 2000 pauses
+  before its first `sched_yield`, instead of 100 pauses and then yield; `-DATSCNTRB_AFIBER_SPIN_OLD` restores the old policy.
+  Measured on `mn_pipeline` at N=4 (the step-G measurement, 1M items): compact channel alone 286 -> 297 ns (no gain); compact
+  channel + new spin policy 142 ns; cycles per instruction 5.4 -> 3.3; `sched_yield` calls 2,398 -> 56 per 1M items; futex calls
+  4,079 -> about 2,500. Spin variants tried (cap per round / pauses before yield): 1 (no backoff) 380 ns; 8 210; 64/2000 150;
+  256/2000 142 (kept); 256/20,000 140; 1024/100,000 134 but 30x slower when all workers are pinned to one CPU (`taskset -c 0`),
+  so rejected. The kept policy is somewhat slower than the old one when pinned to one CPU, which is not a configuration the M:N
+  scheduler is for. New test `POS_mn_pipeline` (4-stage chain over capacity-2 channels, 100,000 items, a close with parked
+  receivers and a trysend on a full channel).
+- 65d4b6688 cleanup: the channel's park wrappers pass the lock field explicitly.
 
-Verification of the merged tree: `make -C contrib/afiber/TEST cleanall regress leakcheck` (22 tests, ASan clean),
-`regress_variants` (7 builds), `stress stress16` (10 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers),
-`make -C doc -f Makefile_test testall` exit 0.
+Verification of the merged tree: `make -C contrib/afiber/TEST cleanall regress leakcheck` (24 tests, ASan clean),
+`regress_variants` (7 builds), `stress stress16` (12 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers),
+`make -C doc -f Makefile_test testall` exit 0. ThreadSanitizer builds of the M:N tests touched by steps G and I report nothing.
 
-## One-worker suite (`make bench`, with `bench_ats_single` built and `BEFORE=` the step-1 binary)
+## One-worker suite (`make bench`, with `bench_ats_single` built and `BEFORE=` the step-2 binary)
 
 Columns: `afiber` is the new library, default build (one worker, no `afiber_workers_start`); `afiber SINGLE build` is
-compiled with `-DATSCNTRB_AFIBER_SINGLE`; `afiber step 1` is the library at 0988553ec.
+compiled with `-DATSCNTRB_AFIBER_SINGLE`; `afiber step 2` is the library at b8c12e43e. Units: ns per op; `spawn_cold` and
+`chain` are ns per fiber (6694 ns = 6.7 us); `sieve` is ns per prime (40052 ns = 40.1 us).
 
-| benchmark | ops | afiber ns/op | afiber SINGLE build ns/op | afiber step 1 ns/op | go P=1 ns/op | go P=32 ns/op | afiber vs go P=1 |
+| benchmark | ops | afiber ns/op | afiber SINGLE build ns/op | afiber step 2 ns/op | go P=1 ns/op | go P=32 ns/op | afiber vs go P=1 |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| spawn | 200000 | 87.9 | 79.3 | 136.2 | 241.1 | 206.0 | 2.74x faster |
-| spawn_cold | 10000 | 6755.2 | 6607.6 | 10503.0 | 734.0 | 301.9 | 9.20x slower |
-| yield | 1000000 | 17.3 | 14.9 | 17.5 | 68.5 | 114.9 | 3.97x faster |
-| pingpong | 1000000 | 35.8 | 30.0 | 34.9 | 144.6 | 143.7 | 4.04x faster |
-| pipe | 5000000 | 16.2 | 13.4 | 15.4 | 34.7 | 35.8 | 2.14x faster |
-| fanin | 5000000 | 16.3 | 13.6 | 15.8 | 34.6 | 49.5 | 2.12x faster |
-| chain | 30000 | 7067.3 | 7060.8 | 10901.9 | 1700.6 | 1372.4 | 4.16x slower |
-| sieve | 1500 | 46549.8 | 41024.5 | 46379.4 | 111772.4 | 24483.2 | 2.40x faster |
+| spawn | 200000 | 87.5 | 77.6 | 87.8 | 245.6 | 236.7 | 2.80x faster |
+| spawn_cold | 10000 | 6693.8 | 6709.2 | 6735.0 | 774.8 | 299.6 | 8.64x slower |
+| yield | 1000000 | 17.9 | 14.7 | 17.3 | 69.0 | 119.1 | 3.85x faster |
+| pingpong | 1000000 | 37.0 | 31.9 | 35.6 | 145.5 | 142.4 | 3.93x faster |
+| pipe | 5000000 | 15.1 | 12.8 | 16.1 | 35.1 | 36.2 | 2.33x faster |
+| fanin | 5000000 | 15.4 | 12.8 | 16.4 | 35.1 | 50.3 | 2.27x faster |
+| chain | 30000 | 6984.3 | 6987.6 | 7038.8 | 1685.0 | 1382.6 | 4.15x slower |
+| sieve | 1500 | 40052.2 | 35371.0 | 46455.4 | 111509.7 | 26009.2 | 2.78x faster |
 
-| memory (parked fibers) | tasks | afiber KB/task | afiber SINGLE build KB/task | afiber step 1 KB/task | go P=1 KB/task | go P=32 KB/task |
+| memory (parked fibers) | tasks | afiber KB/task | afiber SINGLE build KB/task | afiber step 2 KB/task | go P=1 KB/task | go P=32 KB/task |
 |---|---:|---:|---:|---:|---:|---:|
-| mem | 30000 | 4.03 | 4.03 | 4.17 | 2.71 | 3.20 |
+| mem | 30000 | 4.03 | 4.03 | 4.03 | 2.71 | 3.20 |
 
-One worker, against step 1 (the "afiber step 1" column, rerun in this session):
+One worker, against step 2 (the "afiber step 2" column, rerun in this session):
 
-* The stack path got faster, everything else is unchanged. `spawn` (steady state, stacks from the free list) 136.2 -> 87.9 ns
-  (the SINGLE build 126.0 -> 79.3): no `malloc`/`free` of the fiber record any more. `spawn_cold` (10,000 fibers on fresh stacks)
-  10.5 -> 6.8 us per fiber (6755 ns; Go 734 ns: 9.2x slower, was 13.4x in `results_step1.md`). `chain` (30,000 live fibers, all
-  stacks fresh) 10.9 -> 7.1 us (7067 ns; Go 1.70 us: 4.2x slower, was 6.4x): one syscall per carved stack instead of two, and
-  one page fault per fiber (1.07) instead of two. Memory 4.17 -> 4.03 KB per parked fiber (the record lives in the stack;
-  Go 2.71).
-* yield, ping-pong, pipe, fan-in and sieve are unchanged within noise: 17.3 / 35.8 / 16.2 / 16.3 / 46.5 us per prime against
-  17.5 / 34.9 / 15.4 / 15.8 / 46.4 in the step-1 column. Pipe and fan-in read 0.8 and 0.5 ns higher than the step-1 column; that is
-  inside the run-to-run spread we have seen, and the SINGLE build, which has the same code, is unchanged at 13.4 / 13.6
-  (13.5 / 13.6 in `results_step1.md`). The default build still pays the M:N checks over the SINGLE build (yield 17.3 vs 14.9).
-* The remaining one-worker gap to Go is the fresh-stack cost: what is left of the 6.8 us per fiber is mostly the one `mprotect` per stack and the first touch of its page (not profiled); `-DATSCNTRB_AFIBER_NOGUARD` removes the syscall at the price of the guard page.
+* The channel benchmarks got a little faster: pipe 16.1 -> 15.1 ns, fan-in 16.4 -> 15.4, sieve 46.5 -> 40.1 us per prime (the
+  SINGLE build 35.4). The compact channel object means fewer cache lines per channel operation even on one core.
+* Ping-pong is a little slower: 35.6 -> 37.0 ns (+1.4); the SINGLE build 30.0 -> 31.9 (+1.9). Both builds moved the same way, and the
+  SINGLE build has no M:N code, so this is probably real, not noise: most likely the accessor calls in the new ATS channel code on
+  a path that does two channel operations per round trip. A thing to look at (step J below), not a blocker.
+* yield 17.3 -> 17.9: the library's yield did not change, so this is noise (the SINGLE build: 14.9 -> 14.7).
+* spawn (87.5), spawn_cold (6.7 us per fiber), chain (7.0 us per fiber) and memory (4.03 KB per parked fiber) are unchanged
+  against step 2 (87.8 / 6.7 / 7.0 / 4.03). Go's rows moved by a few percent between the two sessions (Go P=1 spawn 241 -> 246 ns,
+  spawn_cold 734 -> 775), so the "vs go" column of this run is not comparable digit for digit with `results_step2.md`.
 
 ## M:N suite (`make benchmn`)
 
@@ -75,75 +83,71 @@ ns per op, median of 5 runs (afiber: N workers; go: GOMAXPROCS=N)
 
 | benchmark | impl | N=1 | N=2 | N=4 | N=8 | N=16 | N=32 |
 |---|---|---:|---:|---:|---:|---:|---:|
-| mn_pingpong | afiber | 28.9 | 21.8 | 10.9 | 5.7 | 5.1 | 5.3 |
-| mn_pingpong | go | 144.6 | 102.3 | 70.5 | 46.9 | 39.5 | 16.0 |
-| mn_pipeline | afiber | 32.1 | 132.0 | 302.4 | 416.2 | 392.8 | 448.2 |
-| mn_pipeline | go | 74.0 | 98.1 | 100.0 | 105.9 | 110.1 | 108.6 |
+| mn_pingpong | afiber | 28.4 | 22.1 | 11.2 | 5.8 | 4.7 | 5.7 |
+| mn_pingpong | go | 144.7 | 102.5 | 69.5 | 47.9 | 40.7 | 15.7 |
+| mn_pipeline | afiber | 30.9 | 94.0 | 135.7 | 186.5 | 192.5 | 252.2 |
+| mn_pipeline | go | 74.4 | 98.9 | 101.2 | 108.2 | 111.6 | 109.2 |
 | mn_cpu | afiber | 1.2 | 0.6 | 0.3 | 0.2 | 0.1 | 0.1 |
 | mn_cpu | go | 1.9 | 1.0 | 0.5 | 0.3 | 0.6 | 0.6 |
-| mn_spawn | afiber | 135.8 | 345.7 | 443.5 | 507.9 | 515.9 | 725.9 |
-| mn_spawn | go | 229.8 | 233.7 | 286.2 | 277.1 | 269.0 | 287.7 |
-| mn_mutex | afiber | 1.9 | 11.0 | 36.5 | 207.4 | 445.8 | 530.4 |
-| mn_mutex | go | 4.6 | 25.4 | 77.9 | 63.2 | 59.8 | 59.4 |
+| mn_spawn | afiber | 134.6 | 356.4 | 482.7 | 513.7 | 541.9 | 725.7 |
+| mn_spawn | go | 225.5 | 247.1 | 203.1 | 291.8 | 255.9 | 254.2 |
+| mn_mutex | afiber | 1.6 | 14.0 | 21.6 | 29.8 | 25.1 | 24.3 |
+| mn_mutex | go | 4.6 | 27.6 | 72.7 | 59.5 | 58.0 | 59.0 |
 
 speedup of wall time vs the same implementation at N=1 (above 1 = faster)
 
 | benchmark | impl | N=1 | N=2 | N=4 | N=8 | N=16 | N=32 |
 |---|---|---:|---:|---:|---:|---:|---:|
-| mn_pingpong | afiber | 1.00 | 1.33 | 2.66 | 5.08 | 5.67 | 5.49 |
-| mn_pingpong | go | 1.00 | 1.41 | 2.05 | 3.08 | 3.66 | 9.05 |
-| mn_pipeline | afiber | 1.00 | 0.24 | 0.11 | 0.08 | 0.08 | 0.07 |
-| mn_pipeline | go | 1.00 | 0.75 | 0.74 | 0.70 | 0.67 | 0.68 |
-| mn_cpu | afiber | 1.00 | 1.98 | 3.93 | 7.73 | 13.96 | 19.84 |
-| mn_cpu | go | 1.00 | 1.90 | 3.69 | 6.27 | 3.26 | 2.87 |
-| mn_spawn | afiber | 1.00 | 0.39 | 0.31 | 0.27 | 0.26 | 0.19 |
-| mn_spawn | go | 1.00 | 0.98 | 0.80 | 0.83 | 0.85 | 0.80 |
-| mn_mutex | afiber | 1.00 | 0.17 | 0.05 | 0.01 | 0.00 | 0.00 |
-| mn_mutex | go | 1.00 | 0.18 | 0.06 | 0.07 | 0.08 | 0.08 |
+| mn_pingpong | afiber | 1.00 | 1.29 | 2.53 | 4.90 | 6.06 | 4.96 |
+| mn_pingpong | go | 1.00 | 1.41 | 2.08 | 3.02 | 3.55 | 9.23 |
+| mn_pipeline | afiber | 1.00 | 0.33 | 0.23 | 0.17 | 0.16 | 0.12 |
+| mn_pipeline | go | 1.00 | 0.75 | 0.74 | 0.69 | 0.67 | 0.68 |
+| mn_cpu | afiber | 1.00 | 1.99 | 3.92 | 7.82 | 13.34 | 19.19 |
+| mn_cpu | go | 1.00 | 1.90 | 3.70 | 6.38 | 3.27 | 2.88 |
+| mn_spawn | afiber | 1.00 | 0.38 | 0.28 | 0.26 | 0.25 | 0.19 |
+| mn_spawn | go | 1.00 | 0.91 | 1.11 | 0.77 | 0.88 | 0.89 |
+| mn_mutex | afiber | 1.00 | 0.12 | 0.07 | 0.05 | 0.06 | 0.07 |
+| mn_mutex | go | 1.00 | 0.17 | 0.06 | 0.08 | 0.08 | 0.08 |
 
 afiber time / go time at the same N (above 1 = afiber slower)
 
 | benchmark | N=1 | N=2 | N=4 | N=8 | N=16 | N=32 |
 |---|---:|---:|---:|---:|---:|---:|
-| mn_pingpong | 0.20 | 0.21 | 0.15 | 0.12 | 0.13 | 0.33 |
-| mn_pipeline | 0.43 | 1.35 | 3.02 | 3.93 | 3.57 | 4.13 |
-| mn_cpu | 0.65 | 0.62 | 0.61 | 0.53 | 0.15 | 0.09 |
-| mn_spawn | 0.59 | 1.48 | 1.55 | 1.83 | 1.92 | 2.52 |
-| mn_mutex | 0.42 | 0.43 | 0.47 | 3.28 | 7.45 | 8.93 |
+| mn_pingpong | 0.20 | 0.22 | 0.16 | 0.12 | 0.12 | 0.37 |
+| mn_pipeline | 0.42 | 0.95 | 1.34 | 1.72 | 1.72 | 2.31 |
+| mn_cpu | 0.65 | 0.62 | 0.61 | 0.53 | 0.16 | 0.10 |
+| mn_spawn | 0.60 | 1.44 | 2.38 | 1.76 | 2.12 | 2.85 |
+| mn_mutex | 0.35 | 0.51 | 0.30 | 0.50 | 0.43 | 0.41 |
 
-Against step 1 (`results_step1.md`) and against Go:
+Against step 2 (`results_step2.md`) and against Go:
 
-* **Ping-pong and compute scale now (step A).** `mn_pingpong` N=2/4/8/16/32: 164 / 326 / 413 / 641 / 1018 -> 21.8 / 10.9 / 5.7 /
-  5.1 / 5.3 ns per message. It is faster than Go at every N (Go 102 / 70.5 / 46.9 / 39.5 / 16.0; afiber/Go 0.21 / 0.15 / 0.12 / 0.13 /
-  0.33) and scales 5.7x at N=16 (5.5x at N=32): a woken fiber runs on the waker's worker through `runnext`, so each of the 16
-  pairs stays on one core and the 16 pairs are 16 independent streams. `mn_cpu` speedup at N=8/16/32: 3.71x / 1.75x / 1.35x ->
-  7.73x / 13.96x / 19.84x (Go 6.27x / 3.26x / 2.87x). Go's `Gosched` goes through its global queue and stops scaling at 8;
-  afiber's yield stays on the worker's ring. In absolute time `mn_cpu` at N=16/32 is 0.1 ns per step, 0.15 and 0.09 of Go's time.
-* **Spawn+join is better but not flat.** `mn_spawn` N=2/4/8/16/32: 510 / 817 / 1554 / 1659 / 2079 -> 346 / 444 / 508 / 516 / 726 ns.
-  Still 1.5-2.5x slower than Go (234-288 ns, flat) and 2.5-5.3x its own N=1 value (136 ns). The cause is the pinned main fiber:
-  main's stack is the main thread's, so it runs only on worker 0. Each `join` of a fiber that is not done parks main, worker 0
-  runs dry and idles, and the death of the fiber on another worker wakes main through the main slot and a condvar signal (a futex)
-  to worker 0 (about one futex per 13 spawns in a `perf` profile of this benchmark).
-* **Pipeline did not improve.** `mn_pipeline` N=2/4/8/16/32: 140 / 251 / 408 / 353 / 511 -> 132 / 302 / 416 / 393 / 448 ns (Go
-  98-110 ns); 1.35x to 4.13x slower than Go at N>=2. The profile below says why: the cost moved from the scheduler to the channel.
-* **Mutex unchanged.** `mn_mutex` N=2/4/8/16/32: 10.3 / 22.4 / 180 / 454 / 545 -> 11.0 / 36.5 / 207 / 446 / 530 ns (Go 25.4 / 77.9 / 63.2
-  / 59.8 / 59.4). N=2/4 read slightly worse than step 1 (11.0 / 36.5 against 10.3 / 22.4), within the spread of a contended mutex;
-  still faster than Go up to N=4 and 3.3x to 8.9x slower from N=8, where the `locked` word bounces between the two L3 complexes and
-  every park/wake goes through the wait queue.
+* **The mutex now beats Go at every N (step I).** `mn_mutex` N=2/4/8/16/32: 11.0 / 36.5 / 207 / 446 / 530 -> 14.0 / 21.6 / 29.8 /
+  25.1 / 24.3 ns (Go 27.6 / 72.7 / 59.5 / 58.0 / 59.0). afiber/Go is 0.51 / 0.30 / 0.50 / 0.43 / 0.41 (0.35 at N=1): 2-3x faster
+  than Go everywhere, where step 2 was 3.3x to 8.9x slower from N=8. N=2 is 3 ns slower than step 2: a CAS fast path instead of an
+  exchange, and the spread of a contended mutex. The cause of the old cost is gone: at N=8 and N=32 only 0.6% of the slow-path
+  entries park.
+* **The pipeline is much better, still not Go's (step G).** `mn_pipeline` N=2/4/8/16/32: 132 / 302 / 416 / 393 / 448 -> 94.0 / 135.7 /
+  186.5 / 192.5 / 252.2 ns (Go 98.9 / 101.2 / 108.2 / 111.6 / 109.2). At N=2 afiber is at Go's cost (0.95); from N=4 it is still
+  1.3x to 2.3x slower (was 3.0x to 4.1x). It does not scale (0.33 to 0.12 of its N=1 speed; Go 0.75 to 0.68): 10 fibers share two
+  channels, so every item takes the same two channel locks, see the profile below. At N=1 afiber is still 2.4x faster (0.42).
+* **Unchanged within noise**: `mn_pingpong` N=2..32 22.1 / 11.2 / 5.8 / 4.7 / 5.7 ns (step 2: 21.8 / 10.9 / 5.7 / 5.1 / 5.3; faster than Go
+  at every N, 0.12 to 0.37 of its time); `mn_cpu` speedup 19.19x at N=32 (19.84x in step 2; Go 2.88x); `mn_spawn` N=2..32
+  356 / 483 / 514 / 542 / 726 ns (step 2: 346 / 444 / 508 / 516 / 726; Go 203-292), 1.4x to 2.9x slower than Go: the pinned main
+  fiber, step H below.
 * At N=1 afiber is faster than Go on every row (0.20 to 0.65 of Go's time), as before.
 
-## What remains (profile of `mn_pipeline` at N=4, `perf record` / `perf stat` / `strace -c`)
+## What remains (profile of `mn_pipeline` at N>=4)
 
-* 51% of the cycles are in `chan_send_opt` and 37% in `chan_recv`: the channel's own spinlock, taken by a producer and a consumer
-  on different cores for every item. 5.6 cycles per instruction. 2,695 `sched_yield` calls (the spinlock gives up after 100 spins and
-  yields the thread) and 5,922 futex calls per 1M items. All scheduler functions together (`idle_loop`, `runq_steal`, `wake_mt`,
-  `kick`, `pick_mt`, `schedule`, `swap`) are under 8%. The pipeline's cost is now the channel, not the scheduler.
-* `mn_spawn` at N>=2 (346-726 ns against 136 at N=1): the pinned main fiber, above.
-* `mn_mutex` from N=8: the mutex's `locked` word and the park/wake through the wait queue; the run-queue change did not move it.
+* After step G the cycles per instruction at N=4 fell from 5.4 to 3.3, `sched_yield` calls from 2,398 to 56 per 1M items. The
+  remaining cost is the two channel locks that all 10 fibers of the benchmark share: perf shows 49% of the cycles in
+  `chan_send_opt` and 44% in `chan_recv`. The scheduler is not the cost.
+* `mn_spawn` at N>=2 (356-726 ns against 135 at N=1): the pinned main fiber (a join parks main, worker 0 idles, the child's death wakes
+  it with a futex).
+* `mn_mutex` is no longer on this list.
 
-Next steps, in order of expected payoff:
+Next steps, in order of expected payoff (not measured yet):
 
-* **G, the channel**: a lock-free (or at least contention-tolerant) buffer, and a spinlock that does not call `sched_yield` after 100
-  spins when the holder is on another core. Expected, not measured: `mn_pipeline` at N>=2 near Go's 100 ns.
-* **H, main on any worker**, or stop pinning the benchmark's joins to main. Expected, not measured: `mn_spawn` near its N=1 value.
-* **I, the mutex at N>=8.**
+* **H, main on any worker**, or stop pinning the benchmark's joins to main (`mn_spawn` near its N=1 value).
+* **G2, the pipeline at N>=4**: direct hand-off in the channel (Go copies the value straight to the parked receiver's stack, so the
+  receiver does not retake the lock) and/or fewer lock acquisitions per item (batching).
+* **J, the one-worker ping-pong regression** of +1.4 ns (SINGLE +1.9) from the new ATS channel code (the accessor calls).

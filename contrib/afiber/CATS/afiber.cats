@@ -449,16 +449,36 @@ atscntrb_afiber__mt()
 #endif
 } // end of [atscntrb_afiber__mt]
 
+/*
+** MS-2026-10 (step G): the holder of a lock of ours (channel, mutex,
+** scheduler) is a running thread and holds it for tens of ns. The
+** waiter spins with [pause], the count doubling up to 256 per round,
+** for ATSCNTRB_AFIBER_SPIN_PAUSES pauses (a few us) before the first
+** [sched_yield] (a syscall that costs more than the wait, and that can
+** deschedule the spinner for a time slice); after that it yields in
+** the loop (the holder may be preempted). -DATSCNTRB_AFIBER_SPIN_OLD
+** brings back the old policy (100 pauses, then yield) for comparison.
+*/
+#ifndef ATSCNTRB_AFIBER_SPIN_MAXR
+#define ATSCNTRB_AFIBER_SPIN_MAXR 256
+#endif
+#ifndef ATSCNTRB_AFIBER_SPIN_PAUSES
+#define ATSCNTRB_AFIBER_SPIN_PAUSES 2000
+#endif
 ATSinline()
 void
 atscntrb_afiber__spin_lock
   (int *p)
 {
   unsigned n = 0 ;
+#ifndef ATSCNTRB_AFIBER_SPIN_OLD
+  unsigned r = 1, i ;
+#endif
   if (!atscntrb_afiber__mt()) { *p = 1 ; return ; }
   for ( ; ; ) {
     if (!__atomic_load_n(p, __ATOMIC_RELAXED)
         && !__atomic_exchange_n(p, 1, __ATOMIC_ACQUIRE)) return ;
+#ifdef ATSCNTRB_AFIBER_SPIN_OLD
     n += 1 ;
     if (n < 100) {
 #if defined(__x86_64__) || defined(__i386__)
@@ -467,6 +487,21 @@ atscntrb_afiber__spin_lock
     } else {
       sched_yield() ;
     }
+#else
+    if (n < ATSCNTRB_AFIBER_SPIN_PAUSES) {
+      for (i = 0 ; i < r ; i++) {
+#if defined(__x86_64__) || defined(__i386__)
+        __asm__ volatile ("pause" ::: "memory") ;
+#elif defined(__aarch64__)
+        __asm__ volatile ("isb" ::: "memory") ;
+#endif
+      }
+      n += r ;
+      if (r < ATSCNTRB_AFIBER_SPIN_MAXR) r <<= 1 ;
+    } else {
+      sched_yield() ;
+    }
+#endif
   }
 } // end of [atscntrb_afiber__spin_lock]
 
@@ -2035,26 +2070,52 @@ atscntrb_afiber_waitq_wake_all
 /*
 ** a parking mutex between fibers
 **
-** MS-2026-10:
-** [locked] is the mutex itself (the fast path is one atomic exchange);
-** [lock] only guards [q] and [nwait]. A fiber that finds the mutex taken
-** spins briefly, then parks on [q]. No wake-up is lost: a waiter does
-** nwait++ and then the exchange (both seq-cst), the unlocker does store-0
-** and then load-nwait (seq-cst), so at least one of them sees the other:
-** if the unlocker reads 0, its store precedes the waiter's exchange, which
-** then takes the mutex; otherwise the unlocker sees nwait > 0 and takes
-** [lock], which the waiter holds until it is in [q] and off its stack (the
-** park pushes before the switch, and releases [lock] after it), so a
-** parked waiter is found. The order matters: a waiter that looked first
-** and announced after could park on a mutex just freed by an unlocker
-** that saw nwait == 0. The woken fiber re-tries the exchange and may
-** lose to a barging fiber: the mutex is not FIFO under contention.
+** MS-2026-10: Go's sync.Mutex adapted to fibers (the waitq [q] is the
+** semaphore). One atomic word [state]:
+**   bit 0 LOCKED   the mutex is held
+**   bit 1 WOKEN    a waiter is awake (spinning, or just woken) and
+**                  competes for the mutex: nobody else needs to be woken
+**   bit 2 STARVING the lock is handed over to the head of [q] (below)
+**   bits 3..       the number of waiters (parked, or about to park)
+** [lock] only guards [q]. Fast path: one CAS 0 -> LOCKED to lock, one
+** fetch_sub of LOCKED to unlock (plain stores with one worker).
+**
+** lock, slow path: spin a few rounds ([pause], several workers only) while
+** the mutex is held and not starving, setting WOKEN while spinning so that
+** [unlock] does not wake anybody else; then one CAS puts in the new state:
+** take LOCKED if it is free, or add a waiter if it is held, and in the
+** latter case park on [q]. The woken fiber retries as the "awake" waiter
+** (WOKEN is cleared by its next CAS). At most one waiter is awake at a
+** time, so the woken fibers do not stampede against the bargers and
+** re-park by the dozen. A waiter that was waiting for more than 1 ms
+** (and is woken and loses again) sets STARVING: now [unlock] clears
+** LOCKED, new arrivals and spinners queue instead of taking it, and the
+** head of [q] is woken and takes the mutex (a FIFO hand-off); the waiter
+** leaves STARVING when it waited less than 1 ms or it is the last one.
+**
+** No wake-up is lost: a waiter announces itself (waiters + 1) in the very
+** CAS that finds LOCKED set, so the word is the single point of
+** serialization: either that CAS precedes the unlocker's fetch_sub (which
+** then sees the waiter in the value it gets back, and wakes one), or it
+** follows it and sees LOCKED clear (it takes the mutex instead). The
+** waiter takes [lock] BEFORE that CAS and keeps it until it is in [q]
+** and off its stack (the park pushes before the switch and releases [lock]
+** after it), so an unlocker that counted the waiter and then takes [lock]
+** to pop [q] always finds it. The unlocker claims one waiter in a CAS
+** (waiters - 1, WOKEN) before popping, so two unlockers never pop for the
+** same waiter. The mutex is not FIFO in the normal mode (bargers win).
 */
+#define ATSCNTRB_AFIBER_MX_LOCKED 1u
+#define ATSCNTRB_AFIBER_MX_WOKEN 2u
+#define ATSCNTRB_AFIBER_MX_STARVING 4u
+#define ATSCNTRB_AFIBER_MX_SHIFT 3
+#define ATSCNTRB_AFIBER_MX_ONE (1u << ATSCNTRB_AFIBER_MX_SHIFT)
+#define ATSCNTRB_AFIBER_MX_STARVE_NS 1000000ULL
+
 typedef
 struct {
-  int lock ;    // guards q and nwait
-  int locked ;  // atomic 0/1: the fast path
-  int nwait ;   // fibers parked (or about to park) on q; written under [lock], read atomically
+  int lock ;           // guards q
+  unsigned int state ; // see above
   atscntrb_afiber_q q ;
 } atscntrb_afiber_mutex_t ;
 
@@ -2073,9 +2134,93 @@ atscntrb_afiber_mutex_free
   (atstype_ptr m0)
 {
   atscntrb_afiber_mutex_t *m = (atscntrb_afiber_mutex_t*)m0 ;
-  if (m->locked || m->nwait != 0 || m->q.head) atscntrb_afiber__fatal("afiber_mutex_free: the mutex is in use") ;
+  if (m->state != 0 || m->q.head) atscntrb_afiber__fatal("afiber_mutex_free: the mutex is in use") ;
   ATS_MFREE(m) ;
 } // end of [atscntrb_afiber_mutex_free]
+
+// compare-and-swap of the state word (a plain store with one worker);
+// on failure *old is refreshed
+ATSinline()
+int
+atscntrb_afiber__mx_cas
+  (unsigned int *p, unsigned int *old, unsigned int nw)
+{
+  if (!atscntrb_afiber__mt()) {
+    if (*p == *old) { *p = nw ; return 1 ; }
+    *old = *p ; return 0 ;
+  }
+  return __atomic_compare_exchange_n(p, old, nw, 0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED) ;
+} // end of [atscntrb_afiber__mx_cas]
+
+ATSinline()
+unsigned int
+atscntrb_afiber__mx_load
+  (unsigned int *p)
+{
+  if (!atscntrb_afiber__mt()) return *p ;
+  return __atomic_load_n(p, __ATOMIC_RELAXED) ;
+} // end of [atscntrb_afiber__mx_load]
+
+__attribute__((noinline))
+static
+void
+atscntrb_afiber__mx_lock_slow
+  (atscntrb_afiber_mutex_t *m)
+{
+  unsigned int *s = &(m->state) ;
+  unsigned long long t0 = 0ULL ;
+  int starving = 0, awoke = 0, iter = 0 ;
+  unsigned int old = atscntrb_afiber__mx_load(s), nw ;
+  for ( ; ; ) {
+    if ((old & (ATSCNTRB_AFIBER_MX_LOCKED | ATSCNTRB_AFIBER_MX_STARVING)) == ATSCNTRB_AFIBER_MX_LOCKED
+        && atscntrb_afiber__mt() && iter < 4) {
+      // spin; tell [unlock] that an awake waiter exists
+      int j ;
+      if (!awoke && !(old & ATSCNTRB_AFIBER_MX_WOKEN) && (old >> ATSCNTRB_AFIBER_MX_SHIFT) != 0
+          && atscntrb_afiber__mx_cas(s, &old, old | ATSCNTRB_AFIBER_MX_WOKEN)) awoke = 1 ;
+      for (j = 0 ; j < 30 ; j += 1) atscntrb_afiber__cpu_relax() ;
+      iter += 1 ;
+      old = atscntrb_afiber__mx_load(s) ;
+      continue ;
+    }
+    if (!(old & (ATSCNTRB_AFIBER_MX_LOCKED | ATSCNTRB_AFIBER_MX_STARVING))) {
+      nw = old | ATSCNTRB_AFIBER_MX_LOCKED ;
+      if (awoke) nw &= ~ATSCNTRB_AFIBER_MX_WOKEN ;
+      if (atscntrb_afiber__mx_cas(s, &old, nw)) return ;
+      continue ;
+    }
+    // held (or starving): announce under [lock], then park
+    atscntrb_afiber__spin_lock(&(m->lock)) ;
+    old = atscntrb_afiber__mx_load(s) ;
+    for ( ; ; ) {
+      if (!(old & (ATSCNTRB_AFIBER_MX_LOCKED | ATSCNTRB_AFIBER_MX_STARVING))) break ;
+      nw = old + ATSCNTRB_AFIBER_MX_ONE ;
+      if (starving && (old & ATSCNTRB_AFIBER_MX_LOCKED)) nw |= ATSCNTRB_AFIBER_MX_STARVING ;
+      if (awoke) nw &= ~ATSCNTRB_AFIBER_MX_WOKEN ;
+      if (atscntrb_afiber__mx_cas(s, &old, nw)) break ;
+    }
+    if (!(old & (ATSCNTRB_AFIBER_MX_LOCKED | ATSCNTRB_AFIBER_MX_STARVING))) {
+      atscntrb_afiber__spin_unlock(&(m->lock)) ;
+      continue ; // it became free: retry the plain CAS
+    }
+    if (t0 == 0ULL) t0 = atscntrb_afiber_clock_ns() ;
+    atscntrb_afiber_waitq_park((atstype_ptr)&(m->q), (atstype_ptr)&(m->lock)) ;
+    atscntrb_afiber__spin_unlock(&(m->lock)) ;
+    // woken (WOKEN was set by the unlocker), or handed the mutex (STARVING)
+    starving = starving || (atscntrb_afiber_clock_ns() - t0 > ATSCNTRB_AFIBER_MX_STARVE_NS) ;
+    old = atscntrb_afiber__mx_load(s) ;
+    if (old & ATSCNTRB_AFIBER_MX_STARVING) {
+      // the mutex was handed to us: take LOCKED, drop our waiter count,
+      // leave the starving mode if we did not wait long or are the last
+      unsigned int delta = ATSCNTRB_AFIBER_MX_LOCKED - ATSCNTRB_AFIBER_MX_ONE ;
+      if (!starving || (old >> ATSCNTRB_AFIBER_MX_SHIFT) == 1) delta -= ATSCNTRB_AFIBER_MX_STARVING ;
+      if (atscntrb_afiber__mt()) __atomic_add_fetch(s, delta, __ATOMIC_ACQ_REL) ;
+      else *s += delta ;
+      return ;
+    }
+    awoke = 1 ; iter = 0 ;
+  }
+} // end of [atscntrb_afiber__mx_lock_slow]
 
 ATSinline()
 void
@@ -2084,35 +2229,34 @@ atscntrb_afiber_mutex_lock
 {
   atscntrb_afiber_mutex_t *m = (atscntrb_afiber_mutex_t*)m0 ;
   if (!atscntrb_afiber__mt()) {
-    if (!m->locked) { m->locked = 1 ; return ; }
+    if (m->state == 0) { m->state = ATSCNTRB_AFIBER_MX_LOCKED ; return ; }
   } else {
-    int i, j ;
-    if (!__atomic_exchange_n(&(m->locked), 1, __ATOMIC_ACQUIRE)) return ;
-    for (i = 0 ; i < 4 ; i += 1) {
-      for (j = 0 ; j < 30 ; j += 1) {
-#if defined(__x86_64__) || defined(__i386__)
-        __asm__ volatile ("pause" ::: "memory") ;
-#endif
-      }
-      if (!__atomic_load_n(&(m->locked), __ATOMIC_RELAXED)
-          && !__atomic_exchange_n(&(m->locked), 1, __ATOMIC_ACQUIRE)) return ;
-    }
+    unsigned int z = 0 ;
+    if (__atomic_compare_exchange_n(&(m->state), &z, ATSCNTRB_AFIBER_MX_LOCKED, 0, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)) return ;
   }
-  atscntrb_afiber__spin_lock(&(m->lock)) ;
-  // announce first, then look: an unlocker that reads nwait == 0 is ordered
-  // before the exchange below, which then sees its 0 (see the comment above)
-  __atomic_add_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
-  for ( ; ; ) {
-    if (atscntrb_afiber__mt()) {
-      if (!__atomic_exchange_n(&(m->locked), 1, __ATOMIC_SEQ_CST)) break ;
-    } else {
-      if (!m->locked) { m->locked = 1 ; break ; }
-    }
-    atscntrb_afiber_waitq_park((atstype_ptr)&(m->q), (atstype_ptr)&(m->lock)) ;
-  }
-  __atomic_sub_fetch(&(m->nwait), 1, __ATOMIC_SEQ_CST) ;
-  atscntrb_afiber__spin_unlock(&(m->lock)) ;
+  atscntrb_afiber__mx_lock_slow(m) ;
 } // end of [atscntrb_afiber_mutex_lock]
+
+__attribute__((noinline))
+static
+void
+atscntrb_afiber__mx_unlock_slow
+  (atscntrb_afiber_mutex_t *m, unsigned int old)
+{
+  unsigned int *s = &(m->state) ;
+  if (!(old & ATSCNTRB_AFIBER_MX_STARVING)) {
+    for ( ; ; ) {
+      // nobody to wake, or somebody is awake / holds it: nothing to do
+      if ((old >> ATSCNTRB_AFIBER_MX_SHIFT) == 0
+          || (old & (ATSCNTRB_AFIBER_MX_LOCKED | ATSCNTRB_AFIBER_MX_WOKEN | ATSCNTRB_AFIBER_MX_STARVING))) return ;
+      if (atscntrb_afiber__mx_cas(s, &old, (old - ATSCNTRB_AFIBER_MX_ONE) | ATSCNTRB_AFIBER_MX_WOKEN)) break ;
+    }
+  }
+  // (starving: hand-off, the woken fiber takes LOCKED and the count itself)
+  atscntrb_afiber__spin_lock(&(m->lock)) ;
+  atscntrb_afiber_waitq_wake_one((atstype_ptr)&(m->q)) ;
+  atscntrb_afiber__spin_unlock(&(m->lock)) ;
+} // end of [atscntrb_afiber__mx_unlock_slow]
 
 ATSinline()
 void
@@ -2120,13 +2264,10 @@ atscntrb_afiber_mutex_unlock
   (atstype_ptr m0)
 {
   atscntrb_afiber_mutex_t *m = (atscntrb_afiber_mutex_t*)m0 ;
-  if (!atscntrb_afiber__mt()) m->locked = 0 ;
-  else __atomic_store_n(&(m->locked), 0, __ATOMIC_SEQ_CST) ;
-  if (__atomic_load_n(&(m->nwait), __ATOMIC_SEQ_CST) > 0) {
-    atscntrb_afiber__spin_lock(&(m->lock)) ;
-    atscntrb_afiber_waitq_wake_one((atstype_ptr)&(m->q)) ;
-    atscntrb_afiber__spin_unlock(&(m->lock)) ;
-  }
+  unsigned int nw ;
+  if (!atscntrb_afiber__mt()) nw = (m->state -= ATSCNTRB_AFIBER_MX_LOCKED) ;
+  else nw = __atomic_sub_fetch(&(m->state), ATSCNTRB_AFIBER_MX_LOCKED, __ATOMIC_ACQ_REL) ;
+  if (nw != 0) atscntrb_afiber__mx_unlock_slow(m, nw) ;
 } // end of [atscntrb_afiber_mutex_unlock]
 
 /* ****** ****** */

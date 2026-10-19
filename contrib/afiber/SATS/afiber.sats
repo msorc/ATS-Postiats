@@ -205,7 +205,10 @@ fun afiber_waitq_wake_all
 (* ****** ****** *)
 //
 // a parking mutex (a fiber that waits lets its worker run others);
-// it spins briefly, then parks, and it is not FIFO under contention
+// it spins briefly, then parks, and it is not FIFO under contention (Go's
+// sync.Mutex design: at most one woken waiter competes with the bargers);
+// a waiter that has waited for more than 1 ms switches it to a starvation
+// mode, a FIFO hand-off to the longest waiter, until the queue is served
 //
 absvtype
 afiber_mutex_vtype = ptr
