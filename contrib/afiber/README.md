@@ -47,11 +47,20 @@ stack is 256 KiB (`-DATSCNTRB_AFIBER_STACKSZ=...`, or `afiber_spawn_sz` per
 fiber); a stack overflow hits the guard page. Default-size stacks are
 recycled through a free list, unbounded unless
 `-DATSCNTRB_AFIBER_STACK_CACHE=n` is given; cached stacks are not returned
-to the OS. All units of a program must use the same `ATSCNTRB_AFIBER_*`
+to the OS. Fresh stacks are carved from slabs of `ATSCNTRB_AFIBER_STACK_SLAB`
+stacks (default 32, one `mmap` each; 1 is one `mmap` per stack): a fresh stack
+costs one `mprotect` (its guard page) and every 32nd one an `mmap`; the mapping
+count stays two per stack. `-DATSCNTRB_AFIBER_NOGUARD` drops the guard page, so a
+fresh stack costs no syscall, but a stack overflow is then silent memory
+corruption: use it only when the fibers are known to fit. The record of a fiber
+lives in the top of its own stack (no `malloc` per spawn). The slab is not used
+with `-DATSCNTRB_AFIBER_STACK_MALLOC`. The part of a slab not carved yet stays
+mapped (untouched, `MAP_NORESERVE`) until `afiber_workers_stop`, or the exit
+of a one-worker program. All units of a program must use the same `ATSCNTRB_AFIBER_*`
 settings. `-DATSCNTRB_AFIBER_SINGLE` is for programs that never start workers:
 it compiles the M:N paths out and restores the pre-M:N one-worker cost
 (`afiber_workers_start(n > 1)` is then fatal). `make -C TEST regress_variants`
-runs the tests with the ucontext, malloc'd-stack, bounded-cache and SINGLE builds. `BENCH/` has afiber vs Go
+runs the tests with the ucontext, malloc'd-stack, bounded-cache, no-guard, SLAB=1 and SINGLE builds. `BENCH/` has afiber vs Go
 benchmarks (`make -C BENCH bench`). If main returns while fibers are
 suspended they are discarded; an uncaught exception in a fiber ends the
 process; a deadlock (every fiber parked) aborts with a message.

@@ -420,8 +420,9 @@ cores (7.8 cycles per instruction at N=4, 75% of the time in `pick_slow` and `wa
 - M:N: one global run queue under one spinlock is the measured bottleneck (profile in `BENCH/README.md`): at N>=2
   everything that touches the scheduler loses to Go (ping-pong 1.6x at N=2, 65x at N=32). Next steps: step A, per-worker
   run queues with a `runnext` slot and work stealing (expected: ping-pong at N>=2 near its N=1 cost, `mn_cpu` scaling to the
-  core count), and step D, a stack slab (one syscall per stack instead of two: chain ~11 -> ~6 us, opt-in no-guard mode for
-  ~1 us). The mutex is no longer FIFO under contention. Also open: the main fiber waits for worker 0 even when other
+  core count), and step D is done: a stack slab (`ATSCNTRB_AFIBER_STACK_SLAB`, one syscall per fresh stack, opt-in
+  `ATSCNTRB_AFIBER_NOGUARD` for none), the page size cached, the fiber record in the top of its own stack (chain
+  ~11 -> ~7 us, ~3 us without guard; steady spawn 138 -> ~88 ns). The mutex is no longer FIFO under contention. Also open: the main fiber waits for worker 0 even when other
   workers are idle; the global arena and plain `ref`s are not
   thread-safe; `errno`/TLS must not be kept across a blocking call;
   ThreadSanitizer cannot follow a `try` that migrates (it keeps

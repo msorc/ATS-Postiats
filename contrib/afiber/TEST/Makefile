@@ -22,7 +22,7 @@ CFLAGS_EXTRA ?=
 MNFLAGS ?= -pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_
 STRESSN ?= 200
 
-POSTESTS := POS_yield POS_join POS_many POS_recursion POS_sleep POS_exn POS_pingpong POS_prodcons POS_linear POS_trysend POS_waves
+POSTESTS := POS_yield POS_join POS_many POS_recursion POS_sleep POS_exn POS_pingpong POS_prodcons POS_linear POS_trysend POS_waves POS_slab
 MNTESTS := POS_mn_counter POS_mn_chan POS_mn_join POS_mn_exn POS_mn_sleep POS_mn_many POS_mn_main POS_mn_mutex2
 # the M:N tests need the workers to be possible
 ALLTESTS := $(POSTESTS) $(if $(MNFLAGS),$(MNTESTS))
@@ -69,6 +69,8 @@ regress_variants:: ; \
 $(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_UCONTEXT && \
 $(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_STACK_MALLOC && \
 $(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_STACK_CACHE=8 && \
+$(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_NOGUARD && \
+$(MAKE) cleanall regress CFLAGS_EXTRA=-DATSCNTRB_AFIBER_STACK_SLAB=1 && \
 $(MAKE) cleanall regress MNFLAGS= && \
 $(MAKE) cleanall regress MNFLAGS="-pthread -D_ATS_CCOMP_RUNTIME_TRYWITH_NONE_ -DATSCNTRB_AFIBER_UCONTEXT" && \
 $(MAKE) cleanall

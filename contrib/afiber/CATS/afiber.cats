@@ -157,6 +157,19 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 #define ATSCNTRB_AFIBER_STACK_CACHE 0
 #endif
 
+/*
+** MS-2026-10 (step D): a stack slab. A default-size stack that is not in
+** the free list of the worker is carved from a region of
+** ATSCNTRB_AFIBER_STACK_SLAB stacks that one [mmap] made; its guard page
+** gets its [mprotect] when the stack is carved. So a fresh stack costs one
+** syscall (none with ATSCNTRB_AFIBER_NOGUARD) and every SLAB-th one an
+** [mmap] more. 1: one [mmap] per stack. Not used with
+** ATSCNTRB_AFIBER_STACK_MALLOC.
+*/
+#ifndef ATSCNTRB_AFIBER_STACK_SLAB
+#define ATSCNTRB_AFIBER_STACK_SLAB 32
+#endif
+
 // the stack of the idle context of worker 0
 #define ATSCNTRB_AFIBER_IDLESZ (64*1024)
 // the pthread stack of the other workers (they only run the idle loop)
@@ -231,7 +244,7 @@ struct atscntrb_afiber_worker_s
     int post_kind ;
     void *post_arg ;
     atscntrb_afiber_t *reap ; // one worker: a dead detached fiber whose stack is no longer in use
-    void *stack_cache ; // free list of default-size stacks, linked through the word at stack_lo
+    void *stack_cache ; // free list of default-size stacks (address of the lowest usable byte), linked through the last word of the region
     long ncached ;
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
   struct { // read by every kick, written by the idling worker
@@ -241,6 +254,10 @@ struct atscntrb_afiber_worker_s
     pthread_t thr ;
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
   atscntrb_afiber_t idle __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ; // the idle context (workers > 1), cold
+  struct { // the stack slab being carved (owning thread only)
+    char *slab_cur ; // the next piece (its guard page, if any, first)
+    long slab_left ; // the pieces not yet carved
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
 } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) atscntrb_afiber_worker_t ;
 
 typedef
@@ -481,6 +498,36 @@ atscntrb_afiber_stacksz_default()
 
 /* ****** ****** */
 
+// the page size, asked once (a benign race: every thread stores the same value)
+ATSinline()
+size_t
+atscntrb_afiber__pagesz()
+{
+  static size_t pg = 0 ;
+  size_t p = __atomic_load_n(&pg, __ATOMIC_RELAXED) ;
+  if (__builtin_expect(p == 0, 0)) {
+    p = (size_t)sysconf(_SC_PAGESIZE) ;
+    __atomic_store_n(&pg, p, __ATOMIC_RELAXED) ;
+  }
+  return p ;
+}
+
+// the size of the guard page below a stack: none with NOGUARD or malloc'd stacks
+ATSinline()
+size_t
+atscntrb_afiber__guardsz()
+{
+#if defined(ATSCNTRB_AFIBER_STACK_MALLOC) || defined(ATSCNTRB_AFIBER_NOGUARD)
+  return 0 ;
+#else
+  return atscntrb_afiber__pagesz() ;
+#endif
+}
+
+// the whole region of a fiber stack made by [create] holds the record of the
+// fiber in its top [RECSZ] bytes
+#define ATSCNTRB_AFIBER_RECSZ ((sizeof(atscntrb_afiber_t) + 63) & ~(size_t)63)
+
 ATSinline()
 size_t
 atscntrb_afiber__stack_usable
@@ -489,7 +536,7 @@ atscntrb_afiber__stack_usable
 #ifdef ATSCNTRB_AFIBER_STACK_MALLOC
   return usable ;
 #else
-  size_t page = (size_t)sysconf(_SC_PAGESIZE) ;
+  size_t page = atscntrb_afiber__pagesz() ;
   usable = (usable + page - 1) / page * page ;
   if (usable < 2*page) usable = 2*page ;
   return usable ;
@@ -502,60 +549,92 @@ size_t
 atscntrb_afiber__stack_total
   (size_t usable)
 {
-#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
-  return usable ;
-#else
-  return (size_t)sysconf(_SC_PAGESIZE) + usable ;
-#endif
+  return atscntrb_afiber__guardsz() + usable ;
 } // end of [atscntrb_afiber__stack_total]
 
+// the link of the free list: the last word of the region, inside the record
+// area (the page of the first frame, already touched)
+#define ATSCNTRB_AFIBER_CACHELINK(lo) \
+  ((void**)((char*)(lo) + atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ) - sizeof(void*)))
+
+/*
+** get a stack of (at least) [usable] bytes: the whole region is
+** [*full] bytes from [*lo]; [*stack] (size [*stacksz]) is what [munmap]
+** takes (the guard page included).
+*/
 ATSinline()
 void
-atscntrb_afiber__stack_alloc
-  (atscntrb_afiber_worker_t *w, atscntrb_afiber_t *f, size_t usable)
+atscntrb_afiber__stack_get
+  (atscntrb_afiber_worker_t *w, size_t usable,
+   void **stack, size_t *stacksz, void **lo, size_t *full)
 {
+  size_t guard = atscntrb_afiber__guardsz() ;
   usable = atscntrb_afiber__stack_usable(usable) ;
+  *full = usable ;
+  *stacksz = guard + usable ;
   if (w->stack_cache
       && usable == atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ)) {
-    void *lo = w->stack_cache ;
-    w->stack_cache = *(void**)lo ;
+    void *l = w->stack_cache ;
+    w->stack_cache = *ATSCNTRB_AFIBER_CACHELINK(l) ;
     w->ncached -= 1 ;
-    f->stack_lo = lo ;
-    f->stack_usable = usable ;
-#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
-    f->stack = lo ;
-#else
-    f->stack = (char*)lo - (size_t)sysconf(_SC_PAGESIZE) ;
-#endif
-    f->stacksz = atscntrb_afiber__stack_total(usable) ;
+    *lo = l ;
+    *stack = (char*)l - guard ;
     return ;
   }
 #ifdef ATSCNTRB_AFIBER_STACK_MALLOC
-  f->stack = ATS_MALLOC(usable) ;
-  f->stacksz = usable ;
-  f->stack_lo = f->stack ;
-  f->stack_usable = usable ;
+  *stack = ATS_MALLOC(usable) ;
+  *lo = *stack ;
 #else
   {
-  size_t page = (size_t)sysconf(_SC_PAGESIZE) ;
-  size_t total = page + usable ;
+  size_t page = atscntrb_afiber__pagesz() ;
+  size_t total = *stacksz ;
   int flags = MAP_PRIVATE | MAP_ANONYMOUS ;
-  void *base ;
+  char *base ;
 #ifdef MAP_NORESERVE
   flags |= MAP_NORESERVE ;
 #endif
 #ifdef MAP_STACK
   flags |= MAP_STACK ;
 #endif
-  base = mmap((void*)0, total, PROT_READ|PROT_WRITE, flags, -1, 0) ;
-  if (base == MAP_FAILED) atscntrb_afiber__fatal("mmap for a fiber stack failed") ;
-  if (mprotect(base, page, PROT_NONE) != 0) atscntrb_afiber__fatal("mprotect for a guard page failed") ;
-  f->stack = base ;
-  f->stacksz = total ;
-  f->stack_lo = (char*)base + page ;
-  f->stack_usable = usable ;
+  if (ATSCNTRB_AFIBER_STACK_SLAB > 1
+      && usable == atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ)) {
+    if (w->slab_left == 0) {
+      /*
+      ** One region of SLAB stacks. The guard pages are protected one at a
+      ** time as the stacks are carved: the mappings stay two per stack (a
+      ** read-write stack, a PROT_NONE guard, alternating), so the bound of
+      ** [vm.max_map_count] is that of one [mmap] per stack. What is not
+      ** carved at [workers_stop] is unmapped by [cache_drain]; in a
+      ** one-worker program it stays mapped to the exit (MAP_NORESERVE:
+      ** untouched pages cost nothing).
+      */
+      void *slab = mmap((void*)0, total * (size_t)ATSCNTRB_AFIBER_STACK_SLAB, PROT_READ|PROT_WRITE, flags, -1, 0) ;
+      if (slab == MAP_FAILED) atscntrb_afiber__fatal("mmap for a fiber stack slab failed") ;
+      w->slab_cur = (char*)slab ;
+      w->slab_left = (long)ATSCNTRB_AFIBER_STACK_SLAB ;
+    }
+    base = w->slab_cur ;
+    w->slab_cur += total ;
+    w->slab_left -= 1 ;
+  } else {
+    void *p = mmap((void*)0, total, PROT_READ|PROT_WRITE, flags, -1, 0) ;
+    if (p == MAP_FAILED) atscntrb_afiber__fatal("mmap for a fiber stack failed") ;
+    base = (char*)p ;
+  }
+  if (guard && mprotect(base, page, PROT_NONE) != 0) atscntrb_afiber__fatal("mprotect for a guard page failed") ;
+  *stack = base ;
+  *lo = base + guard ;
   }
 #endif
+} // end of [atscntrb_afiber__stack_get]
+
+// a stack for a context that is not made by [create] (the idle contexts): no record in it
+ATSinline()
+void
+atscntrb_afiber__stack_alloc
+  (atscntrb_afiber_worker_t *w, atscntrb_afiber_t *f, size_t usable)
+{
+  atscntrb_afiber__stack_get(w, usable, &(f->stack), &(f->stacksz), &(f->stack_lo), &(f->stack_usable)) ;
 } // end of [atscntrb_afiber__stack_alloc]
 
 // give the stack back to the system
@@ -570,42 +649,48 @@ atscntrb_afiber__stack_unmap
 #ifdef ATSCNTRB_AFIBER_STACK_MALLOC
   ATS_MFREE(stack) ;
 #else
+  // possibly a piece of a slab: munmap splits the mapping
   munmap(stack, stacksz) ;
 #endif
 } // end of [atscntrb_afiber__stack_unmap]
 
-// the stack of [f] goes to the cache of [w], or back to the system
+/*
+** the stack of [f] goes to the cache of [w], or back to the system. The
+** record [f] is in that stack: it is not to be touched after this.
+*/
 ATSinline()
 void
 atscntrb_afiber__stack_release
   (atscntrb_afiber_worker_t *w, atscntrb_afiber_t *f)
 {
-  if (!f->stack) return ;
-  if (f->stacksz == atscntrb_afiber__stack_total
+  void *stack = f->stack ;
+  size_t stacksz = f->stacksz ;
+  void *lo = f->stack_lo ;
+  size_t usable = f->stack_usable ; // without the record
+  if (stacksz == atscntrb_afiber__stack_total
         (atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ))
       && (ATSCNTRB_AFIBER_STACK_CACHE == 0 || w->ncached < (long)(ATSCNTRB_AFIBER_STACK_CACHE))) {
 #ifdef ATSCNTRB_AFIBER_ASAN
-    __asan_unpoison_memory_region(f->stack_lo, f->stack_usable) ;
+    __asan_unpoison_memory_region(lo, usable) ;
 #endif
-    *(void**)f->stack_lo = w->stack_cache ;
-    w->stack_cache = f->stack_lo ;
+    *ATSCNTRB_AFIBER_CACHELINK(lo) = w->stack_cache ;
+    w->stack_cache = lo ;
     w->ncached += 1 ;
   } else {
-    atscntrb_afiber__stack_unmap(f->stack, f->stacksz, f->stack_lo, f->stack_usable) ;
+    atscntrb_afiber__stack_unmap(stack, stacksz, lo, usable) ;
   }
-  f->stack = (void*)0 ;
 } // end of [atscntrb_afiber__stack_release]
 
+// [f] was made by [create]: its record is at the top of its stack, and goes with it
 ATSinline()
 void
 atscntrb_afiber__free
   (atscntrb_afiber_t *f)
 {
-  atscntrb_afiber__stack_release(atscntrb_afiber__cw(), f) ;
 #ifdef ATSCNTRB_AFIBER_TSAN
   if (f->tsan_fiber) __tsan_destroy_fiber(f->tsan_fiber) ;
 #endif
-  ATS_MFREE(f) ;
+  atscntrb_afiber__stack_release(atscntrb_afiber__cw(), f) ;
 } // end of [atscntrb_afiber__free]
 
 /* ****** ****** */
@@ -1087,9 +1172,17 @@ atscntrb_afiber__create
   void (*entry)(void*), void *env, size_t stacksz, int detached
 ) {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
-  atscntrb_afiber_t *f = ATS_MALLOC(sizeof(atscntrb_afiber_t)) ;
+  atscntrb_afiber_t *f ;
+  void *stack, *lo ; size_t stackbytes, full, rec ;
+  atscntrb_afiber__stack_get(atscntrb_afiber__cw(), stacksz, &stack, &stackbytes, &lo, &full) ;
+  // the record of the fiber: the top of its stack region, on a line
+  rec = ((uintptr_t)lo + full - ATSCNTRB_AFIBER_RECSZ) & ~(uintptr_t)63 ;
+  f = (atscntrb_afiber_t*)rec ;
   memset(f, 0, sizeof(atscntrb_afiber_t)) ;
-  atscntrb_afiber__stack_alloc(atscntrb_afiber__cw(), f, stacksz) ;
+  f->stack = stack ;
+  f->stacksz = stackbytes ;
+  f->stack_lo = lo ;
+  f->stack_usable = rec - (uintptr_t)lo ;
   atscntrb_afiber__make_context(f, atscntrb_afiber__trampoline) ;
 #ifdef ATSCNTRB_AFIBER_TSAN
   f->tsan_fiber = __tsan_create_fiber(0) ;
@@ -1337,15 +1430,18 @@ atscntrb_afiber__cache_drain
   while (w->stack_cache) {
     void *lo = w->stack_cache ;
     size_t usable = atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ) ;
-    w->stack_cache = *(void**)lo ;
-#ifdef ATSCNTRB_AFIBER_STACK_MALLOC
-    atscntrb_afiber__stack_unmap(lo, usable, lo, usable) ;
-#else
+    w->stack_cache = *ATSCNTRB_AFIBER_CACHELINK(lo) ;
     atscntrb_afiber__stack_unmap
-      ((char*)lo - (size_t)sysconf(_SC_PAGESIZE), atscntrb_afiber__stack_total(usable), lo, usable) ;
-#endif
+      ((char*)lo - atscntrb_afiber__guardsz(), atscntrb_afiber__stack_total(usable), lo, usable) ;
   }
   w->ncached = 0 ;
+#ifndef ATSCNTRB_AFIBER_STACK_MALLOC
+  // what was never carved of the slab
+  if (w->slab_left > 0)
+    munmap(w->slab_cur, (size_t)w->slab_left * atscntrb_afiber__stack_total
+             (atscntrb_afiber__stack_usable((size_t)ATSCNTRB_AFIBER_STACKSZ))) ;
+  w->slab_cur = (char*)0 ; w->slab_left = 0 ;
+#endif
 } // end of [atscntrb_afiber__cache_drain]
 
 /*
