@@ -259,6 +259,135 @@ atscntrb_afiberchan_wake_all
 
 /* ****** ****** */
 
+/*
+** MS-2026-10 (step J): the common paths in one C call. [send_begin] takes
+** the lock and returns the slot for the new item (the caller stores the
+** item, then calls [send_end]: wake a parked receiver, unlock), or
+** NULL when the buffer is full (the lock is held: the caller parks, see
+** [park_send], and calls [send_recheck], which does not lock again), or
+** (void*)1 when the channel is closed (the lock is released). [recv_*] are
+** the mirror image; the slot returned by [recv_begin] holds the oldest
+** item, already removed from the ring, and stays valid until [recv_end]
+** (nobody else can push into it before the unlock). [trysend_begin] and
+** [tryrecv_begin] return a slot (lock held, finish with [send_end] or
+** [recv_end]) or (void*)1 (refused, the lock is released).
+*/
+ATSinline()
+atstype_bool
+atscntrb_afiberchan_ptr_is_one
+  (atstype_ptr p)
+{ return (p == (atstype_ptr)1) ? atsbool_true : atsbool_false ; }
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan__send_check
+  (atscntrb_afiberchan_t *c)
+{
+  size_t n = c->n, cap = c->cap, i ;
+  if (c->closed) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
+  if (n >= cap) return (atstype_ptr)0 ;
+  i = c->head + n ;
+  if (i >= cap) i -= cap ;
+  c->n = n + 1 ;
+  return (atstype_ptr)(ATSCNTRB_AFIBERCHAN_DATA(c) + i * c->tsz) ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan_send_begin
+  (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atscntrb_afiber__spin_lock(&(c->lock)) ;
+  return atscntrb_afiberchan__send_check(c) ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan_send_recheck
+  (atstype_ptr c0)
+{ return atscntrb_afiberchan__send_check((atscntrb_afiberchan_t*)c0) ; }
+
+ATSinline()
+void
+atscntrb_afiberchan_send_end
+  (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  if (c->recvq.head) atscntrb_afiber_waitq_wake_one((atstype_ptr)&(c->recvq)) ;
+  atscntrb_afiber__spin_unlock(&(c->lock)) ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan_trysend_begin
+  (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atstype_ptr p ;
+  atscntrb_afiber__spin_lock(&(c->lock)) ;
+  p = atscntrb_afiberchan__send_check(c) ;
+  if (p == (atstype_ptr)0) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
+  return p ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan__recv_check
+  (atscntrb_afiberchan_t *c)
+{
+  size_t n = c->n, h ;
+  if (n > 0) {
+    h = c->head ;
+    c->n = n - 1 ;
+    c->head = (h + 1 == c->cap) ? 0 : h + 1 ;
+    return (atstype_ptr)(ATSCNTRB_AFIBERCHAN_DATA(c) + h * c->tsz) ;
+  }
+  if (c->closed) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
+  return (atstype_ptr)0 ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan_recv_begin
+  (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atscntrb_afiber__spin_lock(&(c->lock)) ;
+  return atscntrb_afiberchan__recv_check(c) ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan_recv_recheck
+  (atstype_ptr c0)
+{ return atscntrb_afiberchan__recv_check((atscntrb_afiberchan_t*)c0) ; }
+
+ATSinline()
+void
+atscntrb_afiberchan_recv_end
+  (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  if (c->sendq.head) atscntrb_afiber_waitq_wake_one((atstype_ptr)&(c->sendq)) ;
+  atscntrb_afiber__spin_unlock(&(c->lock)) ;
+}
+
+ATSinline()
+atstype_ptr
+atscntrb_afiberchan_tryrecv_begin
+  (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atstype_ptr p ;
+  atscntrb_afiber__spin_lock(&(c->lock)) ;
+  p = atscntrb_afiberchan__recv_check(c) ;
+  if (p == (atstype_ptr)0) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
+  return p ;
+}
+
+/* ****** ****** */
+
 #endif // ifndef ATSCNTRB_AFIBER_CATS_AFIBERCHAN
 
 /* ****** ****** */

@@ -29,7 +29,16 @@ prelude and of libats can block inside a fiber.
   unreceived items back as a `List_vt(T)`). Linear values move through. A channel is one
   cache-line aligned C object (lock, ring header and wait queues on the first
   line), so that a producer and a consumer on different cores move one line
-  and one slot.
+  and one slot. The common paths are one C call to lock and take the slot and one
+  to wake and unlock (step J); `chan_recv_ref`/`chan_tryrecv_ref`
+  (`x: &T? >> opt(T,b)`, no `Some_vt` node, so no malloc and free per item: use
+  them in hot loops) are `chan_recv`/`chan_tryrecv` without the allocation.
+  `chan_recv_batch<T>(ch, n)` waits for an item, then takes up to `n` under one
+  lock acquisition (nil only when the channel is closed and drained);
+  `chan_send_list<T>(ch, xs)` sends a list in order under one lock acquisition
+  (it releases the lock while it is parked on a full channel) and returns the
+  items that were not sent because the channel is closed. FIFO order holds across
+  batches and single operations.
 - `TEST/`: `make -C TEST testall` (and `leakcheck` with AddressSanitizer).
 - `doc/PLAN.md`: the options analysis, the design, and the status (what is
   implemented, departures from the plan, open items).
@@ -61,7 +70,7 @@ with `-DATSCNTRB_AFIBER_STACK_MALLOC`. The part of a slab not carved yet stays
 mapped (untouched, `MAP_NORESERVE`) until `afiber_workers_stop`, or the exit
 of a one-worker program. All units of a program must use the same `ATSCNTRB_AFIBER_*`
 settings. `-DATSCNTRB_AFIBER_RUNNEXT_WAIT_NS=n` (default 3000) is the time an idle worker waits before it steals a `runnext` slot
-(M:N only). The spinlock of channels, the mutex queue and the scheduler spins with `pause` and doubling backoff (`-DATSCNTRB_AFIBER_SPIN_MAXR=n`, default 256, per round; `-DATSCNTRB_AFIBER_SPIN_PAUSES=n`, default 2000 in all, before the first `sched_yield`); `-DATSCNTRB_AFIBER_SPIN_OLD` restores 100 pauses then yield. `-DATSCNTRB_AFIBER_SINGLE` is for programs that never start workers:
+(M:N only). The spinlock of channels, the mutex queue and the scheduler spins with `pause` and doubling backoff (`-DATSCNTRB_AFIBER_SPIN_MAXR=n`, default 256, per round; `-DATSCNTRB_AFIBER_SPIN_PAUSES=n`, default 2000 in all, before the first `sched_yield`); `-DATSCNTRB_AFIBER_SPIN_OLD` restores 100 pauses then yield. `-DATSCNTRB_AFIBER_MAIN_SPIN_NS=n` (default 200000, 0 disables) is how long worker 0 keeps spinning and stealing while the main fiber is parked and other workers are busy (M:N only). `-DATSCNTRB_AFIBER_SINGLE` is for programs that never start workers:
 it compiles the M:N paths out and restores the pre-M:N one-worker cost
 (`afiber_workers_start(n > 1)` is then fatal). `make -C TEST regress_variants`
 runs the tests with the ucontext, malloc'd-stack, bounded-cache, no-guard, SLAB=1 and SINGLE builds. `BENCH/` has afiber vs Go
@@ -85,7 +94,7 @@ Without it `afiber_workers_start (n > 1)` aborts with a message. Each
 worker has its own run queue (a `runnext` slot and a ring, as in Go's
 scheduler) and idle workers steal half of a busy one's ring; a global
 FIFO takes the overflow and the sleepers. The main fiber stays on the
-main thread. A fiber
+main thread (worker 0 keeps looking for work for up to 200 us while main is parked and the others are busy, instead of sleeping). A fiber
 may resume on another OS thread after any call that can block: do not
 keep `errno` or other thread-local state across one. Shared data needs a
 channel, an `afiber_mutex` (not FIFO under contention: it spins briefly before parking, and only one woken waiter competes at a time, as in Go; after a waiter has waited 1 ms it hands the lock over in FIFO order, the starvation mode) or an `afiber_spin`; the global arena of

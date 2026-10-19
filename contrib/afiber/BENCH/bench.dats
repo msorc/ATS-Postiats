@@ -1,6 +1,7 @@
 (* MS-2026-10: afiber benchmarks; the Go twins are in bench.go.
    usage: bench NAME [N]   (prints "NAME N ns" and, for [mem], the rss) *)
 #include "share/atspre_staload.hats"
+staload UN = "prelude/SATS/unsafe.sats"
 staload "contrib/afiber/SATS/afiber.sats"
 staload _ = "contrib/afiber/DATS/afiber.dats"
 staload "contrib/afiber/SATS/afiberchan.sats"
@@ -23,6 +24,15 @@ static void bench_count_atomic(void) { __atomic_fetch_add(&bench_count, 1, __ATO
 static void bench_count_plain(void) { bench_count++; }
 static long bench_count_get(void) { return bench_count; }
 %}
+(* MS-2026-10 (step J): [chan_recv_ref] instead of [chan_recv] (no [Some_vt] node per item);
+   the items of these benchmarks are >= 0, -1 stands for "closed and drained" *)
+fun rv (ch: !chan_vt(int)): int = let
+  var x: int
+in
+  if chan_recv_ref<int> (ch, x)
+  then let prval () = opt_unsome{int}(x) in x end
+  else let prval () = opt_unnone{int}(x); val () = x := 0 in ~1 end
+end
 extern fun lcg (x: ulint): ulint = "mac#bench_lcg"
 extern fun acc_xor (x: ulint): void = "mac#bench_acc_xor"
 extern fun count_atomic (): void = "mac#bench_count_atomic"
@@ -82,11 +92,11 @@ in report ("yield", 2*n, t0) end
 fun ping (c1: !chan_vt(int), c2: !chan_vt(int), k: int, n: int): void =
   if k < n then let
     val () = chan_send<int> (c1, k)
-    val-~Some_vt(_) = chan_recv<int> (c2)
+    val _ = rv (c2)
   in ping (c1, c2, k+1, n) end
 fun pong (c1: !chan_vt(int), c2: !chan_vt(int), k: int, n: int): void =
   if k < n then let
-    val-~Some_vt(x) = chan_recv<int> (c1)
+    val x = rv (c1)
     val () = chan_send<int> (c2, x)
   in pong (c1, c2, k+1, n) end
 fun bench_pingpong (n: int): void = let
@@ -109,7 +119,7 @@ fun produce (ch: !chan_vt(int), n: int): void =
   if n > 0 then (chan_send<int> (ch, n); produce (ch, n-1))
 fun consume (ch: !chan_vt(int), n: int, s: int): int =
   if n > 0 then let
-    val-~Some_vt(x) = chan_recv<int> (ch)
+    val x = rv (ch)
   in consume (ch, n-1, s+x) end else s
 fun spawn_prod {n:nat} (ch: !chan_vt(int), p: int, per: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
   if p > 0 then let
@@ -133,7 +143,7 @@ in report (name, per * p, t0) end
 
 (* ---- chain: a daisy chain of n fibers, one token travels through ---- *)
 fun worker (l: chan_vt(int), r: chan_vt(int)): void = let
-  val-~Some_vt(x) = chan_recv<int> (r)
+  val x = rv (r)
   val () = chan_send<int> (l, x+1)
 in chan_unref_type<int> (l); chan_unref_type<int> (r) end
 fun build (i: int, n: int, left: chan_vt(int)): chan_vt(int) =
@@ -150,7 +160,7 @@ fun bench_chain (n: int): void = let
   val fm = chan_ref<int> (first)
   val last = build (0, n, first)
   val () = chan_send<int> (last, 0)
-  val-~Some_vt(x) = chan_recv<int> (fm)
+  val x = rv (fm)
   val () = assertloc (x = n)
   val () = (chan_unref_type<int> (last); chan_unref_type<int> (fm))
   val () = afiber_run_until_done ()
@@ -162,16 +172,17 @@ fun gen (out: chan_vt(int), k: int): void =
   | ~None_vt() => gen (out, k+1)
   | ~Some_vt(_) => chan_unref_type<int> (out)
 fun filter (inp: chan_vt(int), out: chan_vt(int), p: int): void =
-  case+ chan_recv<int> (inp) of
-  | ~Some_vt(x) =>
+  let val x = rv (inp) in
+  if x >= 0 then
     if x mod p = 0 then filter (inp, out, p) else
       (case+ chan_send_opt<int> (out, x) of
        | ~None_vt() => filter (inp, out, p)
        | ~Some_vt(_) => (chan_close (inp); chan_unref_type<int> (inp); chan_unref_type<int> (out)))
-  | ~None_vt() => (chan_close (out); chan_unref_type<int> (inp); chan_unref_type<int> (out))
+  else (chan_close (out); chan_unref_type<int> (inp); chan_unref_type<int> (out))
+  end
 fun sieve (ch: chan_vt(int), i: int, n: int): chan_vt(int) =
   if i < n then let
-    val-~Some_vt(p) = chan_recv<int> (ch)
+    val p = rv (ch)
     val () = the_sink_ref[] := p
     val nx = chan_make<int> (1)
     val a = chan_ref<int> (ch)
@@ -240,7 +251,7 @@ in report ("mn_pingpong", 2 * n * P, t0) end
 (* ---- mn_pipeline: 1 source -> cap 128 -> 8 stages -> cap 128 -> main ---- *)
 fun stage (a: !chan_vt(int), b: !chan_vt(int), per: int): void =
   if per > 0 then let
-    val-~Some_vt(x) = chan_recv<int> (a)
+    val x = rv (a)
     val () = chan_send<int> (b, x + 1)
   in stage (a, b, per-1) end
 fun spawn_stages {n:nat} (a: !chan_vt(int), b: !chan_vt(int), k: int, per: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
@@ -264,6 +275,41 @@ fun bench_mn_pipeline (n0: int): void = let
   val () = join_all (fs)
   val () = (chan_unref_type<int> (a); chan_unref_type<int> (b))
 in report ("mn_pipeline", n, t0) end
+
+
+fun inc_list (xs: List0_vt(int)): List0_vt(int) =
+  case+ xs of
+  | ~list_vt_nil () => list_vt_nil ()
+  | ~list_vt_cons (x, xs1) => list_vt_cons (x + 1, inc_list (xs1))
+fun bstage (a: !chan_vt(int), b: !chan_vt(int), per: int): void =
+  if per > 0 then let
+    val k = (if per > 16 then 16 else $UN.cast{intGt(0)}(per)): intGt(0)
+    val xs = chan_recv_batch<int> (a, k)
+    val m = list_vt_length (xs)
+    val rest = chan_send_list<int> (b, inc_list (xs))
+    val () = list_vt_free (rest)
+  in bstage (a, b, per-m) end
+fun spawn_bstages {n:nat} (a: !chan_vt(int), b: !chan_vt(int), k: int, per: int, fs: list_vt(afiber_vt,n)): List_vt(afiber_vt) =
+  if k > 0 then let
+    val x = chan_ref<int> (a)
+    val y = chan_ref<int> (b)
+    val f = afiber_spawn (llam () => (bstage (x, y, per); chan_unref_type<int> (x); chan_unref_type<int> (y)))
+  in spawn_bstages (a, b, k-1, per, list_vt_cons (f, fs)) end else fs
+fun bench_mn_pipeline_batch (n0: int): void = let
+  val K = 8
+  val per = n0 / K
+  val n = per * K
+  val t0 = afiber_clock_ns ()
+  val a = chan_make<int> (128)
+  val b = chan_make<int> (128)
+  val src = chan_ref<int> (a)
+  val fsrc = afiber_spawn (llam () => (produce (src, n); chan_unref_type<int> (src)))
+  val fs = spawn_bstages (a, b, K, per, list_vt_cons (fsrc, list_vt_nil ()))
+  val s = consume (b, n, 0)
+  val () = the_sink_ref[] := s
+  val () = join_all (fs)
+  val () = (chan_unref_type<int> (a); chan_unref_type<int> (b))
+in report ("mn_pipeline_batch", n, t0) end
 
 (* ---- mn_cpu: 64 fibers, each iters LCG steps, yielding every 1000 ---- *)
 fun cpu_work (i: int, iters: int, x: ulint): ulint =
@@ -329,6 +375,7 @@ implement main0 {n} (argc, argv) = let
   else if name = "mem" then bench_mem (n)
   else if name = "mn_pingpong" then bench_mn_pingpong (n)
   else if name = "mn_pipeline" then bench_mn_pipeline (n)
+  else if name = "mn_pipeline_batch" then bench_mn_pipeline_batch (n)
   else if name = "mn_cpu" then bench_mn_cpu (n)
   else if name = "mn_spawn" then bench_mn_spawn (n)
   else if name = "mn_mutex" then bench_mn_mutex (n)

@@ -1,7 +1,7 @@
 # afiber vs Go benchmarks
 
-(The tables below are the one-worker numbers measured before M:N. The current numbers, after step 2 of the
-speed-up plan, are in `results.md`; the run after step 1 is `results_step1.md`; the M:N run before step 1 (the library at 4552ac427, up to 19% slower on channel
+(The tables below are the one-worker numbers measured before M:N. The current numbers, after step 4 of the
+speed-up plan, are in `results.md`; the run after step 3 is `results_step3.md`, after step 2 `results_step2.md`, after step 1 `results_step1.md`; the M:N run before step 1 (the library at 4552ac427, up to 19% slower on channel
 ping-pong at one worker) is in `results_step0.md`.)
 
 `bench.dats` (afiber + afiberchan) and `go/bench.go` run the same eight workloads;
@@ -86,10 +86,10 @@ to change). One benchmark by hand: `./bench_ats mn_pingpong 1600000 4`, `GOMAXPR
 (`NAME TOTAL [WORKERS]`). The workloads are `mn_pingpong` (16 pairs), `mn_pipeline` (source, 8 stages, sink),
 `mn_cpu` (64 fibers of pure compute, yield per 1000 steps), `mn_spawn` (spawn+join batches of 1000) and `mn_mutex`
 (32 fibers on one counter). The total work is fixed, so the "speedup" table is wall time at N=1 over wall time at N.
-`make bench` also builds with the M:N flags; with `make bench_ats_1n` (the library without
+`bench.dats` receives with `chan_recv_ref` in every benchmark (no allocation per item, as in Go). A hand-run row not in `run.py`: `./bench_ats mn_pipeline_batch 2000000 N` (the 8 stages use `chan_recv_batch`/`chan_send_list` with batches of up to 16; source and sink per item). `make bench` also builds with the M:N flags; with `make bench_ats_1n` (the library without
 `_ATS_CCOMP_RUNTIME_TRYWITH_NONE_`), `make bench_ats_single` (`-DATSCNTRB_AFIBER_SINGLE`) and `BEFORE=<binary>`
 (`BEFORE_LABEL=` names its column) `python3 run.py` adds columns for the 1:N build, the SINGLE build and a binary of the
-previous library; a benchmark the `BEFORE=` binary lacks prints "-". Numbers: `results.md` (after step 3), `results_step2.md`, `results_step1.md` (after step 1), `results_step0.md` (before it); the older one-worker
+previous library; a benchmark the `BEFORE=` binary lacks prints "-". Numbers: `results.md` (after step 4), `results_step3.md`, `results_step2.md`, `results_step1.md` (after step 1), `results_step0.md` (before it); the older one-worker
 numbers: `results_1n.md`.
 
 ### Reading the M:N numbers (2026-10-18, 16-core/32-thread Ryzen 9 5950X; the figures in the bullets are from `results_step0.md`, before step 1)
@@ -116,7 +116,7 @@ numbers: `results_1n.md`.
   mutex had two layers of it: its own spinlock plus the global queue on every park and wake. Go has a run queue per P,
   a `runnext` slot that runs the just-woken goroutine on the same P (a ping-pong pair stays on one thread), work
   stealing, and wakes a P only when one is idle and nobody is spinning, so the common case takes no shared lock. Step A (below) gave afiber the same design and removed this cause; the pipeline's remaining cost after step 2 was the channel's own lock (51% of cycles in `chan_send_opt`, 37% in `chan_recv` at N=4), not the scheduler (under 8%), which step 3 reduced.
-* **What was done (steps 1 to 3) and what is next.** Step 1 (commits listed in `results_step1.md`), measured there:
+* **What was done (steps 1 to 4) and what is next.** Step 1 (commits listed in `results_step1.md`), measured there:
   - mutex fast path (one atomic exchange) and a 4x30 `pause` spin before parking, as `sync.Mutex` does: `mn_mutex`
     N=4 82 -> 22 ns (Go 79), N=32 2731 -> 545; the mutex is no longer FIFO under contention. Still 3-9x slower than Go
     from N=8, where a failed spin parks through the global queue (step 3 fixed this, below);
@@ -153,10 +153,29 @@ numbers: `results_1n.md`.
     scale: 10 fibers share two channels, the two channel locks are 49% (`chan_send_opt`) and 44% (`chan_recv`) of the cycles.
   - One worker: pipe 16.1 -> 15.1 ns, fan-in 16.4 -> 15.4, sieve 46.5 -> 40.1 us per prime; ping-pong 35.6 -> 37.0 ns (SINGLE
     30.0 -> 31.9) is a small regression, probably the accessor calls of the new ATS channel code; the rest is unchanged.
-    `mn_pingpong`, `mn_cpu` and `mn_spawn` are unchanged within noise.
+    `mn_pingpong`, `mn_cpu` and `mn_spawn` are unchanged within noise. (Step 3 blamed `mn_spawn` at N>=2 on the pinned main
+    fiber and wake-up latency; that diagnosis was wrong, step 4 measured the causes: futex wake-ups and the malloc arena lock.)
 
-  Next, in order of expected payoff (not measured yet): **H**, main on any worker, or the benchmark's joins not pinned to
-  main (`mn_spawn` near its N=1 value of 135 ns, now 356-726 ns against Go's 203-292); **G2**, the pipeline at N>=4: direct
-  hand-off to a parked receiver and/or fewer lock acquisitions per item; **J**, the +1.4 ns one-worker ping-pong regression.
+  **Step 4** (tables in `results.md`, measured against the step-3 binary at 0015eb145):
+  - **Step H**: worker 0 keeps spinning and stealing while the main fiber is parked and other workers are busy
+    (`ATSCNTRB_AFIBER_MAIN_SPIN_NS`, default 200 us, 0 disables). It does not change `mn_spawn` (worker 0 entered the spin 139 times
+    in 400,000 spawns). The measured causes of `mn_spawn` at N>=2: 5,366 futex calls per 100,000 spawns at N=4 (idle workers
+    woken between the 1000-fiber batches) and glibc's malloc arena lock (a closure is allocated by main and freed by the thread
+    that ran the fiber); stacks are not the cause (1,007 `mprotect` per 100,000 spawns at N=4, as at N=1). Go pays the same two
+    costs (its own `mn_spawn` at N>=2 is about 2x its N=1 value).
+  - **Steps J and G2**, the channel: the common paths of send, receive and the try forms are two C calls (lock and take the slot,
+    wake the partner and unlock). The real one-worker cost was the `Some_vt` node that `chan_recv` mallocs and frees per item
+    (28% of the ping-pong cycles), so there is a non-allocating `chan_recv_ref`/`chan_tryrecv_ref`, and `chan_recv_batch`/`chan_send_list`
+    (one lock acquisition per batch). One worker (the benchmark now receives with `chan_recv_ref`): ping-pong 36.8 -> 30.5 ns (SINGLE
+    23.8; Go 146), pipe 15.0 -> 8.0 (Go 35), fan-in 15.7 -> 8.3, sieve 39.9 -> 36.3 us per prime (Go 111); yield 18.0, spawn 94.6 (step 3
+    87.9: probably noise, to re-check), spawn_cold, chain, memory unchanged. `mn_pipeline` N=1/2/4/8/16/32 31/94/136/187/193/252 -> 17.2/78.3/
+    110.3/149.3/159.7/211.2 ns (Go 74/100/98/106/108/109): below Go at N=2, 1.1x to 1.9x slower from N=4 (was 1.3x to 2.3x), still not
+    scaling. The hand-run `mn_pipeline_batch`: 25.8/23.7/47.6/70.2/76.4/103.2 ns per item, under Go at every N, but a different program.
+    `mn_pingpong` 22.1/11.2/5.8/4.7/5.7 -> 18.8/9.5/4.9/4.1/4.4 (N=2..32); `mn_mutex`, `mn_cpu` unchanged. `chan_recv` with `Option_vt` is still
+    there and still allocates. Direct hand-off to a parked receiver is not implemented.
+
+  Next, in order of expected payoff: **G3**, a lock-free (MPMC, e.g. Vyukov) ring in the channel with the lock kept only for parking:
+  the remaining `mn_pipeline` cost is the two channel locks' cache lines bouncing between cores (IPC about 0.28 at N=4); **H2**,
+  `mn_spawn` at N>=2: a per-worker free list for small closure blocks and/or longer idle spinning between batches.
   M:N now pays off for fine-grained communication between independent streams (ping-pong), compute fibers and mutex-heavy
   code; a single producer/consumer chain through a channel (the pipeline) wins at N=1 and loses to Go at N>=4.

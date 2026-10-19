@@ -460,6 +460,9 @@ atscntrb_afiber__mt()
 ** brings back the old policy (100 pauses, then yield) for comparison.
 */
 #ifndef ATSCNTRB_AFIBER_SPIN_MAXR
+#ifndef ATSCNTRB_AFIBER_MAIN_SPIN_NS
+#define ATSCNTRB_AFIBER_MAIN_SPIN_NS 200000ULL // worker 0 looks for work this long while main is parked
+#endif
 #define ATSCNTRB_AFIBER_SPIN_MAXR 256
 #endif
 #ifndef ATSCNTRB_AFIBER_SPIN_PAUSES
@@ -1186,7 +1189,7 @@ atscntrb_afiber__pick_mt
 {
   atscntrb_afiber_sched_t *s = &atscntrb_afiber__sched ;
   atscntrb_afiber_t *f ;
-  if (w->id == 0 && __atomic_load_n(&(s->mainslot), __ATOMIC_RELAXED)) {
+  if (w->id == 0 && __atomic_load_n(&(s->mainslot), __ATOMIC_ACQUIRE)) {
     atscntrb_afiber__spin_lock(&(s->lock)) ;
     f = s->mainslot ; __atomic_store_n(&(s->mainslot), (atscntrb_afiber_t*)0, __ATOMIC_RELAXED) ;
     atscntrb_afiber__spin_unlock(&(s->lock)) ;
@@ -1452,6 +1455,48 @@ atscntrb_afiber__peek_work
 } // end of [atscntrb_afiber__peek_work]
 
 /*
+** Step H: main is pinned to worker 0, and it parks (join, channel, ...)
+** while the fibers it waits for run on the other workers. If worker 0
+** went to sleep on its condition variable every time, main's wake-up
+** would cost a futex wake-up (5-10 us). So worker 0, having found
+** nothing in its spinning rounds, keeps looking (rounds of [pick_mt],
+** which also steals, so it keeps helping) for up to
+** ATSCNTRB_AFIBER_MAIN_SPIN_NS, as long as main is blocked (BLOCKED or
+** WAITALL: not SLEEPING, a sleeper has a deadline), fibers are alive and
+** some other worker is not idle. Main's arrival in [mainslot] is seen by
+** [pick_mt] at the top of the next round (it reads the slot with acquire
+** and then takes [s->lock]). When every other worker is idle too, or after
+** the bound, the caller announces and sleeps as usual (the deadlock
+** detection is there). This spin is NOT counted in [nspinning] (the
+** spinner accounting of the caller has been closed): a counted spinner
+** would suppress the kicks that wake the other workers, and worker 0 is
+** not an extra spinner, it is the one that waits for main; it does not
+** announce itself in [nidle] either, so [kick] still sees the true count.
+*/
+static
+__attribute__((noinline))
+atscntrb_afiber_t*
+atscntrb_afiber__main_spin
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w)
+{
+  unsigned long long t0 = 0ULL ;
+  int st, j ;
+  atscntrb_afiber_t *next ;
+  for ( ; ; ) {
+    st = atscntrb_afiber__getstate(&(s->main)) ;
+    if (st != ATSCNTRB_AFIBER_BLOCKED && st != ATSCNTRB_AFIBER_WAITALL) return (atscntrb_afiber_t*)0 ;
+    if (__atomic_load_n(&(s->nidle), __ATOMIC_SEQ_CST) >= s->nworkers - 1) return (atscntrb_afiber_t*)0 ;
+    if (__atomic_load_n(&(s->nlive), __ATOMIC_SEQ_CST) <= 0) return (atscntrb_afiber_t*)0 ;
+    if (__atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE)) return (atscntrb_afiber_t*)0 ;
+    if (t0 == 0ULL) t0 = atscntrb_afiber_clock_ns() ;
+    else if (atscntrb_afiber_clock_ns() - t0 > ATSCNTRB_AFIBER_MAIN_SPIN_NS) return (atscntrb_afiber_t*)0 ;
+    next = atscntrb_afiber__pick_mt(w, 0) ;
+    if (next) return next ;
+    for (j = 0; j < 30; j += 1) atscntrb_afiber__cpu_relax() ;
+  }
+} // end of [atscntrb_afiber__main_spin]
+
+/*
 ** the idle loop of a worker, on its idle context: run what there
 ** is, else wait on the condition variable of the worker (until the
 ** earliest sleep deadline, if there is one). All workers idle with
@@ -1492,6 +1537,7 @@ atscntrb_afiber__idle_loop()
       __atomic_store_n(&(w->spinning), 0, __ATOMIC_RELAXED) ;
       if (__atomic_sub_fetch(&(s->nspinning), 1, __ATOMIC_SEQ_CST) == 0 && next) atscntrb_afiber__kick(s, 0) ;
     }
+    if (!next && w->id == 0) next = atscntrb_afiber__main_spin(s, w) ;
     if (next) { recheck = 0 ; atscntrb_afiber__switch_to(w, next) ; continue ; }
     pthread_mutex_lock(&(w->mu)) ;
     __atomic_store_n(&(w->waiting), 1, __ATOMIC_SEQ_CST) ;
