@@ -413,11 +413,56 @@ Remaining costs (profile of `mn_pipeline` at N=4): 51% of the cycles in `chan_se
 own spinlock, producer and consumer on different cores), 5.6 cycles per instruction, 2,695 `sched_yield` and 5,922 futex calls
 per 1M items; the scheduler functions together are under 8%. `mn_spawn` at N>=2: the main fiber is pinned to worker 0, a join
 parks it and the child's death wakes it with a futex. Next: (G) the channel (lock-free or contention-tolerant buffer, a
-spinlock that does not `sched_yield` after 100 spins), (H) main on any worker, (I) the mutex at N>=8 (done: Go's woken/starving state machine, see below).
+spinlock that does not `sched_yield` after 100 spins), (H) main on any worker, (I) the mutex at N>=8 (G and I are done in step 3, below).
 
 Verification: `make -C contrib/afiber/TEST cleanall regress leakcheck` (22 tests, ASan clean), `regress_variants` (7 builds),
 `stress stress16` (10 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers), `make -C doc -f Makefile_test testall`
 exit 0.
+
+### Step 3 of the speed-up plan (2026-10-19)
+
+Steps G and I of the plan. Tables and commentary: `BENCH/results.md` (before: `BENCH/results_step2.md`). Landed on `afiber-mn`:
+
+- df816db98 step I, the mutex: Go's `sync.Mutex` state machine adapted to fibers. One atomic word: bit 0 locked, bit 1 woken (a
+  waiter is awake and competing, so unlock wakes nobody else), bit 2 starving (after 1 ms of waiting the lock is handed to the
+  head of the wait queue, FIFO), the waiter count in bits 3 and up. The wait queue is the semaphore; its internal spinlock
+  guards only the queue. Fast path one CAS; the slow path spins 4x30 `pause` while held and not starving, then parks. The
+  lost-wake-up argument is a single CAS (announce and look in one word). Before, every unlock woke one waiter and the woken
+  fibers lost to spinning bargers and re-parked by the dozen; after, at N=8 and N=32 500,000 operations took about 495,000
+  slow-path entries but only about 2,900 parks (0.6%). The mutex is not FIFO in the normal mode. New test `POS_mn_mutex32`
+  (32 fibers x 50,000, a yield every 1000th inside the lock, two 2 ms holders: starvation mode is entered and left; the longest
+  wait seen 2-9 ms).
+- af6d5bded step G, one compact channel object: `atscntrb_afiberchan_t` (64-byte aligned; first line lock, closed flag, ring
+  head and count, both wait queues, refcount; second line the read-mostly capacity and slot size; the slots follow in the same
+  allocation); the ATS side is `assume chan_vtype(a) = ptr` with small C accessors, the API is unchanged. A send and a receive on
+  different cores used to transfer 4-5 cache lines each. And the shared spinlock (`atscntrb_afiber__spin_lock`: channels, the
+  mutex queue, the scheduler lock) spins with `pause` and doubling backoff up to `ATSCNTRB_AFIBER_SPIN_MAXR` (256) per round,
+  for `ATSCNTRB_AFIBER_SPIN_PAUSES` (2000) pauses before its first `sched_yield`; `-DATSCNTRB_AFIBER_SPIN_OLD` restores 100
+  pauses then yield. Measured on `mn_pipeline` at N=4 (ns per item): compact channel alone 286 -> 297 (no gain, the waiters
+  yield); compact channel + new policy 142; cycles per instruction 5.4 -> 3.3; `sched_yield` calls 2,398 -> 56 per 1M items;
+  futex calls 4,079 -> about 2,500. Spin variants (cap per round / pauses before yield): 1 (no backoff) 380; 8 210; 64/2000 150;
+  256/2000 142 (kept); 256/20,000 140; 1024/100,000 134 but 30 times slower with all workers pinned to one CPU
+  (`taskset -c 0`), so rejected. The kept policy is somewhat slower than the old one when pinned to one CPU, which is not a
+  configuration the M:N scheduler is for. New test `POS_mn_pipeline` (4-stage chain over capacity-2 channels, 100,000 items, a
+  close with parked receivers and a trysend on a full channel).
+- 65d4b6688 the channel's park wrappers pass the lock field explicitly.
+
+Numbers (idle Ryzen 9 5950X, step 2 -> step 3). M:N: `mn_mutex` N=2/4/8/16/32 11.0/36.5/207/446/530 -> 14.0/21.6/29.8/25.1/24.3
+ns (Go 27.6/72.7/59.5/58.0/59.0: 2-3x faster than Go at every N, 0.30 to 0.51 of its time; N=2 is 3 ns slower than step 2);
+`mn_pipeline` 132/302/416/393/448 -> 94/136/187/193/252 (Go 99/101/108/112/109: at Go's cost at N=2, 1.3x to 2.3x slower from N=4,
+was 3x to 4x; it does not scale); `mn_pingpong` (22.1/11.2/5.8/4.7/5.7), `mn_cpu` (19.2x at N=32) and `mn_spawn`
+(356-726 ns) unchanged within noise. One worker: pipe 16.1 -> 15.1 ns, fan-in 16.4 -> 15.4, sieve 46.5 -> 40.1 us per prime
+(SINGLE build 35.4); ping-pong 35.6 -> 37.0 (SINGLE 30.0 -> 31.9: a small regression in both builds, probably the accessor calls
+of the new channel code); yield 17.3 -> 17.9 (noise); spawn 87.5 ns, spawn_cold 6.7 us, chain 7.0 us, memory 4.03 KB unchanged.
+
+Remaining costs: `mn_pipeline` at N>=4 is the two channel locks that all 10 fibers of the benchmark share (perf: 49% of the
+cycles in `chan_send_opt`, 44% in `chan_recv`); `mn_spawn` at N>=2 is the main fiber pinned to worker 0. Next: (H) main on any
+worker, (G2) direct hand-off to a parked receiver (Go copies the value straight to the receiver) and/or fewer lock
+acquisitions per item for the pipeline at N>=4, (J) the +1.4 ns one-worker ping-pong regression.
+
+Verification: `make -C contrib/afiber/TEST cleanall regress leakcheck` (24 tests, ASan clean), `regress_variants` (7 builds),
+`stress stress16` (12 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers), `make -C doc -f Makefile_test testall`
+exit 0; ThreadSanitizer builds of the M:N tests touched report nothing.
 
 ### Departures from the plan
 
@@ -482,13 +527,15 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
 - Stack overflow is a silent SIGSEGV on the guard page; a `sigaltstack`
   handler with a message is a possible improvement. Fibers cannot be
   cancelled; an uncaught exception in a fiber ends the process.
-- M:N: the one global run queue under one spinlock was the measured bottleneck (profile in `BENCH/README.md`); step A
-  (per-worker run queues with a `runnext` slot and work stealing) and step D (stack slab) are done, see "Step 2" above and
-  `BENCH/results.md`: ping-pong 164..1018 -> 5..22 ns at N=2..32 (faster than Go), `mn_cpu` 19.8x at N=32, `chain` ~11 -> ~7 us.
-  The global FIFO remains for ring overflow, sleepers and main. Step G is done (see "Step G" below): `mn_pipeline` at N=4 302 -> ~142 ns per item. Open: direct hand-off to a parked
-  receiver (not done); the remaining `mn_pipeline` cost at N>=8 is contention on the two channel locks (8 stages on 2 channels); the main fiber is pinned to worker 0 and
-  waits for it even when other workers are idle (`mn_spawn` at N>=2 is 346-726 ns against 136 at N=1 and Go's 234-288);
-  the mutex at N>=8 was 207-530 ns against Go's ~60 (step I: the state word with locked/woken/starving bits and the waiter count, as in Go's sync.Mutex; N=8..32 about 24 ns, one park per ~170 lock/unlock pairs). The mutex is not FIFO under contention in the normal mode; a waiter that waited 1 ms switches it to a FIFO hand-off (starvation mode). Also open: the global arena
+- M:N: the one global run queue under one spinlock was the measured bottleneck (profile in `BENCH/README.md`); steps A and D
+  (per-worker run queues with a `runnext` slot and work stealing; stack slab, "Step 2" above), and G and I (compact channel
+  and spinlock backoff; Go's mutex, "Step 3" above) are done, see `BENCH/results.md`: ping-pong 164..1018 -> 5..22 ns at
+  N=2..32 (faster than Go), `mn_cpu` 19.2x at N=32, `chain` ~11 -> ~7 us, `mn_mutex` 14-30 ns at N>=2 (Go 28-73),
+  `mn_pipeline` 94-252 ns (Go ~100). The global FIFO remains for ring overflow, sleepers and main. Open: the
+  main fiber is pinned to worker 0 and waits for it even when other workers are idle (`mn_spawn` at N>=2 is 356-726 ns
+  against 135 at N=1 and Go's 203-292); `mn_pipeline` at N>=4 is 1.3x to 2.3x slower than Go because all fibers share two
+  channel locks (direct hand-off to a parked receiver is not done); the mutex is not FIFO under contention in the normal
+  mode, a waiter that waited 1 ms switches it to FIFO hand-off. Also open: the global arena
   and plain `ref`s are not
   thread-safe; `errno`/TLS must not be kept across a blocking call;
   ThreadSanitizer cannot follow a `try` that migrates (it keeps
@@ -496,18 +543,3 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
 - Without GNU C (`__attribute__((weak))`) the scheduler falls back to one
   instance per compilation unit, which is wrong for programs that spawn in
   one unit and yield in another.
-
-### Step G: one compact channel object, spinlock backoff (MS-2026-10)
-
-- `CATS/afiberchan.cats`: the channel is one aligned C struct (layout in "Channels" above); the ATS `chan_vtype` is the
-  pointer to it (no `datavtype` box, no other allocation). `wake_one` on an empty wait queue is a test of `head` on the
-  line the sender already owns.
-- `atscntrb_afiber__spin_lock` (all our locks: channel, mutex, scheduler): `pause` with exponential backoff (1, 2, ... up
-  to `ATSCNTRB_AFIBER_SPIN_MAXR` = 256 pauses per round) for `ATSCNTRB_AFIBER_SPIN_PAUSES` = 2000 pauses in all, and only
-  then `sched_yield` in the loop (the holder may be preempted). `-DATSCNTRB_AFIBER_SPIN_OLD` restores 100 pauses then yield.
-  Measured at N=4 (ns per item, 1M items): old layout + old policy 286; compact layout + old policy 297 (the layout alone
-  does not help while the waiters yield); compact layout + new policy 142. A longer spin (1024 per round, 100,000 in all)
-  is a little faster on a free machine (134) but 30 times slower with 4 workers pinned to one CPU, so it was not kept.
-  `sched_yield` calls per 1M items at N=4: 2,398 -> 56; futex calls 4,079 -> ~2,100-3,000.
-- Not done: direct hand-off (a parked receiver gets the value stored in its slot, the sender makes it runnable): the
-  remaining cost is the contention on the lock, which a hand-off does not remove, and N=4 is already near Go's 100.

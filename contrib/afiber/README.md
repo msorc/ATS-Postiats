@@ -61,7 +61,7 @@ with `-DATSCNTRB_AFIBER_STACK_MALLOC`. The part of a slab not carved yet stays
 mapped (untouched, `MAP_NORESERVE`) until `afiber_workers_stop`, or the exit
 of a one-worker program. All units of a program must use the same `ATSCNTRB_AFIBER_*`
 settings. `-DATSCNTRB_AFIBER_RUNNEXT_WAIT_NS=n` (default 3000) is the time an idle worker waits before it steals a `runnext` slot
-(M:N only). `-DATSCNTRB_AFIBER_SINGLE` is for programs that never start workers:
+(M:N only). The spinlock of channels, the mutex queue and the scheduler spins with `pause` and doubling backoff (`-DATSCNTRB_AFIBER_SPIN_MAXR=n`, default 256, per round; `-DATSCNTRB_AFIBER_SPIN_PAUSES=n`, default 2000 in all, before the first `sched_yield`); `-DATSCNTRB_AFIBER_SPIN_OLD` restores 100 pauses then yield. `-DATSCNTRB_AFIBER_SINGLE` is for programs that never start workers:
 it compiles the M:N paths out and restores the pre-M:N one-worker cost
 (`afiber_workers_start(n > 1)` is then fatal). `make -C TEST regress_variants`
 runs the tests with the ucontext, malloc'd-stack, bounded-cache, no-guard, SLAB=1 and SINGLE builds. `BENCH/` has afiber vs Go
