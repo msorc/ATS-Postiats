@@ -156,6 +156,12 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 // MS-2026-10: the slots of the local run queue of a worker (a power of two)
 #define ATSCNTRB_AFIBER_RINGSZ 256
 
+// MS-2026-10: how long a thief waits before it takes a [runnext] (Go: 3 us; the owner
+// of the slot is probably about to run it itself)
+#ifndef ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS
+#define ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS 3000
+#endif
+
 #ifndef ATSCNTRB_AFIBER_STACK_CACHE
 #define ATSCNTRB_AFIBER_STACK_CACHE 0
 #endif
@@ -948,7 +954,7 @@ atscntrb_afiber__runq_steal
       if (!steal_runnext) return (atscntrb_afiber_t*)0 ;
       rn = __atomic_load_n(&(victim->runnext), __ATOMIC_RELAXED) ;
       if (!rn) return (atscntrb_afiber_t*)0 ;
-      atscntrb_afiber__spin_ns(3000) ;
+      if (ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS > 0) atscntrb_afiber__spin_ns(ATSCNTRB_AFIBER_RUNNEXT_WAIT_NS) ;
       if (__atomic_load_n(&(victim->head), __ATOMIC_ACQUIRE) != __atomic_load_n(&(victim->tail), __ATOMIC_ACQUIRE)) continue ; // it has work in the ring now
       if (__atomic_compare_exchange_n(&(victim->runnext), &rn, (atscntrb_afiber_t*)0, 0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) return rn ;
       return (atscntrb_afiber_t*)0 ; // the owner took it (or replaced it)
