@@ -407,7 +407,7 @@ Remaining costs (profile of `mn_pipeline` at N=4): 51% of the cycles in `chan_se
 own spinlock, producer and consumer on different cores), 5.6 cycles per instruction, 2,695 `sched_yield` and 5,922 futex calls
 per 1M items; the scheduler functions together are under 8%. `mn_spawn` at N>=2: the main fiber is pinned to worker 0, a join
 parks it and the child's death wakes it with a futex. Next: (G) the channel (lock-free or contention-tolerant buffer, a
-spinlock that does not `sched_yield` after 100 spins), (H) main on any worker, (I) the mutex at N>=8.
+spinlock that does not `sched_yield` after 100 spins), (H) main on any worker, (I) the mutex at N>=8 (done: Go's woken/starving state machine, see below).
 
 Verification: `make -C contrib/afiber/TEST cleanall regress leakcheck` (22 tests, ASan clean), `regress_variants` (7 builds),
 `stress stress16` (10 M:N tests x 200 runs, also pinned to one CPU, also at 16 workers), `make -C doc -f Makefile_test testall`
@@ -481,7 +481,7 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
   The global FIFO remains for ring overflow, sleepers and main. Open: the channel's own spinlock (51% + 37% of the cycles of
   `mn_pipeline` at N=4, 302 ns per item against Go's 100; the scheduler is under 8%); the main fiber is pinned to worker 0 and
   waits for it even when other workers are idle (`mn_spawn` at N>=2 is 346-726 ns against 136 at N=1 and Go's 234-288);
-  the mutex at N>=8 (207-530 ns against Go's ~60). The mutex is no longer FIFO under contention. Also open: the global arena
+  the mutex at N>=8 was 207-530 ns against Go's ~60 (step I: the state word with locked/woken/starving bits and the waiter count, as in Go's sync.Mutex; N=8..32 about 24 ns, one park per ~170 lock/unlock pairs). The mutex is not FIFO under contention in the normal mode; a waiter that waited 1 ms switches it to a FIFO hand-off (starvation mode). Also open: the global arena
   and plain `ref`s are not
   thread-safe; `errno`/TLS must not be kept across a blocking call;
   ThreadSanitizer cannot follow a `try` that migrates (it keeps
