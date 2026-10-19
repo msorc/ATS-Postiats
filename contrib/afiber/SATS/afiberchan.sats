@@ -103,5 +103,32 @@ fun{a:vt0p}
 chan_tryrecv (ch: !chan_vt(a)): Option_vt(a) // None: empty or closed
 //
 (* ****** ****** *)
+//
+// MS-2026-10 (step J, G2): variants that allocate nothing, and batches.
+//
+// [chan_recv_ref] is [chan_recv] without the [Some_vt] node (a malloc and
+// a free per item): true, and [x] is the item; or false (closed and
+// drained), and [x] is left uninitialized. [chan_tryrecv_ref] likewise.
+//
+fun{a:vt0p}
+chan_recv_ref
+  (ch: !chan_vt(a), x: &a? >> opt(a, b)): #[b:bool] bool(b)
+fun{a:vt0p}
+chan_tryrecv_ref
+  (ch: !chan_vt(a), x: &a? >> opt(a, b)): #[b:bool] bool(b)
+//
+// [chan_recv_batch] waits (like [chan_recv]) until the channel holds an
+// item, then takes up to [n] items under one lock acquisition, oldest
+// first; nil only if the channel is closed and drained.
+// [chan_send_list] sends the items in order under one lock acquisition
+// (it parks while the channel is full, and the lock is then released);
+// the items that were not sent (the channel is closed) are returned.
+//
+fun{a:vt0p}
+chan_recv_batch (ch: !chan_vt(a), n: intGt(0)): List0_vt(a)
+fun{a:vt0p}
+chan_send_list (ch: !chan_vt(a), xs: List0_vt(a)): List0_vt(a)
+//
+(* ****** ****** *)
 
 (* end of [afiberchan.sats] *)
