@@ -250,6 +250,10 @@ $(LIBATSCC2JS)/output/libatscc2js_all.js libatscc2js/.
 libatscc2js:: ; \
 $(CPRF) $(LIBATSCC2JS)/CATS/* libatscc2js/CATS/.
 libatscc2js:: ; \
+mkdir -p libatscc2js/CATS/Node.js
+libatscc2js:: ; \
+$(CPRF) $(LIBATSCC2JS)/Node.js/CATS/* libatscc2js/CATS/Node.js/.
+libatscc2js:: ; \
 $(CPRF) $(LIBATSCC2JS)/output/DATS/* libatscc2js/DATS/.
 #
 ######
