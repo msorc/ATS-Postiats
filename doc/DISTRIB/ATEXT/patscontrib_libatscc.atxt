@@ -136,9 +136,6 @@ PATSCONTRIB/libatscc-0.3.2\
 (* ****** ****** *)
 
 #packfilename_r("libatscc2js")
-#packfilename_r("libatscc2pl")
-#packfilename_r("libatscc2php")
-#packfilename_r("libatscc2py3")
 
 (* ****** ****** *)
 

@@ -154,7 +154,7 @@ unnecessary if the name of the file ends with the extension .dats.
 //
 --tlcalopt-disable:
 This flag is passed to tempopt to disable tail-call optimization,
-which is needed for atscc-compilers such as atscc2erl and atscc2scm.
+which is needed for atscc-compilers such as atscc2js.
 //
 (*
 //

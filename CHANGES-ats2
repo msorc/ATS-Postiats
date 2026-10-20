@@ -39,8 +39,8 @@ Here is a list of major additions and changes since the last release:
    types for compiler-like code.
 5. All ATS2 tools are rewritten in linear style: patscc, myatscc,
    tempacc, atexting, atsreloc, atslex, libatsrec, CATS-parsemit, the
-   atscc2{js,py3,php,scm,erl,pl,clj,r34} compilers (on the global arena)
-   and their libatscc* runtime libraries, ATS-extsolve(-z3/-smt2), and
+   atscc2js compiler (on the global arena) and its libatscc2js runtime
+   library, ATS-extsolve(-z3/-smt2), and
    the atscntrb/npm-utils packages. GC-only examples and experimental
    packages are removed from doc/ and npm-utils/.
 6. pats2xhtml and libatsynmark (utils/atsynmark, utils/libatsynmark) are
@@ -56,6 +56,14 @@ Here is a list of major additions and changes since the last release:
    `make -f codegen/Makefile_atslib` regenerates the prelude sources with the new
    atsdoc, `make -C utils/atsdoc genall` regenerates and checks all the templates,
    `make -C doc/DISTRIB atspackaging` and `atspacktarzvcf_gmp` work again.
+8. Only the C, C++ and Javascript (JS) backends are kept: the transpilers
+   atscc2clj, atscc2erl, atscc2php, atscc2pl, atscc2py3, atscc2r34 and
+   atscc2scm, along with their runtime libraries libatscc2clj, libatscc2erl,
+   libatscc2php, libatscc2pl, libatscc2py3, libatscc2r34 and libatscc2scm,
+   are removed.  What is kept: the C backend (src/pats_ccomp*), its C++ mode
+   (contrib/ats2cpp) and the Javascript backend (contrib/CATS-atscc2js and
+   contrib/libatscc2js, with the shared contrib/CATS-parsemit and
+   contrib/libatscc).
 
 ######
 

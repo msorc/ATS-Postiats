@@ -20,12 +20,14 @@
 # <TIMESTAMP>. kind is `plain` (atsdoc --outcode X_atxt.dats -i X.atxt > X_atxt.txt;
 # patscc ... X_atxt.dats -latsdoc; ./X_atxt.exe) or `dg` (the DOCUGEN documents: the
 # program is share/DOCUGEN/htmlgendecl.atxt with the data that atsdoc extracts from the
-# document, see the Makefile of the DOCUGEN directories). 402 of the 415 templates are
+# document, see the Makefile of the DOCUGEN directories). 390 of the 402 templates are
 # there: the md5 sums are those of the text that the ATS1 atsdoc/atscc produce (the 6 chapters of the
 # libcairo TUTORIAL and doc/EXAMPLE/EFFECTIVATS/PwTP-bool-vs-prop excepted: ATS1 could not run them
-# either, so their sums are those of the new output, see src/PORTING.md; the 21
+# either, so their sums are those of the new output, see src/PORTING.md; the
 # Makefile.atxt of the DOCUGEN, CODEGEN and DISTRIB directories excepted: their text
-# now names patscc, see src/PORTING.md "atsdoc corpus adaptation").
+# now names patscc, see src/PORTING.md "atsdoc corpus adaptation"; and ATS2FUNCRASH
+# LECTURE/01, LECTURE/03-10 and DISTRIB/ATEXT/patscontrib_libatscc.atxt, whose text was
+# edited when the backends other than C, C++ and JS were removed).
 #
 # The runs happen in the directories of the templates: the programs they leave (*_atxt.*) are
 # ignored by git (`sh genall.sh clean`), but a few tracked, generated programs (the *_atxt.dats of

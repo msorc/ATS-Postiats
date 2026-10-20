@@ -171,9 +171,9 @@ Please note that more scripts for installing ATS can be found on-line at
 
 ATS code is first compiled into code written in a very restricted
 subset of C. The generated C code from ATS source can then be compiled
-into object code or transpiled into code written in a variety of
-programming languages including Javascript, PHP, Perl, Python, Erlang,
-Scheme, Clojure, R, etc.
+into object code, compiled as C++ (see the #filename("ats2cpp") mode
+of the C code generator), or transpiled into code written in
+Javascript (JS).
 
 ')
 
@@ -237,9 +237,7 @@ instance, the name #filename("ATSLIB/prelude") refers to the prelude
 library in ATS that targets C code generation; the name
 #filename("ATSLIB/libats") refers to the libats library in ATS that
 targets C code generation as well; the name #filename("LIBATSCC2JS")
-refers to a library for targeting Javascript (JS) code generation; the
-name #filename("LIBATSCC2PHP") refers to a library for targeting PHP
-code generation; etc.
+refers to a library for targeting Javascript (JS) code generation; etc.
 
 ')
 
