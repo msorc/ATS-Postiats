@@ -125,7 +125,7 @@ TriangleRemove
 #para("\
 
 ATS source can be compiled into many programming languages, including
-C, Javascript (JS), PHP, etc. For instance, we may choose JS as the
+C, Javascript (JS), etc. For instance, we may choose JS as the
 target language for compiling ATS. With this choice, we can implement
 #dyncode("TriangleRemove") in JS directly:
 

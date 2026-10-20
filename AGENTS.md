@@ -45,7 +45,7 @@ programs under the no-GC rules: `main0`, `glist` for lists of atexts, `ref_make_
 `%s`) and `string_of_strptr`. A string argument of a placeholder keeps the ATS1 meaning of `\X`: write `\\X` for a backslash that must reach the output.
 Do not `dynload "libatsdoc/dynloadall.dats"` twice in one module (the helper hats files already do). `make -C utils/atsdoc genall` (about 30 s; `GENARGS=doc/DISTRIB`
 or `GENARGS=prelude` for a part) regenerates the text of every template and compares its md5 sum with `utils/atsdoc/TEST/genall.md5` (the sums are those of the ATS1 toolchain
-for 369 templates, and for 4 EFFECTIVATS documents they equal the tracked `main.html`; the other 29 are sums of the new output only: the 22 `Makefile*.atxt` of the DOCUGEN/CODEGEN/DISTRIB directories differ from ATS1 in the lines that name the compiler, and the 6 libcairo tutorial chapters and `PwTP-bool-vs-prop` never ran with ATS1).
+for most of the templates, and for 4 EFFECTIVATS documents they equal the tracked `main.html`; the others are sums of the new output only: the `Makefile*.atxt` of the DOCUGEN/CODEGEN/DISTRIB directories differ from ATS1 in the lines that name the compiler, and 3 templates were edited when the other backends were removed (`LECTURE/01`, `LECTURE/03-10`, `patscontrib_libatscc.atxt`) (the 6 libcairo tutorial chapters and `PwTP-bool-vs-prop` never ran with ATS1, so they are not in the list).
 
 ## Tests
 
@@ -55,7 +55,7 @@ There is no unit-test framework. Regression testing compiles and runs the exampl
 make -C src check                               # typecheck every module of the compiler (patsopt only)
 make -C src test                                # check + unit tests + the md5 suites of src/test (no ATS1; needs bin/patscc; no -j; ~6 min)
 make -C utils/atsdoc test                       # atsdoc and libatsdoc: 2653 md5 cases
-make -C utils/atsdoc genall                     # regenerates the text of 402 .atxt templates and compares their md5 sums (~30 s)
+make -C utils/atsdoc genall                     # regenerates the text of 390 .atxt templates and compares their md5 sums (~30 s)
 make -C utils/libatsynmark test                 # libatsynmark and pats2xhtml: 5228 md5 cases (after make -C utils/atsynmark)
 make -C doc -f Makefile_test testall            # all subdirs listed in doc/Makefile_test
 make -C doc/EXAMPLE/INTRO regress               # one directory: build its targets and run each binary
@@ -86,8 +86,8 @@ File-suffix convention throughout: `.sats` = interface, `.dats` = implementation
 - `prelude/`, `libats/`: ATS2 standard libraries (`SATS/` interfaces, `DATS/` implementations, `CATS/` C helpers).
 - `ccomp/runtime/`: C runtime headers that generated C code includes. `ccomp/atslib/`: builds `libatslib.a`.
 - `share/`: `atspre_staload.hats`, `atsmake-*.mk`, and other shared include files.
-- `utils/`: tools built on the compiler (`atscc` = patscc source, `myatscc`, `libatsopt`, `atsynmark` and `libatsynmark` (`pats2xhtml`, the syntax highlighter that the documents use), `atexting` (a separate ATS2 text preprocessor with `##name` syntax, not compatible with `.atxt`), `atsdoc` (the `.atxt` text processor; its run-time library is `libatsdoc/`; `make -C utils/atsdoc`; `make -C utils/atsdoc genall` regenerates the 402 runnable templates of the repository and compares them with `TEST/genall.md5`), emacs mode, …).
-- `contrib/`: MIT-licensed. Contains alternative backends (`CATS-atscc2{js,py3,php,scm,…}` with their `libatscc2*` libraries), the external constraint solvers, and `afiber` (stackful cooperative green threads and channels, `contrib/afiber/README.md`; tests in `contrib/afiber/TEST`, run by `doc/Makefile_test`).
+- `utils/`: tools built on the compiler (`atscc` = patscc source, `myatscc`, `libatsopt`, `atsynmark` and `libatsynmark` (`pats2xhtml`, the syntax highlighter that the documents use), `atexting` (a separate ATS2 text preprocessor with `##name` syntax, not compatible with `.atxt`), `atsdoc` (the `.atxt` text processor; its run-time library is `libatsdoc/`; `make -C utils/atsdoc`; `make -C utils/atsdoc genall` regenerates the 390 runnable templates of the repository and compares them with `TEST/genall.md5`), emacs mode, …).
+- `contrib/`: MIT-licensed. Contains the Javascript backend (`CATS-atscc2js` with its `libatscc2js` library and the shared `CATS-parsemit`/`libatscc`), the C++ mode of the C backend (`ats2cpp`), the external constraint solvers, and `afiber` (stackful cooperative green threads and channels, `contrib/afiber/README.md`; tests in `contrib/afiber/TEST`, run by `doc/Makefile_test`).
 - `doc/`: books (`BOOK/`), examples (`EXAMPLE/`), and distribution scripts (`DISTRIB/`).
 
 ## No GC: heap allocation is linear-only

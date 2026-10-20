@@ -125,23 +125,11 @@ all_script::
 #make_entry("contrib_parsemit")
 #
 #make_entry("contrib_atscc2js")
-#make_entry("contrib_atscc2pl")
-#make_entry("contrib_atscc2py3")
-#make_entry("contrib_atscc2php")
-#make_entry("contrib_atscc2scm")
-#make_entry("contrib_atscc2clj")
-#make_entry("contrib_atscc2r34")
 #
 ######
 
 #make_entry("contrib_libatscc")
 #make_entry("contrib_libatscc2js")
-#make_entry("contrib_libatscc2pl")
-#make_entry("contrib_libatscc2py3")
-#make_entry("contrib_libatscc2php")
-#make_entry("contrib_libatscc2scm")
-#make_entry("contrib_libatscc2clj")
-#make_entry("contrib_libatscc2r34")
 
 ######
 
@@ -174,11 +162,6 @@ all_script::
 #
 \#make_entry("patscontrib_libatscc")
 \#make_entry("patscontrib_libatscc2js")
-\#make_entry("patscontrib_libatscc2pl")
-\#make_entry("patscontrib_libatscc2py3")
-\#make_entry("patscontrib_libatscc2php")
-\#make_entry("patscontrib_libatscc2scm")
-\#make_entry("patscontrib_libatscc2clj")
 #
 #make_entry("patscontrib_kernelats")
 #
@@ -213,21 +196,9 @@ atspackaging:: srcget_contrib_extsolve_smt2
 atspackaging:: srcget_contrib_parsemit
 #
 atspackaging:: srcget_contrib_atscc2js
-atspackaging:: srcget_contrib_atscc2pl
-atspackaging:: srcget_contrib_atscc2py3
-atspackaging:: srcget_contrib_atscc2php
-atspackaging:: srcget_contrib_atscc2scm
-atspackaging:: srcget_contrib_atscc2clj
-atspackaging:: srcget_contrib_atscc2r34
 #
 atspackaging:: srcget_contrib_libatscc
 atspackaging:: srcget_contrib_libatscc2js
-atspackaging:: srcget_contrib_libatscc2pl
-atspackaging:: srcget_contrib_libatscc2py3
-atspackaging:: srcget_contrib_libatscc2php
-atspackaging:: srcget_contrib_libatscc2scm
-atspackaging:: srcget_contrib_libatscc2clj
-atspackaging:: srcget_contrib_libatscc2r34
 #
 atspackaging:: srcget_doc_example
 #
@@ -322,21 +293,9 @@ srcget_contrib_extsolve_smt2:: SCRIPT/contrib_extsolve_smt2.bash ; bash $<
 srcget_contrib_parsemit:: SCRIPT/contrib_parsemit.bash ; bash $<
 #
 srcget_contrib_atscc2js:: SCRIPT/contrib_atscc2js.bash ; bash $<
-srcget_contrib_atscc2pl:: SCRIPT/contrib_atscc2pl.bash ; bash $<
-srcget_contrib_atscc2py3:: SCRIPT/contrib_atscc2py3.bash ; bash $<
-srcget_contrib_atscc2php:: SCRIPT/contrib_atscc2php.bash ; bash $<
-srcget_contrib_atscc2scm:: SCRIPT/contrib_atscc2scm.bash ; bash $<
-srcget_contrib_atscc2clj:: SCRIPT/contrib_atscc2clj.bash ; bash $<
-srcget_contrib_atscc2r34:: SCRIPT/contrib_atscc2r34.bash ; bash $<
 #
 srcget_contrib_libatscc:: SCRIPT/contrib_libatscc.bash ; bash $<
 srcget_contrib_libatscc2js:: SCRIPT/contrib_libatscc2js.bash ; bash $<
-srcget_contrib_libatscc2pl:: SCRIPT/contrib_libatscc2pl.bash ; bash $<
-srcget_contrib_libatscc2py3:: SCRIPT/contrib_libatscc2py3.bash ; bash $<
-srcget_contrib_libatscc2php:: SCRIPT/contrib_libatscc2php.bash ; bash $<
-srcget_contrib_libatscc2scm:: SCRIPT/contrib_libatscc2scm.bash ; bash $<
-srcget_contrib_libatscc2clj:: SCRIPT/contrib_libatscc2clj.bash ; bash $<
-srcget_contrib_libatscc2r34:: SCRIPT/contrib_libatscc2r34.bash ; bash $<
 #
 ######
 srcget_doc_example:: srcget_doc_example_misc
@@ -368,28 +327,6 @@ srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/ML/*_?ats.js
 srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/contrib/libatscc2js/ATS2-0.3.2/output/DATS/Bacon.js/*_?ats.js
-#
-srcget_dist_cleanup:: ; \
-rm -rf ATS-Postiats/contrib/libatscc2py3/ATS2-0.3.2/output/__pycache__
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2py3/ATS2-0.3.2/output/DATS/*_?ats.py
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2py3/ATS2-0.3.2/output/DATS/ML/*_?ats.py
-#
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2php/ATS2-0.3.2/output/DATS/*_?ats.php
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2php/ATS2-0.3.2/output/DATS/ML/*_?ats.php
-#
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2scm/ATS2-0.3.2/output/DATS/*_?ats.scm
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2scm/ATS2-0.3.2/output/DATS/ML/*_?ats.scm
-#
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2clj/ATS2-0.3.2/output/DATS/*_?ats.clj
-srcget_dist_cleanup:: ; \
-$(RMF) ATS-Postiats/contrib/libatscc2clj/ATS2-0.3.2/output/DATS/ML/*_?ats.clj
 #
 srcget_dist_cleanup:: ; \
 $(RMF) ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libsdl2/TEST/DATA/*.png
