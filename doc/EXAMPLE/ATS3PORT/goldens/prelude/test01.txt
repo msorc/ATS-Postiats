@@ -1,0 +1,4 @@
+A0(a0rf(sint):tbox) = a0rf(0)
+x0(sint:type) = 0
+A0(a0rf(sint):tbox) = a0rf(10)
+

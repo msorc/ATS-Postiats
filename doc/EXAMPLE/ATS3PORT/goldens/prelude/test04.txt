@@ -1,0 +1,19 @@
+the_print_store:
+A9 = aaaaaaaaa
+|A9| = 9
+AB = abcdefghijklmnopqrstuvwxyz
+BA = zyxwvutsrqponmlkjihgfedcba
+ABAB = abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
+ABBA = abcdefghijklmnopqrstuvwxyzzyxwvutsrqponmlkjihgfedcba
+rABAB = zyxwvutsrqponmlkjihgfedcbazyxwvutsrqponmlkjihgfedcba
+ABABAB = abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
+wrds = list(aello,bello,cello,dello,eello,fello,gello,iello,jello,kello,lello,mello,nello,oello,pello,qello,rello,sello,tello,uello,vello,wello,xello,yello,zello,hallo,hbllo,hcllo,hdllo,hfllo,hgllo,hhllo,hillo,hjllo,hkllo,hlllo,hmllo,hnllo,hollo,hpllo,hqllo,hrllo,hsllo,htllo,hullo,hvllo,hwllo,hxllo,hyllo,hzllo,healo,heblo,heclo,hedlo,heelo,heflo,heglo,hehlo,heilo,hejlo,heklo,hemlo,henlo,heolo,heplo,heqlo,herlo,heslo,hetlo,heulo,hevlo,hewlo,hexlo,heylo,hezlo,helao,helbo,helco,heldo,heleo,helfo,helgo,helho,helio,heljo,helko,helmo,helno,heloo,helpo,helqo,helro,helso,helto,heluo,helvo,helwo,helxo,helyo,helzo,hella,hellb,hellc,helld,helle,hellf,hellg,hellh,helli,hellj,hellk,helll,hellm,helln,hellp,hellq,hellr,hells,hellt,hellu,hellv,hellw,hellx,helly,hellz)
+wrds = list(aello,bello,cello,dello,eello,fello,gello,iello,jello,kello,lello,mello,nello,oello,pello,qello,rello,sello,tello,uello,vello,wello,xello,yello,zello,hallo,hbllo,hcllo,hdllo,hfllo,hgllo,hhllo,hillo,hjllo,hkllo,hlllo,hmllo,hnllo,hollo,hpllo,hqllo,hrllo,hsllo,htllo,hullo,hvllo,hwllo,hxllo,hyllo,hzllo,healo,heblo,heclo,hedlo,heelo,heflo,heglo,hehlo,heilo,hejlo,heklo,hemlo,henlo,heolo,heplo,heqlo,herlo,heslo,hetlo,heulo,hevlo,hewlo,hexlo,heylo,hezlo,helao,helbo,helco,heldo,heleo,helfo,helgo,helho,helio,heljo,helko,helmo,helno,heloo,helpo,helqo,helro,helso,helto,heluo,helvo,helwo,helxo,helyo,helzo,hella,hellb,hellc,helld,helle,hellf,hellg,hellh,helli,hellj,hellk,helll,hellm,helln,hellp,hellq,hellr,hells,hellt,hellu,hellv,hellw,hellx,helly,hellz)
+ab1 = abcdefghijklmnopqrstuvwxyz
+ab2 = abcdefghijklmnopqrstuvwxyz
+ab3 = zyxwvutsrqponmlkjihgfedcba
+prefix("abcde", 3)=abc
+suffix("abcde", 3)=de
+slice("abcde", 1, 1)=
+slice("abcde", 1, 2)=b
+

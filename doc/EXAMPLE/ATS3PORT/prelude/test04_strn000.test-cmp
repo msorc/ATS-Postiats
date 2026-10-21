@@ -1,0 +1,10 @@
+A9 = aaaaaaaaa
+|A9| = 9
+AB = abcdefghijklmnopqrstuvwxyz
+BA = zyxwvutsrqponmlkjihgfedcba
+ABAB = abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
+ABBA = abcdefghijklmnopqrstuvwxyzzyxwvutsrqponmlkjihgfedcba
+prefix("abcde", 3)=abc
+suffix("abcde", 3)=de
+slice("abcde", 1, 1)=
+slice("abcde", 1, 2)=b

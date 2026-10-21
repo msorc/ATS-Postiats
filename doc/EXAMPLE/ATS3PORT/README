@@ -1,0 +1,63 @@
+#
+# The ATS3 (ATS-Xanadu) test corpus, ported to ATS2.
+#
+# The programs here are ports of the tests of the ATS3
+# distribution:
+#
+#   prelude/TEST/CATS/{JS,CM,PY}       ->  prelude/
+#   srcgen2/xats2cc/srcgen1/TEST       ->  xats2cc/
+#   xatslib/githwxi/TEST/CATS/JS       ->  xatslib/
+#
+# The ATS3 tests of the three backends (JS, CM and PY) are the
+# same programs, so they are ported once.
+#
+# Every test is a small program that exercises one part of the
+# library; its expected output is in the corresponding
+# [*.test-cmp] file, and it is run by [make regress].
+#
+# The output of the original ATS3 programs (obtained by running
+# the JavaScript that the ATS3 compiler emits under node) is in
+# [goldens/prelude]; it is the reference that the ports were
+# written against.  The output of the ports is not always the
+# same as the output of the ATS3 programs, because the two
+# languages print their values differently; [MAPPING.txt] says
+# where they differ.
+#
+
+######
+
+The ported programs:
+
+  prelude/      the tests of the ATS3 prelude (12 programs)
+  xats2cc/      the tests of the ATS3 C backend (12 programs)
+  xatslib/      the tests of the ATS3 xatslib (5 programs)
+
+######
+
+The shim:
+
+  shim/xats3shim.hats
+
+is the ATS2 counterpart of the parts of the ATS3 prelude that
+have no counterpart in ATS2: the generic sequence layer
+([GSEQ] and [GASQ]), the debugging layer ([gdbg]) and a few
+string operations.  It is included by the programs that need
+it:
+
+  #include "../shim/xats3shim.hats"
+
+######
+
+How to run the tests:
+
+  make -C doc/EXAMPLE/ATS3PORT/prelude regress
+  make -C doc/EXAMPLE/ATS3PORT/xats2cc regress
+  make -C doc/EXAMPLE/ATS3PORT/xatslib regress
+
+or, all at once:
+
+  make -C doc -f Makefile_test testall
+
+######
+
+###### end of [README] ######

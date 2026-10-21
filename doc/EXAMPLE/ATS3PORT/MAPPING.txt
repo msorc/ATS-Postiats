@@ -1,0 +1,225 @@
+#
+# The mapping from ATS3 (ATS-Xanadu) to ATS2 (ATS/Postiats).
+#
+# This file records every name that had to be mapped when the
+# ATS3 test corpus was ported to ATS2.  It is meant to be
+# reused by later ports.
+#
+
+(*
+** 1. The types
+**
+** ATS3                     ATS2
+** -----------------------  -----------------------------------
+** sint                     int
+** nint                     int (an [int] that is not negative)
+** strn                     string
+** bool                     bool
+** list(a)                  list_vt(a, n)   (linear, static length)
+** optn(a)                  option_vt(a, b)
+** a0rf(a)                  arrayptr(a, n)  (an array by reference)
+** a1sz(a)                  arrayptr(a, n)  (an array by size)
+** a1rf(a)/a1sz(a) as a     list_vt(a, n)  (when a static length
+**                           is wanted)
+** GSEQ(xs, a)              no counterpart: a sequence is a
+**                           list_vt, an arrayptr or a range
+** GASQ(xs, a)              no counterpart: see [gasq_bin$search]
+**                           in the shim
+** lstrm(a)                 stream_vt(a)
+** strm(a)                  stream_vt(a)
+** cgtz                     charNZ
+** dflt                     double
+** exn                      exn (the same)
+** type(a)                  a viewtype (vt0p) or a type (t0p)
+** a:type (a static type)   a:vt0p (a viewtype)
+** tuple (a, b)             @(a, b)        (a flat tuple)
+** vwtpdef                  vtypedef / a view of a flat tuple
+** datatype tree(a)         datavtype tree(a)   (see the note
+**                           about datavtypes below)
+*)
+
+(*
+** 2. The directives
+**
+** ATS3                     ATS2
+** -----------------------  -----------------------------------
+** #staload UN = "..."       staload UN = "..."
+** #staload _ = "..."        staload "..."
+**                          (note: the [staload _ = "..."] form
+**                           of ATS3 hides the symbols of the
+**                           file in ATS2; the plain [staload
+**                           "..."] form is the one to use)
+** #include "..."           #include "..."  (the path is
+**                           relative to the current directory)
+** #symload f with g        overload f with g
+** #extern fun              extern fun
+** #implfun                 implement
+** #impltmp                 implement
+** #typedef                 typedef
+** #vwtpdef                 vtypedef
+** #define                  #define
+** #include (C code)        %{ ... %}
+*)
+
+(*
+** 3. The expressions
+**
+** ATS3                          ATS2
+** ---------------------------   ---------------------------------
+** prints (a, b, "\n")           println! (a, b)
+** printsln (a, b)              println! (a, b)
+** print0s/print1s              println!
+** g_print (x)                  print (x)
+** g_void (x)                   val () = x
+** type (x)                     no counterpart (there is no
+**                               run-time type reflection); the
+**                               static type is given in a comment
+** lam (x) => e                 lam (x) => e
+** fix f (x) => e               fix f (x) => e
+** let val x = e in b end       let val x = e in b end
+** case+ x of | C (y) => e     case+ x of | C (y) => e
+** list@(1, 2, 3)               $list_vt{int}(1, 2, 3)
+** @ (1, 2)                     @(1, 2)
+** x[0] (of a tuple)            x.0
+** [x] (of a list)              list_vt_get_at / the [overload []]
+** $raise E (x)                 $raise E (x)
+** try e with | C (y) => e      try e with ~C (y) => e
+*)
+
+(*
+** 4. The library
+**
+** ATS3                     ATS2
+** -----------------------  -----------------------------------
+** list_ncpy (n, x)         list_make_elt (n, x)
+** list (n, f)              list_tabulate (n) (with
+**                           [list_tabulate$fopr])
+** list_make_fwork (f)      a fold that builds a list_vt
+** map (xs, f)              list_vt_map (xs) (with
+**                           [list_vt_map$fopr])
+** maprev (xs, f)           list_vt_reverse (xs) and then
+**                           list_vt_map
+** appends (xs, ys)         list_vt_append (xs, ys)
+** length (xs)              list_vt_length (xs)
+** list_vt_nfun (n, f)      list_tabulate (n)
+** list_vt (a)              list_vt (a, n)
+** optn_cons (x)            option_vt_some (x)
+** optn_vt_cons (x)         option_vt_some (x)
+** head (xs)                option_vt_unsome (xs)
+** strn_make_ncpy (n, c)    a string literal
+** strn (n, f)              a string literal
+** strn_reverse (s)         string_reverse (s)   (the shim)
+** strn_append (s1, s2)     string_append2 (s1, s2) (the shim)
+** prefix (s, n)            string_prefix (s, n) (the shim)
+** suffix (s, i)            string_suffix (s, i) (the shim)
+** slice (s, i, j)          string_slice (s, i, j) (the shim)
+** strn_word$strmize (s)    no counterpart
+** strn_line$strmize (s)    no counterpart
+** nint_dgt$listize (n)     nint_dgt_str (n)   (the shim is not
+**                           needed for this one)
+** intrange (l, u)          list_make_intrange (l, u)
+** (l, u).foritm (f)        intrange_foreach_env (l, u, env)
+** GSEQ (xs).prod ()         gseq_prod (xs)     (the shim)
+** GSEQ (xs).sum ()         gseq_sum (xs)      (the shim)
+** GSEQ (xs).listize ()     the list_vt itself
+** GSEQ (xs).rlistize ()    list_vt_reverse (xs)
+** GSEQ (xs).foritm (f)     list_vt_foreach_env (xs, env)
+** GSEQ (xs).iforitm (f)   list_vt_iforeach_env (xs, env)
+** GSEQ (xs).exists (p)     a fold with a predicate
+** GASQ (xs).bin$search (x) gasq_bin$search (A, len, cmp) (the shim)
+** gdbg's trace (f, "f")    gdbg_trace (f, x, "f") (the shim)
+** range_ibtw (l, u)        list_make_intrange (l, u)
+** q2lst_snoc (q, x)        the cons of a list_vt
+*)
+
+(*
+** 5. What has no counterpart in ATS2
+**
+** - The [GSEQ] and [GASQ] layers.  In ATS3 a [GSEQ] abstracts
+**   over the container, so that the same code works over a
+**   list, an array or a string.  In ATS2 the container is not
+**   abstracted away: a sequence is a [list_vt], an [arrayptr]
+**   or an [intrange].  The shim provides the folds that ATS2
+**   does not have ([gseq_prod], [gseq_sum]) and the binary
+**   search ([gasq_bin$search]).
+**
+** - The [gdbg] layer.  The shim provides [gdbg_trace] and
+**   [gdbg_trace_str], which print the argument and the result
+**   of a call.
+**
+** - Run-time type reflection ([type (x)]).  The type of a value
+**   is given in the comments of the ported programs instead.
+**
+** - Lists of a length that is only known at run-time.  A
+**   [list_vt] has a static length, so a list that is built at
+**   run-time has to be a [stream_vt] (which is lazy) or an
+**   [arrayptr] (which has a run-time length).  This is why the
+**   programs that enumerate all the pairs or all the triples
+**   of a list (in the ATS3 test [test06_list000]) are not
+**   ported.
+**
+** - The [datatype] with a non-nullary constructor: it is
+**   rejected in ATS2, which has no garbage collector.  A
+**   [datavtype] is the ATS2 counterpart, but it is a linear
+**   heap-allocated structure whose content can only be read
+**   through views, and it cannot be freed (there is no way of
+**   doing that outside the prelude).  The programs that build
+**   trees (the ATS3 tests [test04_xats2cc] and
+**   [test10_xcptn00]) represent the trees by the heights of
+**   the subtrees of their nodes instead.
+**
+** - The CSV parser, the file reader and the object (hash map)
+**   library of the ATS3 [xatslib/githwxi]: ATS2 has nothing
+**   that corresponds to them in its prelude.  The tests of the
+**   ATS3 [xatslib] that need them are not ported.
+**
+** - The splitting of a string into words and into lines (the
+**   ATS3 [strn_word$strmize] and [strn_line$strmize]): the
+**   environment of an iteration in ATS2 cannot hold a string
+**   (a string is a pointer, and the environment of an
+**   iteration has to be a flat viewtype), so the words cannot
+**   be collected while the string is traversed.
+*)
+
+(*
+** 6. The gotchas that cost the most time
+**
+** - [staload _ = "..."] hides the symbols of the file in ATS2.
+**   The form to use is [staload "..."].
+**
+** - [( ... )] is a single expression and [{ ... }] is a block
+**   of [val] declarations; a function body with more than one
+**   statement is written [let ... in ... end].
+**
+** - A [list_vt] is linear: it has to be freed (or consumed by
+**   another function).  The operations of the shim take a
+**   read-only view of a sequence, so that the sequence can be
+**   used more than once.
+**
+** - The element type of a [list_vt] has to be known statically
+**   for the list to be printable; [list_vt_cast{int}] (note the
+**   braces) is the way to make it so.
+**
+** - A static argument is introduced with [{ }] and a template
+**   argument with [< >]; the two are not interchangeable.
+**
+** - A [datavtype] cannot be consumed, and a [datatype] with a
+**   non-nullary constructor is rejected.
+**
+** - A closure that captures variables cannot be returned by a
+**   function without giving it a closure type; a closure that
+**   captures flat variables is made with [lam@] and is held in
+**   variable.
+**
+** - The [try ... with ...] expression is written
+**   [try let ... in ... end with ~C (x) => ...], and the
+**   payload type of an exception is written in parentheses:
+**   [exception E of (string)].
+**
+** - An integer literal has a flexible type; when the type
+**   cannot be inferred, it has to be given, as in
+**   [val n: int = ...].
+*)
+
+(*
+** end of [MAPPING.txt] *)

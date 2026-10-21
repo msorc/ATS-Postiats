@@ -1,0 +1,9 @@
+xs = list(1,2,3)
+ys = list(10,20,30,40)
+ztup = $val(GSEQ(z2tup(GSEQ(list(sint),sint),GSEQ(list(sint),sint)),t0up2(sint,sint)):type)
+listize(ztup) = list_vt(@(1,10),@(2,20),@(3,30))
+strmize(ztup) = strm_vt(@(1,10),@(2,20),@(3,30))
+xztup = $val(GSEQ(x2tup(GSEQ(list(sint),sint),GSEQ(z2tup(GSEQ(list(sint),sint),GSEQ(list(sint),sint)),t0up2(sint,sint))),t0up2(sint,t0up2(sint,sint))):type)
+listize(xztup) = list_vt(@(1,@(1,10)),@(1,@(2,20)),@(1,@(3,30)),@(2,@(1,10)),@(2,@(2,20)),@(2,@(3,30)),@(3,@(1,10)),@(3,@(2,20)),@(3,@(3,30)))
+strmize(xztup) = strm_vt(@(1,@(1,10)),@(1,@(2,20)),@(1,@(3,30)),@(2,@(1,10)),@(2,@(2,20)),@(2,@(3,30)),@(3,@(1,10)),@(3,@(2,20)),@(3,@(3,30)))
+
