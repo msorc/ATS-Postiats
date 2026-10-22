@@ -59,7 +59,7 @@ check::
 #
 # the regression suites: the compiler, the tools and the examples
 #
-test:: check
+test::
 	$(MAKE) -C src test
 	$(MAKE) -C utils/atsdoc test
 	$(MAKE) -C utils/libatsynmark test

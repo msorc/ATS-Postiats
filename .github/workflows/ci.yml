@@ -68,7 +68,7 @@ jobs:
         run: |
           export PATSHOME="${PWD}"
           make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
-          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
+          make -f Makefile_devl PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
           make -C utils/libatsynmark install
 
       - name: the suites of the compiler
@@ -109,7 +109,7 @@ jobs:
         run: |
           export PATSHOME="${PWD}"
           make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
-          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
+          make -f Makefile_devl PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
           make -C utils/libatsynmark install
 
       - name: the version of the release is declared consistently

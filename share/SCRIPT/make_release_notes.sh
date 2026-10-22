@@ -18,7 +18,6 @@
 #
 ######
 
-PWD=$(pwd)
 SCRIPTDIR=$(dirname "$0")
 PATSHOME=${PATSHOME:-$(cd "${SCRIPTDIR}/../.." && pwd)}
 export PATSHOME

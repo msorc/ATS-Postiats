@@ -42,7 +42,7 @@ stdenv.mkDerivation {
 
   installPhase = ''
     mkdir -p $out/bin $out/lib $out/ccomp
-    cp bin/patsopt bin/patscc bin/myatscc $out/bin/
+    cp bin/patsopt bin/patscc bin/myatscc bin/atsdoc $out/bin/
     cp src/libatsopt.a $out/lib/
     cp ccomp/atslib/lib/libatslib.a $out/lib/
     cp -r ccomp/runtime $out/ccomp/
