@@ -503,6 +503,16 @@ doc/EXAMPLE/TESTATS/wherecls
 doc/EXAMPLE/TESTATS/withtype
 doc/EXAMPLE/TYPEVAL/dotprod
 
+#
+# Arch/Manjaro packaging (packaging/arch): only the PKGBUILD and its
+# README are tracked; the sources, the tarball, the package and the
+# other build outputs are not
+#
+packaging/arch/*
+!packaging/arch/PKGBUILD
+!packaging/arch/README
+#
+
 ###### end of [.gitignore] ######
 
 #

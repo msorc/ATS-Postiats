@@ -1,0 +1,48 @@
+######
+#
+# An Arch Linux / Manjaro package of ATS2 (ATS-Postiats), built from the
+# release tarball of this repository (make pack; see doc/DISTRIB/README).
+#
+# For a published package, replace the local source below with the URL of
+# the uploaded tarball, e.g:
+#   https://sourceforge.net/projects/ats-lang/files/ATS2-Postiats-gmp-0.4.3.tgz/download
+#
+# Build:
+#   ln -sf ../../doc/DISTRIB/ATS2-Postiats-gmp-0.4.3.tgz .
+#   makepkg
+#
+######
+
+pkgname=ats2-postiats
+pkgver=0.4.3
+pkgrel=1
+pkgdesc="ATS2 compiler (patsopt, patscc, myatscc) and libraries"
+arch=(x86_64)
+url="https://github.com/githwxi/ATS-Postiats"
+license=(GPL3 LGPL3 MIT)
+depends=(gcc gmp)
+makedepends=(make)
+conflicts=(ats2-postiats-git)
+provides=("ats2-postiats=$pkgver")
+source=("ATS2-Postiats-gmp-$pkgver.tgz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$srcdir/ATS2-Postiats-gmp-$pkgver"
+  # The release build is designed for sequential make (the steps of
+  # utils/atscc must not run out of order); MAKEFLAGS=-jN that makepkg
+  # exports from makepkg.conf would break it. The parallelism of the
+  # C-bootstrap part is through MAKEJ4.
+  unset MAKEFLAGS
+  ./configure --prefix=/usr
+  make MAKEJ4="make -j$(nproc)" all
+}
+
+package() {
+  cd "$srcdir/ATS2-Postiats-gmp-$pkgver"
+  unset MAKEFLAGS
+  make DESTDIR="$pkgdir" install
+}
+
+# End of [PKGBUILD]
+######

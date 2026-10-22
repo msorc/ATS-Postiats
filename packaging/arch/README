@@ -1,0 +1,31 @@
+# Arch Linux / Manjaro package of ATS-Postiats (ATS2)
+
+`PKGBUILD` builds a package of the ATS2 compiler and libraries from the
+release tarball of this repository (the one that `make pack` produces, at
+the repo root, from `doc/DISTRIB`).
+
+Build (from this directory):
+
+```sh
+ln -sf ../../doc/DISTRIB/ATS2-Postiats-gmp-0.4.3.tgz .   # the tarball: make pack
+makepkg                                       # gives ats2-postiats-0.4.3-1-x86_64.pkg.tar.zst
+makepkg -i                                    # install it (replaces ats2-postiats 0.4.2)
+```
+
+Binary variants:
+
+- `ATS2-Postiats-gmp-0.4.3.tgz` -> integer arithmetic with libgmp (depends: gmp; default).
+- `ATS2-Postiats-int-0.4.3.tgz` -> no gmp; use it for an alternative package
+  (source=C3NSTRINTKND=int... just swap the source to the `-int-` tarball
+  and drop `gmp` from `depends`).
+
+Notes:
+
+- For a published package, replace the local `source=` tarball with the URL of
+  the uploaded release and fill in real sums.
+- The build unsets user `MAKEFLAGS` (makepkg exports one; the release build
+  steps of utils/atscc must run sequentially). The C bootstrap part still
+  builds in parallel through `MAKEJ4`.
+- The layout follows the release: real binaries and libraries in
+  `/usr/lib/ats2-postiats-0.4.3/`, wrapper scripts for `patsopt`, `patscc`,
+  `myatscc` in `/usr/bin` (they only set `PATSHOME` when it is unset).
