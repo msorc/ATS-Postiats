@@ -1,0 +1,142 @@
+/*
+**
+** Author: Andrea Ferretti
+** Author: Hongwei Xi (for minor changes)
+**
+** The rules below style the HTML that is made with the DocBook XSL
+** stylesheets (the class names of the XSL stylesheets are used); the
+** rules for the 'font' element are for the HTML that was made with
+** jade (the old pipeline).
+**
+*/
+
+/* ****** ****** */
+
+body {
+  font-family:
+  "Palatino Linotype",
+  "Book Antiqua", Palatino, serif;
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 0 1em;
+  text-align: justify;
+  line-height: 150%;
+}
+
+/* ****** ****** */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: normal;
+  line-height: 125%;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1.title {
+  font-size: 180%;
+}
+
+h2.title {
+  font-size: 150%;
+}
+
+h3.title {
+  font-size: 125%;
+}
+
+/* ****** ****** */
+
+font, code, pre, tt {
+  font-family:
+  Inconsolata, "Courier New", Courier, monospace;
+  font-size: 90%;
+}
+
+code {
+  padding: 2px 4px;
+  background-color: #f0f0f0;
+}
+
+pre {
+  padding: 4px 8px;
+  line-height: 144%;
+  border-radius: 6px;
+  background-color: #e0e0e0;
+  overflow-x: auto;
+}
+
+/* ****** ****** */
+
+a {
+  color: #707070;
+  font-style: italic;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+h1 a {
+  color: black;
+  font-style: normal;
+}
+
+/* ****** ****** */
+
+.programlisting {
+  padding: 4px 8px;
+  line-height: 144%;
+  border-radius: 6px;
+  background-color: #e0e0e0;
+}
+
+/* ****** ****** */
+
+table {
+  border-collapse: collapse;
+  margin: 1em auto;
+}
+
+table th, table td {
+  border: 1px solid #c0c0c0;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+table th {
+  background-color: #f0f0f0;
+}
+
+/* ****** ****** */
+
+div.note, div.warning, div.tip, div.caution, div.important {
+  margin: 1em 2em;
+  padding: 4px 8px;
+  border-left: 4px solid #c0c0c0;
+  background-color: #f8f8f8;
+}
+
+div.toc dl dt a, div.toc dl dd {
+  margin-left: 1em;
+}
+
+/* ****** ****** */
+
+.patsyntax {color:#808080;background-color:#E0E0E0;}
+.patsyntax span.keyword {color:#000000;font-weight:bold;}
+.patsyntax span.comment {color:#787878;font-style:italic;}
+.patsyntax span.extcode {color:#A52A2A;}
+.patsyntax span.neuexp  {color:#800080;}
+.patsyntax span.staexp  {color:#0000F0;}
+.patsyntax span.prfexp  {color:#603030;}
+.patsyntax span.dynexp  {color:#F00000;}
+.patsyntax span.stalab  {color:#0000F0;font-style:italic}
+.patsyntax span.dynlab  {color:#F00000;font-style:italic}
+.patsyntax span.dynstr  {color:#008000;font-style:normal}
+.patsyntax span.stacstdec  {text-decoration:none;}
+.patsyntax span.stacstuse  {color:#0000CF;text-decoration:underline;}
+.patsyntax span.dyncstdec  {text-decoration:none;}
+.patsyntax span.dyncstuse  {color:#B80000;text-decoration:underline;}
+.patsyntax span.dyncst_implement  {color:#B80000;text-decoration:underline;}
+
+/* ****** ****** */
+
+/* end of [ATS-for-APUE3-BOOK.css] */

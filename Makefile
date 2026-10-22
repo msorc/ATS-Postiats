@@ -8,6 +8,7 @@
 #   make check      # typecheck every module of the compiler
 #   make test       # the regression suites of the repository
 #   make doc        # regenerate the generated sources of the libraries
+#   make book       # make the books (the HTML and the PDF)
 #   make pack       # the release tarballs
 #   make clean      # remove the build products
 #
@@ -50,7 +51,7 @@ PATSOPT_ARGS=$(PATSOPT_ARG) $(STAGE0HOME_ARG)
 
 ######
 
-.PHONY: all check test doc pack clean cleanall
+.PHONY: all check test doc book pack clean cleanall
 
 ######
 
@@ -83,6 +84,19 @@ test::
 #
 doc::
 	$(MAKE) -f codegen/Makefile_atslib
+
+######
+#
+# the books: the HTML and the PDF of the books are made with the tools
+# that are described in doc/BOOK/README.md
+#
+BOOKS=INT2PROGINATS ATS2TUTORIAL ATS-for-APUE3 ATS2FUNCRASH
+#
+book::
+	@for i in $(BOOKS); do \
+	  echo "=== making the book: $$i" ; \
+	  $(MAKE) -C doc/BOOK/$$i all || exit 1 ; \
+	done
 
 ######
 #

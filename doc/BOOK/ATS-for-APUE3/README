@@ -8,4 +8,14 @@ concretely how ATS can be used to do systems programming as is presented in
 the famous book by Richard Stevens and Steve Rago on Advanced Programming
 in the UNIX Environment (APUE).
 
+######
+# Making the book
+######
+
+make            # the HTML and the PDF
+make html       # the HTML only: HTML/index.html is the table of contents
+make pdf        # the PDF only: PDF/ATS-for-APUE3-BOOK.pdf
+
+See ../README.md for the tools that are needed.
+
 ###### end of README ######

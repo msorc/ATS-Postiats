@@ -16,3 +16,13 @@ functional core of ATS extended with templates (for handling
 parametric polymorphism), and the presented style of functional
 programming makes extensive use of combinators (which are mostly
 simple list-processing and stream-processing functions).
+
+## Making the book
+
+```sh
+make            # the HTML and the PDF
+make html       # the HTML only: HTML/index.html is the table of contents
+make pdf        # the PDF only: PDF/ATS2FUNCRASH-BOOK.pdf
+```
+
+See `../README.md` for the tools that are needed.

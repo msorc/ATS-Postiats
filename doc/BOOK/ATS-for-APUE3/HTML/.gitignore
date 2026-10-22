@@ -1,0 +1,18 @@
+#
+# Ignoring everything except the files that are kept in git
+#
+*
+!*/
+!.gitignore
+!.gitkeep
+!.keeper
+!Makefile
+!*.dats
+!assets
+!assets/*.css
+!HTMLTOC
+!HTMLTOC/assets
+!HTMLTOC/assets/*.css
+!HTMLTOC/assets/*.js
+#
+# end of [.gitignore]

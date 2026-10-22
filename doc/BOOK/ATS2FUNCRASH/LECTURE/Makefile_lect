@@ -4,12 +4,19 @@
 #
 ######
 #
-PATSHOMEQ="$(PATSHOME)"
 PATSCC=$(PATSHOMEQ)/bin/patscc
 ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 #
 #LIBATSDOC=$(PATSHOMEQ)/ccomp/atslib/lib
 #
+######
+
+# PATSHOME is the root of the ATS2 repository (or of an installation of
+# ATS2); it defaults to the root of this repository.
+PATSHOME ?= $(abspath ../../../../..)
+export PATSHOME
+PATSHOMEQ="$(PATSHOME)"
+
 ######
 
 all:: main.db clean
@@ -18,7 +25,7 @@ all:: main.db clean
 #
 main.exe: \
 main_atxt.dats ; \
-  $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ main_atxt.dats -latsdoc
+  $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ main_atxt.dats -latsdoc -latslib
 #
 main_atxt.dats: main.atxt ; \
   $(ATSDOC) --outcode $@ -i main.atxt > main_atxt.txt

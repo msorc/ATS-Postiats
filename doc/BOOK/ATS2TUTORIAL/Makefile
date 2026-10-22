@@ -3,21 +3,31 @@
 # A Simple Makefile
 #
 #
+# The book is written in the .atxt format: atsdoc turns the chapters
+# into DocBook files (CHAP_*/main.db) that main.db (which is tracked in
+# git) includes with general entities.  The HTML and the PDF are made
+# with the DocBook XSL stylesheets (see ../Makefile_docbook.mk).
+#
 
 ######
 
-PATSHOMEQ="$(PATSHOME)"
 PATSCC=$(PATSHOMEQ)/bin/patscc
 ATSDOC=$(PATSHOMEQ)/bin/atsdoc
 #LIBATSDOC=$(PATSHOMEQ)/ccomp/atslib/lib
 
 ######
 
+# PATSHOME is the root of the ATS2 repository (or of an installation of
+# ATS2); it defaults to the root of this repository.
+PATSHOME ?= $(abspath ../../..)
+export PATSHOME
+PATSHOMEQ="$(PATSHOME)"
+
+######
+
 all::
 all:: html
-all:: synhilit
-all:: htmltoc
-all:: clean
+all:: pdf
 
 ######
 
@@ -30,22 +40,29 @@ JADE=/usr/bin/openjade
 
 ######
 #
-DSL=default
-DSL=./mydocbook.dsl
+# the name of the book and the directories that hold the chapters
 #
-# HX-2016-08-01:
-# PDF needs to be changed from 0 to 1
-# in ats2tutorial.hats before atext2db conversion
+BOOKNAME=ATS2TUTORIAL-BOOK
+BOOKCHAPS=CHAP_*
 #
-pdf: main.db ; \
-jw -b pdf --dsl default --parser $(JADE) --output PDF/ main.db
+# the rules that make the HTML and the PDF are shared by the books
+#
+include ../Makefile_docbook.mk
 #
 ######
 #
+# the old pipeline: it needs jade (or openjade) and the DocBook DSSSL
+# stylesheets, and it does not work with the DocBook source of the book
+# as it is now (the names of the entities and the values of the ids
+# contain '_', which the SGML syntax does not allow)
+#
 DSL=default
 DSL=./mydocbook.dsl
 #
-html: main.db ; \
+pdf-jade: main.db ; \
+jw -b pdf --dsl default --parser $(JADE) --output PDF/ main.db
+#
+html-jade: main.db ; \
 jw -b html --parser $(JADE) --dsl $(DSL) --output HTML/ main.db
 #
 htmltoc: ; \
@@ -63,7 +80,7 @@ main.db:: preface.db
 ######
 
 preface.exe: preface_atxt.dats
-	$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ preface_atxt.dats -latsdoc
+	$(PATSCC) -DATS_MEMALLOC_LIBC -o $@ preface_atxt.dats -latsdoc -latslib
 preface_atxt.dats: preface.atxt
 	$(ATSDOC) --outcode $@ -i preface.atxt > preface_atxt.txt
 preface.db:: preface.exe ; ./$< > $@
