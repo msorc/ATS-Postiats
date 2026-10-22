@@ -21,6 +21,9 @@ chapters into DocBook files (`CHAP_*/main.db`, `LECTURE/*/main.db`) that
 then made from the DocBook source with the DocBook XSL stylesheets:
 
 - `xsltproc` (with the DocBook XSL stylesheets) makes the HTML,
+- the tool of the `MYTEXT` directory of the book (`mytexting`) replaces
+  the marked code blocks with the HTML that is highlighted by
+  `libatsynmark`,
 - a web browser in headless mode (`google-chrome`) prints the PDF.
 
 The rules that do this are shared by the books (`Makefile_docbook.mk`);

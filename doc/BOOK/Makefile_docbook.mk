@@ -52,6 +52,37 @@ docbuild: main.db
 #
 ######
 #
+# the directory that holds the tool that highlights the ATS code
+#
+MYTEXT ?= ./MYTEXT
+#
+HILITE = $(PYTHON) ../hilite.py $(MYTEXT)/bin/mytexting
+#
+######
+#
+# the syntax highlighting of the ATS code: the code blocks of the book
+# are marked in the DocBook source (with "############dats2xhtml_docbook"
+# and the like) and the tool of the MYTEXT directory (mytexting) replaces
+# them with HTML that is highlighted by libatsynmark
+#
+hilite: ; \
+  if [ -f $(MYTEXT)/mytexting.dats ] ; then \
+    $(MAKE) -C $(MYTEXT) mytexting ; \
+    for i in HTML/*.html ; do \
+      case "$$i" in HTML/$(BOOKNAME).html) ;; \
+        *) $(HILITE) $$i ;; \
+      esac ; \
+    done ; \
+  fi
+#
+hilite-book: ; \
+  if [ -f $(MYTEXT)/mytexting.dats ] ; then \
+    $(MAKE) -C $(MYTEXT) mytexting ; \
+    $(HILITE) HTML/$(BOOKNAME).html ; \
+  fi
+#
+######
+#
 # the HTML of the book: it is made of one file per chapter (and one for
 # the table of contents, which is index.html)
 #
@@ -63,6 +94,7 @@ html: docbuild
 	  --stringparam chunker.output.encoding UTF-8 \
 	  --stringparam html.stylesheet assets/$(BOOKNAME).css \
 	  -o HTML/ $(DOCBOOK_XSL)/html/chunk.xsl $(DOCBUILD)/main.db
+	$(MAKE) hilite
 #
 ######
 #
@@ -74,9 +106,14 @@ pdf: docbuild
 	@command -v $(CHROME) > /dev/null || { \
 	  echo "ERROR: $(CHROME) is missing: it is needed to print the PDF." && exit 1 ; }
 	mkdir -p HTML PDF
+	@echo '<?xml version="1.0"?>' > $(DOCBUILD)/single.xsl
+	@echo '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">' >> $(DOCBUILD)/single.xsl
+	@echo '<xsl:import href="$(DOCBOOK_XSL)/html/docbook.xsl"/>' >> $(DOCBUILD)/single.xsl
+	@echo '<xsl:output method="html" encoding="UTF-8" indent="no"/>' >> $(DOCBUILD)/single.xsl
+	@echo '</xsl:stylesheet>' >> $(DOCBUILD)/single.xsl
 	$(XSLTPROC) --nonet \
-	  --stringparam html.output.encoding UTF-8 \
-	  -o HTML/$(BOOKNAME).html $(DOCBOOK_XSL)/html/docbook.xsl $(DOCBUILD)/main.db
+	  -o HTML/$(BOOKNAME).html $(DOCBUILD)/single.xsl $(DOCBUILD)/main.db
+	$(MAKE) hilite-book
 	$(CHROME) --headless --disable-gpu --no-sandbox \
 	  --user-data-dir=$(DOCBUILD)/chrome-profile \
 	  --no-pdf-header-footer \
