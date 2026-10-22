@@ -7,7 +7,16 @@
 #
 ######
 
-ROOT="."
+######
+#
+# The root of this repository: the sources that are generated live in it.
+# PATSHOME is exported so that the sub-makes (the ones that run atsdoc and
+# patscc) find the tools of this repository.
+#
+ROOT := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/..)
+
+PATSHOME := $(ROOT)
+export PATSHOME
 
 ######
 #

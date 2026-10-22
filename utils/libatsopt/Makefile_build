@@ -13,6 +13,12 @@
 #
 ######
 
+# PATSHOME is the root of this repository (it defaults to it)
+ifeq ($(origin PATSHOME),undefined)
+PATSHOME := $(abspath $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/../..)
+endif
+export PATSHOME
+
 all:: libatsopt
 all:: libatsopt_ext
 

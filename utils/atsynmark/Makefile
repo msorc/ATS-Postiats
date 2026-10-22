@@ -16,6 +16,7 @@ CPF=cp -f
 MAKE=make
 
 PATSHOME ?= $(abspath $(CURDIR)/../..)
+export PATSHOME
 
 ######
 

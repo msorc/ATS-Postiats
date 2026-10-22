@@ -16,6 +16,12 @@
 #
 #   make PATSOPT=/usr/bin/patsopt STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all
 #
+# PATSHOME is the root of this repository; it defaults to it and it is
+# exported so that the sub-makes (the tools, the libraries and the tests)
+# find it without the environment having to be set up beforehand:
+#
+#   PATSHOME=/path/to/this/repository make all
+#
 # The old name of this Makefile (Makefile_devl) still works.
 #
 
@@ -23,6 +29,10 @@
 
 MAKE=make
 DEVL=Makefile_devl
+
+# PATSHOME defaults to the root of this repository
+PATSHOME ?= $(abspath $(CURDIR))
+export PATSHOME
 
 # the arguments of the stage-0 compiler are passed on only when they are given
 ifdef PATSOPT

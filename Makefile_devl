@@ -34,6 +34,13 @@ CPF=cp -f
 MVF=mv -f
 MAKE=make
 #
+# PATSHOME is the root of this repository; it defaults to it and it is
+# exported so that the sub-makes (the compiler, the tools and the libraries)
+# find it without the environment having to be set up beforehand.
+#
+PATSHOME ?= $(abspath $(CURDIR))
+export PATSHOME
+#
 # the number of parallel jobs of the build of src/ (do not use make -j on this
 # Makefile: the steps of utils/atscc must not run in parallel)
 JOBS=4

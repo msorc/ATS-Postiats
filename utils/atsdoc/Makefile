@@ -23,6 +23,7 @@ CPF=cp -f
 MAKE=make
 
 PATSHOME ?= $(abspath $(CURDIR)/../..)
+export PATSHOME
 
 .DEFAULT_GOAL := all
 

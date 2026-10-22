@@ -9,6 +9,14 @@
 #
 ######
 
+# PATSHOME is the root of this repository (it defaults to it); this file is
+# reached through symbolic links from the directories that use it, so it is
+# resolved with realpath (the root is the parent of [share])
+ifeq ($(origin PATSHOME),undefined)
+PATSHOME := $(abspath $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/..)
+endif
+export PATSHOME
+
 PATSHOMEQ="$(PATSHOME)"
 
 ######
