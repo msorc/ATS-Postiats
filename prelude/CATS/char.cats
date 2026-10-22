@@ -1,1 +1,1 @@
-CODEGEN/char.cats
+SRCGEN/char.cats

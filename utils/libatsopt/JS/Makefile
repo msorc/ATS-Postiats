@@ -27,7 +27,6 @@ CFLAGS += -Wno-implicit-function-declaration
 ######
 
 all:: libatsopt
-all:: libatsopt_ext.o
 
 ######
 #
@@ -46,17 +45,10 @@ libatsopt:: ; $(MAKE) -C $(PATSHOME)/src/CBOOT/JS libatsopt
 #
 ######
 #
-patsopt_ext_dats.o: \
-patsopt_ext_dats.c; \
-$(CCOMP) -O2 $(CFLAGS) \
-  -I $(ATSHOME) -I $(ATSRUNTIME) -I $(PATSHOME)/src -c -o $@ $<
-patsopt_ext_dats.c: \
-./../DATS/patsopt_ext.dats ; \
-$(ATSOPT) -IATS $(PATSHOME) -IATS $(ATSHOME) -o $@ --dynamic $<
-#
 ######
 #
-libatsopt_ext.o: libatsopt.o patsopt_ext_dats.o ; $(CCOMP) -o $@ $^
+# The C API of libatsopt (libatsopt_ext) is part of src/libatsopt.a: there
+# is nothing to build here (see ../Makefile_build).
 #
 ######
 

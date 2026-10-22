@@ -1,1 +1,1 @@
-CODEGEN/integer_fixed.cats
+SRCGEN/integer_fixed.cats

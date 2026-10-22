@@ -1,1 +1,1 @@
-CODEGEN/parray.sats
+SRCGEN/parray.sats

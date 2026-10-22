@@ -1,0 +1,13 @@
+Here are the steps to generate the lib code:
+
+make -f Makefile.gen
+make -f Makefile all
+make -f Makefile clean
+
+Note that the source of the generated [Makefile] is [Makefile.atxt].
+
+The directory is named SRCGEN (the source of the generated files) to
+tell it apart from the DOCUGEN directory of the same tree, which holds
+the documents of the library.
+
+###### end of [README] ######

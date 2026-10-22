@@ -1,1 +1,1 @@
-CODEGEN/filebas.dats
+SRCGEN/filebas.dats

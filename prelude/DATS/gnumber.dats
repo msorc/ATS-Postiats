@@ -1,1 +1,1 @@
-CODEGEN/gnumber.dats
+SRCGEN/gnumber.dats

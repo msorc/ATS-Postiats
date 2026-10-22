@@ -1,1 +1,1 @@
-CODEGEN/integer.dats
+SRCGEN/integer.dats

@@ -1,1 +1,1 @@
-CODEGEN/filebas.cats
+SRCGEN/filebas.cats

@@ -365,7 +365,7 @@ clean::
 checksats checkdats: $(C3GENHATS)
 
 # ccomp (pats_ccomp*): PORTING.md, "ccomp interface" and "ccomp core modules". The generated encoding of the ccomp data
-# (tmpvar, funlab, funent, primval, instr, ..) is not kept in git (src/.gitignore).
+# (tmpvar, funlab, funent, primval, instr, ..) is kept in git (it is one of the tracked generated encodings).
 CCGENHATS=pats_ccomp_gen.hats pats_ccomp_gen_dats.hats
 pats_ccomp_gen.hats: pats_ccomp.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global sats pats_ccomp.spec > $@
@@ -373,8 +373,7 @@ pats_ccomp_gen_dats.hats: pats_ccomp.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global --compact dats pats_ccomp.spec > $@
 SATS += pats_ccomp.sats
 check:: $(CCGENHATS)
-clean::
-	$(RM) $(CCGENHATS)
+# the tracked generated encodings are not removed by clean
 checksats checkdats: $(CCGENHATS)
 # the core modules of ccomp (phase 1): tmplab, tmpvar, funlab, funent, d2env, instrseq, util, print and pats_ccomp.dats
 # (the constructors of primval/instr/primdec; the only one that includes pats_ccomp_gen_dats.hats)
@@ -392,6 +391,7 @@ checkcca:
 # ccomp group C2 (pats_ccomp_dynexp, pats_ccomp_decl, pats_ccomp_claulst): PORTING.md, "ccomp group C2 (dynexp/decl/claulst)".
 # The data of ccomp (pats_ccomp.spec, interface of phase 1: PORTING.md, "ccomp interface") and the private types of claulst (pats_ccomp_claulst.spec) are generated (src/.gitignore).
 CCC2GENHATS=pats_ccomp_gen.hats pats_ccomp_gen_dats.hats pats_ccomp_claulst_gen.hats pats_ccomp_claulst_gen_dats.hats
+CCC2GENHATS_UNTRACKED=pats_ccomp_claulst_gen.hats pats_ccomp_claulst_gen_dats.hats
 pats_ccomp_claulst_gen.hats: pats_ccomp_claulst.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global sats pats_ccomp_claulst.spec > $@
 pats_ccomp_claulst_gen_dats.hats: pats_ccomp_claulst.spec ../utils/arenagen/arenagen.py
@@ -406,7 +406,7 @@ checkccc2:
 	@for f in $(CCC2DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
 checksats checkdats: $(CCC2GENHATS)
 clean::
-	$(RM) $(CCC2GENHATS)
+	$(RM) $(CCC2GENHATS_UNTRACKED)
 
 # ccomp group B (pats_ccomp_{hitype,hipat,subst,template,main}): PORTING.md, "ccomp group B (hitype/hipat/subst/template/main)".
 # pats_ccomp_hitype_priv.sats holds the generated private types of pats_ccomp_hitype.dats (the generated files are small: kept in git).

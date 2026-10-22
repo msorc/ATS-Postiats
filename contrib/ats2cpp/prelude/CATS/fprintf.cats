@@ -29,7 +29,7 @@
 
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/fprintf.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/fprintf.atxt
 ** Time of generation: Sun Nov 20 15:37:54 2016
 */
 

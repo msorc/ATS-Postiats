@@ -1,1 +1,1 @@
-CODEGEN/list_vt.sats
+SRCGEN/list_vt.sats

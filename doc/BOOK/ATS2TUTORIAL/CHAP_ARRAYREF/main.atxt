@@ -16,6 +16,17 @@ Time of Generation: #timestamp()\
 #title("Persistent Arrays")
 
 #para("\
+\
+#emphasis("Historical note:") this chapter describes the persistent arrays
+of the GC era of ATS2. The type #stacode("arrayref") was removed when the
+support for the garbage collector was dropped: the compiler now rejects
+every nonlinear heap allocation. Use #stacode("arrayptr") (a flat array of
+pointers) instead; its interface is in
+#myatscodelink("prelude/SATS/arrayptr.sats", "prelude/SATS/arrayptr.sats").
+\
+")
+
+#para("\
 
 A persistent array of size n is just n heap-allocated cells (or references)
 in a row.  It is persistent in the sense that the memory allocated for the

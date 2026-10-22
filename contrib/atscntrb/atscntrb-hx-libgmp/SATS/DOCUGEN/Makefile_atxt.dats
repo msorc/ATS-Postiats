@@ -1,19 +1,21 @@
 (*
-Makefile.atxt: 1(line=1, offs=1) -- 176(line=11, offs=3)
+Makefile.atxt: 1(line=1, offs=1) -- 241(line=13, offs=3)
 *)
 
 //
 staload
-STDIO = "libc/SATS/stdio.sats"
-staload TIME = "libc/SATS/time.sats"
+STDIO = "libats/libc/SATS/stdio.sats"
+staload TIME = "libats/libc/SATS/time.sats"
 //
 dynload "libatsdoc/dynloadall.dats"
 //
 staload "libatsdoc/SATS/libatsdoc_atext.sats"
 //
+#include "utils/atsdoc/HATS/atsdoc_compat.hats"
+//
 
 (*
-Makefile.atxt: 178(line=12, offs=1) -- 1029(line=42, offs=3)
+Makefile.atxt: 243(line=14, offs=1) -- 1100(line=44, offs=3)
 *)
 
 
@@ -32,8 +34,8 @@ HTML/%s.html: \
   $(ATSDOC) --prefix __datatok --outcode htmlgendecl_data_atxt.dats > $@
 %s_atxt.exe: htmlgendecl_atxt.dats \
   %s_atxt.txt $(DECLATEXT) $(HTMLGENDECL) ; \
-  $(ATSCC) $(INCLUDE) $(INCLATS) -D_ATS_NGC -o $@ $< \
-    $(DECLATEXT) $(HTMLGENDECL) $(LDPATH) -latsynmark -latsopt -latsdoc -lats -lgmp
+  $(PATSCC) $(INCLUDE) $(INCLATS) $(PATSCCFLAGS) -o $@ $< \
+    $(DECLATEXT) $(HTMLGENDECL) $(LDPATH) -latsynmark -latsdoc -latslib -latsopt -lgmp
 upload_%s:: ; \
   scp HTML/%s.html ats-hwxi,ats-lang@web.sourceforge.net:htdocs/LIBRARY/contrib/libgmp/SATS/DOCUGEN/HTML
 clean:: ; $(RMF) %s_atxt.exe
@@ -47,14 +49,14 @@ end // end of [make_entry]
 
 
 (*
-Makefile.atxt: 2279(line=117, offs=2) -- 2296(line=117, offs=19)
+Makefile.atxt: 2073(line=112, offs=2) -- 2090(line=112, offs=19)
 *)
 val __tok1 = make_entry("gmp")
 val () = theAtextMap_insert_str ("__tok1", __tok1)
 
 (*
-Makefile.atxt: 2623(line=140, offs=1) -- 2696(line=142, offs=3)
+Makefile.atxt: 2417(line=135, offs=1) -- 2491(line=137, offs=3)
 *)
 
-implement main () = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
+implement main0 () = fprint_filsub (stdout_ref, "Makefile_atxt.txt")
 

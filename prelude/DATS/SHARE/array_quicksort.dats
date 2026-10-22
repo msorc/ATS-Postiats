@@ -1,1 +1,1 @@
-CODEGEN/array_quicksort.dats
+SRCGEN/array_quicksort.dats

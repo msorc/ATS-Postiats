@@ -1,1 +1,1 @@
-CODEGEN/arrayptr.sats
+SRCGEN/arrayptr.sats

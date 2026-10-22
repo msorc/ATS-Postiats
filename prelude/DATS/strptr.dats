@@ -1,1 +1,1 @@
-CODEGEN/strptr.dats
+SRCGEN/strptr.dats

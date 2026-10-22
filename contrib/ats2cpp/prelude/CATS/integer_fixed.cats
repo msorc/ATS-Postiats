@@ -37,7 +37,7 @@
 
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/integer_fixed.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/integer_fixed.atxt
 ** Time of generation: Sun Aug 21 20:48:36 2016
 */
 

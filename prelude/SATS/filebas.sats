@@ -1,1 +1,1 @@
-CODEGEN/filebas.sats
+SRCGEN/filebas.sats

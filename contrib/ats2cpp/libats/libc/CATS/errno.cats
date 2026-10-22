@@ -29,7 +29,7 @@
 
 /*
 ** Source:
-** $PATSHOME/libc/CATS/CODEGEN/errno.atxt
+** $PATSHOME/libc/CATS/SRCGEN/errno.atxt
 ** Time of generation: Mon Sep  5 20:36:41 2016
 */
 

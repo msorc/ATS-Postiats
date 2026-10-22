@@ -1,1 +1,1 @@
-CODEGEN/list_vt_quicksort.dats
+SRCGEN/list_vt_quicksort.dats

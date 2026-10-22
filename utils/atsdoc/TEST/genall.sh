@@ -4,7 +4,7 @@
 # stand for, with the new toolchain only (atsdoc, patscc, libatsdoc, no ATS1),
 # and compares them with what is expected.
 #
-#   sh genall.sh [-j N] prelude        regenerates the prelude CODEGEN directories
+#   sh genall.sh [-j N] prelude        regenerates the prelude SRCGEN directories
 #                                      (what `make -f codegen/Makefile_atslib` does) in
 #                                      a scratch copy and compares every tracked generated
 #                                      file with the tracked one (git is not needed)
@@ -24,7 +24,7 @@
 # there: the md5 sums are those of the text that the ATS1 atsdoc/atscc produce (the 6 chapters of the
 # libcairo TUTORIAL and doc/EXAMPLE/EFFECTIVATS/PwTP-bool-vs-prop excepted: ATS1 could not run them
 # either, so their sums are those of the new output, see src/PORTING.md; the
-# Makefile.atxt of the DOCUGEN, CODEGEN and DISTRIB directories excepted: their text
+# Makefile.atxt of the DOCUGEN, SRCGEN and DISTRIB directories excepted: their text
 # now names patscc, see src/PORTING.md "atsdoc corpus adaptation"; and ATS2FUNCRASH
 # LECTURE/01, LECTURE/03-10 and DISTRIB/ATEXT/patscontrib_libatscc.atxt, whose text was
 # edited when the backends other than C, C++ and JS were removed).
@@ -90,11 +90,11 @@ run_dg() {
   rm -rf "$tmp"
 }
 
-# the prelude CODEGEN directories: regenerated in a scratch copy, compared with the tracked files
+# the prelude SRCGEN directories: regenerated in a scratch copy, compared with the tracked files
 do_prelude() {
   tmp=`mktemp -d`
   st=0
-  for d in prelude/SATS/CODEGEN prelude/DATS/CODEGEN prelude/DATS/SHARE/CODEGEN prelude/CATS/CODEGEN; do
+  for d in prelude/SATS/SRCGEN prelude/DATS/SRCGEN prelude/DATS/SHARE/SRCGEN prelude/CATS/SRCGEN; do
     mkdir -p "$tmp/$d"
     cp -RL "$PATSHOME/$d/." "$tmp/$d/"
     # the scratch copy has the tracked files; the generated ones are overwritten

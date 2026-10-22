@@ -1,1 +1,1 @@
-CODEGEN/matrix.cats
+SRCGEN/matrix.cats

@@ -1,0 +1,127 @@
+%{
+#define ATSCODEFORMAT "txt"
+#if (ATSCODEFORMAT == "txt")
+#include "utils/atsdoc/HATS/postiatsatxt.hats"
+#endif // end of [ATSCCODEFORMAT]
+val _thisfilename = atext_strcst"memory.sats"
+val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/SATS/SRCGEN/memory.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+
+typedef bytes (n:int) = @[byte][n]
+typedef b0ytes (n:int) = @[byte?][n]
+
+#atscode_separator()
+
+viewdef bytes_v (l:addr, n:int) = bytes (n) @ l
+viewdef b0ytes_v (l:addr, n:int) = b0ytes (n) @ l
+
+#atscode_separator()
+
+praxi
+b0ytes2bytes
+  {l:addr}{n:int} (&b0ytes(n) >> bytes(n)): void
+// end of [b0ytes2bytes]
+praxi
+b0ytes2bytes_v
+  {l:addr}{n:int} (pf: b0ytes_v (l, n)): bytes_v (l, n)
+// end of [b0ytes2bytes_v]
+
+#atscode_separator()
+
+prfun
+bytes_v_split
+  {l:addr}
+  {n:int}{i:nat | i <= n}
+  (pf: bytes_v (l, n)): (bytes_v (l, i), bytes_v (l+i, n-i))
+// end of [bytes_v_split]
+
+prfun
+bytes_v_split_at
+  {l:addr}
+  {n:int}{i:nat | i <= n}
+  (pf: bytes_v (l, n) | i: size_t (i)): (bytes_v (l, i), bytes_v (l+i, n-i))
+// end of [bytes_v_split_at]
+
+#atscode_separator()
+
+prfun
+bytes_v_unsplit
+  {l:addr}{n1,n2:int}
+  (pf1: bytes_v (l, n1), pf2: bytes_v (l+n1, n2)): bytes_v (l, n1+n2)
+// end of [bytes_v_unsplit]
+
+#atscode_separator()
+//
+// HX-2013-08:
+// for memory initialization
+//
+fun minit_gc (): void = "mac\#%"
+//
+#atscode_separator()
+
+fun
+mfree_gc
+  {l:addr}{n:int}
+(
+  pfat: b0ytes n @ l
+, pfgc: mfree_gc_v (l) | ptr l
+) :<!wrt> void = "mac\#%"
+
+fun
+malloc_gc
+  {n:int}
+(
+  bsz: size_t (n)
+) :<!wrt>
+  [l:agz]
+(
+  b0ytes n @ l, mfree_gc_v (l) | ptr l
+) = "mac\#%" // endfun
+
+#atscode_separator()
+
+absview memory$free_v (l:addr)
+
+#atscode_separator()
+
+fun{
+} memory$free
+  {l:addr}{n:int}
+(
+  pfat: b0ytes n @ l
+, pfmf: memory$free_v (l) | ptr l
+) :<!wrt> void // end-of-fun
+
+fun{
+} memory$alloc
+  {n:int}
+(
+  bsz: size_t (n)
+) :<!wrt>
+  [l:agz]
+(
+  b0ytes n @ l, memory$free_v (l) | ptr l
+) (* end of [memory$alloc] *)
+
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) =
+  fprint_filsub (stdout_ref, "memory_atxt.txt")
+%}\

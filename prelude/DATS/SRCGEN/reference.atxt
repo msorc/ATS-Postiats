@@ -1,0 +1,98 @@
+%{
+#define ATSCODEFORMAT "txt"
+#if (ATSCODEFORMAT == "txt")
+#include "utils/atsdoc/HATS/postiatsatxt.hats"
+#endif // end of [ATSCCODEFORMAT]
+val _thisfilename = atext_strcst"reference.dats"
+val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/DATS/SRCGEN/reference.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("hwxi AT cs DOT bu DOT edu")
+#atscode_start_time("May, 2012")
+
+#atscode_separator()
+
+#atscode_separator()
+
+implement
+{a}(*tmp*)
+ref_get_elt
+  (r) = !p where {
+  val (vbox _ | p) = ref_get_viewptr (r)
+} // end of [ref_get_elt]
+
+implement
+{a}(*tmp*)
+ref_set_elt
+  (r, x) = let
+  val (vbox _ | p) = ref_get_viewptr (r)
+in
+  !p := x // assignment
+end // end of [ref_set_elt]
+
+implement
+{a}(*tmp*)
+ref_exch_elt
+  (r, x) = let
+  val (vbox _ | p) = ref_get_viewptr (r)
+in
+  !p :=: x // exchanging
+end // end of [ref_exch_elt]
+
+#atscode_separator()
+
+implement
+{}(*tmp*)
+ref_app_fun{a} (r, f) = let
+  val (vbox _ | p) = ref_get_viewptr (r) in f (!p)
+end // end of [ref_app_fun]
+
+implement
+{}(*tmp*)
+ref_app_funenv{a}
+  (pfv | r, f, env) = let
+  val (vbox _ | p) = ref_get_viewptr (r) in f (pfv | !p, env)
+end // end of [ref_app_funenv]
+
+#atscode_separator()
+
+implement
+{}(*tmp*)
+ref_vtakeout{a} (r) = let
+//
+val (
+  vbox pf | p
+) = ref_get_viewptr (r)
+//
+prval (pf, fpf) = __copy (pf) where
+{
+  extern praxi __copy {l:addr} (pf: !a @ l): (a @ l, a @ l -<lin,prf> void)
+} (* end of [prval] *)
+//
+in
+  (pf, fpf | p)
+end // end of [ref_vtakeout]
+
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) =
+  fprint_filsub (stdout_ref, "reference_atxt.txt")
+%}\

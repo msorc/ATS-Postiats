@@ -1,1 +1,1 @@
-CODEGEN/list_vt_mergesort.dats
+SRCGEN/list_vt_mergesort.dats

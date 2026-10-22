@@ -187,14 +187,6 @@ clean:: ; $(RMF) prelude_matrixptr_dats.o
 clean:: ; $(RMF) prelude_matrixptr_dats.c
 cleanall:: ; $(RMF) prelude_matrixptr.exe
 regress:: ./prelude_matrixptr.exe ; ./prelude_matrixptr.exe || (echo "$< failed" && exit 1)
-all:: prelude_matrixref
-prelude_matrixref: prelude_matrixref.exe
-prelude_matrixref.exe: prelude_matrixref_dats.c ;   $(CCOPT) -D_GNU_SOURCE -O2     -I$(PATSHOMEQ) -I$(PATSHOMEQ)/ccomp/runtime -DATS_MEMALLOC_LIBC -o $@ $< 
-prelude_matrixref_dats.c: prelude_matrixref.dats ;   $(PATSOPT) -IATS$(PATSHOMEQ)/contrib --output prelude_matrixref_dats.c --dynamic prelude_matrixref.dats
-clean:: ; $(RMF) prelude_matrixref_dats.o
-clean:: ; $(RMF) prelude_matrixref_dats.c
-cleanall:: ; $(RMF) prelude_matrixref.exe
-regress:: ./prelude_matrixref.exe ; ./prelude_matrixref.exe || (echo "$< failed" && exit 1)
 
 
 ######

@@ -1,1 +1,1 @@
-CODEGEN/checkast.sats
+SRCGEN/checkast.sats

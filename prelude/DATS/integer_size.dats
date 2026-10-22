@@ -1,1 +1,1 @@
-CODEGEN/integer_size.dats
+SRCGEN/integer_size.dats

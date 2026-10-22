@@ -15,6 +15,18 @@ Time of Generation: #timestamp()\
 <chapter id="arrszref">
 #title("Persistent Arrays-with-size")
 
+#para("\
+\
+#emphasis("Historical note:") this chapter describes the persistent arrays
+of the GC era of ATS2 (the arrays that carry their size). The types
+#stacode("arrayref") and #stacode("arrayref_sz") were removed when the
+support for the garbage collector was dropped: the compiler now rejects
+every nonlinear heap allocation. Use #stacode("arrayptr") (a flat array of
+pointers) instead; its interface is in
+#myatscodelink("prelude/SATS/arrayptr.sats", "prelude/SATS/arrayptr.sats").
+\
+")
+
 #para('\
 
 I use the name #emphasis("array-with-size") to refer to a persistent

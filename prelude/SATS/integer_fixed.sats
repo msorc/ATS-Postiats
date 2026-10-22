@@ -1,1 +1,1 @@
-CODEGEN/integer_fixed.sats
+SRCGEN/integer_fixed.sats

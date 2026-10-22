@@ -16,6 +16,18 @@ Time of Generation: #timestamp()\
 #title("Persistent Matrices-with-size")
 
 #para("\
+\
+#emphasis("Historical note:") this chapter describes the persistent matrices
+of the GC era of ATS2 (the matrices that carry their size). The types
+#stacode("matrixref") and #stacode("matrixref_sz") were removed when the
+support for the garbage collector was dropped: the compiler now rejects
+every nonlinear heap allocation. Use #stacode("matrixptr") (a flat matrix
+of pointers) instead; its interface is in
+#myatscodelink("prelude/SATS/matrixptr.sats", "prelude/SATS/matrixptr.sats").
+\
+")
+
+#para("\
 
 I use the name #emphasis("matrix-with-size") to refer to a persistent
 matrix with attached dimension information (that is, number of rows and

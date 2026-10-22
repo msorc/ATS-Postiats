@@ -1,1 +1,1 @@
-CODEGEN/gprint.sats
+SRCGEN/gprint.sats

@@ -156,12 +156,6 @@ clean:: ; $(MAKE) -C CHAP_DATATYPES -f ../Makefile_chap clean
 ######
 #
 allchap:: \
-CHAP_LIST
-CHAP_LIST:: ; \
-  $(MAKE) -C CHAP_LIST -f ../Makefile_chap main.db
-clean:: ; $(MAKE) -C CHAP_LIST -f ../Makefile_chap clean
-#
-allchap:: \
 CHAP_LIST_VT
 CHAP_LIST_VT:: ; \
   $(MAKE) -C CHAP_LIST_VT -f ../Makefile_chap main.db

@@ -1,1 +1,1 @@
-CODEGEN/tuple.sats
+SRCGEN/tuple.sats

@@ -1,1 +1,1 @@
-CODEGEN/arith_prf.sats
+SRCGEN/arith_prf.sats

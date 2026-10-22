@@ -1,1 +1,1 @@
-CODEGEN/array_prf.dats
+SRCGEN/array_prf.dats

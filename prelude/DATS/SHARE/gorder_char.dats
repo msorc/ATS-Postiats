@@ -1,1 +1,1 @@
-CODEGEN/gorder_char.dats
+SRCGEN/gorder_char.dats

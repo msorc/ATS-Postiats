@@ -1,1 +1,1 @@
-CODEGEN/integer_short.cats
+SRCGEN/integer_short.cats

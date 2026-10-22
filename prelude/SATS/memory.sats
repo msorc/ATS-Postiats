@@ -1,1 +1,1 @@
-CODEGEN/memory.sats
+SRCGEN/memory.sats

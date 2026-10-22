@@ -1,0 +1,45 @@
+%{
+#define ATSCODEFORMAT "txt"
+#if (ATSCODEFORMAT == "txt")
+#include "utils/atsdoc/HATS/postiatsatxt.hats"
+#endif // end of [ATSCCODEFORMAT]
+val _thisfilename = atext_strcst"filebas_prf.dats"
+val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/DATS/SRCGEN/filebas_prf.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("hwxi AT cs DOT bu DOT edu")
+#atscode_start_time("Feburary, 2012")
+
+#atscode_separator()
+//
+stadef r() = file_mode_r()
+stadef w() = file_mode_w()
+stadef rw() = file_mode_rw()
+//
+primplmnt file_mode_lte_r_r = file_mode_lte_refl{r()}()
+primplmnt file_mode_lte_w_w = file_mode_lte_refl{w()}()
+primplmnt file_mode_lte_rw_rw = file_mode_lte_refl{rw()}()
+//
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) =
+  fprint_filsub (stdout_ref, "filebas_prf_atxt.txt")
+%}\

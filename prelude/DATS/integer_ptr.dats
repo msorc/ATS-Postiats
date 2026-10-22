@@ -1,1 +1,1 @@
-CODEGEN/integer_ptr.dats
+SRCGEN/integer_ptr.dats

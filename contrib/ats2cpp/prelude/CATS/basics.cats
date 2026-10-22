@@ -29,7 +29,7 @@
 
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/basics.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/basics.atxt
 ** Time of generation: Sun Nov 20 15:37:51 2016
 */
 

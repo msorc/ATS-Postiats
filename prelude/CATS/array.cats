@@ -1,1 +1,1 @@
-CODEGEN/array.cats
+SRCGEN/array.cats

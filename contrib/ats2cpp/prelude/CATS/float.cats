@@ -29,7 +29,7 @@
 
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/float.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/float.atxt
 ** Time of generation: Sun Nov 27 09:09:17 2016
 */
 

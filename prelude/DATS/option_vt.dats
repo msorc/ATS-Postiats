@@ -1,1 +1,1 @@
-CODEGEN/option_vt.dats
+SRCGEN/option_vt.dats

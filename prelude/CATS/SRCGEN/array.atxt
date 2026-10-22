@@ -1,0 +1,111 @@
+%{
+#define ATSCODEFORMAT "txt"
+#if (ATSCODEFORMAT == "txt")
+#include "utils/atsdoc/HATS/postiatsatxt.hats"
+#endif // end of [ATSCCODEFORMAT]
+val _thisfilename = atext_strcst"array.cats"
+val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
+%}\
+\
+#atscode_banner_for_C()
+#atscode_copyright_GPL_for_C()
+
+#atscode_separator_for_C()
+
+/*
+** Source:
+** $PATSHOME/prelude/CATS/SRCGEN/array.atxt
+** Time of generation: #timestamp()
+*/
+
+#atscode_separator_for_C()
+
+/*
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("hwxi AT cs DOT bu DOT edu")
+#atscode_start_time("January, 2013")
+*/
+
+#atscode_separator_for_C()
+
+\#ifndef ATSLIB_PRELUDE_CATS_ARRAY
+\#define ATSLIB_PRELUDE_CATS_ARRAY
+
+#atscode_separator_for_C()
+//
+// [stdlib.h]
+//
+extern
+void qsort
+(
+  void *base, size_t nmemb, size_t size
+, int(*compar)(const void *, const void *)
+) ; // end of [qsort]
+//
+// HX-2026-10:
+// glibc (>= 2.40) may define [bsearch] as a macro
+//
+\#ifndef bsearch
+extern
+void *bsearch
+(
+  const void *key
+, const void *base
+, size_t nmemb, size_t size
+, int (*compar)(const void *, const void *)
+) ; // end of [bsearch]
+\#endif // end of [ifndef(bsearch)]
+//
+\#define atspre_array_qsort qsort
+\#define atspre_array_bsearch bsearch
+//
+#atscode_separator_for_C()
+//
+// [string.h]
+//
+\#ifndef memcpy
+extern
+void *memcpy(void *dst, const void *src, size_t n) ;
+\#endif // \#ifndef
+\#ifndef memmove
+extern
+void *memmove(void *dst, const void *src, size_t n) ;
+\#endif // \#ifndef
+//
+\#define atspre_array_memcpy memcpy
+\#define atspre_array_memmove memmove
+//
+#atscode_separator_for_C()
+
+ATSinline()
+atsvoid_t0ype
+atspre_array_foreach_funenv_tsz
+(
+  atstype_ptr A
+, atstype_size n
+, atstype_size tsz
+, atstype_funptr f
+, atstype_boxed env
+) {
+  char *p ;
+  size_t i ;
+  p = (char*)A ;
+  for (i = 0 ; i < n ; i += 1)
+  {
+    ((void(*)(void*, void*))(f))(p, env) ; p += tsz ;
+  }
+  return ;
+} // end of [atspre_array_foreach_funenv_tsz]
+
+#atscode_separator_for_C()
+
+\#endif // ifndef ATSLIB_PRELUDE_CATS_ARRAY
+
+#atscode_separator_for_C()
+
+#atscode_eof_strsub_for_C("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) = fprint_filsub (stdout_ref, "array_atxt.txt")
+%}\

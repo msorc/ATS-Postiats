@@ -1,1 +1,1 @@
-CODEGEN/bool.sats
+SRCGEN/bool.sats

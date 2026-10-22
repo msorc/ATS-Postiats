@@ -1,1 +1,1 @@
-CODEGEN/array.sats
+SRCGEN/array.sats

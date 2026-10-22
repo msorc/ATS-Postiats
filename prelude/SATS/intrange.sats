@@ -1,1 +1,1 @@
-CODEGEN/intrange.sats
+SRCGEN/intrange.sats

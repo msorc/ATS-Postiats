@@ -36,7 +36,7 @@
 /* ****** ****** */
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/integer.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/integer.atxt
 ** Time of generation: Sun Aug 21 20:48:34 2016
 */
 

@@ -7,14 +7,25 @@
 *_?ats.o
 *_?ats.c
 *.exe
+#
+# the C code that is generated and kept in git
+!ccomp/runtime/pats_ccomp_runtime2_dats.c
+!contrib/ATS-extsolve-smt2/npm/CATS/patsolve_cnstrnt_dats.c
+!contrib/ATS-extsolve-smt2/npm/CATS/patsolve_parsing_dats.c
+!contrib/ATS-extsolve-z3/npm/CATS/patsolve_cnstrnt_dats.c
+!contrib/ATS-extsolve-z3/npm/CATS/patsolve_parsing_dats.c
+!contrib/CATS-atscc2js/npm/CATS/catsparse_all_dats.c
 
-config.h
 config.h.in
 config.mk
 config.log
 config.status
 missing
 install-sh
+#
+# the ones that are kept in git (the release package ships them)
+!doc/DISTRIB/ATS-Postiats/missing
+!doc/DISTRIB/ATS-Postiats/install-sh
 configure
 stamp-h1
 aclocal.m4
@@ -56,7 +67,10 @@ bin/patsolve_smt2
 # Patsopt as a library
 #
 
-utils/libatsopt/JS/TEST/PATSHOME
+utils/libatsopt/JS/TEST/PATSHOME/**
+!utils/libatsopt/JS/TEST/PATSHOME/**/
+!utils/libatsopt/JS/TEST/PATSHOME/**/.keeper
+!utils/libatsopt/JS/TEST/PATSHOME/mytmp/hello.dats
 
 #
 # For syntax-highlighting
@@ -80,14 +94,27 @@ utils/atsdoc/TEST/drv_dats.o
 *_atxt.txt
 *_atxt.dats
 *_atxt.exe
+#
+# the generated programs that are kept in git
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/Makefile_atxt.dats
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/Makefile_atxt.txt
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/gmp_atxt.txt
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_atxt.dats
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_atxt.txt
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_data_atxt.dats
+!doc/BOOK/INT2PROGINATS/INTPROGINATS-2013-03-24/CHAPTER_DATATYPES/main_atxt.dats
+!doc/BOOK/INT2PROGINATS/INTPROGINATS-2013-03-24/CHAPTER_DATATYPES/main_atxt.txt
 
 #
 # ATSHOME/ccomp
 #
 
-ccomp/atslib/lib
-ccomp/atslib/lib64
-ccomp/atslib/output
+ccomp/atslib/lib/*
+!ccomp/atslib/lib/.keeper
+ccomp/atslib/lib64/*
+!ccomp/atslib/lib64/.keeper
+ccomp/atslib/output/*
+!ccomp/atslib/output/.keeper
 
 #
 # ATSHOME/utils
@@ -99,18 +126,24 @@ utils/atscc/patscc
 # ATSLIB/prelude
 #
 
-prelude/CATS/CODEGEN/*_atxt.txt
-prelude/CATS/CODEGEN/*_atxt.dats
-prelude/SATS/CODEGEN/*_atxt.txt
-prelude/SATS/CODEGEN/*_atxt.dats
-prelude/DATS/CODEGEN/*_atxt.txt
-prelude/DATS/CODEGEN/*_atxt.dats
-prelude/DATS/SHARE/CODEGEN/*_atxt.txt
-prelude/DATS/SHARE/CODEGEN/*_atxt.dats
+prelude/CATS/SRCGEN/*_atxt.txt
+prelude/CATS/SRCGEN/*_atxt.dats
+prelude/SATS/SRCGEN/*_atxt.txt
+prelude/SATS/SRCGEN/*_atxt.dats
+prelude/DATS/SRCGEN/*_atxt.txt
+prelude/DATS/SRCGEN/*_atxt.dats
+prelude/DATS/SHARE/SRCGEN/*_atxt.txt
+prelude/DATS/SHARE/SRCGEN/*_atxt.dats
 
-prelude/SATS/DOCUGEN/HTML
-prelude/SATS/DOCUGEN/DBOOK
-prelude/SATS/DOCUGEN/TRYIT
+prelude/SATS/DOCUGEN/HTML/**
+!prelude/SATS/DOCUGEN/HTML/**/
+!prelude/SATS/DOCUGEN/HTML/**/.keeper
+prelude/SATS/DOCUGEN/DBOOK/**
+!prelude/SATS/DOCUGEN/DBOOK/**/
+!prelude/SATS/DOCUGEN/DBOOK/**/.keeper
+prelude/SATS/DOCUGEN/TRYIT/**
+!prelude/SATS/DOCUGEN/TRYIT/**/
+!prelude/SATS/DOCUGEN/TRYIT/**/.keeper
 prelude/SATS/DOCUGEN/*_atxt.txt
 prelude/SATS/DOCUGEN/*_atxt.dats
 prelude/SATS/DOCUGEN/Makefile
@@ -120,15 +153,6 @@ prelude/SATS/DOCUGEN/Makefile2
 # ATSLIB/libats
 #
 
-libats/CATS/CODEGEN/*.cats
-libats/CATS/CODEGEN/*_atxt.txt
-libats/CATS/CODEGEN/*_atxt.dats
-libats/SATS/CODEGEN/*.sats
-libats/SATS/CODEGEN/*_atxt.txt
-libats/SATS/CODEGEN/*_atxt.dats
-libats/DATS/CODEGEN/*.dats
-libats/DATS/CODEGEN/*_atxt.txt
-libats/DATS/CODEGEN/*_atxt.dats
 
 libats/SATS/DOCUGEN/Makefile
 libats/SATS/DOCUGEN/*_atxt.txt
@@ -136,33 +160,6 @@ libats/SATS/DOCUGEN/*_atxt.dats
 libats/SATS/DOCUGEN/HTML/*.html
 libats/SATS/DOCUGEN/TRYIT/*.dats
 
-libats/ML/CATS/CODEGEN/*.cats
-libats/ML/CATS/CODEGEN/*_atxt.txt
-libats/ML/CATS/CODEGEN/*_atxt.dats
-libats/ML/SATS/CODEGEN/*.sats
-libats/ML/SATS/CODEGEN/*_atxt.txt
-libats/ML/SATS/CODEGEN/*_atxt.dats
-libats/ML/DATS/CODEGEN/*.dats
-libats/ML/DATS/CODEGEN/*_atxt.txt
-libats/ML/DATS/CODEGEN/*_atxt.dats
-
-libats/ML/SATS/DOCUGEN/*_atxt.txt
-libats/ML/SATS/DOCUGEN/*_atxt.dats
-libats/ML/SATS/DOCUGEN/Makefile
-libats/ML/SATS/DOCUGEN/*_atxt.txt
-libats/ML/SATS/DOCUGEN/*_atxt.dats
-libats/ML/SATS/DOCUGEN/HTML
-libats/ML/SATS/DOCUGEN/TRYIT
-
-libats/libc/CATS/CODEGEN/*.cats
-libats/libc/CATS/CODEGEN/*_atxt.txt
-libats/libc/CATS/CODEGEN/*_atxt.dats
-libats/libc/SATS/CODEGEN/*.sats
-libats/libc/SATS/CODEGEN/*_atxt.txt
-libats/libc/SATS/CODEGEN/*_atxt.dats
-libats/libc/DATS/CODEGEN/*.dats
-libats/libc/DATS/CODEGEN/*_atxt.txt
-libats/libc/DATS/CODEGEN/*_atxt.dats
 
 libats/libc/SATS/DOCUGEN/Makefile
 libats/libc/SATS/DOCUGEN/*_atxt.txt
@@ -170,29 +167,12 @@ libats/libc/SATS/DOCUGEN/*_atxt.dats
 libats/libc/SATS/DOCUGEN/HTML/*.html
 libats/libc/SATS/DOCUGEN/TRYIT/*.dats
 
-libats/libc/CATS/sys/CODEGEN/*.cats
-libats/libc/CATS/sys/CODEGEN/*_atxt.txt
-libats/libc/CATS/sys/CODEGEN/*_atxt.dats
-libats/libc/SATS/sys/CODEGEN/*.sats
-libats/libc/SATS/sys/CODEGEN/*_atxt.txt
-libats/libc/SATS/sys/CODEGEN/*_atxt.dats
-libats/libc/DATS/sys/CODEGEN/*.dats
-libats/libc/DATS/sys/CODEGEN/*_atxt.txt
-libats/libc/DATS/sys/CODEGEN/*_atxt.dats
 
 libats/libc/SATS/sys/DOCUGEN/Makefile
 libats/libc/SATS/sys/DOCUGEN/*_atxt.txt
 libats/libc/SATS/sys/DOCUGEN/*_atxt.dats
 libats/libc/SATS/sys/DOCUGEN/HTML/*.html
 libats/libc/SATS/sys/DOCUGEN/TRYIT/*.dats
-
-#
-# ATSLIB/libatslex
-#
-libatslex/SATS/DOCUGEN/*_atxt.txt
-libatslex/SATS/DOCUGEN/*_atxt.dats
-libatslex/SATS/DOCUGEN/HTML
-libatslex/SATS/DOCUGEN/TRYIT
 
 #
 # ATSHOME/doc/DISTRIB
@@ -202,6 +182,9 @@ doc/DISTRIB/*_atxt.dats
 doc/DISTRIB/HTML
 doc/DISTRIB/SCRIPT/*.bash
 doc/DISTRIB/*.tgz
+doc/DISTRIB/ATS2-Postiats-*/
+doc/DISTRIB/ATS2-Postiats-contrib-*/
+doc/DISTRIB/ATS2-Postiats-include-*/
 #
 # ATSHOME/doc/DISTRIB/ATS-Postiats
 #
@@ -215,32 +198,57 @@ doc/DISTRIB/ATS-Postiats/stamp-h1
 doc/DISTRIB/ATS-Postiats/patscc_env.sh.in
 doc/DISTRIB/ATS-Postiats/patsopt_env.sh.in
 doc/DISTRIB/ATS-Postiats/bin/*
-doc/DISTRIB/ATS-Postiats/share/*
+doc/DISTRIB/ATS-Postiats/share/**
+!doc/DISTRIB/ATS-Postiats/share/**/
+!doc/DISTRIB/ATS-Postiats/share/**/.keeper
 doc/DISTRIB/ATS-Postiats/src/patsopt
 doc/DISTRIB/ATS-Postiats/src/.depend
 doc/DISTRIB/ATS-Postiats/src/Makefile
 doc/DISTRIB/ATS-Postiats/src/pats_*.?ats
 doc/DISTRIB/ATS-Postiats/src/CBOOT/*
-doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib
-doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib64
-doc/DISTRIB/ATS-Postiats/ccomp/atslib/output
+doc/DISTRIB/ATS-Postiats/src/README
+doc/DISTRIB/ATS-Postiats/src/mylibies.hats
+doc/DISTRIB/ATS-Postiats/src/*.spec
+doc/DISTRIB/ATS-Postiats/src/*.c
+doc/DISTRIB/ATS-Postiats/src/*.dats
+doc/DISTRIB/ATS-Postiats/src/*.sats
+doc/DISTRIB/ATS-Postiats/src/*.hats
+doc/DISTRIB/ATS-Postiats/src/*.cats
+doc/DISTRIB/ATS-Postiats/README.md
+doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib/**
+!doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib/**/
+!doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib/**/.keeper
+doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib64/**
+!doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib64/**/
+!doc/DISTRIB/ATS-Postiats/ccomp/atslib/lib64/**/.keeper
+doc/DISTRIB/ATS-Postiats/ccomp/atslib/output/**
+!doc/DISTRIB/ATS-Postiats/ccomp/atslib/output/**/
+!doc/DISTRIB/ATS-Postiats/ccomp/atslib/output/**/.keeper
 doc/DISTRIB/ATS-Postiats/ccomp/atslib/Makefile
-doc/DISTRIB/ATS-Postiats/ccomp/runtime
-doc/DISTRIB/ATS-Postiats/utils/atscc
-doc/DISTRIB/ATS-Postiats/utils/emacs
-doc/DISTRIB/ATS-Postiats/utils/myatscc
+doc/DISTRIB/ATS-Postiats/ccomp/runtime/**
+!doc/DISTRIB/ATS-Postiats/ccomp/runtime/**/
+!doc/DISTRIB/ATS-Postiats/ccomp/runtime/**/.keeper
+doc/DISTRIB/ATS-Postiats/utils/atscc/**
+!doc/DISTRIB/ATS-Postiats/utils/atscc/**/
+!doc/DISTRIB/ATS-Postiats/utils/atscc/**/.keeper
+doc/DISTRIB/ATS-Postiats/utils/emacs/**
+!doc/DISTRIB/ATS-Postiats/utils/emacs/**/
+!doc/DISTRIB/ATS-Postiats/utils/emacs/**/.keeper
+doc/DISTRIB/ATS-Postiats/utils/myatscc/**
+!doc/DISTRIB/ATS-Postiats/utils/myatscc/**/
+!doc/DISTRIB/ATS-Postiats/utils/myatscc/**/.keeper
 doc/DISTRIB/ATS-Postiats/prelude/*.ats
 doc/DISTRIB/ATS-Postiats/prelude/*.?ats
 doc/DISTRIB/ATS-Postiats/prelude/?ATS/*.?ats
 doc/DISTRIB/ATS-Postiats/prelude/DATS/SHARE/*.dats
+doc/DISTRIB/ATS-Postiats/prelude/?ATS/SRCGEN/*
+doc/DISTRIB/ATS-Postiats/prelude/?ATS/DOCUGEN/*
 doc/DISTRIB/ATS-Postiats/libats/?ATS/*.?ats
+doc/DISTRIB/ATS-Postiats-include/utils/atscc/DATS_C/*.c
+doc/DISTRIB/ATS-Postiats-include/utils/myatscc/DATS_C/*.c
 doc/DISTRIB/ATS-Postiats/libats/?ATS/SHARE/*.?ats
 doc/DISTRIB/ATS-Postiats/libats/?ATS/Number/*.?ats
 doc/DISTRIB/ATS-Postiats/libats/?ATS/Number/SHARE/*.?ats
-doc/DISTRIB/ATS-Postiats/libats/ML/?ATS/*.?ats
-doc/DISTRIB/ATS-Postiats/libats/ML/?ATS/SHARE/*.?ats
-doc/DISTRIB/ATS-Postiats/libats/ML/COMPILE/*.?ats
-doc/DISTRIB/ATS-Postiats/libats/ML/COMPILE/?ATS/*.?ats
 doc/DISTRIB/ATS-Postiats/libats/libc/?ATS/*.?ats
 doc/DISTRIB/ATS-Postiats/libats/libc/?ATS/sys/*.?ats
 doc/DISTRIB/ATS-Postiats/libats/libc/?ATS/arpa/*.?ats
@@ -250,7 +258,20 @@ doc/DISTRIB/ATS-Postiats/libats/libc/?ATS/gdbm/SHARE/*.?ats
 doc/DISTRIB/ATS-Postiats/npm-utils/**/*.*
 doc/DISTRIB/ATS-Postiats/npm-utils/**/Makefile*
 doc/DISTRIB/ATS-Postiats/npm-utils/**/README
-doc/DISTRIB/ATS-Postiats/contrib/*
+doc/DISTRIB/ATS-Postiats/contrib/**
+!doc/DISTRIB/ATS-Postiats/contrib/**/
+!doc/DISTRIB/ATS-Postiats/contrib/**/.keeper
+#
+# the trees that have a .gitignore of their own: the files that the
+# packaging copies there are ignored by it
+doc/DISTRIB/ATS-Postiats/contrib/afiber/TEST
+doc/DISTRIB/ATS-Postiats/contrib/afiber/BENCH
+doc/DISTRIB/ATS-Postiats/contrib/CATS-atscc2js/TEST/libatscc2js
+!doc/DISTRIB/ATS-Postiats/contrib/ATS-extsolve
+!doc/DISTRIB/ATS-Postiats/contrib/ATS-extsolve-smt2/ATS-extsolve
+!doc/DISTRIB/ATS-Postiats/contrib/ATS-extsolve-z3/ATS-extsolve
+!doc/DISTRIB/ATS-Postiats/contrib/CATS-atscc2js/CATS-parsemit
+!doc/DISTRIB/ATS-Postiats/contrib/CATS-atscc2js/bin/.gitkeep
 doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/MISC/*.?ats
 doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/MISC/Makefile
 doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/PCPV/*.?ats
@@ -259,26 +280,33 @@ doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/INTRO/*.?ats
 doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/INTRO/Makefile
 doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/ATSLIB/*.?ats
 doc/DISTRIB/ATS-Postiats/doc/EXAMPLE/ATSLIB/Makefile
-#
-doc/DISTRIB/ATS2-Postiats-0.3.10
-#
 # ATSHOME/doc/DISTRIB/ATS-Postiats-contrib
 #
-doc/DISTRIB/ATS-Postiats-contrib/contrib/*
+doc/DISTRIB/ATS-Postiats-contrib/contrib/**
+!doc/DISTRIB/ATS-Postiats-contrib/contrib/**/
+!doc/DISTRIB/ATS-Postiats-contrib/contrib/**/.keeper
 doc/DISTRIB/ATS-Postiats-contrib/document/*
 doc/DISTRIB/ATS-Postiats-contrib/projects/*
-doc/DISTRIB/ATS2-Postiats-contrib-*.*.*
 #
 # ATSHOME/doc/DISTRIB/ATS-Postiats-include
 #
-doc/DISTRIB/ATS-Postiats-include/share
-doc/DISTRIB/ATS-Postiats-include/prelude
+doc/DISTRIB/ATS-Postiats-include/share/**
+!doc/DISTRIB/ATS-Postiats-include/share/**/
+!doc/DISTRIB/ATS-Postiats-include/share/**/.keeper
+doc/DISTRIB/ATS-Postiats-include/prelude/**
+!doc/DISTRIB/ATS-Postiats-include/prelude/**/
+!doc/DISTRIB/ATS-Postiats-include/prelude/**/.keeper
 doc/DISTRIB/ATS-Postiats-include/libc
-doc/DISTRIB/ATS-Postiats-include/libats
-doc/DISTRIB/ATS-Postiats-include/ccomp
-doc/DISTRIB/ATS-Postiats-include/patscontrib
+doc/DISTRIB/ATS-Postiats-include/libats/**
+!doc/DISTRIB/ATS-Postiats-include/libats/**/
+!doc/DISTRIB/ATS-Postiats-include/libats/**/.keeper
+doc/DISTRIB/ATS-Postiats-include/ccomp/**
+!doc/DISTRIB/ATS-Postiats-include/ccomp/**/
+!doc/DISTRIB/ATS-Postiats-include/ccomp/**/.keeper
+doc/DISTRIB/ATS-Postiats-include/patscontrib/**
+!doc/DISTRIB/ATS-Postiats-include/patscontrib/**/
+!doc/DISTRIB/ATS-Postiats-include/patscontrib/**/.keeper
 #
-doc/DISTRIB/ATS2-Postiats-include-*.*.*
 
 #
 # ATSHOME/doc/EXAMPLE
@@ -286,6 +314,7 @@ doc/DISTRIB/ATS2-Postiats-include-*.*.*
 doc/EXAMPLE/*/*_atxt.txt
 doc/EXAMPLE/*/*_atxt.dats
 doc/EXAMPLE/EFFECTIVATS/*/.depend
+doc/EXAMPLE/EFFECTIVATS/*/main.html
 doc/EXAMPLE/EFFECTIVATS/*/.depend?
 
 #
@@ -484,4 +513,37 @@ doc/EXAMPLE/TYPEVAL/dotprod
 **/DOCUGEN/HTML/*.html
 **/DOCUGEN/Makefile
 **/DOCUGEN/Makefile2
+!libats/SATS/DOCUGEN/Makefile
+!npm-utils/contrib/atscntrb/atscntrb-hx-libcairo/SATS/DOCUGEN/Makefile
+!npm-utils/contrib/atscntrb/atscntrb-hx-libevent/SATS/DOCUGEN/Makefile
+!npm-utils/contrib/atscntrb/atscntrb-hx-libsdl2/SATS/DOCUGEN/Makefile
+!prelude/SATS/DOCUGEN/DBOOK/Makefile
+!utils/atscc/DOCUGEN/Makefile
+!utils/atsopt/DOCUGEN/Makefile
+!utils/libatslex/SATS/DOCUGEN/Makefile
+!utils/tempacc/DOCUGEN/Makefile
+!contrib/atscntrb/atscntrb-hx-cstream/SATS/DOCUGEN/Makefile
+!contrib/atscntrb/atscntrb-hx-intinf/SATS/DOCUGEN/Makefile
+!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/Makefile
+!contrib/atscntrb/atscntrb-hx-libhiredis/SATS/DOCUGEN/Makefile
+!doc/BOOK/ATS2FUNCRASH/LECTURE/MYLIB/DOCUGEN/Makefile
 doc/BOOK/ATS2TUTORIAL/TEMP/*.dats
+
+#
+# the .keeper files of the directories that are ignored
+#
+!**/.keeper
+#
+# the .keeper files that the packaging copies into the release tree
+#
+doc/DISTRIB/ATS-Postiats/contrib/atscntrb/atscntrb-hx-cstream/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/contrib/atscntrb/atscntrb-hx-intinf/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/contrib/atscntrb/atscntrb-hx-libjansson/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/contrib/atscntrb/atscntrb-hx-libjansson/SATS/DOCUGEN/TRYIT/.keeper
+doc/DISTRIB/ATS-Postiats/contrib/atscntrb/atscntrb-hx-libpcre/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/contrib/libatscc2js/HTML/Canvas/TEST/.keeper
+doc/DISTRIB/ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libcairo/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/npm-utils/contrib/atscntrb/atscntrb-hx-libsdl2/SATS/DOCUGEN/HTML/.keeper
+doc/DISTRIB/ATS-Postiats/utils/atscc/BUILD/.keeper
+doc/DISTRIB/ATS-Postiats/utils/myatscc/BUILD/.keeper

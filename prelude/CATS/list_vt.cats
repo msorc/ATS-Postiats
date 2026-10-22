@@ -1,1 +1,1 @@
-CODEGEN/list_vt.cats
+SRCGEN/list_vt.cats

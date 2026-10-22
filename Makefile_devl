@@ -25,7 +25,7 @@
 #   make -f Makefile_devl PATSOPT=$PWD/src/CBOOT/patsopt all
 # make -f Makefile_devl all                   # bin/patsopt exists already
 #
-# (the generated prelude sources, prelude/*/CODEGEN/*.?ats, are in git;
+# (the generated prelude sources, prelude/*/SRCGEN/*.?ats, are in git;
 # `make -f codegen/Makefile_atslib` regenerates them with bin/atsdoc (ATS2: `make -f Makefile_devl bin_atsdoc`))
 #
 ######

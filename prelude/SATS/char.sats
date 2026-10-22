@@ -1,1 +1,1 @@
-CODEGEN/char.sats
+SRCGEN/char.sats

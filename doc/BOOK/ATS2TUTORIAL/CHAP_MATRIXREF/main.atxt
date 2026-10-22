@@ -16,6 +16,17 @@ Time of Generation: #timestamp()\
 #title("Persistent Matrices")
 
 #para("\
+\
+#emphasis("Historical note:") this chapter describes the persistent matrices
+of the GC era of ATS2. The type #stacode("matrixref") was removed when the
+support for the garbage collector was dropped: the compiler now rejects
+every nonlinear heap allocation. Use #stacode("matrixptr") (a flat matrix
+of pointers) instead; its interface is in
+#myatscodelink("prelude/SATS/matrixptr.sats", "prelude/SATS/matrixptr.sats").
+\
+")
+
+#para("\
 
 A persistent matrix of dimension m by n is just a persistent array of size
 m*n. Like in C, the representation of a matrix in ATS is row-major. In

@@ -1,1 +1,1 @@
-CODEGEN/string.cats
+SRCGEN/string.cats

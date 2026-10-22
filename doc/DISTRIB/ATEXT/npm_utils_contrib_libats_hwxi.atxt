@@ -60,7 +60,7 @@ out
 #\n\
 \n\
 SOURCE=../../npm-utils/contrib/libats-hwxi\n\
-TARGET=ATS-Postiats/npm-utils/contrib/libats-/hwxi\n\
+TARGET=ATS-Postiats/npm-utils/contrib/libats-hwxi\n\
 \n\
 srcget()\n\
 {\n\
@@ -152,7 +152,7 @@ packfilesynop(x) = atext_nil((*void*))
 (* ****** ****** *)
 
 #packtitle("\
-PATSHOME/npm-utils/contrib/libats-/hwxi\
+PATSHOME/npm-utils/contrib/libats-hwxi\
 ")
 
 (* ****** ****** *)

@@ -12,7 +12,7 @@
 # make genall     regenerates the files of the .atxt templates of the repository with this
 #                 toolchain only and compares them with the expected ones (TEST/genall.sh,
 #                 TEST/genall.md5; GENARGS="prelude" or a path prefix to run a part, JOBS=n)
-# make genprelude the same for the prelude CODEGEN directories (tracked files; no ATS1)
+# make genprelude the same for the prelude SRCGEN directories (tracked files; no ATS1)
 #
 # ATS1 is not needed: see Makefile_build and ../../libatsdoc/Makefile
 #

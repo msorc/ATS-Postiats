@@ -1,1 +1,1 @@
-CODEGEN/tuple.dats
+SRCGEN/tuple.dats

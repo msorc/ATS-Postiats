@@ -16,6 +16,16 @@ Time of Generation: #timestamp()\
 <chapter
  id="lecture06">
 #title("Functional List-Processing (2)")
+#para("\
+\
+#emphasis("Historical note:") this lecture describes the functional lists of
+the GC era of ATS2 (the type #stacode("list0")). The type #stacode("list0")
+was removed when the support for the garbage collector was dropped: the
+compiler now rejects every nonlinear heap allocation. Use #stacode("list_vt")
+(a linear list) instead; its interface is in
+#myatscodelink("prelude/SATS/list_vt.sats", "prelude/SATS/list_vt.sats").
+\
+")
 
 #para("\
 

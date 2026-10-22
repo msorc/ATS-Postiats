@@ -1,1 +1,1 @@
-CODEGEN/bool.dats
+SRCGEN/bool.dats

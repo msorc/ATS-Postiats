@@ -1,1 +1,1 @@
-CODEGEN/stream_vt.sats
+SRCGEN/stream_vt.sats

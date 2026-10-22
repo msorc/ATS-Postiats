@@ -1,1 +1,1 @@
-CODEGEN/integer_short.sats
+SRCGEN/integer_short.sats

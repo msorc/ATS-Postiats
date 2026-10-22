@@ -41,6 +41,14 @@ clean:: ; $(RMF) *_?ats.o *_?ats.c
 clean:: ; $(RMF) *_atxt.txt
 clean:: ; $(RMF) *_atxt.dats
 
+######
+#
+# The example of this directory is only typechecked by the regression suite.
+#
+######
+
+regress::
+
 cleanall:: clean
 
 ###### end of [Makefile] ######

@@ -230,8 +230,6 @@ test/t3.[12].[oe]
 test/__pycache__/
 
 # ccomp group C1: the generated encoding of the ccomp trees (also listed by the other ccomp groups), the generated scenarios and the build of the test (test/cc1/Makefile)
-pats_ccomp_gen.hats
-pats_ccomp_gen_dats.hats
 test/cc1/cc1_cases_[0-9][0-9].hats
 test/cc1/cc1_chunk_[0-9][0-9].dats
 test/cc1/cc1_chunk1_[0-9][0-9].dats
@@ -283,8 +281,6 @@ test/j2dump_asan
 test/j2asan.err
 test/c3data_noexn.txt
 test/c3asan_all.err
-pats_ccomp_gen.hats
-pats_ccomp_gen_dats.hats
 test/cc/cc_compat1.hats
 test/cc/cc_compat2.hats
 test/cc/cc_hand3_1.hats
@@ -314,8 +310,6 @@ test/ca/cacase1_[0-9][0-9].dats
 test/ca/ca_chunks.hats
 test/ca/ca_chunks1.hats
 test/ca/ca_exit.hats
-pats_ccomp_gen.hats
-pats_ccomp_gen_dats.hats
 pats_ccomp_claulst_gen.hats
 pats_ccomp_claulst_gen_dats.hats
 test/cc2/cc2_hd_*.hats

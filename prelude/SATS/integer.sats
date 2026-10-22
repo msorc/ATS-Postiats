@@ -1,1 +1,1 @@
-CODEGEN/integer.sats
+SRCGEN/integer.sats

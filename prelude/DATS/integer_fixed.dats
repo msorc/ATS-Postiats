@@ -1,1 +1,1 @@
-CODEGEN/integer_fixed.dats
+SRCGEN/integer_fixed.dats

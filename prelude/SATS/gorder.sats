@@ -1,1 +1,1 @@
-CODEGEN/gorder.sats
+SRCGEN/gorder.sats

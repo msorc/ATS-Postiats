@@ -1,1 +1,1 @@
-CODEGEN/parray.dats
+SRCGEN/parray.dats

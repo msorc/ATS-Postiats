@@ -1,6 +1,26 @@
 ######
 
-(unreleased: branch no-gc)
+0.4.3
+
+This is the 54th release of ATS2, the successor of the
+ATS programming language. The compiler for ATS2 is given
+the name ATS/Positats, ATS2/Postiats or simply Postiats.
+
+The official website for ATS is:
+
+http://www.ats-lang.org
+
+ATS-Postiats is hosted at github:
+
+https://github.com/githwxi/ATS-Postiats
+
+Major releases of ATS2 are available at:
+
+https://sourceforge.net/projects/ats2-lang/
+
+Major releases of external packages for ATS2 are available at:
+
+https://sourceforge.net/projects/ats2-lang-contrib/
 
 Here is a list of major additions and changes since the last release:
 
@@ -63,11 +83,16 @@ Here is a list of major additions and changes since the last release:
    are removed.  What is kept: the C backend (src/pats_ccomp*), its C++ mode
    (contrib/ats2cpp) and the Javascript backend (contrib/CATS-atscc2js and
    contrib/libatscc2js, with the shared contrib/CATS-parsemit and
-   contrib/libatscc).
+    contrib/libatscc).
+
+Please note that in this release, there are two variants of
+the package released: The "gmp" variant depends on the GMP library and
+the "int" variant does not depend on the GMP library.
 
 ######
 
 0.4.2
+
 
 ------------------------------------------------
 ATS-Postiats-0.4.2.tgz:

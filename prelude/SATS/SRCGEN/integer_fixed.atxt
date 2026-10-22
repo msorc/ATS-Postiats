@@ -1,0 +1,146 @@
+%{
+//
+#define
+ATSCODEFORMAT "txt"
+//
+#if
+(ATSCODEFORMAT == "txt")
+//
+#include
+"utils/atsdoc/HATS/postiatsatxt.hats"
+//
+#endif // end of [ATSCCODEFORMAT]
+//
+#include "prelude_SATS_atext.hats"
+//
+val
+_thisfilename = atext_strcst"integer_fixed.sats"
+val ((*void*)) =
+theAtextMap_insert_str("thisfilename", _thisfilename)
+//
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+
+#atscode_separator()
+
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("gmhwxiATgmailDOTcom")
+#atscode_start_time("January, 2013")
+
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/SATS/SRCGEN/integer_fixed.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+//
+// HX: for unindexed integer types
+//
+#atscode_separator()
+
+sortdef tk = tkind
+
+#atscode_separator()
+//
+stadef int8knd = int8_kind
+stadef int16knd = int16_kind
+stadef int32knd = int32_kind
+stadef int64knd = int64_kind
+//
+stadef uint8knd = uint8_kind
+stadef uint16knd = uint16_kind
+stadef uint32knd = uint32_kind
+stadef uint64knd = uint64_kind
+//
+#atscode_separator()
+//
+fun g0int2int_int8_int (x: int8):<> int = "mac\#%"
+fun g0int2int_int16_int (x: int16):<> int = "mac\#%"
+fun g0int2int_int32_int (x: int32):<> int = "mac\#%"
+fun g0int2int_int64_int (x: int64):<> int = "mac\#%"
+//
+#atscode_separator()
+//
+#g0int_type_aop_cmp_decl("int8", "int8")\
+//
+#g0int_type_aop_cmp_decl("int16", "int16")\
+//
+#g0int_type_aop_cmp_decl("int32", "int32")\
+//
+#g0int_type_aop_cmp_decl("int64", "int64")\
+//
+#atscode_separator()
+
+#fprint_print_prerr_decl("int8", "int8")
+#fprint_print_prerr_decl("int16", "int16")
+#fprint_print_prerr_decl("int32", "int32")
+#fprint_print_prerr_decl("int64", "int64")
+
+#atscode_separator()
+//
+fun g0int2uint_int8_uint (x: int8):<> uint = "mac\#%"
+fun g0int2uint_int16_uint (x: int16):<> uint = "mac\#%"
+fun g0int2uint_int32_uint (x: int32):<> uint = "mac\#%"
+fun g0int2uint_int64_uint (x: int64):<> uint = "mac\#%"
+//
+fun g0uint2int_uint8_int (x: uint8):<> int = "mac\#%"
+fun g0uint2int_uint16_int (x: uint16):<> int = "mac\#%"
+fun g0uint2int_uint32_int (x: uint32):<> int = "mac\#%"
+fun g0uint2int_uint64_int (x: uint64):<> int = "mac\#%"
+//
+fun g0uint2uint_uint8_uint (x: uint8):<> uint = "mac\#%"
+fun g0uint2uint_uint16_uint (x: uint16):<> uint = "mac\#%"
+fun g0uint2uint_uint32_uint (x: uint32):<> uint = "mac\#%"
+fun g0uint2uint_uint64_uint (x: uint64):<> uint = "mac\#%"
+//
+#atscode_separator()
+//
+#g0uint_type_aop_cmp_decl("uint8", "uint8")\
+//
+#g0uint_type_aop_cmp_decl("uint16", "uint16")\
+//
+#g0uint_type_aop_cmp_decl("uint32", "uint32")\
+//
+#g0uint_type_aop_cmp_decl("uint64", "uint64")\
+//
+#atscode_separator()
+
+#fprint_print_prerr_decl("uint8", "uint8")
+#fprint_print_prerr_decl("uint16", "uint16")
+#fprint_print_prerr_decl("uint32", "uint32")
+#fprint_print_prerr_decl("uint64", "uint64")
+
+#atscode_separator()
+//
+#g1int_type_aop_cmp_decl("int8", "int8")\
+//
+#g1int_type_aop_cmp_decl("int16", "int16")\
+//
+#g1int_type_aop_cmp_decl("int32", "int32")\
+//
+#g1int_type_aop_cmp_decl("int64", "int64")\
+//
+#atscode_separator()
+//
+#g1uint_type_aop_cmp_decl("uint8", "uint8")\
+//
+#g1uint_type_aop_cmp_decl("uint16", "uint16")\
+//
+#g1uint_type_aop_cmp_decl("uint32", "uint32")\
+//
+#g1uint_type_aop_cmp_decl("uint64", "uint64")\
+//
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) =
+  fprint_filsub (stdout_ref, "integer_fixed_atxt.txt")
+%}\

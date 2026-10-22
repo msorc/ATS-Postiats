@@ -3,11 +3,12 @@
 # Some key steps in releasing ATS
 #
 ######
-
-HX-2018-03-11:
-The following description is out-of-date.
-Please see ${PATSHOME}/doc/DISTRIB/README
-
+#
+# HX-2026-10-21:
+# The description was rewritten: it is no longer out-of-date.
+# ATS1 is not needed anymore (the compiler is written in ATS2).
+# Please see ${PATSHOME}/doc/DISTRIB/README
+#
 ###### beg of [how-to-release.txt] ######
 
 #
@@ -25,25 +26,21 @@ git push --tags
 # step 1:
 #
 
-Check configure.ac to make sure that the version number is
-correct, which affects the name of the directory where the
-ATS package is installed.
+Update ${PATSHOME}/VERSION, the version of
+${PATSHOME}/doc/DISTRIB/ATS-Postiats/configure.ac, the version macros of
+${PATSHOME}/src/pats_basics.sats and the changelog ${PATSHOME}/CHANGES-ats2.
 
-The following commands should be executed to update various
-configuration files
+Check that all of them agree:
 
-cd ${PATSHOME}
-autoheader configure.ac
-aclocal
-autoconf
-./configure
+sh ${PATSHOME}/share/SCRIPT/check_release_version.sh
 
 #
 # step 2:
 #
 
 cd ${PATSHOME}
-make -f Makefile_devl
+make -f Makefile_devl PATSOPT=<stage-0 patsopt> all
+make -f Makefile_devl bin_atsdoc
 (cd src && make CBOOT)
 
 #
@@ -58,7 +55,8 @@ cd doc/DISTRIB
 # Then do 'make -f Makefile.gen'
 #
 make atspackaging
-make atspacktarzvcf # for ATS2-Postiats-xxx.tgz
+make atspacktarzvcf_gmp # for ATS2-Postiats-gmp-xxx.tgz
+make atspacktarzvcf_int # for ATS2-Postiats-int-xxx.tgz
 #
 make atscontribing
 make atscontribtarzvcf # for ATS2-Postiats-contrib-xxx.tgz
@@ -68,5 +66,13 @@ make atscontribtarzvcf # for ATS2-Postiats-contrib-xxx.tgz
 #
 make -f Makefile_inclats
 make -f Makefile_inclats tarzvcf # ATS2-Postiats-include-xxx.tgz
+#
+# step 4:
+#
+
+Generate the release notes from the changelog:
+
+sh ${PATSHOME}/share/SCRIPT/make_release_notes.sh <version>
+
 #
 ###### end of [how-to-release.txt] ######

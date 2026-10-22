@@ -16,6 +16,18 @@ Time of Generation: #timestamp()\
 id="stream-based-lazy-evaluation"
 xreflabel="stream-based lazy evaluation"
 >#title("Stream-Based Lazy Evaluation")
+#para("\
+\
+#emphasis("Historical note:") this chapter describes the lazy streams of the
+GC era of ATS2. The type #stacode("stream") was removed when the support
+for the garbage collector was dropped: the compiler now rejects every
+nonlinear heap allocation. Use #stacode("stream_vt") (a linear stream) or
+#stacode("$ldelay") instead; their interfaces are in
+#myatscodelink("prelude/SATS/stream_vt.sats", "prelude/SATS/stream_vt.sats").
+The chapter "Lazy Streams" of this book (CHAP_STREAM_VT) documents the
+current interface.
+\
+")
 
 #para('\
 

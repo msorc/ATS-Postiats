@@ -41,6 +41,14 @@ clean:: ; $(RMF) *_dats.c
 
 ######
 
+######
+#
+# The tool of this directory is only built by the regression suite.
+#
+######
+
+regress::
+
 cleanall:: clean
 cleanall:: ; $(RMF) bin/mytexting
 

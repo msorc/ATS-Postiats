@@ -1,1 +1,1 @@
-CODEGEN/grandom.dats
+SRCGEN/grandom.dats

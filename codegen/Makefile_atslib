@@ -18,44 +18,44 @@ all:: prelude
 prelude:: \
 prelude_sats
 prelude_sats:: ; \
-  make -C $(ROOT)/prelude/SATS/CODEGEN -f Makefile.gen
+  make -C $(ROOT)/prelude/SATS/SRCGEN -f Makefile.gen
 prelude_sats:: ; \
-  make -C $(ROOT)/prelude/SATS/CODEGEN -f Makefile all
+  make -C $(ROOT)/prelude/SATS/SRCGEN -f Makefile all
 #
 prelude:: \
 prelude_dats
 prelude_dats:: ; \
-  make -C $(ROOT)/prelude/DATS/CODEGEN -f Makefile.gen
+  make -C $(ROOT)/prelude/DATS/SRCGEN -f Makefile.gen
 prelude_dats:: ; \
-  make -C $(ROOT)/prelude/DATS/CODEGEN -f Makefile all
+  make -C $(ROOT)/prelude/DATS/SRCGEN -f Makefile all
 prelude_dats:: ; \
-  make -C $(ROOT)/prelude/DATS/SHARE/CODEGEN -f Makefile.gen
+  make -C $(ROOT)/prelude/DATS/SHARE/SRCGEN -f Makefile.gen
 prelude_dats:: ; \
-  make -C $(ROOT)/prelude/DATS/SHARE/CODEGEN -f Makefile all
+  make -C $(ROOT)/prelude/DATS/SHARE/SRCGEN -f Makefile all
 #
 prelude:: \
 prelude_cats
 prelude_cats:: ; \
-  make -C $(ROOT)/prelude/CATS/CODEGEN -f Makefile.gen
+  make -C $(ROOT)/prelude/CATS/SRCGEN -f Makefile.gen
 prelude_cats:: ; \
-  make -C $(ROOT)/prelude/CATS/CODEGEN -f Makefile all
+  make -C $(ROOT)/prelude/CATS/SRCGEN -f Makefile all
 #
 ######
 
 clean:: ; \
-make -C $(ROOT)/prelude/SATS/CODEGEN -f Makefile clean
+make -C $(ROOT)/prelude/SATS/SRCGEN -f Makefile clean
 clean:: ; \
-make -C $(ROOT)/prelude/DATS/CODEGEN -f Makefile clean
+make -C $(ROOT)/prelude/DATS/SRCGEN -f Makefile clean
 clean:: ; \
-make -C $(ROOT)/prelude/CATS/CODEGEN -f Makefile clean
+make -C $(ROOT)/prelude/CATS/SRCGEN -f Makefile clean
 
 ######
 
 cleanall:: ; \
-make -C $(ROOT)/prelude/SATS/CODEGEN -f Makefile cleanall
+make -C $(ROOT)/prelude/SATS/SRCGEN -f Makefile cleanall
 cleanall:: ; \
-make -C $(ROOT)/prelude/DATS/CODEGEN -f Makefile cleanall
+make -C $(ROOT)/prelude/DATS/SRCGEN -f Makefile cleanall
 cleanall:: ; \
-make -C $(ROOT)/prelude/CATS/CODEGEN -f Makefile cleanall
+make -C $(ROOT)/prelude/CATS/SRCGEN -f Makefile cleanall
 
 ###### end of [Makefile_atslib] ######

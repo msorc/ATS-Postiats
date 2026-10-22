@@ -1,1 +1,1 @@
-CODEGEN/reference.dats
+SRCGEN/reference.dats

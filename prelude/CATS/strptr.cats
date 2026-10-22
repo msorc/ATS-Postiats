@@ -1,1 +1,1 @@
-CODEGEN/strptr.cats
+SRCGEN/strptr.cats

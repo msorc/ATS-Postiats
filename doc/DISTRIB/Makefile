@@ -493,6 +493,7 @@ atspackaging:: ; (cd ATS-Postiats && ./autogen.sh)
 srcget_home:: ; $(CPF) ../../AUTHORS $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../COPYING $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../INSTALL $(ATSDIST)/
+srcget_home:: ; $(CPF) ../../README.md $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../VERSION $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../CHANGES-ats2 $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../CHANGES-contrib $(ATSDIST)/
@@ -669,7 +670,6 @@ PACKNAMEgmp=ATS2-Postiats-gmp-$(PATSVER)
 #
 atspacktarzvcf_gmp:: ; $(RMRF) $(PACKNAMEgmp)
 atspacktarzvcf_gmp:: ; $(CPRF) ATS-Postiats $(PACKNAMEgmp)
-atspacktarzvcf_gmp:: ; $(RMF) $(PACKNAMEgmp)/Makefile_conf
 atspacktarzvcf_gmp:: ; $(RMF) $(PACKNAMEgmp)/missing ; $(CPF) ATS-Postiats/missing $(PACKNAMEgmp)/
 atspacktarzvcf_gmp:: ; $(RMF) $(PACKNAMEgmp)/install-sh ; $(CPF) ATS-Postiats/install-sh $(PACKNAMEgmp)/
 atspacktarzvcf_gmp:: ; $(MAKE) -C $(PACKNAMEgmp) cleanall
@@ -683,7 +683,6 @@ PACKNAMEint=ATS2-Postiats-int-$(PATSVER)
 #
 atspacktarzvcf_int:: ; $(RMRF) $(PACKNAMEint)
 atspacktarzvcf_int:: ; $(CPRF) ATS-Postiats $(PACKNAMEint)
-atspacktarzvcf_int:: ; $(RMF) $(PACKNAMEint)/Makefile_conf
 atspacktarzvcf_int:: ; $(RMF) $(PACKNAMEint)/missing ; $(CPF) ATS-Postiats/missing $(PACKNAMEint)/
 atspacktarzvcf_int:: ; $(RMF) $(PACKNAMEint)/install-sh ; $(CPF) ATS-Postiats/install-sh $(PACKNAMEint)/
 atspacktarzvcf_int:: ; $(MAKE) -C $(PACKNAMEint) cleanall

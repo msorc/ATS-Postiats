@@ -1,1 +1,1 @@
-CODEGEN/integer_long.sats
+SRCGEN/integer_long.sats

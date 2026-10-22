@@ -1,1 +1,1 @@
-CODEGEN/float.sats
+SRCGEN/float.sats

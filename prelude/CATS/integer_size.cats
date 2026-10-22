@@ -1,1 +1,1 @@
-CODEGEN/integer_size.cats
+SRCGEN/integer_size.cats

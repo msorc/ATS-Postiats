@@ -1,1 +1,1 @@
-CODEGEN/integer_size.sats
+SRCGEN/integer_size.sats

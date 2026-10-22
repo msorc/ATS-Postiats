@@ -1,1 +1,1 @@
-CODEGEN/pointer.sats
+SRCGEN/pointer.sats

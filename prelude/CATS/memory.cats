@@ -1,1 +1,1 @@
-CODEGEN/memory.cats
+SRCGEN/memory.cats

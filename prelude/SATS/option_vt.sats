@@ -1,1 +1,1 @@
-CODEGEN/option_vt.sats
+SRCGEN/option_vt.sats

@@ -1,1 +1,1 @@
-CODEGEN/char.dats
+SRCGEN/char.dats

@@ -9,12 +9,10 @@ all::
 ######
 
 SUBDIRS :=
-SUBDIRS += atscntrb-libcairo
-SUBDIRS += atscntrb-libev
-SUBDIRS += atscntrb-libevent
-SUBDIRS += atscntrb-libhiredis
-SUBDIRS += atscntrb-libjansson
-SUBDIRS += atscntrb-libsdl2
+SUBDIRS += atscntrb/atscntrb-hx-libcairo
+SUBDIRS += atscntrb/atscntrb-hx-libev
+SUBDIRS += atscntrb/atscntrb-hx-libevent
+SUBDIRS += atscntrb/atscntrb-hx-libsdl2
 
 ######
 

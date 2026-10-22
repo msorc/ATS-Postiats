@@ -1,1 +1,1 @@
-CODEGEN/reference.sats
+SRCGEN/reference.sats

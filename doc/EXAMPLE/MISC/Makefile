@@ -35,6 +35,15 @@ RMF=rm -f
 
 ######
 #
+# The examples of this directory are only compiled by the regression
+# suite: some of them read from the standard input.
+#
+######
+
+regress::
+
+######
+#
 all:: coinflip
 coinflip: coinflip.exe
 coinflip.exe: coinflip_dats.c ;   $(CCOPT) -D_GNU_SOURCE -O2 -I$(PATSHOMEQ) -I$(PATSHOMEQ)/ccomp/runtime -o $@ $<

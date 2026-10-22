@@ -1,1 +1,1 @@
-CODEGEN/gorder_bool.dats
+SRCGEN/gorder_bool.dats

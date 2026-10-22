@@ -87,6 +87,14 @@ cleanats:: ; $(RMF) main_atxt_dats.c
 #
 ######
 
+######
+#
+# The examples of this directory are only compiled by the regression suite.
+#
+######
+
+regress::
+
 cleanall:: ; $(RMF) main.html
 
 ######

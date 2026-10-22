@@ -29,7 +29,7 @@
 
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/bool.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/bool.atxt
 ** Time of generation: Fri Feb 28 17:55:34 2014
 */
 

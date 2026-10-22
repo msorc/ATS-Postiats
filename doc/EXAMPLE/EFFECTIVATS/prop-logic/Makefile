@@ -62,6 +62,14 @@ clean:: ; $(RMF) main_atxt.dats
 
 ######
 #
+######
+#
+# The document of this directory is only built by the regression suite.
+#
+######
+
+regress::
+
 cleanall:: clean
 #
 cleanall:: ; $(RMF) main.exe

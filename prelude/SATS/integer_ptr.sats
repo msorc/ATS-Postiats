@@ -1,1 +1,1 @@
-CODEGEN/integer_ptr.sats
+SRCGEN/integer_ptr.sats

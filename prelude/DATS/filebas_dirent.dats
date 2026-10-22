@@ -1,1 +1,1 @@
-CODEGEN/filebas_dirent.dats
+SRCGEN/filebas_dirent.dats

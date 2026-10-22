@@ -1,21 +1,30 @@
 ######
 #
 # HX-2018-03-11:
-# ATS-Anairiats(ATS1) is needed
-# for building ATS-Postiats(ATS2)!
+# The release process of ATS-Postiats(ATS2).
+#
+# HX-2026-10-21:
+# ATS1 is NOT needed anymore: the compiler (src/) is written in ATS2 and
+# compiles itself (see src/README and src/PORTING.md).
 #
 ######
 #
 # The script for building a release:
 # ${PATSHOME}/share/SCRIPT/build_release.sh
-# 
+#
 ######
 #
 # First,
 # update $PATSHOME/VERSION
 # which affects the following:
-# $PATSHOME/doc/DISTRIB/Makefile.atxt
 # $PATSHOME/doc/DISTRIB/ATS-Postiats/configure.ac
+# $PATSHOME/src/pats_basics.sats (PATS_{MAJOR,MINOR,MICRO}_VERSION)
+# $PATSHOME/CHANGES-ats2 (a section that bears the version)
+#
+# The script share/SCRIPT/check_release_version.sh checks that all of
+# them declare the same version:
+#
+# sh ${PATSHOME}/share/SCRIPT/check_release_version.sh
 #
 #
 # If using Nix, run `nix-shell nix/shell.nix` from $PATSHOME.
@@ -54,16 +63,31 @@
 # rm -rf /tmp/ATS-Postiats
 # rm -rf /tmp/ATS-Postiats-contrib
 #
+# The packages can also be built by hand:
+#
+# cd ${PATSHOME}
+# make -f Makefile_devl bin_atsdoc  # atsdoc generates the packaging scripts
+# make -C src CBOOT                  # the bootstrap C bundle
+# cd doc/DISTRIB
+# make -f Makefile.gen
+# make atspackaging                 # fills in ATS-Postiats/
+# make atspacktarzvcf_gmp           # ATS2-Postiats-gmp-x.y.z.tgz
+# make atspacktarzvcf_int           # ATS2-Postiats-int-x.y.z.tgz
+# make -f Makefile_inclats tarzvcf  # ATS2-Postiats-include-x.y.z.tgz
+#
 #######
 #
 # Releasing ATS
 #
-# Creating a release file like the following one:
-# ${PATSHOME}/doc/DISTRIB/ATS-Postiats/RELEASE/ats2-postiats-0.3.9-release.html
+# The release notes of a version are generated from the changelog:
+#
+# sh ${PATSHOME}/share/SCRIPT/make_release_notes.sh x.y.z
+#
+# which writes
+# ${PATSHOME}/doc/DISTRIB/ATS-Postiats/RELEASE/ats2-postiats-x.y.z-release.html
 #
 # Uploading the following files to sourceforge and generate the md5sum and sha1sum
-# of ATS2-Postiats-x.y.z.tgz, and add these to ${PATSHOME}/CHANGE-ats2
-# and to ${PATSHOME}/doc/DISTRIB/ATS-Postiats/RELEASE/ats2-postiats-x.y.z-release.html
+# of ATS2-Postiats-x.y.z.tgz, and add these to ${PATSHOME}/CHANGES-ats2
 #
 # ATS2-Postiats-x.y.z.tgz
 # ATS2-Postiats-gmp-x.y.z.tgz
@@ -73,12 +97,12 @@
 # ats2-postiats-x.y.z-release.html
 #
 # The changes for the above release.html file can be found in
-# ${PATSHOME}/CHANGE-ats2.
+# ${PATSHOME}/CHANGES-ats2.
 #
 # Updating ats-lang.org/Documents
 # Updating ats-lang.org/Community
 # Announcing to ats-lang-users@lists.sourceforge.net
 #
 #######
-   
+
 ###### end of [README] ######

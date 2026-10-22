@@ -1,1 +1,1 @@
-CODEGEN/basics.dats
+SRCGEN/basics.dats

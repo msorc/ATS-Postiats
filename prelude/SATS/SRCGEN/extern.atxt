@@ -1,0 +1,172 @@
+%{
+#define
+ATSCODEFORMAT "txt"
+//
+#if
+(ATSCODEFORMAT == "txt")
+//
+#include
+"utils/atsdoc/HATS/postiatsatxt.hats"
+//
+#endif // end of [ATSCCODEFORMAT]
+//
+val
+_thisfilename = atext_strcst"extern.sats"
+val ((*void*)) =
+theAtextMap_insert_str("thisfilename", _thisfilename)
+//
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/SATS/SRCGEN/extern.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("hwxi AT cs DOT bu DOT edu")
+#atscode_start_time("March, 2012")
+
+#atscode_separator()
+
+#atscode_decl_strcst('\
+sortdef vt0p = viewt@ype
+')\
+
+#atscode_separator()
+
+abstype
+carrayptr (a:t@ype, l:addr, n:int) = ptr(l)
+typedef
+carrayptr0 (a:t@ype, n:int) = [l:addr] carrayptr (a, l, n)
+typedef
+carrayptr1 (a:t@ype, n:int) = [l:addr | l > null] carrayptr (a, l, n)
+
+#atscode_separator()
+//
+// HX-2014-01-30: these are inherently unsafe:
+//
+castfn
+carrayptr_null
+  {a:t@ype}{n:nat} (p: ptr(null)):<> carrayptr (a, null, n)
+castfn
+carrayptr_array
+  {a:t@ype}{n:int} (A: &array(INV(a), n)):<> carrayptr1 (a, n)
+castfn
+carrayptr_arrayptr
+  {a:t@ype}{l:addr}{n:int}
+  (A: !arrayptr(INV(a), l, n)):<> [l > null] carrayptr (a, l, n)
+//
+#atscode_separator()
+
+symintr carrayptr
+overload carrayptr with carrayptr_null
+overload carrayptr with carrayptr_array
+overload carrayptr with carrayptr_arrayptr
+
+#atscode_separator()
+//
+// HX: note that (vt1 \minus v2) roughly means that a ticket of
+// [v2] is taken from [vt1]; the ticket must be returned before
+// [vt1] is consumed. However, the ticket should not be issued
+// repeatedly for otherwise safety may be potentially compromised.
+//
+absview
+minus_vt0ype_view_view
+  (vt1:vt@ype+, v2:view-) = vt1
+absvt@ype
+minus_vt0ype_view_vt0ype
+  (vt1:vt@ype+, v2:view-) = vt1
+//
+viewdef
+minus_v
+(vt1:vt0p, v2:view) =
+minus_vt0ype_view_view(vt1, v2)
+viewdef
+minus_vt
+(vt1:vt0p, v2:view) =
+minus_vt0ype_view_vt0ype(vt1, v2)
+//
+praxi
+minus_v_addback
+  {vt1:vt0p}{v2:view}
+  (minus_v(INV(vt1), v2), v2 | !vt1): void
+//
+castfn
+minus_vt_addback
+  {vt1:vt0p}{v2:view}
+  (pf: v2 | x0: minus_vt(INV(vt1), v2)): (vt1)
+//
+symintr minus_addback
+overload minus_addback with minus_v_addback
+overload minus_addback with minus_vt_addback
+//
+#atscode_separator()
+//
+typedef
+vtget0_ftype
+  (vt1:vt0p, vt2:vt0p) =
+  (!vt1 >> minus_vt(vt1,vt2)) -<fun> vt2
+//
+typedef
+vtget1_ftype
+  (vt1:vt0p, vt2:vt0p) =
+  (!vt1) -<fun> (minus_v(vt1, vt2) | vt2)
+//
+vtypedef vtget1
+  (vt1:vt0p, vt2:vt0p) = (minus_v(vt1, vt2) | vt2)
+//
+#atscode_separator()
+//
+// HX-2016-08:
+// It is implemented in [pointer.dats]
+//
+fun
+{a:vt0p}
+aptr_vtget0_elt
+  {l:agz}
+: vtget0_ftype(aptr(INV(a), l), a)
+//
+fun
+{a:vt0p}
+aptr_vtget1_elt
+  {l:agz}
+: vtget1_ftype(aptr(INV(a), l), a)
+//
+overload vtget0 with aptr_vtget0_elt
+overload vtget1 with aptr_vtget1_elt
+//
+#atscode_separator()
+
+castfn
+argv_takeout_strarr
+  {n:int} (
+  argv: !argv (n)
+) :<> [l:addr] (
+  array_v(string, l, n), minus_v(argv(n), array_v(string, l, n)) | ptr(l)
+) // end of [argv_takeout_strarr]
+
+castfn
+argv_takeout_parray
+  {n:int} (
+  argv: !argv (n)
+) :<> [l:addr] (
+  parray_v(string, l, n), minus_v(argv(n), parray_v(string, l, n)) | ptr(l)
+) // end of [argv_takeout_parray]
+
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) =
+  fprint_filsub (stdout_ref, "extern_atxt.txt")
+%}\

@@ -1,1 +1,1 @@
-CODEGEN/string.dats
+SRCGEN/string.dats

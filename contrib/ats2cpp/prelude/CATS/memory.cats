@@ -29,7 +29,7 @@
 
 /*
 ** Source:
-** $PATSHOME/prelude/CATS/CODEGEN/memory.atxt
+** $PATSHOME/prelude/CATS/SRCGEN/memory.atxt
 ** Time of generation: Sat Jun 27 21:39:49 2015
 */
 

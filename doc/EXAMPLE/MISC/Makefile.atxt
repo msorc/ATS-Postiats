@@ -100,6 +100,15 @@ RMF=rm -f
 
 ######
 #
+# The examples of this directory are only compiled by the regression
+# suite: some of them read from the standard input.
+#
+######
+
+regress::
+
+######
+#
 #make_entry("coinflip")
 #make_entry("ferryman")
 #make_entry("fibver_loop")

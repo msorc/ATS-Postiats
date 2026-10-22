@@ -1,1 +1,1 @@
-CODEGEN/array_prf.sats
+SRCGEN/array_prf.sats

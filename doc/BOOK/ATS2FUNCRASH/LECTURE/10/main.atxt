@@ -16,6 +16,17 @@ Time of Generation: #timestamp()\
 <chapter
  id="lecture10">
 #title("Lazy Stream-Processing")
+#para("\
+\
+#emphasis("Historical note:") this lecture describes the lazy streams of the
+GC era of ATS2 (the type #stacode("stream")). The type #stacode("stream")
+was removed when the support for the garbage collector was dropped: the
+compiler now rejects every nonlinear heap allocation. Use
+#stacode("stream_vt") (a linear stream) or #stacode("$ldelay") instead;
+their interfaces are in
+#myatscodelink("prelude/SATS/stream_vt.sats", "prelude/SATS/stream_vt.sats").
+\
+")
 
 #para("\
 

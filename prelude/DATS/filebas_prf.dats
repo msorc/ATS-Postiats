@@ -1,1 +1,1 @@
-CODEGEN/filebas_prf.dats
+SRCGEN/filebas_prf.dats

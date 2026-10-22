@@ -1,1 +1,1 @@
-CODEGEN/grandom.sats
+SRCGEN/grandom.sats

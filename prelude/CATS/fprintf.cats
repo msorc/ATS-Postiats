@@ -1,1 +1,1 @@
-CODEGEN/fprintf.cats
+SRCGEN/fprintf.cats

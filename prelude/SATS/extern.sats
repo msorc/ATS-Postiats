@@ -1,1 +1,1 @@
-CODEGEN/extern.sats
+SRCGEN/extern.sats

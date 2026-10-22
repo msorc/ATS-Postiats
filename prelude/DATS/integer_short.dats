@@ -1,1 +1,1 @@
-CODEGEN/integer_short.dats
+SRCGEN/integer_short.dats

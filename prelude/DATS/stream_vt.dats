@@ -1,1 +1,1 @@
-CODEGEN/stream_vt.dats
+SRCGEN/stream_vt.dats

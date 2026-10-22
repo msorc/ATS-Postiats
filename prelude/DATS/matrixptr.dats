@@ -1,1 +1,1 @@
-CODEGEN/matrixptr.dats
+SRCGEN/matrixptr.dats

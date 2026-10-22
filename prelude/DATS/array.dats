@@ -1,1 +1,1 @@
-CODEGEN/array.dats
+SRCGEN/array.dats

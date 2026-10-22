@@ -1,0 +1,129 @@
+#
+# The continuous integration of ATS2 (ATS/Postiats).
+#
+# The compiler is written in ATS2 and compiles itself: the stage-0
+# compiler of the build is the current release of ATS2 (0.4.2), which is
+# downloaded here.
+#
+name: CI
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  LC_ALL: C
+  ATS2_VERSION: 0.4.2
+  ATS2_HOME: /usr/local/ats2-postiats-0.4.2
+
+jobs:
+  build:
+    name: the build of the compiler
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: the pre-requisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 libgmp-dev autoconf automake
+
+      - name: the stage-0 compiler (the current release of ATS2)
+        run: |
+          curl -L -o ats2.tgz "https://sourceforge.net/projects/ats2-lang/files/ATS2-Postiats-${ATS2_VERSION}.tgz/download"
+          mkdir -p "${ATS2_HOME}"
+          tar -xzf ats2.tgz -C "${ATS2_HOME}" --strip-components=1
+          echo "${ATS2_HOME}/bin" >> "${GITHUB_PATH}"
+          echo "PATSHOME=${ATS2_HOME}" >> "${GITHUB_ENV}"
+
+      - name: the build
+        run: |
+          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
+
+      - name: the type checking of the compiler
+        run: |
+          make PATSOPT="${PATSHOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" check
+
+  test:
+    name: the regression suites
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: the pre-requisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 libgmp-dev autoconf automake
+
+      - name: the stage-0 compiler (the current release of ATS2)
+        run: |
+          curl -L -o ats2.tgz "https://sourceforge.net/projects/ats2-lang/files/ATS2-Postiats-${ATS2_VERSION}.tgz/download"
+          mkdir -p "${ATS2_HOME}"
+          tar -xzf ats2.tgz -C "${ATS2_HOME}" --strip-components=1
+          echo "PATSHOME=${ATS2_HOME}" >> "${GITHUB_ENV}"
+
+      - name: the build
+        run: |
+          export PATSHOME="${PWD}"
+          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
+          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
+          make -C utils/libatsynmark install
+
+      - name: the suites of the compiler
+        run: |
+          export PATSHOME="${PWD}"
+          make -C src test
+
+      - name: the suites of the tools
+        run: |
+          export PATSHOME="${PWD}"
+          make -C utils/atsdoc test
+          make -C utils/libatsynmark test
+
+      - name: the suite of the examples and of the book code
+        run: |
+          export PATSHOME="${PWD}"
+          make -C doc -f Makefile_test testall
+
+  documents:
+    name: the documents and the release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: the pre-requisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 libgmp-dev autoconf automake
+
+      - name: the stage-0 compiler (the current release of ATS2)
+        run: |
+          curl -L -o ats2.tgz "https://sourceforge.net/projects/ats2-lang/files/ATS2-Postiats-${ATS2_VERSION}.tgz/download"
+          mkdir -p "${ATS2_HOME}"
+          tar -xzf ats2.tgz -C "${ATS2_HOME}" --strip-components=1
+          echo "PATSHOME=${ATS2_HOME}" >> "${GITHUB_ENV}"
+
+      - name: the build
+        run: |
+          export PATSHOME="${PWD}"
+          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
+          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
+          make -C utils/libatsynmark install
+
+      - name: the version of the release is declared consistently
+        run: sh share/SCRIPT/check_release_version.sh
+
+      - name: the packaging scripts are up-to-date
+        run: |
+          export PATSHOME="${PWD}"
+          cd doc/DISTRIB
+          make -f Makefile.gen
+          cd ../..
+          git diff --exit-code -- doc/DISTRIB/Makefile
+
+      - name: the text of the documents is up-to-date
+        run: |
+          export PATSHOME="${PWD}"
+          sh utils/atsdoc/TEST/genall.sh all

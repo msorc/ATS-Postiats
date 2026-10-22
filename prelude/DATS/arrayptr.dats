@@ -1,1 +1,1 @@
-CODEGEN/arrayptr.dats
+SRCGEN/arrayptr.dats

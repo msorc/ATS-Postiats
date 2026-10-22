@@ -1,1 +1,1 @@
-CODEGEN/gorder_float.dats
+SRCGEN/gorder_float.dats

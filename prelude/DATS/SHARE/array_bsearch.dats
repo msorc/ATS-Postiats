@@ -1,1 +1,1 @@
-CODEGEN/array_bsearch.dats
+SRCGEN/array_bsearch.dats

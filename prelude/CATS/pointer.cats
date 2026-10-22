@@ -1,1 +1,1 @@
-CODEGEN/pointer.cats
+SRCGEN/pointer.cats

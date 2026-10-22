@@ -1,0 +1,127 @@
+%{
+//
+#define ATSCODEFORMAT "txt"
+#if (ATSCODEFORMAT == "txt")
+#include "utils/atsdoc/HATS/postiatsatxt.hats"
+#endif // end of [ATSCCODEFORMAT]
+val _thisfilename = atext_strcst"gnumber.sats"
+val () = theAtextMap_insert_str ("thisfilename", _thisfilename)
+//
+#include "prelude_SATS_atext.hats"
+//
+%}\
+\
+#atscode_banner()
+#atscode_copyright_GPL()
+
+#atscode_separator()
+
+(*
+** Source:
+** $PATSHOME/prelude/SATS/SRCGEN/gnumber.atxt
+** Time of generation: #timestamp()
+*)
+
+#atscode_separator()
+
+#atscode_author("Hongwei Xi")
+#atscode_authoremail("hwxi AT cs DOT bu DOT edu")
+#atscode_start_time("September, 2011")
+
+#atscode_separator()
+
+#atscode_author("Brandon Barker")
+#atscode_authoremail("brandon.barker AT gmail DOT com")
+#atscode_start_time("July, 2013")
+
+#atscode_separator()
+//
+// HX: for unindexed gnumber types
+//
+#atscode_separator()
+
+sortdef tk = tkind
+
+#atscode_separator()
+
+typedef SHR(a:type) = a // for commenting purpose
+typedef NSH(a:type) = a // for commenting purpose
+
+#atscode_separator()
+
+abstype
+fprecision_prop (a1:t0p, a2:t0p)
+propdef
+fprecision (a1:t0p, a2:t0p) = fprecision_prop (a1, a2)
+praxi
+fprecision_float (): fprecision (float, float)
+praxi
+fprecision_double (): fprecision (double, double)
+praxi
+fprecision_ldouble (): fprecision (ldouble, ldouble)
+
+#atscode_separator()
+//
+// HX: generic number operations
+//
+#atscode_separator()
+//
+%{
+(*
+#define gint gnumber_int
+#define gdouble gnumber_double
+*)
+%}
+//
+fun{a:t0p} gnumber_int (x: int):<> a
+fun{a:t0p} gnumber_double (x: double):<> a
+//
+#atscode_separator()
+
+fun{a:t0p} gabs_val (x: a):<> a
+fun{a:t0p} gneg_val (x: a):<> a
+fun{a:t0p} gsucc_val (x: a):<> a
+fun{a:t0p} gpred_val (x: a):<> a
+fun{a:t0p} grecip_val (x: a):<!exn> a
+
+#atscode_separator()
+
+fun{a:t0p} gadd_val_val (x: a, y: a):<> a
+fun{a:t0p} gsub_val_val (x: a, y: a):<> a
+fun{a:t0p} gmul_val_val (x: a, y: a):<> a
+fun{a:t0p} gdiv_val_val (x: a, y: a):<!exn> a
+fun{a:t0p} gmod_val_val (x: a, y: a):<!exn> a
+
+#atscode_separator()
+//
+fun{a:t0p} gadd_val_int (x: a, y: int):<> a
+fun{a:t0p} gsub_val_int (x: a, y: int):<> a
+//
+fun{a:t0p} gmul_int_val (x: int, y: a):<> a
+fun{a:t0p} gmul_val_int (x: a, y: int):<> a
+//
+fun{a:t0p} gdiv_int_val (x: int, y: a):<!exn> a
+fun{a:t0p} gdiv_val_int (x: a, y: int):<!exn> a
+fun{a:t0p} gmod_val_int (x: a, y: int):<!exn> a
+//
+#atscode_separator()
+
+fun{a:t0p} gsqrt_val (x: a):<!exn> a
+
+#atscode_separator()
+
+fun{a:t0p} gconjugate_val (x: a):<> a
+
+#atscode_separator()
+
+fun{a:t0p} gpow_int_val (n: intGte(0), x: a):<> a
+
+#atscode_separator()
+
+#atscode_eof_strsub("\#thisfilename$")\
+
+%{
+implement
+main0 (argc, argv) =
+  fprint_filsub (stdout_ref, "gnumber_atxt.txt")
+%}\

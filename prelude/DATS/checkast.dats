@@ -1,1 +1,1 @@
-CODEGEN/checkast.dats
+SRCGEN/checkast.dats

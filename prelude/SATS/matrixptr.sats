@@ -1,1 +1,1 @@
-CODEGEN/matrixptr.sats
+SRCGEN/matrixptr.sats

@@ -42,8 +42,6 @@ $(CPF) $(SRC)/prelude/CATS/*.cats $(DST)/prelude/CATS/.
 ######
 update:: ; \
 $(CPF) $(SRC)/libats/CATS/*.cats $(DST)/libats/CATS/.
-update:: ; \
-$(CPF) $(SRC)/libats/ML/CATS/*.cats $(DST)/libats/ML/CATS/.
 ######
 update:: ; \
 $(CPF) $(SRC)/libats/libc/CATS/*.cats $(DST)/libats/libc/CATS/.
@@ -55,6 +53,24 @@ update:: ; \
 $(CPF) $(SRC)/libats/libc/CATS/netinet/*.cats $(DST)/libats/libc/CATS/netinet/.
 update:: ; \
 $(CPF) $(SRC)/libats/libc/CATS/gdbm/*.cats $(DST)/libats/libc/CATS/gdbm/.
+#
+######
+#
+# The C code of patscc and myatscc is the output of patsopt: it is
+# generated when the package is built (it is not kept in git).
+#
+######
+#
+PATSOPT=$(PATSHOME)/bin/patsopt
+#
+DATS_C_ATSCC=$(DST)/utils/atscc/DATS_C
+DATS_C_MYATSCC=$(DST)/utils/myatscc/DATS_C
+#
+DATS_C::
+	$(PATSOPT) --output $(DATS_C_ATSCC)/patscc_dats.c --dynamic $(PATSHOME)/utils/atscc/DATS/patscc.dats
+	$(PATSOPT) --output $(DATS_C_ATSCC)/atscc_main_dats.c --dynamic $(PATSHOME)/utils/atscc/DATS/atscc_main.dats
+	$(PATSOPT) --output $(DATS_C_ATSCC)/atscc_print_dats.c --dynamic $(PATSHOME)/utils/atscc/DATS/atscc_print.dats
+	$(PATSOPT) --output $(DATS_C_MYATSCC)/myatscc_all_dats.c --dynamic $(PATSHOME)/utils/myatscc/DATS/myatscc_main.dats
 #
 ######
 #
@@ -141,6 +157,7 @@ ATS2-Postiats-include-$(PATSVER)
 
 tarzvcf:: update
 tarzvcf:: update2
+tarzvcf:: DATS_C
 tarzvcf:: ; rm -rf $(PACKNAME)
 tarzvcf:: ; cp -rf $(DST) $(PACKNAME)
 tarzvcf:: ; $(TARZVCF) $(PACKNAME).tgz $(PACKNAME)

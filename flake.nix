@@ -7,16 +7,21 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system}; in
+      let pkgs = nixpkgs.legacyPackages.${system};
+          # the stage-0 compiler of the build (an installed ATS2); ATS1 is not needed
+          ats2 = pkgs.ats2 or null;
+          version = builtins.head (builtins.match "([^\n]*)\n?" (
+            builtins.readFile ./VERSION
+          ));
+      in
       {
         packages = rec {
-          ats2 = pkgs.ats2;
-          # TODO: build by ourselves for more granular control
-          # ats2 = pkgs.callPackage ./package.nix {};
+          # ATS2 (ATS/Postiats) built from this source tree
+          ats2 = pkgs.callPackage ./nix/build.nix { inherit version ats2; src = ./.; };
           default = ats2;
         };
         apps = rec {
-          patsopt = flake-utils.lib.mkApp { 
+          patsopt = flake-utils.lib.mkApp {
             drv = self.packages.${system}.ats2;
             name = "patsopt";
           };

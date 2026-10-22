@@ -1,1 +1,1 @@
-CODEGEN/pointer.dats
+SRCGEN/pointer.dats
