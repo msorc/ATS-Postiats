@@ -107,6 +107,40 @@ afiber_create_funenv_detached
 //
 (* ****** ****** *)
 //
+// MS-2026-10 (step H2): the library owns the closure (the [env]): it
+// frees it when the fiber is done, on the thread that allocated it (so
+// that the allocator's arena lock is not taken by another thread). The
+// ATS wrapper that runs the closure must then give it back with
+// [afiber_closure_dispose] (which also discharges the linearity of the
+// closure).
+//
+fun
+afiber_create_funenv_owned
+  {env:vtype}
+(
+  fwork: (env) -> void, env: env, stacksz: size_t
+) : afiber_vt = "mac#%"
+//
+fun
+afiber_create_funenv_detached_owned
+  {env:vtype}
+(
+  fwork: (env) -> void, env: env, stacksz: size_t
+) : void = "mac#%"
+//
+// [afiber_closure_dispose] is for the use of the library: it gives the
+// closure of the running fiber back to it (the library frees it). It
+// must be called with the closure of the fiber that is running (the
+// program is stopped if it is called with another one).
+//
+fun
+afiber_closure_dispose
+(
+  p: cloptr0
+) : void = "mac#%"
+//
+(* ****** ****** *)
+//
 fun{}
 afiber_spawn
   (fwork: () -<lincloptr1> void): afiber_vt

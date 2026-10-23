@@ -48,15 +48,20 @@ implement
 afiber_spawn_sz
   (fwork, stacksz) = let
 //
+// MS-2026-10 (step H2): the closure is given to the library, which
+// frees it on the thread that allocated it (the [app] wrapper used to
+// free it on the thread that ran the fiber: that took the arena lock of
+// the allocating thread while it was allocating in it).
+//
 fun app
 (
   f: () -<lincloptr1> void
 ): void = let
-  val () = f () in cloptr_free($UN.castvwtp0{cloptr0}(f))
+  val () = f () in afiber_closure_dispose ($UN.castvwtp0{cloptr0}(f))
 end // end of [app]
 //
 in
-  afiber_create_funenv (app, fwork, stacksz)
+  afiber_create_funenv_owned (app, fwork, stacksz)
 end // end of [afiber_spawn_sz]
 
 implement
@@ -76,11 +81,11 @@ fun app
 (
   f: () -<lincloptr1> void
 ): void = let
-  val () = f () in cloptr_free($UN.castvwtp0{cloptr0}(f))
+  val () = f () in afiber_closure_dispose ($UN.castvwtp0{cloptr0}(f))
 end // end of [app]
 //
 in
-  afiber_create_funenv_detached (app, fwork, stacksz)
+  afiber_create_funenv_detached_owned (app, fwork, stacksz)
 end // end of [afiber_spawn_detached_sz]
 
 implement

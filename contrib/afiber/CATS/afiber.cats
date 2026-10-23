@@ -167,6 +167,21 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 #endif
 
 /*
+** MS-2026-10 (step H2): how many closures a worker keeps for itself
+** before it frees them (the closures that other threads hand back to
+** it). The list is bounded: when it is full, the block is freed at once
+** by the thread that reaps the fiber, as before.
+*/
+#ifndef ATSCNTRB_AFIBER_CLO_CAP
+#define ATSCNTRB_AFIBER_CLO_CAP 64
+#endif
+
+// how many blocks the list holds before the owner frees them (in batches)
+#ifndef ATSCNTRB_AFIBER_CLO_DRAIN_MIN
+#define ATSCNTRB_AFIBER_CLO_DRAIN_MIN 8
+#endif
+
+/*
 ** MS-2026-10 (step D): a stack slab. A default-size stack that is not in
 ** the free list of the worker is carved from a region of
 ** ATSCNTRB_AFIBER_STACK_SLAB stacks that one [mmap] made; its guard page
@@ -206,6 +221,8 @@ enum {
 
 /* ****** ****** */
 
+struct atscntrb_afiber_worker_s ; // (defined below)
+
 typedef
 struct atscntrb_afiber_s
 {
@@ -221,8 +238,8 @@ struct atscntrb_afiber_s
   ATSCNTRB_AFIBER_EXNPTR exnframe ; // the head of the exception-frame chain (ATSCNTRB_AFIBER_MN), else saved there while not running
   int state ;
   int detached ;
-  void (*entry)(void*) ; // the ATS wrapper that runs and frees the closure
-  void *env ;
+  void (*entry)(void*) ; // the ATS wrapper that runs the closure
+  void *env ; // the closure (the [env] of the fiber)
   struct atscntrb_afiber_s *joiner ; // the fiber parked in [join] on this one
   struct atscntrb_afiber_s *next ; // the run queue, a wait queue or the sleep list
   unsigned long long deadline_ns ; // when SLEEPING
@@ -230,6 +247,8 @@ struct atscntrb_afiber_s
   void *tsan_fiber ; // ThreadSanitizer's handle of the fiber
   long id ;
   int lock ; // a spinlock: the join/detach/death hand-off (main: WAITALL)
+  int owns_env ; // 1: the library owns [env] and frees it (see [atscntrb_afiber__clo_release])
+  struct atscntrb_afiber_worker_s *owner ; // the worker that created the fiber: it allocated [env]
 } atscntrb_afiber_t ;
 
 typedef
@@ -275,6 +294,13 @@ struct atscntrb_afiber_worker_s
     char *slab_cur ; // the next piece (its guard page, if any, first)
     long slab_left ; // the pieces not yet carved
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
+  struct { // the closures to free: they were allocated by this worker (the
+    // owner), and this worker frees them, so that the arena lock of the
+    // allocator is not taken by another thread (see [atscntrb_afiber__clo_push])
+    int clolock ; // the spinlock of the list
+    unsigned clon ; // the number of blocks in [clslot] (under the lock)
+    void *clslot[ATSCNTRB_AFIBER_CLO_CAP] ;
+  } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
 } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) atscntrb_afiber_worker_t ;
 
 typedef
@@ -301,6 +327,7 @@ struct {
     int nworkers ;
     atscntrb_afiber_worker_t *wk ; // workers 1..nworkers-1, when started (line-aligned)
     int inited ;
+    int ncpu ; // the number of CPUs available to the process (at start)
     void *wk_raw ; // the block [wk] was rounded up from (cold)
   } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ;
   atscntrb_afiber_t main __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ; // the main thread's own context, id 0
@@ -463,6 +490,41 @@ atscntrb_afiber__mt()
 #ifndef ATSCNTRB_AFIBER_MAIN_SPIN_NS
 #define ATSCNTRB_AFIBER_MAIN_SPIN_NS 200000ULL // worker 0 looks for work this long while main is parked
 #endif
+
+/*
+** MS-2026-10 (step H2): how long a worker looks for work before it
+** waits on its condition variable (0: it waits at once). A worker that
+** will be needed again within a few microseconds then does not pay a
+** futex round trip (a sleep and a wake: the wake-up of a worker that
+** sleeps takes a few microseconds, more when the machine is loaded).
+** See [atscntrb_afiber__idle_spin].
+**
+** The default (100 us) is what the mn_spawn benchmark needs: with it,
+** the idle workers do not sleep between the batches of fibers, and the
+** futex calls drop by 65 % (the time per spawn+join drops by 12 to
+** 24 % at N = 2 to 8). A program that runs more workers than it has
+** cores (the spinning workers then take cycles from the working ones)
+** should set this to 0 (or to a smaller value).
+*/
+#ifndef ATSCNTRB_AFIBER_IDLE_SPIN_NS
+#define ATSCNTRB_AFIBER_IDLE_SPIN_NS 100000ULL
+#endif
+
+// how many [pause] instructions between two looks of the idle spin
+#ifndef ATSCNTRB_AFIBER_IDLE_SPIN_PAUSES
+#define ATSCNTRB_AFIBER_IDLE_SPIN_PAUSES 30
+#endif
+
+/*
+** MS-2026-10 (step H2): the idle spin is only used when the workers are
+** few compared to the CPUs available to the process: the spinning
+** workers must not take the cycles of the working ones (on a machine
+** with 32 CPUs, the spin is used up to 8 workers, which is the range
+** where it pays off). 0: the spin is always used.
+*/
+#ifndef ATSCNTRB_AFIBER_IDLE_SPIN_CPUS
+#define ATSCNTRB_AFIBER_IDLE_SPIN_CPUS 4
+#endif
 #define ATSCNTRB_AFIBER_SPIN_MAXR 256
 #endif
 #ifndef ATSCNTRB_AFIBER_SPIN_PAUSES
@@ -576,6 +638,21 @@ atscntrb_afiber__pagesz()
   }
   return p ;
 }
+
+// the number of CPUs available to the process
+ATSinline()
+int
+atscntrb_afiber__ncpu()
+{
+#ifdef CPU_COUNT
+  cpu_set_t cs ;
+  if (sched_getaffinity(0, sizeof(cs), &cs) == 0) {
+    int k = CPU_COUNT(&cs) ;
+    return (k < 1 ? 1 : k) ;
+  }
+#endif
+  { long n = sysconf(_SC_NPROCESSORS_ONLN) ; return (int)(n < 1 ? 1 : n) ; }
+} // end of [atscntrb_afiber__ncpu]
 
 // the size of the guard page below a stack: none with NOGUARD or malloc'd stacks
 ATSinline()
@@ -746,6 +823,131 @@ atscntrb_afiber__stack_release
   }
 } // end of [atscntrb_afiber__stack_release]
 
+
+/* ****** ****** */
+//
+// MS-2026-10 (step H2): the functions of the step H2 (the closure list of
+// a worker and the idle spin) are defined at the end of this file: they
+// are not in the hot path, and keeping them there does not move the code
+// of the scheduler.
+//
+static void atscntrb_afiber__clo_drain_slow (atscntrb_afiber_worker_t *w) ;
+static void atscntrb_afiber__clo_push (atscntrb_afiber_worker_t *w, void *p) ;
+static atscntrb_afiber_t* atscntrb_afiber__idle_spin (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w) ;
+
+// (the fast path: there is nothing to free)
+ATSinline()
+void
+atscntrb_afiber__clo_drain
+  (atscntrb_afiber_worker_t *w)
+{
+  if (__atomic_load_n(&(w->clon), __ATOMIC_RELAXED) == 0) return ;
+  atscntrb_afiber__clo_drain_slow(w) ;
+} // end of [atscntrb_afiber__clo_drain]
+
+// (the fast path: the list is empty or small: it is freed in batches)
+ATSinline()
+void
+atscntrb_afiber__clo_drain_batch
+  (atscntrb_afiber_worker_t *w)
+{
+  if (__atomic_load_n(&(w->clon), __ATOMIC_RELAXED) < (unsigned)ATSCNTRB_AFIBER_CLO_DRAIN_MIN) return ;
+  atscntrb_afiber__clo_drain_slow(w) ;
+} // end of [atscntrb_afiber__clo_drain_batch]
+
+/* ****** ****** */
+//
+// MS-2026-10 (step H2): the closure of a fiber
+//
+// The closure of a fiber (the [env]) is allocated by the thread that
+// spawns the fiber (the owner) and it must be freed by that same
+// thread: otherwise glibc has to lock the arena of the owner while the
+// owner is allocating in it (the [__lll_lock_wait_private] of the
+// profile, which costs more than the spawn itself).
+//
+// The library owns the closure of the fibers it creates with
+// [afiber_create_funenv_owned] (that is what [afiber_spawn] uses). The
+// closure is released when the body of the fiber is done (the ATS
+// wrapper calls [atscntrb_afiber_closure_dispose]) or, if that never
+// happens, when the fiber is reaped. When the thread that releases the
+// closure is not the owner, the block goes to the list of the owner,
+// and the owner frees it (in batches) when it runs.
+//
+/* ****** ****** */
+
+
+
+
+
+// the closure is freed by its owner (the thread that allocated it)
+ATSinline()
+void
+atscntrb_afiber__clo_release
+  (atscntrb_afiber_worker_t *owner, void *p)
+{
+  atscntrb_afiber_worker_t *w = atscntrb_afiber__cw() ;
+  if (!p) return ;
+  if (!owner || owner == w) { ATS_MFREE(p) ; return ; } // the owner frees it
+  atscntrb_afiber__clo_push(owner, p) ; // it goes to the list of the owner
+} // end of [atscntrb_afiber__clo_release]
+
+// the closure of a dead fiber is released (it is not inlined: it is cold)
+static
+__attribute__((noinline))
+void
+atscntrb_afiber__clo_free
+  (atscntrb_afiber_t *f)
+{
+  void *p = f->env ;
+  atscntrb_afiber_worker_t *own = f->owner ;
+  f->env = (void*)0 ;
+  __atomic_store_n(&(f->owns_env), 0, __ATOMIC_RELEASE) ;
+  atscntrb_afiber__clo_release(own, p) ;
+} // end of [atscntrb_afiber__clo_free]
+
+/*
+** The ATS wrapper that runs the closure of a fiber calls this when the
+** body is done: the closure is given to the library, which frees it (on
+** the thread that allocated it). The cast of the linear closure (in the
+** ATS code) discharges its linearity.
+**
+** When the thread that runs the body is not the one that allocated the
+** closure, the closure is not freed here: the reaper of the fiber does
+** it (and the reaper is usually the thread that allocated it).
+*/
+ATSinline()
+void
+atscntrb_afiber_closure_dispose
+  (void *p)
+{
+  atscntrb_afiber_sched_t *s = &atscntrb_afiber__sched ; // it is initialized (a fiber runs)
+  atscntrb_afiber_worker_t *w ;
+  atscntrb_afiber_t *f ;
+  if (!p) return ;
+  if (ATSCNTRB_AFIBER_ONEWORKER(s)) {
+    // one worker: the closure was allocated by this thread: free it here
+    f = s->w0.current ;
+    if (!f || !__atomic_load_n(&(f->owns_env), __ATOMIC_ACQUIRE)) return ;
+    if (f->env != p) atscntrb_afiber__fatal("afiber: the closure of a fiber was replaced") ;
+    f->env = (void*)0 ;
+    __atomic_store_n(&(f->owns_env), 0, __ATOMIC_RELEASE) ;
+    ATS_MFREE(p) ;
+    return ;
+  }
+  w = atscntrb_afiber__cw() ;
+  f = w->current ;
+  if (!f || !__atomic_load_n(&(f->owns_env), __ATOMIC_ACQUIRE)) return ;
+  if (f->env != p) atscntrb_afiber__fatal("afiber: the closure of a fiber was replaced") ;
+  // this thread allocated the closure: free it here
+  if (f->owner == w) {
+    f->env = (void*)0 ;
+    __atomic_store_n(&(f->owns_env), 0, __ATOMIC_RELEASE) ;
+    ATS_MFREE(p) ;
+  }
+  // else: the reaper of the fiber releases it (it goes to the owner)
+  return ;
+} // end of [atscntrb_afiber_closure_dispose]
+
 // [f] was made by [create]: its record is at the top of its stack, and goes with it
 ATSinline()
 void
@@ -755,6 +957,9 @@ atscntrb_afiber__free
 #ifdef ATSCNTRB_AFIBER_TSAN
   if (f->tsan_fiber) __tsan_destroy_fiber(f->tsan_fiber) ;
 #endif
+  // MS-2026-10 (step H2): the closure (the [env]) is freed here, before the
+  // stack of the fiber goes back to the cache: the record is in that stack
+  if (__atomic_load_n(&(f->owns_env), __ATOMIC_ACQUIRE)) atscntrb_afiber__clo_free(f) ;
   atscntrb_afiber__stack_release(atscntrb_afiber__cw(), f) ;
 } // end of [atscntrb_afiber__free]
 
@@ -1520,7 +1725,11 @@ atscntrb_afiber__idle_loop()
     atscntrb_afiber_t *next = (atscntrb_afiber_t*)0 ;
     int spin, rounds, r, stop ;
     unsigned long long dl ;
-    if (w->id != 0 && __atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE)) return ;
+    if (w->id != 0 && __atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE)) {
+      // MS-2026-10 (step H2): the closures this worker has collected are freed here
+      atscntrb_afiber__clo_drain(w) ;
+      return ;
+    }
     spin = __atomic_load_n(&(w->spinning), __ATOMIC_RELAXED) ; // set by the kicker, who has counted it
     if (!spin && 2 * __atomic_load_n(&(s->nspinning), __ATOMIC_RELAXED) < s->nworkers - __atomic_load_n(&(s->nidle), __ATOMIC_RELAXED)) {
       __atomic_add_fetch(&(s->nspinning), 1, __ATOMIC_SEQ_CST) ;
@@ -1538,7 +1747,10 @@ atscntrb_afiber__idle_loop()
       if (__atomic_sub_fetch(&(s->nspinning), 1, __ATOMIC_SEQ_CST) == 0 && next) atscntrb_afiber__kick(s, 0) ;
     }
     if (!next && w->id == 0) next = atscntrb_afiber__main_spin(s, w) ;
+    if (!next) next = atscntrb_afiber__idle_spin(s, w) ;
     if (next) { recheck = 0 ; atscntrb_afiber__switch_to(w, next) ; continue ; }
+    // MS-2026-10 (step H2): the closures this worker has collected are freed now
+    atscntrb_afiber__clo_drain(w) ;
     pthread_mutex_lock(&(w->mu)) ;
     __atomic_store_n(&(w->waiting), 1, __ATOMIC_SEQ_CST) ;
     __atomic_add_fetch(&(s->nidle), 1, __ATOMIC_SEQ_CST) ;
@@ -1647,12 +1859,15 @@ ATSinline()
 atscntrb_afiber_t*
 atscntrb_afiber__create
 (
-  void (*entry)(void*), void *env, size_t stacksz, int detached
+  void (*entry)(void*), void *env, size_t stacksz, int detached, int owns_env
 ) {
   atscntrb_afiber_sched_t *s = atscntrb_afiber__sched_get() ;
+  atscntrb_afiber_worker_t *w = atscntrb_afiber__cw() ;
   atscntrb_afiber_t *f ;
   void *stack, *lo ; size_t stackbytes, full, rec ;
-  atscntrb_afiber__stack_get(atscntrb_afiber__cw(), stacksz, &stack, &stackbytes, &lo, &full) ;
+  // MS-2026-10 (step H2): the closures this worker has collected are freed now
+  atscntrb_afiber__clo_drain_batch(w) ;
+  atscntrb_afiber__stack_get(w, stacksz, &stack, &stackbytes, &lo, &full) ;
   // the record of the fiber: the top of its stack region, on a line
   rec = ((uintptr_t)lo + full - ATSCNTRB_AFIBER_RECSZ) & ~(uintptr_t)63 ;
   f = (atscntrb_afiber_t*)rec ;
@@ -1667,6 +1882,8 @@ atscntrb_afiber__create
 #endif
   f->entry = entry ;
   f->env = env ;
+  f->owns_env = owns_env ;
+  f->owner = w ; // MS-2026-10 (step H2): the worker that allocated [env]
   f->detached = detached ;
   atscntrb_afiber__setstate(f, ATSCNTRB_AFIBER_RUNNABLE) ;
   f->id = __atomic_add_fetch(&(s->nextid), 1, __ATOMIC_SEQ_CST) ;
@@ -1679,10 +1896,18 @@ atscntrb_afiber__create
 
 #define \
 atscntrb_afiber_create_funenv(fwork, env, sz) \
-  ((atstype_ptr)atscntrb_afiber__create((void(*)(void*))(fwork), (void*)(env), (size_t)(sz), 0))
+  ((atstype_ptr)atscntrb_afiber__create((void(*)(void*))(fwork), (void*)(env), (size_t)(sz), 0, 0))
 #define \
 atscntrb_afiber_create_funenv_detached(fwork, env, sz) \
-  ((void)atscntrb_afiber__create((void(*)(void*))(fwork), (void*)(env), (size_t)(sz), 1))
+  ((void)atscntrb_afiber__create((void(*)(void*))(fwork), (void*)(env), (size_t)(sz), 1, 0))
+// MS-2026-10 (step H2): the library owns the closure: it frees it (on the
+// thread that allocated it) when the fiber is done
+#define \
+atscntrb_afiber_create_funenv_owned(fwork, env, sz) \
+  ((atstype_ptr)atscntrb_afiber__create((void(*)(void*))(fwork), (void*)(env), (size_t)(sz), 0, 1))
+#define \
+atscntrb_afiber_create_funenv_detached_owned(fwork, env, sz) \
+  ((void)atscntrb_afiber__create((void(*)(void*))(fwork), (void*)(env), (size_t)(sz), 1, 1))
 
 /* ****** ****** */
 
@@ -1898,6 +2123,9 @@ atscntrb_afiber_workers_start
   }
   __atomic_thread_fence(__ATOMIC_SEQ_CST) ;
   s->nworkers = n ;
+  // MS-2026-10 (step H2): the number of CPUs available to the process (the
+  // idle spin is used only when the workers are few compared to it)
+  s->ncpu = atscntrb_afiber__ncpu() ;
   pthread_attr_init(&attr) ;
   pthread_attr_setstacksize(&attr, (size_t)ATSCNTRB_AFIBER_THRSZ < (size_t)PTHREAD_STACK_MIN ? (size_t)PTHREAD_STACK_MIN : (size_t)ATSCNTRB_AFIBER_THRSZ) ;
   for (i = 1; i < n; i += 1) {
@@ -1960,6 +2188,9 @@ atscntrb_afiber_workers_stop()
   for (i = 1; i < n; i += 1) pthread_join(s->wk[i-1].thr, (void**)0) ;
   for (i = 0; i < n; i += 1) {
     atscntrb_afiber_worker_t *w = atscntrb_afiber__worker_at(s, i) ;
+    // MS-2026-10 (step H2): the closures the workers have collected (they
+    // are freed by the thread that allocated them: here, by main)
+    atscntrb_afiber__clo_drain(w) ;
     atscntrb_afiber__cache_drain(w) ;
     pthread_cond_destroy(&(w->cv)) ;
     pthread_mutex_destroy(&(w->mu)) ;
@@ -1997,11 +2228,7 @@ ATSinline()
 atstype_int
 atscntrb_afiber_ncpu()
 {
-#ifdef CPU_COUNT
-  cpu_set_t cs ;
-  if (sched_getaffinity(0, sizeof(cs), &cs) == 0) return (atstype_int)CPU_COUNT(&cs) ;
-#endif
-  { long n = sysconf(_SC_NPROCESSORS_ONLN) ; return (atstype_int)(n < 1 ? 1 : n) ; }
+  return (atstype_int)atscntrb_afiber__ncpu() ;
 } // end of [atscntrb_afiber_ncpu]
 
 /* ****** ****** */
@@ -2317,6 +2544,113 @@ atscntrb_afiber_mutex_unlock
 } // end of [atscntrb_afiber_mutex_unlock]
 
 /* ****** ****** */
+//
+// MS-2026-10 (step H2): the definitions of the functions declared above
+//
+// the owner gives the blocks it has collected back to the allocator
+static
+__attribute__((noinline))
+void
+atscntrb_afiber__clo_drain_slow
+  (atscntrb_afiber_worker_t *w)
+{
+  void *buf[ATSCNTRB_AFIBER_CLO_CAP] ;
+  unsigned n, i ;
+  atscntrb_afiber__spin_lock(&(w->clolock)) ;
+  n = w->clon ;
+  for (i = 0; i < n; i += 1) buf[i] = w->clslot[i] ;
+  __atomic_store_n(&(w->clon), 0, __ATOMIC_RELAXED) ;
+  atscntrb_afiber__spin_unlock(&(w->clolock)) ;
+  for (i = 0; i < n; i += 1) ATS_MFREE(buf[i]) ;
+} // end of [atscntrb_afiber__clo_drain_slow]
+
+
+
+// a block goes to the list of its owner (the list is bounded)
+static
+__attribute__((noinline))
+void
+atscntrb_afiber__clo_push
+  (atscntrb_afiber_worker_t *w, void *p)
+{
+  int full ;
+  atscntrb_afiber__spin_lock(&(w->clolock)) ;
+  if (w->clon < (unsigned)ATSCNTRB_AFIBER_CLO_CAP) {
+    w->clslot[w->clon] = p ;
+    __atomic_store_n(&(w->clon), w->clon + 1, __ATOMIC_RELAXED) ;
+    full = 0 ;
+  } else {
+    full = 1 ;
+  }
+  atscntrb_afiber__spin_unlock(&(w->clolock)) ;
+  // the list is full: the block goes back to the allocator at once (as before)
+  if (full) ATS_MFREE(p) ;
+} // end of [atscntrb_afiber__clo_push]
+
+/*
+** MS-2026-10 (step H2): a worker that has nothing to run waits on its
+** condition variable, and the wake-up of a sleeping worker costs a
+** futex round trip (a sleep and a wake, a few us). A worker that will
+** be needed again within a few microseconds (the batches of the
+** mn_spawn benchmark) should not sleep: this is a bounded spin before
+** the wait, for ATSCNTRB_AFIBER_IDLE_SPIN_NS nanoseconds (0: no spin).
+**
+** The spin is NOT counted in [nspinning] and the worker does not
+** announce itself in [nidle] while it spins (the same reasoning as
+** [main_spin]): a counted spinner would suppress the kicks that wake
+** the other workers, and an announced worker would make [kick] believe
+** that the workers are asleep (the work that appears during the spin
+** is taken by the next [pick]; the work that appears after it is seen
+** by the announce-then-look protocol of the idle loop, so no wake-up
+** is lost).
+**
+** The spin ends early when: the workers are asked to stop; every other
+** worker is asleep (nothing will come but a deadline); or a sleeper
+** must wake up before the end of the spin (its deadline is not delayed
+** by it).
+**
+** The cheap test comes first: the global FIFO, the main slot and the
+** sleep deadline are read (they are lines that the workers write
+** seldom), and only then is the full [pick_mt] done (it reads the
+** rings of the other workers, which the owner of a ring writes: every
+** poll of those lines is a cache miss on a line in use).
+*/
+static
+__attribute__((noinline))
+atscntrb_afiber_t*
+atscntrb_afiber__idle_spin
+  (atscntrb_afiber_sched_t *s, atscntrb_afiber_worker_t *w)
+{
+#if ATSCNTRB_AFIBER_IDLE_SPIN_NS > 0
+  unsigned long long t0, now, dl, rem ;
+  int j ;
+  // the spinning workers must not take the cycles of the working ones
+  if (ATSCNTRB_AFIBER_IDLE_SPIN_CPUS > 0
+      && (long)(s->nworkers * ATSCNTRB_AFIBER_IDLE_SPIN_CPUS) > (long)s->ncpu)
+    return (atscntrb_afiber_t*)0 ;
+  t0 = atscntrb_afiber_clock_ns() ;
+  for ( ; ; ) {
+    now = atscntrb_afiber_clock_ns() ;
+    if (now - t0 >= (unsigned long long)ATSCNTRB_AFIBER_IDLE_SPIN_NS) return (atscntrb_afiber_t*)0 ;
+    if (__atomic_load_n(&(s->stop), __ATOMIC_ACQUIRE)) return (atscntrb_afiber_t*)0 ;
+    if (__atomic_load_n(&(s->nidle), __ATOMIC_RELAXED) >= s->nworkers - 1) return (atscntrb_afiber_t*)0 ;
+    dl = __atomic_load_n(&(s->sleep_dl), __ATOMIC_RELAXED) ;
+    rem = (unsigned long long)ATSCNTRB_AFIBER_IDLE_SPIN_NS - (now - t0) ;
+    // a sleeper that must wake up before the end of the spin: do not delay it
+    if (dl != ~0ULL && dl <= now + rem) return (atscntrb_afiber_t*)0 ;
+    if (__atomic_load_n(&(s->runq.head), __ATOMIC_RELAXED)
+        || (w->id == 0 && __atomic_load_n(&(s->mainslot), __ATOMIC_RELAXED))
+        || (dl != ~0ULL && dl <= now)) {
+      atscntrb_afiber_t *next = atscntrb_afiber__pick_mt(w, 0) ;
+      if (next) return next ;
+    }
+    for (j = 0; j < ATSCNTRB_AFIBER_IDLE_SPIN_PAUSES; j += 1) atscntrb_afiber__cpu_relax() ;
+  }
+#else
+  (void)s ; (void)w ;
+  return (atscntrb_afiber_t*)0 ;
+#endif
+} // end of [atscntrb_afiber__idle_spin]
 
 #ifdef ATSCNTRB_AFIBER_MN
 /*
