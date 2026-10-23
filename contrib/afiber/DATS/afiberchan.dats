@@ -82,6 +82,12 @@ fun chan_c_pop (c: !ptr): ptr = "mac#atscntrb_afiberchan_pop"
 // the lock must be held: the proof is passed to show it
 extern
 fun chan_c_park_recv (pf: !afiber_locked_v | c: !ptr): void = "mac#atscntrb_afiberchan_park_recv"
+//
+// MS-2026-10 (step G3'): the batch receive parks without a scratch
+// slot: it reads the ring itself, so it cannot be the target of a
+// hand-off.
+extern
+fun chan_c_park_recv_noho (pf: !afiber_locked_v | c: !ptr): void = "mac#atscntrb_afiberchan_park_recv_noho"
 extern
 fun chan_c_park_send (pf: !afiber_locked_v | c: !ptr): void = "mac#atscntrb_afiberchan_park_send"
 extern
@@ -585,7 +591,7 @@ case+ acc of
       val () = chan_c_unlock (pf | chan) in list_vt_nil()
     end // end of [then]
     else let
-      val () = chan_c_park_recv (pf | chan)
+      val () = chan_c_park_recv_noho (pf | chan)
     in
       chan_recv_batch_loop<a>(pf | chan, n, list_vt_nil())
     end // end of [else]

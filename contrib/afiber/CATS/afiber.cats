@@ -153,6 +153,11 @@ void __tsan_switch_to_fiber(void *fiber, unsigned flags) ;
 // MS-2026-10: the size of a cache line, for the layout of the scheduler and the workers
 #define ATSCNTRB_AFIBER_LINE 64
 
+// MS-2026-10 (step G3'): the channel's direct hand-off (see CATS/afiberchan.cats)
+#ifndef ATSCNTRB_AFIBER_CHAN_HANDOFF
+#define ATSCNTRB_AFIBER_CHAN_HANDOFF 0 // 1: the direct hand-off is on
+#endif
+
 // MS-2026-10: the slots of the local run queue of a worker (a power of two)
 #define ATSCNTRB_AFIBER_RINGSZ 256
 
@@ -237,6 +242,14 @@ struct atscntrb_afiber_s
   size_t stack_usable ;
   ATSCNTRB_AFIBER_EXNPTR exnframe ; // the head of the exception-frame chain (ATSCNTRB_AFIBER_MN), else saved there while not running
   int state ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  // MS-2026-10 (step G3'): the direct hand-off of the channel: the
+  // scratch slot of a parked receiver (the slot is owned by the channel)
+  // and the state of the hand-off (0: none, 1: waiting, 2: handed off,
+  // 3: done). They are read and written under the channel's spinlock only.
+  void *ho_slot ;
+  int ho_state ;
+#endif
   int detached ;
   void (*entry)(void*) ; // the ATS wrapper that runs the closure
   void *env ; // the closure (the [env] of the fiber)

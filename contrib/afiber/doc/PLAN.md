@@ -314,7 +314,7 @@ Go's scheduler design (`runqput`/`runqget`/`runqsteal`/`wakep`/`resetspinning`);
 Fiber-aware I/O; main on any worker (main runs on the main thread's own
 stack, so it is pinned to worker 0).
 
-## Status (2026-10-19)
+## Status (2026-10-23)
 
 All of the design above is implemented, on `devel` (the work branches
 `afiber`, phase 1, and `afiber-mn`, phases 2-3 and the speed-up steps, are
@@ -340,24 +340,37 @@ merged; `afiber-mn` is deleted). Nothing here changes `src/`.
   queues on the first line, slots in the same allocation), common paths in two
   C calls, `chan_recv_ref`/`chan_tryrecv_ref` (no allocation per item),
   `chan_recv_batch`/`chan_send_list`.
-- Tests: `TEST/` (27 POS/NEG tests, `regress`, ASan `leakcheck`, 7 variant
+- Step 5 (H2): the closure of a fiber is freed by the thread that allocated
+  it (the library owns it: `afiber_create_funenv_owned`,
+  `afiber_closure_dispose`; the blocks that other threads hand back go to the
+  list of the owner, `ATSCNTRB_AFIBER_CLO_CAP`, and it frees them in batches),
+  and a worker that has nothing to run spins a bounded while before it sleeps
+  (`ATSCNTRB_AFIBER_IDLE_SPIN_NS`, `ATSCNTRB_AFIBER_IDLE_SPIN_PAUSES`,
+  `ATSCNTRB_AFIBER_IDLE_SPIN_CPUS`).
+- Step 5 (G3'): the direct hand-off of the channel (a parked receiver owns a
+  channel-owned scratch slot; the sender writes the payload into it and wakes
+  the receiver) is implemented but **off by default**
+  (`ATSCNTRB_AFIBER_CHAN_HANDOFF`, default 0): it is measured, and it does not
+  pay off (see "Where afiber is still slower than Go").
+- Tests: `TEST/` (30 POS/NEG tests, `regress`, ASan `leakcheck`, 7 variant
   builds, `stress`/`stress16`), run by `doc/Makefile_test`. ThreadSanitizer
   builds of the M:N tests report nothing (`POS_mn_exn` excepted, TSan cannot
   follow a `try` that migrates).
 - Benchmarks against Go (`BENCH/`, `make bench`, `make benchmn`); the history
-  of the four speed-up steps is `BENCH/results_step0.md` .. `results_step3.md`,
+  of the five speed-up steps is `BENCH/results_step0.md` .. `results_step4.md`,
   the current tables `BENCH/results.md`, the reading `BENCH/README.md`.
 - Packaging: `doc/DISTRIB/ATEXT/contrib_afiber.atxt`.
 
-Where afiber is faster than Go (idle Ryzen 9 5950X, 2026-10-19, medians): one
-worker yield 18 ns vs 69, ping-pong 30.5 vs 146, pipe 8.0 vs 35, fan-in 8.3
-vs 35, steady-state spawn 95 vs 242, sieve 36 vs 111 us per prime; M:N
-ping-pong 19/9.5/4.9/4.1/4.4 ns at N = 2/4/8/16/32 vs Go 102/70/53/39/16,
-`mn_mutex` 11-26 ns vs 28-72, `mn_cpu` scaling 20.8x at N=32 vs 2.9x.
+Where afiber is faster than Go (idle Ryzen 9 5950X, 2026-10-23, medians): one
+worker yield 18 ns vs 69, ping-pong 28.6 vs 145, pipe 7.7 vs 35, fan-in 8.1
+vs 35, steady-state spawn 88 vs 240, sieve 35 vs 113 us per prime; M:N
+ping-pong 19/9.8/5.0/4.2/4.9 ns at N = 2/4/8/16/32 vs Go 101/73/54/39/16,
+`mn_mutex` 11-32 ns vs 27-77, `mn_cpu` scaling 20.3x at N=32 vs 2.9x,
+`mn_spawn` faster than Go at N=2, `mn_pipeline` faster than Go at N=4 and N=8.
 
 ### Where afiber is still slower than Go
 
-The figures are the step-4 run (`BENCH/results.md`); N is the number of
+The figures are the step-5 run (`BENCH/results.md`); N is the number of
 workers (afiber) or `GOMAXPROCS` (Go).
 
 1. **Fresh stacks: `chain` 4.0x, `spawn_cold` 8.9x slower.** A fiber whose
@@ -376,43 +389,48 @@ workers (afiber) or `GOMAXPROCS` (Go).
    128-byte record; Go starts at 2 KB and grows its stacks. Stackful fibers
    cannot grow a stack, so only a smaller default stack with a smaller first
    page footprint could close it. Not planned.
-3. **`mn_pipeline` from N=4: 1.1x to 1.9x slower, and no scaling.** One
-   source, 8 stages, one sink, 2M items through 9 channels of capacity 128:
-   afiber 17/78/110/149/160/211 ns per item at N = 1/2/4/8/16/32, Go
-   74/100/98/106/108/109. Below Go at N=2, above from N=4, and 0.08x of its own
-   N=1 speed at N=32. Cause (measured): every item takes a channel lock twice
-   (send, receive), the ten fibers share the nine locks, and the lock lines
-   bounce between cores: 0.28 instructions per cycle at N=4 (perf stat 1.08e9
-   cycles for 3.06e8 instructions), 49% of the cycles in `chan_send_opt` and
-   44% in `chan_recv`, the scheduler under 8%. Evidence that the lock
-   acquisitions are the whole story: the hand-run `mn_pipeline_batch` (the
-   stages take up to 16 items per lock acquisition) runs at 26/24/48/70/76/103,
-   under Go at every N. Fix: **G3**, a lock-free bounded MPMC ring (Vyukov
-   style, one sequence word per slot) with the spinlock kept only for the wait
-   queues; the producer and the consumer then touch different lines and park
-   only on empty/full. Direct hand-off to a parked receiver (Go's `chansend`
-   copies the value onto the receiver's stack) would need the receiver's slot
-   pointer in the fiber record; it is a smaller gain and is not planned before
-   G3.
-4. **`mn_spawn` from N=2: 1.5x to 2.6x slower.** Main spawns 1000 fibers and
-   joins them, 200 times: afiber 134/362/434/491/544/751 ns per spawn+join at
-   N = 1/2/4/8/16/32, Go 231/244/228/221/240/293. Measured causes: (a) idle
-   workers sleep and are woken through futex between the batches, 5,366 futex
-   calls per 100,000 spawns at N=4 (none at N=1), each a sleep/wake pair of
-   several us; (b) glibc's malloc arena lock (`__lll_lock_wait_private` in the
-   profile): each fiber's closure is allocated by main on the main thread and
-   freed by the fiber on the thread that ran it. Not the cause: the stacks
-   (1,007 `mprotect` per 100,000 spawns at N=4, as at N=1: the per-worker
-   caches work) and main's wake-up latency (worker 0 spinning while main is
-   parked did not move the numbers; its ring is almost never empty when main
-   parks). Go pays (a) and (b) too, which is why its own row is 2x its N=1
-   value. Fix: **H2**, a per-worker free list for small closure blocks (the
-   `app` wrapper frees the closure on the fiber's thread; return the block to
-   the spawning worker's list, or allocate closures from a per-worker slab),
-   and a longer bounded idle spin before the condvar so that a worker that will
-   be needed within a few us does not sleep.
-5. **`mn_pingpong` at N=32: 4.4 ns vs Go's 16.1 is still faster**, but afiber
-   scales 5.0x from N=1 while Go scales 9.0x: 16 pairs on 32 hardware threads
+3. **`mn_pipeline` at N=16 and N=32: 1.7x to 1.9x slower, and no scaling.** One
+   source, 8 stages, one sink, 2M items through 2 channels of capacity 128:
+   afiber 16/80/58/97/191/214 ns per item at N = 1/2/4/8/16/32, Go
+   74/99/97/111/113/113. **Below Go at N=1, N=2, N=4 (0.60x of Go's time) and
+   N=8 (0.87x)**, above it at N=16 and N=32, and 0.08x of its own N=1 speed at
+   N=32. The gains at N=4 and N=8 are the idle spin of step 5 (the stages park
+   and are woken for every item; the workers do not sleep in between any more).
+   At N=16 and N=32 the spin is off (the workers outnumber the cores) and the
+   costs are the ones measured before: every item takes a channel lock twice
+   (send, receive), the ten fibers share the two locks, and the lock lines
+   bounce between cores (0.28 instructions per cycle at N=4: 49% of the cycles
+   in `chan_send_opt` and 44% in `chan_recv`, the scheduler under 8%), and the
+   stages' park/wake cycles.
+   **G3 was measured and does not pay off**: a Vyukov lock-free MPMC ring is
+   1.3x to 1.45x slower than the spinlock ring at N>=4 (a failed CAS costs a
+   full retry, a cache-line transfer per attempt, while a mutex's spin phase is
+   a relaxed load and only the winner takes the line exclusively; and the ring
+   needs two locked operations per item against the mutex's one). **G3'**, the
+   direct hand-off to a parked receiver (the channel owns a pool of scratch
+   slots; the sender writes the payload into the receiver's slot and wakes it),
+   is implemented behind `ATSCNTRB_AFIBER_CHAN_HANDOFF` (off by default) and
+   does not pay off either: the park protocol takes the channel's lock again
+   when the fiber wakes up, so a hand-off still costs two lock acquisitions per
+   item. It would pay off with a wait queue that does not need the lock (the
+   woken fiber would read the payload out of its own scratch slot without
+   taking the channel's lock): that is the next step, and it is a change of the
+   park protocol.
+4. **`mn_spawn` at N=16 and N=32: 1.5x to 2.1x slower.** Main spawns 1000 fibers
+   and joins them, 200 times: afiber 137/192/252/294/426/492 ns per spawn+join
+   at N = 1/2/4/8/16/32, Go 222/241/209/239/293/238. **Faster than Go at N=2
+   (0.80x of Go's time) and at parity at N=4 (1.21x)**; it was 1.9x and 2.1x
+   slower before step 5. The two measured causes are gone: the idle workers do
+   not sleep between the batches any more (the futex calls per 200,000
+   spawns: 6,358 -> 12 at N=2, 8,585 -> 1,078 at N=4, 9,657 -> 3,549 at N=8),
+   and the closure of each fiber is freed by the thread that allocated it (the
+   library owns it now: `__lll_lock_wait_private` was 15% of the cycles in the
+   kernel at N=4 and is gone from the profile). What is left at N=16 and N=32
+   is that the idle spin is off there (the workers outnumber the cores:
+   `nworkers * 4 > ncpus`), so the futex round trips are back; Go pays them too
+   (its own `mn_spawn` at N>=2 is about 2x its N=1 value).
+5. **`mn_pingpong` at N=32: 4.9 ns vs Go's 15.8 is still faster**, but afiber
+   scales 4.7x from N=1 while Go scales 9.2x: 16 pairs on 32 hardware threads
    share 16 physical cores and afiber's pairs stay on one worker each (the
    `runnext` hand-off), so the second thread of a core is idle. Not a loss;
    noted so the speedup column is read right.
@@ -427,9 +445,10 @@ are not comparable digit for digit across the `results_step*.md` files.
   item (28% of the one-worker ping-pong cycles before `chan_recv_ref`);
   programs on the hot path should use `chan_recv_ref`. A later API revision
   could make the no-allocation form the primary one.
-- The one-worker `spawn` of 94.6 ns in the step-4 run (87.9 in step 3, the
-  SINGLE build unchanged at 77.5) needs a re-check before it is called a
-  regression.
+- The stacks of the detached fibers are not returned to the worker that
+  allocated them: a detached spawn still pays a fresh `mmap` and `mprotect`
+  per fiber at N>=2 (the same defect the closure had, for the stacks). The
+  per-worker stack cache works, but a stack born on one worker stays there.
 - The mutex is not FIFO under contention in the normal mode; after 1 ms of
   waiting it switches to FIFO hand-off. Under oversubscription (several
   workers pinned to one CPU on a loaded machine) a hand-off to a parked waiter

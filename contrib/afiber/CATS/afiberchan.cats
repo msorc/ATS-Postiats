@@ -56,6 +56,38 @@
 
 /* ****** ****** */
 
+/*
+** MS-2026-10 (step G3'): the direct hand-off. The channel owns a small
+** pool of scratch slots (the size of a slot): a parked receiver owns one
+** of them, the sender writes the payload into it and wakes the
+** receiver, which takes the payload out of it. So a hand-off costs one
+** lock acquisition (the sender's) instead of two (the sender's push
+** and the receiver's pop), and the ring is not touched at all.
+*/
+#ifndef ATSCNTRB_AFIBER_CHAN_SCRATCH
+#define ATSCNTRB_AFIBER_CHAN_SCRATCH 16 // the number of scratch slots per channel
+#endif
+#ifndef ATSCNTRB_AFIBER_CHAN_HANDOFF
+/*
+** MS-2026-10 (step G3'): the hand-off is OFF by default: it does not
+** pay off (see contrib/afiber/doc/PLAN.md). The reason: the parking
+** protocol takes the channel's lock again when the fiber wakes up (see
+** [afiber_waitq_park] in CATS/afiber.cats), so a hand-off still costs
+** two lock acquisitions per item (the sender's and the woken
+** receiver's): the lock's cache line keeps bouncing between the cores
+** and the hand-off only adds work. It would pay off if the wait queue
+** did not need the lock (the woken fiber would take the value out of
+** its own scratch slot without taking the channel's lock).
+*/
+#define ATSCNTRB_AFIBER_CHAN_HANDOFF 0 // 1: the direct hand-off is on
+#endif
+
+/* the state of a hand-off (in the fiber record) */
+#define ATSCNTRB_AFIBER_HO_NONE 0 // no scratch slot
+#define ATSCNTRB_AFIBER_HO_WAITING 1 // the fiber is parked and waits for a hand-off
+#define ATSCNTRB_AFIBER_HO_HANDED_OFF 2 // the payload is in the scratch slot
+#define ATSCNTRB_AFIBER_HO_DONE 3 // the payload was taken out of the scratch slot
+
 typedef
 struct {
   /* the first line: hot */
@@ -69,13 +101,18 @@ struct {
   /* the second line: read-mostly */
   size_t cap __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) ; // the number of slots
   size_t tsz ; // the size of a slot
-  /* then the slots, from [sizeof(...)] on */
+  void *scratch_free ; // the free list of the scratch slots (under the lock)
+  /* then the slots, from [sizeof(...)] on, then the scratch slots */
 } __attribute__((aligned(ATSCNTRB_AFIBER_LINE))) atscntrb_afiberchan_t ;
 
 _Static_assert(offsetof(atscntrb_afiberchan_t, rfcnt) < ATSCNTRB_AFIBER_LINE, "afiberchan: the hot fields are not on the first line") ;
 _Static_assert(offsetof(atscntrb_afiberchan_t, cap) == ATSCNTRB_AFIBER_LINE, "afiberchan: cap is not on the second line") ;
 
 #define ATSCNTRB_AFIBERCHAN_DATA(c) ((char*)(c) + sizeof(atscntrb_afiberchan_t))
+/* the scratch slots: after the ring slots (which are rounded up) */
+#define ATSCNTRB_AFIBERCHAN_SCRATCH(c) \
+  ((void*)(((char*)(c) + sizeof(atscntrb_afiberchan_t) \
+            + (((c)->cap * (c)->tsz + 7) & ~(size_t)7))))
 
 /* ****** ****** */
 
@@ -85,16 +122,65 @@ atscntrb_afiberchan_make
   (atstype_size cap, atstype_size tsz)
 {
   atscntrb_afiberchan_t *c ;
+  // a scratch slot is on a cache line of its own (no false sharing)
+  size_t slot_size = (tsz < 8) ? 8 : tsz ;
+  slot_size = (slot_size + ATSCNTRB_AFIBER_LINE - 1) & ~(size_t)(ATSCNTRB_AFIBER_LINE - 1) ;
   size_t sz = sizeof(atscntrb_afiberchan_t) + cap * tsz ;
   sz = (sz + ATSCNTRB_AFIBER_LINE - 1) & ~(size_t)(ATSCNTRB_AFIBER_LINE - 1) ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  sz += ATSCNTRB_AFIBER_CHAN_SCRATCH * slot_size ;
+#endif
   c = (atscntrb_afiberchan_t*)aligned_alloc(ATSCNTRB_AFIBER_LINE, sz) ;
   if (!c) { fprintf(stderr, "afiberchan: out of memory\n") ; abort() ; }
   c->lock = 0 ; c->closed = 0 ; c->head = 0 ; c->n = 0 ;
   c->recvq.head = c->recvq.tail = (atscntrb_afiber_t*)0 ;
   c->sendq.head = c->sendq.tail = (atscntrb_afiber_t*)0 ;
   c->rfcnt = 1 ; c->cap = cap ; c->tsz = tsz ;
+  c->scratch_free = (void*)0 ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  {
+    // the free list of the scratch slots (the first word of a free slot
+    // holds the next one); the slots are at least 8 bytes long
+    size_t i ; void *fre = (void*)0 ;
+    char *base = (char*)ATSCNTRB_AFIBERCHAN_SCRATCH(c) ;
+    for (i = ATSCNTRB_AFIBER_CHAN_SCRATCH ; i > 0 ; i--) {
+      void *sl = (void*)(base + (i - 1) * slot_size) ;
+      *(void**)sl = fre ; fre = sl ;
+    }
+    c->scratch_free = fre ;
+  }
+#endif
   return (atstype_ptr)c ;
 } // end of [atscntrb_afiberchan_make]
+
+/*
+** the scratch slots (the hand-off). The caller holds the lock.
+*/
+ATSinline()
+void*
+atscntrb_afiberchan__scratch_pop
+  (atscntrb_afiberchan_t *c)
+{
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  void *s = c->scratch_free ;
+  if (s) c->scratch_free = *(void**)s ;
+  return s ;
+#else
+  return (void*)0 ;
+#endif
+} // end of [atscntrb_afiberchan__scratch_pop]
+
+ATSinline()
+void
+atscntrb_afiberchan__scratch_push
+  (atscntrb_afiberchan_t *c, void *s)
+{
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  if (s) { *(void**)s = c->scratch_free ; c->scratch_free = s ; }
+#else
+  (void)c ; (void)s ;
+#endif
+} // end of [atscntrb_afiberchan__scratch_push]
 
 ATSinline()
 void
@@ -220,6 +306,27 @@ void
 atscntrb_afiberchan_park_recv (atstype_ptr c0)
 {
   atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atscntrb_afiber_t *f = atscntrb_afiber__cw()->current ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  // the fiber owns a scratch slot: a sender may hand the value to it
+  if (f->ho_state == ATSCNTRB_AFIBER_HO_NONE) {
+    void *sl = atscntrb_afiberchan__scratch_pop (c) ;
+    if (sl) { f->ho_slot = sl ; f->ho_state = ATSCNTRB_AFIBER_HO_WAITING ; }
+  }
+#endif
+  atscntrb_afiber_waitq_park((atstype_ptr)&(c->recvq), (atstype_ptr)&(c->lock)) ;
+}
+
+/*
+** the same, but the fiber does not own a scratch slot: it cannot be
+** the target of a hand-off. The batch receive uses it (the batch reads
+** the ring itself).
+*/
+ATSinline()
+void
+atscntrb_afiberchan_park_recv_noho (atstype_ptr c0)
+{
+  atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
   atscntrb_afiber_waitq_park((atstype_ptr)&(c->recvq), (atstype_ptr)&(c->lock)) ;
 }
 
@@ -285,6 +392,19 @@ atscntrb_afiberchan__send_check
 {
   size_t n = c->n, cap = c->cap, i ;
   if (c->closed) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  // a parked receiver takes the value directly (Go's sendDirect): the
+  // value is written into the receiver's scratch slot and the receiver
+  // is woken by [send_end] (the lock is still held here, so the parked
+  // receiver is still the head of the queue).
+  if (c->recvq.head) {
+    atscntrb_afiber_t *f = c->recvq.head ;
+    if (f->ho_state == ATSCNTRB_AFIBER_HO_WAITING) {
+      f->ho_state = ATSCNTRB_AFIBER_HO_HANDED_OFF ;
+      return f->ho_slot ;
+    }
+  }
+#endif
   if (n >= cap) return (atstype_ptr)0 ;
   i = c->head + n ;
   if (i >= cap) i -= cap ;
@@ -331,19 +451,55 @@ atscntrb_afiberchan_trysend_begin
   return p ;
 }
 
+/*
+** the check of the receive path. [handoff] is 1 in the re-check (the
+** fiber has parked and may have been handed a value) and 0 in the first
+** attempt (the fiber has not parked: it cannot have a hand-off).
+*/
 ATSinline()
 atstype_ptr
 atscntrb_afiberchan__recv_check
-  (atscntrb_afiberchan_t *c)
+  (atscntrb_afiberchan_t *c, int handoff)
 {
   size_t n = c->n, h ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  atscntrb_afiber_t *f = (void*)0 ;
+  if (handoff) {
+    f = atscntrb_afiber__cw()->current ;
+    // the value was handed to the fiber: it is in its scratch slot (the
+    // hand-off is checked before the ring: the ring may have been filled
+    // by another sender in the meantime)
+    if (f->ho_state == ATSCNTRB_AFIBER_HO_HANDED_OFF) {
+      f->ho_state = ATSCNTRB_AFIBER_HO_DONE ;
+      return f->ho_slot ;
+    }
+  }
+#else
+  (void)handoff ;
+#endif
   if (n > 0) {
     h = c->head ;
     c->n = n - 1 ;
     c->head = (h + 1 == c->cap) ? 0 : h + 1 ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+    // the fiber does not wait for a hand-off any more
+    if (handoff && f->ho_state == ATSCNTRB_AFIBER_HO_WAITING) {
+      atscntrb_afiberchan__scratch_push (c, f->ho_slot) ;
+      f->ho_state = ATSCNTRB_AFIBER_HO_NONE ;
+    }
+#endif
     return (atstype_ptr)(ATSCNTRB_AFIBERCHAN_DATA(c) + h * c->tsz) ;
   }
-  if (c->closed) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
+  if (c->closed) {
+    atscntrb_afiber__spin_unlock(&(c->lock)) ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+    if (handoff && f->ho_state == ATSCNTRB_AFIBER_HO_WAITING) {
+      atscntrb_afiberchan__scratch_push (c, f->ho_slot) ;
+      f->ho_state = ATSCNTRB_AFIBER_HO_NONE ;
+    }
+#endif
+    return (atstype_ptr)1 ;
+  }
   return (atstype_ptr)0 ;
 }
 
@@ -354,14 +510,14 @@ atscntrb_afiberchan_recv_begin
 {
   atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
   atscntrb_afiber__spin_lock(&(c->lock)) ;
-  return atscntrb_afiberchan__recv_check(c) ;
+  return atscntrb_afiberchan__recv_check(c, 0) ;
 }
 
 ATSinline()
 atstype_ptr
 atscntrb_afiberchan_recv_recheck
   (atstype_ptr c0)
-{ return atscntrb_afiberchan__recv_check((atscntrb_afiberchan_t*)c0) ; }
+{ return atscntrb_afiberchan__recv_check((atscntrb_afiberchan_t*)c0, 1) ; }
 
 ATSinline()
 void
@@ -369,6 +525,15 @@ atscntrb_afiberchan_recv_end
   (atstype_ptr c0)
 {
   atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
+  atscntrb_afiber_t *f = atscntrb_afiber__cw()->current ;
+#if ATSCNTRB_AFIBER_CHAN_HANDOFF
+  // the scratch slot of the fiber (if any) goes back to the pool
+  if (f->ho_state == ATSCNTRB_AFIBER_HO_DONE
+      || f->ho_state == ATSCNTRB_AFIBER_HO_WAITING) {
+    atscntrb_afiberchan__scratch_push (c, f->ho_slot) ;
+    f->ho_state = ATSCNTRB_AFIBER_HO_NONE ;
+  }
+#endif
   if (c->sendq.head) atscntrb_afiber_waitq_wake_one((atstype_ptr)&(c->sendq)) ;
   atscntrb_afiber__spin_unlock(&(c->lock)) ;
 }
@@ -381,7 +546,7 @@ atscntrb_afiberchan_tryrecv_begin
   atscntrb_afiberchan_t *c = (atscntrb_afiberchan_t*)c0 ;
   atstype_ptr p ;
   atscntrb_afiber__spin_lock(&(c->lock)) ;
-  p = atscntrb_afiberchan__recv_check(c) ;
+  p = atscntrb_afiberchan__recv_check(c, 0) ;
   if (p == (atstype_ptr)0) { atscntrb_afiber__spin_unlock(&(c->lock)) ; return (atstype_ptr)1 ; }
   return p ;
 }
