@@ -1,87 +1,113 @@
-# [ATS2](http://www.ats-lang.org/) - ATS/Postiats
-
-A Programming Language System to Unleash the Potentials of Types
-and Templates
-
-## Project Description
-
-ATS/Postiats (or ATS2/Postiats) is the name for the current compiler
-of ATS2, the successor of ATS (or ATS1).
-
-The actual implementation of ATS/Postiats started in the March of
-2011, and it took about two and one-half years to reach the first
-release of ATS2 at the beginning of September, 2013. As of now, the
-code base for the compiler of ATS2 consists of 180,000+ lines of code
-(LOC); the compiler was written in ATS1 and has been ported to ATS2: it
-now compiles itself (ATS1 is no longer needed).
-
-When compared to ATS1, the single most important new feature is the
-template system of ATS2. This is a feature that could potentially
-change the way a programmer writes his or her code. One can certainly
-feel that this is a very powerful feature (a bit like feeling that OOP
-is a very powerful feature). However, how this feature should be properly
-and effectively used in practice needs a lot more investigation.
-
-Another thing about ATS2 is that it is a lot leaner than ATS. One can make
-good use of ATS2 without any need for compiled library (libatslib.a). Also,
-there is no GC: heap memory is managed through linear types and views only.
-The compiler rejects any nonlinear heap allocation (a datatype with a
-non-nullary constructor, a cloref closure, a boxed (even linear) tuple or record,
-`$delay`, `$list_t`); use datavtypes, linear closures (cloptr/llam), flat
-tuples and records, `$ldelay`/stream_vt and list_vt instead. Shared data
-whose lifetime is well-delimited can be kept in an arena (libats/arena).
-
-## Build Status
+# ATS/Postiats (ATS2)
 
 [![CI](https://github.com/msorc/ATS-Postiats/actions/workflows/ci.yml/badge.svg)](https://github.com/msorc/ATS-Postiats/actions/workflows/ci.yml)
 
-## Installing ATS2
+ATS2 is a statically typed programming language that combines
+functional programming, dependent types, linear types and templates,
+and compiles to C. Its types can express (and the compiler can check)
+facts about the values of a program, the shapes of its data and the
+ownership of its memory, so that a program can be as safe as a proof
+and as fast and as small as C. `patsopt` is its compiler, `patscc`
+the driver that also runs the C compiler.
 
-Please see
-[https://ats-lang.sourceforge.net/DOWNLOAD/](https://ats-lang.sourceforge.net/DOWNLOAD/) for
-instructions.
+This repository is a line of ATS2 that follows the release 0.4.2
+by Hongwei Xi ([githwxi/ATS-Postiats](https://github.com/githwxi/ATS-Postiats));
+its version is 0.4.3. It differs from 0.4.2 in four ways:
 
-Note that the code in this github directory is primarily meant for people
-who would like to help develop ATS2. For someone who just wants to program
-in ATS2, please install the current release of ATS2, which can be found at
-the following site:
-[https://sourceforge.net/projects/ats2-lang/](https://sourceforge.net/projects/ats2-lang/).
-There are also pre-compiled debian packages for ATS2 available on-line.
+* **No garbage collector.** Heap memory is managed by linear types
+  only, and the compiler rejects every nonlinear heap allocation: a
+  `datatype` with a non-nullary constructor, a `cloref` closure, a
+  boxed tuple or record, `$delay` and `$list_t`. Use `datavtype`,
+  `list_vt`, `option_vt`, `cloptr`/`lam@`, flat `@(...)` tuples,
+  `$ldelay`/`stream_vt` and `arrayptr` instead. The prelude and `libats`
+  were rewritten for this; `libats/arena` is new.
+* **A self-hosted compiler.** `patsopt` is written in ATS2 (with the same
+  rules) and compiles itself. ATS1 is not needed for anything.
+* **A bundled bootstrap.** The C code of the compiler is in the repository
+  (`src/CBOOT`), so a clone builds with a C compiler, `make`, python3 and
+  libgmp (or none, with `KIND=intknd`).
+* **Defaults that work.** `patscc -o hello hello.dats` needs no flags; the
+  C back ends other than C, C++ and JavaScript are gone.
 
-## Developing ATS2
+Programs written for 0.4.2 that use the garbage collector need changes:
+see the [migration guide](doc/GUIDE/migrating-from-0.4.2.md).
 
-The compiler of ATS2 (`src/`) is implemented in ATS2 itself (no GC, linear
-heap data only); ATS1 is not needed. To build it you need a first `patsopt`
-(stage 0): any ATS2 compiler (an installed release or an earlier build), or the
-bootstrap C bundle `src/CBOOT` (tracked; it needs only a C compiler, make,
-python3 and libgmp): a fresh clone builds with `make bootstrap && make`.
-See `src/README` and `src/CBOOT/README`:
+## Install
 
-    make -f Makefile_devl PATSOPT=/usr/bin/patsopt STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all
-    make -C src test     # the compiler's own regression tests (no ATS1)
+From a release (the tarballs are on the
+[releases page](https://github.com/msorc/ATS-Postiats/releases)):
 
-The old ATS1 sources of the compiler are in the git history.
+```sh
+tar -xzvf ATS2-Postiats-0.4.3.tgz
+cd ATS-Postiats
+./configure --prefix=$HOME/ats2      # --without-gmp if you have no libgmp
+make && make install
+export PATH=$HOME/ats2/bin:$PATH
+```
 
-The generated prelude sources (`prelude/*/CODEGEN`), the packaging scripts
-(`doc/DISTRIB`) and the documents (`*.atxt`) are produced by `atsdoc` (ATS2, no
-GC; `make -C utils/atsdoc`), also without ATS1: `make -f codegen/Makefile_atslib`
-regenerates the prelude sources, `make -C utils/atsdoc genall` the text of all
-the templates and checks it, `make -C doc/DISTRIB atspackaging` makes a release.
+From a clone (needs a C compiler, GNU make, python3 and libgmp-dev):
 
-## Documenting ATS2
+```sh
+git clone https://github.com/msorc/ATS-Postiats.git
+cd ATS-Postiats
+make                                  # KIND=intknd if you have no libgmp
+make install PREFIX=$HOME/ats2
+export PATH=$HOME/ats2/bin:$PATH
+```
 
-ATS-users are encouraged to share what they have learned on the
-[ATS2 wiki](https://github.com/githwxi/ATS-Postiats/wiki), which currently
-contains over 45 articles with content.  A list of article stubs is
-maintained at [TODO](https://github.com/githwxi/ATS-Postiats/wiki/TODO).
+[INSTALL](INSTALL) has the details: the requirements, `PREFIX` and
+`DESTDIR`, the tools, the tests and the common failures.
 
-## Licenses for ATS/Postiats
+## Hello, world
 
-* The Compiler (`src/`) is under [GPLv3](COPYING-gpl-3.0.txt).
-* The ATS source of the Libraries (`prelude/`, `libats/`) is under
-  [LGPLv3](COPYING-lgpl-3.0.txt), with a special exception for the C code generated
-  from it (see [LICENSES.md](LICENSES.md)).
+```sh
+cat > hello.dats <<'END'
+#include "share/atspre_staload.hats"
+implement main0 () = println! ("Hello, world!")
+END
+patscc -o hello hello.dats
+./hello
+```
+
+```
+Hello, world!
+```
+
+The [quickstart](doc/GUIDE/quickstart.md) goes on from here.
+
+## Learn ATS2
+
+* [doc/GUIDE](doc/GUIDE): the [quickstart](doc/GUIDE/quickstart.md), the
+  [migration guide from 0.4.2](doc/GUIDE/migrating-from-0.4.2.md), the
+  [FAQ of the compiler's error messages](doc/GUIDE/faq.md) and the
+  [architecture of the compiler](doc/GUIDE/ARCHITECTURE.md).
+* [doc/BOOK](doc/BOOK): the books (`make book`): *Introduction to
+  Programming in ATS*, the *ATS2 tutorial*, *ATS for APUE3* and the
+  *Functional Programming Crash Course*.
+* [doc/EXAMPLE](doc/EXAMPLE): the examples, among them
+  [INTRO](doc/EXAMPLE/INTRO) (a first tour) and
+  [LINHEAP](doc/EXAMPLE/LINHEAP) (one test per rule of the linear heap).
+* `man patsopt`, `man patscc`, `man myatscc`.
+* As background, the [ATS2 wiki](https://github.com/githwxi/ATS-Postiats/wiki)
+  and [ats-lang.org](http://www.ats-lang.org/) of the upstream project (they
+  describe 0.4.2, which has a garbage collector).
+
+## Contributing
+
+Bug reports and pull requests are welcome; see
+[CONTRIBUTING.md](CONTRIBUTING.md) (the build, the tests, the code style
+and how to submit a change), [SECURITY.md](SECURITY.md) and the
+[code of conduct](CODE_OF_CONDUCT.md). The notes for the coding agents are
+in [AGENTS.md](AGENTS.md); the architecture of the compiler is summarized
+in [doc/GUIDE/ARCHITECTURE.md](doc/GUIDE/ARCHITECTURE.md).
+
+## Licenses
+
+* The compiler (`src/`) is under [GPLv3](COPYING-gpl-3.0.txt).
+* The ATS source of the libraries (`prelude/`, `libats/`) is under
+  [LGPLv3](COPYING-lgpl-3.0.txt), with a special exception for the C code
+  generated from it.
 * The contributed portion (`contrib/`) is under the [MIT license](contrib/LICENSE).
 
-[LICENSES.md](LICENSES.md) has the per-directory table, the full text of the linking
-exception, and a note on the license headers of individual source files.
+[LICENSES.md](LICENSES.md) has the per-directory table, the text of the
+linking exception and a note on the license headers of individual files.
