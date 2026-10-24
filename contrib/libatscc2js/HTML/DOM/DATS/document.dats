@@ -34,10 +34,10 @@ ATS_DYNLOADFLAG 0 // no run-time dynloading
 //
 #define
 ATS_EXTERN_PREFIX
-"ats2js_HTML_document_" // prefix for extern names
+"ats2js_html_document_" // prefix for extern names
 #define
 ATS_STATIC_PREFIX
-"_ats2js_HTML_document_" // prefix for static names
+"_ats2js_html_document_" // prefix for static names
 //
 (* ****** ****** *)
 //
