@@ -119,6 +119,8 @@ export PATSLIBHOME
 ######
 
 bindir2 := $(DESTDIR)$(bindir)
+mandir2 := $(DESTDIR)$(mandir)
+MANS := $(notdir $(wildcard doc/man/*.1))
 PATSLIBHOME2 := $(DESTDIR)$(PATSLIBHOME)
 
 ######
@@ -141,6 +143,7 @@ install_files: \
   install_files_31 \
   install_files_40 \
   install_files_50 \
+  install_files_60 \
 
 install_dirs: ; \
   cd "$(abs_top_srcdir)" && \
@@ -181,6 +184,13 @@ install_files_50: ; \
     fi; \
   done
 
+# the manual pages (doc/man/*.1) go to $(mandir)/man1
+install_files_60: ; \
+  $(MKDIR_P) $(mandir2)/man1 && \
+  for m in $(MANS) ; do \
+    $(INSTALL) -m644 doc/man/$$m $(mandir2)/man1/$$m && echo doc/man/$$m ; \
+  done
+
 ######
 # HX-2017-11-11:
 # Please execute the following
@@ -198,6 +208,7 @@ uninstall:: uninstall_home
 uninstall_bin:: ; $(RMF) $(bindir2)/patscc
 uninstall_bin:: ; $(RMF) $(bindir2)/myatscc
 uninstall_bin:: ; $(RMF) $(bindir2)/patsopt
+uninstall_bin:: ; for m in $(MANS) ; do $(RMF) $(mandir2)/man1/$$m ; done
 uninstall_home:: ; $(RMRF) $(PATSLIBHOME2)
 #
 ######

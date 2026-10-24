@@ -1,0 +1,170 @@
+.\" SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+.\" SPDX-License-Identifier: MIT
+.TH PATSCC 1 "2026-10-24" "ATS/Postiats 0.4.3" "ATS2 Manual"
+.SH NAME
+patscc \- compile ATS2 programs to executables
+.SH SYNOPSIS
+.B patscc
+.RI [ options "] " "file.dats ..."
+.br
+.B patscc \-o
+.I prog prog.dats
+.SH DESCRIPTION
+.B patscc
+is the driver of the ATS2 compiler. For each ATS file it runs
+.BR patsopt (1)
+to produce a C file, and then it runs the C compiler on the C files. The
+options that it does not know are passed to the C compiler, so
+.B patscc \-O2 \-o prog prog.dats
+works as expected.
+.PP
+It needs no flag for a program that uses the prelude: the C compiler is
+.B ${CC:\-cc}
+with
+.B \-std=c99 \-D_GNU_SOURCE
+and the include and library paths of
+.BR PATSHOME ;
+libc
+.BR malloc (3)
+is the allocator. (The usage text printed by
+.B patscc \-\-help
+still calls the programs
+.I atscc
+and
+.IR atsopt :
+they are
+.B patscc
+and
+.BR patsopt .)
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Print the usage of
+.BR patscc .
+.TP
+.B \-hats
+Print the usage of
+.BR patsopt .
+.TP
+.B \-vats
+Print the version of
+.BR patsopt .
+.TP
+.B \-ccats
+Only compile the ATS files into C files; do not run the C compiler on them.
+.TP
+.B \-tcats
+Only typecheck the ATS files.
+.TP
+.B \-\-gline
+Passed to
+.B patsopt
+to generate line pragmas in the generated C code.
+.TP
+.B \-verbose
+Print each command line that is executed.
+.TP
+.B \-cleanaft
+Remove each C file that
+.B patsopt
+generated once the C compilation is finished.
+.TP
+.BI \-atsccomp " command"
+Use the next argument as the C compilation command (instead of the value
+of
+.BR PATSCCOMP ).
+.TP
+.BI \-DATS " name" [ =value ]
+Pass the definition to
+.B patsopt
+only.
+.TP
+.BI \-DDATS " name" [ =value ]
+Pass the definition to both
+.B patsopt
+and the C compiler.
+.TP
+.BI \-IATS " dir"
+Pass the include path to
+.B patsopt
+only.
+.TP
+.BI \-IIATS " dir"
+Pass the include path to both
+.B patsopt
+and the C compiler.
+.TP
+.BI \-fsats " file"
+Treat the file as static ATS code (a file with the suffix
+.I .sats
+needs no flag).
+.TP
+.BI \-fdats " file"
+Treat the file as dynamic ATS code (a file with the suffix
+.I .dats
+needs no flag).
+.TP
+.B \-\-tlcalopt\-disable
+Passed to
+.B patsopt
+to disable tail-call optimization.
+.TP
+.B \-\-constraint\-ignore
+Passed to
+.B patsopt
+to ignore constraint solving (dangerous).
+.SH ENVIRONMENT
+.TP
+.B PATSHOME
+The root of the ATS2 installation. The scripts that
+.B make install
+puts in
+.I PREFIX/bin
+set it.
+.TP
+.B CC
+The C compiler (default
+.BR cc ).
+.TP
+.B PATSCCOMP
+The whole C compilation command; it replaces the default one.
+.SH FILES
+.TP
+.I $PATSHOME/ccomp/runtime
+The C headers that the generated code includes.
+.TP
+.I $PATSHOME/ccomp/atslib/lib/libatslib.a
+The runtime library.
+.SH NO GARBAGE COLLECTOR
+There is no garbage collector. Heap data must be linear
+.RB ( datavtype ,
+.BR list_vt ,
+.BR option_vt ,
+.BR arrayptr ,
+.BR cloptr ,
+.BR stream_vt ),
+and the compiler rejects a
+.B datatype
+with a non-nullary constructor, a
+.B cloref
+closure, a boxed tuple or record,
+.B $delay
+and
+.BR $list_t .
+.SH EXAMPLES
+.nf
+patscc \-o hello hello.dats
+patscc \-O2 \-g \-fsanitize=address \-o prog prog.dats
+CC=clang patscc \-o prog prog.dats
+patscc \-ccats prog.dats     # only makes prog_dats.c
+.fi
+.SH SEE ALSO
+.BR patsopt (1),
+.BR myatscc (1)
+.PP
+The documentation of the repository: README.md, INSTALL, doc/GUIDE/.
+.SH AUTHORS
+ATS/Postiats was designed and implemented by Hongwei Xi. This line (0.4.3)
+is maintained at https://github.com/msorc/ATS-Postiats.
+.SH BUGS
+Report bugs at https://github.com/msorc/ATS-Postiats/issues.

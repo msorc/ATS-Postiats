@@ -1,0 +1,161 @@
+.\" SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+.\" SPDX-License-Identifier: MIT
+.TH PATSOPT 1 "2026-10-24" "ATS/Postiats 0.4.3" "ATS2 Manual"
+.SH NAME
+patsopt \- the ATS2 compiler: typechecks ATS source and translates it to C
+.SH SYNOPSIS
+.B patsopt
+.RI [ command " ...]"
+.br
+.B patsopt \-\-dynamic
+.I file.dats
+.B \-\-output
+.I file_dats.c
+.br
+.B patsopt \-\-typecheck \-\-dynamic
+.I file.dats
+.SH DESCRIPTION
+.B patsopt
+is the compiler of ATS/Postiats (ATS2). It reads ATS source files, checks
+their types (including dependent types, linear types and the constraints
+they generate), and writes C code. It does not run the C compiler: the
+driver
+.BR patscc (1)
+does that. This line of ATS2 has no garbage collector, and the compiler
+rejects every nonlinear heap allocation (a
+.B datatype
+with a non-nullary constructor, a
+.B cloref
+closure, a boxed tuple or record,
+.B $delay
+and
+.BR $list_t );
+see
+.BR patscc (1)
+and the documentation below.
+.PP
+A static file (an interface, suffix
+.IR .sats )
+is given with
+.BR \-s ,
+a dynamic file (suffix
+.IR .dats )
+with
+.BR \-d .
+The compiler needs the environment variable
+.B PATSHOME
+to find the prelude and the runtime (the scripts that
+.B make install
+puts in
+.I PREFIX/bin
+set it).
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Print the usage and exit.
+.TP
+.BR \-v ", " \-\-version
+Print the version and exit.
+.TP
+.BI \-s " filenames" "\fR, \fP\-\-static " filenames
+Compile the static files individually.
+.TP
+.BI \-d " filenames" "\fR, \fP\-\-dynamic " filenames
+Compile the dynamic files individually.
+.TP
+.BI \-dd " filenames" "\fR, \fP\-\-dynamics " filenames
+Compile the dynamic files in a combined manner.
+.TP
+.BI \-o " filename" "\fR, \fP\-\-output " filename
+Write the output into the file.
+.TP
+.BI \-\-output\-w " filename"
+Output-write into the file (replace it).
+.TP
+.BI \-\-output\-a " filename"
+Output-append into the file.
+.TP
+.BR \-cc ", " \-\-compile
+Compile into C (the default).
+.TP
+.BR \-tc ", " \-\-typecheck
+Typecheck only; write no C code.
+.TP
+.B \-\-depgen
+Generate information on file dependencies.
+.TP
+.B \-\-taggen
+Generate tagging information on syntactic entities.
+.TP
+.B \-\-gline
+Generate line pragma information in the target code.
+.TP
+.B \-\-debug
+Enable the generation of more informative error messages.
+.TP
+.B \-\-debug2
+Enable the generation of debugging information in the target code.
+.TP
+.B \-\-atsreloc
+Generate a script to help relocate packages in need.
+.TP
+.B \-\-codegen\-2
+Output code generated from level-2 syntax.
+.TP
+.B \-\-jsonize\-2
+Output code in JSON based on level-2 syntax.
+.TP
+.B \-\-tlcalopt\-disable
+Disable tail-call optimization.
+.TP
+.B \-\-constraint\-export
+Export the constraints in JSON format (for an external solver).
+.TP
+.B \-\-constraint\-ignore
+Ignore constraint solving entirely. This is dangerous: use it only with
+a proper justification (such as the constraints being solved elsewhere).
+.PP
+The options
+.BI \-DATS " name" [ =value ]
+(a top-level definition) and
+.BI \-IATS " dir"
+(an include path) are also accepted; they are what
+.BR patscc (1)
+passes on.
+.SH ENVIRONMENT
+.TP
+.B PATSHOME
+The root of the ATS2 installation (the directory that has
+.IR prelude ,
+.IR libats ,
+.I share
+and
+.IR ccomp ).
+It must be set when
+.I bin/patsopt
+is run directly.
+.SH EXIT STATUS
+0 on success; non-zero when a source file has a syntax or type error (the
+messages go to the standard error).
+.SH EXAMPLES
+Typecheck a file:
+.PP
+.RS
+patsopt \-\-typecheck \-d hello.dats
+.RE
+.PP
+Translate it to C:
+.PP
+.RS
+patsopt \-d hello.dats \-o hello_dats.c
+.RE
+.SH SEE ALSO
+.BR patscc (1),
+.BR myatscc (1)
+.PP
+The documentation of the repository: README.md, INSTALL, doc/GUIDE/.
+.SH AUTHORS
+ATS/Postiats was designed and implemented by Hongwei Xi. This line (0.4.3)
+is maintained at https://github.com/msorc/ATS-Postiats.
+.SH BUGS
+Report bugs at https://github.com/msorc/ATS-Postiats/issues.

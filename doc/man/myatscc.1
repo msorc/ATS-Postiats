@@ -1,0 +1,61 @@
+.\" SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+.\" SPDX-License-Identifier: MIT
+.TH MYATSCC 1 "2026-10-24" "ATS/Postiats 0.4.3" "ATS2 Manual"
+.SH NAME
+myatscc \- compile an ATS2 file with the command embedded in the file
+.SH SYNOPSIS
+.B myatscc
+.RI [ flag "]... [" file "]..."
+.SH DESCRIPTION
+.B myatscc
+is a wrapper around
+.BR patscc (1)
+for convenience. A file can carry, in a comment, the command that compiles
+it:
+.PP
+.RS
+.nf
+(*
+##myatsccdef=\\
+patscc \-O2 \-o hello hello.dats
+*)
+.fi
+.RE
+.PP
+.B myatscc
+finds that definition in the file and runs it. A file with no definition
+is compiled with the default one, which runs
+.B patscc
+with
+.B \-cleanaft \-D_GNU_SOURCE \-DATS_MEMALLOC_LIBC \-I${PATSHOME}/contrib
+.B \-o
+.I file_dats file.dats
+.BR \-latslib .
+.PP
+A file can also start with the line
+.B //usr/bin/env myatscc "$0"; exit
+so that it can be run as a script.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Print the help message.
+.TP
+.BR \-\-dry ", " \-\-dryrun
+Only generate and print the command; do not run it.
+.SH ENVIRONMENT
+.TP
+.B PATSHOME
+The root of the ATS2 installation.
+.SH EXAMPLES
+.nf
+myatscc \-\-dry hello.dats   # print the command
+myatscc hello.dats           # compile hello.dats
+.fi
+.SH SEE ALSO
+.BR patscc (1),
+.BR patsopt (1)
+.SH AUTHORS
+ATS/Postiats was designed and implemented by Hongwei Xi. This line (0.4.3)
+is maintained at https://github.com/msorc/ATS-Postiats.
+.SH BUGS
+Report bugs at https://github.com/msorc/ATS-Postiats/issues.

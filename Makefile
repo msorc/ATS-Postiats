@@ -173,7 +173,8 @@ pack::
 # scripts $(PREFIX)/bin/{patsopt,patscc,myatscc,...} set PATSHOME to it (when
 # the caller has not) and exec the real programs. atsdoc, pats2xhtml,
 # libatsopt.a, libatsdoc.a and libatsynmark.a are installed when they were
-# built (make tools). DESTDIR is for packagers: it is not in the scripts.
+# built (make tools). The manual pages doc/man/*.1 go to $(PREFIX)/share/man/man1.
+# DESTDIR is for packagers: it is not in the scripts.
 #
 VERSION := $(shell cat $(PATSHOME)/VERSION 2>/dev/null)
 PACKAGE_TARNAME := ats2-postiats
@@ -183,6 +184,9 @@ DESTDIR ?=
 INST_HOME := $(PREFIX)/lib/$(PACKAGE_TARNAME)-$(VERSION)
 INST_HOME_D := $(DESTDIR)$(INST_HOME)
 INST_BIN_D := $(DESTDIR)$(PREFIX)/bin
+INST_MAN_D := $(DESTDIR)$(PREFIX)/share/man/man1
+# the manual pages (doc/man/*.1)
+INST_MANS := $(notdir $(wildcard $(PATSHOME)/doc/man/*.1))
 # the programs of bin/ that are installed when they exist (with a script in $(PREFIX)/bin)
 INST_PROGS := patsopt patscc myatscc atsdoc pats2xhtml
 # the trees that are copied (symbolic links are kept; the build products are not)
@@ -207,7 +211,7 @@ install::
 	  test -x $(PATSHOME)/bin/$$p || { echo "ERROR: bin/$$p is not built: run 'make' first." ; exit 1 ; } ; \
 	done
 	@test -f $(PATSHOME)/ccomp/atslib/lib/libatslib.a || { echo "ERROR: ccomp/atslib/lib/libatslib.a is not built: run 'make' first." ; exit 1 ; }
-	mkdir -p $(INST_HOME_D)/bin $(INST_HOME_D)/ccomp/atslib/lib $(INST_BIN_D)
+	mkdir -p $(INST_HOME_D)/bin $(INST_HOME_D)/ccomp/atslib/lib $(INST_BIN_D) $(INST_MAN_D)
 	cd $(PATSHOME) && tar -cf - --exclude='*.o' --exclude=.keeper $(INST_TREES) \
 	  | tar -xf - -C $(INST_HOME_D)
 	cd $(PATSHOME) && for f in AUTHORS COPYING VERSION ; do \
@@ -226,13 +230,17 @@ install::
 	  if [ -f ccomp/atslib/lib/$$l.a ] ; then \
 	    install -m 644 ccomp/atslib/lib/$$l.a $(INST_HOME_D)/ccomp/atslib/lib/$$l.a ; \
 	  fi ; done
-	@echo "installed: $(INST_HOME_D) and $(INST_BIN_D)/{patsopt,patscc,myatscc,...}"
+	cd $(PATSHOME)/doc/man && for m in $(INST_MANS) ; do \
+	  install -m 644 $$m $(INST_MAN_D)/$$m ; done
+	@echo "installed: $(INST_HOME_D), $(INST_BIN_D)/{patsopt,patscc,myatscc,...} and $(INST_MAN_D)/*.1"
 
-# the scripts are removed by name and PATSHOME as a whole; the empty $(PREFIX)/bin and
-# $(PREFIX)/lib that install may have created are removed too (rmdir never removes a non-empty directory)
+# the scripts and the manual pages are removed by name and PATSHOME as a whole; the empty $(PREFIX)/bin,
+# $(PREFIX)/lib and $(PREFIX)/share/man that install may have created are removed too (rmdir never removes a non-empty directory)
 uninstall::
 	for p in $(INST_PROGS) ; do rm -f $(INST_BIN_D)/$$p ; done
+	for m in $(INST_MANS) ; do rm -f $(INST_MAN_D)/$$m ; done
 	rm -rf $(INST_HOME_D)
+	-rmdir $(INST_MAN_D) $(DESTDIR)$(PREFIX)/share/man $(DESTDIR)$(PREFIX)/share 2>/dev/null ; true
 	-rmdir $(INST_BIN_D) $(DESTDIR)$(PREFIX)/lib 2>/dev/null ; true
 
 ######
