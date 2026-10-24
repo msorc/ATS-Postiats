@@ -84,6 +84,15 @@ Here is a list of major additions and changes since the last release:
    (contrib/ats2cpp) and the Javascript backend (contrib/CATS-atscc2js and
    contrib/libatscc2js, with the shared contrib/CATS-parsemit and
     contrib/libatscc).
+9. The C flags that every user passed by hand are defaults now:
+   -DATS_MEMALLOC_LIBC is no longer needed (libc is the allocator unless
+   -DATS_MEMALLOC_USER or -DATS_MEMALLOC_UNDEF is given; the flag is still
+   accepted), alloca.h is included by the C run-time (no -include alloca.h),
+   and patscc runs ${CC:-cc} (the environment variable CC, else cc) with
+   -std=c99 -D_GNU_SOURCE (PATSCCOMP still overrides the whole command). The
+   makefiles of src/ detect STAGE0HOME (from the directory of PATSOPT) and
+   C3NSTRINTKND (gmpknd if <gmp.h> is found, else intknd), and Makefile_devl
+   uses nproc for JOBS. So `patscc -o hello hello.dats` needs no flags.
 
 Please note that in this release, there are two variants of
 the package released: The "gmp" variant depends on the GMP library and
