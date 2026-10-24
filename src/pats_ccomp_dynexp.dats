@@ -1270,6 +1270,54 @@ end // end of [hidexp_ccomp_ret_con]
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: the functions of a [fnx]-group are compiled into one C function
+// (its non-first members have no C function of their own): a call to one of
+// them that is not a tail-call cannot be compiled (the C compiler would only
+// report "implicit declaration of function"), so it is reported here.
+//
+fun
+auxfnxchk
+(
+  env: !ccompenv
+, loc0: location, tmpret: tmpvar, pmv_fun: primval
+) : void = let
+//
+fun
+chk
+(
+  env: !ccompenv, fl: funlab
+) : void = let
+  val ntl = ccompenv_find_tailcalenv_opt(env, fl)
+in
+//
+if ntl >= 2 then let
+  val () = prerr_errccomp_loc(loc0)
+  val () =
+  prerr_string
+  (
+    ": a non-tail call to a function of the same [fnx]-group (use [fun] instead of [fnx])."
+  ) (* end of [prerr_string] *)
+  val () = prerr_newline()
+in
+  exit(1)
+end else () // end of [if]
+//
+end // end of [chk]
+//
+in
+//
+case+
+primval_node_view(pmv_fun.primval_node()) of
+| ~PMVfunlab(fl) => chk(env, fl)
+| ~PMVcfunlab(_, fl) => chk(env, fl)
+| ~PMVd2vfunlab(_, fl) => chk(env, fl)
+| v => primval_node_view_free(v)
+//
+end // end of [auxfnxchk]
+
+(* ****** ****** *)
+
 implement
 hidexp_ccomp_ret_app
   (env, res, tmpret, hde0) = let
@@ -1298,6 +1346,10 @@ println! ("hidexp_ccomp_ret_app: loc0 = ", loc0)
 val () =
 println! ("hidexp_ccomp_ret_app: pmv_fun = ", pmv_fun)
 *)
+//
+val () =
+if tlcalopt > 0 then
+(if ~isret then auxfnxchk(env, loc0, tmpret, pmv_fun))
 //
 val () =
 if isret then (

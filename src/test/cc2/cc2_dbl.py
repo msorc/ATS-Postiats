@@ -339,6 +339,8 @@ implement ccompenv_inc_tailcalenv_fnx (env, fls) = let
     | ~list_vt_nil () => ()
 in loop (fls) end
 implement ccompenv_find_tailcalenv (env, fl) = cc2_tc_find ($UN.cast{ptr} (fl))
+// HX-2026-10: the check of non-tail calls to the members of a [fnx]-group (patsopt only): no trace, never fires
+implement ccompenv_find_tailcalenv_opt (env, fl) = ~1
 implement ccompenv_find_tailcalenv_cst (env, d2c) = let
   val p = cc2_tc_find_cst ($UN.cast{ptr} (d2c), 0)
 in if p > the_null_ptr then Some_vt ($UN.cast{funlab} (p)) else None_vt () end

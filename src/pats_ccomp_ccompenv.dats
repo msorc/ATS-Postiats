@@ -1373,6 +1373,33 @@ in
 end // end of [ccompenv_find_tailcalenv]
 
 implement
+ccompenv_find_tailcalenv_opt
+  (env, fl0) = let
+//
+val s0 = funlab_get_stamp (fl0)
+//
+val+ @CCOMPENV (p) = env
+//
+val ans =
+(
+case+ p.ccompenv_tailcalenv of
+| @list_vt_cons
+    (tci, _) => let
+    val ans = auxfind (s0, tci)
+    prval () = fold@ (p.ccompenv_tailcalenv)
+  in
+    ans
+  end // end of [list_vt_cons]
+| list_vt_nil((*void*)) => ~1
+) : int // end of [val]
+//
+prval () = fold@ (env)
+//
+in
+  ans
+end // end of [ccompenv_find_tailcalenv_opt]
+
+implement
 ccompenv_find_tailcalenv_cst
   (env, d2c0) = let
 //

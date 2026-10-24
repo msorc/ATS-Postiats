@@ -1481,6 +1481,10 @@ fun ccompenv_inc_tailcalenv_fnx (env: !ccompenv, fls: funlablst_vt): void
 //
 fun ccompenv_find_tailcalenv (env: !ccompenv, fl: funlab): int
 //
+// HX-2026-10: like the above, but [~1] if no function is being compiled
+//
+fun ccompenv_find_tailcalenv_opt (env: !ccompenv, fl: funlab): int
+//
 fun
 ccompenv_find_tailcalenv_cst
   (env: !ccompenv, d2c: d2cst): funlabopt_vt
