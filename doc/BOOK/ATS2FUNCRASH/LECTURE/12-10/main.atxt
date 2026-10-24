@@ -45,19 +45,35 @@ disk-moving.\
 
 With recursion, it is quite straightforward for one to infer that
 2#sup('64')-1 moves are needed in order to accomplish the aforementioned task.
-For instance, the following code shows how this task can be done:
+For instance, the following code shows how this task can be done. The function
+#dyncode("move") is the one that makes a move (in the code of this chapter, it counts the
+moves and prints a line), and the number of the disks is a parameter of
+the other function:
+
+#dats2xhtml('\
+//
+typedef pole = int // 1, 2 or 3
+//
+var theMoves_var: int = 0 // the number of the moves
+val theMoves =
+ref_make_viewptr{int}(view@ theMoves_var | addr@ theMoves_var)
+//
+fun
+move(src: pole, dst: pole): void =
+(
+!theMoves := !theMoves + 1;
+println! ("move ", !theMoves, ": a disk from pole ", src, " to pole ", dst)
+)
+//
+')
 
 #dats2xhtml('\
 //
 extern
 fun
-move(src: pole, dst: pole): void
-//
-extern
-fun
 nmove(n: int, src: pole, dst: pole, tmp: pole): void
 //
-(* ****** ****** *)
+
 //
 implement
 nmove
@@ -74,7 +90,7 @@ nmove(n-1, src, tmp, dst); move(src, dst); nmove(n-1, tmp, dst, src);
 ')
 
 Given two poles #dyncode("src") and #dyncode("dst"), the function
-#dyncode("move"), which is not implemented here, moves the top disk at
+#dyncode("move") moves the top disk at
 pole #dyncode("src") and stack it on the top of the disks at pole
 #dyncode("dst").  Given a natural number #dyncode("n") and three poles
 #dyncode("src"), #dyncode("dst"), and #dyncode("tmp"), the function
@@ -98,25 +114,22 @@ for each given natural number #dyncode("n").\
 Suppose that we want to animate the process of disk-moving incurred
 by calling #dyncode("nmove"). A very natural approach that we can take
 is to first translate #dyncode("nmove") (implemented in the direct-style)
-into the following #dyncode("k_nmove") implemented in the CPS-style:
-
-")
-
-#para("\
+into the following #dyncode("k_nmove") implemented in the CPS-style. The
+continuations are the linear closures of the previous chapter (of the type
+#stacode("cont0"), which is the type of the thunks that are called once and
+then freed by #dyncode("cont0_call")):
 
 #dats2xhtml('\
 //
-typedef cont() = cfun(void)
+extern
+fun
+k_move(src: pole, dst: pole, k: cont0): void
 //
 extern
 fun
-k_move(src: pole, dst: pole, k: cont()): void
+k_nmove(n: int, src: pole, dst: pole, tmp: pole, k: cont0): void
 //
-extern
-fun
-k_nmove(n: int, src: pole, dst: pole, tmp: pole, k: cont()): void
-//
-(* ****** ****** *)
+
 //
 implement
 k_nmove
@@ -129,9 +142,9 @@ then
 (
 k_nmove
 ( n-1, src, tmp, dst
-, lam() => k_move(src, dst, lam() => k_nmove(n-1, tmp, dst, src, k0)))
+, llam() => k_move(src, dst, llam() => k_nmove(n-1, tmp, dst, src, k0)))
 )
-else k0((*void*))
+else cont0_call(k0)
 // end of [if] // end of [k_nmove]
 //
 ')
@@ -145,70 +158,158 @@ in the follow way:
 
 #dats2xhtml('\
 //
+// the usual implementation of [k_move]
+//
 implement
 k_move
 (src, dst, k0) = let
-  val () = move(src, dst) in k0()
+  val () = move(src, dst) in cont0_call(k0)
 end // end of [k_move]
+//
+val () = println! ("-- direct style --")
+val () = nmove(3, 1, 2, 3)
+//
+val () = !theMoves := 0
+val () = println! ("-- CPS-style --")
+val () = k_nmove(3, 1, 2, 3, llam() => println! ("done"))
 //
 ')
 
 After calling #dyncode("move") to create some effects,
 #dyncode("k_move") calls the passed continuation immediately to
 initiate the work to be continued. For the sake of animation, the
-function #dyncode("k_move") can be implemented as follows:
+function #dyncode("k_move") can be implemented as follows (it is given the name
+#dyncode("k_move2"), and the function #dyncode("k_nmove2") is
+#dyncode("k_nmove") calling it):
 
 #dats2xhtml('\
 //
+// The version of [k_move] for the animation
+//
+extern
+fun
+k_move2(src: pole, dst: pole, k: cont0): void
+//
 implement
-k_move
+k_move2
 (src, dst, k0) = let
   val () = move(src, dst) in save_cont(k0)
-end // end of [k_move]
+end // end of [k_move2]
+//
+
+//
+// [k_nmove2] is [k_nmove] in which [k_move2] is called
+//
+extern
+fun
+k_nmove2(n: int, src: pole, dst: pole, tmp: pole, k: cont0): void
+//
+implement
+k_nmove2
+( n
+, src, dst, tmp
+, k0 ) =
+if
+(n > 0)
+then
+(
+k_nmove2
+( n-1, src, tmp, dst
+, llam() => k_move2(src, dst, llam() => k_nmove2(n-1, tmp, dst, src, k0)))
+)
+else cont0_call(k0)
+// end of [if] // end of [k_nmove2]
 //
 ')
 
 where the function #dyncode("save_cont") stores a given continuation
 somewhere so that it can be fetched and then called at a chosen point
-in future.
+in future. The continuation is linear and it is stored (as a pointer) in a toplevel
+variable, from which the function #dyncode("step") fetches it and calls it (the function
+returns false if there is no continuation to continue with, and the function
+#dyncode("steps") calls it until there is none):
+
+#dats2xhtml('\
+//
+// The continuation is saved, instead of being called: the next
+// step of the animation is taken when [step] is called.
+//
+var theSaved_var: ptr = the_null_ptr
+val theSaved =
+ref_make_viewptr{ptr}(view@ theSaved_var | addr@ theSaved_var)
+//
+fun
+save_cont(k0: cont0): void =
+!theSaved := $UNSAFE.castvwtp0{ptr}(k0)
+//
+// [step] returns false if there is no continuation to continue with
+//
+fun
+step(): bool = let
+  val p = !theSaved
+in
+  if iseqz(p)
+    then false
+    else let
+      val () = !theSaved := the_null_ptr
+      val () = cont0_call($UNSAFE.castvwtp0{cont0}(p))
+    in
+      true
+    end // end of [else]
+end // end of [step]
+//
+fun
+steps(): void = if step() then steps() else ()
+//
+')
+
+The following code shows the animation: after the first call to
+#dyncode("k_nmove2") returns, only the first move has been made, and
+the rest of the work is the continuation that was saved by
+#dyncode("k_move2"); each call to #dyncode("step") makes the next move:
+
+#dats2xhtml('\
+implement
+main0() = {
+//
+val () = !theMoves := 0
+val () = println! ("-- animation: one step at a time --")
+//
+// the first call returns after the first move
+//
+val () = k_nmove2(3, 1, 2, 3, llam() => println! ("done"))
+val () = println! ("(the first move is made, the rest is saved)")
+//
+val-true = step()
+val-true = step()
+//
+val () = println! ("(two more moves are made, the rest is saved)")
+//
+val () = steps()
+//
+val () = println! ("the number of the moves: ", !theMoves)
+//
+} (* end of [main0] *)
+')
 
 ")
 
 #para("\
 
-Please see <ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.html\">on-line</ulink>
-a demo that animates the process of disk-moving involved in solving
-the puzzle of Hanoi Towers, where the animation is achieved by a
-controlled way of evaluating the continuation saved by each call to
-#dyncode("k_move"). Also please refer to <ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.dats\">HanoiTowers.dats</ulink>
-for various implementation details.
+In a browser, the saved continuation would be called by a handler of a click or
+by a timer (see #dyncode("execute_after") in the chapter on animation), and the
+GC-era demo that animates the process of disk-moving involved in solving
+the puzzle of Hanoi Towers is <ulink
+url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.html\">on-line</ulink>.
 
 ")
 
 #para("\
 
 Please find #mycodelink("LECTURE/12-10/CODE", "on-line") the entirety
-of the code used in this chapter. The mentioned URL link(s) can be found as follows:
-
-<itemizedlist>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.html\">https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.html</ulink>
-")#comment("para")
-</listitem>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.dats\">https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/12-10/CODE/HanoiTowers.dats</ulink>
-")#comment("para")
-</listitem>
-
-</itemizedlist>
+of the code used in this chapter. The file #filename("HanoiTowers.dats") was compiled with
+#command("patscc") (no flag is needed) and run with the address sanitizer,
+which reports no leak. The three versions print the same 7 moves for 3 disks.
 
 ")#comment("para")
 
@@ -221,4 +322,3 @@ url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FU
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
