@@ -441,6 +441,21 @@ argument.
 
 #para('\
 
+The function arguments of the combinators in this book follow a few rules
+that the typechecker enforces. A flat closure that is passed by reference can be
+called as many times as one wants, but it cannot be captured by another
+closure (and a borrowed linear value, a list or an array for instance, cannot be captured by a
+closure either): a combinator that needs to call its function argument from inside
+another closure takes an envless function instead (a function value is an ordinary
+value and can be captured by any closure), and a combinator that stores its function
+argument (a stream for instance) takes a boxed linear closure, which it owns and
+frees. Each time one of these rules shapes the code in the following chapters, the
+text says so.
+
+')
+
+#para('\
+
 Finally, a closure-function that is to be stored (or returned) cannot live in
 a stack-frame, and it has to be a boxed one. For instance, the following
 code creates a boxed closure that adds a given integer to its argument:
