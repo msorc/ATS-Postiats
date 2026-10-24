@@ -13,196 +13,204 @@ by [atsdoc] from CHAP_HASHTABLE/main.atxt.\n\
 Time of Generation: #timestamp()\
 ")
 <chapter id="hashtable">
-#title("Persistent Hashtables")
+#title("Linear Hashtables")
 
 #para("\
 
 Hashtables are commonly used to implement finite maps. In ATSLIB/libats,
-there are hashtable implementations based on linear chaining and linear
-probing. There is also support for linear hashtables as well as persistent
-hashtables. The linear ones can be safely freed by the programmer, and the
-persistent ones (which are directly based on linear ones) can only be
-safely reclaimed through garbage collection (GC). In this chapter, I show
-how persistent hashtables can be created and operated on.\
+there are hashtable implementations based on linear chaining
+(#myatscodelink("libats/SATS/hashtbl_chain.sats", "libats/SATS/hashtbl_chain.sats"))
+and linear probing
+(#myatscodelink("libats/SATS/hashtbl_linprb.sats", "libats/SATS/hashtbl_linprb.sats")).
+The hashtables of both are #emphasis("linear"): a hashtable is
+created by the programmer and it must be freed by the programmer, which
+the type-checker enforces. (The persistent hashtables, which can only be
+reclaimed through garbage collection, and the wrapper
+#filename("libats/ML/HATS/myhashtblref.hats") that made them easy to use are
+not available any more together with the support for garbage collection.)
+In this chapter, I show how a linear hashtable can be created and operated
+on.\
 
 ")
 
-#para("\
+#para('\
 
 Suppose that a map is needed for mapping keys of type
-#stacode("key_t") to items of type #stacode("itm_t"). The following code
-essentially sets up an interface for creating and operating on such a map
-based on a hashtable implementation in ATSLIB/libats:
+#stacode("key") to items of type #stacode("itm"). The following code
+essentially sets up the interface and the implementation of a map based on
+the hashtable of ATSLIB/libats that uses linear chaining. Notice that the
+implementation needs a hash function and the implementation of
+the list-based map for the buckets:
 
 #dats2xhtml('\
-local
-
-typedef
-key = key_t and itm = itm_t
-
-in (* in-of-local *)
-
-\#include "libats/ML/HATS/myhashtblref.hats"
-
-end // end of [local]
+staload "libats/SATS/hashtbl_chain.sats"
+//
+staload _(*anon*) = "libats/DATS/hashfun.dats"
+staload _(*anon*) = "libats/DATS/linmap_list.dats"
+staload _(*anon*) = "libats/DATS/qlist.dats"
+staload _(*anon*) = "libats/DATS/hashtbl_chain.dats"
+//
+typedef key = string and itm = int
 ')
 
-Please find #myatscodelink("libats/ML/HATS/myhashtblref.hats", "on-line")
-the HATS file mentioned in the code, which is just a convenience wrapper
-made to simplify programming with hashtables.
+')
 
-")#comment("para")
+#para('\
 
-#para("\
-
-Assume that #stacode("key_t") is #stacode("string") and #stacode("itm_t")
+Assume that #stacode("key") is #stacode("string") and #stacode("itm")
 is #stacode("int"). The following line of code creates a hashtable with its
 initial capacity set to be 1000:
 
 #dats2xhtml('\
-val mymap = myhashtbl_make_nil(1000)
+val mymap = hashtbl_make_nil<key,itm>(i2sz(1000))
 ')
 
 Note that the capacity in this case is the size of the array associated
 with the created hashtable. The underlying hashtable implementation is
 based on linear chaining, and this hashtable can store up to 5000 (5*1000)
 items without need for resizing. When resizing is indeed needed, it is done
-automatically. The following few lines insert some key/item pairs into
+automatically. The value #dyncode("mymap") is linear: it has to be
+freed by calling #dyncode("hashtbl_free") (see below). The following two
+lines of code show the number of items and the capacity of the hashtable:
+
+#dats2xhtml('\
+val () =
+fprintln! (stdout_ref, "mymap.size = ", hashtbl_get_size(mymap))
+val () =
+fprintln! (stdout_ref, "mymap.capacity = ", hashtbl_get_capacity(mymap))
+')
+
+The following few lines insert some key/item pairs into
 #dyncode("mymap"):
 
 #dats2xhtml('\
+val-~None_vt() = hashtbl_insert_opt(mymap, "a", 0)
+val-~Some_vt(0) = hashtbl_insert_opt(mymap, "a", 1)
 //
-val-~None_vt() = mymap.insert("a", 0)
-val-~Some_vt(0) = mymap.insert("a", 1)
+val-~None_vt() = hashtbl_insert_opt(mymap, "b", 1)
+val-~Some_vt(1) = hashtbl_insert_opt(mymap, "b", 2)
 //
-val-~None_vt() = mymap.insert("b", 1)
-val-~Some_vt(1) = mymap.insert("b", 2)
-//
-val-~None_vt() = mymap.insert("c", 2)
-val-~Some_vt(2) = mymap.insert("c", 3)
-//
+val-~None_vt() = hashtbl_insert_opt(mymap, "c", 2)
+val-~Some_vt(2) = hashtbl_insert_opt(mymap, "c", 3)
 ')
 
-The dot-symbol #dyncode(".insert") is overloaded with a function of the
-name #dyncode("myhashtbl_insert"). Given a key and an item,
-#dyncode("mymap.insert") inserts the key/item pair into #dyncode("mymap").
+Given a key and an item, #dyncode("hashtbl_insert_opt") inserts the
+key/item pair into #dyncode("mymap").
 If the key is in the domain of the map represented by #dyncode("mymap")
 before insertion, then the original item associated with the key is
-returned. Otherwise, no item is returned. As can be expected, the size
+returned (as the value of #dyncode("Some_vt"), a linear option). Otherwise,
+#dyncode("None_vt") is returned. The patterns
+#dyncode("val-~None_vt()") and #dyncode("val-~Some_vt(2)") free the
+returned option while they match it. As can be expected, the size
 of #dyncode("mymap") is 3 at this point:
 
 #dats2xhtml('\
-val () = assertloc (mymap.size() = 3)
+val () = assertloc (hashtbl_get_size(mymap) = 3)
+val () = fprintln! (stdout_ref, "mymap = ", mymap)
 ')
 
-The dot-symbol #dyncode(".size") is overloaded with a function of the name
-#dyncode("myhashtbl_get_size"), which returns the number of key/item pairs
-stored in a given hashtable.  During the course of debugging, one may want
-to print out the key/item pairs in a given hashtable:
+The function #dyncode("hashtbl_get_size") returns the number of key/item
+pairs stored in a given hashtable.  During the course of debugging, one may
+want to print out the key/item pairs in a given hashtable; the symbol
+#dyncode("fprint") is overloaded with #dyncode("fprint_hashtbl"). The next
+two lines of code show how search with a given key operates on a hashtable:
 
 #dats2xhtml('\
-//
-val () =
-  fprintln! (stdout_ref, "mymap = ", mymap)
-//
+val-~None_vt() = hashtbl_search_opt(mymap, "")
+val-~Some_vt(1) = hashtbl_search_opt(mymap, "a")
 ')
 
-where the symbol #dyncode("fprint") is overloaded with
-#dyncode("fprint_myhashtbl"). The next two lines of code show how search
-with a given key operates on a hashtable:
-
-#dats2xhtml('\
-val-~None_vt() = mymap.search("")
-val-~Some_vt(1) = mymap.search("a")
-')
-
-The dot-symbol #dyncode(".search") is overloaded with a function of the
-name #dyncode("myhashtbl_search"), which returns the item associated with a
-given key if it is found. The next few lines of code remove some key/item
+The function #dyncode("hashtbl_search_opt") returns the item associated with
+a given key if it is found. The next few lines of code remove some key/item
 pairs from #dyncode("mymap"):
 
 #dats2xhtml('\
+val-true = hashtbl_remove(mymap, "a")
+val-false = hashtbl_remove(mymap, "a")
 //
-val-true = mymap.remove("a")
-val-false = mymap.remove("a")
-//
-val-~Some_vt(2) = mymap.takeout("b")
-val-~Some_vt(3) = mymap.takeout("c")
-//
+val-~Some_vt(2) = hashtbl_takeout_opt(mymap, "b")
+val-~Some_vt(3) = hashtbl_takeout_opt(mymap, "c")
 ')
 
-The dot-symbol #dyncode(".remove") is overloaded with a function of the
-name #dyncode("myhashtbl_remove") for removing a key/item pair of a given
+The function #dyncode("hashtbl_remove") removes the key/item pair of a given
 key. If a key/item pair is removed, then the function returns
 true. Otherwise, it returns false to indicates that no key/item pair of the
-given key is stored in the hashtable being operated on.  The dot-symbol
-#dyncode(".takeout") is overloaded with a function of the name
-#dyncode("myhashtbl_takeout"), which is similar to
-#dyncode("myhashtbl_remove") excepting for returning the removed item.
+given key is stored in the hashtable being operated on.  The function
+#dyncode("hashtbl_takeout_opt") is similar to
+#dyncode("hashtbl_remove") excepting for returning the removed item.
 The next few lines of code make use of several less commonly used functions
 on hashtables:
 
 #dats2xhtml('\
-//
-val () = mymap.insert_any("a", 0)
-val () = mymap.insert_any("b", 1)
-val () = mymap.insert_any("c", 2)
-val kxs = mymap.listize1((*void*))
+val () = hashtbl_insert_any(mymap, "a", 0)
+val () = hashtbl_insert_any(mymap, "b", 1)
+val () = hashtbl_insert_any(mymap, "c", 2)
+val kxs = hashtbl_listize1(mymap)
 val ((*void*)) = fprintln! (stdout_ref, "kxs = ", kxs)
-val kxs = mymap.takeout_all((*void*))
+val ((*void*)) = list_vt_free<(key,itm)>(kxs)
+val kxs = hashtbl_takeout_all(mymap)
 val ((*void*)) = fprintln! (stdout_ref, "kxs = ", kxs)
-//
-val () = assertloc (mymap.size() = 0)
-//
+val ((*void*)) = list_vt_free<(key,itm)>(kxs)
 ')
 
-The dot-symbol #dyncode(".insert_any") is overloaded with a function of the
-name #dyncode("myhashtbl_insert_any"), which #emphasis("always") inserts a
+The function #dyncode("hashtbl_insert_any") #emphasis("always") inserts a
 given key/item pair regardless whether the key is already in use. One
 should really avoid using this function or only call it when it is
 absolutely sure that the given key is not already in use for otherwise the
-involved hashtable would be corrupted.  The dot-symbols
-#dyncode(".listize1") and #dyncode(".takeout_all") are overloaded with two
-functions of the names #dyncode("myhashtbl_listize1") and
-#dyncode("myhashtbl_takeout_all"), respectively. Both of them return a list
-consisting of all the key/item pairs in a given hashtable; the former keeps
-the hashtable unchanged while the latter empties it. Last, I present as follows the
-interface for an iterator going over all the key/item pairs in a given hashtable:
+involved hashtable would be corrupted.  The functions
+#dyncode("hashtbl_listize1") and #dyncode("hashtbl_takeout_all") return a
+linear list consisting of all the key/item pairs in a given hashtable; the
+former keeps the hashtable unchanged while the latter empties it. The list
+is linear, too, and it is freed by #dyncode("list_vt_free"). Last, I present
+as follows the interface for an iterator going over all the key/item pairs
+in a given hashtable:
 
-#dats2xhtml('\
-//
-extern
+#sats2xhtml('\
 fun
-myhashtbl_foreach_cloref
-(
-  tbl: myhashtbl
-, fwork: (key, &(itm) >> _) -<cloref1> void
-) : void // end-of-function
+{key:t0p
+;itm:vt0p}
+hashtbl_foreach(tbl: !hashtbl(key, INV(itm))): void
 //
+fun
+{key:t0p
+;itm:vt0p}
+{env:vt0p}
+hashtbl_foreach$fwork(k: key, x: &itm >> _, &env >> _): void
 ')
 
 As an example, the following code prints out all the key/item
-pairs in a given hashtable:
+pairs in a given hashtable: the template
+#dyncode("hashtbl_foreach$fwork") is implemented to specify the work to
+do for each of them (there is no closure-function to create).
 
 #dats2xhtml('\
+val () = let
 //
-val () =
-myhashtbl_foreach_cloref
-(
-  mymap
-, lam (k, x) => fprintln! (stdout_ref, "k=", k, " and ", "x=", x)
-) (* myhashtbl_foreach_cloref *)
+implement
+hashtbl_foreach$fwork<key,itm><void>
+  (k, x, env) = fprintln! (stdout_ref, "k=", k, " and ", "x=", x)
 //
+in
+  hashtbl_foreach<key,itm> (mymap)
+end // end of [val]
 ')
 
-")
+Finally, the hashtable is freed:
+
+#dats2xhtml('\
+val () = hashtbl_free (mymap)
+')
+
+')
 
 #para("\
 
 Please find the entirety of the code used in this chapter
 #mycodelink("chap_hashtable.dats", "on-line"). Also, there is a
 hashtable-based implementation of symbol table available
-#mycodelink("chap_hashtable2.dats", "on-line").
+#mycodelink("chap_hashtable2.dats", "on-line"): since the table lives as
+long as the program, it is created once and never freed, and the (unsafe)
+casts in the code only pass the table around without consuming it.
 
 ")#comment("para")
 

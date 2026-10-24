@@ -14,7 +14,7 @@ files = sys.argv[2:] or glob.glob('CODE/*.dats') + glob.glob('CODE/*/*.dats') + 
 code = norm(''.join(open(f).read() + '\n' for f in files))
 import os
 home = os.environ.get('PATSHOME', '../../..')
-libs = glob.glob(home + '/prelude/*.sats') + glob.glob(home + '/prelude/SATS/*.sats') + glob.glob(home + '/libats/SATS/*.sats') + glob.glob(home + '/libats/*/SATS/*.sats')
+libs = glob.glob(home + '/prelude/*.sats') + glob.glob(home + '/prelude/SATS/*.sats') + glob.glob(home + '/libats/SATS/*.sats') + glob.glob(home + '/libats/*/SATS/*.sats') + glob.glob(home + '/libats/SATS/SHARE/*.hats')
 lib = norm(''.join(open(f, errors='replace').read() + '\n' for f in libs))
 bad = 0
 for m in re.finditer(r"#(?:dats|sats|hats)2xhtml\((['\"])\\?\n?((?:\\.|(?!\1).)*)\1\)", text, re.S):
