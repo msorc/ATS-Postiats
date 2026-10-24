@@ -6,33 +6,27 @@
 
 ######
 #
-# Note that
-# certain installations require the following changes:
+# PATSHOME is the root of the ATS2 repository or of an installation
+# of ATS2; its [bin] directory holds [patscc] and [patsopt].
 #
-# atscc -> patscc
-# atsopt -> patsopt
-# ATSHOME -> PATSHOME
+PATSHOMEQ="$(PATSHOME)"
 #
 ######
 #
-ATSHOMEQ="$(ATSHOME)"
-#
-######
-#
-ATSCC=$(ATSHOMEQ)/bin/atscc
-ATSOPT=$(ATSHOMEQ)/bin/atsopt
+PATSCC=$(PATSHOMEQ)/bin/patscc
+PATSOPT=$(PATSHOMEQ)/bin/patsopt
 #
 ######
 #
 #
 # HX: Please uncomment the one you want, or skip it entirely
 #
-ATSCCFLAGS=
-# ATSCCFLAGS=-O2
+PATSCCFLAGS=
+# PATSCCFLAGS=-O2
 #
 # '-flto' enables link-time optimization such as inlining lib functions
 #
-#ATSCCFLAGS=-O2 -flto
+# PATSCCFLAGS=-O2 -flto
 #
 #
 ######
@@ -45,15 +39,15 @@ cleanall::
 # with the name of the file you want to compile
 #
 # foo: foo.dats ; \
-#   $(ATSCC) $(ATSCCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+#   $(PATSCC) $(PATSCCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
 # cleanall:: ; $(RMF) foo
 #
 ######
 #
 # You may find these rules useful
 #
-# %_sats.o: %.sats ; $(ATSCC) $(ATSCCFLAGS) -c $< || echo $@ ": ERROR!!!"
-# %_dats.o: %.dats ; $(ATSCC) $(ATSCCFLAGS) -c $< || echo $@ ": ERROR!!!"
+# %_sats.o: %.sats ; $(PATSCC) $(PATSCCFLAGS) -c $< || echo $@ ": ERROR!!!"
+# %_dats.o: %.dats ; $(PATSCC) $(PATSCCFLAGS) -c $< || echo $@ ": ERROR!!!"
 #
 ######
 #
