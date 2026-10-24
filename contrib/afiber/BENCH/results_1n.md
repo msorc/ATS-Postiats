@@ -1,7 +1,7 @@
 # One-worker results measured before M:N scheduling (library at commit bd32831e0, 2026-10-18 morning). The current numbers are in results.md.
 
 rm -f bench_ats bench_go bench_dats.c
-/home/msorc/install/devel/lang/ats/ATS-Postiats/bin/patscc -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o bench_ats bench.dats
+bin/patscc -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o bench_ats bench.dats
 cd go && go build -o ../bench_go .
 python3 run.py
 | benchmark | ops | afiber ns/op | go P=1 ns/op | go P=32 ns/op | afiber vs go P=1 |

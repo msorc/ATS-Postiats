@@ -34,7 +34,7 @@ val () =
 {
 //
 val name =
-"/home/hwxi/research/Postiats/git/doc/EXAMPLE/ATSLIB/prelude_filebas.dats"
+"doc/EXAMPLE/ATSLIB/prelude_filebas.dats"
 //
 val (fpf | ext) = filename_get_ext (name)
 val out = stdout_ref

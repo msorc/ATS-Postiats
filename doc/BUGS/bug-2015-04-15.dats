@@ -19,7 +19,7 @@
 (* ****** ****** *)
 
 (*
-exit(ATS): /home/hwxi/research/Postiats/git/src/pats_typerase_dynexp.dats: 18567(line=820, offs=9) -- 18619(line=820, offs=61): match failure.
+exit(ATS): $PATSHOME/src/pats_typerase_dynexp.dats: 18567(line=820, offs=9) -- 18619(line=820, offs=61): match failure.
 *)
 
 (* ****** ****** *)
