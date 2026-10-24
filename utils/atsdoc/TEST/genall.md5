@@ -137,7 +137,7 @@ e12588009ed4828d2e57e4e67882ae1a  plain  doc/DISTRIB/ATEXT/utils_atscc.atxt
 a35734f0c5b1ba7d00c9119fbaa960c8  plain  doc/DISTRIB/ATEXT/utils_emacs.atxt
 ab942f06739e64e880a5f690822e9a71  plain  doc/DISTRIB/ATEXT/utils_libatsopt.atxt
 8933e19964f28e6143706717b228da15  plain  doc/DISTRIB/ATEXT/utils_myatscc.atxt
-6dc951edbe209827544fc49550f64adb  plain  doc/DISTRIB/Makefile.atxt
+5f61ba64e4cb133fa32a7e0925b30630  plain  doc/DISTRIB/Makefile.atxt
 78eab3716ff5ac6c05ee684647b66c2a  plain  doc/EXAMPLE/ATSLIB/Makefile.atxt
 0d620c3ed649b764270cd866050b1249  plain  doc/EXAMPLE/EFFECTIVATS/PwTP-bool-vs-prop/main.atxt
 5e37c7eb74a1368a1ef0825ae7287332  plain  doc/EXAMPLE/EFFECTIVATS/Readers-and-Writers/main.atxt
