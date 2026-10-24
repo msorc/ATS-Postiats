@@ -13,37 +13,32 @@ by [atsdoc] from CHAP_ARRAYREF/main.atxt.\n\
 Time of Generation: #timestamp()\
 ")
 <chapter id="arrayref">
-#title("Persistent Arrays")
+#title("Linear Arrays")
 
 #para("\
 \
-#emphasis("Historical note:") this chapter describes the persistent arrays
-of the GC era of ATS2. The type #stacode("arrayref") was removed when the
-support for the garbage collector was dropped: the compiler now rejects
-every nonlinear heap allocation. Use #stacode("arrayptr") (a flat array of
-pointers) instead; its interface is in
+#emphasis("Note:") the first versions of this chapter described persistent
+arrays (the type #stacode("arrayref")), which are reclaimed by garbage
+collection (GC). That type was removed when the support for GC was dropped:
+the compiler now rejects every nonlinear heap allocation. The arrays that
+are allocated on heap are linear now: the type for them is
+#stacode("arrayptr") and they must be freed explicitly. The interface is in
 #myatscodelink("prelude/SATS/arrayptr.sats", "prelude/SATS/arrayptr.sats").
 \
 ")
 
 #para("\
 
-A persistent array of size n is just n heap-allocated cells (or references)
-in a row.  It is persistent in the sense that the memory allocated for the
-array cannot be freed manually. Instead, it can only be safely reclaimed
-through systematic garbage collection (GC).\
-
-")
-
-#para("\
-
-Given a viewtype VT, the type for persistent arrays containing N values of
-viewtype VT is #stacode("arrayref(VT, N)").  Note that arrays in ATS are
-the same as those in C: There is no size information attached to them. The
-interfaces for various functions on persistent arrays can be found in
-the SATS file
-#myatscodelink("prelude/SATS/arrayref.sats", "prelude/SATS/arrayref.sats"),
-which is automatically loaded by #command("atsopt").
+A linear array of size n is n consecutive cells in the heap together with
+the obligation to free them. Given a viewtype VT, the type for linear
+arrays containing N values of viewtype VT is #stacode("arrayptr(VT, N)").
+Note that arrays in ATS are the same as those in C: There is no size
+information attached to them at run-time, and the size of an array is only
+part of its static type. (The chapter on arrays-with-size shows how to
+keep the size and the array together.) Since the type is linear, the
+compiler makes sure that an array is either freed or passed to a function
+that takes over the obligation; it also rejects any attempt to use an array
+that has been freed already.
 
 ")#comment("para")
 
@@ -52,47 +47,82 @@ which is automatically loaded by #command("atsopt").
 There are various functions in ATSLIB for array creation. For instance, the
 following two are commonly used:
 
-#sats2xhtml("\
-fun{a:t@ype}
-arrayref_make_elt
-  {n:nat} (asz: size_t n, elt: a):<!wrt> arrayref(a, n)
-// end of [arrayref_make_elt]
+#sats2xhtml('\
+fun
+{a:t0p}
+arrayptr_make_elt
+  {n:int}
+  (asz: size_t(n), x: a):<!wrt> arrayptr(a, n)
+// end of [arrayptr_make_elt]
 
-fun{a:t@ype}
-arrayref_make_listlen
-  {n:int} (xs: list(a, n), n: int n):<!wrt> arrayref(a, n)
-// end of [arrayref_make_listlen]
+fun
+{a:vt0p}
+arrayptr_make_list_vt{n:int}
+  ( asz: int(n)
+  , xs0: list_vt(INV(a), n)):<!wrt> arrayptr(a, n)
+// end of [arrayptr_make_list_vt]
+')
+
+Applied to a size and an element, #dyncode("arrayptr_make_elt") returns an
+array of the given size in which each cell is initialized with the given
+element.  Applied to a (linear) list of elements and the length of the list,
+#dyncode("arrayptr_make_list_vt") consumes the list and returns an array of
+size equal to the given length in which each cell is initialized with the
+corresponding element in the given list.
+
 ")
 
-Applied to a size and an element, #dyncode("arrayref_make_elt") returns an
-array of the given size in which each cell is initialized with the given
-element.  Applied to a list of elements and the length of the list,
-#dyncode("arrayref_make_listlen") returns an array of size equal to the
-given length in which each cell is initialized with the corresponding
-element in the given list.\
+#para("\
+
+The memory of an array of values of a non-linear type is released by
+calling the function #dyncode("arrayptr_free") (the symbol
+#dyncode("free") is overloaded with it):
+
+#sats2xhtml('\
+fun
+arrayptr_free
+  {a:t0p}
+  {l:addr}{n:int}
+  (A: arrayptr(INV(a), l, n)):<!wrt> void = "mac#%"
+// end of [arrayptr_free]
+')
+
+If the array contains linear values, they have to be taken care of first,
+for instance, by calling #dyncode("arrayptr_freelin"), which clears the
+cells one by one with the user-supplied template
+#dyncode("array_uninitize$clear") before it frees the array.
 
 ")
 
 #para("\
 
 For reading from and writing to an array, the function templates
-#dyncode("arrayref_get_at") and #dyncode("arrayref_set_at") can be used,
-respectively, which are assigned the following interfaces:
+#dyncode("arrayptr_get_at") and #dyncode("arrayptr_set_at") can be used,
+respectively, which are assigned the following interfaces (we show the
+ones for the indices of unsigned integer types such as #stacode("size_t")):
 
 #sats2xhtml('\
-fun{a:t@ype}
-arrayref_get_at
-  {n:int} (A: arrayref(a, n), i: sizeLt (n)):<!ref> a
-
-fun{a:t@ype}
-arrayref_set_at
-  {n:int} (A: arrayref(a, n), i: sizeLt (n), x: a):<!ref> void
+fun{
+a:t0p}{tk:tk
+} arrayptr_get_at_guint
+  {n:int}{i:nat | i < n}
+  (A: !arrayptr(INV(a), n), i: g1uint (tk, i)):<> (a)
+//
+fun{
+a:t0p}{tk:tk
+} arrayptr_set_at_guint
+  {n:int}{i:nat | i < n}
+  (A: !arrayptr(INV(a), n), i: g1uint (tk, i), x: a):<!wrt> void
 ')
 
-Given an array #dyncode("A"), an index #dyncode("i") and a value
-#dyncode("v"), #dyncode("arrayref_get_at(A, i)") and
-#dyncode("arrayref_set_at(A, i, v)") can be written as #dyncode("A[i]")
-and #dyncode("A[i] := v"), respectively.\
+Note that the symbol #keycode("!") in front of the type of the array
+indicates that the array is only borrowed: it is still available after a
+call returns. Given an array #dyncode("A"), an index #dyncode("i") and a
+value #dyncode("v"), #dyncode("arrayptr_get_at(A, i)") and
+#dyncode("arrayptr_set_at(A, i, v)") can be written as #dyncode("A[i]") and
+#dyncode("A[i] := v"), respectively. The index is checked statically
+against the size of the array: there is no run-time test, and an access
+that cannot be proven to be in bounds is a type-error.\
 
 ")
 
@@ -102,30 +132,33 @@ As an example, the following function template reverses the content of a
 given array:\
 
 #dats2xhtml('\
-fun{a:t@ype}
-arrayref_reverse{n:nat}
+fun{a:t0p}
+arrayptr_reverse{n:nat}
 (
-  A: arrayref(a, n), n: size_t(n)
+  A: !arrayptr(a, n), n: size_t(n)
 ) : void = let
 //
 fun loop
   {i: nat | i <= n} .<n-i>.
 (
-  A: arrayref(a, n), n: size_t n, i: size_t i
+  A: !arrayptr(a, n), n: size_t n, i: size_t i
 ) : void = let
   val n2 = half (n)
 in
   if i < n2 then let
     val tmp = A[i]
     val ni = pred(n)-i
+    val x = A[ni]
+    val () = A[i] := x
+    val () = A[ni] := tmp
   in
-    A[i] := A[ni]; A[ni] := tmp; loop(A, n, succ(i))
+    loop(A, n, succ(i))
   end else () // end of [if]
 end // end of [loop]
 //
 in
   loop(A, n, i2sz(0))
-end // end of [arrayref_reverse]
+end // end of [arrayptr_reverse]
 ')
 
 ")
@@ -143,57 +176,60 @@ early, can be buried so scarily deep!\
 
 #para("\
 
-The careful reader may have already noticed that the sort #dyncode("t@ype")
+The careful reader may have already noticed that the sort #dyncode("t0p")
 is assigned to the template parameter #dyncode("a"). In other words, the
-above implementation of #dyncode("arrayref_reverse") cannot handle a case
+above implementation of #dyncode("arrayptr_reverse") cannot handle a case
 where the values stored in a given array are of some linear type. The
-reason for choosing the sort #dyncode("t@ype") is that both
-#dyncode("arrayref_get_at") and #dyncode("arrayref_set_at") can only be
-applied to an array containing values of a nonlinear type. In the following
-implementation, the template parameter is given the sort #dyncode("vt@ype")
+reason for choosing the sort #dyncode("t0p") is that both
+#dyncode("arrayptr_get_at") and #dyncode("arrayptr_set_at") can only be
+applied to an array containing values of a nonlinear type: reading a linear
+value out of a cell would duplicate it. In the following
+implementation, the template parameter is given the sort #dyncode("vt0p")
 so that an array containing linear values, that is, values of some linear
 type can be handled:\
 
 ")
 
 #dats2xhtml('\
-fun{a:vt@ype}
-arrayref_reverse{n:nat}
+fun{a:vt0p}
+arrayptr_reverse_lin{n:nat}
 (
-  A: arrayref(a, n), n: size_t(n)
+  A: !arrayptr(a, n), n: size_t(n)
 ) : void = let
 //
 fun loop
   {i: nat | i <= n} .<n-i>.
 (
-  A: arrayref(a, n), n: size_t n, i: size_t i
+  A: !arrayptr(a, n), n: size_t n, i: size_t i
 ) : void = let
   val n2 = half (n)
 in
   if i < n2 then let
-    val () = arrayref_interchange(A, i, pred(n)-i) in loop(A, n, succ(i))
+    val () = arrayptr_interchange(A, i, pred(n)-i) in loop(A, n, succ(i))
   end else () // end of [if]
 end // end of [loop]
 //
 in
   loop(A, n, i2sz(0))
-end // end of [arrayref_reverse]
+end // end of [arrayptr_reverse_lin]
 ')
 
 #para('
 
-The interface for the function template #dyncode("arrayref_interchange") is
+The interface for the function template #dyncode("arrayptr_interchange") is
 given below:
 
 #sats2xhtml('\
-fun{a:vt@ype}
-arrayref_interchange{n:int}
-  (A: arrayref(a, n), i: sizeLt n, j: sizeLt n):<!ref> void
-// end of [arrayref_interchange]
+fun{a:vt0p}
+arrayptr_interchange
+  {n:int}
+(
+  A: !arrayptr(INV(a), n), i: sizeLt n, j: sizeLt n
+) :<!wrt> void // end of [arrayptr_interchange]
 ')
 
-Note that #dyncode("arrayref_interchange") can not be implemented in terms
-of #dyncode("arrayref_get_at") and #dyncode("arrayref_set_at") (unless some
+Note that #dyncode("arrayptr_interchange") can not be implemented in terms
+of #dyncode("arrayptr_get_at") and #dyncode("arrayptr_set_at") (unless some
 form of type-unsafe code is employed).\
 
 ')
@@ -201,48 +237,65 @@ form of type-unsafe code is employed).\
 #para('\
 
 There are various functions available for traversing an array from left to
-right or from right to left. Also, the following two functions can be conveniently
-called to traverse an array from left to right:
-
-#sats2xhtml('\
-//
-fun{a:t0p}
-arrayref_head{n:pos} (A: arrayref(a, n)): (a) // A[0]
-fun{a:t0p}
-arrayref_tail{n:pos} (A: arrayref(a, n)): arrayref(a, n-1)
-//
-overload .head with arrayref_head
-overload .tail with arrayref_tail
-//
-')
-
-For instance, the fold-left function for arrays can be implemented
+right or from right to left, such as #dyncode("arrayptr_foreach") and
+#dyncode("arrayptr_rforeach"). Programming with an explicit index is also
+fine. For instance, the fold-left function for arrays can be implemented
 as follows:
 
 #dats2xhtml('\
-fun{a,b:t@ype}
-arrayref_foldleft{n:int}
+fun{a,b:t0p}
+arrayptr_foldleft{n:nat}
 (
-  f: (a, b) -> a, x: a, A: arrayref(b, n), n: size_t(n)
+  f: (a, b) -> a, x: a, A: !arrayptr(b, n), n: size_t(n)
+) : a = let
+//
+fun loop
+  {i: nat | i <= n} .<n-i>.
+(
+  f: (a, b) -> a
+, x: a, A: !arrayptr(b, n), n: size_t(n), i: size_t(i)
 ) : a =
 (
-if n > 0
-  then arrayref_foldleft<a,b> (f, f (x, A.head()), A.tail(), pred(n))
-  else x
-// end of [if]
-) (* end of [arrayref_foldleft] *)
+if i < n
+  then loop(f, f(x, A[i]), A, n, succ(i)) else x
+) (* end of [loop] *)
+//
+in
+  loop(f, x, A, n, i2sz(0))
+end // end of [arrayptr_foldleft]
 ')
 
-As can be expected, #dyncode("A.head") and #dyncode("A.tail") translate
-into #dyncode("A[0]") and #dyncode('ptr_succ&lt;T&gt;(p0)'), respectively, where T
-is the type for the elements stored in A and p0 is the starting address of
-A.
+')
+
+#para('\
+
+The following test creates an array, fills it, reverses it twice, sums up
+its elements, and frees it:
+
+#dats2xhtml('\
+val n = i2sz(10)
+val A = arrayptr_make_elt<int>(n, 0)
+//
+fun
+fill{n:nat}{i:nat | i <= n} .<n-i>.
+  (A: !arrayptr(int, n), n: size_t(n), i: size_t(i)): void =
+  if i < n then (A[i] := sz2i(i); fill(A, n, succ(i)))
+//
+val () = fill(A, n, i2sz(0))
+val () = arrayptr_reverse(A, n)
+val () = (fprint_arrayptr<int>(stdout_ref, A, n); print_newline())
+val () = arrayptr_reverse_lin(A, n)
+val () = (fprint_arrayptr<int>(stdout_ref, A, n); print_newline())
+val sum = arrayptr_foldleft<int,int>(lam (x, y) => x + y, 0, A, n)
+val () = println! ("sum(A) = ", sum)
+val () = arrayptr_free(A)
+')
 
 ')
 
 #para("\
 
-Please find #mycodelink("chap_arrayref.dats", "on-line") the entirety of the
+Please find #mycodelink("chap_arrayptr.dats", "on-line") the entirety of the
 code used in this chapter.\
 
 ")#comment("para")
@@ -260,7 +313,7 @@ staload STDIO = "libats/libc/SATS/stdio.sats"
 implement main0 () = {
 //
 val filr =
-  $STDIO.fopen_ref_exn ("../TEMP/chap_arrayref.dats", file_mode_w)
+  $STDIO.fopen_ref_exn ("../TEMP/chap_arrayptr.dats", file_mode_w)
 val () = fprint_theCodeLst (filr)
 val () = $STDIO.fclose_exn (filr)
 //

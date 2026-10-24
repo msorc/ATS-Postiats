@@ -19,10 +19,14 @@ lib = norm(''.join(open(f, errors='replace').read() + '\n' for f in libs))
 bad = 0
 for m in re.finditer(r"#(?:dats|sats|hats)2xhtml\((['\"])\\?\n?((?:\\.|(?!\1).)*)\1\)", text, re.S):
     frag = re.sub(r'\\(.)', lambda k: k.group(1), m.group(2)).replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&')
-    n = norm(frag)
-    if not n: continue
-    if n in code or ('extern' + n) in code: continue
-    if m.group(0).startswith('#sats') and n in lib: continue
+    parts = [x for x in re.split(r'\n[ \t]*(?://)?[ \t]*\n', frag) if norm(x)]
+    ok = True
+    for part in parts:
+        n = norm(part)
+        if n in code or ('extern' + n) in code: continue
+        if m.group(0).startswith('#sats') and n in lib: continue
+        ok = False
+    if ok: continue
     bad += 1
     line = text[:m.start()].count('\n') + 1
     print('%s:%d: fragment not in CODE: %s' % (chap, line, frag.strip().split('\n')[0]))
