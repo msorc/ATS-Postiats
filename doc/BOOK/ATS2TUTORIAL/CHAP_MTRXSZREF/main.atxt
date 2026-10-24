@@ -13,45 +13,67 @@ by [atsdoc] from CHAP_MTRXSZREF/main.atxt.\n\
 Time of Generation: #timestamp()\
 ")
 <chapter id="mtrxszref">
-#title("Persistent Matrices-with-size")
+#title("Linear Matrices-with-size")
 
 #para("\
 \
-#emphasis("Historical note:") this chapter describes the persistent matrices
-of the GC era of ATS2 (the matrices that carry their size). The types
-#stacode("matrixref") and #stacode("matrixref_sz") were removed when the
-support for the garbage collector was dropped: the compiler now rejects
-every nonlinear heap allocation. Use #stacode("matrixptr") (a flat matrix
-of pointers) instead; its interface is in
-#myatscodelink("prelude/SATS/matrixptr.sats", "prelude/SATS/matrixptr.sats").
+#emphasis("Note:") the first versions of this chapter described persistent
+matrices-with-size (the type #stacode("mtrxszref")), which are reclaimed by
+garbage collection (GC). That type was removed when the support for GC was
+dropped: the compiler now rejects every nonlinear heap allocation. A
+matrix-with-size is now a linear value, which has to be freed explicitly.
+The prelude does not declare a type for it, but it is easy to define one
+(see below).
 \
 ")
 
 #para("\
 
-I use the name #emphasis("matrix-with-size") to refer to a persistent
-matrix with attached dimension information (that is, number of rows and
-number of columns).  Given a viewtype VT, the type for a matrix-with-size
+I use the name #emphasis("matrix-with-size") to refer to a matrix
+with attached dimension information (that is, number of rows and
+number of columns).  Given a viewtype VT, a matrix-with-size
 that contains M rows and N columns of elements of viewtype VT is
-#stacode("mtrxszref(VT, M, N)"). Essentially, such a value is a boxed
-record of three components of types #stacode("arrayref(VT, N)"),
-#stacode("size_t(M)") and #stacode("size_t(N)"). The interfaces for various
-functions on persistent matrices-with-size can be found in
-#myatscodelink("prelude/SATS/matrixref.sats", "prelude/SATS/matrixref.sats").
+essentially a record of three components of types
+#stacode("matrixptr(VT, M, N)"), #stacode("size_t(M)") and
+#stacode("size_t(N)"), where M and N are unknown statically. We declare a
+linear (boxed) type for it, which we call #stacode("mtrxszptr"):
+
+#dats2xhtml('\
+datavtype
+mtrxszptr(a:vt0p) =
+  | {m,n:nat} MTRXSZPTR of (matrixptr(a, m, n), size_t(m), size_t(n))
+')
 
 ")
 
 #para('\
 
-The following function is commonly used to create a matrix-with-size:
+The following function is commonly used to create a matrix-with-size, and
+the second function frees it:
 
-#sats2xhtml('\
+#dats2xhtml('\
 fun{a:t0p}
-mtrxszref_make_elt (m: size_t, n: size_t, x0: a): mtrxref(a)
-// end of [mtrxszref_make_elt]
+mtrxszptr_make_elt
+  (m: size_t, n: size_t, x0: a): mtrxszptr(a) = let
+//
+val m = g1ofg0(m) and n = g1ofg0(n)
+val () = assertloc(m >= 0 && n >= 0)
+//
+in
+  MTRXSZPTR(matrixptr_make_elt<a>(m, n, x0), m, n)
+end // end of [mtrxszptr_make_elt]
+
+fun
+mtrxszptr_free
+  {a:t0p}
+  (M: mtrxszptr(a)): void = let
+  val ~MTRXSZPTR(M0, m, n) = M
+in
+  matrixptr_free(M0)
+end // end of [mtrxszptr_free]
 ')
 
-Given two sizes m and n plus an element x0, #dyncode("mtrxszref_make_elt")
+Given two sizes m and n plus an element x0, #dyncode("mtrxszptr_make_elt")
 returns a matrix-with-size of the dimension m by n in which each matrix-cell
 is initialized with the given element x0.\
 
@@ -60,23 +82,55 @@ is initialized with the given element x0.\
 #para('\
 
 For accessing and updating the content of a matrix-cell, the following
-two functions #dyncode("mtrxszref_get_at") and #dyncode("mtrxszref_set_at")
-can be called:
+two functions #dyncode("mtrxszptr_get_at") and #dyncode("mtrxszptr_set_at")
+can be implemented. Here is the first of them:
 
-#sats2xhtml('\
+#dats2xhtml('\
 fun{a:t0p}
-mtrxszref_get_at (M: mtrxszref(a), i: size_t, j: size_t): (a)
-fun{a:t0p}
-mtrxszref_set_at (M: mtrxszref(a), i: size_t, j: size_t, x: a): void
+mtrxszptr_get_at
+  (M: !mtrxszptr(a), i: size_t, j: size_t): (a) = let
+//
+val+ @MTRXSZPTR(M0, m, n) = M
+val i = g1ofg0(i) and j = g1ofg0(j)
+//
+in
+//
+if i < m
+  then (
+    if j < n
+      then let
+        val x = matrixptr_get_at(M0, i, n, j)
+        prval () = fold@(M)
+      in
+        x
+      end // end of [then]
+      else let
+        prval () = fold@(M)
+      in
+        $raise MatrixSubscriptExn()
+      end // end of [else]
+  ) (* end of [then] *)
+  else let
+    prval () = fold@(M)
+  in
+    $raise MatrixSubscriptExn()
+  end // end of [else]
+//
+end // end of [mtrxszptr_get_at]
 ')
 
-Given a matrix-with-size M, two indices i and j, and a value v,
-#dyncode("mtrxszref_get_at(M, i, j)") and #dyncode("mtrxszref_set_at(M, i,
-j, v)") can be written as #dyncode("M[i,j]") and #dyncode("M[i,j] := v"),
-respectively. Notice that matrix-bounds checking is performed at run-time
-whenever #dyncode("mtrxszref_get_at") or #dyncode("mtrxszref_set_at") is
+The pattern #dyncode("@MTRXSZPTR(M0, m, n)") unfolds the value
+#dyncode("M") in place, which gives access to its three components, and
+#dyncode("fold@(M)") folds it back in each branch before the function
+returns; the argument is borrowed (#keycode("!")) and thus still available
+to the caller. Notice that matrix-bounds checking is performed at run-time
+whenever #dyncode("mtrxszptr_get_at") or #dyncode("mtrxszptr_set_at") is
 called, and the exception #dyncode("MatrixSubscriptExn") is raised in case
-of out-of-bounds matrix access being detected.
+of out-of-bounds matrix access being detected. The test of the column
+index is nested in the test of the row index so that the type-checker has
+both facts at hand when the cell is accessed statically.
+Writing #dyncode("mtrxszptr_set_at") is analogous (see the code of this
+chapter).
 
 ')
 
@@ -86,46 +140,46 @@ As a simple example, the following code implements a function that
 transpose the content of the matrix inside a given matrix-with-size:
 
 #dats2xhtml('\
-//
 extern
 fun{a:t0p}
-mtrxszref_transpose
-  (M: mtrxszref(a)): void
+mtrxszptr_transpose
+  (M: !mtrxszptr(a)): void
 //
 implement
 {a}(*tmp*)
-mtrxszref_transpose
+mtrxszptr_transpose
   (M) = let
 //
-val n = M.nrow()
+val n = mtrxszptr_get_nrow<a>(M)
 //
-val () = assertloc(M.nrow() = M.ncol())
+val () = assertloc(n = mtrxszptr_get_ncol<a>(M))
 //
 fun loop
 (
- i: size_t, j: size_t
+ M: !mtrxszptr(a), n: size_t, i: size_t, j: size_t
 ) : void =
 (
 if
 (j < n)
 then let
-  val x = M[i,j]
-  val () = M[i,j] := M[j,i]
-  val () = M[j,i] := x
+  val x = mtrxszptr_get_at<a>(M, i, j)
+  val y = mtrxszptr_get_at<a>(M, j, i)
+  val () = mtrxszptr_set_at<a>(M, i, j, y)
+  val () = mtrxszptr_set_at<a>(M, j, i, x)
 in
-  loop(i, succ(j))
+  loop(M, n, i, succ(j))
 end // end of [then]
 else let
   val i1 = succ(i)
 in
-  if i1 < n then loop(i1, succ(i1)) else ()
+  if i1 < n then loop(M, n, i1, succ(i1)) else ()
 end // end of [else]
 //
 ) (* end of [loop] *)
 //
 in
-  if (n > 0) then loop(i2sz(0), i2sz(1)) else ()
-end // end of [mtrxszref_transpose]
+  if (n > 0) then loop(M, n, i2sz(0), i2sz(1)) else ()
+end // end of [mtrxszptr_transpose]
 ')
 
 ')
@@ -143,7 +197,7 @@ matrices when there are clear benefits from doing so.\
 
 #para("\
 
-Please find #mycodelink("chap_mtrxszref.dats", "on-line") the entirety of the
+Please find #mycodelink("chap_mtrxszptr.dats", "on-line") the entirety of the
 code used in this chapter.\
 
 ")#comment("para")
@@ -161,7 +215,7 @@ staload STDIO = "libats/libc/SATS/stdio.sats"
 implement main0 () = {
 //
 val filr =
-  $STDIO.fopen_ref_exn ("../TEMP/chap_mtrxszref.dats", file_mode_w)
+  $STDIO.fopen_ref_exn ("../TEMP/chap_mtrxszptr.dats", file_mode_w)
 val () = fprint_theCodeLst (filr)
 val () = $STDIO.fclose_exn (filr)
 //
