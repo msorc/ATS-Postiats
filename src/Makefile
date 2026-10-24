@@ -161,6 +161,8 @@ DATS= \
 # the generated encodings of the level-2 trees are large: not kept in git (src/.gitignore)
 GENHATS=pats_staexp2_gen.hats pats_staexp2_gen_dats.hats pats_staexp2_error_gen.hats pats_staexp2_error_gen_dats.hats
 ARENAGEN=python3 ../utils/arenagen/arenagen.py
+# a generator that fails (no python3) must not leave an empty, up-to-date-looking target
+.DELETE_ON_ERROR:
 pats_staexp2_gen.hats: pats_staexp2.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global sats pats_staexp2.spec > $@
 pats_staexp2_gen_dats.hats: pats_staexp2.spec ../utils/arenagen/arenagen.py
