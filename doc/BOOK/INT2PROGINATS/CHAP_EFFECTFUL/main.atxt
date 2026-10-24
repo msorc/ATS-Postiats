@@ -509,7 +509,7 @@ end // end of [sumup]
 A local variable is declared with the keyword #dyncode("var"). A function
 that is defined inside the body of #dyncode("sumup") cannot refer to
 such a variable directly; the variable is passed to the function by reference
-(the symbol #dyncode("&") in the type of an argument indicates this) and the
+(the symbol #dyncode("&amp;") in the type of an argument indicates this) and the
 function can update the value of the variable. I will say more on this when
 discussing views. This is an acceptable implementation, but a program making
 heavy use of mutable variables is often difficult to reason about. A much

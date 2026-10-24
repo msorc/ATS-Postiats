@@ -1372,7 +1372,7 @@ the version above, there is none: the closure #dyncode("f") is stored in the
 stack frame of #dyncode("sqrmodsum"), no memory is allocated in the heap, and
 there is nothing to free. If a pointer closure is used instead (the
 argument of #dyncode("ifold2") is then of the type
-#dyncode("!(int, int) -<cloptr1> int")), then the closure must be created on
+#dyncode("!(int, int) -&lt;cloptr1&gt; int")), then the closure must be created on
 heap and freed by the caller after the call returns; and this is what it
 takes to avoid memory leaks in the absence of a garbage collector.  Both
 variants are included in the on-line code for this chapter.\
@@ -1583,7 +1583,7 @@ never freed, which would be a memory leak in the absence of a garbage
 collector. For this reason, the compiler rejects the definition of
 #dyncode("acker2") (as it does for any curried function) by reporting that a
 cloref closure is constructed.  A curried version that explicitly returns a
-pointer closure of the type #dyncode("(int) -<cloptr1> int") can be written,
+pointer closure of the type #dyncode("(int) -&lt;cloptr1&gt; int") can be written,
 but its caller must free the closure it receives, as is done in the
 on-line code of this section.\
 

@@ -1050,7 +1050,7 @@ implement intmod_mod<double> (x, y) = $M.fmod_double (x, y)
 implement intmod_cmp<double> (x, y) = compare (x, y)
 ')
 
-After that, #dyncode("rat_add<int>") and #dyncode("rat_add<double>") add
+After that, #dyncode("rat_add&lt;int&gt;") and #dyncode("rat_add&lt;double&gt;") add
 rationals based on integers of the types #stacode("int") and #stacode("double"),
 respectively. There is some related testing code available
 #mycodelink("CHAP_MODULARITY/test_ratfun.dats", "on-line") as well.\
