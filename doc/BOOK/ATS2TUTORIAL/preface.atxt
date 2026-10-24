@@ -37,6 +37,25 @@ effective use in the construction of high-quality programs.\
 
 ')
 
+#para('\
+
+This edition of the tutorial describes the dialect of ATS2 that has no
+garbage collector (GC) and allocates on heap only linear values: the
+compiler rejects datatypes with non-nullary constructors, boxed tuples and
+records, non-linear closure-functions, and the constructs that need GC to be
+reclaimed (for instance, #dyncode("$delay")). Heap-allocated data are
+therefore declared with #keycode("datavtype"), lists are #stacode("list_vt"),
+arrays are #stacode("arrayptr"), closure-functions are #stacode("cloptr")
+(or are stored in a stack-frame), lazy streams are #stacode("stream_vt"), and
+every such value is either borrowed (#keycode("!")) or consumed, and it is
+freed by the programmer; the type-checker verifies that no memory is leaked.
+A program needs no special flag: it is compiled by
+<command>patscc -o foo foo.dats</command>. The code of the chapters is built
+and run by the regression tests of the repository, and every code fragment
+of a chapter is taken from it.\
+
+')
+
 </preface>
 
 #comment(" end of [preface.atxt] ")
