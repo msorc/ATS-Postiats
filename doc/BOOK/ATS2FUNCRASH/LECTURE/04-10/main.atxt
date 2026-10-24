@@ -22,7 +22,8 @@ Time of Generation: #timestamp()\
 I would like to present a very simple example of animation in this
 chapter that makes use of higher-order functions. Please click <ulink
 url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitClock.html\">here</ulink>
-for a quick demo of this example.\
+for a quick demo of this example (the demo runs the JS code generated from the
+GC-era version of the example).\
 
 ")
 
@@ -35,10 +36,7 @@ function #dyncode("animate"):
 //
 extern
 fun
-sleep(ms: int): void
-extern
-fun
-animate(fwork: cfun(void)): void
+animate(fwork: () -> void): void
 //
 (* ****** ****** *)
 //
@@ -46,8 +44,7 @@ implement
 animate(fwork) =
 {
   val () = fwork()
-  val () = sleep(N(*ms*))
-  val () = animate(fwork)
+  val () = sleep_animate(100(*ms*), fwork)
 }
 //
 ')
@@ -55,7 +52,11 @@ animate(fwork) =
 The argument #dyncode("fwork") is supposed to be called to generate
 some effect (for instance, outputing text on a webpage), and the
 function call #dyncode("sleep(N)") pauses program execution for
-#dyncode("N") milliseconds, where #dyncode("N") is fixed constant.
+#dyncode("N") milliseconds, where #dyncode("N") is fixed constant
+(100 here). Note that #dyncode("fwork") is an envless function (the
+type #stacode("() -&gt; void")): it is called again and again, and so it
+cannot be a closure that is consumed by a call; state shared by the calls
+is kept in a global variable.
 
 ")
 
@@ -70,16 +71,7 @@ executed concurrently. Instead, let us combine #dyncode("sleep") and
 extern
 fun
 sleep_animate
-(ms: int, fwork: cfun(void)): void
-//
-(* ****** ****** *)
-//
-implement
-animate(fwork) =
-{
-  val () = fwork()
-  val () = sleep_animate(N(*ms*), fwork)
-}
+(ms: int, fwork: () -> void): void
 //
 ')
 
@@ -92,63 +84,90 @@ immediately, causing no pause of program execution.\
 
 #para("\
 
-Let us generalize #dyncode("sleep_animate") to the following function
-#dyncode("execute_after"):
+Let us generalize #dyncode("sleep_animate") to the function
+#dyncode("execute_after"), whose interface is given as follows:
 
 #dats2xhtml('\
+//
+vtypedef
+thunk = () -<lincloptr1> void
 //
 extern
 fun
 execute_after
-(fwork: cfun(void), ms: int): void
-//
-(* ****** ****** *)
-//
-implement
-sleep_animate(ms, fwork) =
-execute_after(lam() => animate(fwork), ms)
+(fwork: thunk, ms: int): void
 //
 ')
 
 Given a thunk #dyncode("fwork") (that is, a closure-function
 returning void) and an integer #dyncode("ms"), #dyncode("execute_after")
 schedules a call to #dyncode("fwork") after #dyncode("ms") milliseconds.
+The thunk is created on heap and it is passed to the scheduler, which is
+responsible for freeing it after the call (it is called only once): this
+is the way a closure that outlives the function creating it is
+handled in the absence of GC, and the type #stacode("thunk") is linear.
+With #dyncode("execute_after"), the function #dyncode("sleep_animate")
+can be implemented as follows:
+
+#dats2xhtml('\
+//
+implement
+sleep_animate(ms, fwork) =
+execute_after(llam() => animate(fwork), ms)
+//
+')
+
+where #keycode("llam") is used for creating a linear closure that is called at
+most once.
 
 ")
 
 #para("\
 
 If we target JS, then the function #dyncode("execute_after") can be
-implemented as follows:
-
-#dats2xhtml('\
-//
-implement
-execute_after
-  (fwork, ms) = (
-//
-$extfcall
-(void, "setTimeout", cloref2fun0(fwork), ms)
-//
-) (* end of [execute_after] *)
-//
-')
-
-where the keyword #keycode("$extfcall") initiates a call to the native
-function #dyncode("setTimeout") in JS, and the function #dyncode("cloref2fun0")
-converts a (nullary) closure-function into an envless function (that
-is, one with no environment).
+implemented by calling the native function #dyncode("setTimeout") of JS
+(through #keycode("$extfcall")); in JS the closure is an ordinary function
+value and the JS engine reclaims it. For the C code of this book, the file
+#filename("eventloop.hats") in the code of this chapter implements
+#dyncode("execute_after") for a tiny simulated event loop (a clock and one
+pending event, which is a linear thunk stored as a pointer), so that the
+examples can run without a browser: the call to
+#dyncode("eventloop_run(limit)") calls the pending thunk, and
+then frees it, until no event is pending or the due time is beyond
+#dyncode("limit"). The pending thunk that is not called is freed, too, and
+the programs run clean with the address sanitizer.
 
 ")
 
 #para("\
 
-As an example, please find the ATS source in <ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitClock.dats\">DigitClock.dats</ulink>
-for a digital clock directly based on #dyncode("animate"). And please
-click <ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitClock.html\">here</ulink>
-for a demo of the digital clock.
+The following program animates a counter (an event is a printed line):
+
+#dats2xhtml('\
+var theCount_var: int = 0
+val theCount =
+ref_make_viewptr{int}(view@ theCount_var | addr@ theCount_var)
+
+fun
+tick(): void = let
+  val n = !theCount
+in
+  !theCount := n + 1;
+  println! ("tick ", n, " at ", eventloop_now(), "ms")
+end // end of [tick]
+//
+val () = animate(lam() => tick())
+val () = eventloop_run(450)
+//
+')
+
+and it prints the lines #dyncode("tick 0 at 0ms"),
+#dyncode("tick 1 at 100ms"), ..., #dyncode("tick 4 at 400ms"). Note that
+a reference can only be created from memory that is never freed (a toplevel
+variable in this case) and the content of the reference is not linear.
+For a digital clock directly based on #dyncode("animate"), please see
+the source of the GC-era demo <ulink
+url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitClock.dats\">DigitClock.dats</ulink>.
 
 ")
 
@@ -164,7 +183,7 @@ extern
 fun
 repeat_execute_after
 ( N: int,
-  fwork: (int) -> void, ms: int) : void = "mac#"
+  fwork: (int) -> void, ms: int) : void
 //
 implement
 repeat_execute_after
@@ -176,7 +195,7 @@ fun
 auxmain(i: int): void =
 if i >= N
   then auxmain(0)
-  else (fwork(i); execute_after(lam() => auxmain(i+1), ms))
+  else (fwork(i); execute_after(llam() => auxmain(i+1), ms))
 //
 in
   auxmain(0)
@@ -198,7 +217,10 @@ presented previously.
 #para("\
 
 Please find #mycodelink("LECTURE/04-10/CODE", "on-line") the entirety
-of the code used in this chapter. The mentioned URL link(s) can be found as follows:
+of the code used in this chapter (the file #filename("animate.dats") contains
+the code of this chapter, which was compiled and run with
+#command("patscc") and with the address sanitizer, no leak is reported).
+The mentioned URL link(s) can be found as follows:
 
 <itemizedlist>
 
@@ -212,21 +234,7 @@ url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitC
 <listitem>
 #para("\
 <ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitClock.dats\">https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/DigitClock.dats</ulink>
-")#comment("para")
-</listitem>
-
-<listitem>
-#para("\
-<ulink
 url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/Sierpinski.html\">https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/Sierpinski.html</ulink>
-")#comment("para")
-</listitem>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/Sierpinski.dats\">https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/04-10/CODE/Sierpinski.dats</ulink>
 ")#comment("para")
 </listitem>
 
@@ -243,4 +251,3 @@ url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FU
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
