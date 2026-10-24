@@ -64,7 +64,7 @@ files that are needed to use ATS2 from C. Say x.y.z is 0.4.3.
 
   sha256sum -c ATS2-Postiats-0.4.3.tgz.sha256
   tar -xzvf ATS2-Postiats-0.4.3.tgz
-  cd ATS-Postiats
+  cd ATS2-Postiats-0.4.3
   ./configure --prefix=/path/to/MYATS      # --without-gmp for no libgmp
   make
   make install

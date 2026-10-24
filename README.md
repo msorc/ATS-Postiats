@@ -39,7 +39,7 @@ From a release (the tarballs are on the
 
 ```sh
 tar -xzvf ATS2-Postiats-0.4.3.tgz
-cd ATS-Postiats
+cd ATS2-Postiats-0.4.3
 ./configure --prefix=$HOME/ats2      # --without-gmp if you have no libgmp
 make && make install
 export PATH=$HOME/ats2/bin:$PATH
