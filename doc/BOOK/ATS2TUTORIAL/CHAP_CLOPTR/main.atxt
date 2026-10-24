@@ -22,39 +22,46 @@ Time of Generation: #timestamp()\
 A closure-function is a boxed record that contains a pointer to an envless
 function plus bindings that map certain names in the body of the envless
 function to values. In practice, a function argument of a higher-order
-function is often a closure-function (instead of an envless function). For
-instance, the following higher-order function #dyncode("list_map_cloref")
-takes a closure-function as its second argument:
-
-#sats2xhtml('\
-fun{
-a:t@ype}{b:t@ype
-} list_map_cloref{n:int}
-  (xs: list (a, n), f: (a) -<cloref> b): list_vt (b, n)
-')
-
-")#comment("para")
-
-#para("\
-
-Closure-functions can be either linear or non-linear, and linear ones can
-be explicitly freed in a safe manner. The keyword
-#keycode("-&lt;cloref&gt;") is used to form a type for non-linear
-closure-functions. As a variant of #dyncode("list_map_cloref"), the
-following higher-order function #dyncode("list_map_cloptr") takes a linear
-closure-function as its second argument:
+function is often a closure-function (instead of an envless function).
+Because there is no garbage collector (GC) in this dialect of ATS2, every
+closure-function is #emphasis("linear"): its memory has to be freed
+explicitly, and the compiler refuses to compile a program that forgets to
+do so. For instance, the following higher-order function
+#dyncode("list_map_cloptr") takes a linear closure-function as its second
+argument:
 
 #sats2xhtml('\
 fun{
 a:t@ype}{b:t@ype
 } list_map_cloptr{n:int}
-  (xs: list (a, n), f: !(a) -<cloptr> b): list_vt (b, n)
+  (xs: !list_vt (a, n), f: !(a) -<cloptr> b): list_vt (b, n)
 ')
 
-As can be easily guessed, the keyword #keycode("-&lt;cloptr&gt;") is used
-to form a type for linear closure-functions.  Note that the symbol
-#keycode("!") indicates that the second argument is still available after
-a call to #dyncode("list_map_cloptr") returns.
+The keyword #keycode("-&lt;cloptr&gt;") is used to form a type for linear
+closure-functions.  Note that the symbol #keycode("!") in front of the type
+of the second argument indicates that the closure-function is still
+available after a call to #dyncode("list_map_cloptr") returns (it is only
+borrowed).  The same symbol in front of the type of the first argument means
+that the list #dyncode("xs") is borrowed, too: the result is a new list.
+
+")#comment("para")
+
+#para("\
+
+The non-linear variant of closure-functions (the keyword
+#keycode("-&lt;cloref&gt;"), which was used for closure-functions that are
+reclaimed by GC) is not available any more: the compiler rejects every
+#keycode("lam") or #keycode("fun") that would create a non-linear closure on
+heap. The programmer can choose among the following alternatives:
+
+
+First, a linear closure-function can be created by #keycode("lam") with
+the annotation #keycode("=&lt;cloptr&gt;") (or #keycode("=&lt;cloptr1&gt;"),
+or by #keycode("llam")); it is freed with #dyncode("cloptr_free"). Second, a
+closure-function can be stored in the stack-frame of a function (see the
+chapter on stack-allocated closure-functions), which needs no memory
+allocation at all. Third, a plain envless function can be used if no
+environment needs to be captured.
 
 ")#comment("para")
 
@@ -65,13 +72,13 @@ A typical example making use of #dyncode("list_map_cloptr") is given as follows:
 #dats2xhtml('\
 fun foo{n:int}
 (
-  x0: int, xs: list (int, n)
+  x0: int, xs: !list_vt (int, n)
 ) : list_vt (int, n) = res where
 {
 //
-val f = lam (x) =<cloptr> x0 + x
+val f = lam (x: int): int =<cloptr> x0 + x
 val res = list_map_cloptr (xs, f)
-val () = cloptr_free ($UNSAFE.cast{cloptr(void)}(f))
+val () = cloptr_free ($UNSAFE.castvwtp0{cloptr(void)}(f))
 //
 } (* end of [foo] *)
 ')
@@ -81,12 +88,16 @@ Note that a linear closure is first created in the body of the function
 #dyncode("cloptr_free") is given the following interface:
 
 #sats2xhtml('\
-fun cloptr_free {a:t0p} (pclo: cloptr (a)): void
+fun cloptr_free {a:t0p} (pclo: cloptr (a)):<!wrt> void
 ')
 
 where #stacode("cloptr") is abstract. The cast
-#dyncode("$UNSAFE.cast{cloptr(void)}(f)") can certainly be replaced with
-something safer but it would make programming more curbersome.
+#dyncode("$UNSAFE.castvwtp0{cloptr(void)}(f)") turns the closure into a
+value of the type #stacode("cloptr(void)") that
+#dyncode("cloptr_free") can consume; it can certainly be replaced with
+something safer but it would make programming more cumbersome. If the
+call to #dyncode("cloptr_free") is dropped, the compiler complains that
+the linear variable #dyncode("f") is not consumed.
 
 ')#comment("para")
 
@@ -94,11 +105,9 @@ something safer but it would make programming more curbersome.
 
 There is also some interesting interaction between currying and linear
 closure-functions. In functional programming, currying means turning a
-function taking multiple arguments simutaneously into a corresponding one
-that takes these arguments sequentially. For instance, the function
-#dyncode("acker2") in the following code is a curried version of the
-function #dyncode("acker"), which implements the famous Ackermann function
-(that is recursive but not primitive recursive):
+function taking multiple arguments simultaneously into a corresponding one
+that takes these arguments sequentially. Let us first implement the famous
+Ackermann function (that is recursive but not primitive recursive):
 
 #dats2xhtml('\
 fun
@@ -109,47 +118,44 @@ acker(m:int, n:int): int =
   | (m, 0) => acker (m-1, 1)
   | (_, _) => acker (m-1, acker (m, n-1))
 ) (* end of [acker] *)
-
-fun acker2 (m:int) (n:int): int = acker (m, n)
 ')
 
-Suppose that we apply #dyncode("acker2") to two integers 3 and 4:
-#dyncode("acker2(3)(4)"); the application #dyncode("acker2(3)") evaluates
-to a (non-linear) closure-function; the application of this
-closure-function to 4 evaluates to #dyncode("acker(3,4)"), which further
-evaluates to the integer 125. Note that the closure-function generated from
-evaluating #dyncode("acker2(3)") becomes a heap-allocated value that is no
-longer accessible after the evaluation of #dyncode("acker2(3)(4)")
-finishes, and the memory for such a value can only to be safely reclaimed
-through garbage collection (GC).
-
-')#comment("para")
-
-#para('\
-
-It is also possible to define a curried version of #dyncode("acker") as
-follows:
+A curried version of #dyncode("acker"), say, #dyncode("acker2") with the
+header #dyncode("fun acker2 (m:int) (n:int): int"), would evaluate
+#dyncode("acker2(3)") to a non-linear closure-function on heap, which only
+GC could reclaim; so it is rejected. Instead, a curried version has to
+return a linear closure-function:
 
 #dats2xhtml('\
 fun acker3 (m:int) = lam (n:int): int =<cloptr1> acker (m, n)
 ')
 
-While the evaluation of #dyncode("acker3(3)(4)") yields the same result as
-#dyncode("acker2(3)(4)"), the compiler of ATS (ATS/Postiats) inserts code
-that automatically frees the linear closure-function generated from evaluating
-#dyncode("acker3(3)") after the evaluation of #dyncode("acker3(3)(4)") finishes.
+The evaluation of #dyncode("acker3(3)(4)") yields the integer 125. The
+closure-function that is generated from evaluating #dyncode("acker3(3)")
+is linear, and it has to be freed once it is of no more use:
+
+#dats2xhtml('\
+val () = let
+  val f = acker3 (3)
+  val () = println! ("acker3(3)(4) = ", f(4))
+in
+  cloptr_free ($UNSAFE.castvwtp0{cloptr(void)}(f))
+end // end of [val]
+')
 
 ')#comment("para")
 
 #para("\
 
-In ATS1, linear closure-functions play a pivotal role in supporting
-programming with higher-order functions in the absence of GC. Due to
-advanced support for templates in ATS2, the role played by linear
-closure-functions in ATS1 is greatly diminished. However, if
-closure-functions need to be stored in a data structure but GC is
-unavailable or undesirable, then using linear closure-functions can lead to
-a solution that avoids the risk of generatig memory leaks at run-time.
+Linear closure-functions play a pivotal role in supporting programming with
+higher-order functions in the absence of GC. Due to advanced support for
+templates in ATS2, a function argument of a higher-order function can often
+be given as a template parameter instead (see the chapter on higher-order
+functions), and then no closure-function is created at all. However, if
+closure-functions need to be stored in a data structure, then using linear
+closure-functions is the way to avoid the risk of generating memory leaks
+at run-time: the data structure that contains them is linear, too, and the
+type-checker makes sure that they are freed.
 
 ")#comment("para")
 
