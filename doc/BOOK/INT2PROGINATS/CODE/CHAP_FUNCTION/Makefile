@@ -28,6 +28,10 @@ ATSCCFLAGS=
 
 all:: coinchange
 all:: queens
+all:: acker
+all:: bsearch
+all:: twice
+all:: misc
 
 ######
 
@@ -44,6 +48,26 @@ queens: queens_dats.c ; \
 regress:: queens; ./queens
 cleanall:: ; $(RMF) queens
 
+
+acker: acker_dats.c ; \
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+regress:: acker; ./acker
+cleanall:: ; $(RMF) acker
+
+bsearch: bsearch_dats.c ; \
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+regress:: bsearch; ./bsearch
+cleanall:: ; $(RMF) bsearch
+
+twice: twice_dats.c ; \
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+regress:: twice; ./twice
+cleanall:: ; $(RMF) twice
+
+misc: misc_dats.c ; \
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+regress:: misc; ./misc
+cleanall:: ; $(RMF) misc
 
 ######
 

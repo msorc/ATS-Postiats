@@ -1074,7 +1074,7 @@ An envless function is represented by a pointer pointing to some place in a
 code segment where the object code for executing a call to this function is
 located. Every function in the programming language C is envless. A
 closure-function is also represented by a pointer, but the pointer points
-to some place in a heap where a tuple is allocated (at run-time). Usually,
+to some place in memory where a tuple is allocated (at run-time). Usually,
 the first component of this tuple is a pointer representing an envless
 function and the rest of the components represent some bindings. A tuple as
 such is often referred to as a closure-function or simply closure, which
@@ -1097,7 +1097,7 @@ fun sum
   fun loop
   (
     i: int, res: int
-  ) :<cloref1> int =
+  ) : int =
     if i <= n then loop (i+1, res+i) else res
   // end of [loop]
 in
@@ -1105,25 +1105,12 @@ in
 end // end of [sum]
 ")
 
-The inner function #dyncode("loop") is a closure-function as is indicated
-by the special syntax #dyncode(":&lt;cloref1&gt;"), and the type assigned
-to #dyncode("loop") is denoted by #dyncode("(int, int) -&lt;cloref1&gt;
-int"). Hence, envless functions and closure-functions can be distinguished
-at the level of types.\
-
-")#comment("para")
-
-#para("\
-
-If the syntax #dyncode(":&lt;cloref1&gt;") is replaced with the colon
-symbol #dyncode(":") alone, the code can still pass typechecking but its
-compilation may eventually lead to a warning or even an error indicating
-that #dyncode("loop") cannot be compiled into a toplevel function in C. The
-reason for this warning/error is due to the body of #dyncode("loop")
-containing a variable #dyncode("n") that is neither at toplevel nor a part
-of the arguments of #dyncode("loop") itself. It is straightforward to make
-#dyncode("loop") an envless function by including #dyncode("n") as an
-argument in addition to the original ones:
+The inner function #dyncode("loop") contains a variable #dyncode("n") that
+is neither at toplevel nor a part of the arguments of #dyncode("loop")
+itself. Nevertheless, #dyncode("loop") is an envless function: during
+compilation, the code above gets translated, more or less, into the
+following code, where #dyncode("n") is passed to #dyncode("loop") as an
+additional argument:
 
 #dats2xhtml("\
 fun sum
@@ -1139,44 +1126,119 @@ in
 end // end of [sum]
 ")
 
-As a matter of fact, what happens during compilation is that the first
-implementation of #dyncode("sum") and #dyncode("loop") gets translated,
-more or less, into the second implementation, and there is #emphasis("no")
-actual creation of closures at run-time.\
+There is #emphasis("no") actual creation of closures at run-time in this
+case, and the memory that is used for the calls of #dyncode("loop") is the
+stack of the program.\
 
 ")#comment("para")
 
 #para("\
 
 The need for creating closures often appears when a function is not
-directly applied. For instance, the return value of a function call may
-also be a function. In the following code, the defined function
-#dyncode("addx") returns another function when applied to a given integer
-#dyncode("x"), and the returned function is a closure-function, which
-always adds the integer #dyncode("x") to its own argument:
+directly applied, that is, when it is passed as an argument or returned as a
+value. For a closure-function that does not live on the stack, memory has to
+be allocated, and I need to say something about its ownership first.\
+
+")#comment("para")
+
+#para("\
+
+In a language with a garbage collector, closures are allocated freely and
+reclaimed automatically when they are no longer reachable. There is no
+garbage collector in this version of ATS2. A closure that is allocated in
+the heap is therefore #emphasis("linear"): it has an owner, and the owner is
+responsible for freeing it exactly once. For this reason, the compiler
+rejects the closure-functions of the kind that are shared freely (these are
+written with the syntax #dyncode(":&lt;cloref1&gt;") or
+#dyncode("=&lt;cloref1&gt;")): typechecking
+
+#dats2xhtml("\
+fun f (x: int):<cloref1> int = x
+")
+
+yields an error message stating that a cloref closure is constructed and
+could never be freed. Instead, there are three kinds of closure-functions
+that can be used:
+
+<itemizedlist>
+
+<listitem>
+#para("\
+A <emphasis>flat closure</emphasis>, which is created by
+#dyncode("lam@") and has a type of the form #dyncode("(T1) -&lt;clo1&gt; T2").
+Its environment is stored in a variable (typically on the stack of the
+function that creates it) and no heap memory is allocated. A flat closure is
+passed around by reference: the type of the corresponding argument is
+#dyncode("&amp;(T1) -&lt;clo1&gt; T2").\
+")
+</listitem>
+
+<listitem>
+#para("\
+A <emphasis>pointer closure</emphasis>, which is created by
+#dyncode("lam") with the effect annotation #dyncode("=&lt;cloptr1&gt;") and
+has a type of the form #dyncode("(T1) -&lt;cloptr1&gt; T2"). The closure is
+allocated in the heap (with #dyncode("malloc")) and must be freed by the
+creator with #dyncode("cloptr_free") when it is no longer needed. A pointer
+closure can be called as many times as needed, and it can be passed to
+functions that only borrow it, which have the argument type
+#dyncode("!(T1) -&lt;cloptr1&gt; T2").\
+")
+</listitem>
+
+<listitem>
+#para("\
+A <emphasis>one-shot closure</emphasis>, which is created by
+#dyncode("llam") and has a type of the form
+#dyncode("(T1) -&lt;lincloptr1&gt; T2"). This is a truly linear value: the
+type system makes sure that it is called at most once and then freed.\
+")
+</listitem>
+
+</itemizedlist>
+
+I will cover the details of the latter two kinds when discussing linear
+types; in this chapter, I only use them where they are really needed.\
+
+")#comment("para")
+
+#para("\
+
+The following code defines a function #dyncode("addx") that returns a
+(pointer) closure-function when applied to a given integer #dyncode("x"),
+which always adds the integer #dyncode("x") to its own argument:
 
 #dats2xhtml("\
 //
-fun addx (x: int): int -<cloref1> int = lam y => x + y
-//
-val plus1 = addx (1) // [plus1] is of the type int -<cloref1> int
-val plus2 = addx (2) // [plus2] is of the type int -<cloref1> int
+fun addx (x: int): (int) -<cloptr1> int = lam y =<cloptr1> x + y
 //
 ")
 
-It should be clear that #dyncode("plus1(0)") and #dyncode("plus2(0)")
-return #dyncode("1") and #dyncode("2"), respectively.  The closure-function
-that is given the name #dyncode("plus1") consists of an envless function
-and an environment binding #dyncode("x") to #dyncode("1"). The envless
-function can essentially be described by the pseudo syntax #dyncode("lam
-(env, y) => env.x + y"), where #dyncode("env") and #dyncode("env.x") refer
-to an environment and the value to which #dyncode("x") is bound in that
-environment. When evaluating #dyncode("plus1(0)"), we can first bind
-#dyncode("env") and #dyncode("y") to the environment in #dyncode("plus1")
-and the argument #dyncode("0"), respectively, and then start to evaluate
-the body of the envless function in #dyncode("plus1"), which is
-#dyncode("env.x + y"). Clearly, this evaluation yields the value
-#dyncode("1") as is expected.\
+The caller of #dyncode("addx") owns the
+closure it receives and has to free it:
+
+#dats2xhtml("\
+//
+val plus1 = addx (1) // [plus1] is of the type int -<cloptr1> int
+val () = println! (plus1 (0)) // 1 is printed
+val () = cloptr_free ($UNSAFE.castvwtp0{cloptr(void)}(plus1))
+//
+")
+
+It should be clear that #dyncode("plus1(0)") returns #dyncode("1"). The
+closure-function that is given the name #dyncode("plus1") consists of an
+envless function and an environment binding #dyncode("x") to #dyncode("1").
+The envless function can essentially be described by the pseudo syntax
+#dyncode("lam (env, y) => env.x + y"), where #dyncode("env") and
+#dyncode("env.x") refer to an environment and the value to which
+#dyncode("x") is bound in that environment. When evaluating
+#dyncode("plus1(0)"), we can first bind #dyncode("env") and #dyncode("y") to
+the environment in #dyncode("plus1") and the argument #dyncode("0"),
+respectively, and then start to evaluate the body of the envless function in
+#dyncode("plus1"), which is #dyncode("env.x + y"). Clearly, this evaluation
+yields the value #dyncode("1") as is expected. The cast in the last line is
+the idiom for freeing a closure; it turns the closure into a value of the
+type #dyncode("cloptr(void)") that #dyncode("cloptr_free") accepts.\
 
 ")#comment("para")
 
@@ -1184,7 +1246,8 @@ the body of the envless function in #dyncode("plus1"), which is
 
 Closures are often passed as arguments to functions that are referred
 to as higher-order functions.  It is also fairly common for closures to
-be embedded in data structures.\
+be embedded in data structures; such a data structure then owns the
+closures it contains.\
 
 ")
 
@@ -1275,38 +1338,44 @@ generalization does not actually work. The simple reason is that
 the function passed to #dyncode("ifold") in the body of
 #dyncode("sqrmodsum") is clearly not envless (due to its use of
 #dyncode("d")). To address the issue, we can implement a variant of
-#dyncode("ifold") as follows and then implement #dyncode("sqrmodsum") based
-on this variant:
+#dyncode("ifold") that takes a flat closure and then implement
+#dyncode("sqrmodsum") based on this variant:
 
 #dats2xhtml("\
 //
 fun
 ifold2
 (
-  n: int, f: (int, int) -<cloref1> int, ini: int
+  n: int, f: &(int, int) -<clo1> int, ini: int
 ) : int =
-  if n > 0 then f (ifold2 (n-1, f, ini), n) else ini
+  if n > 0 then let
+    val res = ifold2 (n-1, f, ini)
+  in
+    f (res, n)
+  end else ini
 // end of [ifold2]
 //
 fun
 sqrmodsum
-(n: int, d: int): int =
-  ifold2(n, lam (res, x) => if x mod d = 0 then res + x * x else res, 0)
-// end of [sqrmodsum]
+(n: int, d: int): int = let
+  var f = lam@ (res: int, x: int): int =>
+    if x mod d = 0 then res + x * x else res
+in
+  ifold2 (n, f, 0)
+end // end of [sqrmodsum]
 //
 ")
 
-While #dyncode("ifold2") is indeed more general than #dyncode("ifold"),
-this generality does come with a price. Whenever #dyncode("sqrmodsum") is
-called, a closure-function must be created on heap and then passed to
-#dyncode("ifold2"); this closure-function is of no further use after the
-call returns and the memory it occupies can only be properly relcaimed
-through garbage collection (GC). Therefore, calling functions like
-#dyncode("sqrmodsum") can readily result in memory leaks in a setting where
-GC is not available. Fortunately, there are also linear closure-functions
-in ATS, which do not cause any memory leaks even in the absence of GC as
-they are required to be explicitly freed by the programmer. I will cover
-this interesting programming feature elsewhere.\
+While #dyncode("ifold2") is indeed more
+general than #dyncode("ifold"), this generality may come with a price. In
+the version above, there is none: the closure #dyncode("f") is stored in the
+stack frame of #dyncode("sqrmodsum"), no memory is allocated in the heap, and
+there is nothing to free. If a pointer closure is used instead (the
+argument of #dyncode("ifold2") is then of the type
+#dyncode("!(int, int) -<cloptr1> int")), then the closure must be created on
+heap and freed by the caller after the call returns; and this is what it
+takes to avoid memory leaks in the absence of a garbage collector.  Both
+variants are included in the on-line code for this chapter.\
 
 ")#comment("para")
 
@@ -1316,6 +1385,11 @@ As more features of ATS are introduced, higher-order functions will become
 even more effective in facilitating code reuse.\
 
 ")#comment("para")
+
+#para("\
+Please find #mycodelink("CHAP_FUNCTION/misc.dats", "on-line")
+the entire code in this section plus some additional code for testing.
+")
 
 </sect1>
 
@@ -1340,13 +1414,14 @@ inclusive, and x0 < f(i) holds for i ranging from i0+1 to ub, inclusive:
 //
 fun bsearch_fun
 (
-  f: int -<cloref1> uint
+  f: &(int) -<clo1> uint
 , x0: uint, lb: int, ub: int
 ) : int =
   if lb <= ub then let
     val mid = lb + (ub - lb) / 2
+    val x = f (mid)
   in
-    if x0 < f (mid) then
+    if x0 < x then
       bsearch_fun (f, x0, lb, mid-1)
     else
       bsearch_fun (f, x0, mid+1, ub)
@@ -1355,7 +1430,8 @@ fun bsearch_fun
 // end of [bsearch_fun]
 ")
 
-As an example, the following function #dyncode("isqrt") is defined based
+Note that the function to be inverted is passed as a flat closure.  As an
+example, the following function #dyncode("isqrt") is defined based
 on #dyncode("bsearch_fun") to compute the integer square root of a given
 natural number, that is, the largest integer whose square is less than or
 equal to the given natural number:
@@ -1371,9 +1447,11 @@ fun
 square(x: uint): uint = x * x
 //
 fun isqrt
-  (x: uint): int =
-  bsearch_fun(lam i => square(g0i2u(i)), x, 0, ISQRT_MAX)
-// end of [isqrt]
+  (x: uint): int = let
+  var f = lam@ (i: int): uint => square(g0i2u(i))
+in
+  bsearch_fun(f, x, 0, ISQRT_MAX)
+end // end of [isqrt]
 ")
 
 Note that the function #dyncode("g0i2u") is for casting a signed integer
@@ -1397,56 +1475,53 @@ id="example-a-higher-order-fun-puzzle">
 
 #para("\
 
-Let us first introduce a type definition as follows:
-
-#sats2xhtml("\
-typedef I(a:t@ype) = (a) -<cloref1> a
-")
-
-Given a type T, I(T) is for a closure-function that maps a given input
-value of type T to an output value of the same type T. Given a function f
-of type I(T), we can compose f with itself to form another function, which
-just applies f twice to a given argument. The following function template
-#dyncode("twice") does precisely the described function composition:
+Let us first introduce a function template that applies a given
+function twice to a given argument:
 
 #dats2xhtml("\
-fn{a:t0p}
-twice (f: I(a)):<cloref> I(a) = lam (x) => f (f (x))
+fun{a:t@ype}
+twice (f: &(a) -<clo1> a, x: a): a = f (f (x))
 ")
 
-Let us now take a look at some interesting code involving #dyncode("twice")
-that is also likely to be puzzling:
+Given a type T, the argument f is for a flat closure that maps a given
+input value of type T to an output value of the same type T. The
+following code applies #dyncode("twice") to the successor function:
 
 #dats2xhtml("\
-//
-typedef I0 = int
-typedef I1 = I(I0)
-typedef I2 = I(I1)
-typedef I3 = I(I2)
 //
 val Z = 0
-val S = lam (x: int): int =<cloref> x + 1
-val ans0 = twice<I0>(S)(Z)
-val ans1 = twice<I1>(twice<I0>)(S)(Z)
-val ans2 = twice<I2>(twice<I1>)(twice<I0>)(S)(Z)
-val ans3 = twice<I3>(twice<I2>)(twice<I1>)(twice<I0>)(S)(Z)
+//
+implement
+main0 () = {
+  var S = lam@ (x: int): int => x + 1
+  val ans0 = twice<int>(S, Z)
+  val () = println! (\"ans0 = \", ans0)
+}
 //
 ")
 
-Note that the type definitions
-#stacode("I0"),
-#stacode("I1"),
-#stacode("I2"), and
-#stacode("I3") are introduced to make the above code more easily
-accessible.\
+Obviously, #dyncode("Z") stands for the integer 0 and #dyncode("S") for the
+successor function on integers. Also, #dyncode("ans0") equals 2 as it is
+the result of applying #dyncode("S") to #dyncode("Z") twice.\
 
 ")
 
 #para("\
 
-Obviously, #dyncode("Z") stands for the integer 0 and #dyncode("S") for the
-successor function on integers. Also, #dyncode("ans0") equals 2 as it is
-the result of applying #dyncode("S") to #dyncode("Z") twice. Let
+The original form of this puzzle composes #dyncode("twice") with itself: the
+function #dyncode("twice") is turned into one that takes and returns
+closure-functions of the type #dyncode("I(T)"), where #dyncode("I(T)") is
+the type of closure-functions mapping T to T, and the following values are
+computed:
+
+<programlisting>
+ans0 = twice&lt;I0&gt;(S)(Z)
+ans1 = twice&lt;I1&gt;(twice&lt;I0&gt;)(S)(Z)
+ans2 = twice&lt;I2&gt;(twice&lt;I1&gt;)(twice&lt;I0&gt;)(S)(Z)
+ans3 = twice&lt;I3&gt;(twice&lt;I2&gt;)(twice&lt;I1&gt;)(twice&lt;I0&gt;)(S)(Z)
+</programlisting>
+
+where I0 is #dyncode("int") and I(k+1) is #dyncode("I(Ik)"). Let
 #dyncode("S2") be the function that applies #dyncode("S") twice.  It is
 clear that #dyncode("ans1") is the result of applying #dyncode("S2") to
 #dyncode("Z") twice and thus equals 4. With a bit more effort, one should
@@ -1454,6 +1529,16 @@ be able to figure out that the value of #dyncode("ans2") is 16. What is the
 value of #dyncode("ans3")? In general, what is the nth value in the
 sequence of #dyncode("ans0"), #dyncode("ans1"), #dyncode("ans2"), etc.?
 I leave these questions as exercises for the interested reader.
+
+This puzzle is no longer expressible in the form above in this version of
+ATS2. Each application of #dyncode("twice") creates a closure that
+captures its argument, and then the closure is applied repeatedly, and shared
+by later applications. Such closures can only be managed with a
+garbage collector; flat closures cannot be returned from a function, and
+one-shot closures cannot be applied repeatedly. This is a typical
+example of programming style in functional languages that is based on the
+unrestricted sharing of closures, and that does not carry over to a
+setting where every piece of memory has an owner.\
 
 ")
 
@@ -1476,10 +1561,9 @@ Currying, which is named after the logician Haskell Curry, means to
 turn a function taking multiple arguments simultaneously into a function of
 the same body (modulo corresponding recursive function calls being changed
 accordingly) that takes these arguments sequentially. Uncurrying means
-precisely the opposite of currying. In the following code, both of the
-defined functions #dyncode("acker1") and #dyncode("acker2") implement the
-Ackermann's function (which is famous for being recursive but not primitive
-recursive):
+precisely the opposite of currying. In the following code, the function
+#dyncode("acker1") implements the Ackermann's function (which is famous for
+being recursive but not primitive recursive):
 
 #dats2xhtml('\
 fun acker1
@@ -1489,21 +1573,19 @@ fun acker1
     if n > 0 then acker1 (m-1, acker1 (m, n-1)) else acker1 (m-1, 1)
   else n+1 // end of [if]
 )
-
-fun acker2
-  (m: int) (n: int): int =
-(
-  if m > 0 then
-    if n > 0 then acker2 (m-1) (acker2 m (n-1)) else acker2 (m-1) 1
-  else n+1 // end of [if]
-)
 ')
 
-The function #dyncode("acker2") is a curried version of #dyncode("acker1")
-while the function #dyncode("acker1") in an uncurried version of
-#dyncode("acker2"). Applying #dyncode("acker2") to an integer value
-generates a closure-function, which causes a memory-leak unless it can be
-reclaimed by garbage collection (GC) at run-time.\
+A curried version of #dyncode("acker1") would be defined by writing
+#dyncode("acker2 (m: int) (n: int): int") with the corresponding recursive
+calls #dyncode("acker2 (m-1) (acker2 m (n-1))"), etc. Applying such a
+function to an integer value generates a closure-function that is shared and
+never freed, which would be a memory leak in the absence of a garbage
+collector. For this reason, the compiler rejects the definition of
+#dyncode("acker2") (as it does for any curried function) by reporting that a
+cloref closure is constructed.  A curried version that explicitly returns a
+pointer closure of the type #dyncode("(int) -<cloptr1> int") can be written,
+but its caller must free the closure it receives, as is done in the
+on-line code of this section.\
 
 ")#comment("para")
 
@@ -1516,8 +1598,7 @@ languages, currying often leads to better performance at run-time and thus
 is preferred. In ATS, functions of multiple arguments are supported
 directly. Also, given a function of multiple arguments, a curried version
 of the function is likely to perform less efficiently at run-time than the
-function itself (due to the treatment of curried functions by the ATS
-compiler <command>atsopt</command>).  Therefore, the need for currying in
+function itself. Therefore, the need for currying in
 ATS is greatly diminished. Unless convincing reasons can be given, currying
 is in general #emphasis("not") a recommended programming style in ATS.\
 
