@@ -31,32 +31,31 @@ interactions with the browser running JS code).
 
 #para("\
 
-Let us take a look at a simple webpage for computing factorials
-<ulink
- url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/Factorial.html\">on-line</ulink>.
+Let us take a look at a simple webpage for computing factorials: the file
+#filename("Factorial.html") in the code of this chapter.
 After inputing a natural number, one can click the
 #emphasis('Evaluate') button to see some output mentioning the
 factorial of the number.
-Please find the HTML source for the webpage
-<ulink url=\"https://github.com/ats-lang/ats-lang.github.io/tree/master/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/Factorial.html\">here</ulink>.
 
-Note that the following JS scripts are needed for evaluating
+Note that the following JS scripts (which are in the directory
+#filename("contrib/libatscc2js") of the ATS2 repository) are needed for evaluating
 JS code generated from ATS source:
 
 <informalexample><programlisting>
-&lt;script type=\"text/javascript\"
- src=\"https://ats-lang.github.io/LIBRARY/libatscc2js/ATS2-0.3.2/libatscc2js_all.js\"&gt;
-&lt;/script&gt;
-&lt;script type=\"text/javascript\"
-  src=\"https://ats-lang.github.io/LIBRARY/libatscc2js/ATS2-0.3.2/libatscc2js_print_store_cats.js\"&gt;
-&lt;/script&gt;
+&lt;script src=\"libatscc2js/CATS/basics_cats.js\"&gt;&lt;/script&gt;
+&lt;script src=\"libatscc2js/CATS/bool_cats.js\"&gt;&lt;/script&gt;
+&lt;script src=\"libatscc2js/CATS/integer_cats.js\"&gt;&lt;/script&gt;
+&lt;script src=\"libatscc2js/CATS/string_cats.js\"&gt;&lt;/script&gt;
+&lt;script src=\"libatscc2js/CATS/PRINT/print_store_cats.js\"&gt;&lt;/script&gt;
 </programlisting></informalexample>
 
 The JS code in the file #filename("Factorial_dats.js") is generated
 from compiling the ATS source stored in
 #filename("Factorial.dats"). The command #command("patsopt") is called
 on the ATS source to compile it onto C code, and the command
-#command("atscc2js") is subsequently called on the generated C code to
+#command("atscc2js") (which is built by executing #command("make") in the
+directory #filename("contrib/CATS-atscc2js") of the repository) is
+subsequently called on the generated C code to
 transpile it into JS code:
 
 <informalexample><programlisting>
@@ -68,10 +67,18 @@ atscc2js -o Factorial_dats.js -i Factorial_dats.c
 
 #para("\
 
+The JS backend has no garbage collector to rely on either, as the types of
+ATS are the same: a linear list (or stream, or closure) in the ATS source has
+to be consumed there, and the JS engine reclaims the memory of the JS values it
+manages. In the example of this chapter nothing is linear.
+
+")
+
+#para("\
+
 As a concrete example, please see the code in
-<ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/Factorial.dats\">Factorial.dats</ulink>.
-At the beginning of the file, the following code is present:
+#filename("Factorial.dats"). At the beginning of the file, the following code is
+present:
 
 #dats2xhtml('\
 //
@@ -86,7 +93,7 @@ source contained in #filename("Factorial.dats") is compiled into C.
 Then this dynload-function is transpiled into JS by
 #command("atscc2js"), and it is supposed to be called first (to
 perform initialization) before any function in the generated JS code
-is put into use.
+is put into use (the page calls it when it is loaded).
 
 ")
 
@@ -100,16 +107,12 @@ needed for compiling ATS to JS:
 //
 \#define
 LIBATSCC2JS_targetloc
-"$PATSHOME/contrib\\\\\\\\
-/libatscc2js/ATS2-0.3.2"
+"$PATSHOME/contrib/libatscc2js"
 //
-\#include "{$LIBATSCC2JS}/staloadall.hats" // for prelude stuff
+\#include "{$LIBATSCC2JS}/mylibies.hats" // for prelude stuff
 \#staload "{$LIBATSCC2JS}/SATS/print.sats" // for printing into a store
 //
 ')
-
-The version we use here is ATS2-0.3.2, which is the latest
-stable release of LIBATSCC2JS.
 
 ")
 
@@ -123,14 +126,14 @@ in ATS and implemented in JS:
 //
 extern
 fun
-funarg1_get(): int = "mac\\\\#"
+funarg1_get(): int = "mac\#"
 //
-\\\%{^
+%{^
 function funarg1_get()
 {
   return parseInt(document.getElementById("funarg1").value);
 }
-\\\%} (* end of external code *)
+%} (* end of external code *)
 //
 ')
 
@@ -139,24 +142,46 @@ DOM-element identified by #dyncode("funarg1") and then converts
 into an integer the string stored in the value-field of the
 DOM-element.
 
-Note that the use of the string #dyncode('"mac\\\\#"') simply
+Note that the use of the string #dyncode('"mac\#"') simply
 indicates to #command("patsopt") that the function
 #dyncode("funarg1_get") is to be given the same name when compiled
 into C. In contrast, the name automatically chosen (by
 #command("patsopt")) for #dyncode("funarg1_get") contains a long
 prefix (for carrying some namespace information) if the string
-#dyncode('"mac\\\\#"') is not present. In case a different name is
+#dyncode('"mac\#"') is not present. In case a different name is
 needed for #dyncode("funarg1_get") in C, the name should be explicitly
-mentioned after the symbol #dyncode('\\\\#'). For instance, if the
-string #dyncode('"mac\\\\#\\\JS_funarg1_get"') is used, then the name
+mentioned after the symbol #dyncode('\#'). For instance, if the
+string #dyncode('"mac\#JS_funarg1_get"') is used, then the name
 #dyncode("JS_funarg1_get") is chosen (by #command("patsopt")) for
 #dyncode("funarg1_get").  In ATS source, the code written between
-#dyncode("\\\%{^") and #dyncode("\\\%}") is considered external and is
+#dyncode("%{^") and #dyncode("%}") is considered external and is
 directly pasted by #command("patsopt") into the generated C code.  The
 symbol #dyncode("^") means that the pasted code is to appear near the
 beginning of the generated code. If the symbol #dyncode("^") is
 omitted or replaced with #dyncode("$"), the code is to be pasted
 near the bottom of the generated code.
+
+")
+
+#para("\
+
+Another function implemented in JS puts a string into the DOM-element
+identified by #dyncode("theOutput"):
+
+#dats2xhtml('\
+//
+extern
+fun
+theOutput_set(text: string): void = "mac\#"
+//
+%{^
+function theOutput_set(text)
+{
+  document.getElementById("theOutput").innerHTML = text;
+}
+%} (* end of external code *)
+//
+')
 
 ")
 
@@ -182,11 +207,8 @@ Factorial__evaluate
   println!
   ("The factorial of ", arg, " is ", fact(arg))
   // end of [val]
-  val theOutput =
-    document_getElementById("theOutput")
-  // end of [val]
 in
-  xmldoc_set_innerHTML(theOutput, the_print_store_join())
+  theOutput_set(the_print_store_join())
 end // end of [Factorial__evaluate]
 //
 ')
@@ -195,49 +217,41 @@ There is a global store, an array of strings, for receiving the
 output generated from calling various print-functions. The function
 #dyncode("the_print_store_clear") is for clearing this store and the
 function #dyncode("the_print_store_join") for joining the strings
-contained in the store into a single one.  Given a name,
-#dyncode("document_getElementById") locates the DOM-element identified
-by the name.  Given a DOM-element and a string,
-#dyncode("xmldoc_set_innerHTML") updates the innerHTML-field of the
-DOM-element with the string.
+contained in the store into a single one.  The function
+#dyncode("theOutput_set") updates the innerHTML-field of the
+DOM-element identified by #dyncode("theOutput") with the string.
 
 ")
 
 #para("\
 
-For a more involved example, please visit <ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/QueenPuzzle.html\">on-line</ulink>
-a webpage for animating the process that searches (in the depth-first
-fashion) for solutions to the 8-queen puzzle. The HTML source for the
-webpage can be viewed <ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/tree/master/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/QueenPuzzle.html\">here</ulink>,
-and the code implementing depth-first search is simply adapted from some
-sample ATS code presented in a previous chapter.
+The command #command("make") in the code of this chapter generates
+#filename("Factorial_dats.js") from #filename("Factorial.dats"), and
+#command("make regress") runs the generated code under Node.js with a tiny
+stub of the DOM in place of a browser (the file #filename("test_Factorial.js")),
+which checks that the output for 10 is the text
+#dyncode("The factorial of 10 is 3628800"). The test is skipped
+if #command("atscc2js") or #command("node") is not available. The page
+itself needs a browser.
+
+")
+
+#para("\
+
+For a more involved example, there was a webpage for animating the process that
+searches (in the depth-first fashion) for solutions to the 8-queen puzzle,
+and the code implementing depth-first search was simply adapted from the sample
+ATS code presented in a previous chapter. That demo was written in the GC era
+(it makes use of non-linear lists and streams) and it has not been ported: the
+8-queen code of this book is linear and its stream-based version is presented in a
+later chapter.
 
 ")
 
 #para("\
 
 Please find #mycodelink("LECTURE/06-20/CODE", "on-line") the entirety of
-the code used in this chapter. The mentioned URL link(s) can be found as follows:
-
-<itemizedlist>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/Factorial.html\">https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/Factorial.html</ulink>
-")#comment("para")
-</listitem>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/QueenPuzzle.html\">https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/QueenPuzzle.html</ulink>
-")#comment("para")
-</listitem>
-
-</itemizedlist>
+the code used in this chapter.
 
 ")#comment("para")
 
@@ -250,4 +264,3 @@ url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/06-20/CODE/QueenP
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
