@@ -16,18 +16,8 @@ Time of Generation: #timestamp()\
 <chapter
  id="lecture05">
 #title("Functional List-Processing (1)")
-#para("\
-\
-#emphasis("Historical note:") this lecture describes the functional lists of
-the GC era of ATS2 (the type #stacode("list0")). The type #stacode("list0")
-was removed when the support for the garbage collector was dropped: the
-compiler now rejects every nonlinear heap allocation. Use #stacode("list_vt")
-(a linear list) instead; its interface is in
-#myatscodelink("prelude/SATS/list_vt.sats", "prelude/SATS/list_vt.sats").
-\
-")
 
-#para("\
+#para('\
 
 Lists are by far the most commonly used data structure in functional
 programming: The functional programming language LISP is even named
@@ -37,273 +27,351 @@ is essentially an immutable linked-list: Such a list can never be
 changed after its creation. In particular, functional list-processing
 cannot modify any lists being processed. \
 
-")
+')
 
-#para("\
-  
-In ATS, there is a datatype #stacode("list0") declared as follows:
+#para('\
 
-#dats2xhtml('\
+There is no garbage collector (GC) in this dialect of ATS2, and
+the lists of the GC era (the type #stacode("list0")) do not exist any more:
+a list node lives on heap, and a value that lives on heap has to be
+#emphasis("linear") (that is, there is exactly one owner who is responsible for
+freeing it). The lists of this book are the linear lists of the prelude,
+that is, the lists of the type #stacode("list_vt"). The functions that are
+presented in this chapter keep the spirit of functional list-processing:
+a list that is only read is
+#emphasis("borrowed") (the symbol #keycode("!") in front of its type, which
+means that the caller keeps the list and still owns it after the call) and
+the result of a function is a newly constructed list, which belongs to
+the caller, who is to free it in the end.
+
+')
+
+#para('\
+
+In ATS, there is a datatype #stacode("list_vt") declared as follows
+(the actual name of the type constructor is a long one, and
+#stacode("list_vt") is a shorthand of it):
+
+#sats2xhtml('\
 //
-datatype
-list0(a:t@ype) =
-list0_nil of () | list0_cons of (a, list0(a))
+datavtype
+list_vt0ype_int_vtype
+  (a:vt@ype+, int) =
+  | list_vt_nil(a, 0) of ()
+  | {n:int | n >= 0}
+    list_vt_cons(a, n+1) of (a, list_vt0ype_int_vtype(a, n))
+// end of [list_vt0ype_int_vtype]
 //
 ')
 
-Note that #stacode("t@ype") is a sort for static terms representing
-types of dynamic values of unspecified size. There is also a sort
-#stacode("type") in ATS, which is for types of boxed dynamic values
-(of the size of exactly one machine word). Given any type
-#stacode("T"), #stacode("list0(T)") is for lists consisting of
-elements of the type #stacode("T").
+Note that #stacode("vt@ype") is a sort for static terms representing
+types of dynamic values of unspecified size that may be linear. Given a type
+#stacode("T") and a natural number #stacode("n"), #stacode("list_vt(T, n)") is
+for lists of length #stacode("n") consisting of elements of the type
+#stacode("T"). The type #stacode("List0_vt(T)") of the prelude is for lists of
+an unspecified length and it is the type that is used when the length does not
+matter.
 
-")
+')
 
-#para("\
+#para('\
 
-Every datatype is associated with a set of data-constructors, which
+Every datavtype is associated with a set of data-constructors, which
 are called for constructing (boxed) values of the datatype. The
-declaration of #stacode("list0") indicates that #dyncode("list0_nil")
-and #dyncode("list0_cons") are the two constructors assocated with
-#stacode("list0"); #dyncode("list0_nil") is nullary;
-#dyncode("list0_cons") is binary, which takes a given element and a
+declaration of #stacode("list_vt") indicates that #dyncode("list_vt_nil")
+and #dyncode("list_vt_cons") are the two constructors assocated with
+#stacode("list_vt"); #dyncode("list_vt_nil") is nullary;
+#dyncode("list_vt_cons") is binary, which takes a given element and a
 given list to form a new list such that the given element and list are
 the head and tail of the newly formed list, respectively. For instance,
 the following code binds #dyncode("xs3") to a list of type
-#stacode("list0(int)") that contains three elements 3, 2, and 1:
+#stacode("list_vt(int, 3)") that contains three elements 3, 2, and 1:
 
 #dats2xhtml('\
-val xs0 = list0_nil{int}() // xs = ()
-val xs1 = list0_cons(1, xs0) // xs = (1)
-val xs2 = list0_cons(2, xs1) // xs = (2, 1)
-val xs3 = list0_cons(3, xs2) // xs = (3, 2, 1)
+val xs0 = list_vt_nil{int}() // xs = ()
+val xs1 = list_vt_cons{int}(1, xs0) // xs = (1)
+val xs2 = list_vt_cons{int}(2, xs1) // xs = (2, 1)
+val xs3 = list_vt_cons{int}(3, xs2) // xs = (3, 2, 1)
 ')
 
-If #dyncode("list0_nil()") is used instead, then the typechecker of
-ATS can only infer that the type of #dyncode("xs3") is #dyncode("list0(T)")
-for some type #dyncode("T") such that 3, 2, and 1 are values of #dyncode("T").
-Note that the type system of ATS is highly expressive and it is beyond the focus
-of this book to cover advanced use of types in ATS.
-
-")
-
-#para("\
-
-In ATS, #dyncode("nil0") and #dyncode("cons0") are declared aliases
-for #dyncode("list0_nil") and #dyncode("list0_cons"), respectively.
-Following the convention of ML, we can use #dyncode("::") for
-#dyncode("list0_cons") as well:
+Constructing a list with #dyncode("list_vt_cons") consumes its tail:
+the variables #dyncode("xs0"), #dyncode("xs1") and #dyncode("xs2") are
+not available any more once they are used. The static argument
+#dyncode("{int}") tells the typechecker that the element type of the list
+is #stacode("int"). Another notation for constructing a list is used in the
+following sample code:
 
 #dats2xhtml('\
-\#define :: list0_cons
-val xs123 = 1 :: 2 :: 3 :: nil0{int}() // xs123 = (1, 2, 3)
+val xs123 = $list_vt{int}(1, 2, 3) // xs123 = (1, 2, 3)
+val ys123 = $list_vt{string}("1", "2", "3") // ys123 = ("1", "2", "3")
 ')
 
-In addition, another notation for constructing list0-values is used
-in the following sample code:
+Note that #dyncode("$list_vt{T}(...)") is for constructing a list-value
+in which each element is of type T. In the absence of GC, a list has to be freed
+by its owner, and the function #dyncode("list_vt_free") of the prelude does
+so for a list of non-linear elements. For instance, we can print out the list
+#dyncode("xs3") (printing borrows the list) and free it as follows:
 
 #dats2xhtml('\
-val xs123 = g0ofg1($list{int}(1, 2, 3)) // xs123 = (1, 2, 3)
-val ys123 = g0ofg1($list{string}("1", "2", "3")) // ys123 = ("1", "2", "3")
+val () = println! ("xs3 = ", xs3)
+val () = println! ("length(xs3) = ", list_length<int>(xs3))
+//
+val () = list_vt_free<int>(xs3)
 ')
 
-Note that #dyncode("$list{T}(...)") is for constructing a list-value
-in which each element is of type T and #dyncode("g0ofg1") is a cast
-function (of zero run-time cost) that casts a list-value into the
-corresponding list0-value.
+If the last line is dropped, the compiler complains that the linear variable
+#dyncode("xs3") is not consumed. And if the list is used after the last line,
+the compiler complains that it is not available any more.
 
-")
+')
 
-#para("\
+#para('\
 
-The function for computing the length of a given list0-value can be implemented
-as follows:
+The function for computing the length of a given list
+can be implemented as follows (the functions of the chapter, which
+form a part of the library of the book, are collected in the file
+#filename("listfun.hats")):
 
 #dats2xhtml('\
+//
+extern
 fun
 {a:t@ype}
-list0_length
-  (xs0: list0(a)): int =
+list_length
+  {n:nat}(xs: !list_vt(a, n)): int(n)
+//
+implement
+{a}(*tmp*)
+list_length(xs) =
 (
-case xs0 of
-| list0_nil() => 0
-| list0_cons(x0, xs1) => 1 + list0_length<a>(xs1)
-) (* end of [list0_length] *)
+case+ xs of
+| list_vt_nil() => 0
+| list_vt_cons(x0, xs1) => 1 + list_length<a>(xs1)
+) (* end of [list_length] *)
+//
 ')
 
-Strictly speacking, #dyncode("list0_length") is a function template
+Strictly speacking, #dyncode("list_length") is a function template
 (rather than a function). In the case-expression, there are two
 pattern matching clauses; each clause consists of a guard, which is
 pattern, and a body, which is an expression. When the value
-#dyncode("xs0") matches the guard of a clause, the body of the clause
-is chosen for subsequent evaluation. If #dyncode("xs0") is empty,
-then it is constructed with #dyncode("list0_nil") and thus matches the
-pattern #dyncode("list0_nil()").  If #dyncode("xs0") is non-empty,
-then then it is constructed with #dyncode("list0_cons") and thus
-matches the pattern #dyncode("list0_cons(x0, xs1)"), resulting in the
+#dyncode("xs") matches the guard of a clause, the body of the clause
+is chosen for subsequent evaluation. If #dyncode("xs") is empty,
+then it is constructed with #dyncode("list_vt_nil") and thus matches the
+pattern #dyncode("list_vt_nil()").  If #dyncode("xs") is non-empty,
+then then it is constructed with #dyncode("list_vt_cons") and thus
+matches the pattern #dyncode("list_vt_cons(x0, xs1)"), resulting in the
 names #dyncode("x0") and #dyncode("xs1") bound to the head and tail of
-#dyncode("xs0"), respectively.
+#dyncode("xs"), respectively. As #dyncode("xs") is borrowed, the pattern
+matching only reads it, and the length is returned as an integer
+of the singleton type #stacode("int(n)") (this is how the typechecker knows
+that the result of a call on a list of length n is n).
 
-")
+')
 
-#para("\
+#para('\
 
-Though the given implementation of #dyncode("list0_length") is not
+Though the given implementation of #dyncode("list_length") is not
 tail-recursive, it should be clear that a tail-recursive
 implementation can be readily done. Note that the function
-#dyncode("list0_length") is of O(n)-time for n being the length of its
+#dyncode("list_length") is of O(n)-time for n being the length of its
 argument. Often I see someone writing the code
-#dyncode("list0_length(xs) > 0") for testing whether a given list
+#dyncode("list_length(xs) > 0") for testing whether a given list
 #dyncode("xs") is empty. This practice is terribly inefficient as
 checking whether a list is empty can be easily done in O(1)-time.
 
-")
+')
 
-#para("\
+#para('\
 
-The function for concatenating two given list0-values can be implemented
+The function for concatenating two given lists can be implemented
 as follows:
 
 #dats2xhtml('\
+//
+extern
 fun
 {a:t@ype}
-list0_append
-(xs: list0(a),
- ys: list0(a)): list0(a) =
+list_append
+  {m,n:nat}
+( xs: !list_vt(a, m)
+, ys: !list_vt(a, n)): list_vt(a, m+n)
+//
+implement
+{a}(*tmp*)
+list_append(xs, ys) =
 (
 case+ xs of
-| list0_nil() => ys
-| list0_cons(x, xs) => list0_cons(x, list0_append<a>(xs, ys))
-) (* end of [list0_append] *)
+| list_vt_nil() => list_vt_copy<a>(ys)
+| list_vt_cons(x, xs) => list_vt_cons(x, list_append<a>(xs, ys))
+) (* end of [list_append] *)
+//
 ')
 
-Given #dyncode("xs") and #dyncode("ys"), #dyncode("list0_append")
+Given #dyncode("xs") and #dyncode("ys"), #dyncode("list_append")
 returns a list that represents the concatenation of #dyncode("xs") and
-#dyncode("ys"). Clearly, #dyncode("list0_append") is O(n)-time for n
-being the length of #dyncode("xs"). The implementation of
-#dyncode("list0_append") is functional in the sense that it does not
+#dyncode("ys"). Clearly, #dyncode("list_append") is O(n)-time for n
+being the length of #dyncode("xs") plus the length of #dyncode("ys")
+(since a list cannot be shared in the absence of GC, the elements of
+#dyncode("ys") are copied by #dyncode("list_vt_copy")). The implementation of
+#dyncode("list_append") is functional in the sense that it does not
 alter either #dyncode("xs") or #dyncode("ys") for the construction of
-the concatenation. For clarification, I point out that there is a
-function of the name #dyncode("list_vt_append") in ATS that consumes
-two given linear lists to construct their concatenation. When a call
-to #dyncode("list_vt_append") returns, the two linear lists passed to
-the call are no longer available for subsequent use.
+the concatenation: they are both borrowed. For clarification, I point out that there is a
+function of the name #dyncode("list_vt_append") in the prelude that consumes
+two given linear lists to construct their concatenation in O(n)-time without
+copying. When a call to #dyncode("list_vt_append") returns, the two linear lists
+passed to the call are no longer available for subsequent use.
 
-")
+')
 
-#para("\
+#para('\
 
-The function for constructing the reverse of a given list0-value
+The function for constructing the reverse of a given list
 can be implemented as follows:
 
 #dats2xhtml('\
+//
+extern
 fun
 {a:t@ype}
-list0_reverse
-(xs: list0(a)): list0(a) =
-list0_revappend<a>(xs, list0_nil())
-
-and
-list0_revappend
-(xs: list0(a),
- ys: list0(a)): list0(a) =
+list_revappend
+  {m,n:nat}
+( xs: !list_vt(a, m)
+, ys: list_vt(a, n)): list_vt(a, m+n)
+//
+extern
+fun
+{a:t@ype}
+list_reverse
+  {n:nat}(xs: !list_vt(a, n)): list_vt(a, n)
+//
+implement
+{a}(*tmp*)
+list_revappend(xs, ys) =
 (
 case+ xs of
-| list0_nil() => ys
-| list0_cons(x, xs) => list0_revappend<a>(xs, list0_cons(x, ys))
-) (* end of [list0_revappend] *)
+| list_vt_nil() => ys
+| list_vt_cons(x, xs) => list_revappend<a>(xs, list_vt_cons(x, ys))
+) (* end of [list_revappend] *)
+//
+implement
+{a}(*tmp*)
+list_reverse(xs) = list_revappend<a>(xs, list_vt_nil())
+//
 ')
 
-Given a list0-value #dyncode("xs"), #dyncode("list0_reverse")
-returns a newly contructed list0-value that represents the reverse of
-#dyncode("xs"). Given two list0-values #dyncode("xs") and
-#dyncode("ys"), #dyncode("list0_revappend") returns a newly contructed
-list0-value that represents the concatenation of the reverse of
-#dyncode("xs") and #dyncode("ys").
-Clearly, both #dyncode("list0_reverse") and #dyncode("list0_revappend")
-are O(n)-time functions, where n is the length of #dyncode("xs").
+Given a list #dyncode("xs"), #dyncode("list_reverse")
+returns a newly contructed list that represents the reverse of
+#dyncode("xs"). Given two lists #dyncode("xs") and
+#dyncode("ys"), #dyncode("list_revappend") returns a newly
+contructed list that represents the concatenation of the reverse of
+#dyncode("xs") and #dyncode("ys"); the list #dyncode("ys") is
+consumed (it becomes a part of the result) and the list #dyncode("xs")
+is borrowed. Clearly, both #dyncode("list_reverse") and
+#dyncode("list_revappend") are O(n)-time functions, where n is the length of
+#dyncode("xs"), and they are tail-recursive.
 
-")
+')
 
-#para("\
+#para('\
 
-A commonly used list-combinator is the #dyncode("list0_foldleft")
+A commonly used list-combinator is the #dyncode("list_foldleft")
 function implemented as follows:
 
 #dats2xhtml('\
 //
 extern
 fun
-{r:t@ype}
+{r:vt@ype}
 {a:t@ype}
-list0_foldleft
-( xs: list0(a)
-, r0: r, fopr: cfun(r, a, r)): r
+list_foldleft
+( xs: !List0_vt(a)
+, r0: r, fopr: &(r, a) -<clo1> r): r
 //
 implement
 {r}{a}
-list0_foldleft
+list_foldleft
 ( xs
 , r0, fopr) =
-loop(xs, r0) where
+loop(xs, r0, fopr) where
 {
 fun
 loop
 (
-xs: list0(a), r0: r
+xs: !List0_vt(a), r0: r, fopr: &(r, a) -<clo1> r
 ) : r =
 (
 case+ xs of
-| list0_nil() => r0
-| list0_cons(x, xs) => loop(xs, fopr(r0, x))
+| list_vt_nil() => r0
+| list_vt_cons(x, xs) => loop(xs, fopr(r0, x), fopr)
 ) (* end of [loop] *)
 }
 //
 ')
 
 where the elements in the given list #dyncode("xs") are processed from
-left to right. Clearly, #dyncode("list0_foldleft") is tail-recursive.
+left to right. Clearly, #dyncode("list_foldleft") is tail-recursive. The sort
+#stacode("vt@ype") of #stacode("r") means that the accumulator can be a
+linear value (for instance, a list that is being built), which is passed to
+#dyncode("fopr") and replaced by the value that is returned (and thus it is
+never lost or duplicated). The function argument #dyncode("fopr") is a
+flat closure that is passed by reference (see the chapter on higher-order
+functions): it is created with #keycode("lam@") in the stack-frame of the caller
+and nothing needs to be freed.
 
-")
+')
 
-#para("\
+#para('\
 
 As an example, the function for computing the length of
-a given list0-value can be implemented with a direct
-call to #dyncode("list0_foldleft"):
+a given list can be implemented with a direct
+call to #dyncode("list_foldleft"):
 
 #dats2xhtml('\
 //
+extern
 fun
 {a:t@ype}
-list0_length
-  (xs: list0(a)): int =
-  list0_foldleft<int><a>(xs, 0, lam(r, _) => r + 1)
+list_length2(xs: !List0_vt(a)): int
+//
+implement
+{a}(*tmp*)
+list_length2(xs) = let
+  var fopr = lam@(r: int, _: a): int => r + 1
+in
+  list_foldleft<int><a>(xs, 0, fopr)
+end // end of [list_length2]
 //
 ')
 
 As another example, the reverse-append function that returns the link
-of the reverse of a given list0-value with another given list0-value
-can also be implemented with a direct call to #dyncode("list0_foldleft"):
+of the reverse of a given list with another given list
+can also be implemented with a direct call to #dyncode("list_foldleft"):
 
 #dats2xhtml('\
+//
+extern
 fun
 {a:t@ype}
-list0_revappend
-(
-xs: list0(a),
-ys: list0(a)
-) : list0(a) =
-  list0_foldleft<list0(a)><a>(xs, ys, lam(ys, x) => list0_cons(x, ys))
+list_revappend2
+(xs: !List0_vt(a), ys: List0_vt(a)): List0_vt(a)
+//
+implement
+{a}(*tmp*)
+list_revappend2(xs, ys) = let
+  var fopr = lam@(ys: List0_vt(a), x: a): List0_vt(a) => list_vt_cons(x, ys)
+in
+  list_foldleft<List0_vt(a)><a>(xs, ys, fopr)
+end // end of [list_revappend2]
+//
 ')
 
-")
+')
 
-#para("\
+#para('\
 
-In contrast to #dyncode("list0_foldleft"), the following function
-#dyncode("list0_foldright") processes the elements in a given list
+In contrast to #dyncode("list_foldleft"), the following function
+#dyncode("list_foldright") processes the elements in a given list
 from right to left:
 
 #dats2xhtml('\
@@ -311,92 +379,117 @@ from right to left:
 extern
 fun
 {a:t@ype}
-{r:t@ype}
-list0_foldright
-( xs: list0(a)
-, fopr: cfun(a, r, r), r0: r): r
+{r:vt@ype}
+list_foldright
+( xs: !List0_vt(a)
+, fopr: &(a, r) -<clo1> r, r0: r): r
 //
 implement
 {a}{r}
-list0_foldright
+list_foldright
 ( xs
 , fopr, r0) =
-auxlst(xs) where
+auxlst(xs, fopr, r0) where
 {
 fun
 auxlst
-(xs: list0(a)): r =
+(
+xs: !List0_vt(a), fopr: &(a, r) -<clo1> r, r0: r
+) : r =
 (
 case+ xs of
-| list0_nil() => r0
-| list0_cons(x, xs) => fopr(x, auxlst(xs))
+| list_vt_nil() => r0
+| list_vt_cons(x, xs) => fopr(x, auxlst(xs, fopr, r0))
 ) (* end of [auxlst] *)
 }
 //
 ')
 
-Please note that #dyncode("list0_foldright") is not tail-recursive.
+Please note that #dyncode("list_foldright") is not tail-recursive.
 As an example, the append function for concatenating two given
-list0-values can be implmented with a direct call to
-#dyncode("list0_foldright"):
+lists can be implmented with a direct call to
+#dyncode("list_foldright"):
 
 #dats2xhtml('\
 //
+extern
 fun
 {a:t@ype}
-list0_append
-(xs: list0(a),
- ys: list0(a)): list0(a) =
-list0_foldright<a><list0(a)>
-  (xs, lam(x, ys) => list0_cons(x, ys), ys)
+list_append2
+(xs: !List0_vt(a), ys: !List0_vt(a)): List0_vt(a)
+//
+implement
+{a}(*tmp*)
+list_append2(xs, ys) = let
+  var fopr = lam@(x: a, ys: List0_vt(a)): List0_vt(a) => list_vt_cons(x, ys)
+in
+  list_foldright<a><List0_vt(a)>(xs, fopr, list_vt_copy<a>(ys))
+end // end of [list_append2]
 //
 ')
 
 As another example, the list-concatenate function for concatenating
-a list of list0-values can also be implemented with a direct call to
-#dyncode("list0_foldright"):
+a list of lists is given as follows. A list of lists is linear (the elements
+are lists), and it is consumed: every list in it is appended to the
+following ones, and no copy is needed:
 
 #dats2xhtml('\
 //
+extern
 fun
 {a:t@ype}
-list0_concat
-(xss: list0(list0(a))): list0(a) =
-list0_foldright<list0(a)><list0(a)>
-  (xss, lam(xs, res) => list0_append<a>(xs, res), list0_nil())
+list_concat(xss: List0_vt(List0_vt(a))): List0_vt(a)
+//
+implement
+{a}(*tmp*)
+list_concat(xss) =
+(
+case+ xss of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(xs, xss) => list_vt_append<a>(xs, list_concat<a>(xss))
+) (* end of [list_concat] *)
 //
 ')
 
-")
+The symbol #keycode("~") in front of a pattern means that the matched
+list node is freed (and the matched value is no longer available) while its
+components, which are all owned by the matched value, are bound to the
+variables of the pattern and are now owned by the program.
 
-#para("\
+')
 
-In a case where a function (for example, #dyncode("list0_length"))
-can be implemented with a call to either #dyncode("list0_foldleft")
-or #dyncode("list0_foldright"), it is clear (unless there is a very
+#para('\
+
+In a case where a function (for example, #dyncode("list_length2"))
+can be implemented with a call to either #dyncode("list_foldleft")
+or #dyncode("list_foldright"), it is clear (unless there is a very
 special reason) that the former should be chosen as it is
 tail-recursive but the latter is not.
 
-")
+')
 
-#para("\
+#para('\
 
 Often I see a beginner of functional programming giving
-the following implementation of #dyncode("list0_reverse"):
+the following implementation of #dyncode("list_reverse"):
 
 #dats2xhtml('\
-
+//
+extern
 fun
 {a:t@ype}
-list0_reverse
-(xs: list0(a)): list0(a) =
+list_reverse2(xs: !List0_vt(a)): List0_vt(a)
+//
+implement
+{a}(*tmp*)
+list_reverse2(xs) =
 (
 case+ xs of
-| list0_nil() => list0_nil()
-| list0_cons(x, xs) =>
-  list0_append<a>(list0_reverse<a>(xs), list0_cons(x, list0_nil()))
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) =>
+  list_vt_append<a>(list_reverse2<a>(xs), list_vt_cons(x, list_vt_nil()))
 )
-
+//
 ')
 
 While this implementation is functionally correctly, it is of
@@ -404,12 +497,12 @@ O(n#sup("2"))-time complexity and thus can take a prohibitively long
 time for an input that is not so short (e.g., one containing 10K
 elements).
 
-")
+')
 
-#para("\
+#para('\
 
 As the last example of this chapter,
-#dyncode("list0_insertion_sort") is implemented
+#dyncode("list_insertion_sort") is implemented
 as follows that applies insertion sort to a given
 list to return a sorted version of the list:
 
@@ -418,54 +511,86 @@ list to return a sorted version of the list:
 extern
 fun
 {a:t@ype}
-list0_insertion_sort
+list_insertion_sort
 (
-xs: list0(a), cmp: cfun(a, a, int)
-) : list0(a)
+xs: !List0_vt(a), cmp: &(a, a) -<clo1> int
+) : List0_vt(a)
 //
 implement
 {a}(*tmp*)
-list0_insertion_sort
+list_insertion_sort
   (xs, cmp) = let
 //
 fun
 insord
 ( x0: a
-, xs: list0(a)): list0(a) =
+, xs: List0_vt(a)
+, cmp: &(a, a) -<clo1> int): List0_vt(a) =
 (
 case+ xs of
-| list0_nil() =>
-  list0_sing(x0)
-| list0_cons(x1, xs1) =>
+| ~list_vt_nil() =>
+  list_vt_sing(x0)
+| ~list_vt_cons(x1, xs1) =>
   (
     if cmp(x0, x1) < 0
-      then list0_cons(x0, xs)
-      else list0_cons(x1, insord(x0, xs1))
+      then list_vt_cons(x0, list_vt_cons(x1, xs1))
+      else list_vt_cons(x1, insord(x0, xs1, cmp))
     // end of [if]
-  ) // end of [list0_cons]
+  ) // end of [list_vt_cons]
 ) (* end of [insord] *)
+//
+fun
+loop
+( xs: !List0_vt(a)
+, res: List0_vt(a)
+, cmp: &(a, a) -<clo1> int): List0_vt(a) =
+(
+case+ xs of
+| list_vt_nil() => res
+| list_vt_cons(x, xs) => loop(xs, insord(x, res, cmp), cmp)
+) (* end of [loop] *)
 //
 in
 //
-list0_foldleft<list0(a)><a>
-  (xs, list0_nil(), lam(res, x) => insord(x, res))
+loop(xs, list_vt_nil(), cmp)
 //
-end // end of [list0_insertion_sort]
+end // end of [list_insertion_sort]
 //
 ')
 
 Note that the argument #dyncode("cmp") is a comparion function that is
 expected to return -1, 1, or 0 when its first argument is less than,
 greater than, or equal to its second argument, respectively.
+The loop is written directly instead of being a call to
+#dyncode("list_foldleft"): the closure #dyncode("cmp") is passed by reference
+and cannot be captured by another closure, which a call to
+#dyncode("list_foldleft") would need.
 
-")
+')
 
-#para("\
+#para('\
+
+A call to #dyncode("list_insertion_sort") may look like:
+
+#dats2xhtml('\
+var cmp = lam@(x: int, y: int): int => compare(x, y)
+val ys = list_insertion_sort<int>(xs, cmp)
+val () = println! ("sorted = ", ys)
+')
+
+where #dyncode("xs") is a list of integers. Both #dyncode("xs") and
+the result #dyncode("ys") are lists, and the program is to free both of them.
+
+')
+
+#para('\
 
 Please find #mycodelink("LECTURE/05/CODE", "on-line") the entirety of
-the code used in this chapter. \
+the code used in this chapter. It was compiled with #command("patscc")
+(no flag is needed) and run with the address sanitizer, which reports
+no leak. \
 
-")#comment("para")
+')#comment("para")
 
 </chapter><!--id="lecture05"-->
 
@@ -476,4 +601,3 @@ the code used in this chapter. \
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
