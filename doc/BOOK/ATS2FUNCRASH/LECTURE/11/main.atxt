@@ -292,7 +292,7 @@ case+ !xs of
 In the function #dyncode("ftally2"), the three streams are created, the
 elements of #dyncode("xs3") are produced one by one and consumed by the
 fold, and all of the nodes, the thunks and the closure (the one created by
-#dyncode("lam(i) =<cloptr1> f(i)")) are freed before the function returns:
+#dyncode("lam(i) =&lt;cloptr1&gt; f(i)")) are freed before the function returns:
 when the end of #dyncode("xs2") is reached, the rest of #dyncode("xs1")
 is freed by #dyncode("stream_takeLte"), and the closure is freed by
 #dyncode("stream_map"). The program that tests the functions
