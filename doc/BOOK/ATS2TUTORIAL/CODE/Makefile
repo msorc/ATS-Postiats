@@ -113,6 +113,17 @@ cleanall:: ; $(RMF) chap_exception
 ######
 #
 all:: \
+chap_reference
+chap_reference: \
+chap_reference.dats ; \
+$(PATSCC2) -o $@ $<
+#
+regress:: chap_reference; ./$<
+cleanall:: ; $(RMF) chap_reference
+#
+######
+#
+all:: \
 chap_tuprec_1
 chap_tuprec_1: \
 chap_tuprec_1.dats ; \

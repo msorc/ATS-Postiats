@@ -19,9 +19,14 @@ id="reference"
 #para("\
 
 A reference is a singleton array, that is, an array of size 1.  It is
-persistent in the sense that the (heap-allocated) memory for storing the
-content of a reference cannot be freed manually in a type-safe
-manner. Instead, it can only be reclaimed through garbage collection (GC).
+persistent in the sense that it can be freely copied and the memory for
+storing its content is never freed: the type of a reference is not linear,
+so there is no way to tell when the last copy of a reference is gone.
+Therefore, a reference cannot be allocated on heap in this dialect of ATS2,
+which has no garbage collector (GC): the function that used to do so
+(#dyncode("ref_make_elt"), also spelled #dyncode("ref")) was removed. What
+is left is the possibility of forming a reference from memory that is
+never freed, for instance, a variable that is declared at the toplevel.
 
 ")
 
@@ -29,11 +34,15 @@ manner. Instead, it can only be reclaimed through garbage collection (GC).
 
 Given a viewtype VT, the type for references to values of viewtype VT is
 #stacode("ref")(VT). For convenience, the type constructor #stacode("ref")
-is declared to be abstract in ATS. However, it can be defined as follows:
+is declared to be abstract in ATS (it is a pointer at run-time). The
+following cast-function shows what the type stands for: a reference is a
+pointer together with a #emphasis("vbox") that allows the content of the
+memory at the pointer to be accessed at any time.
 
 #sats2xhtml('\
-typedef
-ref(a:vt@ype) = [l:addr] (vbox(a @ l) | ptr l)
+castfn ref_get_viewptr
+  {a:vt0p} (r: ref a):<> [l:agz] (vbox (a @ l) | ptr l)
+// end of [ref_get_viewptr]
 ')
 
 The interfaces for various functions on references can be found in
@@ -42,17 +51,23 @@ The interfaces for various functions on references can be found in
 ")#comment("para")
 
 #para("\
-For creating a reference, the function template #dyncode("ref_make_elt") of
-the following interface can be called:
+For creating a reference, the cast-function #dyncode("ref_make_viewptr")
+of the following interface can be called:
 
 #sats2xhtml('\
-fun{a:vt@ype} ref_make_elt (x: a):<!wrt> ref(a)
+castfn
+ref_make_viewptr
+  {a:vt0p}{l:addr}
+  (pf: a @ l | p: ptr(l)):<> ref(a)
+// end of [ref_make_viewptr]
 ')
 
-It is also allowed to use the shorthand #dyncode("ref") for
-#dyncode("ref_make_elt").  Note that the symbol #stacode("!wrt") indicates
-that the so-called #stacode("wrt")-effect may occur when
-#dyncode("ref_make_elt") is called.
+It takes a pointer and a proof of the at-view associated with the pointer
+and returns a reference after consuming the proof. As
+#dyncode("ref_make_viewptr") is a cast-function, it causes no run-time
+overhead. The memory of the reference is the memory of the pointer; it must
+never be freed, which is the case, for instance, for a variable that is
+declared at the toplevel (that is, a statically allocated variable).
 
 ")
 
@@ -63,8 +78,10 @@ templates #dyncode("ref_get_elt") and #dyncode("ref_set_elt") can be used,
 respectively, which are assigned the following types:
 
 #sats2xhtml('\
-fun{a:t@ype} ref_get_elt (r: ref a):<!ref> a
-fun{a:t@ype} ref_set_elt (r: ref a, x: a):<!refwrt> void
+fun{a:t0p}
+ref_get_elt(r: ref a):<!ref> (a)
+fun{a:t0p}
+ref_set_elt(r: ref a, x: a):<!refwrt> void
 ')
 
 Note that the symbol #stacode("!ref") indicates that the so-called
@@ -81,28 +98,30 @@ respectively, in terms of bracket-notation.\
 #para("\
 
 A reference is typically employed to record some form of persistent state.
-For instance, following is such an example:
+For instance, following is such an example, where the reference
+#dyncode("count") is made from the toplevel variable
+#dyncode("theCount"), which is local to the example:
 
 #dats2xhtml('\
 local
 //
-\#define BUFSZ 128
+var theCount: int = 0
 //
-val count = ref<int> (0)
+val count = ref_make_viewptr{int} (view@(theCount) | addr@(theCount))
 //
 in (* in of [local] *)
 
 fun genNewName
-  (prfx: string): string = let
+  (prfx: string): Strptr0 = let
   val n = !count
   val () = !count := n + 1
-  var res = @[byte][BUFSZ]((*void*))
-  val err =
-  $extfcall (
-    int, "snprintf", addr@res, BUFSZ, "%s%i", prfx, n
-  ) (* end of [$extfcall] *)
+  val s1 = string0_copy(prfx)
+  val s2 = tostrptr_int(n)
+  val res = strptr_append(s1, s2)
+  val () = strptr_free(s1)
+  val () = strptr_free(s2)
 in
-  strptr2string(string0_copy($UNSAFE.cast{string}(addr@res)))
+  res
 end // end of [genNewName]
 
 end // end of [local]
@@ -112,8 +131,7 @@ The function #dyncode("genNewName") is called to generate fresh names. As
 the integer content of the reference #dyncode("count") is updated whenever
 a call to #dyncode("genNewName") is made, each name returned by
 #dyncode("genNewName") is guaranteed to have not been generated
-before. Note that the use of #keycode("$extfcall") is for making a direct
-call to the function #dyncode("snprintf") in C.
+before. The names are linear strings, and they are freed by the caller.
 
 ")#comment("para")
 
@@ -124,7 +142,7 @@ References are commonly misused in practice. The following program is often
 written by a beginner of functional programming who has already learned
 (some) imperative programming:
 
-#dats2xhtml('\
+#atscode('\
 fun fact
   (n: int): int = let
   val res = ref<int> (1)
@@ -150,56 +168,65 @@ fact (int n) {
 //
 ')
 
-In the ATS implementation of #dyncode("fact"), #dyncode("res") is a
-heap-allocated reference and it becomes garbage (waiting to be reclaimed by
-the GC) after a call to #dyncode("fact") returns.  On the other hand, the
+The ATS program above is not accepted any more: it creates a reference on
+heap and a non-linear closure-function, neither of which is allowed
+without GC. (In earlier versions of ATS2, #dyncode("res") was a
+heap-allocated reference that became garbage after a call to
+#dyncode("fact") returned.)
+On the other hand, the
 variable #dyncode("res") in the C implementation of #dyncode("fact") is
 stack-allocated (or it can even be mapped to a machine register), and there
-is no generated garbage after a call to #dyncode("fact") returns. A proper
-translation of the C implementation in ATS can actually be given as
-follows:
+is no generated garbage after a call to #dyncode("fact") returns. A
+translation of the C implementation in ATS that is faithful to it makes use of
+a stack-allocated variable, which is passed by reference to the loop:
 
 #dats2xhtml('\
 fun fact
+  (n: int): int = let
+  fun loop (n: int, res: &int >> _): void =
+    if n > 0 then (res := n * res; loop(n-1, res)) else ()
+  var res: int = 1
+  val () = loop (n, res)
+in
+  res
+end // end of [fact]
+')
+
+A proper translation, however, does not use any variable at all:
+
+#dats2xhtml('\
+fun fact2
   (n: int): int = let
   fun loop (n: int, res: int): int =
     if n > 0 then loop (n-1, n * res) else res
   // end of [loop]
 in
   loop (n, 1)
-end // end of [fact]
+end // end of [fact2]
 ')
-
-which makes no use of references at all.
 
 ")#comment("para")
 
 #para("\
 
 Unless strong justification can be given, making extensive use of
-(dynamically created) references is often a sure sign of poor coding style.
+references (or even variables) is often a sure sign of poor coding style.
 
 ")#comment("para")
 
 #para("\
 
-#emphasis("Statically Allocated References")
-Creating a reference by calling #dyncode("ref_make_elt") involves dynamic
-memory allocation. If this is not desirable or even acceptable, it is
-possible to only employ statically allocated memory in a reference creation
-as is shown below:
+#emphasis("References and Variables")
+Both of the following lines create a reference from a statically allocated
+variable. The variable #dyncode("myvar") is no longer available after its
+at-view proof is consumed by #dyncode("ref_make_viewptr"):
 
 #dats2xhtml('\
 var myvar: int = 0
-val myref = ref_make_viewptr (view@(myvar) | addr@(myvar))
+val myref = ref_make_viewptr{int} (view@(myvar) | addr@(myvar))
 ')
 
-The function #dyncode("ref_make_viewptr") takes a pointer and a proof of
-some at-view associated with the pointer and returns a reference after
-consuming the proof. As #dyncode("ref_make_viewptr") is a cast-function, it
-causes no run-time overhead. In the above code, #dyncode("myvar") is
-statically allocated and it is no longer available after its at-view proof
-is consumed by #dyncode("ref_make_viewptr"). It should be interesting to
+It should be interesting to
 observe that both #dyncode("myvar") and #dyncode("myref") are just the same
 pointer in C but they are the reification of fundamentally different
 concepts in ATS: the former is a linear variable while the latter is a
