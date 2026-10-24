@@ -63,6 +63,19 @@ void *atsruntime_realloc_undef (void *ptr, size_t bsz) ;
 #endif // ifdef(ATS_MEMALLOC_FLAG)
 
 /* ****** ****** */
+//
+// HX: there is no GC any more, so libc is the default;
+// -DATS_MEMALLOC_LIBC is accepted (no-op), -DATS_MEMALLOC_USER
+// selects pats_ccomp_memalloc_user.h and -DATS_MEMALLOC_UNDEF the
+// [atsruntime_*_undef] functions (libatslib defines them with libc)
+//
+#if !defined(ATS_MEMALLOC_LIBC) && \
+    !defined(ATS_MEMALLOC_USER) && !defined(ATS_MEMALLOC_UNDEF)
+#define ATS_MEMALLOC_LIBC
+#endif
+//
+
+/* ****** ****** */
 
 #ifdef ATS_MEMALLOC_LIBC
 //
@@ -102,7 +115,7 @@ void *atsruntime_realloc_undef (void *ptr, size_t bsz) ;
 
 /* ****** ****** */
 
-#ifndef ATS_MEMALLOC_FLAG
+#ifndef ATS_MEMALLOC_FLAG // ATS_MEMALLOC_UNDEF
 #define ATS_MEMALLOC_FLAG
 //
 #define ATS_MINIT atsruntime_minit_undef
