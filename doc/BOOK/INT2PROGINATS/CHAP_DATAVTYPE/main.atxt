@@ -20,10 +20,11 @@ A dataviewtype can be thought of as a linear version of datatype. To a
 large extent, it is a combination of a datatype and a dataview. This
 programming feature is primarily introduced into ATS for the purpose of
 providing in the setting of manual memory management the kind of
-convenience brought by pattern matching. In a situation where GC must be
-reduced or even completely eliminated, dataviewtypes can often be chosen as
-a replacement for datatypes.  I now present in this chapter some commonly
-encountered dataviewtypes and their uses.
+convenience brought by pattern matching. As there is no garbage collector in
+this version of ATS2, dataviewtypes are the way to declare the datatypes whose
+values are allocated in the heap: they have been used in the earlier chapters
+under the keyword #keycode("datavtype"), and I now present in this chapter
+some commonly encountered dataviewtypes and their uses.
 
 ")
 
@@ -44,11 +45,11 @@ follows:
 #sats2xhtml('\
 //
 datavtype
-option_vt (a:t@ype+, bool) =
+option_vt (a:vt@ype+, bool) =
   | Some_vt (a, true) of a | None_vt (a, false) of ()
 // end of [option_vt]
 //
-vtypedef Option_vt (a:t@ype) = [b:bool] option_vt(a, b)
+vtypedef Option_vt (a:vt@ype) = [b:bool] option_vt(a, b)
 //
 ')
 
@@ -64,21 +65,23 @@ fun{a:t@ype}
 find_rightmost
   {n:nat} .<n>.
 (
-  xs: list (a, n), P: (a) -<cloref1> bool
+  xs: !list_vt (a, n), P: &(a) -<clo1> bool
 ) : Option_vt (a) =
 (
   case+ xs of
-  | list_cons (x, xs) => let
+  | list_vt_cons (x, xs) => let
       val opt = find_rightmost (xs, P)
     in
       case opt of
       | ~None_vt () => if P (x) then Some_vt (x) else None_vt ()
       | _ (*Some_vt*) => opt
-    end // end of [list_cons]
-  | list_nil () => None_vt ()
+    end // end of [list_vt_cons]
+  | list_vt_nil () => None_vt ()
 ) (* end of [find_rightmost] *)
 ')
 
+The list is borrowed (it is of the type #stacode("!list_vt(a, n)")) and the
+predicate is a flat closure that is passed by reference.
 Note that the tilde symbol (#keycode("~")) in front of the pattern
 #dyncode("None_vt()") indicates that the memory for the node that matches
 the pattern is freed before the body of the matched clause is evaluated.
@@ -99,10 +102,10 @@ fn{a:t@ype}
 list_optcons
   {b:bool}{n:nat}
 (
-  opt: option_vt (a, b), xs: list (a, n)
-) : list (a, n+bool2int(b)) =
+  opt: option_vt (a, b), xs: list_vt (a, n)
+) : list_vt (a, n+bool2int(b)) =
   case+ opt of
-  | ~Some_vt (x) => list_cons (x, xs) | ~None_vt () => xs
+  | ~Some_vt (x) => list_vt_cons (x, xs) | ~None_vt () => xs
 // end of [list_optcons]
 ')
 
@@ -110,7 +113,9 @@ The symbol #stacode("bool2int") stands for a built-in static function in
 ATS that maps #dyncode("true") and #dyncode("false") to 1 and 0,
 respectively. What is special here is that the first argument of
 #dyncode("list_optcons"), which is linear, is consumed after a call to
-#dyncode("list_optcons") returns and the memory it occupies is reclaimed.
+#dyncode("list_optcons") returns and the memory it occupies is reclaimed, and
+that the second argument is consumed as well: the returned list owns the nodes
+of the given list.
 
 ')
 
@@ -133,9 +138,9 @@ a type and an integer:
 
 #sats2xhtml('\
 datavtype
-list_vt (a:t@ype+, int) =
+list_vt (a:vt@ype+, int) =
   | list_vt_nil (a, 0) of ()
-  | {n:nat}
+  | {n:int | n >= 0}
     list_vt_cons (a, n+1) of (a, list_vt (a, n))
 // end of [list_vt]
 ')
@@ -283,7 +288,9 @@ It is also possible to use the special function #dyncode("free@") to
 explicitly free a node (also called a skeleton) left in a linear variable
 after the variable matches a pattern formed with a constructor associated
 with some dataviewtype. For instance, the following code gives another
-implementation of #dyncode("list_vt_free"):
+implementation of #dyncode("list_vt_free") (in the on-line code, the two
+implementations are named #dyncode("list_vt_free1") and
+#dyncode("list_vt_free2")):
 
 ')
 
@@ -449,61 +456,63 @@ dataviews.
 #para('\
 
 This is also a good place for me to mention a closely related issue
-involving (functional) list construction and tail-recursion. Following is a
-typical implementation of functioal list concatenation:
+involving list construction and tail-recursion. Following is a
+typical implementation of list concatenation that consumes its arguments
+and builds the result by applying the constructor to the result of a
+recursive call:
 
 #dats2xhtml('\
 fun{
 a:t@ype
 } append1{m,n:nat}
 (
-  xs: list(a, m), ys: list(a, n)
-) : list (a, m+n) =
+  xs: list_vt (a, m), ys: list_vt (a, n)
+) : list_vt (a, m+n) =
   case+ xs of
-  | list_nil() => ys
-  | list_cons(x, xs) => list_cons(x, append1<a>(xs, ys))
+  | ~list_vt_nil() => ys
+  | ~list_vt_cons(x, xs) => list_vt_cons(x, append1<a>(xs, ys))
 // end of [append1]
 ')
 
 Clearly, #dyncode("append1") is not tail-recursive, which means that it may
 cause stack overflow at run-time if its first argument is very long (e.g.,
 containing 1 million elements). There is, however, a direct and type-safe
-way in ATS to implement functional list concatenation in a tail-recursive
+way in ATS to implement list concatenation (that builds new nodes) in a tail-recursive
 manner, thus eliminating the concern of potential stack overflow. For
 instance, the following implementation of #dyncode("append2") returns the
-concatenation of two given functional lists while being tail-recursive:
+concatenation of two given lists while being tail-recursive:
 
 #dats2xhtml('\
 fun{
 a:t@ype
 } append2{m,n:nat}
 (
-  xs: list (a, m), ys: list (a, n)
-) : list (a, m+n) = let
+  xs: list_vt (a, m), ys: list_vt (a, n)
+) : list_vt (a, m+n) = let
 //
 fun loop
   {m,n:nat} .<m>.
 (
-  xs: list (a, m), ys: list (a, n)
-, res: &(List a)? >> list (a, m+n)
+  xs: list_vt (a, m), ys: list_vt (a, n)
+, res: &(List_vt a)? >> list_vt (a, m+n)
 ) : void =
 (
   case+ xs of
-  | list_nil() =>
+  | ~list_vt_nil() =>
       (res := ys)
-    // end of [list_nil]
-  | list_cons(x, xs) => let
-      val () = 
-      res := list_cons{a}{0}(x, _)
-      val+ list_cons (_, res1) = res
+    // end of [list_vt_nil]
+  | ~list_vt_cons(x, xs) => let
+      val () =
+      res := list_vt_cons{a}{0}(x, _)
+      val+ list_vt_cons (_, res1) = res
       val () = loop (xs, ys, res1)
       prval ((*void*)) = fold@ (res)
     in
       // nothing
-    end // end of [list_cons]
+    end // end of [list_vt_cons]
 ) (* end of [loop] *)
 //
-var res: List(a)
+var res: List_vt(a)
 val () = loop (xs, ys, res)
 //
 in
@@ -511,22 +520,22 @@ in
 end // end of [append2]
 ')
 
-During typechecking, the expression #dyncode("list_cons{a}{0}(x, _)")
-is assigned the (linear) type #stacode("list_cons_unfold(L0, L1, L2)")
+During typechecking, the expression #dyncode("list_vt_cons{a}{0}(x, _)")
+is assigned the (linear) type #stacode("list_vt_cons_unfold(L0, L1, L2)")
 for some addresses L0, L1 and L2 while a proof of the at-view
-#stacode("a@L1") and another proof of the at-view #stacode("list(a,
+#stacode("a@L1") and another proof of the at-view #stacode("list_vt(a,
 0)?@L2") are put into the store for currently available proofs. Note
 that the special symbol #keycode("_") simply indicates that the tail
 of the newly constructed list is uninitialized. A partially
-initialized list of the type #stacode("list_cons_unfold(L0, L1, L2)")
-is guaranteed to match the pattern #dyncode("list_cons(_, res1)"),
+initialized list of the type #stacode("list_vt_cons_unfold(L0, L1, L2)")
+is guaranteed to match the pattern #dyncode("list_vt_cons(_, res1)"),
 yielding a binding between #dyncode("res1") and the pointer pointing
 to L2 where the (possibly uninitialized) tail of the list is
 stored. When #dyncode("fold@") is called on a variable of the type
-#stacode("list_cons_unfold(L0, L1, L2)"), it changes the type of the
-variable to #stacode("list(T, N+1)") by consuming a proof of the
+#stacode("list_vt_cons_unfold(L0, L1, L2)"), it changes the type of the
+variable to #stacode("list_vt(T, N+1)") by consuming a proof of the
 at-view #stacode("T@L1") and another proof of the at-view
-#stacode("list(T, N)@L2"), where T and N are a type and an integer,
+#stacode("list_vt(T, N)@L2"), where T and N are a type and an integer,
 respectively.\
 
 ')
@@ -725,7 +734,7 @@ Finally, #dyncode("mergeSort") can be implemented with a call to
 
 #dats2xhtml('\
 implement{a}
-mergeSort (xs, cmp) = msort<a> (xs, length (xs), cmp)
+mergeSort (xs, cmp) = msort<a> (xs, list_vt_length (xs), cmp)
 ')
 
 By inspecting the implementation of #dyncode("split") and
@@ -1183,7 +1192,7 @@ a:t@ype
 } search
   {n:nat} .<n>.
 (
-  t: !bstree_vt (a, n), P: (&a) -<cloref> bool
+  t: !bstree_vt (a, n), P: &(&a) -<clo1> bool
 ) : Option_vt (a) =
   case+ t of
   | @bstree_vt_cons
@@ -1429,26 +1438,25 @@ id="transition_from_datatypes_to_dataviewtypes">
 #para('\
 
 Many programmers are likely to find it a rather involved task to write code
-manipulating values of dataviewtypes. When handling a complex data
-structure, I myself often try to first use a datatype to model the data
-structure and implement some functionalities of the data structure based
-the datatype. I then change the datatype into a corresponding dataviewtype
-and modify the implementation accordingly to make it work with the
-dataviewtype. I now present as follows an implementation of linear
+manipulating values of dataviewtypes in place. When handling a complex data
+structure, I myself often try to first model the data
+structure with a datatype in a functional style (which, in this version of
+ATS2, is a datavtype whose values are consumed and rebuilt) and implement
+some functionalities of the data structure in that style. I then modify the
+implementation accordingly to update the nodes in place. I now present as
+follows an implementation of linear
 red-black trees that is directly based on a previous
 <xref linkend="example_fun_red-black_trees"/>,
-illustrating concretely a kind of gradual transition from datatypes to
-dataviewtypes that can greatly reduce the level of difficulty one may
-otherwise encounter in an attempt to program with dataviewtypes directly.
+illustrating concretely a kind of gradual transition from a functional
+style to an in-place style that can greatly reduce the level of difficulty one may
+otherwise encounter in an attempt to program with in-place updates directly.
 
 ')
 
 #para('\
 
 The following declaration of dataviewtype #stacode("rbtree") is identical
-to the previous declaration of datatype #stacode("rbtree") except the
-keyword #keycode("datavtype") being now used instead of the keyword
-#keycode("datatype"):
+to the previous declaration of #stacode("rbtree"):
 
 #sats2xhtml('\
 \#define BLK 0; \#define RED 1

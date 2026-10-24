@@ -34,6 +34,16 @@
 // HX-2014-02-11: Ported to ATS2
 //
 (* ****** ****** *)
+//
+// HX-2026-10: no GC
+// The closure for the predicate is a flat closure (passed by reference)
+//
+(* ****** ****** *)
+//
+#include
+"share/atspre_staload.hats"
+//
+(* ****** ****** *)
 
 datavtype
 bstree_vt
@@ -65,7 +75,7 @@ a:t@ype
 } search
   {n:nat} .<n>.
 (
-  t: !bstree_vt (a, n), P: (&a) -<cloref> bool
+  t: !bstree_vt (a, n), P: &(&a) -<clo1> bool
 ) : Option_vt (a) =
   case+ t of
   | @bstree_vt_cons
@@ -230,6 +240,53 @@ a:t@ype
       bstree_vt_cons (bstree_vt_nil, x0, bstree_vt_nil)
     // end of [bstree_vt_nil]
 // end of [insertRT]
+
+(* ****** ****** *)
+
+fun{
+a:t@ype
+} bstree_vt_free{n:nat} .<n>.
+  (t: bstree_vt (a, n)): void =
+  case+ t of
+  | ~bstree_vt_nil () => ()
+  | ~bstree_vt_cons (tl, _, tr) => (bstree_vt_free<a> (tl); bstree_vt_free<a> (tr))
+
+(* ****** ****** *)
+
+implement
+main0 () =
+{
+//
+stadef T = int
+//
+implement
+compare<T> (x, y, _) = x - y
+//
+fun loop
+  {n:nat}
+(
+  t: bstree_vt (T, n), i: int, N: int
+) : [n:nat] bstree_vt (T, n) =
+  if i < N then let
+    var x: T = (i * 7919) mod 1000
+  in
+    loop (insert<T> (t, x, $UNSAFE.cast{cmp(T)}(0)), i+1, N)
+  end else let
+    var x: T = 500
+  in
+    insertRT<T> (insert<T> (t, x, $UNSAFE.cast{cmp(T)}(0)), x, $UNSAFE.cast{cmp(T)}(0))
+  end
+//
+val t = loop (bstree_vt_nil{T}(), 0, 100)
+val () = assertloc (size<T> (t) >= 100)
+//
+var P = lam@ (x: &T >> _): bool => (x >= 500)
+val-~Some_vt (x) = search<T> (t, P)
+val () = assertloc (x >= 500)
+//
+val () = bstree_vt_free (t)
+//
+} (* end of [main0] *)
 
 (* ****** ****** *)
 
