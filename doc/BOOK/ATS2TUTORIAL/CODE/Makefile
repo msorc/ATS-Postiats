@@ -123,11 +123,23 @@ cleanall:: ; $(RMF) chap_tuprec_1
 #
 ######
 #
-######
+all:: \
+chap_arrayptr
+chap_arrayptr: \
+chap_arrayptr.dats ; \
+$(PATSCC2) -o $@ $<
 #
-######
+regress:: chap_arrayptr; ./$<
+cleanall:: ; $(RMF) chap_arrayptr
 #
-######
+all:: \
+chap_arrszptr
+chap_arrszptr: \
+chap_arrszptr.dats ; \
+$(PATSCC2) -o $@ $<
+#
+regress:: chap_arrszptr; ./$<
+cleanall:: ; $(RMF) chap_arrszptr
 #
 ######
 #

@@ -13,47 +13,64 @@ by [atsdoc] from CHAP_ARRSZREF/main.atxt.\n\
 Time of Generation: #timestamp()\
 ")
 <chapter id="arrszref">
-#title("Persistent Arrays-with-size")
+#title("Linear Arrays-with-size")
 
 #para("\
 \
-#emphasis("Historical note:") this chapter describes the persistent arrays
-of the GC era of ATS2 (the arrays that carry their size). The types
-#stacode("arrayref") and #stacode("arrayref_sz") were removed when the
-support for the garbage collector was dropped: the compiler now rejects
-every nonlinear heap allocation. Use #stacode("arrayptr") (a flat array of
-pointers) instead; its interface is in
-#myatscodelink("prelude/SATS/arrayptr.sats", "prelude/SATS/arrayptr.sats").
+#emphasis("Note:") the first versions of this chapter described persistent
+arrays-with-size (the type #stacode("arrszref")), which are reclaimed by
+garbage collection (GC). That type was removed when the support for GC was
+dropped: the compiler now rejects every nonlinear heap allocation. An
+array-with-size is now a linear value, which has to be freed explicitly.
+The prelude does not declare a type for it, but it is easy to define one
+(see below); the prelude provides the type #stacode("arrpsz") for the
+array-with-size that is created by the special form #dyncode("$arrpsz").
 \
 ")
 
 #para('\
 
-I use the name #emphasis("array-with-size") to refer to a persistent
-array with attached size information.  Given a viewtype VT, the type for an
-array-with-size that contains N values of viewtype VT is
-#stacode("arrszref(VT, N)"). Essentially, such a value is a boxed pair of
-two components of types #stacode("arrayref(VT, N)") and
-#stacode("size_t(N)"). The interfaces for various functions on persistent
-arrays-with-size can be found in
-#myatscodelink("prelude/SATS/arrayref.sats", "prelude/SATS/arrayref.sats").
+I use the name #emphasis("array-with-size") to refer to an
+array with attached size information.  Given a viewtype VT, an
+array-with-size that contains N values of viewtype VT is essentially a pair
+of two components of types #stacode("arrayptr(VT, N)") and
+#stacode("size_t(N)"), where N is unknown statically. It is
+straightforward to declare a linear (boxed) type for it, which we call
+#stacode("arrszptr"):
+
+#dats2xhtml('\
+datavtype
+arrszptr(a:vt0p) =
+  | {n:nat} ARRSZPTR of (arrayptr(a, n), size_t(n))
+')
+
+The universally quantified variable #stacode("n") in the constructor
+becomes existentially quantified in the type: a value of the type
+#stacode("arrszptr(VT)") contains an array of some size and the size
+itself, and the connection between the two is kept by the type-checker.
 
 ')
 
 #para('\
 
-For creating an array-with-size, the following functions
-#dyncode("arrszref_make_arrpsz") and #dyncode("arrszref_make_arrayref") can
-be called:
+For creating an array-with-size, the following function
+#dyncode("arrszptr_make_arrpsz") can be called, which turns the
+array-with-size of the type #stacode("arrpsz") (the one that the special
+form #dyncode("$arrpsz") creates) into one of the type
+#stacode("arrszptr"):
 
-#sats2xhtml('\
-fun{}
-arrszref_make_arrpsz
-  {a:vt0p}{n:int} (arrpsz(INV(a), n)): arrszref(a)
-fun{}
-arrszref_make_arrayref
-  {a:vt0p}{n:int} (arrayref(a, n), size_t(n)): arrszref(a)
-// end of [arrszref_make_arrayref]
+#dats2xhtml('\
+fun{a:vt0p}
+arrszptr_make_arrpsz
+  {n:nat}
+  (psz: arrpsz(a, n)): arrszptr(a) = let
+//
+var n: size_t
+val A0 = arrpsz_get_ptrsize(psz, n)
+//
+in
+  ARRSZPTR(A0, n)
+end // end of [arrszptr_make_arrpsz]
 ')
 
 As an example, the following code creates an array-with-size containing
@@ -61,33 +78,65 @@ all the decimal digits:
 
 #dats2xhtml('\
 val DIGITS =
-  (arrszref)$arrpsz{int}(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  arrszptr_make_arrpsz($arrpsz{int}(0, 1, 2, 3, 4, 5, 6, 7, 8, 9))
 ')
 
-Note that #dyncode("arrszref") is overloaded with #dyncode("arrszref_make_arrpsz").
+Like any linear value, an array-with-size has to be freed explicitly:
+
+#dats2xhtml('\
+fun
+arrszptr_free
+  {a:t0p}
+  (A: arrszptr(a)): void = let
+  val ~ARRSZPTR(A0, n) = A
+in
+  arrayptr_free(A0)
+end // end of [arrszptr_free]
+')
 
 ')#comment("para")
 
 #para('\
 
 For reading from and writing to an array-with-size, the function templates
-#dyncode("arrszref_get_at") and #dyncode("arrszref_set_at") can be used,
-respectively, which are assigned the following interfaces:
+#dyncode("arrszptr_get_at") and #dyncode("arrszptr_set_at") can be
+implemented as follows:
 
-#sats2xhtml('\
-fun{a:t@ype}
-arrszref_get_at (A: arrszref(a), i: size_t): (a)
-fun{a:t@ype}
-arrszref_set_at (A: arrszref(a), i: size_t, x: a): void
+#dats2xhtml('\
+fun{a:t0p}
+arrszptr_get_at
+  (A: !arrszptr(a), i: size_t): (a) = let
+//
+val+ @ARRSZPTR(A0, n) = A
+val i = g1ofg0(i)
+//
+in
+//
+if i < n
+  then let
+    val x = A0[i]
+    prval () = fold@(A)
+  in
+    x
+  end // end of [then]
+  else let
+    prval () = fold@(A)
+  in
+    $raise ArraySubscriptExn()
+  end // end of [else]
+//
+end // end of [arrszptr_get_at]
 ')
 
-Given an array-with-size A, an index i and a value v,
-#dyncode("arrszref_get_at(A, i)") and #dyncode("arrszref_set_at(A, i, v)")
-can be written as #dyncode("A[i]") and #dyncode("A[i] := v"),
-respectively. Notice that array-bounds checking is performed at run-time
-whenever #dyncode("arrszref_get_at") or #dyncode("arrszref_set_at") is
-called, and the exception #dyncode("ArraySubscriptExn") is raised in case
-of out-of-bounds array access being detected.
+The pattern #dyncode("@ARRSZPTR(A0, n)") unfolds the value
+#dyncode("A") in place, which gives access to its two components, and
+#dyncode("fold@(A)") folds it back before the function returns; the
+argument is borrowed (#keycode("!")) and thus still available to the
+caller. Notice that array-bounds checking is performed at run-time
+whenever #dyncode("arrszptr_get_at") is called, and the exception
+#dyncode("ArraySubscriptExn") is raised in case of out-of-bounds array
+access being detected. Writing #dyncode("arrszptr_set_at") is analogous (see
+the code of this chapter).
 
 ')
 
@@ -97,30 +146,33 @@ As a simple example, the following code implements a function that
 reverses the content of the array inside a given array-with-size:
 
 #dats2xhtml('\
-fun{a:t@ype}
-arrszref_reverse
-(
-  A: arrszref(a)
-) : void = let
+fun{a:vt0p}
+arrszptr_reverse
+  (A: !arrszptr(a)): void = let
 //
-val n = A.size()
-val n2 = half (n)
+val+ @ARRSZPTR(A0, n) = A
 //
 fun loop
-  (i: size_t): void = let
+  {n:nat}{i:nat | i <= n} .<n-i>.
+(
+  A: !arrayptr(a, n), n: size_t n, i: size_t i
+) : void = let
+  val n2 = half (n)
 in
   if i < n2 then let
-    val tmp = A[i]
-    val ni = pred(n)-i
-  in
-    A[i] := A[ni]; A[ni] := tmp; loop (succ(i))
+    val () = arrayptr_interchange(A, i, pred(n)-i) in loop(A, n, succ(i))
   end else () // end of [if]
 end // end of [loop]
 //
+val () = loop(A0, n, i2sz(0))
+//
 in
-  loop (i2sz(0))
-end // end of [arrszref_reverse]
+  fold@(A)
+end // end of [arrszptr_reverse]
 ')
+
+Because #dyncode("arrayptr_interchange") is used, the function can handle
+an array-with-size that contains linear values, too.
 
 ')
 
@@ -137,7 +189,7 @@ replace them with arrays when I can see clear benefits from doing so.\
 
 #para("\
 
-Please find #mycodelink("chap_arrszref.dats", "on-line") the entirety of the
+Please find #mycodelink("chap_arrszptr.dats", "on-line") the entirety of the
 code used in this chapter.\
 
 ")#comment("para")
@@ -157,7 +209,7 @@ implement main0 () =
 {
 //
 val filr =
-  $STDIO.fopen_ref_exn ("../TEMP/chap_arrszref.dats", file_mode_w)
+  $STDIO.fopen_ref_exn ("../TEMP/chap_arrszptr.dats", file_mode_w)
 val () = fprint_theCodeLst (filr)
 val () = $STDIO.fclose_exn (filr)
 //
