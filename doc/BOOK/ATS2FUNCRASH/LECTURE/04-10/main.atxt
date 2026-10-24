@@ -129,12 +129,12 @@ implemented by calling the native function #dyncode("setTimeout") of JS
 (through #keycode("$extfcall")); in JS the closure is an ordinary function
 value and the JS engine reclaims it. For the C code of this book, the file
 #filename("eventloop.hats") in the code of this chapter implements
-#dyncode("execute_after") for a tiny simulated event loop (a clock and one
-pending event, which is a linear thunk stored as a pointer), so that the
+#dyncode("execute_after") for a tiny simulated event loop (a clock and a linear list of
+pending events sorted by due time, each of which is a linear thunk), so that the
 examples can run without a browser: the call to
-#dyncode("eventloop_run(limit)") calls the pending thunk, and
+#dyncode("eventloop_run(limit)") calls the first thunk, and
 then frees it, until no event is pending or the due time is beyond
-#dyncode("limit"). The pending thunk that is not called is freed, too, and
+#dyncode("limit"). The pending thunks that are not called are freed, too, and
 the programs run clean with the address sanitizer.
 
 ")

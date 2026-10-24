@@ -1,9 +1,10 @@
 (* ****** ****** *)
 //
 // A tiny simulated event loop for running the examples of the chapters
-// on animation without a browser. At most one event is pending: it is a
-// linear thunk that is stored together with the time when it is due.
-// A browser (or node) provides the real thing, [setTimeout].
+// on animation without a browser. The pending events are kept in a
+// linear list, which is sorted according to the time when an event is
+// due; an event is a linear thunk. A browser (or node) provides the
+// real thing, [setTimeout].
 //
 (* ****** ****** *)
 
@@ -27,40 +28,57 @@ fun
 eventloop_run(limit: int): void
 //
 (* ****** ****** *)
+//
+datavtype
+events =
+  | events_nil of ()
+  | events_cons of (int(*due*), thunk, events)
+//
+macdef
+thunk_free(fwork) =
+cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(,(fwork)))
+//
+fun
+events_free(evs: events): void =
+(
+case+ evs of
+| ~events_nil() => ()
+| ~events_cons(_, fwork, evs) => (thunk_free(fwork); events_free(evs))
+)
+//
+// an event is inserted after those that are due no later
+//
+fun
+events_insert
+(due: int, fwork: thunk, evs: events): events =
+(
+case+ evs of
+| ~events_nil() => events_cons(due, fwork, events_nil())
+| ~events_cons(due1, fwork1, evs1) =>
+  if due < due1
+    then events_cons(due, fwork, events_cons(due1, fwork1, evs1))
+    else events_cons(due1, fwork1, events_insert(due, fwork, evs1))
+)
+//
+(* ****** ****** *)
 
 var theClock_var: int = 0
-var theDueTime_var: int = 0
-var thePending_var: ptr = the_null_ptr
+var theEvents_var: ptr = the_null_ptr // an events-value is stored as a pointer
 //
 val theClock =
 ref_make_viewptr{int}(view@ theClock_var | addr@ theClock_var)
-val theDueTime =
-ref_make_viewptr{int}(view@ theDueTime_var | addr@ theDueTime_var)
-val thePending =
-ref_make_viewptr{ptr}(view@ thePending_var | addr@ thePending_var)
+val theEvents =
+ref_make_viewptr{ptr}(view@ theEvents_var | addr@ theEvents_var)
 //
 implement
 execute_after
 (fwork, ms) = let
 //
-val p0 = !thePending
+val evs = $UNSAFE.castvwtp0{events}(!theEvents)
+val evs = events_insert(!theClock + ms, fwork, evs)
 //
 in
-//
-if
-iseqz(p0)
-then let
-  val () = !theDueTime := !theClock + ms
-in
-  !thePending := $UNSAFE.castvwtp0{ptr}(fwork)
-end // end of [then]
-else let
-  // only one event can be pending in this simulation
-  val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(fwork))
-in
-  prerrln! ("execute_after: an event is already pending")
-end // end of [else]
-//
+  !theEvents := $UNSAFE.castvwtp0{ptr}(evs)
 end // end of [execute_after]
 //
 implement
@@ -68,40 +86,35 @@ eventloop_now() = !theClock
 //
 (* ****** ****** *)
 //
-// The pending thunk is called when its time is due; the calls stop
+// The first event is called when its time is due; the calls stop
 // when no event is pending or when the clock goes beyond the limit
-// (and the thunk that is still pending is freed).
+// (and the events that are still pending are freed).
 //
 implement
 eventloop_run(limit) = let
 //
-val p0 = !thePending
+val evs = $UNSAFE.castvwtp0{events}(!theEvents)
 //
 in
 //
-if
-iseqz(p0)
-then ()
-else let
-//
-val () =
-!thePending := the_null_ptr
-val fwork = $UNSAFE.castvwtp0{thunk}(p0)
-//
-in
-//
-if
-!theDueTime <= limit
-then let
-  val () = !theClock := !theDueTime
-  val () = fwork()
-  val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(fwork))
-in
-  eventloop_run(limit)
-end // end of [then]
-else cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(fwork))
-//
-end // end of [else]
+case+ evs of
+| ~events_nil() => (!theEvents := the_null_ptr)
+| ~events_cons(due, fwork, evs) =>
+  if due <= limit
+    then let
+      val () = !theClock := due
+      val () = !theEvents := $UNSAFE.castvwtp0{ptr}(evs)
+      val () = fwork()
+      val () = thunk_free(fwork)
+    in
+      eventloop_run(limit)
+    end // end of [then]
+    else let
+      val () = thunk_free(fwork)
+      val () = events_free(evs)
+    in
+      !theEvents := the_null_ptr
+    end // end of [else]
 //
 end // end of [eventloop_run]
 //
