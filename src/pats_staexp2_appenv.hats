@@ -46,88 +46,84 @@ staload "./pats_staexp2.sats"
 (* ****** ****** *)
 //
 extern
-fun{}
+fun
 s2cstlst_app (x: s2cstlst, env: !appenv): void
 //
 extern
-fun{}
+fun
 s2varlst_app (x: s2varlst, env: !appenv): void
 //
 extern
-fun{}
+fun
 d2conlst_app (x: d2conlst, env: !appenv): void
 //
 (* ****** ****** *)
 //
 implement
-{}(*tmp*)
 s2cstlst_app
   (xs, env) = synentlst_app<s2cst> (xs, env, s2cst_app)
 //
 (* ****** ****** *)
 //
 implement
-{}(*tmp*)
 s2varlst_app
   (xs, env) = synentlst_app<s2var> (xs, env, s2var_app)
 //
 (* ****** ****** *)
 //
 implement
-{}(*tmp*)
 d2conlst_app
   (xs, env) = synentlst_app<d2con> (xs, env, d2con_app)
 //
 (* ****** ****** *)
 //
 extern
-fun{}
+fun
 s2exp_app (x: s2exp, env: !appenv): void
 //
 extern
-fun{}
+fun
 s2explst_app (x: s2explst, env: !appenv): void
 extern
-fun{}
+fun
 s2explstlst_app (x: s2explstlst, env: !appenv): void
 //
 extern
-fun{}
+fun
 labs2explst_app (x: labs2explst, env: !appenv): void
 extern
-fun{}
+fun
 wths2explst_app (x: wths2explst, env: !appenv): void
 //
 extern
-fun{}
+fun
 s2expopt_app (x: s2expopt, env: !appenv): void
 //
 (* ****** ****** *)
 //
 extern
-fun{}
+fun
 s2qualst_app (x: s2qualst, env: !appenv): void
 //
 (* ****** ****** *)
 //
 extern
-fun{}
+fun
 s2zexp_app (x: s2zexp, env: !appenv): void
 extern
-fun{}
+fun
 s2zexplst_app (x: s2zexplst, env: !appenv): void
 extern
-fun{}
+fun
 s2zexplstlst_app (x: s2zexplstlst, env: !appenv): void
 //
 extern
-fun{}
+fun
 labs2zexplst_app (x: labs2zexplst, env: !appenv): void
 //
 (* ****** ****** *)
 
 implement
-{}(*tmp*)
 s2exp_app
   (s2e0, env) = let
 in
@@ -264,19 +260,16 @@ end // end of [s2exp_app]
 (* ****** ****** *)
 //
 implement
-{}(*tmp*)
 s2explst_app
-  (xs, env) = synentlst_app<s2exp> (xs, env, s2exp_app<>)
+  (xs, env) = synentlst_app<s2exp> (xs, env, s2exp_app)
 //
 implement
-{}(*tmp*)
 s2explstlst_app
-  (xss, env) = synentlst_app<s2explst> (xss, env, s2explst_app<>)
+  (xss, env) = synentlst_app<s2explst> (xss, env, s2explst_app)
 //
 (* ****** ****** *)
 
 implement
-{}(*tmp*)
 labs2explst_app
   (lxs, env) = let
 in
@@ -295,7 +288,6 @@ end // end of [labs2explst_app]
 (* ****** ****** *)
 
 implement
-{}(*tmp*)
 wths2explst_app
   (wxs, env) = let
 in
@@ -317,7 +309,6 @@ end // end of [wths2explst_app]
 (* ****** ****** *)
 
 implement
-{}(*tmp*)
 s2expopt_app (opt, env) =
 (
 //
@@ -329,7 +320,6 @@ case+ gopt_view(opt) of
 (* ****** ****** *)
   
 implement
-{}(*tmp*)
 s2qualst_app
   (s2qs, env) = let
 in
@@ -347,7 +337,6 @@ end // end of [s2qualst_app]
 (* ****** ****** *)
 
 implement
-{}(*tmp*)
 s2zexp_app
   (x0, env) =
 (
@@ -383,19 +372,16 @@ case+ s2zexp_view(x0) of
 (* ****** ****** *)
 //
 implement
-{}(*tmp*)
 s2zexplst_app
-  (xs, env) = synentlst_app<s2zexp> (xs, env, s2zexp_app<>)
+  (xs, env) = synentlst_app<s2zexp> (xs, env, s2zexp_app)
 //
 implement
-{}(*tmp*)
 s2zexplstlst_app
-  (xss, env) = synentlst_app<s2zexplst> (xss, env, s2zexplst_app<>)
+  (xss, env) = synentlst_app<s2zexplst> (xss, env, s2zexplst_app)
 //
 (* ****** ****** *)
 
 implement
-{}(*tmp*)
 labs2zexplst_app
   (lxs, env) = (
 //
