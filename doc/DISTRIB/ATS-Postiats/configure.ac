@@ -47,61 +47,6 @@ dnl = checks for system services
 dnl = AC_CONFIG_FILES([file...])
 
 AC_INIT([ATS2/Postiats], [0.4.3], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.4.2], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.4.1], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.4.0], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.13], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.12], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.11], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.10], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.9], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.8], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.7], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.6], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.5], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.4], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.3], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.2], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.1], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.3.0], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.13], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.12], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.11], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.10], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.9], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.8], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.7], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.6], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.5], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.4], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.3], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.2], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.1], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.2.0], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.13], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.12], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.11], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.10], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.9], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.8], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.7], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.6], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.5], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.4], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.3], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.2], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.1], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.1.0], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.8], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.7], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.6], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.5], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.4], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.3], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.2], [gmpostiats@gmail.com])
-dnl = AC_INIT([ATS2/Postiats], [0.0.1], [gmpostiats@gmail.com])
-dnl = VERSION may have a trailing newline
-dnl = AC_INIT([ATS2/Postiats], m4_esyscmd([cat VERSION | tr -d '\n']), [gmpostiats@gmail.com])
 
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
@@ -110,15 +55,25 @@ AC_CONFIG_FILES([bin/patscc_env.sh])
 AC_CONFIG_FILES([bin/myatscc_env.sh])
 AC_CONFIG_FILES([bin/patsopt_env.sh])
 
-dnl = AM_INIT_AUTOMAKE
-
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MKDIR_P
 AC_PROG_LN_S
 
+dnl HAVE_LIBGMP is "yes" when <gmp.h> is there (the compiler is built with
+dnl KIND=gmpknd), else empty (KIND=intknd, machine integers in the constraint
+dnl solver); --without-gmp chooses intknd even if <gmp.h> is there
+AC_ARG_WITH([gmp],
+  [AS_HELP_STRING([--without-gmp],
+    [build the compiler without libgmp (machine integers in the constraint solver)])],
+  [], [with_gmp=check])
 AC_CHECK_HEADERS(gmp.h)
-AC_SUBST(HAVE_LIBGMP, ${ac_cv_header_gmp_h%no})
+AS_IF([test "x$with_gmp" = xno],
+  [HAVE_LIBGMP=],
+  [HAVE_LIBGMP=${ac_cv_header_gmp_h%no}
+   AS_IF([test "x$with_gmp" = xyes -a -z "$HAVE_LIBGMP"],
+     [AC_MSG_ERROR([--with-gmp: <gmp.h> not found])])])
+AC_SUBST(HAVE_LIBGMP)
 
 AC_CHECK_SIZEOF(void*)
 AC_CHECK_FUNCS(posix_memalign memalign)

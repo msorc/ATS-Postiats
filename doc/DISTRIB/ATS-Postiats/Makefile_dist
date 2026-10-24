@@ -67,9 +67,13 @@ CFLAGS=
 LDFLAGS=
 #
 ######
+# KIND: gmpknd when configure found <gmp.h> (and no --without-gmp), else intknd
+# (HAVE_LIBGMP is empty); src/CBOOT/Makefile builds the C bundle of that kind
+KIND = $(if $(strip $(HAVE_LIBGMP)),gmpknd,intknd)
+#
 src2_patsopt: ; \
 $(MAKEJ4) -C src/CBOOT patsopt \
-CC=$(CCOMP) LDFLAGS=$(LDFLAGS)
+CC=$(CCOMP) LDFLAGS=$(LDFLAGS) KIND=$(KIND)
 #
 bin2_patsopt: src2_patsopt ; $(CPF) src/CBOOT/patsopt bin/patsopt
 #
@@ -89,7 +93,7 @@ $(MVF) utils/myatscc/BUILD/myatscc bin/myatscc
 
 ######
 src2_libatsopt: ; \
-$(MAKE) -C src/CBOOT CC=$(CCOMP) libatsopt.a
+$(MAKE) -C src/CBOOT CC=$(CCOMP) KIND=$(KIND) libatsopt.a
 lib2_libatsopt: src2_libatsopt ; \
 $(CPF) src/CBOOT/libatsopt.a ccomp/atslib/lib/.
 #

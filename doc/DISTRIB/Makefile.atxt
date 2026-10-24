@@ -247,14 +247,14 @@ srcget_share:: ; $(CPF) ../../share/atsmake-post.mk $(ATSDIST)/share/.
 
 #
 # The compiler sources (ATS2, no GC): everything of src/ but the tests and the porting notes;
-# the bootstrap bundle needs `make -C ../../src CBOOT` first (no generated C is kept in git)
+# the bootstrap bundle src/CBOOT is tracked (`make -C ../../src CBOOT` regenerates it)
 srcget_patsrc:: ; \\
   mkdir -p $(ATSDIST)/src && \\
   cd ../../src && for f in Makefile README mylibies.hats *.sats *.dats *.hats *.cats *.spec *.c; do \\
     [ -f $$f ] && cp -f $$f ../doc/DISTRIB/$(ATSDIST)/src/ ; done ; true
 srcget_patsrc_cboot:: ; \\
   mkdir -p $(ATSDIST)/src/CBOOT && \\
-  cd ../../src/CBOOT && cp -Rf Makefile README mkboot.sh modules.mk *.c gmpknd intknd inc \\
+  cd ../../src/CBOOT && cp -Rf Makefile README mkboot.sh stripc.py modules.mk *.c gmpknd intknd inc \\
     ../../doc/DISTRIB/$(ATSDIST)/src/CBOOT/
 
 ######
@@ -394,32 +394,23 @@ $(shell cat ${PATSHOME}/VERSION)
 ######
 PACKNAME=ATS2-Postiats-$(PATSVER)
 ######
-# atspacktarzvcf: atspacktarzvcf_int
-# atspacktarzvcf: atspacktarzvcf_gmp
-######
-PACKNAMEgmp=ATS2-Postiats-gmp-$(PATSVER)
 #
-atspacktarzvcf_gmp:: ; $(RMRF) $(PACKNAMEgmp)
-atspacktarzvcf_gmp:: ; $(CPRF) ATS-Postiats $(PACKNAMEgmp)
-atspacktarzvcf_gmp:: ; $(RMF) $(PACKNAMEgmp)/missing ; $(CPF) ATS-Postiats/missing $(PACKNAMEgmp)/
-atspacktarzvcf_gmp:: ; $(RMF) $(PACKNAMEgmp)/install-sh ; $(CPF) ATS-Postiats/install-sh $(PACKNAMEgmp)/
-atspacktarzvcf_gmp:: ; $(MAKE) -C $(PACKNAMEgmp) cleanall
-atspacktarzvcf_gmp:: ; $(TARZVCF) $(PACKNAMEgmp).tgz $(PACKNAMEgmp)/.
+# The release tarball: ATS2-Postiats-<version>.tgz. One tarball serves both
+# kinds of the integers of the constraint solver (the compiler is built from
+# the C bundle src/CBOOT with the KIND of config.mk, gmpknd or intknd):
+# ./configure uses libgmp when <gmp.h> is there and falls back to intknd
+# (machine integers) when it is not (or with --without-gmp).
 #
-atspacktarzvcf_gmp_up:: ; \\
-scp $(PACKNAMEgmp).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(PACKNAMEgmp).tgz
+atspacktarzvcf:: ; $(RMRF) $(PACKNAME)
+atspacktarzvcf:: ; $(CPRF) ATS-Postiats $(PACKNAME)
+atspacktarzvcf:: ; $(RMF) $(PACKNAME)/missing ; $(CPF) ATS-Postiats/missing $(PACKNAME)/
+atspacktarzvcf:: ; $(RMF) $(PACKNAME)/install-sh ; $(CPF) ATS-Postiats/install-sh $(PACKNAME)/
+atspacktarzvcf:: ; $(MAKE) -C $(PACKNAME) cleanall
+atspacktarzvcf:: ; $(TARZVCF) $(PACKNAME).tgz $(PACKNAME)/.
 #
-######
-PACKNAMEint=ATS2-Postiats-int-$(PATSVER)
-#
-atspacktarzvcf_int:: ; $(RMRF) $(PACKNAMEint)
-atspacktarzvcf_int:: ; $(CPRF) ATS-Postiats $(PACKNAMEint)
-atspacktarzvcf_int:: ; $(RMF) $(PACKNAMEint)/missing ; $(CPF) ATS-Postiats/missing $(PACKNAMEint)/
-atspacktarzvcf_int:: ; $(RMF) $(PACKNAMEint)/install-sh ; $(CPF) ATS-Postiats/install-sh $(PACKNAMEint)/
-atspacktarzvcf_int:: ; $(MAKE) -C $(PACKNAMEint) cleanall
-atspacktarzvcf_int:: ; $(TARZVCF) $(PACKNAMEint).tgz $(PACKNAMEint)/.
-atspacktarzvcf_int_up:: ; \
-scp $(PACKNAMEint).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(PACKNAMEint).tgz
+# the names of the former two variants (-gmp and -int) of the tarball
+atspacktarzvcf_gmp: atspacktarzvcf
+atspacktarzvcf_int: atspacktarzvcf
 #
 ######
 CONTRIBNAME=ATS2-Postiats-contrib-0.3.13
@@ -428,9 +419,6 @@ CONTRIBNAME=ATS2-Postiats-contrib-$(PATSVER)
 atscontribtarzvcf:: ; $(RMRF) $(CONTRIBNAME)
 atscontribtarzvcf:: ; $(CPRF) ATS-Postiats-contrib $(CONTRIBNAME)
 atscontribtarzvcf:: ; $(TARZVCF)  $(CONTRIBNAME).tgz  $(CONTRIBNAME)/.
-#
-atscontribtarzvcf_up:: ; \\
-scp $(CONTRIBNAME).tgz ats-hwxi,ats-lang@web.sourceforge.net:htdocs/IMPLEMENT/Postiats/$(CONTRIBNAME).tgz
 #
 ######
 

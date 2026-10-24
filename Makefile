@@ -148,8 +148,9 @@ book::
 
 ######
 #
-# the release tarballs: ATS2-Postiats-<version>.tgz (the two variants:
-# with and without libgmp) and ATS2-Postiats-include-<version>.tgz
+# the release tarballs in doc/DISTRIB: ATS2-Postiats-<version>.tgz (./configure
+# builds with libgmp when <gmp.h> is there, else without it) and
+# ATS2-Postiats-include-<version>.tgz
 #
 pack::
 	@if [ ! -x bin/atsdoc ] ; then \
@@ -159,8 +160,7 @@ pack::
 	  echo "ERROR: src/CBOOT is incomplete: regenerate it with 'make -C src CBOOT'." && exit 1 ; \
 	fi
 	$(MAKE) -C doc/DISTRIB atspackaging
-	$(MAKE) -C doc/DISTRIB atspacktarzvcf_gmp
-	$(MAKE) -C doc/DISTRIB atspacktarzvcf_int
+	$(MAKE) -C doc/DISTRIB atspacktarzvcf
 	$(MAKE) -C doc/DISTRIB -f Makefile_inclats tarzvcf
 
 ######
@@ -240,8 +240,8 @@ uninstall::
 # make dist: the release tarballs ATS2-Postiats-*.tgz, each with a .sha256
 #
 dist:: pack
-	for f in ATS2-Postiats-*-$(VERSION).tgz ; do \
-	  sha256sum $$f > $$f.sha256 || shasum -a 256 $$f > $$f.sha256 ; \
+	cd doc/DISTRIB && for f in ATS2-Postiats-$(VERSION).tgz ATS2-Postiats-include-$(VERSION).tgz ; do \
+	  { sha256sum $$f || shasum -a 256 $$f ; } > $$f.sha256 && ls -l $$f $$f.sha256 && cat $$f.sha256 || exit 1 ; \
 	done
 
 ######
