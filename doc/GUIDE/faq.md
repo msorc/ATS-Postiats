@@ -122,6 +122,50 @@ binds the fields by reference (as in `size` of
 [datavtype.dats](examples/datavtype.dats)); to take it apart, match with `~`
 and free or rebuild every part.
 
+### an `if` or `case` whose branches are linear, inside a `val`
+
+```
+error(3): the dynamic expression cannot be assigned the type [S2EVar(3947)].
+error(3): mismatch of sorts in unification:
+The sort of variable is: S2RTbas(S2RTBASimp(1; t@ype))
+The sort of solution is: S2RTbas(S2RTBASimp(2; viewtype))
+```
+
+for
+
+```
+val res = if x2 = 0 then res else list_vt_cons(x1/x2, res)
+```
+
+The `=` is not the problem (a plain `bool` condition fails the same way, and
+so does the compiler of 0.4.2): when an `if` or a `case` has no expected
+type, its type is a variable of sort `t@ype`, which a linear type (a
+`list_vt`, ...) cannot instantiate. Give the expected type, either by
+writing the `if` as the body of a function with a declared result type, or
+with an ascription:
+
+```
+val res = (if x2 = 0 then res else list_vt_cons(x1/x2, res)): List0_vt(expr)
+```
+
+(`val res: List0_vt(expr) = if ...` is not enough.) See
+[POS_if_linear.dats](../EXAMPLE/ERRORS/POS_if_linear.dats) and
+[NEG_if_linear.dats](../EXAMPLE/ERRORS/NEG_if_linear.dats).
+
+### a non-tail call to a function of the same `fnx`-group
+
+```
+error(ccomp): a non-tail call to a function of the same [fnx]-group (use [fun] instead of [fnx]).
+```
+
+The functions of a `fnx ... and ...` group are compiled into one C function
+so that their tail-calls become jumps. A call to a function of the group
+that is not a tail-call (`1 + g(n-1)`, `list_vt_cons(x, g(xs))`, ...) has no
+C function to call. Older compilers (0.4.2 included) did not say so and
+produced C code with an implicit declaration of the function. Use
+`fun ... and ...` for a group that is not tail-recursive
+([NEG_fnx_nontail.dats](../EXAMPLE/ERRORS/NEG_fnx_nontail.dats)).
+
 ## Names that are gone
 
 ### unrecognized identifier: list0, option0, arrayref, ref
