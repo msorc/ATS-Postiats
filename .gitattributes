@@ -1,0 +1,7 @@
+# the bootstrap C bundle is generated: no diffs, no language statistics (the scripts and docs next to it stay diffable)
+src/CBOOT/** linguist-generated=true -diff
+src/CBOOT/mkboot.sh -linguist-generated diff
+src/CBOOT/stripc.py -linguist-generated diff
+src/CBOOT/Makefile -linguist-generated diff
+src/CBOOT/README -linguist-generated diff
+src/CBOOT/.gitignore -linguist-generated diff

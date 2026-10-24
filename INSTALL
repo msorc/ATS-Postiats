@@ -94,10 +94,13 @@ patsopt (the stage-0 compiler) is needed. It is one of:
 
 * any ATS2 compiler (an installed release or an earlier build of this
   repository);
-* the bootstrap C bundle of this repository: `make -C src CBOOT`
-  generates it (it needs a working patsopt, see src/CBOOT/README) and
-  `make -C src/CBOOT` builds it (it needs only a C compiler and libgmp);
-  the resulting compiler is src/CBOOT/patsopt.
+* the bootstrap C bundle of this repository (src/CBOOT, tracked):
+  `make bootstrap` builds it (it needs only a C compiler, make, python3 and
+  libgmp; `make bootstrap KIND=intknd` without libgmp) and then the whole
+  of ATS2 with it, so a clone builds with `make bootstrap && make`
+  (a plain `make` does the bootstrap itself when there is no bin/patsopt).
+  The bundle is regenerated with `make -C src CBOOT` (it needs a working
+  patsopt, see src/CBOOT/README).
 
 Then the compiler and the tools are built with
 

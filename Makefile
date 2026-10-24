@@ -6,7 +6,8 @@
 # The steps of the build are in Makefile_devl (the release script uses
 # them); this Makefile gives them the names that are easier to remember:
 #
-#   make            # the same as `make all`
+#   make bootstrap  # a clone with no ATS2 compiler: build patsopt from the C bundle src/CBOOT (a C compiler, make and python3; libgmp or KIND=intknd), then everything
+#   make            # the same as `make all` (it bootstraps when there is no bin/patsopt and no PATSOPT)
 #   make check      # typecheck every module of the compiler
 #   make test       # the regression suites of the repository
 #   make doc        # regenerate the generated sources of the libraries
@@ -14,8 +15,11 @@
 #   make pack       # the release tarballs
 #   make clean      # remove the build products
 #
-# The stage-0 compiler (the first patsopt; ATS1 is not needed) is given
-# with PATSOPT (and STAGE0HOME for an installed ATS2):
+# The stage-0 compiler (the first patsopt; ATS1 is not needed) is, in this
+# order: PATSOPT; bin/patsopt of an earlier build; else the tracked bootstrap
+# bundle src/CBOOT is compiled (`make bootstrap`, done by `make all` itself).
+# A patsopt of the PATH is used only when PATSOPT says so. For an installed
+# ATS2 give PATSOPT (and STAGE0HOME):
 #
 #   make PATSOPT=/usr/bin/patsopt STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all
 #
@@ -53,12 +57,42 @@ PATSOPT_ARGS=$(PATSOPT_ARG) $(STAGE0HOME_ARG)
 
 ######
 
-.PHONY: all check test doc book pack clean cleanall
+# the number of parallel jobs of the compilation of the bundle
+JOBS ?= $(shell nproc 2>/dev/null || echo 4)
+# KIND=intknd (no libgmp) is passed on to the bundle and to the compiler; without it both probe <gmp.h>
+ifdef KIND
+BOOT_ARGS=KIND=$(KIND)
+ifeq ($(KIND),intknd)
+C3_ARG=C3NSTRINTKND=intknd
+endif
+endif
+
+.PHONY: all bootstrap check test doc book pack clean cleanall
 
 ######
 
+# without PATSOPT and bin/patsopt the bootstrap bundle is the stage-0 compiler
+ifndef PATSOPT
+ifeq ($(wildcard $(PATSHOME)/bin/patsopt),)
+all:: bootstrap
+else
 all::
-	$(MAKE) -f $(DEVL) $(PATSOPT_ARGS) all
+	$(MAKE) -f $(DEVL) $(C3_ARG) all
+endif
+else
+all::
+	$(MAKE) -f $(DEVL) $(PATSOPT_ARGS) $(C3_ARG) all
+endif
+
+######
+#
+# bootstrap: patsopt from the C bundle src/CBOOT (a C compiler and libgmp only; CC=, CFLAGS=, KIND=intknd as in
+# src/CBOOT/README), then the normal build `all` with that patsopt as stage 0, which installs bin/patsopt
+#
+bootstrap::
+	$(MAKE) -C src/CBOOT -j$(JOBS) $(BOOT_ARGS) patsopt
+	$(MAKE) -f $(DEVL) PATSOPT=$(abspath $(CURDIR))/src/CBOOT/patsopt $(C3_ARG) all
+	@echo "bootstrap: done: bin/patsopt and bin/patscc are built from src/CBOOT; use PATSHOME=$(abspath $(CURDIR)) PATH=$(abspath $(CURDIR))/bin:\$$PATH"
 
 ######
 #
@@ -109,8 +143,8 @@ pack::
 	@if [ ! -x bin/atsdoc ] ; then \
 	  echo "ERROR: bin/atsdoc is missing: build it with 'make -f $(DEVL) bin_atsdoc'." && exit 1 ; \
 	fi
-	@if [ ! -d src/CBOOT ] ; then \
-	  echo "ERROR: src/CBOOT is missing: generate it with 'make -C src CBOOT'." && exit 1 ; \
+	@if [ ! -f src/CBOOT/modules.mk ] ; then \
+	  echo "ERROR: src/CBOOT is incomplete: regenerate it with 'make -C src CBOOT'." && exit 1 ; \
 	fi
 	$(MAKE) -C doc/DISTRIB atspackaging
 	$(MAKE) -C doc/DISTRIB atspacktarzvcf_gmp
@@ -122,6 +156,7 @@ pack::
 clean::
 	$(MAKE) -f $(DEVL) src_cleanall
 	$(MAKE) -f $(DEVL) atslib_cleanall
+	$(MAKE) -C src/CBOOT clean
 
 cleanall:: clean
 

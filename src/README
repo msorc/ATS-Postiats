@@ -23,7 +23,7 @@ Building
 
 `make -f Makefile_devl all` (repository root) does the above and then builds bin/patscc, bin/myatscc and
 ccomp/atslib/lib/libatsopt.a and libatslib.a, with the same variables (PATSOPT=, STAGE0HOME=, C3NSTRINTKND=).
-Without PATSOPT the stage-0 compiler is $PATSHOME/bin/patsopt if it exists (an earlier build), else patsopt of the PATH.
+Without PATSOPT the stage-0 compiler is $PATSHOME/bin/patsopt if it exists (an earlier build), else CBOOT/patsopt if built, else patsopt of the PATH.
 `make -C src test` needs bin/patscc and bin/patsopt in the PATH (build them with Makefile_devl first).
 
 Getting the first patsopt
@@ -49,7 +49,9 @@ Getting the first patsopt
 
 (b) The bootstrap C bundle: `make -C src CBOOT` (run with a working patsopt) generates the C code of the whole compiler in
     CBOOT/; `make -C CBOOT` links a patsopt from it with a C compiler and gmp only (CBOOT/README).
-    The bundle is not kept in git: it is part of the release tarballs.
+    The bundle is tracked (generated files, see .gitattributes): `make bootstrap` at the root builds patsopt from it
+    and then the whole of ATS2. Stage-0 order of src/Makefile: PATSOPT=; $PATSHOME/bin/patsopt; CBOOT/patsopt (once built);
+    patsopt of the PATH. The root `make` uses the bundle when there is no bin/patsopt and no PATSOPT.
 
 Source conventions
 ------------------

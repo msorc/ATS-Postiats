@@ -2,8 +2,9 @@ CBOOT: the bootstrap C bundle of patsopt
 ========================================
 
 The compiler is written in ATS2. To build it without any ATS compiler, the C code that a working patsopt
-generates for every module is distributed as a bundle in this directory. Nothing here is kept in git except this
-README, Makefile, mkboot.sh, stripc.py and .gitignore: the bundle is generated and is part of release tarballs.
+generates for every module is distributed as a bundle in this directory. The bundle is tracked (a fresh clone builds
+with `make bootstrap && make` at the root): the generated files are marked in ../../.gitattributes (no diffs); only the build
+products (obj_*/, patsopt, libatsopt.a) are ignored. It is path-independent: see "Path independence" below.
 
 Generating (needs a working patsopt and python3; see ../README)
 
@@ -12,7 +13,7 @@ Generating (needs a working patsopt and python3; see ../README)
 mkboot.sh generates, for C3NSTRINTKND=gmpknd and intknd, the C code of every module (pats_*_dats.c, pats_error_sats.c, the
 main module with and without main() for libatsopt, libatsopt_ext_dats.c) and writes:
 
-    *.c               the C code that does not depend on the integer kind (the time stamps and all the comments of the generated code are removed by stripc.py)
+    *.c               the C code that does not depend on the integer kind (the time stamps and all the comments of the generated code are removed by stripc.py, the paths are made neutral)
     gmpknd/*.c intknd/*.c   the modules that differ (pats_intinf, pats_lintprgm_myint, pats_constraint3_solve)
     pats_runtime_ats1.c, libatsopt_ext.c   hand-written C of src/
     inc/              the headers that the C code includes: ccomp/runtime, prelude/CATS, libats/CATS, src/*.cats
@@ -20,9 +21,20 @@ main module with and without main() for libatsopt, libatsopt_ext_dats.c) and wri
 
 The generated *_gen*.hats files (arena encodings) are already expanded in the C code: python3 is not needed to use the bundle.
 
+Path independence
+
+The generated C holds the absolute path of the tree and of the stage-0 compiler: in strings (location of assertions and
+exceptions: "/path/src/pats_error.sats:FatalErrorExn") and in identifiers (patsopt mangles every character that is not
+[A-Za-z0-9_] into _%03o_: "/path/src/pats_error.sats__FatalErrorExn" is _057_path_057_src_057_pats_error_056_sats__FatalErrorExn).
+stripc.py --root replaces each root (the PATSHOME of the build, and the PATSHOME of the stage-0 compiler when that is another
+install) by the word PATSHOME in both forms, in every file, so that the names stay consistent across the modules and
+the bundle generated in any directory is byte-identical (the strings are only diagnostics: no file is opened through them).
+
 Using (a C compiler, make and libgmp; nothing else)
 
-    make -C src/CBOOT -j8                  # ./patsopt (needs gmp)
+    make bootstrap                         # (root of the repository) patsopt from the bundle, then the whole build with it: bin/patsopt, bin/patscc, ..
+                                           #   KIND=intknd for no gmp; CC=, CFLAGS= are honoured
+    make -C src/CBOOT -j8                  # ./patsopt (gmp if <gmp.h> is there, else the machine integers: KIND is probed)
     make -C src/CBOOT KIND=intknd          # ./patsopt without gmp
     make -C src/CBOOT libatsopt.a          # the library version (the API of utils/libatsopt)
     make -C src/CBOOT CC=clang CFLAGS=-O1 LDFLAGS=...
@@ -30,9 +42,10 @@ Using (a C compiler, make and libgmp; nothing else)
 Then build the real compiler from the sources with it (stage 2; the bundle's patsopt is stage 1, compiled from the C that
 the compiler that generated the bundle produced):
 
+    make -C src                                        # finds CBOOT/patsopt (after PATSOPT= and bin/patsopt, before the patsopt of the PATH)
     make -C src PATSOPT=$PWD/src/CBOOT/patsopt         # PATSHOME = this repository
     # or: make -f Makefile_devl PATSOPT=$PWD/src/CBOOT/patsopt all
 
 If the compiler that generated the bundle is itself a stage-2 build, the C of the bundle is the C that the normal build
-compiles: the patsopt of the bundle and the one of `make -C src` are then the same program up to the path strings in the
-generated C (comments and assertion messages hold the paths of the tree that generated the bundle).
+compiles: the patsopt of the bundle and the one of `make -C src` are then the same program (up to the path strings,
+which the bundle holds as PATSHOME/src/..).

@@ -21,6 +21,7 @@
 #
 # make -f Makefile_devl PATSOPT=/usr/bin/patsopt \
 #   STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all   # an installed ATS2
+# make bootstrap                              # (root Makefile) src/CBOOT, then this
 # make -C src/CBOOT && \
 #   make -f Makefile_devl PATSOPT=$PWD/src/CBOOT/patsopt all
 # make -f Makefile_devl all                   # bin/patsopt exists already

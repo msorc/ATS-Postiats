@@ -53,8 +53,9 @@ There are also pre-compiled debian packages for ATS2 available on-line.
 The compiler of ATS2 (`src/`) is implemented in ATS2 itself (no GC, linear
 heap data only); ATS1 is not needed. To build it you need a first `patsopt`
 (stage 0): any ATS2 compiler (an installed release or an earlier build), or the
-bootstrap C bundle that `make -C src CBOOT` generates (it needs only a C
-compiler and libgmp to be linked). See `src/README` and `src/CBOOT/README`:
+bootstrap C bundle `src/CBOOT` (tracked; it needs only a C compiler, make,
+python3 and libgmp): a fresh clone builds with `make bootstrap && make`.
+See `src/README` and `src/CBOOT/README`:
 
     make -f Makefile_devl PATSOPT=/usr/bin/patsopt STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all
     make -C src test     # the compiler's own regression tests (no ATS1)

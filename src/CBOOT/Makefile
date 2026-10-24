@@ -4,15 +4,25 @@
 # Makefile of the bootstrap bundle of patsopt: links patsopt from the C code in this directory with a C compiler and (for
 # the default integer kind) gmp. Nothing else is needed: no ATS compiler, no python. See README.
 #
-#   make                       builds ./patsopt (with gmp)
+#   make                       builds ./patsopt (with gmp if <gmp.h> is there, else without)
 #   make libatsopt.a           builds the library version of the compiler (the API of utils/libatsopt)
-#   make KIND=intknd           builds ./patsopt without gmp (the integers of the constraint solver are machine integers)
+#   make KIND=intknd           builds ./patsopt without gmp (KIND=gmpknd: with) (the integers of the constraint solver are machine integers)
 #   make -j8 CC=gcc CFLAGS=-O1
 #
+# CC, CFLAGS and LDFLAGS are taken from the command line or the environment; KIND (gmpknd or intknd) is gmpknd when <gmp.h> is there, else intknd
+ifeq ($(origin CC),default)
 CC=gcc
-CFLAGS=-O2
-LDFLAGS=
+endif
+CFLAGS ?= -O2
+LDFLAGS ?=
+ifeq ($(strip $(KIND)),)
+ifeq ($(shell echo '\#include <gmp.h>' | $(CC) -E - >/dev/null 2>&1 && echo yes),yes)
 KIND=gmpknd
+else
+KIND=intknd
+$(info KIND=intknd: no <gmp.h> for $(CC), building without gmp)
+endif
+endif
 
 include modules.mk
 

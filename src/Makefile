@@ -8,21 +8,25 @@
 #   clean, cleanall
 #
 # The first patsopt: any ATS2 compiler works as stage 0:   make -C src PATSOPT=/path/to/patsopt
-# or the C bundle:  make -C src/CBOOT && make -C src PATSOPT=$PWD/CBOOT/patsopt     (see README)
+# or the C bundle:  `make bootstrap` in the root, or make -C src/CBOOT && make -C src     (CBOOT/patsopt is found; see CBOOT/README)
 # PATSHOME defaults to the root of this repository (the prelude, share/ and the C run-time are read from there).
 # C3NSTRINTKND=intknd builds without gmp.
 #
 PATSHOME ?= $(abspath $(CURDIR)/..)
 export PATSHOME
-# Stage 0: PATSOPT, else $(PATSHOME)/bin/patsopt, else patsopt of the PATH.
-# HOOK: a later phase adds a tracked bootstrap bundle (src/CBOOT) here, built when no patsopt is found.
+# Stage 0, in this order: PATSOPT; $(PATSHOME)/bin/patsopt (an earlier build); CBOOT/patsopt (built from the tracked bootstrap
+# bundle of this tree: `make bootstrap` at the root, or `make -C CBOOT`); patsopt of the PATH (an installed ATS2).
+# The patsopt of the bundle belongs to this tree (it reads this tree's prelude): no STAGE0HOME below.
 ifndef PATSOPT
 ifneq ($(wildcard $(PATSHOME)/bin/patsopt),)
 PATSOPT=$(PATSHOME)/bin/patsopt
+else ifneq ($(wildcard $(CURDIR)/CBOOT/patsopt),)
+PATSOPT=$(CURDIR)/CBOOT/patsopt
+$(info stage 0: PATSOPT=$(PATSOPT) (the bootstrap bundle))
 else
 PATSOPT:=$(shell command -v patsopt 2>/dev/null)
 ifeq ($(PATSOPT),)
-$(error no stage-0 patsopt: give PATSOPT=/path/to/patsopt (any ATS2 compiler, e.g. an installed ats2-postiats), or build one from the bootstrap bundle: make -C src/CBOOT (see src/CBOOT/README) and PATSOPT=$$PWD/src/CBOOT/patsopt)
+$(error no stage-0 patsopt: run `make bootstrap` in the root of the repository (it builds one from the C bundle src/CBOOT with a C compiler only), or give PATSOPT=/path/to/patsopt (any ATS2 compiler, e.g. an installed ats2-postiats))
 endif
 $(info stage 0: PATSOPT=$(PATSOPT) (from the PATH))
 endif
@@ -36,7 +40,7 @@ all: patsopt libatsopt.a
 cleanall:: clean
 # the generated bootstrap bundle (CBOOT target)
 cleanboot:
-	$(RM) -r CBOOT/*.c CBOOT/gmpknd CBOOT/intknd CBOOT/inc CBOOT/gen_* CBOOT/obj_* CBOOT/modules.mk CBOOT/patsopt CBOOT/libatsopt.a
+	$(RM) -r CBOOT/gen_* CBOOT/obj_* CBOOT/patsopt CBOOT/libatsopt.a
 
 SATS= \
   pats_basics.sats \

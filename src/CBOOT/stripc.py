@@ -9,7 +9,13 @@
 # respected: comment markers inside string and character literals are kept.  A comment becomes one space (so that the
 # tokens around it do not merge); the lines that are empty after that are dropped, so that the preprocessor
 # directives (which need a line of their own) and the line continuations are untouched.
-# usage: stripc.py file.c ...   (the files are rewritten in place)
+#
+# The absolute paths of the build are made neutral too, so that the bundle does not depend on where it was generated:
+# every `--root DIR` (the PATSHOME of the build and the PATSHOME of the stage-0 compiler) is replaced by the word PATSHOME,
+# in the plain form (strings: "PATSHOME/src/pats_error.sats:FatalErrorExn") and in the form that patsopt mangles into
+# C identifiers (each character that is not [A-Za-z0-9_] becomes _%03o_: "/" is _057_, "-" is _055_, "." is _056_),
+# so that PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn is the name in every file.
+# usage: stripc.py [--root DIR]... file.c ...   (the files are rewritten in place)
 import os, re, sys
 
 TOK = re.compile(r'''"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|/\*.*?\*/|//[^\n]*(?:\\\n[^\n]*)*''', re.S)
@@ -34,9 +40,33 @@ def strip(src):
         cont = l.endswith('\\')
     return ''.join(res)
 
-for f in sys.argv[1:]:
+def mangle(p):
+    return ''.join(c if (c.isascii() and (c.isalnum() or c == '_')) else '_%03o_' % ord(c) for c in p)
+
+args = sys.argv[1:]
+roots = []
+while args and args[0] == '--root':
+    r = args[1].rstrip('/')
+    roots += [r, os.path.realpath(r)]
+    args = args[2:]
+# the longest root first (one root may be a prefix of another), without duplicates
+roots = sorted(set(r for r in roots if r), key=len, reverse=True)
+subs = [(r, 'PATSHOME') for r in roots] + [(mangle(r), 'PATSHOME') for r in roots]
+subs = [(a, b) for (a, b) in subs if a]
+subs.sort(key=lambda t: len(t[0]), reverse=True)
+
+# a stage-0 compiler with its own prelude reads the arena of this tree through the directory src/stage0 (src/Makefile):
+# it is libats of PATSHOME for the bundle, whichever stage 0 generated it
+subs += [('PATSHOME/src/stage0/', 'PATSHOME/'), ('PATSHOME_057_src_057_stage0_057_', 'PATSHOME_057_')]
+
+def norm(s):
+    for a, b in subs:
+        s = s.replace(a, b)
+    return s
+
+for f in args:
     with open(f, encoding='latin-1', newline='') as fh:
         s = fh.read()
     with open(f + '.tmp', 'w', encoding='latin-1', newline='') as fh:
-        fh.write(strip(s))
+        fh.write(norm(strip(s)))
     os.replace(f + '.tmp', f)
