@@ -560,41 +560,41 @@ exact 3 components. I will say more about pattern matching elsewhere.
 #para("\
 
 The tuples introduced above are often referred to as flat tuples, native
-tuples or unboxed tuples. There is another kind of tuples supported in ATS,
-which are called boxed tuples. A boxed tuple is essentially a pointer
-pointing to some heap location where a flat tuple is stored.\
-
+tuples or unboxed tuples: the components of such a tuple are stored in
+consecutive memory locations (typically on the stack, or inside some other
+data structure), and the tuple is passed around by value.  There is another
+kind of tuples in the syntax of ATS, which are called boxed tuples. A boxed
+tuple, written #dyncode("'(exp1, exp2)"), is essentially a pointer pointing to
+some heap location where a flat tuple is stored.\
 ")
 
 #para("\
 
-Assume that exp1 and exp2 are two expressions of the types T1 and T2,
-respectively. Then the expression '(exp1, exp2), refers to a tuple of the
-tuple type '(T1, T2). Accordingly, we can form boxed tuples and boxed tuple
-types of fewer or more components. What should be noted immediately is that
-every boxed tuple is of the size of a pointer, and can thus be stored in
-any place where a pointer can. Using boxed tuples is rather similar to
-using unboxed ones. For instance, the meaning of the following code should
-be evident:
+There is no garbage collector in this version of ATS2, and a boxed
+tuple that is never freed is a memory leak. For this reason, the compiler
+rejects every expression that constructs a boxed tuple (and every boxed
+record). For instance, typechecking
 
 #dats2xhtml("\
 val xyz = '( 'A', 1, 2.0 )
-val x = xyz.0 and y = xyz.1 and z = xyz.2
 ")
 
-Note that a space is needed between #dyncode("'(") and #dyncode("'A'")
-for otherwise the current parser (for ATS/Postiats) would be confused.\
+yields an error message stating that a boxed tuple is constructed and could
+never be freed. Please use a flat tuple (#dyncode("@(exp1, exp2)"), or simply
+#dyncode("(exp1, exp2)") as above) instead. When data really needs to live in
+the heap, we will use linear data structures (datavtypes), whose
+memory is owned by the program and must be freed explicitly; they are
+introduced in a later chapter.\
 
 ")
 
 #para("\
 
-Given the availability of flat and boxed tuples, one naturally wants to
-know whether there is a simple way to determine which kind is preferred
-over the other. Unfortunately, there is no simple way to do this as far as
-I can tell. In order to be certain, some kind of profiling is often
-needed. However, if we want to run code with no support of garbage
-collection (GC), then we should definitely avoid using boxed tuples.\
+Since all tuples are flat, a tuple can be stored in any place where its
+components can, and its size is the sum of the sizes of its components (plus
+possible padding). Passing a large tuple to a function copies it; if this
+becomes an issue, a pointer to the tuple can be passed instead, and I will
+explain how to do this safely in a later chapter on views.\
 
 ")
 
@@ -662,10 +662,10 @@ matching on record values.
 ")
 
 #para("\
-Compared with handling native/flat/unboxed records, the only change
-needed for handling boxed records is to replace the special symbol
-#dyncode("@{") with another one: #dyncode("'{"), which is a quote
-followed immediately by a left curly brace.\
+Records in the form of #dyncode("'{ ... }") (a quote followed immediately
+by a left curly brace) are boxed records. As with boxed tuples, the compiler
+rejects the construction of a boxed record because there is no garbage
+collector to reclaim it; use flat records (#dyncode("@{ ... }")) as shown above.\
 ")
 
 </sect1><!--id="records_and_record_types"-->
