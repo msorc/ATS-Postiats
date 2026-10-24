@@ -173,16 +173,20 @@ pats_staexp2_error_gen.hats: pats_staexp2_error.spec ../utils/arenagen/arenagen.
 pats_staexp2_error_gen_dats.hats: pats_staexp2_error.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global --compact dats pats_staexp2_error.spec > $@
 
+# JOBS: the number of parallel typechecks (check) and compilations (test); JOBS=1 is the serial run. The typecheck of a file only reads.
+JOBS ?= $(shell nproc 2>/dev/null || echo 4)
+export JOBS
+# TYPECHECK(s or d, files): the typecheck of every file, JOBS at a time (all the files are checked; make fails if one does not pass)
+TYPECHECK=printf '%s\n' $(2) | xargs -r -P $(JOBS) -I{} sh -c 'echo "typecheck {}"; $(PATSOPT) --typecheck -$(1) {} >/dev/null'
+
 check:: $(GENHATS) checksats checkdats
 
 checksats:
-	@for f in $(SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(SATS))
 
 checkdats:
-	@for f in $(DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,d,$(DATS))
 
-# JOBS: the number of parallel compilations in test/Makefile (the runs and the md5 comparisons are serial: see there)
-JOBS ?= $(shell nproc 2>/dev/null || echo 4)
 # `make -j N test`: check, then the suites, one after the other (the parallel part is in test/, with JOBS)
 ifneq ($(filter test,$(MAKECMDGOALS)),)
 .NOTPARALLEL:
@@ -229,8 +233,8 @@ pats_dynexp2_gen_dats.hats: pats_dynexp2.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global --compact dats pats_dynexp2.spec > $@
 check:: $(DYN2GENHATS) checkdyn2
 checkdyn2:
-	@for f in $(DYN2SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(DYN2DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(DYN2SATS))
+	@$(call TYPECHECK,d,$(DYN2DATS))
 clean::
 	$(RM) $(DYN2GENHATS)
 
@@ -269,8 +273,8 @@ pats_trans3_gen_dats.hats: pats_trans3.spec ../utils/arenagen/arenagen.py
 	$(ARENAGEN) --global --compact dats pats_trans3.spec > $@
 check:: $(MAC2GENHATS) checkmac2
 checkmac2:
-	@for f in $(MAC2SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(MAC2DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(MAC2SATS))
+	@$(call TYPECHECK,d,$(MAC2DATS))
 clean::
 	$(RM) $(MAC2GENHATS)
 
@@ -294,8 +298,8 @@ D3SATS=pats_dynexp3.sats pats_trans3.sats pats_trans3_env.sats pats_trans3_env_e
 D3DATS=pats_dynexp3.dats pats_dynexp3_print.dats pats_trans3_env.dats pats_trans3_env_dvar.dats pats_trans3_env_effect.dats pats_trans3_env_lamlp.dats pats_trans3_env_lstate.dats pats_trans3_env_pfman.dats pats_trans3_env_print.dats pats_trans3_env_scst.dats pats_trans3_env_svar.dats pats_trans3_env_termet.dats
 check:: $(D3GENHATS) checkd3
 checkd3:
-	@for f in $(D3SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(D3DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(D3SATS))
+	@$(call TYPECHECK,d,$(D3DATS))
 clean::
 	$(RM) $(D3GENHATS)
 
@@ -351,8 +355,8 @@ SATS += pats_trans3_appsym.sats
 DATS += $(T3DATS)
 check:: $(GENHATS) $(DYN2GENHATS) $(MAC2GENHATS) $(D3GENHATS) $(TR2GENHATS) $(HDGENHATS) $(T3GENHATS) checkt3
 checkt3:
-	@for f in $(T3SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(T3DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(T3SATS))
+	@$(call TYPECHECK,d,$(T3DATS))
 checksats checkdats: $(GENHATS) $(DYN2GENHATS) $(MAC2GENHATS) $(D3GENHATS) $(TR2GENHATS) $(HDGENHATS) $(T3GENHATS)
 clean::
 	$(RM) $(T3GENHATS)
@@ -365,8 +369,8 @@ CC1SATS=pats_ccomp.sats
 CC1DATS=pats_ccomp_ccompenv.dats pats_ccomp_environ.dats pats_ccomp_caseof.dats pats_ccomp_looping.dats pats_ccomp_trywith.dats pats_ccomp_lazyeval.dats
 check:: $(CCOMPGENHATS) checkcc1
 checkcc1: $(CCOMPGENHATS)
-	@for f in $(CC1SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(CC1DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(CC1SATS))
+	@$(call TYPECHECK,d,$(CC1DATS))
 
 # Constraint solving (pats_constraint3*) and level-2 jsonize (pats_jsonize_synent2): PORTING.md, "Constraint solving (constraint3)", "Level-2 jsonize".
 # The generated encoding of [s3exp] is not kept in git (src/.gitignore).
@@ -405,7 +409,7 @@ DATS += pats_ccomp.dats pats_ccomp_tmplab.dats pats_ccomp_tmpvar.dats pats_ccomp
 CCADATS=pats_ccomp_emit.dats pats_ccomp_emit2.dats pats_ccomp_emit3.dats
 check:: checkcca
 checkcca:
-	@for f in $(CCADATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,d,$(CCADATS))
 
 # ccomp group C2 (pats_ccomp_dynexp, pats_ccomp_decl, pats_ccomp_claulst): PORTING.md, "ccomp group C2 (dynexp/decl/claulst)".
 # The data of ccomp (pats_ccomp.spec, interface of phase 1: PORTING.md, "ccomp interface") and the private types of claulst (pats_ccomp_claulst.spec) are generated (src/.gitignore).
@@ -421,8 +425,8 @@ SATS += $(CCC2SATS)
 DATS += $(CCC2DATS)
 check:: $(CCC2GENHATS) checkccc2
 checkccc2:
-	@for f in $(CCC2SATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(CCC2DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(CCC2SATS))
+	@$(call TYPECHECK,d,$(CCC2DATS))
 checksats checkdats: $(CCC2GENHATS)
 clean::
 	$(RM) $(CCC2GENHATS_UNTRACKED)
@@ -434,8 +438,8 @@ CCBSATS=pats_ccomp_hitype_priv.sats
 CCBDATS=pats_ccomp_hitype.dats pats_ccomp_hipat.dats pats_ccomp_subst.dats pats_ccomp_template.dats pats_ccomp_main.dats
 check:: checkccb
 checkccb:
-	@for f in $(CCBSATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -s $$f >/dev/null || exit 1; done
-	@for f in $(CCBDATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,s,$(CCBSATS))
+	@$(call TYPECHECK,d,$(CCBDATS))
 gen::
 	python3 ../utils/arenagen/arenagen.py --global sats pats_ccomp_hitype.spec > pats_ccomp_hitype_gen.hats
 	python3 ../utils/arenagen/arenagen.py --global --compact dats pats_ccomp_hitype.spec > pats_ccomp_hitype_gen_dats.hats
@@ -559,5 +563,5 @@ clean::
 
 # the driver and the stub of the ATS1 prelude includes (typecheck only; `make patsopt` builds the executable)
 checkdrv:
-	@for f in pats_atspre.dats pats_main.dats symmap_htlinprb_check.dats; do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
+	@$(call TYPECHECK,d,pats_atspre.dats pats_main.dats symmap_htlinprb_check.dats)
 check:: checkdrv
