@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # Makefile of the bootstrap bundle of patsopt: links patsopt from the C code in this directory with a C compiler and (for
 # the default integer kind) gmp. Nothing else is needed: no ATS compiler, no python. See README.

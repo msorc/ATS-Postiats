@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_ccomp.{sats,dats}: the data of ccomp (tmplab, tmpvar, funlab, funent, d2env, primval, primdec,
 # instr, ..), --compact
 # python3 ../utils/arenagen/arenagen.py --global sats pats_ccomp.spec > pats_ccomp_gen.hats

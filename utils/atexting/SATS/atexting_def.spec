@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # HX-2026-10: no GC
 # The arena encoding (in the global arena) of text definitions

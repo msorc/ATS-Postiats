@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_ccomp_hitype.dats: the C types (ATS1: the datatypes [hitype] and [labhitype] local to
 # pats_ccomp_hitype.dats), --compact
 # python3 ../utils/arenagen/arenagen.py --global sats pats_ccomp_hitype.spec > pats_ccomp_hitype_gen.hats

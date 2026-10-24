@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_lexing.sats (token_node, token, lexerr_node, lexerr)
 # generated from the datatype in src/pats_lexing.sats; run `make gen` in src/
 # T_CDATA (arrayref(char, n), size_t(n)) became (ptr, size_t): it is never produced

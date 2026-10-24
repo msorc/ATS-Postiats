@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # The entry point of the build of ATS2 (ATS/Postiats).
 #

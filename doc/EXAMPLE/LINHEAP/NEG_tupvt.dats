@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (*
 ** a boxed linear tuple: it could never be freed
 *)

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_patcst2.{sats,dats}: the pattern constraints (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_patcst2.spec > pats_patcst2_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_patcst2.spec > pats_patcst2_gen_dats.hats

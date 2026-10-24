@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 """
 spec_from_sats: a draft of an arenagen spec from the type declarations of an
 ATS1 .sats ("'{..}" records, datatypes with "and", List/Option aliases):

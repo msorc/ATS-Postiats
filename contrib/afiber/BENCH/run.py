@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # MS-2026-10: run bench_ats and bench_go, median of REPS runs.
 #   python3 run.py        one-worker suite: afiber vs Go GOMAXPROCS=1 and default
 #                         (env BEFORE=/path/to/old/binary adds a column of an earlier library, titled

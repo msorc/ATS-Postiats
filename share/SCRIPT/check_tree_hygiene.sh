@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # Checks the hygiene of the tracked files (no build needed):
 #  1. no tracked symbolic link is dangling (a fresh clone must not have

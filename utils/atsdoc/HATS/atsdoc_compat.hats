@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (* ****** ****** *)
 //
 // atsdoc_compat.hats: the few ATS1 idioms that the code blocks of the

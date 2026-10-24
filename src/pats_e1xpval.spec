@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_e1xpval.{sats,dats}: the errors of the evaluator of #define/#if expressions
 # python3 ../utils/arenagen/arenagen.py --global sats pats_e1xpval.spec > pats_e1xpval_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_e1xpval.spec > pats_e1xpval_gen_dats.hats

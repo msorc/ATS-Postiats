@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_hidynexp.{sats,dats}: the erased-program trees (the output of typerase), --compact
 # python3 ../utils/arenagen/arenagen.py --global sats pats_hidynexp.spec > pats_hidynexp_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_hidynexp.spec > pats_hidynexp_gen_dats.hats

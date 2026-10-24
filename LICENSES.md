@@ -10,7 +10,7 @@ own license header, read it together with this summary (see "Source headers").
 |-----------|---------|--------------|
 | `src/` (the compiler `patsopt`) | GPLv3 | [COPYING-gpl-3.0.txt](COPYING-gpl-3.0.txt) (`COPYING` is a symlink to it) |
 | `utils/` (tools built on the compiler) | GPLv3 | [COPYING-gpl-3.0.txt](COPYING-gpl-3.0.txt) |
-| `prelude/`, `libats/` (ATSLIB: the ATS source of the libraries) | LGPLv3, with the linking exception below | [COPYING-lgpl-3.0.txt](COPYING-lgpl-3.0.txt) |
+| `prelude/`, `libats/` (ATSLIB: the ATS source of the libraries; except the arena library `libats/*/arena.*`, which is MIT, see "Files under MIT inside the GPL/LGPL directories") | LGPLv3, with the linking exception below | [COPYING-lgpl-3.0.txt](COPYING-lgpl-3.0.txt) |
 | `ccomp/runtime/` (C runtime headers) | see "Source headers" | headers say GPLv3; README also announces an MIT-style release of the C headers (`doc/DISTRIB/ATS-Postiats-include/COPYING`) |
 | `contrib/` | MIT | [contrib/LICENSE](contrib/LICENSE) |
 | `COPYING-lgpl-2.1.txt` | LGPLv2.1 text, kept for the `contrib/` and `libatsdoc/` files whose headers say "version 2.1" | [COPYING-lgpl-2.1.txt](COPYING-lgpl-2.1.txt) |
@@ -26,6 +26,18 @@ This is the exception stated in `README.md`, reproduced verbatim:
 > unrelated to using ATS that can result in the executable being covered by GPLv3/LGPLv3.
 
 It is not part of any of the license texts above; it is a statement of the project.
+
+## Files under MIT inside the GPL/LGPL directories
+
+Some files in the GPL/LGPL directories above were written by Mikhail Sorochan
+and are under the MIT license. They carry the lines
+`SPDX-FileCopyrightText: 2026 Mikhail Sorochan` and
+`SPDX-License-Identifier: MIT` at the top. They are: the arena library
+(`libats/SATS/arena.sats`, `libats/DATS/arena.dats`, `libats/CATS/arena.cats`),
+`utils/arenagen`, the arena specs (`src/*.spec` and the other `*.spec` files),
+the bootstrap scripts `src/CBOOT`, the `doc/EXAMPLE/LINHEAP` tests, and the
+other files listed by `grep -rl "SPDX-License-Identifier: MIT"`. For such a
+file the SPDX line is authoritative, whatever the directory's license is.
 
 ## Source headers
 

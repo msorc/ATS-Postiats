@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_jsonize.{sats,dats}: the JSON value representation (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_jsonize.spec > pats_jsonize_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_jsonize.spec > pats_jsonize_gen_dats.hats

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_staexp2_error.sats: the static errors of the unification (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_staexp2_error.spec > pats_staexp2_error_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_staexp2_error.spec > pats_staexp2_error_gen_dats.hats

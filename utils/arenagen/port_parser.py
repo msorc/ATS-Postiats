@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 """
 port_parser: first mechanical pass for porting a hand-written ATS1 parser (src/pats_parsing_*.dats)
 to the ATS2 parser of src2/ (PORTING.md, section "Parser, phase 2"). Usage:

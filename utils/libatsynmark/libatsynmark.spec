@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for SATS/libatsynmark.sats (the d0eclrep tree), --global, --compact
 # python3 ../arenagen/arenagen.py --global sats libatsynmark.spec > SATS/libatsynmark_gen.hats
 # python3 ../arenagen/arenagen.py --global --compact dats libatsynmark.spec > DATS/libatsynmark_gen_dats.hats

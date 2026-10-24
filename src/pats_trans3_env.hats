@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (* ****** ****** *)
 //
 // HX-2026-10: no GC. Helpers shared by pats_trans3_env*.dats (see PORTING.md, "Type-checking environment (trans3_env)")

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_dynexp2.{sats,dats}: the level-2 dynamic syntax (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_dynexp2.spec > pats_dynexp2_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_dynexp2.spec > pats_dynexp2_gen_dats.hats

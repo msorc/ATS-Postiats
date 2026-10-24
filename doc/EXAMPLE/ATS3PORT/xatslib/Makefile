@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # The ATS3 (ATS-Xanadu) xatslib test corpus ported to ATS2.
 #

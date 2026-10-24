@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (* ****** ****** *)
 //
 // HX-2026-10: no GC. Helpers shared by the pats_typerase_*.dats files

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_constraint3.sats: the static expressions of the constraint solver (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_constraint3.spec > pats_constraint3_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_constraint3.spec > pats_constraint3_gen_dats.hats

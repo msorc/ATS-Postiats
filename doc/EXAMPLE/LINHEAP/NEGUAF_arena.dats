@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (*
 ** HX-2026-10: no GC
 ** a handle into an arena cannot be used once

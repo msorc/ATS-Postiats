@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (* MS-2026-10: afiber benchmarks; the Go twins are in bench.go.
    usage: bench NAME [N]   (prints "NAME N ns" and, for [mem], the rss) *)
 #include "share/atspre_staload.hats"

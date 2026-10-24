@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_staexp1.{sats,dats}: the level-1 static syntax (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_staexp1.spec > pats_staexp1_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_staexp1.spec > pats_staexp1_gen_dats.hats

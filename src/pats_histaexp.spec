@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_histaexp.{sats,dats}: the types of the typerase output (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_histaexp.spec > pats_histaexp_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_histaexp.spec > pats_histaexp_gen_dats.hats

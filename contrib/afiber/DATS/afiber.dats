@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (* ******************************************************************* *)
 (*                                                                     *)
 (*                         ATS/contrib/afiber                          *)

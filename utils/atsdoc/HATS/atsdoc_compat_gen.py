@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # Regenerates the arity-indexed part of atsdoc_compat.hats (the part between
 # "begin of [generated]" and "end of [generated]"): python3 atsdoc_compat_gen.py
 import os, re

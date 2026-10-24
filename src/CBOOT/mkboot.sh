@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # mkboot.sh: generate the bootstrap C bundle of patsopt in this directory (run by `make -C src CBOOT`).
 #

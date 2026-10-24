@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 """
 port_ats1: a first mechanical pass of porting an ATS1 .dats (that builds and
 matches a record/datatype AST) to the arena encoding of a spec (arenagen.py

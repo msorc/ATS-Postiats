@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_trans3_env.sats: the constraints of the level-3 translation (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_trans3_env.spec > pats_trans3_env_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_trans3_env.spec > pats_trans3_env_gen_dats.hats

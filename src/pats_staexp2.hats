@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (*
 ** HX-2026-10: no GC
 ** Helpers shared by the .dats files of pats_staexp2*, pats_namespace (#include them

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # MS-2026-10: afiber vs Go benchmarks.
 #   make bench     -> one-worker suite (afiber vs Go P=1 / P=ncpu)

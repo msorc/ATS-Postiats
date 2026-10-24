@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 ######
 #
 # Makefile of libatsdoc (the run-time library of the programs that atsdoc generates)

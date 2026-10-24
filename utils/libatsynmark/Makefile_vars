@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # Makefile_vars: the variables that the makefiles of libatsynmark and atsynmark share
 # (included by libatsynmark/Makefile_build, atsynmark/Makefile_build and libatsynmark/TEST/Makefile)

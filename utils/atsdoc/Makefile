@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 ######
 #
 # Makefile of atsdoc (the text processor that turns a .atxt file into an ATS2 program)

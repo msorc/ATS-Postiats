@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_dynexp3.{sats,dats}: the level-3 trees (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_dynexp3.spec > pats_dynexp3_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_dynexp3.spec > pats_dynexp3_gen_dats.hats

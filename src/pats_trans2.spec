@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_trans2.sats: the list of the errors of the level-2 translation (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_trans2.spec > pats_trans2_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_trans2.spec > pats_trans2_gen_dats.hats

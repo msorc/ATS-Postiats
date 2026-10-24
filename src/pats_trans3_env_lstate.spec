@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for the private types of pats_trans3_env_lstate.dats (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_trans3_env_lstate.spec > pats_trans3_env_lstate_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_trans3_env_lstate.spec > pats_trans3_env_lstate_gen_dats.hats

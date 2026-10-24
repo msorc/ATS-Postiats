@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 (*
 ** The atext macros of the tutorials written in DocBook (the libcairo
 ** tutorial, npm-utils/contrib/atscntrb/atscntrb-hx-libcairo/TUTORIAL).

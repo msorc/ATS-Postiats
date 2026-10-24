@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for SATS/atsdoc_translate.sats (funarg, tranitm, docerr), --global
 # python3 ../arenagen/arenagen.py --global sats atsdoc_translate.spec > SATS/atsdoc_translate_gen.hats
 # python3 ../arenagen/arenagen.py --global dats atsdoc_translate.spec > DATS/atsdoc_translate_gen_dats.hats

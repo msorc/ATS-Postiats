@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for the private type of pats_trans3_env_dvar.dats (--compact)
 # python3 ../utils/arenagen/arenagen.py --global sats pats_trans3_env_dvar.spec > pats_trans3_env_dvar_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_trans3_env_dvar.spec > pats_trans3_env_dvar_gen_dats.hats

@@ -1,3 +1,5 @@
+/* SPDX-FileCopyrightText: 2026 Mikhail Sorochan */
+/* SPDX-License-Identifier: MIT */
 /*
 ** HX-2026-10: libatsopt -- the C API of libatsopt of ATS1 (utils/libatsopt/
 ** DATS/patsopt_ext.dats) over the compiler of src/. PORTING.md, "Completion

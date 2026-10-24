@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # arenagen specification for pats_ccomp_claulst.dats: the private types of the pattern matrices (matoken, patcomp, patckontref), --compact
 # python3 ../utils/arenagen/arenagen.py --global sats pats_ccomp_claulst.spec > pats_ccomp_claulst_gen.hats
 # python3 ../utils/arenagen/arenagen.py --global --compact dats pats_ccomp_claulst.spec > pats_ccomp_claulst_gen_dats.hats

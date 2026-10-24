@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 
 ######
 #

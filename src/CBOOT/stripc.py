@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 # stripc.py: remove the comments of the C files that patsopt generates (run by mkboot.sh).
 #
 # patsopt writes a comment for every instruction (`emit_instr: loc0 = <absolute path>..`), template instance,

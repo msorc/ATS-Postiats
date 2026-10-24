@@ -1,3 +1,5 @@
+/* SPDX-FileCopyrightText: 2026 Mikhail Sorochan */
+/* SPDX-License-Identifier: MIT */
 /*
 ** HX-2026-10: the run-time system of patsopt / libatsopt with the
 ** messages of the ATS1 run-time (src/ of the ATS1 build), see PORTING.md,
