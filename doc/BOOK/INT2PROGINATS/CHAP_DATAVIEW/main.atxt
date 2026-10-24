@@ -384,13 +384,13 @@ array_ptr_tabulate
   {l:addr}{n:nat}
 (
   pf: !array_v (a?,l,n) >> array_v (a,l,n)
-| p: ptr (l), n: int (n), f: natLt(n) -<cloref1> a
+| p: ptr (l), n: int (n), f: &(natLt(n)) -<clo1> a
 ) : void = let
   fun loop{l:addr}
     {i:nat | i <= n} .<n-i>.
   (
     pf: !array_v (a?,l,n-i) >> array_v (a,l,n-i)
-  | p: ptr l, n: int n, f: natLt(n) -<cloref1> a, i: int i
+  | p: ptr l, n: int n, f: &(natLt(n)) -<clo1> a, i: int i
   ) : void =
     if i < n then let
       prval array_v_cons (pf1, pf2) = pf
@@ -412,7 +412,8 @@ end // end of [array_ptr_tabulate]
 Given a natural number n, the type #stacode("natLt(n)") is for all natural
 numbers less than n. Given a type T, the function
 #dyncode("array_ptr_tabulate&lt;T&gt;") takes a pointer to an uninitialized
-array, the size of the array and a function f that maps each natural number
+array, the size of the array and a flat closure f (passed by reference, as
+indicated by the symbol #dyncode("&")) that maps each natural number
 less than n to a value of the type T, and it initializes the array with the
 sequence of values of f(0), f(1), ..., and f(n-1). In other words, the
 array stores a tabulation of the given function f after the initialization

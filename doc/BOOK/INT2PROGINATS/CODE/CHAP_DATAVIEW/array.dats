@@ -147,13 +147,13 @@ array_ptr_tabulate
   {l:addr}{n:nat}
 (
   pf: !array_v (a?,l,n) >> array_v (a,l,n)
-| p: ptr (l), n: int (n), f: natLt(n) -<cloref1> a
+| p: ptr (l), n: int (n), f: &(natLt(n)) -<clo1> a
 ) : void = let
   fun loop{l:addr}
     {i:nat | i <= n} .<n-i>.
   (
     pf: !array_v (a?,l,n-i) >> array_v (a,l,n-i)
-  | p: ptr l, n: int n, f: natLt(n) -<cloref1> a, i: int i
+  | p: ptr l, n: int n, f: &(natLt(n)) -<clo1> a, i: int i
   ) : void =
     if i < n then let
       prval array_v_cons (pf1, pf2) = pf
