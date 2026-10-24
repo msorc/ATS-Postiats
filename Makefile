@@ -150,7 +150,8 @@ book::
 #
 # the release tarballs in doc/DISTRIB: ATS2-Postiats-<version>.tgz (./configure
 # builds with libgmp when <gmp.h> is there, else without it) and
-# ATS2-Postiats-include-<version>.tgz
+# ATS2-Postiats-include-<version>.tgz (the generators run patsopt/patscc by
+# name: bin/ of the tree is put on the PATH)
 #
 pack::
 	@if [ ! -x bin/atsdoc ] ; then \
@@ -159,9 +160,9 @@ pack::
 	@if [ ! -f src/CBOOT/modules.mk ] ; then \
 	  echo "ERROR: src/CBOOT is incomplete: regenerate it with 'make -C src CBOOT'." && exit 1 ; \
 	fi
-	$(MAKE) -C doc/DISTRIB atspackaging
-	$(MAKE) -C doc/DISTRIB atspacktarzvcf
-	$(MAKE) -C doc/DISTRIB -f Makefile_inclats tarzvcf
+	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C doc/DISTRIB atspackaging
+	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C doc/DISTRIB atspacktarzvcf
+	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C doc/DISTRIB -f Makefile_inclats tarzvcf
 
 ######
 #
