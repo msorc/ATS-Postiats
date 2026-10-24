@@ -16,17 +16,6 @@ Time of Generation: #timestamp()\
 <chapter
  id="lecture10">
 #title("Lazy Stream-Processing")
-#para("\
-\
-#emphasis("Historical note:") this lecture describes the lazy streams of the
-GC era of ATS2 (the type #stacode("stream")). The type #stacode("stream")
-was removed when the support for the garbage collector was dropped: the
-compiler now rejects every nonlinear heap allocation. Use
-#stacode("stream_vt") (a linear stream) or #stacode("$ldelay") instead;
-their interfaces are in
-#myatscodelink("prelude/SATS/stream_vt.sats", "prelude/SATS/stream_vt.sats").
-\
-")
 
 #para("\
 
@@ -37,42 +26,59 @@ programming starts with streams.
 
 #para("\
 
+#emphasis("A note on the dialect.") The lazy streams of the GC era (the type
+#stacode("stream"), the construct #keycode("$delay") and the function
+#dyncode("lazy_force"), which cached the evaluated cells: memoization) do
+not exist any more: a suspended computation or a cell of a stream is allocated on
+heap, and nothing but a garbage collector could reclaim it when it is shared. What
+this chapter and the next one present are the lazy streams that remain: the
+#emphasis("linear") streams, of the type #stacode("stream_vt"), which are made
+with the construct #keycode("$ldelay"). A linear stream is used only once (forcing
+it consumes it), there is no caching, and a stream that is not needed any
+more has to be freed. The functions below show how functional stream-processing is done under these
+rules.
+
+")
+
+#para("\
+
 A stream is like a list but it is lazy in the sense that the elements
 in a stream are not required to be made available at the moment when
 the stream is formed. Instead, each element only needs to be produced
 at the point where the element is actually needed for evaluation.
-Given a type T, the type #stacode("stream(T)") is for a value
+Given a type T, the type #stacode("stream_vt(T)") is for a value
 representing a stream of elements of the type T. Let us use the name
 stream-value to refer to such a value, which is completely opaque for
 it does not even reveal whether the stream it represents is empty or
 not. Internally, a stream-value is represented as a thunk, that is, a
-nullary closure-function. Evaluating a stream-value (that is, calling
-the thunk representing it) yields a stream-con value of type
-#dyncode("stream_con(T)") for some T, where #dyncode("stream_con")
-is the following declared datatype:
+nullary closure-function (it lives on heap and it is linear). Evaluating a stream-value
+(that is, calling the thunk representing it, which is written with the
+prefix operator #keycode("!")) yields a stream-con value of type
+#dyncode("stream_vt_con(T)") for some T, where #dyncode("stream_vt_con")
+is the following declared linear datatype (in the prelude):
 
 #sats2xhtml('\
 //
-datatype
-stream_con(a:t@ype) =
-  | steam_nil of ()
-  | stream_cons of (a, stream(a))
+datavtype
+stream_vt_con
+  (a:vt@ype+) =
+  | stream_vt_nil of ((*void*))
+  | stream_vt_cons of (a, stream_vt(a))
+//
+where
+stream_vt
+  (a:vt@ype) = lazy_vt(stream_vt_con(a))
 //
 ')
 
 With pattern matching, we can inspect whether a stream-con value
 represents an empty stream or not. If the stream is non-empty, then
-its first element can be extracted. Formally speaking, we have the
-following type definition in ATS:
-
-#sats2xhtml('\
-typedef stream(a:t@ype) = lazy(stream_con(a))
-')
-
-where #stacode("lazy") is a special type constructor. Given a type
-T, the type #stacode("lazy(T)") is essentially for a thunk that returns
-a value of the type T. Often such a thunk is referred to as a suspended
-computation of the type T, which can be resumed by simply calling the thunk.
+its first element can be extracted. The type #stacode("lazy_vt(T)") is
+essentially for a thunk that returns a value of the type T. Evaluating a
+stream-value consumes the thunk (and the memory of the thunk is reclaimed), and the
+stream-con value that it yields is to be consumed, too: in a pattern, the symbol
+#keycode("~") says that the cell is freed and that the head and the tail of
+the stream are now owned by the program.
 
 ")
 
@@ -85,15 +91,20 @@ ascendingly all of the integers greater than or equal to
 
 #dats2xhtml('\
 //
+extern
 fun
-int_stream_from
-  (n: int): stream(int) =
-  $delay(stream_cons(n, int_stream_from(n+1)))
+int_stream_from(n: int): stream_vt(int)
+//
+implement
+int_stream_from(n) =
+$ldelay(stream_vt_cons(n, int_stream_from(n+1)))
 //
 ')
 
-The keyword #keycode("$delay") indicates the construction
-of a thunk based on the expression appearing as its argument.
+The keyword #keycode("$ldelay") indicates the construction
+of a thunk based on the expression appearing as its argument. Calling
+#dyncode("int_stream_from") returns immediately as all that is done is
+creating a thunk.
 
 ")
 
@@ -104,19 +115,24 @@ example:
 
 #dats2xhtml('\
 //
+extern
 fun
 {a:t@ype}
 stream_get_at
-  (xs: stream(a), n: int): a =
+(xs: stream_vt(a), n: int): a
+//
+implement
+{a}(*tmp*)
+stream_get_at(xs, n) =
 (
 case+ !xs of
-| stream_nil() =>
+| ~stream_vt_nil() =>
   (
     $raise StreamSubscriptExn()
   )
-| stream_cons(x, xs) =>
+| ~stream_vt_cons(x, xs) =>
   (
-    if n <= 0 then x else stream_get_at<a>(xs, n-1)
+    if n <= 0 then (~xs; x) else stream_get_at<a>(xs, n-1)
   )
 )
 //
@@ -126,8 +142,11 @@ The function #dyncode("stream_get_at") is the stream-version of
 #dyncode("list_get_at"): Given a stream and a position (denoted by an
 integer), #dyncode("stream_get_at") returns the element in the stream
 at the given position. Note that the symbol #dyncode("!") refers to
-the function #dyncode("lazy_force"), which evaluates a given stream
-value into a stream-con value in this case. Like
+the function #dyncode("lazy_vt_force"), which evaluates a given stream
+value into a stream-con value in this case. The stream is consumed: the cells
+before the element are freed as they are passed, and the rest of the stream (which was
+never evaluated) is freed by #dyncode("~xs"), the abbreviation of
+#dyncode("lazy_vt_free(xs)"). Like
 #dyncode("list_get_at"), it is almost always a poor style of
 programming to make use of #dyncode("stream_get_at") excessively (for
 instance, inside the body of a loop).
@@ -136,37 +155,31 @@ instance, inside the body of a loop).
 
 #para("\
 
-Let us see what is involved in the evaluation of the following two
-lines of code:
+Let us see what is involved in the evaluation of the following code:
 
 #dats2xhtml('\
 //
+// A stream can be used only once: its first million elements are
+// consumed (and freed one by one) by [stream_get_at]
+//
 val xs = int_stream_from(0)
 val x0 = stream_get_at<int>(xs, 1000000)
+val () = println! ("x0 = ", x0)
 //
 ')
 
 The call to #dyncode("int_stream_from") returns immediately as all
 that is essentially done is creating a thunk (that is, a nullary
 closure-function). The call to #dyncode("stream_get_at") returns
-1000000 after creating 1000001 nodes to store the first 1000001
-elements in the stream bound to the name #dyncode("xs"). While it
-takes only a tiny amount of memory to store the initial stream bound
-to the name #dyncode("xs"), it requires a large amount of memory to
-store the expanded stream created during the evaluation of the call to
-#dyncode("stream_get_at"). In general, a call to
-#dyncode("lazy_force") evaluates its argument (of type
-#stacode("lazy(T)")) to a value (of type T) and then caches the value
-internally so that the value can be returned immediately when another
-call to #dyncode("lazy_force") on the same argument evaluates later.
-In other words, some form of memoization happens when the evaluation
-of a suspended computation is performed.  Memoization can be expensive
-memory-wise and unpredicatable time-wise. There is another kind of
-stream (to be presented later) that is referred to as
-#emphasis("linear stream"), which involves no memoization when
-evaluated. As a matter of fact, the internal representation of a
-linear stream only needs memory for storing one node (that contains
-the head element of the stream), resulting in great memory-efficiency.
+1000000 after creating 1000001 nodes one after another, and each node
+is freed as soon as the next element is requested. Therefore the whole
+evaluation takes a tiny amount of memory. In the GC era, a call to
+#dyncode("lazy_force") evaluated its argument to a value and cached the value, so that the 1000001
+nodes created by a call to #dyncode("stream_get_at") were kept in memory as long
+as the stream was in use: this is the memoization, which is expensive
+memory-wise and unpredicatable time-wise. A linear stream involves
+no memoization, and the internal representation of a stream only needs memory for
+storing one node (that contains the head element of the stream).
 
 ")
 
@@ -175,8 +188,8 @@ the head element of the stream), resulting in great memory-efficiency.
 Basically, for each a list-processing function, there is a
 corresponding version of stream-processing function. Let us see some
 concrete examples.  For instance, the following function
-#dyncode("stream_append") (corresponding to #dyncode("list0_append"))
-concatenates two given streams:
+#dyncode("stream_append") (corresponding to #dyncode("list_append"))
+concatenates two given streams, both of which are consumed:
 
 #dats2xhtml('\
 //
@@ -184,24 +197,33 @@ extern
 fun
 {a:t@ype}
 stream_append
-(xs: stream(a), ys: stream(a)): stream(a)
+(xs: stream_vt(a), ys: stream_vt(a)): stream_vt(a)
 //
 implement
 {a}(*tmp*)
 stream_append
-(xs, ys) = $delay
+(xs, ys) = $ldelay
+(
 (
 case+ !xs of
-| stream_nil() => !ys
-| stream_cons(x, xs) =>
-  stream_cons(x, stream_append<a>(xs, ys))
+| ~stream_vt_nil() => !ys
+| ~stream_vt_cons(x, xs) =>
+  stream_vt_cons(x, stream_append<a>(xs, ys))
+) : stream_vt_con(a)
+,
+(~xs; ~ys) // called when the stream is freed
 )
 //
 ')
 
 Please note the symbol #dyncode("!") in front of #dyncode("!ys"):
-The expression following #keycode("$delay") should evaluate to
-a stream-con value (instead of a stream value).
+The expression following #keycode("$ldelay") should evaluate to
+a stream-con value (instead of a stream value). The expression following
+the comma is evaluated when the stream is freed before it is forced:
+it frees the two streams that the thunk holds. A thunk is created with two
+pieces of code: the first is for evaluating it and the second for freeing
+it, and a thunk with no second piece of code frees nothing (see
+the next chapter).
 
 ")
 
@@ -211,81 +233,103 @@ Improper use of streams is abundant in practice.  In particular, it is
 very common to see streams being treated as lists, which defeats the
 purpose of having streams in the first place. I would like to make a
 point on proper stream construction by comparing three implementations
-of the following function #dyncode("stream_make_list0") for turning a
-given list into a stream:
+of the following function #dyncode("stream_make_list") for turning a
+given list (which is consumed) into a stream:
 
-#sats2xhtml("\
+#dats2xhtml('\
+//
+extern
 fun
 {a:t@ype}
-stream_make_list0(xs: list0(a)): stream(a)
-")
-
-The first implementation is given as follows:
-
-#dats2xhtml("\
+stream_make_list(xs: List0_vt(a)): stream_vt(a)
+//
 implement
 {a}(*tmp*)
-stream_make_list0
-  (xs) = $delay
+stream_make_list
+  (xs) = $ldelay
 (
-case xs of
-| list0_nil() =>
-  stream_nil()
-| list0_cons(x, xs) =>
-  stream_cons(x, stream_make_list0<a>(xs))
-) (* end of [stream_make_list0] *)
-")
+(
+case+ xs of
+| ~list_vt_nil() =>
+  stream_vt_nil()
+| ~list_vt_cons(x, xs) =>
+  stream_vt_cons(x, stream_make_list<a>(xs))
+) : stream_vt_con(a)
+,
+list_vt_free<a>(xs)
+) (* end of [stream_make_list] *)
+//
+')
 
 This one is what I consider to be a proper implementation
 of stream construction. It is #emphasis("fully lazy") in the
 sense that the implementation does nothing when called
-upon a given list0-value except for constructing a thunk
-(that represents the returned stream).
+upon a given list-value except for constructing a thunk
+(that represents the returned stream); the list is held by the thunk, and it is
+freed by the second piece of code if the stream is freed before the thunk is
+evaluated.
 
-The next implementation of #dyncode("stream_make_list0") is a slight
+The next implementation of #dyncode("stream_make_list") is a slight
 variant of the previous one:
 
-#dats2xhtml("\
-implement
-{a}(*tmp*)
-stream_make_list0
-  (xs) =
+#dats2xhtml('\
+//
+// The second implementation of [stream_make_list]: it is not fully lazy
+// as it inspects the list before it constructs the thunk
+//
+fun
+{a:t@ype}
+stream_make_list2
+  (xs: List0_vt(a)): stream_vt(a) =
 (
-case xs of
-| list0_nil() =>
-  $delay(stream_nil())
-| list0_cons(x, xs) =>
-  $delay(stream_cons(x, stream_make_list0<a>(xs)))
-) (* end of [stream_make_list0] *)
-")
+case+ xs of
+| ~list_vt_nil() =>
+  $ldelay(stream_vt_nil())
+| ~list_vt_cons(x, xs) =>
+  $ldelay
+  ( stream_vt_cons(x, stream_make_list2<a>(xs))
+  , list_vt_free<a>(xs) // called when the stream is freed
+  )
+) (* end of [stream_make_list2] *)
+//
+// The third implementation of [stream_make_list]: the stream is
+// not lazy at all (the whole list is turned into nodes of the
+// stream before the function returns)
+//
+fun
+{a:t@ype}
+stream_make_list3
+  (xs: List0_vt(a)): stream_vt(a) =
+(
+case+ xs of
+| ~list_vt_nil() =>
+  $ldelay(stream_vt_nil())
+| ~list_vt_cons(x, xs) => let
+    val xs = stream_make_list3<a>(xs)
+  in
+    $ldelay(stream_vt_cons(x, xs), ~xs)
+  end // end of [list_vt_cons]
+) (* end of [stream_make_list3] *)
+//
+val zs2 = stream2list_vt<int>(stream_make_list2<int>($list_vt{int}(1, 2, 3)))
+val zs3 = stream2list_vt<int>(stream_make_list3<int>($list_vt{int}(1, 2, 3)))
+val () = println! ("make_list2: ", zs2)
+val () = println! ("make_list3: ", zs3)
+val () = list_vt_free<int>(zs2)
+val () = list_vt_free<int>(zs3)
+//
+')
 
-Note this one is not fully lazy as it inspects whether
+Note the second implementation is not fully lazy as it inspects whether
 the given list is empty before it constructs a thunk (that
 represents the returned stream).
 
-The implementation of
-#dyncode("stream_make_list0") that should definitely be
-avoided is the following one:
-
-#dats2xhtml("\
-implement
-{a}(*tmp*)
-stream_make_list0
-  (xs) =
-(
-case xs of
-| list0_nil() =>
-  $delay(stream_nil())
-| list0_cons(x, xs) => let
-    val xs =
-    stream_make_list0<a>(xs) in $delay(stream_cons(x, xs))
-  end // end of [list0_cons]
-) (* end of [stream_make_list0] *)
-")
-
-where there is essentially no laziness involved in
-the construction of the stream being generated. This is
-a typical example that shows clearly what is meant by treating
+The third implementation of
+#dyncode("stream_make_list") should definitely be
+avoided: there is essentially no laziness involved in
+the construction of the stream being generated, as the recursive call is made
+before the thunk is created (and the whole list is turned into nodes at once).
+This is a typical example that shows clearly what is meant by treating
 a stream as a list.
 
 ")
@@ -299,21 +343,50 @@ deeply nested recursive calls. In the case of
 #dyncode("stream_append") returns immediately as all it does
 essentially is to form a thunk (for representing the resulting
 stream). On the other hand, the implementation of
-#dyncode("list0_append") presented previously can potentially cause
+#dyncode("list_append") presented previously can potentially cause
 stack overflow if its argument is a long list (e.g., one consisting of
 1000000 elements). By the way, the actual implementation of
-#dyncode("list0_append") in #filename("ATSLIB/prelude") (the prelude
+#dyncode("list_vt_append") in #filename("ATSLIB/prelude") (the prelude
 library of ATS) cannot cause stack overflow due to its being
 tail-recursive. However, there is no free lunch here as this library
 implementation is written in an advanced style that is somewhat
-difficult to adopt in practice.
+difficult to adopt in practice. A test of the two functions above:
+
+#dats2xhtml('\
+//
+val xs123 = stream_make_list<int>($list_vt{int}(1, 2, 3))
+val ys456 = stream_make_list<int>($list_vt{int}(4, 5, 6))
+val xs123456 = stream_append<int>(xs123, ys456)
+val zs = stream2list_vt<int>(xs123456)
+val () = println! ("append: ", zs)
+val () = list_vt_free<int>(zs)
+//
+')
 
 ")
 
 #para("\
 
-The following function #dyncode("stream_map") is the stream-version of
-#dyncode("list0_map"):
+A function argument that is stored in a stream is a closure that has to
+live as long as the stream does. It is a linear closure (the arrow
+#stacode("-&lt;cloptr1&gt;")) that the stream owns: it is freed with the stream, and
+it is freed when the end of the stream is reached. The function
+#dyncode("cfun_free") frees a closure (it plays the role of the call to
+#dyncode("cloptr_free"), which is a little verbose), and the following function
+#dyncode("stream_map") is the stream-version of
+#dyncode("list_map"):
+
+#dats2xhtml('\
+//
+// a linear closure is freed by this function
+//
+fun
+{a,b:t@ype}
+cfun_free
+(f: (a) -<cloptr1> b): void =
+cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(f))
+//
+')
 
 #dats2xhtml('\
 //
@@ -322,18 +395,22 @@ fun
 {a:t@ype}
 {b:t@ype}
 stream_map
-(xs: stream(a), fopr: cfun(a, b)): stream(b)
+(xs: stream_vt(a), fopr: (a) -<cloptr1> b): stream_vt(b)
 //
 implement
 {a}{b}
 stream_map
-  (xs, fopr) = $delay
+  (xs, fopr) = $ldelay
+(
 (
 case+ !xs of
-| stream_nil() =>
-  stream_nil()
-| stream_cons(x, xs) =>
-  stream_cons(fopr(x), stream_map<a><b>(xs, fopr))
+| ~stream_vt_nil() =>
+  (cfun_free<a,b>(fopr); stream_vt_nil())
+| ~stream_vt_cons(x, xs) =>
+  stream_vt_cons(fopr(x), stream_map<a><b>(xs, fopr))
+) : stream_vt_con(b)
+,
+(~xs; cfun_free<a,b>(fopr))
 )
 //
 ')
@@ -343,7 +420,7 @@ case+ !xs of
 #para("\
 
 The following function #dyncode("stream_filter") is the stream-version of
-#dyncode("list0_filter"):
+#dyncode("list_filter"):
 
 #dats2xhtml('\
 //
@@ -351,24 +428,28 @@ extern
 fun
 {a:t@ype}
 stream_filter
-(xs: stream(a), test: cfun(a, bool)): stream(a)
+(xs: stream_vt(a), test: (a) -<cloptr1> bool): stream_vt(a)
 //
 implement
 {a}(*tmp*)
 stream_filter
-  (xs, test) = $delay
+  (xs, test) = $ldelay
+(
 (
 case+ !xs of
-| stream_nil() =>
-  stream_nil()
-| stream_cons(x, xs) =>
+| ~stream_vt_nil() =>
+  (cfun_free<a,bool>(test); stream_vt_nil())
+| ~stream_vt_cons(x, xs) =>
   if test(x)
     then
-    stream_cons
+    stream_vt_cons
       (x, stream_filter<a>(xs, test))
     // end of [then]
     else !(stream_filter<a>(xs, test))
   // end of [if]
+) : stream_vt_con(a)
+,
+(~xs; cfun_free<a,bool>(test))
 )
 //
 ')
@@ -380,6 +461,18 @@ case+ !xs of
 A function like #dyncode("stream_map") and #dyncode("stream_filter")
 is often referred to as being fully lazy as its evaluation does nothing
 except for creating a thunk (to represent a suspended computation).
+They can be put to work together, as in the following code that finds
+the 11th even square:
+
+#dats2xhtml('\
+//
+val xs = int_stream_from(1)
+val ys = stream_map<int><int>(xs, lam(x) =<cloptr1> x * x)
+val zs = stream_filter<int>(ys, lam(x) =<cloptr1> x % 2 = 0)
+val z10 = stream_get_at<int>(zs, 10)
+val () = println! ("the 11th even square: ", z10)
+//
+')
 
 ")
 
@@ -390,18 +483,30 @@ Eratosthenes for enumerating prime numbers:
 
 #dats2xhtml('\
 //
+extern
 fun
-sieve(): stream(int) = let
+sieve(): stream_vt(int)
+//
+implement
+sieve() = let
 //
 fun
 auxmain
 (
-xs: stream(int)
-) : stream(int) = $delay
+xs: stream_vt(int)
+) : stream_vt(int) = $ldelay
 (
-case- !xs of
-| stream_cons(x0, xs) =>
-  stream_cons(x0, auxmain(stream_filter(xs, lam(x) => x % x0 > 0)))
+(
+case+ !xs of
+| ~stream_vt_nil() => stream_vt_nil()
+| ~stream_vt_cons(x0, xs) =>
+  stream_vt_cons
+  ( x0
+  , auxmain(stream_filter<int>(xs, lam(x) =<cloptr1> x % x0 > 0))
+  ) // end of [stream_vt_cons]
+) : stream_vt_con(int)
+,
+~xs
 )
 //
 in
@@ -412,10 +517,10 @@ end // end of [sieve]
 
 A call to #dyncode("sieve") returns a stream consisting of all the
 primes enumerated in the ascending order: 2, 3, 5, 7, 11, etc. Note
-that #keycode("case-") is used in place of #keycode("case") for the
-purpose of suppressing a warning message that would otherwise be
-issued due to pattern matching being non-exhaustive (as the case
-#dyncode("stream_nil()") is not covered).
+that the closure passed to #dyncode("stream_filter") captures the integer
+#dyncode("x0") (a value) and it is owned by the filtered stream; and that
+the pattern #dyncode("~stream_vt_nil()") has to be covered, since the cell
+is to be freed (the case is not possible for this stream).
 
 ")
 
@@ -425,20 +530,27 @@ As a simple experiment, please try to evaluate the following code:
 
 #dats2xhtml('\
 //
-val
-thePrimes = sieve()
-val () = println! ("stream_get_at(thePrimes, 5000):")
-val () = println! (stream_get_at<int>(thePrimes, 5000))
+val thePrimes = sieve()
 val () = println! ("stream_get_at(thePrimes, 5000):")
 val () = println! (stream_get_at<int>(thePrimes, 5000))
 //
 ')
 
-Note that the number #emphasis("48619") is to be printed out
-twice. There is a clear pause before it is done for the first time,
-but there is virtually no delay between the first time and the second
-time, showing clearly the effect of memoization performed during the
-first call to #dyncode("stream_get_at") on #dyncode("thePrimes").
+Note that the number #emphasis("48619") is to be printed out. There is a clear
+pause before it is done. In the GC era, the same call was made twice and the
+second call was done immediately thanks to memoization: here a stream can be used
+only once, and a second call would need a second stream (that is, another run
+of the same computation). A stream that is not consumed is freed by
+#dyncode("~"):
+
+#dats2xhtml('\
+//
+// A stream that is not consumed is freed by [~] (or by [lazy_vt_free])
+//
+val xs = int_stream_from(0)
+val () = ~xs
+//
+')
 
 ")
 
@@ -446,41 +558,16 @@ first call to #dyncode("stream_get_at") on #dyncode("thePrimes").
 
 Lastly, let us see a simple but telling example that demonstrates a
 stream-based approach to addressing the potential risk of stack
-overflow due to deeply nested non-tail-recursive calls. The following
-implementation of #dyncode("list0_map") is standard:
-
-#dats2xhtml('\
-//
-implement
-{a}{b}
-list0_map
-(xs, fopr) =
-auxmain(xs) where
-{
-//
-fun
-auxmain
-(
-xs: list0(a)
-) : list0(b) =
-(
-case+ xs of
-| list0_nil() => list0_nil()
-| list0_cons(x, xs) => list0_cons(fopr(x), auxmain(xs))
-)
-//
-} (* end of [list0_map] *)
-//
-')
-
-Clearly, this implementation is not tail-recursive. When applied to a
+overflow due to deeply nested non-tail-recursive calls. The standard
+implementation of #dyncode("list_map") (see the chapter on list-processing) is
+not tail-recursive. When applied to a
 long list (e.g., one consisting of 1000000 elements),
-#dyncode("list0_map") runs a high risk of causing stack overflow. This
-can become a very serious issue in practice if we ever want to apply
+#dyncode("list_map") runs a high risk of causing stack overflow (I tried: the
+program crashes). This can become a very serious issue in practice if we ever want to apply
 functional programming to a domain like machine learning where
 processing large data is a norm rather than an exception. One
 possibility is to insist on using only tail-recursion in the
-implementation of a function like #dyncode("list0_map") that may need
+implementation of a function like #dyncode("list_map") that may need
 to be applied to large data, but such a requirement or restriction can
 clearly exert negative impact on the use of recursion in
 problem-solving. After all, there are numerous algorithms that are
@@ -492,53 +579,67 @@ on tail-recursion only, likely diminishing programming productivity.
 
 #para("\
 
-Another implementation of #dyncode("list0_map") is given as follows:
+Another implementation of a mapping function on lists is given as follows
+(the list is consumed by the function, as it is held by the thunks of the stream,
+and the function is an envless one):
 
 #dats2xhtml('\
 //
-implement
-{a}{b}
-list0_map(xs, fopr) = let
+// The standard implementation of [list_map] is not tail-recursive
+//
+fun
+{a,b:t@ype}
+list_map_stream
+(xs: List0_vt(a), fopr: (a) -> b): List0_vt(b) = let
 //
 fun
 auxmain
 (
-xs: list0(a)
-) : stream(b) = $delay
+xs: List0_vt(a), fopr: (a) -> b
+) : stream_vt(b) = $ldelay
+(
 (
 case+ xs of
-| list0_nil() => stream_nil()
-| list0_cons(x, xs) => stream_cons(fopr(x), auxmain(xs))
+| ~list_vt_nil() => stream_vt_nil()
+| ~list_vt_cons(x, xs) => stream_vt_cons(fopr(x), auxmain(xs, fopr))
+) : stream_vt_con(b)
+,
+list_vt_free<a>(xs)
 )
 //
 in
-  g0ofg1(stream2list(auxmain(xs)))
-end // end of [list0_map]
+  stream2list_vt<b>(auxmain(xs, fopr))
+end // end of [list_map_stream]
+//
+val xs = list_make_intrange(0, 1000000)
+val ys = list_map_stream<int,int>(xs, lam(x) => x + 1)
+val () = println! ("length(ys) = ", list_vt_length<int>(ys))
+val () = list_vt_free<int>(ys)
 //
 ')
 
-What is special about this implementation of #dyncode("list0_map")
+What is special about this implementation
 lies in the implementation of the inner function #dyncode("auxmain"),
 which turns a list into a stream. Calling #dyncode("auxmain") runs no
 risk of stack overflow as it simply creates a thunk (without issuing
-any recursive calls).  The library function #dyncode("stream2list")
-turns a stream into a (linear) list, which can be cast into a
-list0-value in O(1)-time by a call to #dyncode("g0ofg1"). As
-#dyncode("stream2list") is implemented tail-recursively, it can be
+any recursive calls).  The library function #dyncode("stream2list_vt")
+turns a stream into a (linear) list. As
+#dyncode("stream2list_vt") is implemented tail-recursively, it can be
 safely called to generate a long list.  Consequently, this
-stream-based implementation of #dyncode("list0_map") can be applied to
-a long list with no concern of causing stack overflow. After linear
-lazy streams are introduced, we are to see a significantly improved
-version of this stream-based approach to resolving a common type of
-risk of stack overflow caused by calling recursively defined functions
-for generating long lists.
+stream-based implementation of the mapping function can be applied to
+a long list with no concern of causing stack overflow (the code applies it to a list of
+1000000 elements). After linear
+lazy streams are looked at more closely, we are to see a
+version of this stream-based approach that does not even need a list.
 
 ")
 
 #para("\
 
 Please find #mycodelink("LECTURE/10/CODE", "on-line") the entirety of
-the code used in this chapter. \
+the code used in this chapter. It was compiled with #command("patscc")
+(no flag is needed) and run with the address sanitizer, which reports no
+leak. \
 
 ")#comment("para")
 
@@ -551,4 +652,3 @@ the code used in this chapter. \
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
