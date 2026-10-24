@@ -141,6 +141,24 @@ $(PATSCC2) -o $@ $<
 regress:: chap_arrszptr; ./$<
 cleanall:: ; $(RMF) chap_arrszptr
 #
+all:: \
+chap_matrixptr
+chap_matrixptr: \
+chap_matrixptr.dats ; \
+$(PATSCC2) -o $@ $<
+#
+regress:: chap_matrixptr; ./$<
+cleanall:: ; $(RMF) chap_matrixptr
+#
+all:: \
+chap_mtrxszptr
+chap_mtrxszptr: \
+chap_mtrxszptr.dats ; \
+$(PATSCC2) -o $@ $<
+#
+regress:: chap_mtrxszptr; ./$<
+cleanall:: ; $(RMF) chap_mtrxszptr
+#
 ######
 #
 all:: \

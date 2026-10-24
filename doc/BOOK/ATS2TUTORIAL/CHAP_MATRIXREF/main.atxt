@@ -13,22 +13,23 @@ by [atsdoc] from CHAP_MATRIXREF/main.atxt.\n\
 Time of Generation: #timestamp()\
 ")
 <chapter id="matrixref">
-#title("Persistent Matrices")
+#title("Linear Matrices")
 
 #para("\
 \
-#emphasis("Historical note:") this chapter describes the persistent matrices
-of the GC era of ATS2. The type #stacode("matrixref") was removed when the
-support for the garbage collector was dropped: the compiler now rejects
-every nonlinear heap allocation. Use #stacode("matrixptr") (a flat matrix
-of pointers) instead; its interface is in
+#emphasis("Note:") the first versions of this chapter described persistent
+matrices (the type #stacode("matrixref")), which are reclaimed by garbage
+collection (GC). That type was removed when the support for GC was dropped:
+the compiler now rejects every nonlinear heap allocation. The matrices that
+are allocated on heap are linear now: the type for them is
+#stacode("matrixptr") and they must be freed explicitly. The interface is in
 #myatscodelink("prelude/SATS/matrixptr.sats", "prelude/SATS/matrixptr.sats").
 \
 ")
 
 #para("\
 
-A persistent matrix of dimension m by n is just a persistent array of size
+A matrix of dimension m by n is just an array of size
 m*n. Like in C, the representation of a matrix in ATS is row-major. In
 other words, element (i, j) in a matrix of dimension m by n is element
 i*n+j in the underlying array that represents the matrix.
@@ -38,43 +39,54 @@ i*n+j in the underlying array that represents the matrix.
 #para("\
 
 Given a viewtype VT and two integers M and N, the type
-#stacode("matrixref(VT, M, N)") is for persistent matrices of dimension M
+#stacode("matrixptr(VT, M, N)") is for linear matrices of dimension M
 by N that contain elements of the viewtype VT.  There is no dimension
-information attached to matrixref-values explicitly. The interfaces for various
-functions on persistent matrices can be found in the SATS file
-#myatscodelink("prelude/SATS/matrixref.sats",
-"prelude/SATS/matrixref.sats"), which is automatically loaded by
-#command("atsopt").
+information attached to matrixptr-values at run-time: the dimensions are
+part of the static type only. The interfaces for various
+functions on linear matrices can be found in the SATS file
+#myatscodelink("prelude/SATS/matrixptr.sats",
+"prelude/SATS/matrixptr.sats"), which is automatically loaded by
+#command("patsopt").
 
 ")#comment("para")
 
 #para('\
 
-The following function is commonly used to create a matrixref-value:
+The following function is commonly used to create a matrixptr-value:
 
 #sats2xhtml('\
-fun{a:t0p}
-matrixref_make_elt{m,n:int}
-  (m: size_t m, n: size_t n, x0: a):<!wrt> matrixref(a, m, n)
-// end of [matrixref_make_elt]
+fun{
+a:t0p
+} matrixptr_make_elt
+  {m,n:int}
+  (m: size_t m, n: size_t n, x: a):<!wrt> matrixptr(a, m, n)
+// end of [matrixptr_make_elt]
 ')
 
-Given two sizes m and n plus an element x0,
-#dyncode("matrixref_make_elt") returns a matrix of dimension m by n
-in which each cell is initialized with the element x0.\
+Given two sizes m and n plus an element x,
+#dyncode("matrixptr_make_elt") returns a matrix of dimension m by n
+in which each cell is initialized with the element x. The matrix is
+released by calling the function #dyncode("matrixptr_free"):
+
+#sats2xhtml('\
+fun matrixptr_free
+  {a:t0p}{l:addr}{m,n:int}
+  (A: matrixptr(INV(a), l, m, n)):<!wrt> void = "mac#%"
+// end of [matrixptr_free]
+')
 
 ')
 
 #para('\
 
-Also, the following cast function can be called to turn an array into
-a matrix:
+Also, the following function can be called to turn an array into
+a matrix (the array is consumed):
 
 #sats2xhtml('\
-castfn
-arrayref2matrixref
-  {a:vt0p}{m,n:nat} (A: arrayref(a, m*n)):<> matrixref(a, m, n)
-// end of [arrayref2matrixref]
+fun{
+} arrayptr2matrixptr_size
+  {a:vt0p}{l:addr}{m,n:int}
+  (A: arrayptr(INV(a), l, m*n), m: size_t m, n: size_t n):<> matrixptr(a, l, m, n)
 ')
 
 ')
@@ -82,30 +94,31 @@ arrayref2matrixref
 #para('\
 
 For accessing and updating the content of a matrix-cell, the following
-two functions #dyncode("matrixref_get_at") and #dyncode("matrixref_set_at")
-can be called:
+two functions #dyncode("matrixptr_get_at") and #dyncode("matrixptr_set_at")
+can be called (we show the ones for the indices of the type
+#stacode("size_t")):
 
 #sats2xhtml('\
-//
 fun{a:t0p}
-matrixref_get_at
+matrixptr_get_at_size
   {m,n:int}
 (
-  A: matrixref(a, m, n), i: sizeLt(m), n: size_t(n), j: sizeLt(n)
-) :<!ref> (a) // end of [matrixref_get_at]
+  A: !matrixptr(INV(a), m, n), i: sizeLt (m), n: size_t n, j: sizeLt (n)
+) :<> (a) // end of [matrixptr_get_at_size]
 //
 fun{a:t0p}
-matrixref_set_at
+matrixptr_set_at_size
   {m,n:int}
 (
-  A: matrixref(INV(a), m, n), i: sizeLt(m), n: size_t n, j: sizeLt(n), x: a
-) :<!refwrt> void // end of [matrixref_set_at]
-//
+  A: !matrixptr(INV(a), m, n), i: sizeLt (m), n: size_t n, j: sizeLt (n), x: a
+) :<!wrt> void // end of [matrixptr_set_at_size]
 ')
 
 Note that it is not enough to just supply the coordinates of a
 matrix-cell in order to access it; the column dimension of the matrix
-needs to be supplied as well.
+needs to be supplied as well. The symbol #keycode("!") in front of the
+type of the matrix indicates that the matrix is only borrowed; it is
+still available after the call.
 
 ')
 
@@ -115,66 +128,62 @@ In the following presentation, I give an implementation of a function that
 turns a given square matrix into its transpose:
 
 #dats2xhtml('\
-//
 extern
 fun{a:t0p}
-matrixref_transpose
+matrixptr_transpose
   {n:nat}
 (
-  M: matrixref(a, n, n), n: size_t(n)
-) : void // end of [matrixref_transpose]
+  M: !matrixptr(a, n, n), n: size_t(n)
+) : void // end of [matrixptr_transpose]
 //
 implement
 {a}(*tmp*)
-matrixref_transpose
+matrixptr_transpose
   {n}(M, n) = let
-//
-macdef
-mget(i, j) =
-matrixref_get_at(M, ,(i), n, ,(j))
-//
-macdef
-mset(i, j, x) =
-matrixref_set_at(M, ,(i), n, ,(j), ,(x))
 //
 fun
 loop
 {i,j:nat |
  i < j; j <= n
-} .<n-i,n-j>. 
+} .<n-i,n-j>.
 (
- i: size_t(i), j: size_t(j)
+ M: !matrixptr(a, n, n), i: size_t(i), j: size_t(j)
 ) : void = (
 //
 if
 (j < n)
 then let
-  val x = mget(i, j)
-  val () = mset(i, j, mget(j, i))
-  val () = mset(j, i, x)
+  val x = matrixptr_get_at(M, i, n, j)
+  val y = matrixptr_get_at(M, j, n, i)
+  val () = matrixptr_set_at(M, i, n, j, y)
+  val () = matrixptr_set_at(M, j, n, i, x)
 in
-  loop (i, j+1)
+  loop (M, i, succ(j))
 end // end of [then]
 else let
   val i1 = succ (i)
 in
 //
-if i1 < n then loop(i1, succ(i1)) else ()
+if i1 < n then loop(M, i1, succ(i1)) else ()
 //
 end // end of [else]
 //
 ) (* end of [loop] *)
 //
 in
-  if (n > 0) then loop(i2sz(0), i2sz(1)) else ()
-end // end of [matrixref_transpose]
+  if (n > 0) then loop(M, i2sz(0), i2sz(1)) else ()
+end // end of [matrixptr_transpose]
 ')
+
+Note that the nested function #dyncode("loop") takes the matrix as an
+argument instead of capturing it: a linear value cannot be captured by a
+function that may be called more than once.
 
 ')#comment("para")
 
 #para("\
 
-Please find #mycodelink("chap_matrixref.dats", "on-line") the entirety of the
+Please find #mycodelink("chap_matrixptr.dats", "on-line") the entirety of the
 code used in this chapter.\
 
 ")#comment("para")
@@ -192,7 +201,7 @@ staload STDIO = "libats/libc/SATS/stdio.sats"
 implement main0 () = {
 //
 val filr =
-  $STDIO.fopen_ref_exn ("../TEMP/chap_matrixref.dats", file_mode_w)
+  $STDIO.fopen_ref_exn ("../TEMP/chap_matrixptr.dats", file_mode_w)
 val () = fprint_theCodeLst(filr)
 val () = $STDIO.fclose_exn(filr)
 //
