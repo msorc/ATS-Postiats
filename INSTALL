@@ -165,7 +165,7 @@ There is no unit-test framework: the tests are regression suites. They
 need the tools (`make tools`).
 
   make check                             # typecheck every module of the compiler
-  make test                              # all the suites below (about 10 minutes)
+  make test                              # all the suites below (several minutes)
 
 or one by one:
 
