@@ -498,6 +498,7 @@ srcget_home:: ; $(CPF) ../../VERSION $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../CHANGES-ats2 $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../CHANGES-contrib $(ATSDIST)/
 srcget_home:: ; mkdir -p $(ATSDIST)/doc/man && $(CPF) ../../doc/man/*.1 $(ATSDIST)/doc/man/
+srcget_home:: ; mkdir -p $(ATSDIST)/doc/GUIDE/examples && $(CPF) ../../doc/GUIDE/*.md $(ATSDIST)/doc/GUIDE/ && $(CPF) ../../doc/GUIDE/examples/Makefile ../../doc/GUIDE/examples/*.dats $(ATSDIST)/doc/GUIDE/examples/
 #srcget_home:: ; $(CPF) ../../configure.ac $(ATSDIST)/
 #srcget_home:: ; $(CPF) ../../config.mk.in $(ATSDIST)/
 srcget_home:: ; $(CPF) ../../bin/patscc_env.sh.in $(ATSDIST)/bin/

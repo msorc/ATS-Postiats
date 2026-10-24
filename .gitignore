@@ -181,6 +181,9 @@ doc/DISTRIB/*_atxt.dats
 doc/DISTRIB/HTML
 doc/DISTRIB/SCRIPT/*.bash
 doc/DISTRIB/*.tgz
+doc/DISTRIB/*.tgz.sha256
+doc/DISTRIB/ATS-Postiats/doc/GUIDE/
+doc/DISTRIB/ATS-Postiats/doc/man/
 doc/DISTRIB/ATS2-Postiats-*/
 doc/DISTRIB/ATS2-Postiats-contrib-*/
 doc/DISTRIB/ATS2-Postiats-include-*/
