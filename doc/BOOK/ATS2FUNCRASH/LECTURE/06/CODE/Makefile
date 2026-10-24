@@ -15,7 +15,7 @@ all:: lecture06
 
 ######
 
-lecture06: lecture06.dats ../../04/CODE/intfun.hats ../../05/CODE/listfun.hats listfun2.hats queens.hats ; $(PATSCC) -o $@ lecture06.dats
+lecture06: lecture06.dats ../../04/CODE/intfun.hats ../../05/CODE/listfun.hats listfun2.hats queens.hats queens_dfs.hats ; $(PATSCC) -o $@ lecture06.dats
 
 ######
 

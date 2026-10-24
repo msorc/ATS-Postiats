@@ -801,8 +801,8 @@ are used in place of functional lists.
 #para('\
 
 Please find #mycodelink("LECTURE/06/CODE", "on-line") the entirety of
-the code used in this chapter (the files #filename("listfun2.hats") and
-#filename("queens.hats") and a test in #filename("lecture06.dats"), which was
+the code used in this chapter (the files #filename("listfun2.hats"),
+#filename("queens.hats") and #filename("queens_dfs.hats") and a test in #filename("lecture06.dats"), which was
 compiled with #command("patscc") and run with the address sanitizer, no
 leak is reported). \
 

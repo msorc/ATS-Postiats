@@ -119,6 +119,7 @@ val () = list_vt_free<int>(xs)
 // 8-queen puzzle
 //
 #include "./queens.hats"
+#include "./queens_dfs.hats"
 //
 val () = println! ("the number of solutions of the puzzle is ", QueenCount())
 //
