@@ -19,6 +19,15 @@ env:
   ATS2_HOME: /usr/local/ats2-postiats-0.4.2
 
 jobs:
+  hygiene:
+    name: the hygiene of the tree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: no dangling symbolic links, no absolute developer paths
+        run: sh share/SCRIPT/check_tree_hygiene.sh
+
   build:
     name: the build of the compiler
     runs-on: ubuntu-latest
