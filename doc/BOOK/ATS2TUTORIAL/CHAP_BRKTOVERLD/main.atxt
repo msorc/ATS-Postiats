@@ -83,7 +83,8 @@ function #dyncode("lock_release") returns the void-value.\
 #para('\
 
 In ATS, bracket-notation is already overloaded with functions performing
-list-subscripting, array-subscripting and matrix-subscripting, and it can
+array-subscripting and matrix-subscripting (for the linear arrays and
+matrices of the chapters on arrays and matrices), and it can
 also be used to access and update a given reference.\
 
 ')#comment("para")
