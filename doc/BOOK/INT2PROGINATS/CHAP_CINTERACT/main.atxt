@@ -496,20 +496,24 @@ and give it the following interface:
 
 #sats2xhtml('\
 fun{a:t@ype}
-array_copy_from_list (A: array0(a), xs: list0(a)): void
+array_copy_from_list
+  {n:nat} (A: !arrayptr(a, n), xs: !list_vt(a, n)): void
 ')
 
-Given a type T, #stacode("array0(T)") is for an array0-value containing a
-pointer p and a size n such that p points to a C-style array storing n
-elements of the type T.
+Given a type T and a natural number n, #stacode("arrayptr(T, n)") is for an
+array of n elements of the type T that is allocated in the heap (see the
+chapter on effectful programming features), and #stacode("list_vt(T, n)") is for a linear list of n
+elements of the type T (see the chapter on dependent datatypes). Both
+the array and the list are borrowed by the function (they are of the types
+#stacode("!arrayptr(T, n)") and #stacode("!list_vt(T, n)")), and they have the same length.
 
 ")
 
 #para("\
 
 For the moment, let us require that the size of the array A equals the
-length of the list xs when #dyncode("array_copy_from_list(A, xs)") is
-called.  Following is an implementation of #dyncode("array_copy_from_list")
+length of the list xs, which the type of the function states.
+Following is an implementation of #dyncode("array_copy_from_list")
 in ATS that makes use of an unsafe function (#dyncode("ptr0_set")) declared
 in #myatscodelink("prelude/SATS/unsafe.sats", "unsafe.sats"):
 
@@ -525,19 +529,20 @@ array_copy_from_list
   (A, xs) = let
 //
 fun loop
+  {n:nat}
 (
-  p: ptr, xs: list0(a)
+  p: ptr, xs: !list_vt(a, n)
 ) : void =
 (
 case+ xs of
-| list0_nil() => ()
-| list0_cons(x, xs) => let
+| list_vt_nil() => ()
+| list_vt_cons(x, xs) => let
     val () = $UN.ptr0_set<a>(p, x) in loop (ptr0_succ<a>(p), xs)
-  end // end of [list0_cons]
+  end // end of [list_vt_cons]
 ) (* end of [loop] *)
 //
 in
-  loop (array0_get_ref(A), xs)
+  loop (ptrcast(A), xs)
 end // end of [array_copy_from_list]
 ')
 
@@ -546,9 +551,9 @@ Given a type T, a pointer p, and a value x of the type T,
 which p points.  Like #dyncode("ptr0_get"), #dyncode("ptr0_set") is
 inherently unsafe as there is simply no guarantee that p actually points to
 a valid memory location where a value of the type T can be stored.  The
-function #dyncode("array0_get_ref"), which is declared in
-#myatscodelink("libats/ML/SATS/array0.sats", "array0.sats"), returns the
-pointer to the C-style array associated with a given array0-value.
+function #dyncode("ptrcast"), which is declared in
+#myatscodelink("prelude/SATS/arrayptr.sats", "arrayptr.sats"), returns the
+pointer to the C-style array associated with a given arrayptr-value.
 
 ")
 
@@ -596,10 +601,11 @@ Sometimes, we want to construct in C values of a datatype declared in ATS.
 For instance, let us try to construct a value of the form
 #dyncode("cons2(i, d)") in C for an integer i and a double d, where
 #dyncode("cons2") is a data constructor associated with the following
-declared datatype #stacode("abc"):
+declared datatype #stacode("abc") (a linear datatype, as its values are
+allocated in the heap):
 
 #sats2xhtml('\
-datatype abc =
+datavtype abc =
   | cons1 of int | cons2 of (int, double)
 ')
 
@@ -633,15 +639,27 @@ code in C:
 typedef
 struct {
 int contag ; // constructor tag
-int atslab__0; double atslab__1; 
+int atslab__0; double atslab__1;
 } cons2_node_ ;
 typedef cons2_node_ *cons2_node ;
 ')
 
-It is now straightforward to create a value of the form #dyncode("cons2(i,d)") in C directly:
+It is now straightforward to create a value of the form #dyncode("cons2(i,d)") in C directly.
+As the types #stacode("cons2_node") and #stacode("cons2_node_") are
+defined in the generated C file, the code is placed at the end of the
+file (with the form #dyncode("%{$ ... %}")), and the declaration of the
+function (which returns a pointer) is placed at the beginning of the file
+(with the form #dyncode("%{^ ... %}")):
 
 #atscode('\
-cons2_node
+%{^
+extern void *cons2_make (int i, double d) ;
+%}
+
+(* ... *)
+
+%{$
+void *
 cons2_make
 (
   int i, double d
@@ -653,6 +671,7 @@ cons2_make
   p->atslab__1 = d ;
   return p ;
 } /* end of [cons2_make] */
+%}
 ')
 
 Note that the tags for #dyncode("cons1") and #dyncode("cons2") are 0 and 1,
@@ -664,7 +683,8 @@ second constructors associated with the datatype #stacode("abc").
 #para('\
 
 By assigning an interface to #dyncode("cons2_make") in ATS, we can readily
-check whether #dyncode("cons2_make") behaves as expected:
+check whether #dyncode("cons2_make") behaves as expected (the value is linear,
+and it is consumed by the pattern with the prefix #dyncode("~")):
 
 #dats2xhtml('\
 //
@@ -672,7 +692,7 @@ extern
 fun
 cons2_make(int, double): abc = "mac#"
 //
-val-cons2(1, 2.34) = cons2_make(1, 2.34)
+val-~cons2(1, 2.34) = cons2_make(1, 2.34)
 //
 ')
 
@@ -719,7 +739,7 @@ exported to C under the same name:
 //
 vtypedef
 list_node =
-list_cons_pstruct(int,ptr) // [list_node] for boxed nodes
+list_vt_cons_pstruct(int,ptr) // [list_node] for boxed nodes
 //
 extern
 vtypedef "list_node" = list_node // exporting [list_node] to C
@@ -764,7 +784,7 @@ in
 if i < N then let
   val res =
   $UN.castvwtp0{list_node}(p)
-  val+list_cons (x, xs) = res
+  val+list_vt_cons (x, xs) = res
   val (
   ) = x := i*i
   val p = ptr_succ<list_node_> (p)
@@ -782,13 +802,16 @@ end // end of [loop]
 in (* in of [local] *)
 
 val () = loop (addr@nodes, 0)
-val xs_static = $UN.castvwtp0{list(int,N)}((view@nodes|addr@nodes))
+val xs_static = $UN.castvwtp0{list_vt(int,N)}((view@nodes|addr@nodes))
 val () = println! ("xs_static = ", xs_static) // 0, 1, 4, 9, 16, ...
+val _(*ptr*) = $UN.castvwtp0{ptr}(xs_static)
 
 end // end of [local]
 ')#comment("atscode")
 
-The implementation of #dyncode("loop") makes extensive use of
+The list is linear, and it would have to be freed; as the memory is static,
+it is never freed, and the list is simply given up in the last line
+(by a cast). The implementation of #dyncode("loop") makes extensive use of
 unsafe C-style programming in ATS. For someone familiar with C, it
 should be straightforward to visualize the C code that corresponds to
 this implementation directly.\
@@ -798,7 +821,8 @@ this implementation directly.\
 #para("\
 
 Please find the entire code for this example
-#mycodelink("CHAP_CINTERACT/StaticAllocList.dats", "on-line").
+#mycodelink("CHAP_CINTERACT/StaticAllocList.dats", "on-line"), and the code
+for exporting a datatype in #mycodelink("CHAP_CINTERACT/abc.dats", "abc.dats").
 
 ")
 

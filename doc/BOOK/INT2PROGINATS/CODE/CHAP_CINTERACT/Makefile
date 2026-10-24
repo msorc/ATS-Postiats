@@ -62,9 +62,30 @@ cleanall:: ; $(RMF) strcmp
 ######
 
 
+all:: ArrayCopyFromList
+ArrayCopyFromList: ArrayCopyFromList_dats.c ; $(PATSCC) $(ATSCCFLAGS) -o $@ $^
+regress:: ArrayCopyFromList; ./ArrayCopyFromList
+cleanall:: ; $(RMF) ArrayCopyFromList
+
 ######
 
-%_dats.c: %.dats; $(PATSCC) -DATS_MEMALLOC_LIBC $(ATSCCFLAGS) -ccats $< || touch $@
+all:: StaticAllocList
+StaticAllocList: StaticAllocList_dats.c ; $(PATSCC) $(ATSCCFLAGS) -o $@ $^
+regress:: StaticAllocList; ./StaticAllocList
+cleanall:: ; $(RMF) StaticAllocList
+
+######
+
+all:: abc
+abc: abc_dats.c ; $(PATSCC) $(ATSCCFLAGS) -o $@ $^
+regress:: abc; ./abc
+cleanall:: ; $(RMF) abc
+
+######
+
+######
+
+%_dats.c: %.dats; $(PATSCC) $(ATSCCFLAGS) -ccats $< || touch $@
 
 ######
 
