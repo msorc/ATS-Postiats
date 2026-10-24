@@ -47,24 +47,24 @@ all:: mergesort
 
 
 misc: misc_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: misc; ./misc
 cleanall:: ; $(RMF) misc
 
 listfuns: listfuns_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: listfuns; ./listfuns
 cleanall:: ; $(RMF) listfuns
 
 mergesort: mergesort_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: mergesort; ./mergesort
 cleanall:: ; $(RMF) mergesort
 
 ######
 
 %_dats.c: %.dats ; \
-  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $<
 
 ######
 

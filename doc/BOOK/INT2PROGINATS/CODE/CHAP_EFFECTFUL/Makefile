@@ -51,7 +51,7 @@ all:: counter
 ######
 
 hello: hello_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: hello ; ./hello
 cleanall:: ; $(RMF) hello hello.txt
 
@@ -59,40 +59,40 @@ cleanall:: ; $(RMF) hello hello.txt
 
 echoline: \
 echoline_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< -latslib || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< -latslib
 regress:: echoline ; $(CAT) echoline.dats | ./echoline > /dev/null
 cleanall:: ; $(RMF) echoline
 
 brauntest: brauntest_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: brauntest ; ./brauntest
 cleanall:: ; $(RMF) brauntest
 
 ######
 
 insort: insort_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: insort ; ./insort
 cleanall:: ; $(RMF) insort
 
 ######
 
 permord: permord_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: permord ; ./permord
 cleanall:: ; $(RMF) permord
 
 ######
 
 transpose: transpose_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: transpose ; ./transpose
 cleanall:: ; $(RMF) transpose
 
 ######
 
 counter: counter_dats.c ; \
-  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(PATSCC) $(ATSCCFLAGS) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: counter ; ./counter
 cleanall:: ; $(RMF) counter
 
@@ -100,7 +100,7 @@ cleanall:: ; $(RMF) counter
 
 ######
 
-%_dats.c: %.dats ; $(PATSOPT) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+%_dats.c: %.dats ; $(PATSOPT) -o $@ --dynamic $<
 
 #####
 

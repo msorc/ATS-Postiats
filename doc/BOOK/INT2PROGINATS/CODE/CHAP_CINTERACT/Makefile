@@ -85,7 +85,7 @@ cleanall:: ; $(RMF) abc
 
 ######
 
-%_dats.c: %.dats; $(PATSCC) $(ATSCCFLAGS) -ccats $< || touch $@
+%_dats.c: %.dats; $(PATSCC) $(ATSCCFLAGS) -ccats $<
 
 ######
 

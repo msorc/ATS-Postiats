@@ -50,39 +50,39 @@ all:: intopt
 
 
 wday: wday_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: wday; ./wday
 cleanall:: ; $(RMF) wday
 
 charlst: charlst_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: charlst; ./charlst
 cleanall:: ; $(RMF) charlst
 
 bstree: bstree_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: bstree; ./bstree
 cleanall:: ; $(RMF) bstree
 
 intexp: intexp_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: intexp; ./intexp
 cleanall:: ; $(RMF) intexp
 
 intexp2: intexp2_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: intexp2; ./intexp2
 cleanall:: ; $(RMF) intexp2
 
 intopt: intopt_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: intopt; ./intopt
 cleanall:: ; $(RMF) intopt
 
 ######
 
 %_dats.c: %.dats ; \
-  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $<
 
 ######
 

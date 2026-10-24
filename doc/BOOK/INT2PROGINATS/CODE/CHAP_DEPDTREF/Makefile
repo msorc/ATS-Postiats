@@ -47,24 +47,24 @@ all:: rbtree
 
 
 listfuns: listfuns_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: listfuns; ./listfuns
 cleanall:: ; $(RMF) listfuns
 
 mergesort: mergesort_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: mergesort; ./mergesort
 cleanall:: ; $(RMF) mergesort
 
 rbtree: rbtree_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: rbtree; ./rbtree
 cleanall:: ; $(RMF) rbtree
 
 ######
 
 %_dats.c: %.dats ; \
-  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $<
 
 ######
 

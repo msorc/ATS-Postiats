@@ -53,7 +53,7 @@ ACKER_OBJ := $(ACKER_SRC)
 ACKER_OBJ := $(patsubst %.dats, %_dats.o, $(ACKER_OBJ))
 
 test_acker: $(ACKER_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_acker
 
 ######
@@ -63,7 +63,7 @@ ACKER2_OBJ := $(ACKER2_SRC)
 ACKER2_OBJ := $(patsubst %.dats, %_dats.o, $(ACKER2_OBJ))
 
 test_acker2: $(ACKER2_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_acker2
 
 ######
@@ -73,7 +73,7 @@ ACKER3_OBJ := $(ACKER3_SRC)
 ACKER3_OBJ := $(patsubst %.dats, %_dats.o, $(ACKER3_OBJ))
 
 test_acker3: $(ACKER3_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_acker3
 
 ######
@@ -88,7 +88,7 @@ RATMOD_OBJ := $(patsubst %.sats, %_sats.o, $(RATMOD_OBJ))
 RATMOD_OBJ := $(patsubst %.dats, %_dats.o, $(RATMOD_OBJ))
 
 test_ratmod: $(RATMOD_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_ratmod
 
 ######
@@ -103,7 +103,7 @@ MYLIST_OBJ := $(MYLIST_SRC)
 MYLIST_OBJ := $(patsubst %.dats, %_dats.o, $(MYLIST_OBJ))
 
 test_mylist: $(MYLIST_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_mylist
 
 ######
@@ -114,7 +114,7 @@ LISTEQ_OBJ := $(LISTEQ_SRC)
 LISTEQ_OBJ := $(patsubst %.dats, %_dats.o, $(LISTEQ_OBJ))
 
 test_listeq: $(LISTEQ_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_listeq
 
 ######
@@ -126,7 +126,7 @@ INTSET_OBJ := $(patsubst %.sats, %_sats.o, $(INTSET_OBJ))
 INTSET_OBJ := $(patsubst %.dats, %_dats.o, $(INTSET_OBJ))
 
 test_intset: $(INTSET_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^
 cleanall:: ; $(RMF) test_intset
 
 ######
@@ -138,16 +138,16 @@ RATFUN_OBJ := $(patsubst %.sats, %_sats.o, $(RATFUN_OBJ))
 RATFUN_OBJ := $(patsubst %.dats, %_dats.o, $(RATFUN_OBJ))
 
 test_ratfun: $(RATFUN_OBJ)
-	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ -lm || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -o $@ $^ -lm
 cleanall:: ; $(RMF) test_ratfun
 
 ######
 
 %_sats.o: %.sats
-	$(PATSCC) $(ATSCCFLAGS) -c $< || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -c $<
 
 %_dats.o: %.dats
-	$(PATSCC) $(ATSCCFLAGS) -c $< || touch $@
+	$(PATSCC) $(ATSCCFLAGS) -c $<
 
 ######
 

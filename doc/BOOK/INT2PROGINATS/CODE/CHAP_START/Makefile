@@ -29,19 +29,19 @@ all:: queens
 ######
 
 hello: hello_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CFLAGS) -o $@ $<
 regress:: hello; ./hello
 cleanall:: ; $(RMF) hello
 
 queens: queens_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CFLAGS) -o $@ $<
 regress:: queens; ./queens
 cleanall:: ; $(RMF) queens
 
 ######
 
 %_dats.c: %.dats ; \
-  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $<
 
 ######
 

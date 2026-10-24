@@ -47,24 +47,24 @@ all:: terminate
 
 
 strings: strings_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: strings; ./strings
 cleanall:: ; $(RMF) strings
 
 bsearch_arr: bsearch_arr_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: bsearch_arr; ./bsearch_arr
 cleanall:: ; $(RMF) bsearch_arr
 
 terminate: terminate_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: terminate; ./terminate
 cleanall:: ; $(RMF) terminate
 
 ######
 
 %_dats.c: %.dats ; \
-  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $<
 
 ######
 

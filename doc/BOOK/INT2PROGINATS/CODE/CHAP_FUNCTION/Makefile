@@ -39,40 +39,40 @@ all:: misc
 
 
 coinchange: coinchange_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: coinchange; ./coinchange
 cleanall:: ; $(RMF) coinchange
 
 queens: queens_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: queens; ./queens
 cleanall:: ; $(RMF) queens
 
 
 acker: acker_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: acker; ./acker
 cleanall:: ; $(RMF) acker
 
 bsearch: bsearch_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: bsearch; ./bsearch
 cleanall:: ; $(RMF) bsearch
 
 twice: twice_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: twice; ./twice
 cleanall:: ; $(RMF) twice
 
 misc: misc_dats.c ; \
-  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $< || echo $@ ": ERROR!!!"
+  $(CCOPT) $(INCLUDES) $(CCFLAGS) -o $@ $<
 regress:: misc; ./misc
 cleanall:: ; $(RMF) misc
 
 ######
 
 %_dats.c: %.dats ; \
-  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $< || echo $@ ": ERROR!!!"
+  $(PATSOPT) $(ATSCCFLAGS) -o $@ --dynamic $<
 
 ######
 
