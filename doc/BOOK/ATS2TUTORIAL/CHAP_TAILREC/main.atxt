@@ -7,7 +7,7 @@ dynload "libatsdoc/dynloadall.dats"
 %}\
 #comment("\n\
 The file is automatically generated
-by [atsdoc] from [CHAP_STREAM/main.atxt].\n\
+by [atsdoc] from [CHAP_TAILREC/main.atxt].\n\
 ")
 #comment("\n\
 Time of Generation: #timestamp()\
@@ -31,7 +31,7 @@ support in ATS for turning tail-recursive calls into local jumps.\
 
 #comment(" ****** ****** ")
 
-#comment(" end of [chap_stream.atxt] ")
+#comment(" end of [chap_tailrec.atxt] ")
 
 %{
 //
