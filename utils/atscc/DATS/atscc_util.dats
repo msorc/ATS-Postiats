@@ -118,7 +118,7 @@ removed once subsequent C-compilation is finished.
 This flag indicates that the next argument is to be interpreted as
 the C-compilation command subsequently employed for processing the
 generated C files. If this flag is not present, then the value of the
-environment variable ATSCCOMP is interpreted as the C-compilation command.
+environment variable PATSCCOMP is interpreted as the C-compilation command.
 //
 -DATS:
 //
@@ -180,36 +180,15 @@ fprint_string (stdout_ref, ATSOPT_USAGE)
 //
 (* ****** ****** *)
 //
-(*
+// HX: the C compiler is $CC if set, else cc; PATSCCOMP overrides all of it
+// (the command goes through the shell, so ${CC:-cc} is expanded there)
+//
 #define
 ATSCCOMP_DEFAULT "\
-gcc -std=c99 -D_XOPEN_SOURCE \
--I${PATSHOME} -I${PATSHOME}/ccomp/runtime \
--L${PATSHOME}/ccomp/atslib/lib -L${PATSHOME}/ccomp/atslib/lib64 \
-"
-*)
-#define
-ATSCCOMP_DEFAULT "\
-gcc -std=c99 -D_XOPEN_SOURCE \
--I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib  \
+${CC:-cc} -std=c99 -D_GNU_SOURCE \
+-I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib \
 "
 //
-(* ****** ****** *)
-
-(*
-(*
-** HX: this one is suggested by Barry Schwartz, MN, USA
-*)
-#define
-ATSCCOMP_DEFAULT2 "\
-gcc -std=c99 \
--D_XOPEN_SOURCE \
--I${PATSHOME} -I${PATSHOME}/ccomp/runtime \
--L${PATSHOME}/ccomp/atslib/lib -L${PATSHOME}/ccomp/atslib/lib64 \
--Wl,--warn-common \
-"
-*)
-
 (* ****** ****** *)
 
 implement
