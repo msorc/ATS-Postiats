@@ -22,7 +22,18 @@ id="datatypes"
 
 Datatypes are a form of user-defined types for classifying data (or
 values). The support for datatypes and pattern matching in ATS is primarily
-adopted from ML.
+adopted from ML. In this dialect of ATS2, which has no garbage collector
+(GC), there are two kinds of them: a #keycode("datatype") has only nullary
+data constructors (that is, it is an enumeration), and a
+#keycode("datavtype") is a #emphasis("linear") datatype whose values are
+allocated on heap and have to be freed by the programmer. The compiler
+rejects a #keycode("datatype") with a non-nullary constructor, because
+the values of such a type could only be reclaimed by GC:
+
+<programlisting>
+error(2): nonlinear heap allocation is not supported (no GC): the datatype
+[intlst] has a non-nullary constructor; use [datavtype] instead.
+</programlisting>
 
 ')
 
@@ -57,13 +68,18 @@ function #dyncode("weekday2int") to find out the integers reprsenting
 the constructors associated with #stacode("weekday"):
 
 #dats2xhtml('\
+staload UN = $UNSAFE
+
+(* ****** ****** *)
 //
-staload UN = "prelude/SATS/unsafe.sats"
+datatype weekday =
+  | Monday | Tuesday | Wednesday | Thursday | Friday
+//
+(* ****** ****** *)
 //
 fun
 weekday2int
   (wd: weekday): int = $UN.cast{int}($UN.cast{intptr}(wd))
-//
 ')
 
 The small integer representing a nullary constructor is often referred to
@@ -105,53 +121,81 @@ val () = assertloc (isFriday(Friday))
 val () = assertloc (isFriday(Friday()))
 ')
 
-')
-
-#para('\
-
-If there is only one constructor associated with a datatype, then
-there is no tag in the representation for values of this datatype.
+Values of such a type are not allocated on heap, so there is nothing to
+free.
 
 ')
 
 #para('\
 
-A datatype is list-like if there are two data constructors associated with
+If there is only one constructor associated with a datavtype, then
+there is no tag in the representation for values of this datavtype.
+
+')
+
+#para('\
+
+All the other datatypes of this chapter allocate their values on heap, so
+they are declared with the keyword #keycode("datavtype"). A value of a
+datavtype is linear: it can be consumed only once, and the compiler
+reports an error if a value is dropped or used again. A function either
+borrows a value (the parameter is annotated with #keycode("!")) or
+consumes it (it frees the value or returns it). A value is freed by a
+pattern-matching that uses the symbol #keycode("~") in front of the
+constructor, as is shown below.
+
+')
+
+#para('\
+
+A datavtype is list-like if there are two data constructors associated with
 it such that one is nullary (nil-like) and the other is non-nullary
-(cons-like). For instance, the datatype #stacode("ab") declared as follows
+(cons-like). For instance, the datavtype #stacode("ab") declared as follows
 is list-like:
 
 #sats2xhtml('\
-datatype ab = A of () | B of (bool)
+datavtype ab = AA of () | BB of (bool)
 ')
 
-The values of a list-like datatype are represented in a special way.  Given
-a value of the datatype; if it is constructed with the nil-like
+The values of a list-like datavtype are represented in a special way.  Given
+a value of the datavtype; if it is constructed with the nil-like
 constructor, then it is represented as the null-pointer; if it is
 constructed with the cons-like constructor, then it is reprenstend as a
 heap-allocated tuple containing all of the arguments passed to the
 constructor.
 
-In the above case, the value #dyncode("A()") is represented as the null
-pointer, and the value #dyncode("B(b)") for each boolean #dyncode("b") is
+In the above case, the value #dyncode("AA()") is represented as the null
+pointer, and the value #dyncode("BB(b)") for each boolean #dyncode("b") is
 represented as a heap-allocated singleton tuple containing the only
 component #dyncode("b"). This description can be readily verified with
-the following code:
+the following code (the function #dyncode("ab_free") frees a value of the
+type #stacode("ab")):
 
 #dats2xhtml('\
-val () = assertloc (iseqz($UN.cast{ptr}(A())))
-val () = assertloc (true = $UN.ptr0_get<bool>($UN.cast{ptr}(B(true))))
-val () = assertloc (false = $UN.ptr0_get<bool>($UN.cast{ptr}(B(false))))
+fun
+ab_free(x: ab): void = case+ x of ~AA() => () | ~BB(_) => ()
+
+val () = let
+  val x = AA()
+  val () = assertloc (iseqz($UN.castvwtp1{ptr}(x)))
+in
+  ab_free(x)
+
+val () = let
+  val x = BB(true)
+  val () = assertloc (true = $UN.ptr0_get<bool>($UN.castvwtp1{ptr}(x)))
+in
+  ab_free(x)
 ')
 
 ')
 
 #para('\
 
-The following declaration introduces a datatype of the name #stacode("abc"):
+The following declaration introduces a datavtype of the name #stacode("abc"):
 
 #sats2xhtml('\
-datatype abc =
+datavtype abc =
   | A of () | B of (bool) | C of (int, double)
 ')
 
@@ -170,13 +214,14 @@ each value it constructs is a heap-allocated tuple of n+1 components, where
 the first one is the tag assigned to the constructor and the rest are the
 arguments passed to the constructor.  For instance, the following function
 can be called to find out the tags assigned to the constructors associated
-with #stacode("abc"):
+with #stacode("abc") (the argument is borrowed, so the function does not
+consume it), and the function #dyncode("abc_free") frees a value:
 
 #dats2xhtml('\
 fun
 abc2tag
-(x: abc): int = let
-  val p = $UN.cast{intptr}(x)
+(x: !abc): int = let
+  val p = $UN.castvwtp1{intptr}(x)
 in
 //
 case+ 0 of
@@ -184,6 +229,11 @@ case+ 0 of
 | _ (*heap-allocated*) => $UN.ptr0_get<int>($UN.cast{ptr}(p))
 //
 end // end of [abc2tag]
+
+fun
+abc_free(x: abc): void =
+  case+ x of ~A() => () | ~B(_) => () | ~C(_, _) => ()
+
 ')
 
 In this case, the tags assigned to #dyncode("A"), #dyncode("B"), and
@@ -193,71 +243,72 @@ In this case, the tags assigned to #dyncode("A"), #dyncode("B"), and
 
 #para('\
 
-Datatypes can be defined recursively. As an example,
-the following declaration introduces a recursively defined datatype
-#stacode("intexp") (for representing arithemetic integer expressions):
+Datavtypes can be defined recursively. As an example,
+the following declaration introduces a recursively defined datavtype
+#stacode("exp") (for representing arithemetic integer expressions):
 
 #sats2xhtml('\
-datatype
-intexp =
+datavtype exp =
 | Int of int
-| Neg of (intexp)
-| Add of (intexp, intexp)
-| Sub of (intexp, intexp)
+| Neg of (exp)
+| Add of (exp, exp)
+| Sub of (exp, exp)
 ')
 
 For instance, #dyncode("(1+2)-3")
 can be represented as #dyncode("Sub(Add(Int(1), Int(2)), Int(3))").
 As another example, the following code introduces two mutually recursively
-defined datatypes #stacode("intexp") and #stacode("boolexp")
+defined datavtypes #stacode("intexp") and #stacode("boolexp")
 (for integer expressions and boolean expressions, respectively):
 
 #sats2xhtml('\
-datatype
+datavtype
 intexp =
-| Int of int
-| Neg of (intexp)
-| Add of (intexp, intexp)
-| Sub of (intexp, intexp)
+| IInt of int
+| INeg of (intexp)
+| IAdd of (intexp, intexp)
+| ISub of (intexp, intexp)
 | IfThenElse of (boolexp, intexp, intexp)
-
 and
 boolexp =
-| Bool of bool // constant
-| Not of (boolexp) // negation
-| Less of (intexp, intexp) // Less(x, y): x < y
-| LessEq of (intexp, intexp) // LessEq(x, y): x <= y
-| Conj of (boolexp, boolexp) // Conj(x, y): x /\\\ y
-| Disj of (boolexp, boolexp) // Disj(x, y): x \\\/ y
+| Bool of bool
+| Not of (boolexp)
+| Disj of (boolexp, boolexp)
+| Conj of (boolexp, boolexp)
+| Less of (intexp, intexp)
+| LessEq of (intexp, intexp)
 ')
 
 The code below implements two mutually recursive functions
 #dyncode("eval_intexp") and #dyncode("eval_boolexp") for evaluating integer
-expressions and boolean expressions, respectively:
+expressions and boolean expressions, respectively. The expression to
+evaluate is only borrowed (its type is preceded by #keycode("!")):
 
 #dats2xhtml('\
-//
 symintr eval
 //
 extern
-fun eval_intexp : intexp -> int
+fun eval_intexp : (!intexp) -> int
 extern
-fun eval_boolexp : boolexp -> bool
+fun eval_boolexp : (!boolexp) -> bool
 //
 overload eval with eval_intexp
 overload eval with eval_boolexp
 //
-(* ****** ****** *)
-//
+extern
+fun free_intexp : (intexp) -> void
+extern
+fun free_boolexp : (boolexp) -> void
+
 implement
 eval_intexp
   (e0) = (
 //
 case+ e0 of
-| Int (i) => i
-| Neg (e) => ~eval(e)
-| Add (e1, e2) => eval(e1) + eval(e2)
-| Sub (e1, e2) => eval(e1) - eval(e2)
+| IInt (i) => i
+| INeg (e) => ~eval(e)
+| IAdd (e1, e2) => eval(e1) + eval(e2)
+| ISub (e1, e2) => eval(e1) - eval(e2)
 | IfThenElse
     (e_test, e_then, e_else) =>
     if eval(e_test) then eval(e_then) else eval(e_else)
@@ -277,14 +328,62 @@ case+ e0 of
 | Disj (e1, e2) => eval(e1) || eval(e2)
 //
 ) (* end of [eval_boolexp] *)
-//
-(* ****** ****** *)
 ')
 
-The datatypes presented in this chapter are simple datatypes.
-Other more advanced forms of datatypes include polymorphic datatypes,
-dependent datatypes, and linear datatypes, which will be covered
-elsewhere.
+Since the expressions are linear, they have to be freed once they are of no
+more use. The following two mutually recursive functions free an integer
+expression and a boolean expression, respectively (the symbol
+#keycode("~") in a pattern means that the matched value is freed):
+
+#dats2xhtml('\
+implement
+free_intexp
+  (e0) = (
+//
+case+ e0 of
+| ~IInt (_) => ()
+| ~INeg (e) => free_intexp(e)
+| ~IAdd (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~ISub (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~IfThenElse
+    (e_test, e_then, e_else) =>
+    (free_boolexp(e_test); free_intexp(e_then); free_intexp(e_else))
+//
+) (* end of [free_intexp] *)
+//
+implement
+free_boolexp
+  (e0) = (
+//
+case+ e0 of
+| ~Bool (_) => ()
+| ~Not (e) => free_boolexp(e)
+| ~Less (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~LessEq (e1, e2) => (free_intexp(e1); free_intexp(e2))
+| ~Conj (e1, e2) => (free_boolexp(e1); free_boolexp(e2))
+| ~Disj (e1, e2) => (free_boolexp(e1); free_boolexp(e2))
+//
+) (* end of [free_boolexp] *)
+')
+
+Here is an example of use:
+
+#dats2xhtml('\
+val E0 =
+IfThenElse (
+  Less(IInt(1), IInt(2)), ISub(IInt(11), IInt(1)), IAdd(IInt(12), IInt(13))
+) (* end of [val] *)
+
+val () = assertloc (eval(E0) = 10)
+val () = free_intexp (E0)
+')
+
+If the last line is deleted, the compiler complains that the linear
+variable #dyncode("E0") is not consumed. The datavtypes presented in this
+chapter are simple datavtypes.
+Other more advanced forms of datatypes include polymorphic datatypes
+(such as the linear lists #stacode("list_vt")),
+dependent datatypes, which will be covered elsewhere.
 
 ')
 

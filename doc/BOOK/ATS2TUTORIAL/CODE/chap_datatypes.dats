@@ -215,7 +215,7 @@ IfThenElse (
   Less(IInt(1), IInt(2)), ISub(IInt(11), IInt(1)), IAdd(IInt(12), IInt(13))
 ) (* end of [val] *)
 
-val () = assertlocmsg (eval(E0) = 10, "\n")
+val () = assertloc (eval(E0) = 10)
 val () = free_intexp (E0)
 
 (* ****** ****** *)
