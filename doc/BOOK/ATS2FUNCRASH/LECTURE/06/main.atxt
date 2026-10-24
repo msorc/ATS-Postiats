@@ -16,131 +16,147 @@ Time of Generation: #timestamp()\
 <chapter
  id="lecture06">
 #title("Functional List-Processing (2)")
-#para("\
-\
-#emphasis("Historical note:") this lecture describes the functional lists of
-the GC era of ATS2 (the type #stacode("list0")). The type #stacode("list0")
-was removed when the support for the garbage collector was dropped: the
-compiler now rejects every nonlinear heap allocation. Use #stacode("list_vt")
-(a linear list) instead; its interface is in
-#myatscodelink("prelude/SATS/list_vt.sats", "prelude/SATS/list_vt.sats").
-\
-")
 
-#para("\
+#para('\
 
 Sometimes, a list-processing function is partial in the sense that it
 is not well-defined for all of the lists. For instance, the function
-#dyncode("list0_head") for returning the head element of a given list
-is defined only if the given list is non-empty:
+#dyncode("list_head") for returning the head element of a given list
+is defined only if the given list is non-empty. As in the previous chapter,
+the list is a linear list that is borrowed (the symbol #keycode("!")):
 
 #dats2xhtml('\
+//
+exception ListSubscriptExn of ()
+//
+extern
 fun
 {a:t@ype}
-list0_head(xs: list0(a)): a =
+list_head(xs: !List0_vt(a)): a
+//
+implement
+{a}(*tmp*)
+list_head(xs) =
 (
 case+ xs of
-| list0_cons(x, _) => x
-| _(* list0_nil() *) => $raise ListSubscriptExn()
+| list_vt_cons(x, _) => x
+| _(* list_vt_nil() *) => $raise ListSubscriptExn()
 )
+//
 ')
 
 Note that the code #dyncode("$raise ListSubscriptExn()") is for
 raising an exception (in the case where #dyncode("xs") is empty),
-which is to be explained in details later. Another approach to
-handling a partial function is to turn it into a total one that
-returns options. For instance, #dyncode("list0_head_opt") is such a
-total function corresponding to #dyncode("list0_head"):
-
-#dats2xhtml('\
-//
-datatype
-option0(a:t@ype) = Some0 of (a) | None0 of ()
-//
-fun
-{a:t@ype}
-list0_head_opt
-  (xs: list0(a)): option0(a) =
-(
-case+ xs of list0_cons(x, _) => Some0(x) | _ => None0()
-)
-')
-
-The function returning the last element
-of a given list is also partial as it is only defined
-for a non-empty list. The following function
-#dyncode("list0_last_opt") returns an option to indicate
-whether the last element of a given list is found:
-
-#dats2xhtml('\
-//
-fun
-{a:t@ype}
-list0_last_opt
-(
-xs: list0(a)
-) : option0(a) = let
-//
-fun
-loop
-(x0: a, xs: list0(a)): a =
-(
-case+ xs of
-| list0_nil() => x0
-| list0_cons(x1, xs) => loop(x1, xs)
-)
-//
-in
-//
-case+ xs of
-| list0_nil() => None0()
-| list0_cons(x, xs) => Some0(loop(x, xs))
-//
-end // end of [list0_last_opt]
-//
-')
-
-Note that the inner function #dyncode("loop") in the
-body of #dyncode("list0_last_opt") is tail-recursive.
-
-")
-
-#para("\
-
-Before moving on, I would like to point out a very common mistake in
-(functional) list-processing. First and foremost, a list is not meant
-to be used like an array. The following (partial) function
-#dyncode("list0_get_at") does the so-called list-subscripting:
+which is to be explained in details later. An exception is a resource,
+too: it is linear, and a handler is to consume it. A function that raises an
+exception while it holds a linear value (a list for instance) abandons the
+value, which is a leak; for this reason (and also because the type system does
+not permit a linear value to be used inside a try-expression unless the value is
+local to it) I prefer to turn a partial function into a total one that returns
+options when linear values are involved. The type #stacode("Option_vt(T)")
+is for linear options (it is a datavtype with the constructors
+#dyncode("Some_vt") and #dyncode("None_vt")), and
+#dyncode("list_head_opt") is a total function corresponding to
+#dyncode("list_head"):
 
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_get_at
-(xs: list0(a), n: int): a
+list_head_opt
+  (xs: !List0_vt(a)): Option_vt(a)
 //
 implement
 {a}(*tmp*)
-list0_get_at
+list_head_opt(xs) =
+(
+case+ xs of list_vt_cons(x, _) => Some_vt(x) | _ => None_vt()
+)
+//
+')
+
+A linear option is to be consumed, too: the function
+#dyncode("option_vt_free") frees an option of non-linear contents, and a
+pattern like #dyncode("~Some_vt(x)") consumes the option and binds its content to
+#dyncode("x"). The function returning the last element
+of a given list is also partial as it is only defined
+for a non-empty list. The following function
+#dyncode("list_last_opt") returns an option to indicate
+whether the last element of a given list is found:
+
+#dats2xhtml('\
+//
+extern
+fun
+{a:t@ype}
+list_last_opt
+  (xs: !List0_vt(a)): Option_vt(a)
+//
+implement
+{a}(*tmp*)
+list_last_opt(xs) = let
+//
+fun
+loop
+(x0: a, xs: !List0_vt(a)): a =
+(
+case+ xs of
+| list_vt_nil() => x0
+| list_vt_cons(x1, xs) => loop(x1, xs)
+)
+//
+in
+//
+case+ xs of
+| list_vt_nil() => None_vt()
+| list_vt_cons(x, xs) => Some_vt(loop(x, xs))
+//
+end // end of [list_last_opt]
+//
+')
+
+Note that the inner function #dyncode("loop") in the
+body of #dyncode("list_last_opt") is tail-recursive.
+
+')
+
+#para('\
+
+Before moving on, I would like to point out a very common mistake in
+(functional) list-processing. First and foremost, a list is not meant
+to be used like an array. The following (partial) function
+#dyncode("list_get_at") does the so-called list-subscripting:
+
+#dats2xhtml('\
+//
+extern
+fun
+{a:t@ype}
+list_get_at
+(xs: !List0_vt(a), n: int): a
+//
+implement
+{a}(*tmp*)
+list_get_at
   (xs, n) =
 (
 case+ xs of
-| list0_nil() =>
+| list_vt_nil() =>
   $raise ListSubscriptExn()
-| list0_cons(x, xs) =>
-  if n <= 0 then x else list0_get_at<a>(xs, n-1)
+| list_vt_cons(x, xs) =>
+  if n <= 0 then x else list_get_at<a>(xs, n-1)
 )
 //
 ')
 
 For instance, given the list #dyncode("(1,10,100)") and the index
-#dyncode("1"), #dyncode("list0_get_at") returns the element
-#dyncode("10").  Another common name for #dyncode("list0_get_at") is
-#dyncode("list0_nth"). Clearly, the time-complexity of
-#dyncode("list0_get_at") is O(n) (while array-subscripting is
+#dyncode("1"), #dyncode("list_get_at") returns the element
+#dyncode("10").  Another common name for #dyncode("list_get_at") is
+#dyncode("list_nth"). Clearly, the time-complexity of
+#dyncode("list_get_at") is O(n) (while array-subscripting is
 O(1)-time). It is almost always a poor programming style to process
-the elements in a list by calling #dyncode("list0_get_at") (as the
+the elements in a list by calling #dyncode("list_get_at") (as the
 resulting code is likely to be prohibitively inefficient
 time-wise). For the purpose of illustration, let us take a look at the
 following two functions for tallying the integers contained in a given
@@ -149,38 +165,52 @@ list:
 #dats2xhtml('\
 //
 fun
-list0_tally1
-  (xs: list0(int)): int =
-  list0_foldleft<int><int>(xs, 0, lam(res, x) => res + x)
+list_tally1
+  (xs: !List0_vt(int)): int = let
+  var fopr = lam@(res: int, x: int): int => res + x
+in
+  list_foldleft<int><int>(xs, 0, fopr)
+end // end of [list_tally1]
 //
 fun
-list0_tally2
-  (xs: list0(int)): int =
-  int_foldleft<int>
-  (list0_length(xs), 0, lam(res, i) => res + list0_get_at<int>(xs, i))
+list_tally2
+  (xs: !List0_vt(int)): int = let
+//
+fun
+loop
+(xs: !List0_vt(int), i: int, n: int, res: int): int =
+  if i < n then loop(xs, i+1, n, res + list_get_at<int>(xs, i)) else res
+//
+in
+  loop(xs, 0, list_length<int>(xs), 0)
+end // end of [list_tally2]
 //
 ')
 
 Given a list #dyncode("xs") of length n, the function
-#dyncode("list0_tally1") is O(n)-time while the function
-#dyncode("list0_tally2") is O(n#sup("2"))-time. List-processing should
-be done in the efficient style of #dyncode("list0_tally1") rather than
-in the terribly inefficient style of #dyncode("list0_tally2"). In
+#dyncode("list_tally1") is O(n)-time while the function
+#dyncode("list_tally2") is O(n#sup("2"))-time. (In
+#dyncode("list_tally2"), the list #dyncode("xs") is passed as an argument to
+#dyncode("loop") instead of being captured by a closure passed to
+#dyncode("int_foldleft"): a closure cannot capture a borrowed linear value.)
+List-processing should
+be done in the efficient style of #dyncode("list_tally1") rather than
+in the terribly inefficient style of #dyncode("list_tally2"). In
 general, please try to avoid doing list-subscripting repeatedly if the
 involved index cannot be bounded by a small constant!
 
-")
+')
 
-#para("\
+#para('\
 
 Let us see more functions for performing functional
 list-processing in the following presentation and an
 example of functional programming at the end that illustrates some
 typical use of list-processing functions.
 
-")
+')
 
-#para("\
+#para('\
 
 A commonly used (higher-order) function is often referred to as
 list-map, which takes a list and a function and returns a newly
@@ -193,81 +223,103 @@ extern
 fun
 {a:t@ype}
 {b:t@ype}
-list0_map
-(xs: list0(a), fopr: cfun(a, b)): list0(b)
+list_map
+(xs: !List0_vt(a), fopr: &(a) -<clo1> b): List0_vt(b)
 //
 implement
 {a}{b}
-list0_map
+list_map
 (
   xs, fopr
-) = auxlst(xs) where
+) = auxlst(xs, fopr) where
 {
 //
 fun
 auxlst
-(xs: list0(a)): list0(b) =
+(xs: !List0_vt(a), fopr: &(a) -<clo1> b): List0_vt(b) =
 (
 case+ xs of
-| list0_nil() => list0_nil()
-| list0_cons(x, xs) => list0_cons(fopr(x), auxlst(xs))
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) => list_vt_cons(fopr(x), auxlst(xs, fopr))
 )
 //
-} (* end of [list0_map] *)
+} (* end of [list_map] *)
 //
 ')
 
 For instance, given the list #dyncode("(1, 2, 3, 4, 5)") and the
-integer square function, #dyncode("list0_map") returns the list
+integer square function, #dyncode("list_map") returns the list
 consisting of #dyncode("1"), #dyncode("4"), #dyncode("9"),
-#dyncode("16"), and #dyncode("25").\
+#dyncode("16"), and #dyncode("25"). The given list is borrowed and the result is a
+new list, which has to be freed by the caller:
 
-")
+#dats2xhtml('\
+val sq =
+let
+  var fopr = lam@(x: int): int => x * x
+in
+  list_map<int><int>(xs5, fopr)
+end
+val () = println! ("squares = ", sq)
+val () = list_vt_free<int>(sq)
+')
 
-#para("\
+')
 
-With #dyncode("list0_map"), we can readily build #dyncode("list0_cross")
-as follows for computing the cross product of two given lists:
+#para('\
+
+With #dyncode("list_map"), we can build #dyncode("list_cross")
+as follows for computing the cross product of two given lists. The
+elements of the result are flat tuples (the type #stacode("@(a, b)")),
+which are not allocated on heap:
 
 #dats2xhtml('\
 //
 extern
 fun
 {a,b:t@ype}
-list0_cross
-(xs: list0(a), ys: list0(b)): list0($tup(a, b))
+list_cross
+(xs: !List0_vt(a), ys: !List0_vt(b)): List0_vt(@(a, b))
 //
 implement
 {a,b}(*tmp*)
-list0_cross
+list_cross
   (xs, ys) = let
 //
-typedef ab = $tup(a, b)
+typedef ab = @(a, b)
 //
 in
 //
-list0_concat // for concatenating a list of lists
-(
-list0_map<a><list0(ab)>
-  (xs, lam(x) => list0_map<b><ab>(ys, lam(y) => $tup(x, y)))
-) (* end of [list0_concat] *)
+case+ xs of
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) => let
+    var fopr = lam@(y: b): ab => @(x, y)
+    val res1 = list_map<b><ab>(ys, fopr)
+    val res2 = list_cross<a,b>(xs, ys)
+  in
+    list_vt_append<ab>(res1, res2)
+  end // end of [list_vt_cons]
 //
-end // end of [list0_cross]
+end // end of [list_cross]
 //
 ')
 
 For instance, given two lists #dyncode("(0, 1)")
-and #dyncode("(2, 3, 4)"), #dyncode("list0_cross") returns a newly
+and #dyncode("(2, 3, 4)"), #dyncode("list_cross") returns a newly
 constructed list consisting of the following six pairs: #dyncode("(0,
 2)"), #dyncode("(0, 3)"), #dyncode("(0, 4)"), #dyncode("(1, 2)"),
-#dyncode("(1, 3)"), and #dyncode("(1, 4)").
+#dyncode("(1, 3)"), and #dyncode("(1, 4)"). (In the version of the GC era,
+the code was a call to #dyncode("list_map") nested in the closure passed to
+another call to #dyncode("list_map"), and a call to #dyncode("list_concat");
+here the closure would have to capture the borrowed list #dyncode("ys"),
+which is not possible, and so the first list is traversed directly.)
 
-")
+')
 
-#para("\
+#para('\
 
-A function rather similar to #dyncode("list0_map") is
-#dyncode("list0_foreach"), which takes a list and a procedure (i.e., a
+A function rather similar to #dyncode("list_map") is
+#dyncode("list_foreach"), which takes a list and a procedure (i.e., a
 function returning void) and applies the procedure to each element in
 the list (so as to create some effects):
 
@@ -276,33 +328,33 @@ the list (so as to create some effects):
 extern
 fun
 {a:t@ype}
-list0_foreach
-(xs: list0(a), fwork: cfun(a, void)): void
+list_foreach
+(xs: !List0_vt(a), fwork: &(a) -<clo1> void): void
 //
 implement
 {a}(*tmp*)
-list0_foreach
+list_foreach
 (
   xs, fwork
-) = loop(xs) where
+) = loop(xs, fwork) where
 {
 //
 fun
 loop
-(xs: list0(a)): void =
+(xs: !List0_vt(a), fwork: &(a) -<clo1> void): void =
 (
 case+ xs of
-| list0_nil() => ()
-| list0_cons(x, xs) => (fwork(x); loop(xs))
+| list_vt_nil() => ()
+| list_vt_cons(x, xs) => (fwork(x); loop(xs, fwork))
 )
 //
-} (* end of [list0_foreach] *)
+} (* end of [list_foreach] *)
 //
 ')
 
-")
+')
 
-#para("\
+#para('\
 
 Another commonly used (higher-order) function is often referred to as
 list-filter, which takes a list and a predicate (i.e., a function
@@ -315,45 +367,45 @@ given predicate:
 extern
 fun
 {a:t@ype}
-list0_filter
-(xs: list0(a), test: cfun(a, bool)): list0(a)
+list_filter
+(xs: !List0_vt(a), test: &(a) -<clo1> bool): List0_vt(a)
 //
 implement
 {a}(*tmp*)
-list0_filter
+list_filter
 (
   xs, test
-) = auxlst(xs) where
+) = auxlst(xs, test) where
 {
 //
 fun
 auxlst
-(xs: list0(a)): list0(a) =
+(xs: !List0_vt(a), test: &(a) -<clo1> bool): List0_vt(a) =
 (
 case+ xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x, xs) =>
+| list_vt_nil() =>
+  list_vt_nil()
+| list_vt_cons(x, xs) =>
   if test(x)
-    then list0_cons(x, auxlst(xs)) else auxlst(xs)
+    then list_vt_cons(x, auxlst(xs, test)) else auxlst(xs, test)
   // end of [if]
 )
 //
-} (* end of [list0_filter] *)
+} (* end of [list_filter] *)
 //
 ')
 
 For instance, given the list #dyncode("(1, 2, 3, 4, 5)")
 and the predicate for testing whether an integer is even,
-#dyncode("list0_filter") returns the list consisting of #dyncode("2")
+#dyncode("list_filter") returns the list consisting of #dyncode("2")
 and #dyncode("4").
 
-")
+')
 
-#para("\
+#para('\
 
 Given a list #dyncode("xs"), the following function
-#dyncode("list0_remdup") removes all of the elements in #dyncode("xs")
+#dyncode("list_remdup") removes all of the elements in #dyncode("xs")
 that have already appeared previously:
 
 #dats2xhtml('\
@@ -361,119 +413,137 @@ that have already appeared previously:
 extern
 fun
 {a:t@ype}
-list0_remdup
-(xs: list0(a), eqfn: cfun(a, a, bool)): list0(a)
+list_remdup
+(xs: !List0_vt(a), eqfn: (a, a) -> bool): List0_vt(a)
 //
 implement
 {a}(*tmp*)
-list0_remdup(xs, eqfn) =
+list_remdup(xs, eqfn) =
 (
 case+ xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x0, xs) =>
-  list0_cons(x0, list0_remdup<a>(list0_filter<a>(xs, lam(x) => ~eqfn(x0, x)), eqfn))
+| list_vt_nil() =>
+  list_vt_nil()
+| list_vt_cons(x0, xs) => let
+    var test = lam@(x: a): bool => ~eqfn(x0, x)
+    val ys = list_filter<a>(xs, test)
+    val zs = list_remdup<a>(ys, eqfn)
+    val () = list_vt_free<a>(ys)
+  in
+    list_vt_cons(x0, zs)
+  end // end of [list_vt_cons]
 )
 //
 ')
 
-The implementation of #dyncode("list0_remdup") should clearly remind
+The implementation of #dyncode("list_remdup") should clearly remind
 one of the sieve of Eratosthenes, which is to be given a stream-based
-implementation later.
+implementation later. Note that the function argument
+#dyncode("eqfn") is an envless function (the type
+#stacode("(a, a) -&gt; bool")) rather than a flat closure passed by reference: it is
+captured by the closure #dyncode("test"), which is possible for
+an envless function (a value) but not for a flat closure passed by
+reference. The intermediate list #dyncode("ys") is freed as soon as it is no
+longer needed.
 
-")
+')
 
-#para("\
+#para('\
 
-The list-processing function #dyncode("list0_map") processes every
-element in its list argument and so does #dyncode("list0_filter").
+The list-processing function #dyncode("list_map") processes every
+element in its list argument and so does #dyncode("list_filter").
 Sometimes, we need a list-processing function that stops immediately
 after certain condition is met. For instance, we may want to locate
 the index of the first element in a given list that satisfies some test,
-which can be done by calling the following function #dyncode("list0_find_index"):
+which can be done by calling the following function #dyncode("list_find_index"):
 
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_find_index
-(xs: list0(a), test: cfun(a, bool)): int
+list_find_index
+(xs: !List0_vt(a), test: &(a) -<clo1> bool): int
 //
 implement
 {a}(*tmp*)
-list0_find_index
+list_find_index
   (xs, test) = let
 //
 fun
 loop
-(xs: list0(a), i: int): int =
+(xs: !List0_vt(a), i: int, test: &(a) -<clo1> bool): int =
 (
 case+ xs of
-| list0_nil() => ~1
-| list0_cons(x, xs) =>
-  if test(x) then i else loop(xs, i+1)
+| list_vt_nil() => ~1
+| list_vt_cons(x, xs) =>
+  if test(x) then i else loop(xs, i+1, test)
 )
 //
 in
-  loop(xs, 0)
-end // end of [list0_find_index]
+  loop(xs, 0, test)
+end // end of [list_find_index]
 //
 ')
 
 For instance, given the list #dyncode("(1, 2, 3)") and the predicate
-for testing whether an integer is even, #dyncode("list0_find_index")
+for testing whether an integer is even, #dyncode("list_find_index")
 returns #dyncode("1") (which is the index for the element #dyncode("2")
 in the given list). Note that #dyncode("~1") (negative 1) is returned
 if no element satisfying the given predicate is found.
 
-")
+')
 
-#para("\
+#para('\
 
-Given a list0-value #dyncode("xs") and a predicate #dyncode("test"),
-#dyncode("list0_exist") returns true if and only if there exists one
+Given a list #dyncode("xs") and a predicate #dyncode("test"),
+#dyncode("list_exists") returns true if and only if there exists one
 element in #dyncode("xs") satisfing #dyncode("test"), and
-#dyncode("list0_forall") returns true if and only if every element in
-#dyncode("xs") satisfies #dyncode("test"). Both of these two functions
-can be readily implemented based on a direct call to
-#dyncode("list0_find_index"):
+#dyncode("list_forall") returns true if and only if every element in
+#dyncode("xs") satisfies #dyncode("test"). The former can be
+readily implemented based on a direct call to
+#dyncode("list_find_index"); the latter is implemented by a direct recursion
+(a call to #dyncode("list_find_index") on the negation of #dyncode("test") would
+require a closure that captures the closure #dyncode("test")):
 
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_exists
-(xs: list0(a), test: cfun(a, bool)): bool
+list_exists
+(xs: !List0_vt(a), test: &(a) -<clo1> bool): bool
 extern
 fun
 {a:t@ype}
-list0_forall
-(xs: list0(a), test: cfun(a, bool)): bool
+list_forall
+(xs: !List0_vt(a), test: &(a) -<clo1> bool): bool
 //
 implement
 {a}(*tmp*)
-list0_exists(xs, test) =
-list0_find_index<a>(xs, test) >= 0
+list_exists(xs, test) =
+list_find_index<a>(xs, test) >= 0
 implement
 {a}(*tmp*)
-list0_forall(xs, test) =
-list0_find_index<a>(xs, lam(x) => not(test(x))) < 0
+list_forall(xs, test) =
+(
+case+ xs of
+| list_vt_nil() => true
+| list_vt_cons(x, xs) => test(x) && list_forall<a>(xs, test)
+)
 //
 ')
 
-")
+')
 
-#para("\
+#para('\
 
 Given a list (x#sub("0"), ..., x#sub("n-1")) of length n, its indexed
 version refers to the list of pairs in which the elements are of the form
 (i, x#sub("i")) for i ranging from 0 to n-1.  For a function that
 processes a given list, there is often a meaningful variant of the
 function that processes the indexed version of the list. For instance,
-the following function #dyncode("list0_imap") is such a variant of
-#dyncode("list0_map"):
+the following function #dyncode("list_imap") is such a variant of
+#dyncode("list_map"):
 
 #dats2xhtml('\
 //
@@ -481,185 +551,244 @@ extern
 fun
 {a:t@ype}
 {b:t@ype}
-list0_imap
-(xs: list0(a), fopr: cfun(int, a, b)): list0(b)
+list_imap
+(xs: !List0_vt(a), fopr: &(int, a) -<clo1> b): List0_vt(b)
 //
 implement
 {a}{b}
-list0_imap
+list_imap
 (
   xs, fopr
-) = auxlst(0, xs) where
+) = auxlst(0, xs, fopr) where
 {
 //
 fun
 auxlst
-(i: int, xs: list0(a)): list0(b) =
+(i: int, xs: !List0_vt(a), fopr: &(int, a) -<clo1> b): List0_vt(b) =
 (
 case+ xs of
-| list0_nil() => list0_nil()
-| list0_cons(x, xs) => list0_cons(fopr(i, x), auxlst(i+1, xs))
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) => list_vt_cons(fopr(i, x), auxlst(i+1, xs, fopr))
 )
 //
-} (* end of [list0_imap] *)
+} (* end of [list_imap] *)
 //
 ')
 
-Let us use #dyncode("list0_iexists") and #dyncode("list0_iforall") to
-refer to the variants of #dyncode("list0_exists") and
-#dyncode("list0_forall"), respectively, for processing indexed lists.
-The code implementing #dyncode("list0_iexists") and #dyncode("list0_iforall")
-is omitted for brevity.
+Let us use #dyncode("list_iexists") and #dyncode("list_iforall") to
+refer to the variants of #dyncode("list_exists") and
+#dyncode("list_forall"), respectively, for processing indexed lists.
+The code implementing #dyncode("list_iforall") is as follows
+(and #dyncode("list_iexists") is omitted for brevity):
 
-")
+#dats2xhtml('\
+//
+extern
+fun
+{a:t@ype}
+list_iforall
+(xs: !List0_vt(a), test: &(int, a) -<clo1> bool): bool
+//
+implement
+{a}(*tmp*)
+list_iforall(xs, test) = loop(0, xs, test) where
+{
+//
+fun
+loop
+(i: int, xs: !List0_vt(a), test: &(int, a) -<clo1> bool): bool =
+(
+case+ xs of
+| list_vt_nil() => true
+| list_vt_cons(x, xs) => test(i, x) && loop(i+1, xs, test)
+)
+//
+} (* end of [list_iforall] *)
+//
+')
 
-#para("\
+')
+
+#para('\
 
 I have so far presented a variety of functions for processing lists in a
 functional style. I would like to conclude the chapter with an example
 of functional programming that can concretely demonstrate some typical use of
 list-processing functions in practice.
 
-")
+')
 
-#para("\
+#para('\
 
 The famous 8-queen puzzle asks the player to find ways to put eight
 queen pieces on a chess board such that no queen piece can attack any
 other ones. In other words, no two queen pieces can be put on the same
 row, the same column, or the same diagnal. This puzzle can be readily
-solved with a tree-based search. Let us introduce an abstract type as
-follows:
-
-#dats2xhtml('\
-abstype node = ptr
-')
-
-where #stacode("ptr") indicates that #stacode("node") is
-boxed. Intuitively, a node represents a partial solution where there
+solved with a tree-based search. Intuitively, a node represents a partial
+solution where there
 are #emphasis("n") queen pieces (for some #emphasis("n") less than or
 equal to 8) on the first #emphasis("n") rows of the chess board such
 that no one piece can attack any other pieces. Given a node, another
 node extending it with one more queen piece is considered its
-child. The following declared function #dyncode("node_get_children")
-is supposed to be called to obtain all of the child nodes of a given
-node:
+child. A node is represented as a list of integers; the length of the list
+refers to the number of queen pieces on the chess board; the integers
+(between 0 and N-1, inclusive) in the list refer to the reversely listed
+column positions of the queen pieces. As a node is a linear list, a node is
+linear, too, and each node that is made is to be consumed or freed:
 
 #dats2xhtml('\
-extern
-fun
-node_get_children(node): list0(node)
-overload .children with node_get_children
-')
-
-With
-#dyncode("node_get_children"),
-we can readily implement #dyncode("node_dfsenum") as follows
-for enumerating in the depth-first manner all of the nodes contained
-in the tree rooted at a given node:
-
-#dats2xhtml('\
-//
-extern
-fun
-node_dfsenum(node): list0(node)
-//
-implement
-node_dfsenum
-(nx0) =
-list0_cons
-(
-nx0
-,
-list0_concat<node>
-(
-list0_map<node><list0(node)>(nx0.children(), lam(nx) => node_dfsenum(nx))
-) (* list0_concat *)
-) (* node_dfsenum *)
-//
-')
-
-In order to find all of the solutions to the 8-queen puzzle,
-we just need to keep all of the nodes of length 8 that are contained
-in the tree rooted at the initial node (representing the empty partial
-soloution):
-
-#dats2xhtml('\
-//
-extern
-fun
-QueenSolve(): list0(node)
 //
 \#define N 8
 //
-implement
-QueenSolve() =
-list0_filter<node>(node_dfsenum(node_init()), lam(nx) => node_length(nx) = N)
+vtypedef node = List0_vt(int)
 //
 ')
 
-where #dyncode("node_init") returns the initial node and
-#dyncode("node_length") returns the length of a node (that is, the
-number of queen pieces in the partial solution represented by the node).
-By treating #stacode("node") as #stacode("list0(int)"), we
-can implement #dyncode("node_init") and #dyncode("node_length")
-as follows:
+The initial node (representing the empty partial solution), the length of a node
+and the freeing of a node (and of a list of nodes) are as follows:
 
 #dats2xhtml('\
 //
-assume node = list0(int)
+fun
+node_init(): node = list_vt_nil()
 //
-implement
-node_init() = list0_nil()
+fun
+node_length(nx: !node): int = list_length<int>(nx)
 //
-implement
-node_length(nx) = list0_length(nx)
+fun
+node_free(nx: node): void = list_vt_free<int>(nx)
+//
+fun
+nodes_free(nxs: List0_vt(node)): void =
+(
+case+ nxs of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(nx, nxs) => (node_free(nx); nodes_free(nxs))
+)
 //
 ')
 
-A node is represented as a list of integers; the length of the list
-refers to the number of queen pieces on the chess board; the integers
-(between 0 and N-1, inclusive) in the list refer to the reversely listed
-column positions of the queen pieces. The function #dyncode("node_get_children")
-is implemented as follows:
+The function #dyncode("test_safety") checks whether the column position
+of the queen that is put at the head of a node is safe for the other queens:
 
 #dats2xhtml('\
 //
 fun
 test_safety
 (
-xs: list0(int)
+xs: !List0_vt(int)
 ) : bool = let
-//
-val-
-list0_cons(x0, xs) = xs
 //
 in
 //
-list0_iforall<int> // abs: absolute value
-  (xs, lam(i, x) => (x0 != x && abs(x0-x) != (i+1)))
+case+ xs of
+| list_vt_nil() => true
+| list_vt_cons(x0, xs) => let
+    var test = // abs: absolute value
+    lam@(i: int, x: int): bool => (x0 != x && abs(x0-x) != (i+1))
+  in
+    list_iforall<int>(xs, test)
+  end // end of [list_vt_cons]
 //
 end // end of [test_safety]
 //
-implement
+')
+
+The function #dyncode("node_get_children") is supposed to be called to obtain
+all of the child nodes of a given node. A candidate child is constructed
+with a copy of the given node (since the given node is only borrowed), and a
+candidate that is not safe is freed:
+
+#dats2xhtml('\
+//
+fun
 node_get_children
-  (nx) =
-  list0_filter<node>
-  (int_list0_map<node>
-    (N, lam(x) => list0_cons(x, nx)), lam(nx) => test_safety(nx)
-  )
+  (nx: !node): List0_vt(node) = let
+//
+fun
+loop(nx: !node, x: int): List0_vt(node) =
+if
+(x >= N)
+then list_vt_nil()
+else let
+  val nx1 = list_vt_cons(x, list_vt_copy<int>(nx))
+in
+  if test_safety(nx1)
+    then list_vt_cons(nx1, loop(nx, x+1))
+    else (node_free(nx1); loop(nx, x+1))
+end // end of [else]
+//
+in
+  loop(nx, 0)
+end // end of [node_get_children]
 //
 ')
 
-The function #dyncode("test_safety") checks whether a column position
-is safe for the next queen piece. Note that applying
-#dyncode("int_list0_map") to an integer n is like applying
-#dyncode("list0_map") to the list consisting of all of the integers
-between 0 and n-1, inclusive.
+')
 
-")
+#para('\
 
-#para("\
+With
+#dyncode("node_get_children"),
+we can readily implement #dyncode("node_dfsenum") as follows
+for enumerating in the depth-first manner all of the nodes contained
+in the tree rooted at a given node. The given node is consumed (it becomes the head
+of the result) and so are the children, each of which is passed to a recursive
+call:
+
+#dats2xhtml('\
+//
+fun
+node_dfsenum
+(nx0: node): List0_vt(node) = let
+  val nxs = node_get_children(nx0)
+in
+  list_vt_cons(nx0, auxlst(nxs))
+end // end of [node_dfsenum]
+//
+and
+auxlst
+(nxs: List0_vt(node)): List0_vt(node) =
+(
+case+ nxs of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(nx, nxs) =>
+  list_vt_append<node>(node_dfsenum(nx), auxlst(nxs))
+)
+//
+')
+
+In order to find all of the solutions to the 8-queen puzzle,
+we just need to keep all of the nodes of length 8 that are contained
+in the tree rooted at the initial node (representing the empty partial
+soloution). The nodes that are not kept are freed:
+
+#dats2xhtml('\
+//
+fun
+keep_solutions
+(nxs: List0_vt(node)): List0_vt(node) =
+(
+case+ nxs of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(nx, nxs) =>
+  if node_length(nx) = N
+    then list_vt_cons(nx, keep_solutions(nxs))
+    else (node_free(nx); keep_solutions(nxs))
+)
+//
+fun
+QueenSolve(): List0_vt(node) =
+keep_solutions(node_dfsenum(node_init()))
+//
+')
+
+A call to #dyncode("QueenSolve") returns a list of 92 solutions, which the
+caller is to free (by calling #dyncode("nodes_free")).
+
+')
+
+#para('\
 
 The presented code for solving 8-queen puzzle is of the kind of
 high-level functional programming style I intend to advocate
@@ -667,14 +796,17 @@ throughout the book. It should soon be clear that we can reap even
 more benefits from programming in this way when (linear) lazy streams
 are used in place of functional lists.
 
-")
+')
 
-#para("\
+#para('\
 
 Please find #mycodelink("LECTURE/06/CODE", "on-line") the entirety of
-the code used in this chapter. \
+the code used in this chapter (the files #filename("listfun2.hats") and
+#filename("queens.hats") and a test in #filename("lecture06.dats"), which was
+compiled with #command("patscc") and run with the address sanitizer, no
+leak is reported). \
 
-")#comment("para")
+')#comment("para")
 
 </chapter><!--id="lecture06"-->
 
@@ -685,4 +817,3 @@ the code used in this chapter. \
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
