@@ -62,7 +62,7 @@ There is no unit-test framework. Regression testing compiles and runs the exampl
 
 ```sh
 make -C src check                               # typecheck every module of the compiler (patsopt only)
-make -C src test                                # check + unit tests + the md5 suites of src/test (no ATS1; needs bin/patscc; no -j; ~6 min)
+make -C src test [JOBS=N]                       # check + unit tests + the md5 suites of src/test (no ATS1; needs bin/patscc; ~9 min with JOBS=nproc=32, 35 to 50 min with JOBS=1)
 make -C utils/atsdoc test                       # atsdoc and libatsdoc: 2653 md5 cases
 make -C utils/atsdoc genall                     # regenerates the text of 370 .atxt templates and compares their md5 sums (~30 s)
 make -C utils/libatsynmark test                 # libatsynmark and pats2xhtml: 5228 md5 cases (after make -C utils/atsynmark)
@@ -72,6 +72,8 @@ make -C doc/EXAMPLE/INTRO acker1 && ./doc/EXAMPLE/INTRO/acker1   # a single test
 ```
 
 The md5 suites compare output with md5 sums recorded from the ATS1 tools (the compiler's suites in `src/test`, `utils/atsdoc/TEST`, `utils/libatsynmark/TEST`). They run all the cases of a list in one process, so the sums depend on the order of the file list and on how `PATSHOME` is spelled: their Makefiles pin `LC_ALL=C` and the canonical `PATSHOME`, keep that when you add a suite, and regenerate recorded sums from the ATS1 output, never from the ATS2 output alone. The differential targets (`make -C src/test s2compare`, `t3compare`, `drvfiles`, ..., the `*dump1.sh` scripts) compare against a real ATS1 build and are only needed when you change a ported module's behaviour: you must provide an ATS1 compiler install yourself (it is not part of this repository), check the old `src/` out of git history (the parent of the commit that replaced it: `git log --grep='Replace the ATS1 compiler sources' --format=%H`, then `git archive <that>^ src`), build it with ATS1 and set `ATS1REF=<its src dir>` (see `src/README`; the ATS1 objects only link at the path they were built at); without `ATS1REF` they stop with a message.
+
+`make -C src test` compiles in parallel and runs serially: the `prebuild` step of `src/test/Makefile` first generates every shared generated file once (serial), then builds every program of every suite with `make -j$(JOBS)` (`JOBS` defaults to `nproc`; `JOBS=1` is the old fully serial run), and then `all` runs the suites one after the other, in the same order as before, on the programs that are up to date. A `-j N` given to make is ignored for the runs (`.NOTPARALLEL`: the suites share generated files and their outputs must not interleave); it is harmless. The reasons: `patscc` writes `X_dats.c` into the current directory, so two compilations of the same module must not share a directory (the objects are built in their `*obj` directory, the programs built by one `patscc` call in `../cc_tmp_PROGRAM`), and the generators (`*_gen.py`, `make -C src pats_*_gen*.hats`) must not run twice at the same time. When you add a suite, add its program to `PREEXES` and its generated files to `PREGEN` at the end of `src/test/Makefile`.
 
 Example Makefiles include `$(PATSHOME)/share/atsmake-pre.mk` / `atsmake-post.mk` and declare `all::` / `regress::` / `cleanall::` targets. To quickly check one ATS2 file: `patscc -DATS_MEMALLOC_LIBC -o foo foo.dats` (typecheck only: `patsopt --typecheck -d foo.dats`).
 

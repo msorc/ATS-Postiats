@@ -16,7 +16,7 @@ Building
 
     make -C src PATSOPT=<stage-0 patsopt> [STAGE0HOME=<its PATSHOME>] [-j N]   # ./patsopt and ./libatsopt.a
     make -C src check                  # typecheck every module (needs only patsopt)
-    make -C src test                   # check + unit tests + md5 suites of test/ (no ATS1; no -j; ~6 minutes)
+    make -C src test                   # check + unit tests + md5 suites of test/ (no ATS1; compiles JOBS at a time, default nproc, JOBS=1 for the serial run; ~9 minutes with 32 cores, 35 to 50 serial)
     make -C src CBOOT                  # generate the bootstrap C bundle in CBOOT/ (CBOOT/README)
     make -C src clean | cleanall | cleanboot
 
