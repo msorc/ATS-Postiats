@@ -21,7 +21,7 @@ LDFLAGS += -latslib
 
 all:: timer
 timer: timer.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC $(CFLAGS) -o $@ $< -lrt $(LDFLAGS)
+  $(PATSCC) $(CFLAGS) -o $@ $< -lrt $(LDFLAGS)
 regress:: timer ; ./timer
 cleanall:: ; $(RMF) timer
 
@@ -30,7 +30,7 @@ cleanall:: ; $(RMF) timer
 all:: \
 circbuf
 circbuf: circbuf.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC $(CFLAGS) -o $@ $< $(LDFLAGS)
+  $(PATSCC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 regress:: circbuf ; ./circbuf
 cleanall:: ; $(RMF) circbuf
 
@@ -39,7 +39,7 @@ cleanall:: ; $(RMF) circbuf
 all:: \
 circbuf2
 circbuf2: circbuf2.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC $(CFLAGS) -o $@ $< $(LDFLAGS)
+  $(PATSCC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 regress:: circbuf2 ; ./circbuf2
 cleanall:: ; $(RMF) circbuf2
 
@@ -48,7 +48,7 @@ cleanall:: ; $(RMF) circbuf2
 all:: \
 shared_vt
 shared_vt: shared_vt.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC $(CFLAGS) -o $@ $< -lpthread $(LDFLAGS)
+  $(PATSCC) $(CFLAGS) -o $@ $< -lpthread $(LDFLAGS)
 regress:: shared_vt ; ./shared_vt
 cleanall:: ; $(RMF) shared_vt
 
@@ -57,7 +57,7 @@ cleanall:: ; $(RMF) shared_vt
 all:: \
 channel_vt
 channel_vt: channel_vt.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC $(CFLAGS) -o $@ $< -lpthread $(LDFLAGS)
+  $(PATSCC) $(CFLAGS) -o $@ $< -lpthread $(LDFLAGS)
 regress:: channel_vt ; ./channel_vt
 cleanall:: ; $(RMF) channel_vt
 

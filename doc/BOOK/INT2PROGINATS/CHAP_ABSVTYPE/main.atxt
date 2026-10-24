@@ -330,8 +330,8 @@ entirety of the code presented in this section plus some testing code.
 #para("\
 
 The issue of memory allocation and deallocation is of paramount importance
-in systems programming, where garabage collection (GC) at run-time may not
-even be allowed.  Handling memory management safely and efficiently is a long
+in systems programming, where garbage collection (GC) at run-time may not
+even be available (there is no garbage collector in this version of ATS2).  Handling memory management safely and efficiently is a long
 standing problem of great challenge in programming, and its novel solution
 in ATS is firmly rooted in the paradigm of programming with theorem-proving
 (PwTP).

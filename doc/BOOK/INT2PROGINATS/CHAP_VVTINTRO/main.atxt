@@ -700,19 +700,19 @@ freed by the programmer.
 
 The following code implements a higher-order function
 #dyncode("list_map_cloptr") which takes a linear closure-function
-as its second argument:
+as its second argument (the list is borrowed):
 
 #dats2xhtml('\
 fun{
 a:t@ype}{b:vt@ype
 } list_map_cloptr{n:int}
 (
-  xs: list (a, n), f: !(a) -<cloptr1> b
+  xs: !list_vt (a, n), f: !(a) -<cloptr1> b
 ) : list_vt (b, n) =
 (
   case+ xs of
-  | list_nil () => list_vt_nil ()
-  | list_cons (x, xs) => list_vt_cons (f (x), list_map_cloptr<a><b> (xs, f))
+  | list_vt_nil () => list_vt_nil ()
+  | list_vt_cons (x, xs) => list_vt_cons (f (x), list_map_cloptr<a><b> (xs, f))
 )
 ')
 
@@ -744,7 +744,7 @@ val len = list_vt_length (xs)
 val f = lam (x: int): int =<cloptr1> x * len
 //
 val ys =
-list_map_cloptr<int><int> ($UNSAFE.list_vt2t(xs), f)
+list_map_cloptr<int><int> (xs, f)
 //
 val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(f))
 //
@@ -771,14 +771,17 @@ Also, the cast involved in
 
 #para('\
 
-The support for linear closure-functions in ATS1 is crucial in a setting
-where higher-order functions are needed but run-time garbage collection
-(GC) is not allowed or supported. In ATS2, linear closure-functions become
-much less important as programming with higher-order functions in a setting
-without GC can be more conveniently achieved through the use of templates.
-However, if one wants to store closure-functions in a data structure
-without causing memory leaks, it is necessary to use linear closure-functions
-unless GC can be relied upon to reclaim memory.\
+The support for linear closure-functions is crucial in this version of ATS2,
+in which there is no run-time garbage collection and a closure-function
+that is allocated in the heap and shared freely (such as a closure of the
+kind #dyncode("cloref")) is rejected by the compiler. In many cases,
+programming with higher-order functions can be more conveniently achieved
+through the use of templates (see the chapter on function templates) or of
+flat closures, which are allocated on the stack (see the chapter on
+functions). However, if one wants to store closure-functions in a data
+structure without causing memory leaks, it is necessary to use linear
+closure-functions, and the owner of such a closure-function has to free
+it.\
 
 ')
 

@@ -32,7 +32,7 @@ cleanall:: ; $(RMF) stkclo
 ######
 
 all:: cloptr
-cloptr: cloptr.dats; $(PATSCC2) -DATS_MEMALLOC_LIBC -o $@ $< || touch $@
+cloptr: cloptr.dats; $(PATSCC2) -o $@ $< || touch $@
 regress:: cloptr; ./cloptr
 cleanall:: ; $(RMF) cloptr
 
