@@ -39,7 +39,7 @@ list_vt_foreach
   {n:nat}
 (
   xs: !list_vt(a, n)
-, fwork: (&(a) >> _) -<cloref1> void
+, fwork: !(&(a) >> _) -<cloptr1> void
 ) : void =
 (
 case+ xs of
@@ -91,7 +91,25 @@ case+ xs of
 
 (* ****** ****** *)
 
-implement main0 () = {}
+implement
+main0 () = {
+//
+// [list_vt_free] above is a template for a list of
+// non-linear elements; the one in the prelude is used here
+//
+val xs = list_vt_cons(1, list_vt_cons(2, list_vt_nil()))
+val ys = list_vt_cons(3, list_vt_nil())
+val zs = list_vt_append<int>(xs, ys)
+val () = println! ("length(zs) = ", list_vt_length<int>(zs))
+//
+val inc = lam (x: &int >> _): void =<cloptr1> (x := x + 1)
+val () = list_vt_foreach<int>(zs, inc)
+val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(inc))
+//
+val () = println! ("zs = ", zs)
+val () = list_vt_free<int>(zs)
+//
+} (* end of [main0] *)
 
 (* ****** ****** *)
 

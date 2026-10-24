@@ -100,6 +100,17 @@ cleanall:: ; $(RMF) chap_list
 ######
 #
 all:: \
+chap_list_vt
+chap_list_vt: \
+chap_list_vt.dats ; \
+$(PATSCC2) -o $@ $<
+#
+regress:: chap_list_vt; ./$<
+cleanall:: ; $(RMF) chap_list_vt
+#
+######
+#
+all:: \
 chap_exception
 chap_exception: \
 chap_exception.dats ; \

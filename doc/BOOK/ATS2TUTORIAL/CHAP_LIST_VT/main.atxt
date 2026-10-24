@@ -7,7 +7,7 @@ dynload "libatsdoc/dynloadall.dats"
 %}\
 #comment("\n\
 The file is automatically generated
-by [atsdoc] from CHAP_ARRAYREF/main.atxt.\n\
+by [atsdoc] from CHAP_LIST_VT/main.atxt.\n\
 ")
 #comment("\n\
 Time of Generation: #timestamp()\
@@ -18,18 +18,21 @@ Time of Generation: #timestamp()\
 #para("\
 
 A linearly typed list in ATS is also referred to as a linear list, which
-essentially corresponds to a singly-linked list in C. The following linear
+essentially corresponds to a singly-linked list in C. Linear lists are the
+lists of this dialect of ATS2: the lists that were reclaimed by garbage
+collection (GC) do not exist any more. The following linear
 datatype declaration introduces a linear type #stacode("list_vt") for
-linear lists:
+linear lists (the actual name of the type constructor is a long one, and
+#stacode("list_vt") is a shorthand of it):
 
 #sats2xhtml('\
-//
 datavtype
-list_vt(a:vt@ype, int) =
-| list_vt_nil(a, 0) of ()
-| {n:nat}
-  list_vt_cons(a, n+1) of (a, list_vt(a, n))
-//
+list_vt0ype_int_vtype
+  (a:vt@ype+, int) =
+  | list_vt_nil(a, 0) of ()
+  | {n:int | n >= 0}
+    list_vt_cons(a, n+1) of (a, list_vt0ype_int_vtype(a, n))
+// end of [list_vt0ype_int_vtype]
 ')
 
 Note that the keyword #keycode('datavtype') can also be written as
@@ -38,7 +41,7 @@ N, the type #stacode("list_vt(T,N)") is for a list of length N that
 contains elements of type T.  The interfaces for various functions on
 linear lists can be found in the SATS file
 #myatscodelink("prelude/SATS/list_vt.sats", "prelude/SATS/list_vt.sats"),
-which is automatically loaded by #command("atsopt").\
+which is automatically loaded by #command("patsopt").\
 
 ")
 
@@ -48,17 +51,14 @@ The following function #dyncode("list_vt_length") shows a typical way of
 handling a linear list in a read-only situation:
 
 #dats2xhtml('\
-//
 fun
 {a:vt@ype}
 list_vt_length
-  (xs: !list_vt(a, n)): int(n) =
+  {n:nat}(xs: !list_vt(a, n)): int(n) =
 (
 case+ xs of
 | list_vt_nil() => 0
-| list_vt_cons(x, xs2) => 1 + list_vt_length<a> (xs2)
-)
-//
+| list_vt_cons(x, xs2) => 1 + list_vt_length(xs2)
 ')
 
 When #dyncode("xs") is matched with the pattern #dyncode("list_vt_nil()"),
@@ -68,30 +68,34 @@ the type of #dyncode("xs") is #stacode("list_vt(a, N+1)") for some natural
 number N and the types of #dyncode("x") and #dyncode("xs2") are
 #stacode("a") and #stacode("list_vt(a, N)"), respectively. Note that both
 #dyncode("x") and #dyncode("xs2") are names for values, and their types are
-required to stay unchanged.
+required to stay unchanged. The symbol #keycode("!") in front of the type
+of #dyncode("xs") means that the list is only borrowed: it is still
+available when the function returns.
 
 ")
 
 #para("\
 
 The following function #dyncode("list_vt_foreach") shows a typical way of
-modifying elements stored in a linear list:
+modifying elements stored in a linear list. The function argument
+#dyncode("fwork") is a linear closure-function, which is borrowed (the
+symbol #keycode("!")), so that the caller frees it after the call (see the
+chapter on linear closure-functions):
 
 #dats2xhtml('\
-//
 fun
 {a:vt@ype}
 list_vt_foreach
+  {n:nat}
 (
   xs: !list_vt(a, n)
-, fwork: (&(a) >> _) -<cloref1> void
+, fwork: !(&(a) >> _) -<cloptr1> void
 ) : void =
 (
 case+ xs of
 | list_vt_nil() => ()
 | @list_vt_cons(x, xs2) => (fwork(x); list_vt_foreach<a> (xs2, fwork); fold@(xs))
-)
-//
+) (* end of [list_vt_foreach] *)
 ')
 
 When #dyncode("xs") is matched with the pattern
@@ -118,7 +122,6 @@ different from the original one assigned to it after folding. For
 instance, the following example shows a case as such:
 
 #dats2xhtml('\
-//
 fun
 {a:vt@ype}
 list_vt_append
@@ -143,7 +146,6 @@ in
   | ~list_vt_nil () => ys
   | @list_vt_cons (x, xs2) => (loop(xs2, ys); fold@(xs); xs)
 end // end of [list_vt_append]
-//
 ')
 
 The meaning of the symbol #dyncode("~") in front of a pattern is to be
@@ -151,7 +153,9 @@ explained below. The implementation of #dyncode("list_vt_append") exactly
 corresponds to the standard implementaion of concatenating two
 singly-linked lists in C: Let xs and ys be two given lists; if xs is empty,
 then ys is returned; otherwise, the last node in xs is located and ys is
-stored in the field of the node reserved for the next node.
+stored in the field of the node reserved for the next node. Both lists are
+consumed by the function (there is no #keycode("!")), and the result is a
+list that has to be freed.
 
 ")
 
@@ -161,7 +165,6 @@ The following function #dyncode("list_vt_free") frees a given linear
 list containing non-linear elements:
 
 #dats2xhtml('\
-//
 fun
 {a:vt@ype}
 list_vt_free
@@ -173,8 +176,6 @@ list_vt_free
 case+ xs of
 | ~list_vt_nil() => ()
 | ~list_vt_cons(x, xs2) => list_vt_free<a> (xs2)
-)
-//
 ')
 
 When #dyncode("xs") is matched with the pattern #dyncode("~list_vt_nil()"),
@@ -189,6 +190,33 @@ referred to as #dyncode("x") and #dyncode("xs2"), respectively. So what is
 really freed here is the memory for the first list-node in the list
 referred to as #dyncode("xs").
 
+")
+
+#para("\
+
+The following code puts these functions together: it appends two lists,
+increments each element of the result, and frees the result.
+
+#dats2xhtml('\
+val xs = list_vt_cons(1, list_vt_cons(2, list_vt_nil()))
+val ys = list_vt_cons(3, list_vt_nil())
+val zs = list_vt_append<int>(xs, ys)
+val () = println! ("length(zs) = ", list_vt_length<int>(zs))
+//
+val inc = lam (x: &int >> _): void =<cloptr1> (x := x + 1)
+val () = list_vt_foreach<int>(zs, inc)
+val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(inc))
+//
+val () = println! ("zs = ", zs)
+val () = list_vt_free<int>(zs)
+')
+
+If the last line is deleted, the compiler reports that the linear
+variable #dyncode("zs") is not consumed; if the call to
+#dyncode("cloptr_free") is deleted, it reports the same about
+#dyncode("inc"). Similarly, the lists #dyncode("xs") and
+#dyncode("ys") cannot be used any more after the call to
+#dyncode("list_vt_append"), as they are consumed by it.
 
 ")
 
