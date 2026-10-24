@@ -1,9 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 #
 # The continuous integration of ATS2 (ATS/Postiats).
 #
-# The compiler is written in ATS2 and compiles itself: the stage-0
-# compiler of the build is the current release of ATS2 (0.4.2), which is
-# downloaded here.
+# The compiler is written in ATS2 and compiles itself, but no ATS2 release is
+# needed: the first compiler (stage 0) is the tracked bootstrap C bundle
+# src/CBOOT, which `make bootstrap` compiles with a C compiler, make, python3
+# and libgmp (KIND=intknd for no libgmp). Every job starts from a clean
+# checkout and runs the commands that a user would run:
+#
+#   gates       the hygiene of the tree and the version of the release
+#   bootstrap   make bootstrap; stage 2 = stage 3; src/CBOOT is a fixed point;
+#               make -C src test
+#   portability make bootstrap with gcc and clang on Linux and macOS (and
+#               without libgmp), then a hello world
+#   suites      the suites of the tools and of the examples and book code
+#   documents   the packaging scripts and the text of the templates
+#   sanitizers  the compiler and the tests under ASan and UBSan
+#   dist        make dist, then ./configure && make && make install of the
+#               tarball (with and without libgmp), make install/uninstall
 #
 name: CI
 
@@ -13,126 +28,241 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 env:
   LC_ALL: C
-  ATS2_VERSION: 0.4.2
-  ATS2_HOME: /usr/local/ats2-postiats-0.4.2
 
 jobs:
-  hygiene:
-    name: the hygiene of the tree
+  gates:
+    name: gates (hygiene, version)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - name: no dangling symbolic links, no absolute developer paths
         run: sh share/SCRIPT/check_tree_hygiene.sh
 
-  build:
-    name: the build of the compiler
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: the pre-requisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3 libgmp-dev autoconf automake
-
-      - name: the stage-0 compiler (the current release of ATS2)
-        run: |
-          curl -L -o ats2.tgz "https://sourceforge.net/projects/ats2-lang/files/ATS2-Postiats-${ATS2_VERSION}.tgz/download"
-          mkdir -p "${ATS2_HOME}"
-          tar -xzf ats2.tgz -C "${ATS2_HOME}" --strip-components=1
-          echo "${ATS2_HOME}/bin" >> "${GITHUB_PATH}"
-          echo "PATSHOME=${ATS2_HOME}" >> "${GITHUB_ENV}"
-
-      - name: the build
-        run: |
-          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
-
-      - name: the type checking of the compiler
-        run: |
-          make PATSOPT="${PATSHOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" check
-
-  test:
-    name: the regression suites
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: the pre-requisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3 libgmp-dev autoconf automake
-
-      - name: the stage-0 compiler (the current release of ATS2)
-        run: |
-          curl -L -o ats2.tgz "https://sourceforge.net/projects/ats2-lang/files/ATS2-Postiats-${ATS2_VERSION}.tgz/download"
-          mkdir -p "${ATS2_HOME}"
-          tar -xzf ats2.tgz -C "${ATS2_HOME}" --strip-components=1
-          echo "PATSHOME=${ATS2_HOME}" >> "${GITHUB_ENV}"
-
-      - name: the build
-        run: |
-          export PATSHOME="${PWD}"
-          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
-          make -f Makefile_devl PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
-          make -C utils/libatsynmark install
-
-      - name: the suites of the compiler
-        run: |
-          export PATSHOME="${PWD}"
-          make -C src test
-
-      - name: the suites of the tools
-        run: |
-          export PATSHOME="${PWD}"
-          make -C utils/atsdoc test
-          make -C utils/libatsynmark test
-
-      - name: the suite of the examples and of the book code
-        run: |
-          export PATSHOME="${PWD}"
-          make -C doc -f Makefile_test testall
-
-  documents:
-    name: the documents and the release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: the pre-requisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential python3 libgmp-dev autoconf automake
-
-      - name: the stage-0 compiler (the current release of ATS2)
-        run: |
-          curl -L -o ats2.tgz "https://sourceforge.net/projects/ats2-lang/files/ATS2-Postiats-${ATS2_VERSION}.tgz/download"
-          mkdir -p "${ATS2_HOME}"
-          tar -xzf ats2.tgz -C "${ATS2_HOME}" --strip-components=1
-          echo "PATSHOME=${ATS2_HOME}" >> "${GITHUB_ENV}"
-
-      - name: the build
-        run: |
-          export PATSHOME="${PWD}"
-          make PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" all
-          make -f Makefile_devl PATSOPT="${ATS2_HOME}/bin/patsopt" STAGE0HOME="${ATS2_HOME}" bin_atsdoc
-          make -C utils/libatsynmark install
-
       - name: the version of the release is declared consistently
         run: sh share/SCRIPT/check_release_version.sh
 
-      - name: the packaging scripts are up-to-date
+  bootstrap:
+    name: bootstrap from a clean clone (gcc)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: bootstrap
+
+      - name: make bootstrap (patsopt from src/CBOOT, then everything with it)
+        run: make bootstrap
+
+      - name: a hello world with the built tree
         run: |
-          export PATSHOME="${PWD}"
-          cd doc/DISTRIB
-          make -f Makefile.gen
-          cd ../..
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          printf 'implement main0 () = println! ("Hello, world!")\n' > "$RUNNER_TEMP/hello.dats"
+          cd "$RUNNER_TEMP" && patscc -o hello hello.dats && ./hello | grep -x 'Hello, world!'
+
+      # bin/patsopt is stage 2 (compiled from the C that the compiler of the
+      # bundle produced). Stage 3 is built from the sources by stage 2 and
+      # stage 4 by stage 3: all of them must be the same program, and the C
+      # code that stage 3 and stage 4 generate must be the same text (but for
+      # the time stamp of the header of each file).
+      - name: stage 2 = stage 3 = stage 4
+        run: |
+          export PATSHOME="$PWD"
+          s3="$RUNNER_TEMP/stage3"; s4="$RUNNER_TEMP/stage4"
+          make -C src -j"$(nproc)" PATSOPT="$PWD/bin/patsopt" P2OBJDIR="$s3" P2EXE="$s3/patsopt" patsopt
+          make -C src -j"$(nproc)" PATSOPT="$s3/patsopt" P2OBJDIR="$s4" P2EXE="$s4/patsopt" patsopt
+          cmp bin/patsopt "$s3/patsopt"
+          cmp "$s3/patsopt" "$s4/patsopt"
+          diff -r -I 'The starting compilation time is' --exclude='*.o' --exclude=patsopt "$s3" "$s4"
+          echo "stage 2, stage 3 and stage 4 are bit-identical"
+
+      # the bundle is meant to be a fixed point: the compiler regenerates it
+      # unchanged (a change of the compiler that is not followed by
+      # `make -C src CBOOT` leaves the bundle behind)
+      - name: src/CBOOT is up to date
+        run: |
+          export PATSHOME="$PWD"
+          make -C src CBOOT PATSOPT="$PWD/bin/patsopt"
+          st="$(git status --porcelain -- src/CBOOT)"
+          if [ -n "$st" ]; then
+            echo "::error::src/CBOOT is stale: run 'make -C src CBOOT' and commit the result"
+            echo "$st" | head -40
+            git diff --stat -- src/CBOOT | tail -5
+            exit 1
+          fi
+
+      - name: make -C src test (the md5 suites of the compiler; no -j)
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C src test
+
+  portability:
+    name: ${{ matrix.os }}, ${{ matrix.cc }}${{ matrix.kind == 'intknd' && ', no libgmp' || '' }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    # The macOS entries are not proven: the Makefiles have not been run on
+    # macOS by their author (libgmp comes from Homebrew and is found through
+    # CPATH/LIBRARY_PATH set by the setup action; "gcc" is gcc-14 of Homebrew,
+    # since /usr/bin/gcc of macOS is clang). Their failure is shown but does
+    # not fail the workflow until they have been green once.
+    continue-on-error: ${{ startsWith(matrix.os, 'macos') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, cc: gcc,      kind: gmpknd }
+          - { os: ubuntu-latest, cc: clang,    kind: gmpknd }
+          - { os: ubuntu-latest, cc: gcc,      kind: intknd }
+          - { os: macos-latest,  cc: gcc-14,   kind: gmpknd }
+          - { os: macos-latest,  cc: clang,    kind: gmpknd }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: portability-${{ matrix.cc }}-${{ matrix.kind }}
+
+      # CC is passed to the build of the bundle, of the compiler and (through
+      # the environment) of patscc, so that every C file is compiled by it
+      - name: make bootstrap
+        env:
+          CC: ${{ matrix.cc }}
+        run: |
+          $CC --version | head -2
+          make bootstrap CC="$CC" KIND="${{ matrix.kind }}"
+
+      - name: a hello world (no flags)
+        env:
+          CC: ${{ matrix.cc }}
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          printf 'implement main0 () = println! ("Hello, world!")\n' > "$RUNNER_TEMP/hello.dats"
+          cd "$RUNNER_TEMP" && patscc -o hello hello.dats && ./hello | grep -x 'Hello, world!'
+
+      - name: the type checking of every module of the compiler
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C src check
+
+  suites:
+    name: the suites of the tools and of the examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: suites
+
+      - name: make tools (bootstraps first; atsdoc, pats2xhtml, the libraries)
+        run: make tools
+
+      - name: atsdoc and libatsdoc
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C utils/atsdoc test
+
+      - name: libatsynmark and pats2xhtml
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C utils/libatsynmark test
+
+      - name: the examples and the book code
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C doc -f Makefile_test testall
+
+  documents:
+    name: the documents and the packaging scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: documents
+
+      - name: make tools
+        run: make tools
+
+      - name: the packaging scripts are up to date
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C doc/DISTRIB -f Makefile.gen
           git diff --exit-code -- doc/DISTRIB/Makefile
 
-      - name: the text of the documents is up-to-date
+      - name: the text of the documents is up to date
         run: |
-          export PATSHOME="${PWD}"
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           sh utils/atsdoc/TEST/genall.sh all
+
+  sanitizers:
+    name: AddressSanitizer and UndefinedBehaviorSanitizer
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      # every C file is compiled with the sanitizers: the bundle, the compiler
+      # (CC is the compiler of src/Makefile too) and, since patscc uses $CC,
+      # the programs that the tests compile. -O1 keeps the build fast.
+      CC: gcc -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
+      CFLAGS: -O1
+      P2OPT: -O1
+      ASAN_OPTIONS: detect_leaks=1:abort_on_error=0:strict_string_checks=1
+      UBSAN_OPTIONS: print_stacktrace=1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: sanitizers
+
+      - name: make bootstrap (the whole compiler under the sanitizers)
+        run: make bootstrap
+
+      - name: make -C src test
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C src test
+
+      - name: the examples and the book code
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C doc -f Makefile_test testall
+
+  dist:
+    name: dist, configure, make install
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: dist
+
+      - name: make tools && make dist
+        run: |
+          make tools
+          make dist
+          ls -l doc/DISTRIB/ATS2-Postiats-*.tgz doc/DISTRIB/ATS2-Postiats-*.tgz.sha256
+          cd doc/DISTRIB && for f in ATS2-Postiats-*.tgz.sha256; do sha256sum -c "$f"; done
+
+      # the tarball, unpacked in an empty directory, builds and installs by
+      # itself; the installed tree is then used with nothing but its bin/ in
+      # the PATH (no PATSHOME)
+      - name: ./configure && make && make install, hello world (with libgmp)
+        run: sh .github/scripts/tarball_install.sh "$RUNNER_TEMP" with-gmp
+
+      - name: ./configure --without-gmp && make && make install, hello world
+        run: sh .github/scripts/tarball_install.sh "$RUNNER_TEMP" without-gmp
+
+      - name: make install DESTDIR=... then make uninstall leaves nothing
+        run: sh .github/scripts/destdir_install.sh "$RUNNER_TEMP"

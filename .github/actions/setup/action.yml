@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
+#
+# The pre-requisites of the build of ATS2 on a runner. The first compiler
+# (stage 0) is the tracked bootstrap bundle src/CBOOT, so a C compiler, make,
+# python3 and libgmp are all that is needed: no ATS2 release is downloaded.
+#
+# The only cache is ccache (the C objects of the bundle and of the compiler,
+# keyed by the content of the compiled files, so a stale entry cannot be used;
+# the cache key only decides which entries are restored).
+#
+name: setup
+description: the packages of the build of ATS2 and the ccache cache
+
+inputs:
+  key:
+    description: the name of the job (the ccache cache of a job is its own)
+    required: true
+  packages:
+    description: more apt (Linux) or brew (macOS) packages, separated by spaces
+    required: false
+    default: ""
+  ccache:
+    description: "use ccache (Linux only): 'true' or 'false'"
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: the packages (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          build-essential python3 libgmp-dev autoconf automake ccache ${{ inputs.packages }}
+
+    - name: the packages (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install gmp autoconf automake ${{ inputs.packages }}
+        # <gmp.h> and libgmp are not on the default search paths of the compilers
+        echo "CPATH=$(brew --prefix gmp)/include" >> "$GITHUB_ENV"
+        echo "LIBRARY_PATH=$(brew --prefix gmp)/lib" >> "$GITHUB_ENV"
+
+    - name: ccache
+      if: runner.os == 'Linux' && inputs.ccache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ccache
+        key: ccache-${{ runner.os }}-${{ inputs.key }}-${{ hashFiles('src/CBOOT/**') }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ inputs.key }}-
+
+    - name: ccache in front of the compilers
+      if: runner.os == 'Linux' && inputs.ccache == 'true'
+      shell: bash
+      run: |
+        # /usr/lib/ccache holds gcc, cc, clang, ... that run ccache; CC=gcc and the cc of patscc find them first
+        echo "/usr/lib/ccache" >> "$GITHUB_PATH"
+        echo "CCACHE_MAXSIZE=500M" >> "$GITHUB_ENV"
+        echo "CCACHE_DIR=$HOME/.cache/ccache" >> "$GITHUB_ENV"
