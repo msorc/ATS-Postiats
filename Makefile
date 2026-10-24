@@ -34,7 +34,6 @@
 
 ######
 
-MAKE=make
 DEVL=Makefile_devl
 
 # PATSHOME defaults to the root of this repository

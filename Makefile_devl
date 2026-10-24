@@ -33,7 +33,6 @@
 
 CPF=cp -f
 MVF=mv -f
-MAKE=make
 #
 # PATSHOME is the root of this repository; it defaults to it and it is
 # exported so that the sub-makes (the compiler, the tools and the libraries)
@@ -42,9 +41,12 @@ MAKE=make
 PATSHOME ?= $(abspath $(CURDIR))
 export PATSHOME
 #
-# the number of parallel jobs of the build of src/ (do not use make -j on this
-# Makefile: the steps of utils/atscc must not run in parallel)
+# the number of parallel jobs of the build of src/ (this Makefile itself can
+# also be run with make -j: the steps have their prerequisites; the sub-makes
+# of utils/ and ccomp/atslib are run with -j1 because their goals (and the
+# double-colon rules of one goal) depend on each other without saying so)
 JOBS ?= $(shell nproc 2>/dev/null || echo 4)
+MAKE1=$(MAKE) -j1
 
 ######
 #
@@ -57,7 +59,7 @@ all:: atslib_update
 #
 ######
 #
-src_cleanall: ; make -C src cleanall
+src_cleanall: ; $(MAKE) -C src cleanall
 #
 ######
 #
@@ -65,8 +67,8 @@ bin_patscc: \
 src_patscc; \
 $(MVF) utils/atscc/BUILD/patscc bin/patscc
 #
-src_patscc:: bin_patsopt ; \
-make -C utils/atscc -f Makefile copy build clean
+src_patscc: bin_patsopt ; \
+$(MAKE1) -C utils/atscc -f Makefile copy build clean
 #
 ######
 #
@@ -77,9 +79,8 @@ make -C utils/atscc -f Makefile copy build clean
 bin_patsopt: \
 src_patsopt; \
 $(CPF) src/patsopt bin/patsopt
-src_patsopt: \
-src_cleanall ; \
-make -C src -f Makefile -j$(JOBS) \
+src_patsopt: ; \
+$(MAKE) -C src -f Makefile -j$(JOBS) \
 $(if $(C3NSTRINTKND),C3NSTRINTKND=$(C3NSTRINTKND)) all
 #
 ######
@@ -87,15 +88,15 @@ $(if $(C3NSTRINTKND),C3NSTRINTKND=$(C3NSTRINTKND)) all
 bin_myatscc: \
 src_myatscc; \
 $(MVF) utils/myatscc/BUILD/myatscc bin/myatscc
-src_myatscc: ; \
-make -C utils/myatscc -f Makefile copy build clean
+src_myatscc: bin_patsopt ; \
+$(MAKE1) -C utils/myatscc -f Makefile copy build clean
 #
 ######
 #
-lib_patsopt:: bin_patsopt ; \
-make -C src -f Makefile -j$(JOBS) \
-$(if $(C3NSTRINTKND),C3NSTRINTKND=$(C3NSTRINTKND)) libatsopt.a
-lib_patsopt:: ; $(CPF) src/libatsopt.a ccomp/atslib/lib/.
+lib_patsopt: bin_patsopt ; \
+$(MAKE) -C src -f Makefile -j$(JOBS) \
+$(if $(C3NSTRINTKND),C3NSTRINTKND=$(C3NSTRINTKND)) libatsopt.a && \
+$(CPF) src/libatsopt.a ccomp/atslib/lib/.
 #
 ######
 #
@@ -103,8 +104,8 @@ lib_patsopt:: ; $(CPF) src/libatsopt.a ccomp/atslib/lib/.
 # ATS2 and built on src/libatsopt.a: not part of [all]; use `make -f Makefile_devl
 # bin_pats2xhtml` after [all] (it builds bin/pats2xhtml and utils/libatsynmark/BUILD/libatsynmark.a)
 #
-bin_pats2xhtml: ; \
-make -C utils/libatsynmark -f Makefile install && make -C utils/atsynmark -f Makefile build
+bin_pats2xhtml: lib_patsopt ; \
+$(MAKE1) -C utils/libatsynmark -f Makefile install && $(MAKE1) -C utils/atsynmark -f Makefile build
 #
 ######
 #
@@ -112,13 +113,13 @@ make -C utils/libatsynmark -f Makefile install && make -C utils/atsynmark -f Mak
 # src/libatsopt.a: not part of [all]; use `make -f Makefile_devl bin_atsdoc` after [all]
 # (it builds bin/atsdoc and ccomp/atslib/lib/libatsdoc.a)
 #
-bin_atsdoc: ; \
-make -C utils/atsdoc -f Makefile build libs
+bin_atsdoc: lib_patsopt bin_patscc ; \
+$(MAKE1) -C utils/atsdoc -f Makefile build libs
 #
 ######
 #
-atslib_update:: ; make -C ccomp/atslib -f Makefile
-atslib_cleanall:: ; make -C ccomp/atslib -f Makefile clean
+atslib_update: bin_patscc ; $(MAKE1) -C ccomp/atslib -f Makefile
+atslib_cleanall:: ; $(MAKE1) -C ccomp/atslib -f Makefile clean
 #
 ######
 #
