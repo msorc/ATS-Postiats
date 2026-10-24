@@ -383,3 +383,4 @@ test/t3g1.out2
 test/t3g1.err1
 test/t3g1.err2
 test/d1dump1
+cc_tmp_*/

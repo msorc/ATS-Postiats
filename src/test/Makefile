@@ -13,6 +13,36 @@ export LC_ALL := C
 export PATSHOME := $(abspath ../..)
 PATSCC=patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I..
 M=..
+
+# Parallel build. JOBS (default: the number of processors; JOBS=1 gives the old, fully serial run) is the number of parallel compilations of
+# the "prebuild" step of `all`: it builds, at the same time, every program that the suites run (the C files of ~900 modules), and the rest of `all`
+# (the runs, the comparisons, the md5 sums) stays serial, in the same order, on the programs that are up to date by then. The step has two phases:
+#  1. (serial) everything that is generated, once: the stamps and files of the python generators (they write files that several suites share),
+#     the arena encodings ($(M)/pats_*_gen*.hats, made by `make -C $(M)`), pats_error_sats.c;
+#  2. (make -jJOBS, PREBUILD=1) the programs. patscc writes the C file of `X.dats` as X_dats.c into the CURRENT directory, so two compilations
+#     of a module may run at the same time only if they run in different directories: the objects are made in their own object directory
+#     (`cd xobj && patscc -c`), and the programs that patscc builds from sources are built in a private directory ../cc_tmp_PROGRAM (CCIN: at
+#     the same depth as this directory, so that the "../pats_X.dats" of the sources mean the same file and give the same symbol names).
+# (c3obj_int/c3dump.o is the same program as c3obj/c3dump.o with another define, compiled in a private directory for the same reason.)
+# Without PREBUILD the whole Makefile is serial (.NOTPARALLEL), so that a `make -j N` of the caller cannot run the suites at the same time:
+# they share the generated files, and each run needs the programs of its own step.
+JOBS ?= $(shell nproc 2>/dev/null || echo 4)
+export JOBS
+ifndef PREBUILD
+.NOTPARALLEL:
+endif
+
+# patscc of the sources $(3) (a list of files relative to this directory) into the program $(1), run in the private directory $(M)/cc_tmp_$(1).
+# $(2): options before the sources, $(4): libraries after them.
+CCIN=mkdir -p $(M)/cc_tmp_$(1) && cd $(M)/cc_tmp_$(1) && patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$(M) -I../test -IATS ../test $(2) -o ../test/$(1) $(foreach f,$(3),$(if $(filter ../%,$(f)),$(f),../test/$(f))) $(4)
+
+all: prebuild
+.PHONY: prebuild pregen preexes
+prebuild:
+ifneq ($(JOBS),1)
+	@$(MAKE) --no-print-directory pregen
+	@$(MAKE) --no-print-directory -j$(JOBS) -Otarget PREBUILD=1 preexes
+endif
 TESTS=test_basics test_utils test_intinf test_intinf_int test_counter test_stamp \
       test_error test_symbol test_filename test_location test_errmsg \
       test_label test_fixity test_symmap test_symenv test_syntax test_lexing test_avlmap
@@ -27,51 +57,51 @@ all: $(TESTS) pardump e1xdump treedump d1dump
 	@$(MAKE) --no-print-directory s2test
 
 test_basics: test_basics.dats $(M)/pats_basics.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_utils: test_utils.dats $(M)/pats_utils.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_intinf: test_intinf.dats $(M)/pats_utils.dats $(M)/pats_intinf.dats
-	$(PATSCC) -o $@ $^ -lgmp
+	$(call CCIN,$@,,$^,-lgmp)
 # the gmp-free variant of pats_intinf
 test_intinf_int: test_intinf.dats $(M)/pats_utils.dats $(M)/pats_intinf.dats
-	$(PATSCC) -DATS C3NSTRINTKND=intknd -o $@ $^
+	$(call CCIN,$@,-DATS C3NSTRINTKND=intknd,$^)
 test_counter: test_counter.dats $(M)/pats_counter.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_stamp: test_stamp.dats $(M)/pats_counter.dats $(M)/pats_stamp.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 # a .sats file with exception declarations is compiled by itself
 pats_error_sats.c: $(M)/pats_error.sats
 	patsopt --output $@ --static $<
 test_error: test_error.dats $(M)/pats_error.dats pats_error_sats.c
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_symbol: test_symbol.dats $(M)/pats_symbol.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_filename: test_filename.dats $(M)/pats_utils.dats $(M)/pats_symbol.dats $(M)/pats_filename.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_location: test_location.dats $(M)/pats_utils.dats $(M)/pats_symbol.dats $(M)/pats_filename.dats $(M)/pats_location.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_errmsg: test_errmsg.dats $(M)/pats_utils.dats $(M)/pats_symbol.dats $(M)/pats_filename.dats $(M)/pats_location.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 
 test_label: test_label.dats $(M)/pats_symbol.dats $(M)/pats_label.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_fixity: test_fixity.dats $(M)/pats_utils.dats $(M)/pats_symbol.dats $(M)/pats_filename.dats $(M)/pats_location.dats $(M)/pats_fixity_prec.dats $(M)/pats_fixity_fxty.dats $(M)/pats_error.dats pats_error_sats.c
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_symmap: test_symmap.dats $(M)/pats_symbol.dats $(M)/pats_symmap.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_avlmap: test_avlmap.dats $(M)/pats_avlmap.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 test_symenv: test_symenv.dats $(M)/pats_symbol.dats $(M)/pats_symmap.dats $(M)/pats_symenv.dats
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 
 # reader, lexbuf, lexing, tokbuf
 LEXSRC=$(M)/pats_utils.dats $(M)/pats_symbol.dats $(M)/pats_filename.dats $(M)/pats_location.dats $(M)/pats_basics.dats $(M)/pats_reader.dats $(M)/pats_lexbuf.dats $(M)/pats_lexing_token.dats $(M)/pats_lexing.dats $(M)/pats_lexing_error.dats $(M)/pats_lexing_print.dats $(M)/pats_tokbuf.dats
 # the level-0 syntax: the output is compared with test_syntax.expected
 test_syntax: test_syntax.dats $(M)/pats_label.dats $(M)/pats_syntax.dats $(M)/pats_syntax_print.dats $(LEXSRC)
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 
 test_lexing: test_lexing.dats $(LEXSRC)
-	$(PATSCC) -o $@ $^
+	$(call CCIN,$@,,$^)
 # the token dumper used for the comparison with the ATS1 lexer (see lexcompare)
 lexdump: lexdump.dats $(LEXSRC)
 	$(PATSCC) -o $@ $^
@@ -85,7 +115,7 @@ PARSRC=$(M)/pats_error.dats pats_error_sats.c $(M)/pats_label.dats $(M)/pats_syn
   $(M)/pats_parsing_base.dats $(M)/pats_parsing_e0xp.dats $(M)/pats_parsing_sort.dats $(M)/pats_parsing_staexp.dats \
   $(M)/pats_parsing_p0at.dats $(M)/pats_parsing_dynexp.dats $(M)/pats_parsing_decl.dats $(M)/pats_parsing_toplevel.dats
 pardump: pardump.dats pardump.cats deepdump.hats $(PARSRC)
-	$(PATSCC) -o $@ pardump.dats $(PARSRC)
+	$(call CCIN,$@,,pardump.dats $(PARSRC))
 
 # Validation against the ATS1 parser of src/ (same environment as for lexcompare):
 #   make parcompare CORPUS=corpus.txt
@@ -119,6 +149,7 @@ clean:
 	$(RM) -r s2obj s2obj_asan
 	$(RM) $(TESTS) lexdump lexdump1 pardump pardump1 pardump_asan pardump_o2 e1xdump e1xdump1 e1xdump_asan treedump treedump1 treedump_asan d1dump d1dump1 d1dump_asan d1dump_o2 *_?ats.c *.o
 	$(RM) -r d1obj d1obj_o2 d1obj_asan t1.1.o t1.1.e t1.2.o t1.2.e t1list.txt
+	$(RM) -r $(M)/cc_tmp_*
 
 # ---------------------------------------------------------------------------------------------
 # Level 1: pats_effect, pats_staexp1(_print), pats_dynexp1(_print), pats_e1xpval(_error), pats_trans1_env (the e1xpenv)
@@ -134,14 +165,14 @@ L1SRC=$(M)/pats_effect.dats $(M)/pats_fixity_prec.dats $(M)/pats_fixity_fxty.dat
   $(M)/pats_dynexp1.dats $(M)/pats_dynexp1_print.dats $(M)/pats_e1xpval.dats $(M)/pats_e1xpval_error.dats
 
 e1xdump: e1xdump.dats e1xdump.cats pardump.cats $(PARSRC) $(L1SRC)
-	$(PATSCC) -o $@ e1xdump.dats $(PARSRC) $(L1SRC)
+	$(call CCIN,$@,,e1xdump.dats $(PARSRC) $(L1SRC))
 
 # the tree cases are large and generated: not kept in git
 treecases.hats treecases1.hats: tree1_gen.py
 	python3 tree1_gen.py
 
 treedump: treedump.dats treecases.hats deepdump.hats deepdump_l1.hats pardump.cats $(PARSRC) $(L1TREESRC)
-	$(PATSCC) -o $@ treedump.dats $(PARSRC) $(L1TREESRC)
+	$(call CCIN,$@,,treedump.dats $(PARSRC) $(L1TREESRC))
 
 # AddressSanitizer builds (no error, no leak expected, except the linear environments of an evaluation that aborts)
 e1xdump_asan: e1xdump.dats e1xdump.cats pardump.cats $(PARSRC) $(L1SRC)
@@ -1030,8 +1061,8 @@ c3obj_int/%_dats.o: $(M)/%.dats $(C3GENHATS)
 	@mkdir -p c3obj_int
 	cd c3obj_int && $(PATSCCA) -DATS C3NSTRINTKND=intknd -c -o $(notdir $@) $(abspath $<)
 c3obj_int/c3dump.o: c3dump.dats c3gen.stamp $(C3HATS) $(C3GENHATS) $(M)/pats_constraint3_icnstr.dats $(M)/pats_lintprgm.dats $(M)/pats_lintprgm_print.dats $(M)/pats_lintprgm_myint.dats
-	@mkdir -p c3obj_int
-	$(PATSCCA) -DATS C3NSTRINTKND=intknd -I$(abspath .) -c -o $@ $<
+	@mkdir -p c3obj_int $(M)/cc_tmp_c3dump_int
+	cd $(M)/cc_tmp_c3dump_int && $(PATSCCA) -DATS C3NSTRINTKND=intknd -I$(abspath .) -IATS $(abspath .) -c -o $(abspath $@) ../test/c3dump.dats
 $(foreach d,c3obj_int,$(eval $(d)/pats_error_sats.o: pats_error_sats.c))
 c3obj_int/pats_error_sats.o c3obj_int/c3drv.o: c3obj_int/%.o: %.c
 	@mkdir -p c3obj_int
@@ -1137,3 +1168,23 @@ drvopt:
 	python3 -I drvopt.py comtable.txt
 	python3 -I drvopt.py drvtable.txt
 .PHONY: drvfiles drvopt
+
+# ---------------------------------------------------------------------------------------------------------------------------------
+# The prebuild step of `all` (see the top of this file): phase 1 `pregen` (serial), phase 2 `preexes` (make -j$(JOBS), PREBUILD=1).
+# Everything that the runs of `all` need is built here, by the rules of the suites themselves, so the serial part finds it up to date
+# (the *_exe targets are phony and are only relinked). The suites that have a Makefile of their own (lp hs hd cc1 cc ca cc2 ccb) build
+# in a staging directory, with their own parallel compilations (JOBS), when `all` runs them; t3g1 and g2 are built from here.
+PREGEN=s2gen.stamp d2gen.stamp m2gen.stamp cggen.stamp t3gen.stamp t3g3gen.stamp g4gen.stamp c3gen.stamp j2gen.stamp \
+  t2dd.hats f3dd.hats deepdump_t1.hats treecases.hats pats_error_sats.c $(sort $(T3GENHATS) $(C3OWNHATS))
+pregen: $(PREGEN)
+	$(MAKE) --no-print-directory -f t3g1.mk t3g1gen.stamp
+	python3 g2_gen.py
+PREEXES=$(TESTS) pardump e1xdump treedump d1dump t2dump f3dump tooldump comdump \
+  s2dump_exe d2dump_exe m2dump_exe cgdump_exe t3dump_exe t3g3dump_exe g4dump_exe c3dump_exe c3dump_int_exe j2dump_exe \
+  prebuild_t3g1 prebuild_g2
+preexes: $(PREEXES)
+prebuild_t3g1:
+	$(MAKE) --no-print-directory -f t3g1.mk t3g1dump
+prebuild_g2:
+	sh g2build.sh
+.PHONY: prebuild_t3g1 prebuild_g2

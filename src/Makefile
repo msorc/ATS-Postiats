@@ -3,7 +3,8 @@
 #
 #   all          builds ./patsopt and ./libatsopt.a with the stage-0 compiler $(PATSOPT)       (make -j N helps)
 #   check        typecheck every .sats/.dats of the compiler (needs only $(PATSOPT))
-#   test         check + the unit tests and the md5 suites of test/ (no ATS1; needs bin/patscc: build with Makefile_devl first; no -j)
+#   test         check + the unit tests and the md5 suites of test/ (no ATS1; needs bin/patscc: build with Makefile_devl first);
+#                the programs of the suites are compiled JOBS at a time (default: nproc; JOBS=1: serial); the runs are always serial, so a -j N is ignored
 #   CBOOT        generate the bootstrap C bundle src/CBOOT/ (README there)
 #   clean, cleanall
 #
@@ -180,8 +181,14 @@ checksats:
 checkdats:
 	@for f in $(DATS); do echo "typecheck $$f"; $(PATSOPT) --typecheck -d $$f >/dev/null || exit 1; done
 
+# JOBS: the number of parallel compilations in test/Makefile (the runs and the md5 comparisons are serial: see there)
+JOBS ?= $(shell nproc 2>/dev/null || echo 4)
+# `make -j N test`: check, then the suites, one after the other (the parallel part is in test/, with JOBS)
+ifneq ($(filter test,$(MAKECMDGOALS)),)
+.NOTPARALLEL:
+endif
 test:: check
-	PATH="$(PATSHOME)/bin:$$PATH" $(MAKE) -C test all
+	PATH="$(PATSHOME)/bin:$$PATH" $(MAKE) -C test all JOBS=$(JOBS)
 
 clean::
 	$(RM) *_?ats.c *.o $(GENHATS)
