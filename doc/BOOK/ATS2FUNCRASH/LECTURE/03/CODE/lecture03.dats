@@ -3,14 +3,14 @@
 #include
 "share/atspre_staload.hats"
 //
-(*
-//
-// Not needed here:
-//
-#include
-"share/atspre_staload_libats_ML.hats"
-//
-*)
+(* ****** ****** *)
+
+fun
+fact(n: int): int =
+if n > 0 then n * fact(n-1) else 1
+
+val () = println! ("fact(10) = ", fact(10))
+
 (* ****** ****** *)
 
 fun
@@ -23,7 +23,7 @@ if i < n
 // end of [if]
 //
 in
-  loop(0, n)
+  loop(0, 1)
 end // end of [fact2]
 
 (* ****** ****** *)
@@ -49,6 +49,26 @@ end // end of [testfact2]
 (* ****** ****** *)
 
 val () = testfact2(100)
+
+(* ****** ****** *)
+
+fun
+f91(n: int): int =
+  if n > 100 then n-10 else f91(f91(n+11))
+
+val () = println! ("f91(50) = ", f91(50))
+
+(* ****** ****** *)
+
+fnx
+isevn(n: int): bool =
+if n > 0 then isodd(n-1) else true
+//
+and
+isodd(n: int): bool =
+if n > 0 then isevn(n-1) else false
+
+val () = println! ("isevn(1000000) = ", isevn(1000000))
 
 (* ****** ****** *)
 

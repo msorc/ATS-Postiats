@@ -70,7 +70,7 @@ if i < n
 // end of [if]
 //
 in
-  loop(0, n)
+  loop(0, 1)
 end // end of [fact2]
 //
 ')
@@ -87,7 +87,7 @@ caller). Let us take a look at another example:
 //
 fun
 f91(n: int): int =
-  if x > 100 then x-10 else f91(f91(x+11))
+  if n > 100 then n-10 else f91(f91(n+11))
 //
 ')
 
@@ -117,12 +117,12 @@ it is executed.\
 In ATS, mutually recursive functions can be defined by simply
 joining a sequence of function definitions together. For instance,
 the functions #dyncode("isevn") and #dyncode("isodd") are defined
-mutually recursively in the following code:
-
+mutually recursively in the following code (the keyword
+#keycode("fnx") is explained below):
 
 #dats2xhtml('\
 //
-fun
+fnx
 isevn(n: int): bool =
 if n > 0 then isodd(n-1) else true
 //
@@ -138,7 +138,9 @@ definitions.  The call to #dyncode("isodd") in the body of
 #dyncode("isevn") in the body of #dyncode("isodd").  In order for the
 ATS compiler to recognize that these two calls are tail-recursive
 calls (and thus can be translated into local jumps), the keyword
-#keycode("fun") needs to be replaced with #keycode("fnx").
+#keycode("fnx") is used in place of #keycode("fun"). With
+#keycode("fun"), the compiler does not turn these mutual calls into jumps and
+a call such as #dyncode("isevn(1000000)") may overflow the stack.
 
 ")
 
