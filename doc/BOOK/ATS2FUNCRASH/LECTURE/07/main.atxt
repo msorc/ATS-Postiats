@@ -16,437 +16,570 @@ Time of Generation: #timestamp()\
 <chapter
  id="lecture07">
 #title("Functional List-Processing (3)")
-#para("\
-\
-#emphasis("Historical note:") this lecture describes the functional lists of
-the GC era of ATS2 (the type #stacode("list0")). The type #stacode("list0")
-was removed when the support for the garbage collector was dropped: the
-compiler now rejects every nonlinear heap allocation. Use #stacode("list_vt")
-(a linear list) instead; its interface is in
-#myatscodelink("prelude/SATS/list_vt.sats", "prelude/SATS/list_vt.sats").
-\
-")
 
-#para("\
+#para('\
 
 In this chapter, I intend to present a few more list-processing
 functions. More importantly, I would like to argue for the practice of
 actively identifying the need for generic list-processing functions
-during problem-solving.
+during problem-solving. As in the previous chapters, the lists are
+linear lists: a function borrows the lists it reads and constructs the lists
+it returns, which are to be freed by the caller; a list of lists is
+linear, too, and it has to be freed as a whole.
 
-")
+')
 
-#para("\
+#para('\
 
 There are many useful list-processing functions for handling two lists
-simultaneously. For instance, the following function #dyncode("list0_zip")
-takes a pair of lists and returns a list of pairs:
+simultaneously. For instance, the following function #dyncode("list_zip")
+takes a pair of lists and returns a list of pairs (the pairs are flat tuples):
 
 #dats2xhtml('\
 //
 extern
-fun {
-a,b:t@ype
-} list0_zip
-  (xs: list0(a), ys: list0(b)): list0($tup(a, b))
+fun
+{a,b:t@ype}
+list_zip
+  {m,n:nat}
+( xs: !list_vt(a, m)
+, ys: !list_vt(b, n)): List0_vt(@(a, b))
 //
 implement
-{a,b}
-list0_zip(xs, ys) =
+{a,b}(*tmp*)
+list_zip(xs, ys) =
 (
-case xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x, xs) =>
+case+ xs of
+| list_vt_nil() =>
+  list_vt_nil()
+| list_vt_cons(x, xs) =>
   (
     case+ ys of
-    | list0_nil() =>
-      list0_nil()
-    | list0_cons(y, ys) =>
-      list0_cons($tup(x, y), list0_zip<a,b>(xs, ys))
+    | list_vt_nil() =>
+      list_vt_nil()
+    | list_vt_cons(y, ys) =>
+      list_vt_cons(@(x, y), list_zip<a,b>(xs, ys))
   )
 )
 //
 ')
 
 For instance, given two lists
-#dyncode("(1, 3, 5)") and #dyncode("(2, 4)"), #dyncode("list0_zip")
-returns the list consisting of #dyncode("$tup(1, 2)") and
-#dyncode("$tup(3,4)").  Note that #dyncode("$tup") is a keyword in ATS
-(for constructing tuples). For a list-processing function handling one
+#dyncode("(1, 3, 5)") and #dyncode("(2, 4)"), #dyncode("list_zip")
+returns the list consisting of #dyncode("@(1, 2)") and
+#dyncode("@(3,4)").  Note that #dyncode("@(...)") is the notation for
+constructing flat tuples. The dependent types #stacode("list_vt(a, m)") and
+#stacode("list_vt(b, n)") in the interface tell that the arguments are
+lists of lengths m and n; the length of the result is not specified as it is
+the smaller of m and n. For a list-processing function handling one
 list, there is often a meaningful variant that essentially acts like
 passing to the list-processing function a list of pairs obtained from
-applying #dyncode("list0_zip") to two given lists. As an example,
-the following function #dyncode("list0_map2") is such a variant
-of #dyncode("list0_map"):
+applying #dyncode("list_zip") to two given lists. As an example,
+the following function #dyncode("list_map2") is such a variant
+of #dyncode("list_map"):
 
 #dats2xhtml('\
 //
 extern
-fun
-{a
-,b:t@ype}
-{c:t@ype}
-list0_map2
-(xs: list0(a), ys: list0(b), fopr: cfun(a, b, c)): list0(c)
+fun {
+a,b:t@ype}{c:t@ype
+} list_map2
+( xs: !List0_vt(a)
+, ys: !List0_vt(b)
+, fopr: &(a, b) -<clo1> c): List0_vt(c)
 //
 implement
 {a,b}{c}
-list0_map2
+list_map2
 (xs, ys, fopr) =
 (
-case xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x, xs) =>
+case+ xs of
+| list_vt_nil() =>
+  list_vt_nil()
+| list_vt_cons(x, xs) =>
   (
     case+ ys of
-    | list0_nil() =>
-      list0_nil()
-    | list0_cons(y, ys) =>
-      list0_cons(fopr(x, y), list0_map2<a,b><c>(xs, ys, fopr))
-  ) (* end of [list0_cons] *)
+    | list_vt_nil() =>
+      list_vt_nil()
+    | list_vt_cons(y, ys) =>
+      list_vt_cons(fopr(x, y), list_map2<a,b><c>(xs, ys, fopr))
+  ) (* end of [list_vt_cons] *)
 )
 //
 ')
 
 For instance, given two lists
 #dyncode("(1, 3, 5)") and #dyncode("(2, 4, 6)")
-and the multiplication function, #dyncode("list0_map2") returns the
-list #dyncode("(2, 12, 30)"). Sometimes, #dyncode("list0_map2") is
-referred to as #dyncode("list0_zipwith").
+and the multiplication function, #dyncode("list_map2") returns the
+list #dyncode("(2, 12, 30)"). Sometimes, #dyncode("list_map2") is
+referred to as #dyncode("list_zipwith").
 
-")
+')
 
-#para("\
+#para('\
 
 There are various list-processing functions operating on ordered
-lists. For instance, the following function #dyncode("list0_merge") is
-for merging two ordered lists into one:
-  
+lists. For instance, the following function #dyncode("list_merge") is
+for merging two ordered lists into one. The type of the function tells that the
+length of the result is the sum of the lengths of the two arguments, which are
+only borrowed (the elements are copied to the result):
+
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_merge
-( xs: list0(a)
-, ys: list0(a), cmp: cfun(a, a, int)): list0(a)
+list_merge
+  {m,n:nat}
+( xs: !list_vt(a, m)
+, ys: !list_vt(a, n)
+, cmp: &(a, a) -<clo1> int): list_vt(a, m+n)
 //
 implement
 {a}(*tmp*)
-list0_merge
+list_merge
 (xs0, ys0, cmp) = let
 //
 fun
 auxlst
-( xs0: list0(a)
-, ys0: list0(a)
-) : list0(a) = (
+{m,n:nat}
+( xs0: !list_vt(a, m)
+, ys0: !list_vt(a, n)
+, cmp: &(a, a) -<clo1> int
+) : list_vt(a, m+n) = (
 //
 case+ xs0 of
-| list0_nil() => ys0
-| list0_cons
+| list_vt_nil() => list_vt_copy<a>(ys0)
+| list_vt_cons
     (x1, xs1) => (
     case+ ys0 of
-    | list0_nil() => xs0
-    | list0_cons
+    | list_vt_nil() => list_vt_copy<a>(xs0)
+    | list_vt_cons
         (y1, ys1) => let
         val sgn = cmp(x1, y1)
       in
         if (sgn <= 0)
-          then list0_cons(x1, auxlst(xs1, ys0))
-          else list0_cons(y1, auxlst(xs0, ys1))
+          then list_vt_cons(x1, auxlst(xs1, ys0, cmp))
+          else list_vt_cons(y1, auxlst(xs0, ys1, cmp))
         // end of [if]
-      end // end of [list0_cons]
-  ) (* end of [list0_cons] *)
+      end // end of [list_vt_cons]
+  ) (* end of [list_vt_cons] *)
 //
 ) (* end of [auxlst] *)
 //
 in
-  auxlst(xs0, ys0)
-end // end of [list0_merge]
+  auxlst(xs0, ys0, cmp)
+end // end of [list_merge]
 //
 ')
 
-With #dyncode("list0_merge"), we can readily implement
-as follows the well-known mergesort algorithm to sort a given
-list0-value:
+Both #dyncode("list_take(xs, k)") and #dyncode("list_drop(xs, k)") are given
+dependent types, which tell that #dyncode("k") is at most the length of
+#dyncode("xs"). The former returns the prefix of
+#dyncode("xs") that is of length #dyncode("k") and the latter the suffix of #dyncode("xs")
+that excludes the first #dyncode("k") elements of #dyncode("xs"); both construct
+a new list. (In the GC era, the functions were partial and raised exceptions
+when the number of elements was out of range.)
 
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_mergesort
-(xs: list0(a), cmp: cfun(a, a, int)): list0(a)
+list_take
+  {n,k:nat | k <= n}
+(xs: !list_vt(a, n), k: int(k)): list_vt(a, k)
+//
+extern
+fun
+{a:t@ype}
+list_drop
+  {n,k:nat | k <= n}
+(xs: !list_vt(a, n), k: int(k)): list_vt(a, n-k)
 //
 implement
 {a}(*tmp*)
-list0_mergesort
+list_take(xs, k) =
+(
+if k > 0
+  then let
+    val+list_vt_cons(x, xs) = xs
+  in
+    list_vt_cons(x, list_take<a>(xs, k-1))
+  end
+  else list_vt_nil()
+)
+//
+implement
+{a}(*tmp*)
+list_drop(xs, k) =
+(
+if k > 0
+  then let
+    val+list_vt_cons(_, xs) = xs
+  in
+    list_drop<a>(xs, k-1)
+  end
+  else list_vt_copy<a>(xs)
+)
+//
+')
+
+With #dyncode("list_merge"), we can readily implement
+as follows the well-known mergesort algorithm to sort a given
+list:
+
+#dats2xhtml('\
+//
+extern
+fun
+{a:t@ype}
+list_mergesort
+(xs: !List0_vt(a), cmp: &(a, a) -<clo1> int): List0_vt(a)
+//
+implement
+{a}(*tmp*)
+list_mergesort
   (xs, cmp) = let
 //
 // [msort]:
-// It is assumed
-// that length(xs) = n
+// the second argument is the length of the first one
 //
 fun
 msort
-(xs: list0(a), n: int): list0(a) =
+{n:nat}
+( xs: !list_vt(a, n)
+, n: int(n)
+, cmp: &(a, a) -<clo1> int): list_vt(a, n) =
 if
 (n >= 2)
 then let
   val n1 = n / 2
-  val xs1 = list0_take_exn(xs, n1)
-  val xs2 = list0_drop_exn(xs, n1)
+  val xs1 = list_take<a>(xs, n1)
+  val xs2 = list_drop<a>(xs, n1)
+  val ys1 = msort(xs1, n1, cmp)
+  val ys2 = msort(xs2, n-n1, cmp)
+  val res = list_merge<a>(ys1, ys2, cmp)
+  val () = list_vt_free<a>(xs1)
+  val () = list_vt_free<a>(xs2)
+  val () = list_vt_free<a>(ys1)
+  val () = list_vt_free<a>(ys2)
 in
-  list0_merge<a>(msort(xs1, n1), msort(xs2, n-n1), cmp)
+  res
 end // end of [then]
-else (xs) // end of [else]
+else list_vt_copy<a>(xs) // end of [else]
 //
 in
-  msort(xs, list0_length<a>(xs))
-end // end of [list0_mergesort]
+  msort(xs, list_length<a>(xs), cmp)
+end // end of [list_mergesort]
 //
 ')
 
-Note that #dyncode("list0_take_exn(xs, n)") returns the prefix of
-#dyncode("xs") that is of length #dyncode("n") and
-#dyncode("list0_drop_exn(xs, n)") returns the suffix of #dyncode("xs")
-that excludes the first #dyncode("n") elements of #dyncode("xs").  It
-is guaranteed that #dyncode("list0_mergesort") is log-linear (that is,
+It is guaranteed that #dyncode("list_mergesort") is log-linear (that is,
 it is of O(n(log(n)))-time for n being the length of its
-argument). Also, #dyncode("list0_mergesort") is stable in the sense
+argument). Also, #dyncode("list_mergesort") is stable in the sense
 that the order of the elements considered equal in the input is not
-changed in the output.  Clearly, #dyncode("list0_merge") is not
+changed in the output. All of the intermediate lists are freed as soon as they
+are no longer needed, and the sorted list is returned. Clearly,
+#dyncode("list_merge") is not
 tail-recursive, potentially running the risk of stack overflow when
-#dyncode("list0_mergesort") is applied to a long list (e.g., one
+#dyncode("list_mergesort") is applied to a long list (e.g., one
 containing 1 million elements). This is a very serious issue with
 non-tail-recursion in practice, and some approaches to addressing it are
-to be presented later.
+to be presented later. In practice, a linear list can be sorted in place
+without copying its elements, by the function #dyncode("list_vt_mergesort") of the
+prelude, which consumes its argument, and the functions of this chapter are
+meant to show how functional list-processing is done.
 
-")
+')
 
-#para("\
+#para('\
 
 During problem-solving, it often pays if one actively looks for
 opptunities to generalize a specific function into one that can be
 given a meaningful description in a broader context. As an example, if
 one encounters a need to process all of the pairs formed with elements
 chosen from a given list, then one may want to implement the following
-function #dyncode("list0_choose2"):
+function #dyncode("list_choose2"):
 
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_choose2
-(xs: list0(a)): list0($tup(a, a))
+list_choose2
+(xs: !List0_vt(a)): List0_vt(@(a, a))
 //
 implement
 {a}(*tmp*)
-list0_choose2
+list_choose2
   (xs) = let
 //
-typedef aa = $tup(a, a)
+typedef aa = @(a, a)
 //
 in
 //
 case+ xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x0, xs) =>
-  list0_append<aa>
-  (list0_map<a><aa>(xs, lam(x) => $tup(x0, x)), list0_choose2(xs))
+| list_vt_nil() =>
+  list_vt_nil()
+| list_vt_cons(x0, xs) => let
+    var fopr = lam@(x: a): aa => @(x0, x)
+    val res1 = list_map<a><aa>(xs, fopr)
+    val res2 = list_choose2<a>(xs)
+  in
+    list_vt_append<aa>(res1, res2)
+  end // end of [list_vt_cons]
 //
-end // end of [list0_choose2]
+end // end of [list_choose2]
 //
 ')
 
 For instance, given the list #dyncode("(1, 2, 3)"),
-#dyncode("list0_choose2") returns the list of 3 pairs: #dyncode("(1,
+#dyncode("list_choose2") returns the list of 3 pairs: #dyncode("(1,
 2)"), #dyncode("(1, 3)"), and #dyncode("(2, 3)"). And
-#dyncode("list0_choose2") can be further generalized into the
-following function #dyncode("list0_nchoose") for listing all of the
+#dyncode("list_choose2") can be further generalized into the
+following function #dyncode("list_nchoose") for listing all of the
 tuples of a given length that are formed with elements chosen from a
-given list:
+given list. A list of lists is linear and the elements of the result are
+lists that are all owned by the result; the function
+#dyncode("lists_free") frees such a result, and the function #dyncode("list_mapcons")
+consumes the list of lists that is passed to it and prepends its first argument to
+each element in it:
 
-")
-
-#para("\
+#dats2xhtml('\
+//
+// A list of lists is linear and it is freed (or consumed) as a whole
+//
+fun
+{a:t@ype}
+lists_free
+(xss: List0_vt(List0_vt(a))): void =
+(
+case+ xss of
+| ~list_vt_nil() => ()
+| ~list_vt_cons(xs, xss) => (list_vt_free<a>(xs); lists_free<a>(xss))
+)
+//
+// [list_mapcons] consumes its second argument:
+// the first argument is added to the front of each list in it
+//
+extern
+fun
+{a:t@ype}
+list_mapcons
+(x0: a, xss: List0_vt(List0_vt(a))): List0_vt(List0_vt(a))
+//
+implement
+{a}(*tmp*)
+list_mapcons(x0, xss) =
+(
+case+ xss of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(xs, xss) =>
+  list_vt_cons(list_vt_cons(x0, xs), list_mapcons<a>(x0, xss))
+)
+//
+')
 
 #dats2xhtml('\
 //
 extern
 fun
 {a:t@ype}
-list0_nchoose
-(xs: list0(a), n: int): list0(list0(a))
+list_nchoose
+(xs: !List0_vt(a), n: int): List0_vt(List0_vt(a))
 //
 implement
 {a}(*tmp*)
-list0_nchoose
+list_nchoose
   (xs, n) =
   auxlst(xs, n) where
 {
 //
-typedef xs = list0(a)
+vtypedef xs = List0_vt(a)
 //
 fun
 auxlst
 (
-xs: xs, n: int
-) : list0(xs) =
+xs: !xs, n: int
+) : List0_vt(xs) =
 (
 if
 (n <= 0)
 then
-list0_sing(list0_nil())
+list_vt_sing(list_vt_nil())
 else
 (
 case+ xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x0, xs) =>
-  list0_append<xs>(list0_mapcons(x0, auxlst(xs, n-1)), auxlst(xs, n))
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x0, xs) =>
+  list_vt_append<xs>(list_mapcons<a>(x0, auxlst(xs, n-1)), auxlst(xs, n))
 ) (* end of [else] *)
 )
 //
-} (* end of [list0_nchoose] *)
+} (* end of [list_nchoose] *)
 //
 ')
+
+')
+
+#para('\
 
 Sometimes, we may need to process tuples consisting of elements
 chosen from a given list as well as the complements of these tuples.
-The following function #dyncode("list0_nchoose_rest") generalizes
-#dyncode("list0_nchoose") in this regard:
+The following function #dyncode("list_nchoose_rest") generalizes
+#dyncode("list_nchoose") in this regard. The elements of the result are
+flat tuples that contain two linear lists, and the result is consumed
+step by step by the two helper functions (a pattern in a flat tuple opens it):
 
 #dats2xhtml('\
+//
+// [list_nchoose_rest] is a generalization of [list_nchoose]:
+// the pairs are flat tuples, which consist of two linear lists
 //
 extern
 fun
 {a:t@ype}
-list0_nchoose_rest
-(xs: list0(a), n: int): list0($tup(list0(a), list0(a)))
+list_nchoose_rest
+(xs: !List0_vt(a), n: int): List0_vt(@(List0_vt(a), List0_vt(a)))
 //
 implement
 {a}(*tmp*)
-list0_nchoose_rest
+list_nchoose_rest
   (xs, n) =
   auxlst(xs, n) where
 {
 //
-typedef xs = list0(a)
-typedef xsxs = $tup(xs, xs)
+vtypedef xs = List0_vt(a)
+vtypedef xsxs = @(xs, xs)
+//
+// the first component of each pair of a list is extended
+//
+fun
+cons1
+(x0: a, res: List0_vt(xsxs)): List0_vt(xsxs) =
+(
+case+ res of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(@(xs1, xs2), res) =>
+  list_vt_cons(@(list_vt_cons(x0, xs1), xs2), cons1(x0, res))
+)
+//
+// the second component of each pair of a list is extended
+//
+fun
+cons2
+(x0: a, res: List0_vt(xsxs)): List0_vt(xsxs) =
+(
+case+ res of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(@(xs1, xs2), res) =>
+  list_vt_cons(@(xs1, list_vt_cons(x0, xs2)), cons2(x0, res))
+)
 //
 fun
 auxlst
 (
-xs: xs, n: int
-) : list0(xsxs) =
+xs: !xs, n: int
+) : List0_vt(xsxs) =
 (
 if
 (n <= 0)
 then
-list0_cons
-($tup(list0_nil(), xs), list0_nil())
+list_vt_cons(@(list_vt_nil(), list_vt_copy<a>(xs)), list_vt_nil())
 else
 (
 case+ xs of
-| list0_nil() =>
-  list0_nil()
-| list0_cons(x0, xs) => let
-    val res1 =
-    list0_map<xsxs><xsxs>
-    ( auxlst(xs, n-1)
-    , lam($tup(xs1, xs2)) => $tup(list0_cons(x0, xs1), xs2)
-    )
-    val res2 =
-    list0_map<xsxs><xsxs>
-    ( auxlst(xs, n-0)
-    , lam($tup(xs1, xs2)) => $tup(xs1, list0_cons(x0, xs2))
-    )
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x0, xs) => let
+    val res1 = cons1(x0, auxlst(xs, n-1))
+    val res2 = cons2(x0, auxlst(xs, n-0))
   in
-    list0_append<xsxs>(res1, res2)
-  end // end of [list0_cons]
+    list_vt_append<xsxs>(res1, res2)
+  end // end of [list_vt_cons]
 ) (* end of [else] *)
 )
 //
-} (* end of [list0_nchoose_rest] *)
+} (* end of [list_nchoose_rest] *)
+//
 ')
 
 For instance, given the list #dyncode("(1, 2, 3)") and integer
-#dyncode("2"), #dyncode("list0_choose_rest") returns the list of 3
-pairs: #dyncode("$tup((1, 2), (3))"), #dyncode("$tup((1, 3), (2))"),
-and #dyncode("$tup((2, 3), (1))").
+#dyncode("2"), #dyncode("list_nchoose_rest") returns the list of 3
+pairs: #dyncode("@((1, 2), (3))"), #dyncode("@((1, 3), (2))"),
+and #dyncode("@((2, 3), (1))").
 
-")
+')
 
-#para("\
+#para('\
 
 The problem of enumerating all of the permutations of a given
-list is often used to test one's ability in constructing
+list is often used to test one\'s ability in constructing
 recursively defined functions. Let us see a solution to this
 problem given as follows:
 
 #dats2xhtml('\
 //
+extern
 fun
 {a:t@ype}
-list0_permute
-(
-xs: list0(a)
-) : list0(list0(a)) =
-(
+list_permute
+(xs: !List0_vt(a)): List0_vt(List0_vt(a))
+//
+implement
+{a}(*tmp*)
+list_permute
+  (xs) = (
 case+ xs of
-| list0_nil() =>
-  list0_cons(nil0(), nil0())
-| list0_cons _ => let
-    typedef xs = list0(a)
-    typedef out = list0(xs)
-    typedef inp = $tup(xs, xs)
-  in
-    list0_concat<xs>
+| list_vt_nil() =>
+  list_vt_sing(list_vt_nil())
+| list_vt_cons _ => let
+    vtypedef xs = List0_vt(a)
+    vtypedef xsxs = @(xs, xs)
+//
+    fun
+    auxlst
+    (yszs: List0_vt(xsxs)): List0_vt(xs) =
     (
-     list0_map<inp><out>
-     ( list0_nchoose_rest<a>(xs, 1)
-     , lam($tup(ys, zs)) => list0_mapcons<a>(ys[0], list0_permute<a>(zs))
-     )
-    ) (* list0_concat *)
-  end (* end of [list0_cons] *)
+      case+ yszs of
+      | ~list_vt_nil() => list_vt_nil()
+      | ~list_vt_cons(@(ys, zs), yszs) => let
+          val-~list_vt_cons(y, ys) = ys
+          val () = list_vt_free<a>(ys)
+          val res = list_mapcons<a>(y, list_permute<a>(zs))
+          val () = list_vt_free<a>(zs)
+        in
+          list_vt_append<xs>(res, auxlst(yszs))
+        end // end of [list_vt_cons]
+    ) (* end of [auxlst] *)
+//
+  in
+    auxlst(list_nchoose_rest<a>(xs, 1))
+  end (* end of [list_vt_cons] *)
 )
 //
 ')
 
 For instance, given the list #dyncode("(1, 2, 3)"),
-#dyncode("list0_permute") returns a list of length 6 in which each
+#dyncode("list_permute") returns a list of length 6 in which each
 element is a permutation of #dyncode("(1, 2, 3)").  Note that
-#dyncode("ys[0]") refers to the first element in #dyncode("ys") and
-#dyncode("list0_mapcons") prepends its first argument to each element
-in its second argument (which is a list of lists). A demo
-of #dyncode("list0_permute") can be seen by following this <ulink
+the first element of the pair in each element of
+the list returned by #dyncode("list_nchoose_rest(xs, 1)") is a list of length 1:
+its only element is
+used for a permutation of the rest, and the temporary lists are freed.
+A demo of the GC-era #dyncode("list_permute") can be seen by following this <ulink
 url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07/CODE/Permute.html\">link</ulink>.
 
-")
+')
 
-#para("\
+#para('\
 
 Please find #mycodelink("LECTURE/07/CODE", "on-line") the entirety of
-the code used in this chapter. The mentioned URL link(s) can be found as follows:
+the code used in this chapter. The test in #filename("lecture07.dats") was
+compiled with #command("patscc") (no flag is needed) and run with the address
+sanitizer, which reports no leak. \
 
-<itemizedlist>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07/CODE/Permute.html\">https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07/CODE/Permute.html</ulink>
-")#comment("para")
-</listitem>
-
-</itemizedlist>
-
-")#comment("para")
+')#comment("para")
 
 </chapter><!--id="lecture07"-->
 
@@ -457,4 +590,3 @@ url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07/CODE/Permute.h
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
