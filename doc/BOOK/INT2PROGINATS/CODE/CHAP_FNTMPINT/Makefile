@@ -11,44 +11,42 @@ PATSOPT=$(PATSHOME)/bin/patsopt
 
 ######
 
-ATSCNTRB=$(PATSHOME)/contrib/atscntrb
-
-######
-
 CFLAGS :=
 CFLAGS += -O2
-CFLAGS += -D_GNU_SOURCE -DATS_MEMALLOC_LIBC
 
 ######
 #
+all:: gnumber
+all:: myprint
+all:: list_map
+all:: loopcons
+all:: intfloat
 #
-#
-#
-######
-#
-all:: \
-gnumber
-gnumber: \
-gnumber.dats ; \
-$(PATSCC) -I$(ATSCNTRB) $(CFLAGS) -o $@ $< -lgmp
-regress:: \
-gnumber ; ./gnumber
-#
+gnumber: gnumber.dats ; \
+$(PATSCC) $(CFLAGS) -o $@ $<
+regress:: gnumber ; ./gnumber
 cleanall:: ; $(RMF) gnumber
 #
-######
+myprint: myprint.dats ; \
+$(PATSCC) $(CFLAGS) -o $@ $<
+regress:: myprint ; ./myprint
+cleanall:: ; $(RMF) myprint
 #
+list_map: list_map.dats ; \
+$(PATSCC) $(CFLAGS) -o $@ $<
+regress:: list_map ; ./list_map
+cleanall:: ; $(RMF) list_map
 #
+loopcons: loopcons.dats ; \
+$(PATSCC) $(CFLAGS) -o $@ $<
+regress:: loopcons ; ./loopcons
+cleanall:: ; $(RMF) loopcons
 #
+intfloat: intfloat.dats ; \
+$(PATSCC) $(CFLAGS) -o $@ $<
+regress:: intfloat ; ./intfloat
+cleanall:: ; $(RMF) intfloat
 #
-######
-#
-#
-#
-#
-######
-
-
 ######
 
 RMF=rm -f

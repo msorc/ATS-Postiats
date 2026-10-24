@@ -25,7 +25,7 @@ provide a general approach to code reuse in ATS that is highly flexible (in
 terms of applicability) while incurring minimal run-time overhead if
 any. Both ATSPRE (that is, ATSLIB/prelude) and ATSLIB/libats are nearly
 entirely template-based, and the templates in these libraries are for use
-by #command("atsopt") to generate C code that implements template
+by #command("patsopt") to generate C code that implements template
 instances in the ATS source being compiled. The library files of ATS for
 linking (#filename("libatslib.a") and #filename("libatslib.so")) are minimal, and
 they are not even necessary for compiling ATS source into executable binaries.
@@ -54,10 +54,12 @@ templates can do much more than just supporting parametric polymorphism.
 Let #dyncode("myprint") be a function template of the following interface:
 
 #sats2xhtml('\
-fun{a:t@ype} myprint (x: a): void
+fun{a:vt@ype} myprint (x: !a): void
 ')
 
-Given a value, #dyncode("myprint") is supposed to print out some kind of
+where the symbol #dyncode("!") in front of the type of the argument indicates
+that the value (which may be linear) is only borrowed. Given a value,
+#dyncode("myprint") is supposed to print out some kind of
 representation for this value. For example, we can implement
 #dyncode("myprint") as follows:
 
@@ -88,32 +90,37 @@ implementation of #dyncode("myprint") is often referred to as a specific
 template implementation due to the template parameter being bound to a
 specific type (that is, #stacode("int") in this case). The following code
 implements #dyncode("myprint") for list-values (that is, values of type
-#stacode("List(T)") for some type T):
+#stacode("mylist(T)") for some type T, where #stacode("mylist") is the
+linear datatype for lists that was introduced in the chapter on parametric
+polymorphism; the lists are borrowed, and are therefore not consumed by the
+printing):
 
 #dats2xhtml('\
 implement(a)
-myprint<List(a)> (xs) =
+myprint<mylist(a)> (xs) =
+(
 case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) =>
-    (myprint<a> (x); myprint<List(a)> (xs))
+| mylist_nil () => ()
+| mylist_cons (x, xs) =>
+    (myprint<a> (x); myprint<mylist(a)> (xs))
+)
 ')
 
 This implementation of #dyncode("myprint") is often referred to as a
 partially generic template implementation. In order for an instance of
 #dyncode("myprint") to use this implementation, the template parameter for
-the instance must be of the form #stacode("List(T)") for some type T.
+the instance must be of the form #stacode("mylist(T)") for some type T.
 As an example, the following code calls an instance of #dyncode("myprint")
-to print out a list of two integer lists:
+to print out a list of integers (and then frees the list):
 
 #dats2xhtml('\
 (*
-** The output is "0123401234"
+** The output is "01234"
 *)
-val ys = $list{int}(0,1,2,3,4)
-val yss = $list{List(int)}(ys, ys)
-val ((*void*)) = myprint<List(List(int))> (yss)
+val ys = mylist_cons (0, mylist_cons (1, mylist_cons (2, mylist_cons (3, mylist_cons (4, mylist_nil)))))
+val ((*void*)) = myprint<mylist(int)> (ys)
 val ((*void*)) = print_newline((*void*))
+val ((*void*)) = mylist_free<int> (ys)
 ')
 
 ')#comment("para")
@@ -139,7 +146,7 @@ implementation for a template instance. Let #dyncode("myprint2") be a
 function template of the following interface:
 
 #sats2xhtml('\
-fun{a:t@ype} myprint2 (x: a): int
+fun{a:vt@ype} myprint2 (x: !a): int
 ')
 
 Following is a partially generic implementation of #dyncode("myprint2"):
@@ -147,59 +154,41 @@ Following is a partially generic implementation of #dyncode("myprint2"):
 #dats2xhtml('\
 //
 implement(a)
-myprint2<List(a)> (xs) =
+myprint2<mylist(a)> (xs) =
 case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) =>
-    (myprint<a> (x); 1 + myprint2 (xs))
+| mylist_nil () => 0
+| mylist_cons (x, xs) =>
+    (myprint<a> (x); 1 + myprint2<mylist(a)> (xs))
 //
 ')
 
-This template implementation actually behaves very differently from what
-one might have expected. Note that the template parameter of the called
-instance of #dyncode("myprint2") in the body of the implementation is
-synthesized to be a type of the form #stacode("list(a, N)") for some static
-term N (of the sort #stacode("int")). As this form can never match
-#stacode("List(T)") for any type T, the called instance of the template
-#dyncode("myprint2") cannot be compiled according to the given template
-implementation of #dyncode("myprint2"). This issue can be readily fixed by
-passing explicity the type #stacode("List(a)") (as a template parameter) to
-the called instance of #dyncode("myprint2"):
-
-#dats2xhtml('\
-//
-implement(a)
-myprint2<List(a)> (xs) =
-case+ xs of
-| list_nil () => ()
-| list_cons (x, xs) =>
-    (myprint<a> (x); 1 + myprint2<List(a)> (xs))
-//
-')
-
-The instance #dyncode("myprint2&lt;List(a)&gt;") in this example is often
+The instance #dyncode("myprint2&lt;mylist(a)&gt;") in this example is often
 referred to as a recursive instance. In general, it is a good programming
-practice to #emphasis("avoid") using recursive instances. For example, the
-following equivalent implementation of #dyncode("myprint2") makes no use of
+practice to #emphasis("avoid") using recursive instances, because the
+template parameter of a recursive instance must be passed explicitly (and
+it must match exactly the one in the implementation), and a mistake in doing
+so can lead to a call being compiled according to a different template
+implementation than expected. For example, the following equivalent
+implementation of #dyncode("myprint2") makes no use of
 recursive instances:
 
 #dats2xhtml('\
 //
 implement(a)
-myprint2<List(a)>
+myprint2<mylist(a)>
   (xs) = let
 //
 fun
 aux
-(xs: List(a)): int =
+(xs: !mylist(a)): int =
 //
 case+ xs of
-| list_nil () => 0
-| list_cons (x, xs) => (myprint<a>(x); 1 + aux(xs))
+| mylist_nil () => 0
+| mylist_cons (x, xs) => (myprint<a>(x); 1 + aux(xs))
 //
 in
   aux (xs)
-end // end of [myprint2<List(a)>]
+end // end of [myprint2<mylist(a)>]
 //
 ')
 
@@ -340,43 +329,15 @@ implement factd(n) = gfact<double>(n)
 //
 ')
 
-There is support in ATS based on the GNU multiple precision arithmetic
-library (GMPLIB) for integers of unlimited precision. The following code
-presents a way to compute the true value of the factorial of 100:
-
-#dats2xhtml('\
-//
-\#define
-HX_INTINF_targetloc
-"$PATSHOME\
-/contrib/atscntrb-hx-intinf"
-//
-(* ****** ****** *)
-//
-staload _(*T*) =
-"{$HX_INTINF}/DATS/intinf_t.dats"
-staload _(*VT*) =
-"{$HX_INTINF}/DATS/intinf_vt.dats"
-//
-staload
-GINTINF =
-"{$HX_INTINF}/DATS/gintinf_t.dats"
-//
-(* ****** ****** *)
-//
-typedef intinf = $GINTINF.intinf
-overload print with $GINTINF.print_intinf
-//
-val () =
-println! ("gfact<intinf>(100) = ", gfact<intinf>(100))
-//
-')
-
-I only list some leading digits of the result:
-
-#atscode('\
-gfact<intinf>(100) = 933262154439441526816992388562667[...omitted...]
-')
+The generic functions on numbers (#dyncode("gmul_int_val"), etc.) are
+available for the nonlinear number types such as #stacode("int"),
+#stacode("lint"), #stacode("llint"), #stacode("float") and
+#stacode("double"); the on-line code includes the outputs of
+#dyncode("gfact") on all of them. Integers of unlimited precision (which
+are based on the GNU multiple precision arithmetic library (GMPLIB)) are
+linear values in this version of ATS, as the memory for storing a number has to
+be freed; they cannot be used with #dyncode("gnumber") for this reason, and
+#dyncode("gfact&lt;intinf&gt;") is therefore not shown here.
 ")
 
 #para('\
@@ -410,7 +371,7 @@ fun
 {a:t@ype}
 {b:t@ype}
 list_map_fun{n:nat}
-  (xs: list(a, n), fopr: a -> b): list_vt(b, n)
+  (xs: !list_vt(a, n), fopr: a -> b): list_vt(b, n)
 //
 implement
 {a}{b}
@@ -418,11 +379,11 @@ list_map_fun (xs, fopr) = let
 //
 fun
 aux{n:nat}
-  (xs: list(a, n)): list_vt(b, n) =
+  (xs: !list_vt(a, n)): list_vt(b, n) =
 (
 case+ xs of
-| list_nil() => list_vt_nil()
-| list_cons(x, xs) => list_vt_cons(fopr(x), aux(xs))
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) => list_vt_cons(fopr(x), aux(xs))
 )
 //
 in
@@ -431,7 +392,7 @@ end // end of [list_map_fun]
 //
 ')
 
-Given a list of cerntain length and a function (which is envless),
+Given a list of cerntain length (which is borrowed) and a function (which is envless),
 #dyncode("list_map_fun") returns a linear list of the same
 length. Unfortunately, #dyncode("list_map_fun") cannot be called on a list and
 a closure-function. We certainly can implement a variant of
@@ -444,18 +405,18 @@ extern
 fun
 {a:t@ype}
 {b:t@ype}
-list_map_cloref{n:nat}
-  (xs: list(a, n), fopr: a -<cloref1> b): list_vt(b, n)
+list_map_clo{n:nat}
+  (xs: !list_vt(a, n), fopr: &(a) -<clo1> b): list_vt(b, n)
 //
 ')
 
-While #dyncode("list_map_cloref") can be called on a list and a
-closure-function, the closure-function that is formed at run-time to be
-passed to a call to #dyncode("list_map_cloref") most likely becomes garbage
-immediately after the call returns. Without garbage collection (GC), the
-memory for storing the closure is leaked. We surely have many good reasons
-for avoiding using a higher-order function like #dyncode("list_map_cloref")
-when doing embedded programming in ATS.
+While #dyncode("list_map_clo") can be called on a list and a
+closure-function, the closure-function has to be formed (on the stack,
+as a flat closure) and passed by reference. We surely have many good reasons
+for avoiding using a higher-order function like #dyncode("list_map_clo")
+when doing embedded programming in ATS: the closure may not capture the
+variables that are passed by reference, and a closure that is allocated in the heap
+(a pointer closure) would have to be freed explicitly.
 
 ")
 
@@ -470,7 +431,7 @@ fun
 {a:t@ype}
 {b:t@ype}
 list_map{n:nat}
-  (xs: list(a, n)): list_vt(b, n)
+  (xs: !list_vt(a, n)): list_vt(b, n)
 //
 extern
 fun
@@ -482,11 +443,11 @@ list_map (xs) = let
 //
 fun
 aux{n:nat}
-  (xs: list(a, n)): list_vt(b, n) =
+  (xs: !list_vt(a, n)): list_vt(b, n) =
 (
 case+ xs of
-| list_nil() => list_vt_nil()
-| list_cons(x, xs) => list_vt_cons(list_map$fopr<a><b>(x), aux(xs))
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) => list_vt_cons(list_map$fopr<a><b>(x), aux(xs))
 ) (* end of [aux] *)
 //
 in
@@ -530,22 +491,37 @@ direct access to the argument #dyncode("fopr") of
 are often referred to as #emphasis("embeddable") templates as they can
 be directly implemented in the bodies of functions.
 
-We can implement #dyncode("list_map_cloref") similarly as follows:
+We can implement #dyncode("list_map_clo") similarly as follows, where the
+closure is passed by reference to the auxiliary function (a function cannot
+use a variable passed by reference that is declared outside of its body):
 
 #dats2xhtml('\
 implement
 {a}{b}
-list_map_cloref(xs, fopr) = let
+list_map_clo(xs, fopr) = let
 //
-implement list_map$fopr<a><b> (x) = fopr(x)
+fun
+aux{n:nat}
+(
+  xs: !list_vt(a, n), fopr: &(a) -<clo1> b
+) : list_vt(b, n) =
+(
+case+ xs of
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(x, xs) => let
+    val y = fopr(x)
+  in
+    list_vt_cons(y, aux(xs, fopr))
+  end // end of [list_vt_cons]
+) (* end of [aux] *)
 //
 in
-  list_map<a><b> (xs)
-end // end of [list_map_cloref]
+  aux(xs, fopr)
+end // end of [list_map_clo]
 ')
 
 For those who are familiar with functors in SML, the implementation of
-#dyncode("list_map_fun") and #dyncode("list_map_cloref") should clearly
+#dyncode("list_map_fun") should clearly
 remind them of functor application.\
 
 ')#comment("para")
@@ -621,7 +597,7 @@ the following one:
 fun
 for_loop
 (
-  count: int, limit: int, fwork: (int) -<cloref1> void
+  count: int, limit: int, fwork: (int) -> void
 ) : void = (
 //
 if count < limit
@@ -630,35 +606,25 @@ if count < limit
 ) (* end of [for_loop] *)
 ')
 
-For example, the following function #dyncode("tally2") is directly based
-on #dyncode("for_loop"):
-
-#dats2xhtml('\
-fun
-tally2
-(
-  n: int
-) : int = let
-  val res = ref<int> (0)
-in
-  for_loop (0, n, lam (i) => !res := !res + i); !res
-end // end of [tally2]
-')
-
-While both #dyncode("tally") and #dyncode("tally2") return the same result
-when applied to a given natural number, they behave very differently at
-run-time. In particular, each call to #dyncode("tally2") creates a
-(persistent) reference on heap for temporary use; the reference becomes
-garbage immediately after the call returns. Compared to #dyncode("tally"),
-#dyncode("tally2") is inefficient both time-wise and memory-wise.\
+An envless function like #dyncode("fwork") has no way to accumulate a result
+unless it makes use of a reference, and in the earlier versions of ATS one
+would have created a reference in the body of the function that calls
+#dyncode("for_loop") (and the reference would have become garbage
+immediately after the call returns). There is no way to create such a
+reference in this version of ATS, and the closure-function that is formed at
+run-time would have to be allocated in the heap and freed explicitly. Compared
+to #dyncode("tally"), such a function is inefficient both time-wise and
+memory-wise.\
 
 ')#comment("para")
 
 #para('\
 
-To eliminate the need for reference creation in #dyncode("tally2"), we
+To eliminate the need for reference creation, we
 turn #dyncode("for_loop") into the following function template
-#dyncode("for_loop2"):
+#dyncode("for_loop2"), in which the environment is passed
+explicitly (by reference) and the function is a flat closure, which lives on
+the stack:
 
 #dats2xhtml('\
 //
@@ -667,7 +633,7 @@ env:t@ype
 } for_loop2
 (
   count: int, limit: int
-, env: &env >> _, fwork: (int, &env >> _) -<cloref1> void
+, env: &env >> _, fwork: &(int, &env >> _) -<clo1> void
 ) : void = (
 //
 if
@@ -680,7 +646,7 @@ then (
 ) (* end of [for_loop2] *)
 ')
 
-We can further turn #dyncode("tally2") into the following #dyncode("tally3")
+We can then define the following function #dyncode("tally3")
 based on #dyncode("for_loop2"):
 
 #dats2xhtml('\
@@ -690,15 +656,15 @@ tally3
   n: int
 ) : int = let
   var res: int = 0
+  var fwork = lam@ (i: int, res: &int >> _): void => res := res + i
 in
-  for_loop2<int> (0, n, res, lam (i, res) => res := res + i); res
+  for_loop2<int> (0, n, res, fwork); res
 end // end of [tally3]
 ')
 
-While #dyncode("tally3") improves upon #dyncode("tally2"), it is still
-a bit unsatisfactory. Clearly, the closure function formed before
-#dyncode("tally3") calls #dyncode("for_loop2") becomes garbage
-immediately after the call returns. It is plausible to expect that an
+While #dyncode("tally3") improves upon the version based on references, it is still
+a bit unsatisfactory. Clearly, the closure function is formed before
+#dyncode("tally3") calls #dyncode("for_loop2"). It is plausible to expect that an
 optimizing C compiler (e.g., gcc and clang) can eliminate the need for
 actual closure formation when it compiles the C code generated from
 ATS source, but there is no guarantee. In order to have such a
@@ -751,7 +717,7 @@ in
 end // end of [tally4]
 ')
 
-By inspecting the C code generated by #command("atsopt") from compiling
+By inspecting the C code generated by #command("patsopt") from compiling
 #dyncode("tally4"), we can see that the C code is essentially equivalent to
 the implementation of #dyncode("tally") in C (given at the beginning of
 this section).
@@ -793,11 +759,12 @@ supporting late-binding (of function calls). Let us first take a look at a
 simple example to see why late-binding can be so desirable. The following
 code declares a datatype #stacode("intfloat") such that each value of this
 declared type represents either an integer or a floating point number (of
-double precision):
+double precision). As the values are allocated in the heap, the datatype is
+linear (a datavtype):
 
 #sats2xhtml('\
 //
-datatype
+datavtype
 intfloat = INT of int | FLOAT of double
 //
 ')
@@ -809,7 +776,7 @@ In order to print values of the type #stacode("intfloat"), we can implement
 //
 fun
 print_intfloat
-  (x: intfloat): void =
+  (x: !intfloat): void =
 (
 case+ x of
 | INT(int) => print_int(int)
@@ -832,7 +799,7 @@ a higher-order function #dyncode("fprint_intfloat") as follows:
 fun
 fprint_intfloat
 (
-  x: intfloat
+  x: !intfloat
 , print_int: int -> void
 , print_double: double -> void
 ) : void =
@@ -875,7 +842,7 @@ fun{}
 tprint_double(double): void
 extern
 fun{}
-tprint_intfloat(intfloat): void
+tprint_intfloat(!intfloat): void
 //
 (* ****** ****** *)
 //
@@ -913,7 +880,9 @@ val () = (
 ')
 
 where the first line consists of the string "0" and the second one
-the string "1.000000". The following code also outputs two lines:
+the string "1.000000" (the values #dyncode("INT(0)") and
+#dyncode("FLOAT(1.0)") are borrowed, and they have to be freed after being used,
+which I do not show here). The following code also outputs two lines:
 
 #dats2xhtml('\
 local
