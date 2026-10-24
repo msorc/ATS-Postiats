@@ -64,11 +64,11 @@ We can now generate an executable file #filename('mytest') by issuing
 the following command-line:
 
 <informalexample><programlisting>
-<command>atscc</command> -o mytest foo.dats foo2.dats
+<command>patscc</command> -o mytest foo.dats foo2.dats
 </programlisting></informalexample>
 
-Note that <command>atscc</command> may need to be changed to
-<command>patscc</command>.
+No other flag is needed: the generated C code is compiled and linked
+against the library of ATS2 by <command>patscc</command>.
 
 ")#comment("para")
 
