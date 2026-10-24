@@ -108,9 +108,10 @@ are impredicative. A boxed type is a static term of the sort
 static terms of the sort #emphasis("t@ype"). As type constructors,
 #stacode("bool") and #stacode("int") are static terms of the sorts
 (#emphasis("bool -&gt; t@ype")) and (#emphasis("int -&gt; t@ype")),
-respectively.  Also note that the type constructor #stacode("list0") is of
-the sort (#emphasis("t@ype -&gt; type")), which indicates that
-#stacode("list0") forms a boxed type when applied to an unboxed one.  There
+respectively.  Also note that the type constructor #stacode("mylist") (see the
+chapter on parametric polymorphism) is of the sort
+(#emphasis("t@ype -&gt; viewtype")), which indicates that
+#stacode("mylist") forms a boxed, linear type when applied to an unboxed one.  There
 are a variety of built-in static functions in ATS for constructing static
 terms of the sorts #emphasis("bool") and #emphasis("int"), and I list as
 follows some of these functions together with the sorts assigned to them:
@@ -463,10 +464,13 @@ be readily solved by the constraint solver in ATS, which is based on the
 Fourier-Motzkin variable elimination method. However, the second constraint
 cannot be handled by the constraint solver as it is nonlinear: The
 constraint cannot be turned into a linear integer programming problem due
-to the occurrence of the nonlinear term (n*r#sub("1")).  While nonlinear
+to the occurrence of the nonlinear term (n*r#sub("1")).  As a consequence,
+typechecking the above code reports an unsolved constraint of the form
+#stacode("n * r1 >= 0"). While nonlinear
 constraints cannot be handled automatically by the constraint solver in
 ATS, the programmer can verify them by constructing proofs in ATS
-explicitly. I will cover the issue of explicit proof construction in an
+explicitly. (If the type of the result is weakened to the type
+#stacode("int"), then the code passes typechecking.) I will cover the issue of explicit proof construction in an
 elaborated manner elsewhere.\
 
 ")#comment("para")
@@ -596,19 +600,19 @@ fun
 string_find{n:nat}
 (
   str: string n, c0: char
-) : Option(sizeLt n) = let
+) : Option_vt(sizeLt n) = let
   typedef res = sizeLt(n)
   fun loop{i:nat | i <= n}
   (
     str: string n, c0: char, i: size_t i
-  ) : Option(res) = let
+  ) : Option_vt(res) = let
     val isnot = string_isnot_atend(str, i)
   in
     if isnot then
       if (c0 = str[i])
-        then Some{res}(i) else loop(str, c0, succ(i))
+        then Some_vt{res}(i) else loop(str, c0, succ(i))
       // end of [if]
-    else None() // end of [if]
+    else None_vt() // end of [if]
   end (* end of [loop] *)
 in
   loop(str, c0, i2sz(0))
@@ -616,10 +620,14 @@ end // end of [string_find]
 //
 ")
 
+Note that the optional value that is returned is of the type
+#stacode("Option_vt"), which is linear: the caller has to consume it,
+for instance, by matching it against the patterns
+#dyncode("~Some_vt(i)") and #dyncode("~None_vt()").
 If the character #dyncode("c0") occurs in the string #dyncode("str"), then
-a value of the form #dyncode("Some(i)") is returned, when i refers to the
+a value of the form #dyncode("Some_vt(i)") is returned, when i refers to the
 position of the first occurrence of #dyncode("c0") (counting from left to
-right). Otherwise, the value #dyncode("None()") is returned.\
+right). Otherwise, the value #dyncode("None_vt()") is returned.\
 
 ")#comment("para")
 
@@ -642,7 +650,7 @@ fun
 string_find2{n:nat}
 (
   str: string n, c0: char
-) : Option(sizeLt n) = let
+) : Option_vt(sizeLt n) = let
 //
 fun
 loop
@@ -650,16 +658,21 @@ loop
 (
   str: string(n)
 , c0: char, i: size_t(i)
-) : Option(sizeLt n) = let
+) : Option_vt(sizeLt n) = let
   typedef res = sizeLt(n)
-  val c = string_test_at(str, i)
+  val (pf | c) = string_test_at(str, i)
 in
-  if c != '\\\\\\\\000' then
-  (
+  if c != '\\\\\\\\000' then let
+    prval string_index_p_neqz() = pf
+  in
     if (c0 = c)
-      then Some{res}(i) else loop(str, c0, succ(i))
+      then Some_vt{res}(i) else loop(str, c0, succ(i))
     // end of [if]
-  ) else None((*void*)) // end of [if]
+  end else let
+    prval string_index_p_eqz() = pf
+  in
+    None_vt((*void*)) // end of [if]
+  end // end of [if]
 end // end of [loop]
 //
 in
@@ -676,13 +689,20 @@ string_test_at
   {n:int}{i:nat | i <= n}
 (
   str: string(n), i: size_t(i)
-) : [c:char | (c != NUL && i < n) || (c == NUL && i >= n)] char(c)
+) : [c:int] (string_index_p(n, i, c) | char(c))
 // end of [string_test_at]
 ")
 
 By checking the return value of a call to #dyncode("string_test_at"),
 we can readily tell whether the position #dyncode("i") is at the end of
-the string #dyncode("str").\
+the string #dyncode("str"). The value that precedes the bar symbol in the
+result is a proof (it has no run-time representation): it states that either
+#dyncode("c") is the null character and #dyncode("i") equals the length of the string, or
+#dyncode("c") is not null and #dyncode("i") is less than the length. When
+the character is not null, the proof is matched against the pattern
+#dyncode("string_index_p_neqz()") so that the typechecker knows that #dyncode("i") is a valid index
+into the string. I will explain how to construct and use proofs in the chapters
+on theorem-proving.\
 
 ")#comment("para")
 
@@ -708,41 +728,44 @@ id="example_binary_search_on_arrays">
 #para("\
 
 Given a type T of the sort #emphasis("t@ype") and a static integer I (i.e.,
-a static term of the sort #emphasis("int")), #stacode("arrayref(T, I)") is
+a static term of the sort #emphasis("int")), #stacode("arrayptr(T, I)") is
 a boxed type for arrays of size I in which each stored element is of the
-type T. Note that such arrays have no size information attached to them.
-The following interface is for a function template
-#dyncode("array_make_elt") that can be called to create an array (with no
-size information attached to it):
+type T. Such an array is allocated in the heap and is a linear value: it
+is owned by someone, and has to be freed (see the chapter on effectful
+programming features). Note that such arrays have no size information attached to them
+at run-time. The function template
+#dyncode("arrayptr_make_elt") can be called to create an array (with no
+size information attached to it); its interface is as follows:
 
 #sats2xhtml("\
 fun{a:t@ype}
-array_make_elt{n:int} (asz: size_t(n), elt: a): arrayref(a, n)
+arrayptr_make_elt{n:int} (asz: size_t(n), elt: a): arrayptr(a, n)
 ")
 
 Given a static integer I, the type #stacode("size_t(I)") is a singleton
 type for a value of the type size_t in C that represents the integer equal
 to I. The function templates for reading from and writing to an array cell
-have the following interfaces:
+have the following interfaces (the array is borrowed):
 
 #sats2xhtml("\
 //
 fun{a:t@ype}
-arrayref_get_at
-  {n:int}{i:nat | i < n} (A: arrayref(a, n), i: size_t i): (a)
-overload [] with arrayref_get_at
+arrayptr_get_at
+  {n:int}{i:nat | i < n} (A: !arrayptr(a, n), i: size_t i): (a)
+overload [] with arrayptr_get_at
 //
 fun{a:t@ype}
-arrayref_set_at
-  {n:int}{i:nat | i < n} (A: arrayref(a, n), i: size_t i, x: a): void
-overload [] with arrayref_set_at
+arrayptr_set_at
+  {n:int}{i:nat | i < n} (A: !arrayptr(a, n), i: size_t i, x: a): void
+overload [] with arrayptr_set_at
 //
 ")
 
 Note that these two function templates do not incur any run-time
 array-bounds checking: The types assigned to them guarantee that each index
 used for array subscripting is always legal, that is, within the bounds of
-the array being subscripted.\
+the array being subscripted. (The index can be an integer of the type
+#stacode("int(i)") as well.)\
 
 ")#comment("para")
 
@@ -757,15 +780,15 @@ fun{
 a:t@ype
 } bsearch_arr{n:nat}
 (
-  A: arrayref(a, n), n: int n, x0: a, cmp: (a, a) -> int
+  A: !arrayptr(a, n), n: int n, x0: a, cmp: (a, a) -> int
 ) : int = let
 //
 fun loop
   {i,j:int |
    0 <= i; i <= j+1; j+1 <= n}
 (
-  A: arrayref(a, n), l: int i, u: int j
-) :<cloref1> int =
+  A: !arrayptr(a, n), l: int i, u: int j
+) : int =
 (
   if l <= u then let
     val m = l + half(u - l)
@@ -782,7 +805,8 @@ end // end of [bsearch_arr]
 ")
 
 The function #dyncode("loop") defined in the body of
-#dyncode("bsearch_arr") searches the segment of the array #dyncode("A")
+#dyncode("bsearch_arr") (which gets the array as an argument, as it cannot
+use a linear variable declared outside of its body) searches the segment of the array #dyncode("A")
 between the indices #dyncode("l") and #dyncode("u"), inclusive.  Clearly,
 the type assigned to #dyncode("loop") indicates that the integer values i
 and j of the arguments #dyncode("l") and #dyncode("u") must satisfy the
