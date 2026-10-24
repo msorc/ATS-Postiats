@@ -100,17 +100,20 @@ functions are 2nd-order.
 
 As an example, let us implement as follows a 2nd-order function
 #dyncode("find_root") that takes as its only argument a function f from
-integers to integers and searches for a root of f by enumeration:
+integers to integers and searches for a root of f by enumeration. The
+argument is an envless function (the annotation #keycode("-&lt;fun1&gt;")
+in the type): a function that needs no environment to be passed around
+and, therefore, needs no memory allocation:
 
-#dats2xhtml("\
+#dats2xhtml('\
 fn find_root
 (
-  f: int -<cloref1> int
+  f: int -<fun1> int
 ) : int = let
 //
 fun loop
 (
-  f: int -<cloref1> int, n: int
+  f: int -<fun1> int, n: int
 ) : int =
   if f (n) = 0 then n else (
     if n <= 0 then loop (f, ~n + 1) else loop (f, ~n)
@@ -118,22 +121,35 @@ fun loop
 in
   loop (f, 0)
 end // end of [find_root]
-")
+')
 
 The function #dyncode("find_root") computes the values of f at 0, 1, -1, 2,
 -2, etc. until it finds the first integer n in this sequence that satisfies
-f(n) = 0.
+f(n) = 0. For instance, it can be called as follows:
+
+#dats2xhtml('\
+val () = println!
+(
+  "root(x*x + x - 110) = ", find_root(lam(x) =<fun1> x*x + x - 110)
+) (* end of [val] *)
+')
 
 ")#comment("para")
 
 #para("\
 
 As another example, let us implement as follows the famous Newton-Raphson's
-method for finding roots of functions on reals:
+method for finding roots of functions on reals. Here, a function argument
+is a closure-function that captures a value (see the code for the square
+root function below). In this dialect of ATS2, closure-functions are
+linear: the type #stacode("fdouble") is a linear type, and the arguments
+#dyncode("f") and #dyncode("f1") are only borrowed (the symbol
+#keycode("!") in front of the types) so that the caller keeps ownership of
+them:
 
-#dats2xhtml("\
-typedef
-fdouble = double -<cloref1> double
+#dats2xhtml('\
+vtypedef
+fdouble = double -<cloptr1> double
 //
 macdef epsilon = 1E-6 (* precision *)
 //
@@ -142,10 +158,10 @@ macdef epsilon = 1E-6 (* precision *)
 fun
 newton_raphson
 (
-  f: fdouble, f1: fdouble, x0: double
+  f: !fdouble, f1: !fdouble, x0: double
 ) : double = let
   fun loop (
-    f: fdouble, f1: fdouble, x0: double
+    f: !fdouble, f1: !fdouble, x0: double
   ) : double = let
     val y0 = f x0
   in
@@ -156,19 +172,34 @@ newton_raphson
 in
   loop (f, f1, x0)
 end // end of [newton_raphson]
-")
+')
 
 With #dyncode("newton_raphson"), both the square root function and the
-cubic root function can be readily implemented as follows:
+cubic root function can be readily implemented as follows. The closures are
+created by the caller and freed by the caller after the call returns:
 
-#dats2xhtml("\
+#dats2xhtml('\
+fn
+fdouble_free(f: fdouble): void =
+  cloptr_free ($UNSAFE.castvwtp0{cloptr(void)}(f))
+//
 // square root function
-fn sqrt (c: double): double =
-  newton_raphson (lam x => x * x - c, lam x => 2.0 * x, 1.0)
+fn sqrt (c: double): double = let
+  val f = lam (x: double): double =<cloptr1> x * x - c
+  val f1 = lam (x: double): double =<cloptr1> 2.0 * x
+  val res = newton_raphson (f, f1, 1.0)
+in
+  fdouble_free (f); fdouble_free (f1); res
+end // end of [sqrt]
 // cubic root function
-fn cbrt (c: double): double =
-  newton_raphson (lam x => x * x * x - c, lam x => 3.0 * x * x, 1.0)
-")
+fn cbrt (c: double): double = let
+  val f = lam (x: double): double =<cloptr1> x * x * x - c
+  val f1 = lam (x: double): double =<cloptr1> 3.0 * x * x
+  val res = newton_raphson (f, f1, 1.0)
+in
+  fdouble_free (f); fdouble_free (f1); res
+end // end of [cbrt]
+')
 
 ")#comment("para")
 
@@ -176,17 +207,21 @@ fn cbrt (c: double): double =
 
 Higher-order functions can be of great use in supporting a form of code
 sharing that is both common and flexible. As function arguments are often
-represented as heap-allocated closures that can only be reclaimed through
-garbage collection (GC), higher-order functions are used infrequently, if
-at all, in a setting where GC is not present. In ATS, linear closures,
-which can be freed explictly in a safe manner, are available to support
-higher-order functions in the absence of GC, making it possible to employ
-higher-order functions extensively in systems programming (where GC is
-unavailable or simply disallowed). The details on linear closures are to be
-given elsewhere.
+represented as heap-allocated closures, higher-order functions are used
+infrequently, if at all, in a setting where garbage collection (GC) is not
+present, since the closures could only be reclaimed through GC. In ATS,
+linear closures, which can be freed explictly in a safe manner, are
+available to support higher-order functions in the absence of GC (and they
+are the only closures of this dialect of ATS2), making it possible to
+employ higher-order functions extensively in systems programming (where GC
+is unavailable or simply disallowed). The details on linear closures are
+given in the chapter on linear closure-functions. In many cases, a
+higher-order function can be written as a template taking the function
+argument as a template function (see, for instance, the implementation of
+#dyncode("hashtbl_foreach") in the chapter on hashtables), and then no
+closure is created at all.
 
 ")#comment("para")
-
 
 #para("\
 
