@@ -2,7 +2,7 @@
 
 This page takes you from an installed ATS2 to a first program that owns
 heap memory. Install first: see [INSTALL](../../INSTALL). Then
-`patscc --version` prints the version (0.4.3 here) and `which patscc` tells
+`patsopt --version` prints the version (0.4.3 here) and `which patscc` tells
 you which installation you are running.
 
 ## Hello, world

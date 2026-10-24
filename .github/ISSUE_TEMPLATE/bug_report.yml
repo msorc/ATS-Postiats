@@ -1,0 +1,43 @@
+name: Bug report
+description: The compiler, a library or a tool does not do what it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For a security problem do not open an issue:
+        see [SECURITY.md](https://github.com/msorc/ATS-Postiats/blob/devel/SECURITY.md). For a message of the compiler about a
+        nonlinear heap allocation, read doc/GUIDE/faq.md first.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `patsopt --version`, and where ATS2 came from (release tarball, clone and its commit).
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: Operating system, C compiler (`cc --version`), and whether libgmp was used (`KIND=intknd`).
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Smallest program or commands that show it
+      description: A short `.dats` file and the command line (`patscc -o prog prog.dats`).
+      render: shell
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The full compiler or runtime output.
+      render: text

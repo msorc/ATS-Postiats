@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/msorc/ATS-Postiats/security/advisories/new
+    about: Report a security problem privately (see SECURITY.md).
+  - name: Questions about the language (upstream)
+    url: https://github.com/githwxi/ATS-Postiats/wiki
+    about: The upstream wiki and the ats-lang-users group (they describe ATS2 0.4.2, which has a garbage collector).

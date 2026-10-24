@@ -82,7 +82,7 @@ The install step puts ATS2 in
 so it is enough to have /path/to/MYATS/bin on the PATH:
 
   export PATH=/path/to/MYATS/bin:${PATH}
-  patscc --version
+  patsopt --version
 
 You need no other environment variable. The default prefix is /usr/local.
 
@@ -220,7 +220,7 @@ doc/DISTRIB/README and CONTRIBUTING.md.
   package of ATS2 0.4.2, an older install): the build uses the PATSOPT you
   give, else bin/patsopt of the tree, else the bundle, so it is not
   disturbed; but running `patscc` by name finds the first one on the PATH.
-  Check with `which patscc patsopt` and `patscc --version`; put
+  Check with `which patscc patsopt` and `patsopt --version`; put
   $PATSHOME/bin (or PREFIX/bin) first. The compilers of 0.4.2 cannot read
   the prelude of this tree (it has no list.sats), and the other way round.
 
