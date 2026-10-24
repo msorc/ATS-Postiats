@@ -13,174 +13,150 @@ by [atsdoc] from CHAP_FUNSETMAP/main.atxt.\n\
 Time of Generation: #timestamp()\
 ")
 <chapter id="funsetmap">
-#title("Functional Sets and Maps")
+#title("Linear Sets and Maps")
 
 #para("\
 
 Both (finite) sets and (finite) maps are commonly used data structures.
-Functional sets and maps are immutable after their construction.  Insertion
-into or removal from a functional set/map results in the construction of a
-new set/map while the original is kept intact. Usually the newly
-constructed set/map and the original one share a lot of underlying
-representation. Note that a functional set/map cannot be safely freed
-explicitly and the memory for representing it can only be reclaimed through
-garbage collection (GC).
+Functional sets and maps are immutable after their construction.
+Insertion into or removal from a functional set/map results in the
+construction of a new set/map while the original is kept intact, and the
+newly constructed set/map and the original one share a lot of underlying
+representation. Such sharing is incompatible with explicit freeing: a
+functional set/map can only be reclaimed through garbage collection (GC).
+The functional sets and maps of ATSLIB (the ones in
+#filename("libats/ML")) were removed together with the support for GC.
+
+")
+
+#para("\
+
+What ATSLIB provides is #emphasis("linear") sets and maps: an insertion
+into or a removal from a linear set/map updates it in place (it is passed by
+reference), and the set/map has to be freed by the programmer, which the
+type-checker enforces. In this chapter, I show how a linear set and a linear
+map based on balanced trees (AVL trees) can be created and operated on.
 
 ")
 
 <sect1
  id="funsetmap_set">
-#title("Functional Sets")
+#title("Linear Sets")
 
-#para("\
+#para('\
 
 Suppose that a set is needed for collecting values of type
-#stacode("elt_t"). The following code essentially sets up an interface for
-creating and operating on such a set based on a balanced-tree
-implementation in ATSLIB/libats:
+#stacode("elt"). The following code sets up the interface and the
+implementation of a set based on the AVL-tree implementation in
+ATSLIB/libats (the implementation of the sets needs the implementation of
+the queues of lists, too). Note that a comparison function on values of the
+type #stacode("elt") is needed, which is implemented here with the overloaded
+symbol #dyncode("compare"). If this symbol is not overloaded for the
+type, one needs to implement such a function.
 
 #dats2xhtml('\
-local
+staload "libats/SATS/linset_avltree.sats"
 //
-typedef elt = elt_t
+staload _(*anon*) = "libats/DATS/qlist.dats"
+staload _(*anon*) = "libats/DATS/linset_avltree.dats"
 //
-staload
-FS = "libats/ML/SATS/funset.sats"
+typedef elt = int
+//
 implement
-$FS.compare_elt_elt<elt>(x, y) = compare(x, y)
-//
-in (* in-of-local *)
-
-\#include "libats/ML/HATS/myfunset.hats"
-
-end // end of [local]
+compare_elt_elt<elt>(x, y) = compare(x, y)
 ')
 
-Please find #myatscodelink("libats/ML/HATS/myfunset.hats", "on-line") the
-HATS file mentioned in the code, which is just a convenience wrapper made
-to simplify programming with functional sets. Note that it is assumed here
-that there is a comparison function on values of the type #stacode("elt_t")
-that overloads the symbol #dyncode("compare"). If this is not the case, one
-needs to implement such a function.
-
-")
+')
 
 #para("\
 
-Assume that #stacode("elt_t") is #stacode("int"). The following line
-of code creates a functional set (of integers) containing no elements:
+Assume that #stacode("elt") is #stacode("int"). The following line
+of code creates a linear set (of integers) containing no elements:
 
 #dats2xhtml('\
-val myset = myfunset_nil()
+var myset: set(elt) = linset_make_nil{elt}()
 ')
 
 The function for inserting an element into a given set is assigned the
 following type:
 
 #sats2xhtml('\
-//
-fun myfunset_insert(xs: &myset >> _, x0: elt): bool
-//
+fun{a:t0p}
+linset_insert
+  (xs: &set(INV(a)) >> _, x0: a):<!wrt> bool
 ')
 
-The dot-symbol #dyncode(".insert") is overloaded with the function
-#dyncode("myfunset_insert"). Note that the first argument of
-#dyncode("myfunset_insert") is call-by-reference. If the given element is
-inserted into the given set, then the newly created set is stored into the
-call-by-reference argument and #dyncode("false") is returned (to indicate
-no error).  Otherwise, #dyncode("true") is returned (to indicate a
-failure). The following few lines of code shows how insertion can be
-operated on a functional set:
+Note that the first argument of #dyncode("linset_insert") is
+call-by-reference, which is why #dyncode("myset") is declared as a
+variable (with the keyword #keycode("var")). If the given element is
+inserted into the given set, then the set is updated and #dyncode("false")
+is returned (to indicate no error).  Otherwise, #dyncode("true") is
+returned (to indicate that the element is already in the set). The
+following few lines of code shows how insertion can be operated on a set:
 
 #dats2xhtml('\
-//
-var myset = myset
-//
-val-false = myset.insert(0) // inserted
-val-(true) = myset.insert(0) // not actually inserted
-val-false = myset.insert(1) // inserted
-val-(true) = myset.insert(1) // not actually inserted
-//
+val-false = linset_insert(myset, 0) // inserted
+val-(true) = linset_insert(myset, 0) // not actually inserted
+val-false = linset_insert(myset, 1) // inserted
+val-(true) = linset_insert(myset, 1) // not actually inserted
 ')
-
-The first line in the above code may seem puzzling:
-Its sole purpose is to create a left-value to be passed as the first
-argument to #dyncode("myfunset_insert").
 
 During the course of debugging, one may want to print out the values
 contained in a given set:
 
 #dats2xhtml('\
-//
+val () = assertloc (linset_size(myset) = 2)
 val () = fprintln! (stdout_ref, "myset = ", myset)
-//
 ')
 
 where the symbol #dyncode("fprint") is overloaded with
-#dyncode("fprint_myset"). The function for removing an element from a
+#dyncode("fprint_linset"). The function for removing an element from a
 given set is assigned the following type:
 
 #sats2xhtml('\
-//
-fun myfunset_remove(xs: &myset >> _, x0: elt): bool
-//
+fun{a:t0p}
+linset_remove
+  (xs: &set(INV(a)) >> _, x0: a):<!wrt> bool
 ')
 
-The dot-symbol #dyncode(".remove") is overloaded with the function
-#dyncode("myfunset_remove"). Note that the first argument of
-#dyncode("myfunset_remove") is call-by-reference. If the given element is
-removed from the given set, then the newly created set is stored into the
-call-by-reference argument and #dyncode("true") is returned.  Otherwise,
+If the given element is removed from the given set, then the set is
+updated and #dyncode("true") is returned.  Otherwise,
 #dyncode("false") is returned.  The following few lines of code shows how
-removal can be operated on a functional set:
+removal can be operated on a set:
 
 #dats2xhtml('\
-val-true = myset.remove(0) // removed
-val-false = myset.remove(0) // not actually removed
-val-true = myset.remove(1) // removed
-val-false = myset.remove(1) // not actually removed
+val-true = linset_remove(myset, 0) // removed
+val-false = linset_remove(myset, 0) // not actually removed
+val-true = linset_remove(myset, 1) // removed
+val-false = linset_remove(myset, 1) // not actually removed
 ')
 
 ")
 
 #para('\
 
-The following function is available for generating a module
-(that is, a record) containing various operations on myset-values:
-
-#sats2xhtml('\
-//
-fun myfunset_make_module((*void*)): myset_modtype
-//
-')
-
-For instance, a module of the name #dyncode("MYSET") is
-created as follows:
+A set has to be consumed before the end of its scope. The function
+#dyncode("linset_free") frees a set, and the function
+#dyncode("linset_listize") turns it into a linear list of the elements
+(in increasing order) and, in the process, consumes the set. The
+function #dyncode("linset_foreach") visits the elements of a set that is
+only borrowed:
 
 #dats2xhtml('\
-val MYSET = myfunset_make_module()
-')
-
-With #dyncode("MYSET"), we can create a (functional) set
-and then perform certain insertion and removal operations:
-
-#dats2xhtml('\
+val-false = linset_insert(myset, 3)
+val-false = linset_insert(myset, 1)
+val-false = linset_insert(myset, 2)
 //
-var myset = (MYSET.nil)()
+val () = let
+  implement
+  linset_foreach$fwork<elt><void>(x, env) = println! ("x = ", x)
+in
+  linset_foreach<elt>(myset)
+end // end of [val]
 //
-val-false = (MYSET.insert)(myset, 0) // inserted
-val-false = (MYSET.insert)(myset, 1) // inserted
-//
-val ((*void*)) = assertloc((MYSET.size)(myset) = 2)
-//
-val-(true) = (MYSET.remove)(myset, 0) // removed
-//
-val ((*void*)) = assertloc((MYSET.size)(myset) = 1)
-//
-val-(true) = (MYSET.remove)(myset, 1) // removed
-//
-val ((*void*)) = assertloc((MYSET.size)(myset) = 0)
-//
+val xs = linset_listize(myset) // [myset] is consumed
+val () = println! ("xs = ", xs)
+val () = list_vt_free<elt>(xs)
 ')
 
 ')#comment("para")
@@ -188,8 +164,8 @@ val ((*void*)) = assertloc((MYSET.size)(myset) = 0)
 #para('\
 
 Various common set operations can be found in
-#myatscodelink("libats/ML/HATS/myfunset.hats",
-"libats/ML/HATS/myfunset.hats").  By following the types assigned to these
+#myatscodelink("libats/SATS/SHARE/linset.hats",
+"libats/SATS/SHARE/linset.hats").  By following the types assigned to these
 operations, one should have no difficulty in figuring out how they are
 supposed to be called.  Please find the entirety of the code used in this
 section #mycodelink("chap_funsetmap_set.dats", "on-line").
@@ -200,168 +176,121 @@ section #mycodelink("chap_funsetmap_set.dats", "on-line").
 
 <sect1
  id="funsetmap_map">
-#title("Functional Maps")
+#title("Linear Maps")
 
-#para("\
+#para('\
 
 Suppose that a map is needed for mapping keys of type
-#stacode("key_t") to items of type #stacode("itm_t"). The following code
-essentially sets up an interface for creating and operating on such a map
-based on a balanced-tree implementation in ATSLIB/libats:
+#stacode("key") to items of type #stacode("itm"). The following code
+sets up the interface and the implementation of a map based on the
+AVL-tree implementation in ATSLIB/libats. As for sets, a comparison
+function on keys is needed:
 
 #dats2xhtml('\
-local
+staload "libats/SATS/linmap_avltree.sats"
 //
-typedef
-key = key_t and itm = itm_t
+staload _(*anon*) = "libats/DATS/qlist.dats"
+staload _(*anon*) = "libats/DATS/linmap_avltree.dats"
 //
-staload
-FM = "libats/ML/SATS/funmap.sats"
+typedef key = string and itm = int
+//
 implement
-$FM.compare_key_key<key>(x, y) = compare(x, y)
-//
-in (* in-of-local *)
-
-\#include "libats/ML/HATS/myfunmap.hats"
-
-end // end of [local]
+compare_key_key<key>(x, y) = compare(x, y)
 ')
 
-Please find #myatscodelink("libats/ML/HATS/myfunmap.hats", "on-line") the
-HATS file mentioned in the code, which is just a convenience wrapper made
-to simplify programming with functional maps. Note that it is assumed here
-that there is a comparison function on values of the type #stacode("key_t")
-that overloads the symbol #dyncode("compare"). If this is not the case, one
-needs to implement such a function.
-
-")
+')
 
 #para("\
 
-Assume that #stacode("key_t") is #stacode("string") and #stacode("itm_t")
-is #stacode("int"). The following line of code creates an empty functional map:
+Assume that #stacode("key") is #stacode("string") and #stacode("itm")
+is #stacode("int"). The following line of code creates an empty linear map:
 
 #dats2xhtml('\
-val mymap = myfunmap_nil()
+var mymap: map(key, itm) = linmap_make_nil{key,itm}()
 ')
 
 The following few lines insert some key/item pairs into
 #dyncode("mymap"):
 
 #dats2xhtml('\
+val-~None_vt() = linmap_insert_opt(mymap, "a", 0)
+val-~Some_vt(0) = linmap_insert_opt(mymap, "a", 1)
 //
-var mymap = mymap
+val-~None_vt() = linmap_insert_opt(mymap, "b", 1)
+val-~Some_vt(1) = linmap_insert_opt(mymap, "b", 2)
 //
-val-~None_vt() = mymap.insert("a", 0)
-val-~Some_vt(0) = mymap.insert("a", 1)
-//
-val-~None_vt() = mymap.insert("b", 1)
-val-~Some_vt(1) = mymap.insert("b", 2)
-//
-val-~None_vt() = mymap.insert("c", 2)
-val-~Some_vt(2) = mymap.insert("c", 3)
-//
+val-~None_vt() = linmap_insert_opt(mymap, "c", 2)
+val-~Some_vt(2) = linmap_insert_opt(mymap, "c", 3)
 ')
 
-The dot-symbol #dyncode(".insert") is overloaded with a function of the
-name #dyncode("myfunmap_insert").  The first line in the above code may
-seem puzzling: Its sole purpose is to create a left-value to be passed as
-the first argument to #dyncode("myfunmap_insert").  Given a key and an
-item, #dyncode("mymap.insert") inserts the key/item pair into
-#dyncode("mymap").  If the key is in the domain of the map represented by
+Given a key and an item, #dyncode("linmap_insert_opt") inserts the key/item
+pair into #dyncode("mymap") (it is passed by reference, hence the
+variable).  If the key is in the domain of the map represented by
 #dyncode("mymap") before insertion, then the original item associated with
-the key is returned. Otherwise, no item is returned. As can be expected,
+the key is returned (in the linear option-value built from
+#dyncode("Some_vt")). Otherwise, #dyncode("None_vt") is returned.
+The patterns #dyncode("val-~None_vt()") and #dyncode("val-~Some_vt(2)")
+free the returned option while they match it. As can be expected,
 the size of #dyncode("mymap") is 3 at this point:
 
 #dats2xhtml('\
-val () = assertloc (mymap.size() = 3)
-')
-
-The dot-symbol #dyncode(".size") is overloaded with a function of the name
-#dyncode("myfunmap_size"), which returns the number of key/item pairs
-stored in a given map.  During the course of debugging, one may want to
-print out the key/item pairs in a given map:
-
-#dats2xhtml('\
-//
+val () = assertloc (linmap_size(mymap) = 3)
 val () = fprintln! (stdout_ref, "mymap = ", mymap)
-//
 ')
 
-where the symbol #dyncode("fprint") is overloaded with
-#dyncode("fprint_mymap"). The next two lines of code show how search with a
-given key operates on a map:
+The function #dyncode("linmap_size") returns the number of key/item pairs
+stored in a given map (in constant time).  During the course of debugging,
+one may want to print out the key/item pairs in a given map; the symbol
+#dyncode("fprint") is overloaded with #dyncode("fprint_linmap"). The next
+two lines of code show how search with a given key operates on a map:
 
 #dats2xhtml('\
-val-~None_vt() = mymap.search("")
-val-~Some_vt(1) = mymap.search("a")
+val-~None_vt() = linmap_search_opt(mymap, "")
+val-~Some_vt(1) = linmap_search_opt(mymap, "a")
 ')
 
-The dot-symbol #dyncode(".search") is overloaded with a function of the
-name #dyncode("myfunmap_search"), which returns the item associated with a
-given key if it is found. The next few lines of code remove some key/item
+The function #dyncode("linmap_search_opt") returns the item associated with
+a given key if it is found. The next few lines of code remove some key/item
 pairs from #dyncode("mymap"):
 
 #dats2xhtml('\
+val-true = linmap_remove(mymap, "a")
+val-false = linmap_remove(mymap, "a")
 //
-val-true = mymap.remove("a")
-val-false = mymap.remove("a")
-//
-val-~Some_vt(2) = mymap.takeout("b")
-val-~Some_vt(3) = mymap.takeout("c")
-//
+val-~Some_vt(2) = linmap_takeout_opt(mymap, "b")
+val-~Some_vt(3) = linmap_takeout_opt(mymap, "c")
 ')
 
-The dot-symbol #dyncode(".remove") is overloaded with a function of the
-name #dyncode("myfunmap_remove") for removing a key/item pair of a given
+The function #dyncode("linmap_remove") removes the key/item pair of a given
 key. If a key/item pair is removed, then the function returns
 true. Otherwise, it returns false to indicates that no key/item pair of the
-given key is stored in the map being operated on.  The dot-symbol
-#dyncode(".takeout") is overloaded with a function of the name
-#dyncode("myfunmap_takeout"), which is similar to #dyncode("myfunmap_remove")
+given key is stored in the map being operated on.  The function
+#dyncode("linmap_takeout_opt") is similar to #dyncode("linmap_remove")
 excepting for returning the removed item.
 
 ")
 
 #para('\
 
-The following function is available for generating a module
-(that is, a record) containing various operations on mymap-values:
-
-#sats2xhtml('\
-//
-fun myfunmap_make_module((*void*)): mymap_modtype
-//
-')
-
-For instance, a module of the name #dyncode("MYMAP") is
-created as follows:
+The key/item pairs of a map can be visited with the template
+#dyncode("linmap_foreach") (there is no closure-function to create: the
+template #dyncode("linmap_foreach$fwork") is implemented to specify the
+work to do for each pair). Finally, the map is freed with
+#dyncode("linmap_free"):
 
 #dats2xhtml('\
-val MYMAP = myfunmap_make_module()
-')
-
-With #dyncode("MYMAP"), we can create a (functional) map
-and then perform various insertion and removal operations:
-
-#dats2xhtml('\
+val-~None_vt() = linmap_insert_opt(mymap, "x", 10)
+val-~None_vt() = linmap_insert_opt(mymap, "y", 20)
 //
-var mymap = (MYMAP.nil)()
+val () = let
+  implement
+  linmap_foreach$fwork<key,itm><void>
+    (k, x, env) = println! ("k=", k, " and ", "x=", x)
+in
+  linmap_foreach<key,itm>(mymap)
+end // end of [val]
 //
-val-~None_vt() = (MYMAP.insert)(mymap, "a", 0)
-val-~None_vt() = (MYMAP.insert)(mymap, "b", 1)
-val-~None_vt() = (MYMAP.insert)(mymap, "c", 2)
-//
-val-~Some_vt(0) = (MYMAP.insert)(mymap, "a", 1)
-val-~Some_vt(1) = (MYMAP.insert)(mymap, "b", 2)
-val-~Some_vt(2) = (MYMAP.insert)(mymap, "c", 3)
-//
-val-(true) = (MYMAP.remove)(mymap, "a")
-val-(true) = (MYMAP.remove)(mymap, "b")
-val-(true) = (MYMAP.remove)(mymap, "c")
-//
-val () = assertloc((MYMAP.size)(mymap) = 0)
-//
+val () = linmap_free(mymap)
 ')
 
 ')#comment("para")
@@ -369,8 +298,8 @@ val () = assertloc((MYMAP.size)(mymap) = 0)
 #para('\
 
 Various common map operations can be found in
-#myatscodelink("libats/ML/HATS/myfunmap.hats",
-"libats/ML/HATS/myfunmap.hats").  By following the types assigned to these
+#myatscodelink("libats/SATS/SHARE/linmap.hats",
+"libats/SATS/SHARE/linmap.hats").  By following the types assigned to these
 operations, one should have no difficulty in figuring out how they are
 supposed to be called. Please find the entirety of the code used in this
 section #mycodelink("chap_funsetmap_map.dats", "on-line").
