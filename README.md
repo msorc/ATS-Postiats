@@ -33,8 +33,7 @@ whose lifetime is well-delimited can be kept in an arena (libats/arena).
 
 ## Build Status
 
-* [![Build Status](https://travis-ci.org/githwxi/ATS-Postiats.svg?branch=master)](https://travis-ci.org/githwxi/ATS-Postiats) Ubuntu
-* [![Build Status](https://ci.appveyor.com/api/projects/status/github/githwxi/ats-postiats?branch=master&svg=true)](https://ci.appveyor.com/project/githwxi/ats-postiats/branch/master) Cygwin
+[![CI](https://github.com/msorc/ATS-Postiats/actions/workflows/ci.yml/badge.svg)](https://github.com/msorc/ATS-Postiats/actions/workflows/ci.yml)
 
 ## Installing ATS2
 

@@ -1,1 +1,0 @@
-doc/DISTRIB/ATS-Postiats/config.h
