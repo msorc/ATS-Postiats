@@ -46,15 +46,17 @@ the guards of the matching clauses in clseq. If there is a match, the
 raised exception is caught and we continue to evaluate the body of the
 first clause whose guard is matched. If there is no match, the raised
 exception is uncaught. In the following example,
-#dyncode("list0_exists") is implemented based on
-#dyncode("list0_foreach"):
+#dyncode("int_exists") is implemented based on
+#dyncode("int_foreach") of the chapter on higher-order functions
+(it tells whether some integer less than n satisfies a given test):
 
 #dats2xhtml('\
 //
-implement
-{a}(*tmp*)
-list0_exists
-  (xs, test) = let
+// Stopping a loop by raising an exception
+//
+fun
+int_exists
+(n: int, test: (int) -> bool): bool = let
 //
 exception True of ()
 //
@@ -62,41 +64,43 @@ in
 //
 try let
 //
-val () =
-list0_foreach<a>
-( xs
-, lam(x) => if test(x) then $raise True()
-)
+var fwork =
+lam@(i: int): void => if test(i) then $raise True()
+//
+val () = int_foreach(n, fwork)
 //
 in
   false
 end with ~True() => true
 //
-end // end of [list0_exists]
+end // end of [int_exists]
+//
+val () = println! ("exists i < 10. i*i = 49: ", int_exists(10, lam(i) => i*i = 49))
+val () = println! ("exists i < 5. i*i = 49: ", int_exists(5, lam(i) => i*i = 49))
 //
 ')
 
-Given a list and a predicate, #dyncode("list0_exists") returns a
-boolean value to indicate whether there exists an element in the list
+Given a natural number and a predicate, #dyncode("int_exists") returns a
+boolean value to indicate whether there exists a natural number less than the given one
 that satisfies the predicate.  There is a built-in type
 #stacode("exn") in ATS, which is somewhat like an extensible datatype
 in the sense that a new constructor associated with #stacode("exn")
 can be introduced through an exception-declaration. For instance,
 #dyncode("True") is introduced as a nullary exception-constructor in
-the body of #dyncode("list0_exists"). Given a list and a function,
-#dyncode("list0_foreach") normally traverses until the end of the list
-while appying the function to each encountered element.  When the call
-to #dyncode("list0_foreach") in the body of #dyncode("list0_exists")
+the body of #dyncode("int_exists"). Given a natural number and a function,
+#dyncode("int_foreach") normally traverses until the end while appying the
+function to each encountered integer.  When the call
+to #dyncode("int_foreach") in the body of #dyncode("int_exists")
 is evaluated, an exception (#dyncode("True()")) is raised to stop
-further traversing if an element satisfying the predicate
+further traversing if an integer satisfying the predicate
 #dyncode("test") is encountered.  If the call to
-#dyncode("list0_foreach") returns, then the value #dyncode("false") is
-the return value of #dyncode("list0_exists").  If #dyncode("True()")
+#dyncode("int_foreach") returns, then the value #dyncode("false") is
+the return value of #dyncode("int_exists").  If #dyncode("True()")
 is raised during the evaluation of the call, then this raised
 exception is to be caught by the handler following the keyword
 #keycode("with"), resulting in the value #dyncode("true") becoming the
-return value of #dyncode("list0_exists").  Note that a raised
-exception is considered a resource in ATS and it needs to be properly
+return value of #dyncode("int_exists").  Note that a raised
+exception is considered a resource in ATS (it is linear) and it needs to be properly
 freed or re-raised after being caught. The symbol #dyncode("~") in the
 pattern #dyncode("~True()") indicates that the caught execption is
 freed.
@@ -105,33 +109,54 @@ freed.
 
 #para("\
 
+There is a restriction that comes with the absence of GC: raising an
+exception abandons whatever linear value is held by the function calls that the
+exception passes through (they are not resumed, and nobody frees what they hold). Therefore, the
+typechecker does not permit a linear value (a list, an array, a closure on heap) to be used in the
+body of a try-expression unless the value is created in it. This is why
+the example above is about integers rather than about the linear lists of the
+earlier chapters (the GC-era version of this chapter implemented
+#dyncode("list0_exists") with an exception raised by the closure passed to
+#dyncode("list0_foreach")): for a list, the loop that stops when it finds an element
+is a recursion that returns (see #dyncode("list_find_index")), and an exception is
+used for data that is not linear. The flat closure #dyncode("fwork") above is fine
+since it is created in the try-expression.
+
+")
+
+#para("\
+
 By raising an exception, a function can efficiently pass some
 information gathered during its evaluation. Let us see a typical
-example of this kind as follows. A datatype #stacode("tree") is
-decared for representing binary trees:
+example of this kind as follows. Binary trees are an example of shared data
+(a subtree can be shared by many trees), which are kept in an arena by the
+program: the type #stacode("tree") is the type of the handles of the nodes, and
+it is not linear. The file #filename("tree.spec") in the code of this chapter
+specifies the type for the tool #command("arenagen") (see the chapter on the
+game of 24):
 
-#dats2xhtml('\
-//
-datatype
-tree(a:t@ype) =
-  | tree_nil of ()
-  | tree_cons of (tree(a), a, tree(a))
-//
-')
+<informalexample><programlisting>
+type tree
+  TREEnil ()
+  TREEcons (tree, int, tree)
+</programlisting></informalexample>
 
-For instance, the function for computing the height of a given
-binary tree can be implemented as follows:
+The generated interface is in #filename("tree.sats"). For instance, the
+function for computing the height of a given
+binary tree can be implemented as follows (the function
+#dyncode("tree_view") turns a handle into a value of a linear datavtype that
+is used for pattern matching and consumed by the patterns with the
+symbol #keycode("~")):
 
 #dats2xhtml('\
 //
 fun
-{a:t@ype}
-tree_height(t0: tree(a)): int =
+tree_height(t0: tree): int =
 (
-case+ t0 of
-| tree_nil() => 0
-| tree_cons(tl, _, tr) =>
-  1 + max(tree_height<a>(tl), tree_height<a>(tr))
+case+ tree_view(t0) of
+| ~TREEnil() => 0
+| ~TREEcons(tl, _, tr) =>
+  1 + max(tree_height(tl), tree_height(tr))
 )
 //
 ')
@@ -145,16 +170,14 @@ binary tree is perfect:
 #dats2xhtml('\
 //
 fun
-{a:t@ype}
-tree_is_perfect
-  (t0: tree(a)): bool =
+tree_is_perfect(t0: tree): bool =
 (
-case+ t0 of
-| tree_nil() => true
-| tree_cons(tl, _, tr) =>
-  tree_is_perfect<a>(tl) &&
-  tree_is_perfect<a>(tr) &&
-  (tree_height<a>(tl) = tree_height<a>(tr))
+case+ tree_view(t0) of
+| ~TREEnil() => true
+| ~TREEcons(tl, _, tr) =>
+  tree_is_perfect(tl) &&
+  tree_is_perfect(tr) &&
+  (tree_height(tl) = tree_height(tr))
 )
 //
 ')
@@ -167,17 +190,16 @@ O(n)-time that also checks whether a given tree is perfect:
 #dats2xhtml('\
 //
 fun
-{a:t@ype}
 tree_is_perfect2
-  (t0: tree(a)): bool = let
+  (t0: tree): bool = let
 //
 exception NotPerfect of ()
 //
 fun
-aux(t0: tree(a)): int =
-case+ t0 of
-| tree_nil() => 0
-| tree_cons(tl, _, tr) => let
+aux(t0: tree): int =
+case+ tree_view(t0) of
+| ~TREEnil() => 0
+| ~TREEcons(tl, _, tr) => let
     val hl = aux(tl) and hr = aux(tr)
   in
     if hl = hr
@@ -197,14 +219,40 @@ perfect. Otherwise, an exception (#dyncode("NotPerfect()")) is
 raised. In other words, if a call to #dyncode("aux") on a tree
 returns, we know that the tree is pefect while obtaining its height.
 This is often dubbed a #emphasis("hitting-two-birds-with-one-stone")
-scenario.
+scenario. The following code builds a perfect tree of height 10, in
+which the two subtrees of a node are the same node, and tests the two functions:
+
+#dats2xhtml('\
+//
+// the perfect tree of a given height; the subtrees are shared
+//
+fun
+tree_perfect(h: int): tree =
+if h <= 0
+  then tree_TREEnil()
+  else let
+    val t = tree_perfect(h-1) in tree_TREEcons(t, h, t)
+  end // end of [else]
+//
+val perfect = tree_perfect(10)
+val unperfect = tree_TREEcons(perfect, 0, tree_TREEnil())
+//
+val () = println! ("height(perfect) = ", tree_height(perfect))
+val () = println! ("is_perfect(perfect) = ", tree_is_perfect(perfect))
+val () = println! ("is_perfect2(perfect) = ", tree_is_perfect2(perfect))
+val () = println! ("is_perfect(unperfect) = ", tree_is_perfect(unperfect))
+val () = println! ("is_perfect2(unperfect) = ", tree_is_perfect2(unperfect))
+//
+')
 
 ")
 
 #para("\
 
 Please find #mycodelink("LECTURE/09/CODE", "on-line") the entirety of
-the code used in this chapter. \
+the code used in this chapter. It was compiled with #command("patscc")
+(no flag is needed) and run with the address sanitizer, which reports no
+leak. \
 
 ")#comment("para")
 
@@ -217,4 +265,3 @@ the code used in this chapter. \
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
