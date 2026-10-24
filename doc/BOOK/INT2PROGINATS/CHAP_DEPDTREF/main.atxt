@@ -20,7 +20,8 @@ id="datatype_refinement">
 The datatype mechanism in ATS is adopted from ML directly, and it is really
 a signatory feature in functional programming. However, the datatypes we
 have seen so far are not very precise when employed to classify values. For
-instance, given a type T, the type #stacode("list0(T)") is for values
+instance, given a type T, the type #stacode("mylist(T)") (see the chapter on
+parametric polymorphism) is for values
 representing both empty and non-empty lists consisting of elements of the
 type T. Therefore, empty and non-empty lists cannot be distinguished at the
 level of types. This limitation severely diminishes the effectiveness of
@@ -48,126 +49,125 @@ id="dependent_datatypes">
 #para("\
 
 The syntax for declaring dependent datatypes is mostly similar to the
-syntax for declaring non-dependent datatypes: For instance, the dependent
-datatype #stacode("list") in ATS is declared as follows:
+syntax for declaring non-dependent datatypes. As the values of a datatype
+whose constructors carry arguments are allocated in the heap, such a datatype is
+declared with the keyword #keycode("datavtype") (see the chapter on
+datatypes). For instance, the dependent
+datatype #stacode("mylist") in ATS, which refines the datatype of the
+same name that I presented before, is declared as follows:
 
 #sats2xhtml("\
-datatype
-list(t@ype+, int) =
-  | {a:t@ype} list_nil(a, 0) of () // [of ()] is optional
-  | {a:t@ype}{n:nat} list_cons(a, n+1) of (a, list(a, n))
+datavtype
+mylist(a:t@ype+, int) =
+  | mylist_nil(a, 0) of () // [of ()] is optional
+  | {n:nat} mylist_cons(a, n+1) of (a, mylist(a, n))
 ")
 
-More precisely, #stacode("list") is declared as a type constructor of the
-sort #emphasis("(t@ype, int) -> type"), which means that #stacode("list")
-takes an unboxed type and a static integer to form a boxed type. The
-keyword #keycode("t@ype+") indicates that #stacode("list") is covariant at
+More precisely, #stacode("mylist") is declared as a type constructor of the
+sort #emphasis("(t@ype, int) -> viewtype"), which means that #stacode("mylist")
+takes an unboxed type and a static integer to form a boxed and linear type. The
+keyword #keycode("t@ype+") indicates that #stacode("mylist") is covariant at
 its first parameter (of the sort #emphasis("t@ype")), that is,
-#stacode("list(T1, I)") is considered a subtype of #stacode("list(T2, I)")
+#stacode("mylist(T1, I)") is considered a subtype of #stacode("mylist(T2, I)")
 if T1 is a subtype of T2.  There is also the keyword #keycode("t@ype-") for
 indicating the declared type constructor being contravariant at a
 parameter, but it is rarely used in practice. Also, keywords like
-#keycode("type+") and #keycode("type-") are interpreted similarly.\
+#keycode("type+") and #keycode("type-") are interpreted similarly. (The
+datatype #stacode("list_vt") in the prelude of ATS is declared in the same
+manner, and so is #stacode("option_vt") that is shown below.)\
 
 ")#comment("para")
 
 #para("\
 
-There two data (or value) constructors #dyncode("list_nil") and
-#dyncode("list_cons") associated with #stacode("list"), which are declared to be
+There two data (or value) constructors #dyncode("mylist_nil") and
+#dyncode("mylist_cons") associated with #stacode("mylist"), which are declared to be
 of the following types:
 
 #atscode("\
-list_nil : {a:t@ype} () -> list(a, 0)
-list_cons : {a:t@ype}{n:nat} (a, list(a, n)) -> list(a, n+1)
+mylist_nil : {a:t@ype} () -> mylist(a, 0)
+mylist_cons : {a:t@ype}{n:nat} (a, mylist(a, n)) -> mylist(a, n+1)
 ")
 
-Given a type T and a static integer I, the type #stacode("list(T, I)") is
+Given a type T and a static integer I, the type #stacode("mylist(T, I)") is
 for values representing lists of length I in which each element is of the
-type T. Hence, the types of #dyncode("list_nil") and #dyncode("list_cons")
-mean that #dyncode("list_nil") forms a list of length 0 and
-#dyncode("list_cons") forms a list of length n+1 if applied to an element
-and a list of length n.  Note that it is also possible to declare
-#stacode("list") as follows in a more concise style:
-
-#sats2xhtml("\
-datatype
-list(a:t@ype+, int) =
-  | list_nil(a, 0) of () // [of ()] is optional
-  | {n:nat} list_cons(a, n+1) of (a, list(a, n))
-")
-
-The use of #stacode("a:t@ype+") (instead of #keycode("t@ype+")) introduces
+type T. Hence, the types of #dyncode("mylist_nil") and #dyncode("mylist_cons")
+mean that #dyncode("mylist_nil") forms a list of length 0 and
+#dyncode("mylist_cons") forms a list of length n+1 if applied to an element
+and a list of length n.  The use of #stacode("a:t@ype+") (instead of
+#keycode("t@ype+")) introduces
 implicitly a universal quantifier over #stacode("a") for the type assigned
 to each data constructor associated with the declared type constructor
-#stacode("list").\
+#stacode("mylist").\
 
 ")#comment("para")
 
 #para("\
 
 As an example of programming with dependent datatypes, the following code
-implements a function template for computing the length of a given list:
+implements a function template for computing the length of a given list.
+The list is only read, so it is borrowed (the symbol #dyncode("!") in front
+of the type of the argument indicates this):
 
 #dats2xhtml("\
 fun{
 a:t@ype
-} list_length
+} mylist_length
   {n:nat} .<n>.
-  (xs: list(a, n)): int(n) =
+  (xs: !mylist(a, n)): int(n) =
   case+ xs of
-  | list_nil() => 0
-  | list_cons(_, xs1) => 1 + list_length<a>(xs1)
-// end of [list_length]
+  | mylist_nil() => 0
+  | mylist_cons(_, xs1) => 1 + mylist_length<a>(xs1)
+// end of [mylist_length]
 ")
 
 Note that #stacode(".&lt;n&gt;.") is is a termination metric.
-The type assigned to the function #dyncode("list_length") indicates that
+The type assigned to the function #dyncode("mylist_length") indicates that
 the function takes a list of length n for any natural number n and returns
 an integer of value n. In addition, the function is verified to be
-terminating. Therefore, #dyncode("list_length") is guaranteed to implement the
+terminating. Therefore, #dyncode("mylist_length") is guaranteed to implement the
 function that computes the length of a given list. I now briefly explain
 how typechecking can be performed on the definition of
-#dyncode("list_length"). Let us first see that the the following clause
+#dyncode("mylist_length"). Let us first see that the the following clause
 typechecks:
 
 #atscode("\
-  | list_cons(_, xs1) => 1 + list_length(xs1)
+  | mylist_cons(_, xs1) => 1 + mylist_length(xs1)
 ")
 
 What we need to verify is that the expression on the righthand side of the
 symbol #keycode("=>") can be assigned the type #stacode("int(n)") under the
 assumption that #dyncode("xs") matches the pattern on the lefthand side of
 the symbol #keycode("=>").  Let us assume that #dyncode("xs1") is of the
-type #stacode("list(a, n1)") for some natural number #stacode("n1"), and
-this assumption implies that the pattern #dyncode("list_cons(_, xs1)") is
-of the type #stacode("list(a, n1+1)").  Clearly, matching #dyncode("xs")
-against the pattern #dyncode("list_cons(_, xs1)") generates a condition
-#stacode("n=n1+1").  It is also clear that #dyncode("list_length(xs1)") is
-of the type #stacode("int(n1)") and thus #dyncode("1 + list_length(xs1)")
+type #stacode("mylist(a, n1)") for some natural number #stacode("n1"), and
+this assumption implies that the pattern #dyncode("mylist_cons(_, xs1)") is
+of the type #stacode("mylist(a, n1+1)").  Clearly, matching #dyncode("xs")
+against the pattern #dyncode("mylist_cons(_, xs1)") generates a condition
+#stacode("n=n1+1").  It is also clear that #dyncode("mylist_length(xs1)") is
+of the type #stacode("int(n1)") and thus #dyncode("1 + mylist_length(xs1)")
 is of the type #stacode("int(1+n1)"). As the condition #stacode("n=n1+1")
-implies #stacode("n=1+n1"), #dyncode("1 + list_length(xs1)") can be given
+implies #stacode("n=1+n1"), #dyncode("1 + mylist_length(xs1)") can be given
 the type #stacode("int(n)"). So this clause typechecks.  Note that matching
-#dyncode("xs") against the pattern #dyncode("list_nil()") generates the
+#dyncode("xs") against the pattern #dyncode("mylist_nil()") generates the
 assumption #stacode("n=0"), which implies that #stacode("0") is of the type
 #stacode("int(n)"). Therefore, the following clause typechecks: ")
 
 #atscode("\
-  | list_nil((*void*)) => 0
+  | mylist_nil((*void*)) => 0
 ")
 
 #para("\
 
 Given that the two clauses typecheck properly, the case-expression
 containing them can be assigned the type #stacode("int(n)"). Therefore, the
-definition of #dyncode("list_length") typechecks.\
+definition of #dyncode("mylist_length") typechecks.\
 
 ")#comment("para")
 
 #para('\
 
 As the recursive call in the body of the above defined function
-#dyncode("list_length") is not a tail-call, the function may not be able to
+#dyncode("mylist_length") is not a tail-call, the function may not be able to
 handle a long list (e.g., one that contains 1 million elements).  The
 following code gives another implementation for computing the length of a
 given list:
@@ -177,26 +177,26 @@ given list:
 #dats2xhtml('\
 fun
 {a:t@ype}
-list_length{n:nat} .<>.
-  (xs: list(a, n)): int(n) = let
+mylist_length{n:nat} .<>.
+  (xs: !mylist(a, n)): int(n) = let
 //
-// loop: {i,j:nat} (list(a, i), int(j)) -> int(i+j)
+// loop: {i,j:nat} (!mylist(a, i), int(j)) -> int(i+j)
 //
 fun loop{i,j:nat} .<i>.
   // .<i>. is a termination metric
-  (xs: list(a, i), j: int(j)): int(i+j) =
+  (xs: !mylist(a, i), j: int(j)): int(i+j) =
   case+ xs of
-  | list_cons(_, xs1) => loop(xs1, j+1) | list_nil() => j
+  | mylist_cons(_, xs1) => loop(xs1, j+1) | mylist_nil() => j
 // end of [loop]
 //
 in
   loop(xs, 0)
-end // end of [list_length]
+end // end of [mylist_length]
 ')
 
 #para('\
 
-This time, #dyncode("list_length") is based on a tail-recursive function
+This time, #dyncode("mylist_length") is based on a tail-recursive function
 #dyncode("loop") and thus can handle lists of any length in constant stack
 space. Note that the type assigned to #dyncode("loop") indicates that
 #dyncode("loop") takes a list of length i and an integer of value j for some
@@ -207,70 +207,72 @@ natural numbers i and j and returns an integer of value i+j. Also,
 
 #para('\
 
-There is also a dependent datatype #stacode("option") in ATS for forming
-optional values:
+There is also a dependent datatype #stacode("option_vt") in the prelude of ATS
+for forming optional values:
 
 ')
 
 #sats2xhtml('\
-datatype
-option(a:t@ype+, bool) =
-  | Some(a, true) of a | None(a, false) of ()
-// end of [option]
+datavtype
+option_vt(a:vt@ype+, bool) =
+  | Some_vt(a, true) of a | None_vt(a, false) of ()
+// end of [option_vt]
 ')
 
 #para('\
 
-As an example, the following function template #dyncode("list_last") tries to
-find the last element in a given list:
+As an example, the following function template #dyncode("mylist_last") tries to
+find the last element in a given list (the list is borrowed, and the returned
+optional value is linear: it has to be consumed by the caller):
 
 ')
 
 #dats2xhtml('\
 fun{
 a:t@ype
-} list_last
+} mylist_last
   {n:nat} .<>.
 (
-  xs: list(a, n)
-) : option(a, n > 0) = let
+  xs: !mylist(a, n)
+) : option_vt(a, n > 0) = let
 //
 fun loop
   {n:pos} .<n>.
 (
-  xs: list(a, n)
+  xs: !mylist(a, n)
 ) : a = let
-  val+ list_cons(_, xs1) = xs
+  val+ mylist_cons(x, xs1) = xs
 in
   case+ xs1 of
-  | list_nil() => let
-      val+list_cons(x, _) = xs in x
-    end // end of [list_nil]
-  | list_cons(_, _) => loop(xs1)
+  | mylist_nil() => x
+  | mylist_cons(_, _) => loop(xs1)
 end // end of [loop]
 //
 in
   case+ xs of
-  | list_nil() => None() | list_cons _ => Some(loop(xs))
-end // end of [list_last]
+  | mylist_nil() => None_vt() | mylist_cons _ => Some_vt(loop(xs))
+end // end of [mylist_last]
 ')
 
 #para('\
 
 The inner function #dyncode("loop") is evidently tail-recursive and it is
-verified to be terminating.
+verified to be terminating. Note that the type of the result of
+#dyncode("mylist_last") tells that the returned value is of the form
+#dyncode("Some_vt(_)") if and only if the given list is not empty.
 
 ')
 
 #para('\
 
-After a programmer becomes familar with #stacode("list") and
-#stacode("option"), there is little incentive for him or her to use
-#stacode("list0") and #stacode("option0") anymore. Internally, values of
-#stacode("list") and #stacode("list0") have exactly the same representation and
-there are cast functions of zero run-time cost in ATS for translating
-between values of #stacode("list") and #stacode("list0").  The same applies
-to values of #stacode("option") and #stacode("option0") as well.
+After a programmer becomes familar with dependent datatypes such as
+#stacode("mylist") and #stacode("option_vt"), there is little incentive for him
+or her to use the non-dependent versions of them anymore. The datatypes of the
+prelude of ATS that correspond to them are #stacode("list_vt") and
+#stacode("option_vt"); the non-dependent versions are available as
+#stacode("List_vt(a)") and #stacode("Option_vt(a)"), which stand for
+the types of lists of an unspecified length and optional values of an
+unspecified form, respectively.
 
 ')
 
@@ -285,10 +287,10 @@ id="example_function_templates_on_lists_redux">
 #para("\
 
 I have presented previously implementation of some commonly used function
-templates on lists formed with the constructors #dyncode("list0_nil") and
-#dyncode("list0_cons"). This time, I present as follows implementation of
-the corresponding function templates on lists formed with the constructors
-#dyncode("list_nil") and #dyncode("list_cons"), which make it possible to
+templates on lists formed with the constructors #dyncode("mylist_nil") and
+#dyncode("mylist_cons") of the non-dependent datatype. This time, I present as follows
+implementation of the corresponding function templates on lists formed with the
+constructors of the dependent datatype, which make it possible to
 assign more accurate types to these templates.
 
 ")
@@ -299,32 +301,33 @@ code for testing #mycodelink("CHAP_DEPDTREF/listfuns.dats", "on-line").
 ")
 
 <sect2 id="list_append">
-#title("Appending: #dyncode("list_append")")
+#title("Appending: #dyncode("mylist_append")")
 
 #para("\
 
-Given two lists xs and ys of the types #stacode("list(T, I1)") and
-#stacode("list(T, I2)") for some type T and integers I1 and I2,
-#dyncode("list_append(xs, ys)") returns a list of the type
-#stacode("list(T,I1+I2)") that is the concatenation of xs and ys:
+Given two lists xs and ys of the types #stacode("mylist(T, I1)") and
+#stacode("mylist(T, I2)") for some type T and integers I1 and I2,
+#dyncode("mylist_append(xs, ys)") returns a list of the type
+#stacode("mylist(T,I1+I2)") that is the concatenation of xs and ys. Both
+xs and ys are consumed:
 
 #dats2xhtml("\
 fun
 {a:t@ype}
-list_append
+mylist_append
   {m,n:nat} .<m>.
 (
-  xs: list(a, m)
-, ys: list(a, n)
-) : list(a, m+n) =
+  xs: mylist(a, m)
+, ys: mylist(a, n)
+) : mylist(a, m+n) =
 (
   case+ xs of
-  | list_nil() => ys
-  | list_cons(x, xs) => list_cons(x, list_append<a>(xs, ys))
-) (* end of [list_append] *)
+  | ~mylist_nil() => ys
+  | ~mylist_cons(x, xs) => mylist_cons(x, mylist_append<a>(xs, ys))
+) (* end of [mylist_append] *)
 ")
 
-Clearly, this implementation of #dyncode("list_append") is not
+Clearly, this implementation of #dyncode("mylist_append") is not
 tail-recursive.\
 
 ")#comment("para")
@@ -332,34 +335,34 @@ tail-recursive.\
 </sect2><!--id="list_append"-->
 
 <sect2 id="list_reverse_append">
-#title("Reverse Appending: #dyncode("list_reverse_append")")
+#title("Reverse Appending: #dyncode("mylist_reverse_append")")
 
 #para("\
 
-Given two lists xs and ys of the type #stacode("list(T, I1)") and
-#stacode("list(T, I2)") for some type T and integers I1 and I2,
-#dyncode("list_reverse_append(xs, ys)") returns a list of the type
-#stacode("list(T, I1+I2)") that is the concatenation of the reverse of xs
-and ys:
+Given two lists xs and ys of the type #stacode("mylist(T, I1)") and
+#stacode("mylist(T, I2)") for some type T and integers I1 and I2,
+#dyncode("mylist_reverse_append(xs, ys)") returns a list of the type
+#stacode("mylist(T, I1+I2)") that is the concatenation of the reverse of xs
+and ys (both lists are consumed):
 
 #dats2xhtml("\
 fun
 {a:t@ype}
-list_reverse_append
+mylist_reverse_append
   {m,n:nat} .<m>.
 (
-  xs: list(a, m)
-, ys: list(a, n)
-) : list(a, m+n) =
+  xs: mylist(a, m)
+, ys: mylist(a, n)
+) : mylist(a, m+n) =
 (
   case+ xs of
-  | list_nil() => ys
-  | list_cons(x, xs) =>
-      list_reverse_append<a>(xs, list_cons(x, ys))
-) (* end of [list_reverse_append] *)
+  | ~mylist_nil() => ys
+  | ~mylist_cons(x, xs) =>
+      mylist_reverse_append<a>(xs, mylist_cons(x, ys))
+) (* end of [mylist_reverse_append] *)
 ")
 
-Clearly, this implementation of #dyncode("list_reverse_append") is
+Clearly, this implementation of #dyncode("mylist_reverse_append") is
 tail-recursive.\
 
 ")#comment("para")
@@ -367,51 +370,56 @@ tail-recursive.\
 </sect2><!--id="list_reverse_append"-->
 
 <sect2 id="list_reverse">
-#title("Reversing: #dyncode("list_reverse")")
+#title("Reversing: #dyncode("mylist_reverse")")
 
 #para("\
 
-Given a list xs, #dyncode("list_reverse(xs)") returns the reverse of xs,
-which is of the same length as xs:
+Given a list xs, #dyncode("mylist_reverse(xs)") returns the reverse of xs,
+which is of the same length as xs (xs is consumed):
 
 #dats2xhtml("\
 fun
 {a:t@ype}
-list_reverse{n:nat} .<>. // defined non-recursively
-  (xs: list(a, n)): list(a, n) = list_reverse_append<a>(xs, list_nil())
-// end of [list_reverse]
+mylist_reverse{n:nat} .<>. // defined non-recursively
+  (xs: mylist(a, n)): mylist(a, n) = mylist_reverse_append<a>(xs, mylist_nil())
+// end of [mylist_reverse]
 ")
 ")#comment("para")
 
 </sect2><!--id="list_reverse"-->
 
 <sect2 id="list_map">
-#title("Mapping: #dyncode("list_map")")
+#title("Mapping: #dyncode("mylist_map")")
 
 #para("\
 
-Given a list xs of the type #stacode("list(T1, I)") for some type T1 and
-integer I and a closure function f of the type #stacode("T1 -&lt;cloref1&gt; T2")
-for some T2, #dyncode("list_map(xs)") returns a list ys of the type #stacode("list(T2, I)"):
+Given a list xs of the type #stacode("mylist(T1, I)") for some type T1 and
+integer I and a flat closure function f of the type #stacode("T1 -&lt;clo1&gt; T2")
+for some T2, #dyncode("mylist_map(xs, f)") returns a list ys of the type
+#stacode("mylist(T2, I)"). The list xs is borrowed, and f is passed by reference:
 
 #dats2xhtml("\
 fun{
 a:t@ype}
 {b:t@ype
-} list_map
+} mylist_map
   {n:nat} .<n>.
 (
-  xs: list(a, n), f: a -<cloref1> b
-) : list(b, n) =
+  xs: !mylist(a, n), f: &(a) -<clo1> b
+) : mylist(b, n) =
 (
   case+ xs of
-  | list_nil() => list_nil()
-  | list_cons(x, xs) => list_cons(f(x), list_map<a>(xs, f))
-) (* end of [list_map] *)
+  | mylist_nil() => mylist_nil()
+  | mylist_cons(x, xs) => let
+      val y = f(x)
+    in
+      mylist_cons(y, mylist_map<a><b>(xs, f))
+    end // end of [mylist_cons]
+) (* end of [mylist_map] *)
 ")
 
 Each element y in ys equals f(x), where x is the corresponding element in
-xs.  Clearly, this implementation of #dyncode("list_map") is not
+xs.  Clearly, this implementation of #dyncode("mylist_map") is not
 tail-recursive.\
 
 ")#comment("para")
@@ -419,84 +427,88 @@ tail-recursive.\
 </sect2><!--id="list_map"-->
 
 <sect2 id="list_zip">
-#title("Zipping: #dyncode("list_zip")")
+#title("Zipping: #dyncode("mylist_zip")")
 
 #para("\
 
-Given two lists xs and ys of the types #stacode("list(T1, I)") and
-#stacode("list(T2, I)") for some types T1 and T2 and integer I, respectively,
-#dyncode("list_zip(xs, ys)") returns a list zs of the type #stacode("list((T1,T2), I)").
+Given two lists xs and ys of the types #stacode("mylist(T1, I)") and
+#stacode("mylist(T2, I)") for some types T1 and T2 and integer I, respectively,
+#dyncode("mylist_zip(xs, ys)") returns a list zs of the type #stacode("mylist((T1,T2), I)").
+Both xs and ys are borrowed.
 
 #dats2xhtml("\
 fun{
 a,b:t@ype
-} list_zip
+} mylist_zip
   {n:nat} .<n>.
 (
-  xs: list(a, n)
-, ys: list(b, n)
-) : list((a, b), n) =
+  xs: !mylist(a, n)
+, ys: !mylist(b, n)
+) : mylist((a, b), n) =
 (
-  case+ (xs, ys) of
-  | (
-      list_nil()
-    , list_nil()
-    ) => list_nil((*void*))
-  | (
-      list_cons(x, xs)
-    , list_cons(y, ys)
-    ) => list_cons((x, y), list_zip<a,b>(xs, ys))
-) (* end of [list_zip] *)
+  case+ xs of
+  | mylist_nil() => mylist_nil((*void*))
+  | mylist_cons(x, xs) =>
+    (
+      case+ ys of
+      | mylist_cons(y, ys) => mylist_cons((x, y), mylist_zip<a,b>(xs, ys))
+    )
+) (* end of [mylist_zip] *)
 ")
 
+Note that the inner case-expression has a single clause: as xs is not empty,
+ys is known (from the type) not to be empty either, and
+the typechecker agrees that the case-expression is exhaustive.
 Each element z in zs equals the pair (x, y), where x and y are the
 corresponding elements in xs and ys, respectively.  Clearly, this
-implementation of #dyncode("list_zip") is not tail-recursive.\
+implementation of #dyncode("mylist_zip") is not tail-recursive.\
 
 ")#comment("para")
 
 </sect2><!--id="list_zip"-->
 
 <sect2 id="list_zipwith">
-#title("Zipping with: #dyncode("list_zipwith")")
+#title("Zipping with: #dyncode("mylist_zipwith")")
 
 #para("\
 
-Given two lists xs and ys of the types #stacode("list(T1, I)") and
-#stacode("list(T2, I)") for some types T1 and T2 and integer I,
-respectively, and a closure function f of the type #stacode("(T1, T2)
--&lt;cloref1&gt; T3") for some type T3, #dyncode("list_zipwith(xs, ys, f)")
-returns a list zs of the type #stacode("list(T3, I)"):
+Given two lists xs and ys of the types #stacode("mylist(T1, I)") and
+#stacode("mylist(T2, I)") for some types T1 and T2 and integer I,
+respectively, and a flat closure function f of the type #stacode("(T1, T2)
+-&lt;clo1&gt; T3") for some type T3, #dyncode("mylist_zipwith(xs, ys, f)")
+returns a list zs of the type #stacode("mylist(T3, I)"):
 
 #dats2xhtml("\
 fun{
 a,b:t@ype
 }{c:t@ype
-} list_zipwith
+} mylist_zipwith
   {n:nat} .<n>.
 (
-  xs: list(a, n)
-, ys: list(b, n)
-, f: (a, b) -<cloref1> c
-) : list(c, n) =
+  xs: !mylist(a, n)
+, ys: !mylist(b, n)
+, f: &(a, b) -<clo1> c
+) : mylist(c, n) =
 (
-  case+ (xs, ys) of
-  | (
-      list_nil()
-    , list_nil()
-    ) => list_nil((*void*))
-  | (
-      list_cons(x, xs)
-    , list_cons(y, ys)
-    ) =>
-      list_cons(f(x, y), list_zipwith<a,b><c>(xs, ys, f))
-     // end of (list_cons, list_cons)
-) (* end of [list_zipwith] *)
+  case+ xs of
+  | mylist_cons(x, xs) =>
+    (
+      case+ ys of
+      | mylist_cons(y, ys) => let
+          val z = f(x, y)
+        in
+          mylist_cons(z, mylist_zipwith<a,b><c>(xs, ys, f))
+        end
+    ) (* end of [mylist_cons] *)
+  | _ =>> mylist_nil((*void*))
+) (* end of [mylist_zipwith] *)
 ")
 
 Each element z in zs equals f(x, y), where x and y are the corresponding
 elements in xs and ys, respectively.  Clearly, this implementation of
-#dyncode("list_zipwith") is not tail-recursive.
+#dyncode("mylist_zipwith") is not tail-recursive. (The symbol
+#keycode("=>>") in the last clause is explained in the section on sequentiality
+of pattern matching below.)
 ")#comment("para")
 
 </sect2><!--id="list_zipping_with"-->
@@ -511,10 +523,10 @@ elements in xs and ys, respectively.  Clearly, this implementation of
 #para('\
 
 I have previously presented an <xref linkend="example_mergesort"/>
-that are formed with the constructors #dyncode("list0_nil") and
-#dyncode("list0_cons").  In this section, I give an implementation of
-mergesort on lists formed with the constructors #dyncode("list_nil") and
-#dyncode("list_cons"). This implementation is based on the same algorithm
+that are formed with the constructors of the non-dependent datatype #dyncode("mylist").
+In this section, I give an implementation of
+mergesort on lists formed with the constructors of the dependent datatype
+#dyncode("mylist"). This implementation is based on the same algorithm
 as the previous one but it assigns a type to the implemented sorting
 function that guarantees the function to be length-preserving, that is, the
 function always returns a list of the same length as the list it sorts.
@@ -523,7 +535,8 @@ function always returns a list of the same length as the list it sorts.
 
 #para("\
 The following defined function #dyncode("merge") combines two
-ordered list (according to a given ordering) into a single ordered list:
+ordered list (according to a given ordering) into a single ordered list. It
+consumes both of its arguments:
 
 #dats2xhtml("\
 //
@@ -534,20 +547,20 @@ a:t@ype
 } merge
   {m,n:nat} .<m+n>.
 (
-  xs0: list(a, m), ys0: list(a, n), lte: lte a
-) : list(a, m+n) =
+  xs0: mylist(a, m), ys0: mylist(a, n), lte: lte a
+) : mylist(a, m+n) =
   case+ xs0 of
-  | list_nil() => ys0
-  | list_cons(x, xs1) =>
+  | ~mylist_nil() => ys0
+  | ~mylist_cons(x, xs1) =>
     (
     case+ ys0 of
-    | list_nil() => xs0
-    | list_cons(y, ys1) =>
+    | ~mylist_nil() => mylist_cons(x, xs1)
+    | ~mylist_cons(y, ys1) =>
         if x \\\\\\\\lte y
-          then list_cons(x, merge (xs1, ys0, lte))
-          else list_cons(y, merge (xs0, ys1, lte))
+          then mylist_cons(x, merge (xs1, mylist_cons(y, ys1), lte))
+          else mylist_cons(y, merge (mylist_cons(x, xs1), ys1, lte))
         // end of [if]
-    ) // end of [list_cons]
+    ) // end of [mylist_cons]
 // end of [merge]
 //
 ")
@@ -562,47 +575,48 @@ lists. Note that a termination metric is present for verifying that
 #para("\
 
 The following defined function #dyncode("mergesort") mergesorts a
-list according to a given ordering:
+list according to a given ordering. It consumes its argument:
 
 #dats2xhtml("\
 fun{
 a:t@ype
 } mergesort{n:nat}
 (
-  xs: list(a, n), lte: lte a
-) : list(a, n) = let
+  xs: mylist(a, n), lte: lte a
+) : mylist(a, n) = let
 //
   fun msort
     {n:nat} .<n,n>.
   (
-    xs: list(a, n), n: int n, lte: lte a
-  ) : list(a, n) =
+    xs: mylist(a, n), n: int n, lte: lte a
+  ) : mylist(a, n) =
     if n >= 2
-      then split(xs, n, lte, half(n), list_nil) else xs
+      then split(xs, n, lte, half(n), mylist_nil) else xs
     // end of [if]
   // end of [msort]
   and split
     {n:int | n >= 2}{i:nat | i <= n/2} .<n,i>.
   (
-    xs: list(a, n-n/2+i)
-  , n: int(n), lte: lte a, i: int(i), xsf: list(a, n/2-i)
-  ) : list(a, n) =
+    xs: mylist(a, n-n/2+i)
+  , n: int(n), lte: lte a, i: int(i), xsf: mylist(a, n/2-i)
+  ) : mylist(a, n) =
     if i > 0 then let
-      val+list_cons(x, xs) = xs
+      val ~mylist_cons(x, xs) = xs
     in
-      split(xs, n, lte, i-1, list_cons(x, xsf))
+      split(xs, n, lte, i-1, mylist_cons(x, xsf))
     end else let
       val n2 = half(n)
-      val xsf = list_reverse<a>(xsf) // make sorting stable!
-      val xsf = list_of_list_vt(xsf) // linear list -> nonlinear list
+      val xsf = mylist_reverse<a>(xsf) // make sorting stable!
       val xsf = msort(xsf, n2, lte) and xs = msort (xs, n-n2, lte)
     in
       merge(xsf, xs, lte)
     end // end of [if]
   // end of [split]
 //
+  val n = mylist_length<a>(xs)
+//
 in
-  msort(xs, list_length<a>(xs), lte)
+  msort(xs, n, lte)
 end // end of [mergesort]
 ")
 
@@ -617,11 +631,10 @@ to be the length of its list argument, and a mismatch between the two
 surely results in a type-error.  The type assigned to #dyncode("split") is
 particularly informative, depicting a relation between the arguments and
 the return value of the function that can be of great help for someone
-trying to understand the code.  The function #dyncode("list_reverse")
-returns a linear list that is the reverse of its input, and the cast
-function #dyncode("list_of_list_vt") turns a linear list into a nonlinear
-one (while incuring no cost at run-time). I will explain what linear lists
-are elsewhere.\
+trying to understand the code.  The function #dyncode("mylist_reverse")
+returns the reverse of its input, which it consumes. Note that every list
+is consumed exactly once: the type system makes sure that no list is lost
+or used twice.\
 
 ")#comment("para")
 
@@ -644,41 +657,44 @@ In ATS, pattern matching is performed sequentially at run-time. In other
 words, a clause is selected only if a given value matches the pattern
 guard associated with this clause but the value fails to match the pattern
 associated with any clause ahead of it. Naturally, one may expect that the
-following implementation of #dyncode("list_zipwith") also typechecks:
+following implementation of #dyncode("mylist_zipwith") also typechecks:
 
 #dats2xhtml("\
 fun{
 a,b:t@ype
 }{c:t@ype
-} list_zipwith
+} mylist_zipwith
   {n:nat}
 (
-  xs: list(a, n)
-, ys: list(b, n)
-, f: (a, b) -<cloref1> c
-) : list(c, n) = (
+  xs: !mylist(a, n)
+, ys: !mylist(b, n)
+, f: &(a, b) -<clo1> c
+) : mylist(c, n) = (
 //
-case+ (xs, ys) of
-| (
-    list_cons(x, xs)
-  , list_cons(y, ys)) =>
+case+ xs of
+| mylist_cons(x, xs) =>
   (
-    list_cons(f(x, y), list_zipwith<a,b><c>(xs, ys, f))
+    case+ ys of
+    | mylist_cons(y, ys) => let
+        val z = f(x, y)
+      in
+        mylist_cons(z, mylist_zipwith<a,b><c>(xs, ys, f))
+      end
   )
-| (_, _) => list_nil((*void*))
+| _ => mylist_nil((*void*))
 //
-) (* end of [list_zipwith] *)
+) (* end of [mylist_zipwith] *)
 ")
 
 This, however, is not the case. In ATS, typechecking clauses is done
 nondeterministically (rather than sequentially). In this example, the
 second clause fails to typecheck as it is done without the assumption of
-the given pair #dyncode("(xs, ys)") failing to match the pattern
+the given list #dyncode("xs") failing to match the pattern
 guard associated with the first clause.  The second clause can be modified
 slightly as follows to pass typechecking:
 
 #atscode("\
-  | (_, _) =>> list_nil((*void*))
+  | _ =>> mylist_nil((*void*))
 ")
 
 The use of the symbol #keycode("=>>") (in place of #keycode("=>"))
@@ -686,39 +702,26 @@ indicates to the typechecker that this clause needs to be typechecked under
 the sequentiality assumption that the given value matching it does not
 match the pattern guards associated with any previous clauses. Therefore,
 when the modified second clause is typechecked, it can be assumed that the
-pair #dyncode("(xs, ys)") matching the pattern #dyncode("(_, _)") must
-match one of the following three patterns:
+list #dyncode("xs") matching the pattern #dyncode("_") must
+match the following pattern:
 
 <itemizedlist>
 
 <listitem>
 #para("
-#dyncode("(list_nil(), list_nil())")
-")
-</listitem>
-
-<listitem>
-#para("
-#dyncode("(list_cons _, list_nil())")
-")
-</listitem>
-
-<listitem>
-#para("
-#dyncode("(list_nil(), list_cons _)")
+#dyncode("mylist_nil()")
 ")
 </listitem>
 
 </itemizedlist>
 
-Given that #dyncode("xs") and #dyncode("ys") are of the same length,
-the typechecker can readily infer that #dyncode("(xs, ys)") can only
-match the first of the above three patterns. After the last two
-patterns are ruled out, typechecking is essentially done as if the
+Given that #dyncode("xs") is of the length n, and the pattern says that it is
+empty, the typechecker can readily infer that n equals 0, and
+typechecking is essentially done as if the
 second clause was written as follows:
 
 #atscode("\
-  | (list_nil(), list_nil()) => list_nil((*void*))
+  | mylist_nil() => mylist_nil((*void*))
 ")
 
 ")#comment("para")
@@ -758,7 +761,7 @@ occurring on each path in a red-black tree is often referred to as the
 #para('\
 
 Formally, a datatype precisely for red-black trees can be declared in ATS
-as follows:
+as follows (the nodes are allocated in the heap and the tree is linear):
 
 ')
 
@@ -768,7 +771,7 @@ as follows:
 \#define RED 1
 sortdef clr = {c:nat | c <= 1}
 //
-datatype rbtree
+datavtype rbtree
 (
   a:t@ype+
 , int(*color*)
@@ -807,7 +810,7 @@ we can declare #stacode("rbtree") as follows:
 
 #sats2xhtml('\
 //
-datatype rbtree
+datavtype rbtree
 (
   a:t@ype+
 , int // color
@@ -843,7 +846,9 @@ color violations).
 
 Given a tree containing at most one color violation, an element and another
 tree containing no violations, the following operation constructs a valid
-red-black tree:
+red-black tree. The two trees are consumed: the patterns with the prefix
+#dyncode("~") take the nodes apart, and the nodes of the resulting tree are
+allocated by the constructors:
 
 ')
 
@@ -856,12 +861,21 @@ a:t@ype
 ) : [c:clr] rbtree0 (a, c, bh+1) = let
   \#define B BLK; \#define R RED; \#define cons rbtree_cons
 in
-  case+ (tl, x0, tr) of
-  | (cons(R, cons(R, a, x, b), y, c), z, d) =>
-      cons(R, cons(B, a, x, b), y, cons(B, c, z, d)) // shallow rot
-  | (cons(R, a, x, cons(R, b, y, c)), z, d) =>
-      cons(R, cons(B, a, x, b), y, cons(B, c, z, d)) // deep rotation
-  | (a, x, b) =>> cons(B, a, x, b)
+  case+ tl of
+  | ~cons(R, tll, y, tlr) =>
+    (
+      case+ tll of
+      | ~cons(R, a, x, b) =>
+          cons(R, cons(B, a, x, b), y, cons(B, tlr, x0, tr)) // shallow rot
+      | _ =>>
+        (
+          case+ tlr of
+          | ~cons(R, b, y1, c) =>
+              cons(R, cons(B, tll, y, b), y1, cons(B, c, x0, tr)) // deep rotation
+          | _ =>> cons(B, cons(R, tll, y, tlr), x0, tr)
+        )
+    )
+  | _ =>> cons(B, tl, x0, tr)
 end // end of [insfix_l]
 ')
 
@@ -889,12 +903,21 @@ a:t@ype
 ) : [c:clr] rbtree0 (a, c, bh+1) = let
   \#define B BLK; \#define R RED; \#define cons rbtree_cons
 in
-  case+ (tl, x0, tr) of
-  | (a, x, cons(R, b, y, cons(R, c, z, d))) =>
-      cons(R, cons(B, a, x, b), y, cons(B, c, z, d)) // shallow rot
-  | (a, x, cons(R, cons(R, b, y, c), z, d)) =>
-      cons(R, cons(B, a, x, b), y, cons(B, c, z, d)) // deep rotation
-  | (a, x, b) =>> cons(B, a, x, b)
+  case+ tr of
+  | ~cons(R, trl, z, trr) =>
+    (
+      case+ trr of
+      | ~cons(R, c, z1, d) =>
+          cons(R, cons(B, tl, x0, trl), z, cons(B, c, z1, d)) // shallow rot
+      | _ =>>
+        (
+          case+ trl of
+          | ~cons(R, b, y, c) =>
+              cons(R, cons(B, tl, x0, b), y, cons(B, c, z, trr)) // deep rotation
+          | _ =>> cons(B, tl, x0, cons(R, trl, z, trr))
+        )
+    )
+  | _ =>> cons(B, tl, x0, tr)
 end // end of [insfix_r]
 ')
 
@@ -904,11 +927,14 @@ The preparation for implementing insertion on a red-black tree is all done
 by now, and we are ready to see an implementation of insertion guaranteeing
 that the tree obtained from inserting an element into a given red-black
 tree is always a valid red-black tree itself. This guarantee is precisely
-captured in the following interface for insertion:
+captured in the following interface for insertion (the tree is consumed and a
+tree is returned):
 
 ')
 
 #dats2xhtml('\
+typedef cmp (a:t@ype) = (a, a) -> int
+
 extern
 fun{
 a:t@ype
@@ -947,10 +973,10 @@ fun ins
 ] rbtree (a, cl, bh, v) =
 (
   case+ t of
-  | nil((*void*)) =>
+  | ~nil((*void*)) =>
     cons{..}{..}{..}{0}(R, nil, x0, nil)
-  | cons(c, tl, x, tr) => let
-      val sgn = compare(x0, x, cmp)
+  | ~cons(c, tl, x, tr) => let
+      val sgn = cmp(x0, x)
     in
       //
       // [ifcase] for combining a sequence
@@ -973,14 +999,14 @@ fun ins
             else cons{..}{..}{..}{cr}(R, tl, x, tr)
           // end of [if]
         end (* sgn > 0 *)
-      | _(* sgn = 0 *) => (t) // end of [ifcase]
+      | _(* sgn = 0 *) => cons{..}{..}{..}{0}(c, tl, x, tr) // [x0] found
     end // end of [cons]
 ) (* end of [ins] *)
 //
 val t = ins(t, x0)
 //
 in
-  case+ t of cons(R, tl, x, tr) => cons(B, tl, x, tr) | _ =>> t
+  case+ t of ~cons(R, tl, x, tr) => cons(B, tl, x, tr) | _ =>> t
 end // end of [rbtree_insert]
 ')
 
@@ -1003,13 +1029,17 @@ understanding of the insertion algorithm on red-black trees.
 #para('\
 
 The insertion operation implemented above does not insert an element if it
-is already in the given red-black tree. It may be desirable to require that
+is already in the given red-black tree (the tree is rebuilt as it was). It may be
+desirable to require that
 the operation inform the caller if such a case occurs. For instance, an
 exception can be raised for this purpose. An alternative is to give
 #dyncode("rbtree_insert") a call-by-reference argument so that a flag can be
 returned in it to indicate whether the element to be inserted is actually
 inserted. I will explain elsewhere what call-by-reference is and how it is
-supported in ATS.
+supported in ATS.  Also, as this implementation allocates a new node for each
+node on the path from the root to the new element, an implementation that
+updates the tree in place is more efficient; such an implementation is
+presented in the chapter on dataviewtypes.
 
 ')
 
