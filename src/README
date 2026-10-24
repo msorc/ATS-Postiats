@@ -7,10 +7,9 @@ alternative when there is none (see CBOOT/README). The notes of the port from AT
 in PORTING.md ("src2" there is this directory). The tools built on these modules (atsdoc,
 libatsdoc, libatsynmark, pats2xhtml) and the .atxt templates of the repository need no ATS1 either (see utils/atsdoc).
 
-Prerequisites: a C compiler, GNU make, python3 (generates the arena encodings of the
-syntax trees, utils/arenagen), libgmp (without it: C3NSTRINTKND=intknd). PATSHOME
-defaults to the root of the repository; the prelude, share/ and the C run-time are read
-from there.
+Requirements and the normal build and install (`make`, `make install`): see ../INSTALL. This file is for the developers of the compiler:
+the stage-0 choices and the sub-builds. PATSHOME defaults to the root of the repository; the prelude, share/ and the C run-time
+are read from there.
 
 Building
 --------
@@ -58,7 +57,7 @@ Source conventions
 
 The no-GC rules of the repository apply to the compiler itself (see CLAUDE.md): linear heap data only, the shared
 syntax trees live in arenas (libats/arena) generated from the pats_*.spec files by utils/arenagen/arenagen.py
-(the generated pats_*_gen*.hats are not in git; `make -C src check` or the build makes them).
+(16 modules' generated pats_*_gen*.hats are tracked, the others are build output; `make -C src check` or the build makes them).
 When you add a module add it to the lists of src/Makefile (SATS/DATS and the group lists) and to the dynload list in pats_main.dats.
 
 The ATS1 sources

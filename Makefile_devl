@@ -15,16 +15,13 @@
 #
 # Note:
 #
-# ATS1 is no longer needed: the compiler in src/ is written in ATS2 (no GC).
-# The first patsopt (stage 0) is any ATS2 compiler or the C bundle of
-# src/CBOOT; see src/README. Examples (PATSHOME is the root of this repo):
+# This is the step-by-step makefile behind the root Makefile (use `make`,
+# `make bootstrap`, `make install`: see INSTALL). ATS1 is not needed. The
+# first patsopt (stage 0) is PATSOPT=, bin/patsopt of an earlier build, or
+# the tracked bootstrap bundle src/CBOOT; see src/README. For example:
 #
 # make -f Makefile_devl PATSOPT=/usr/bin/patsopt \
 #   STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all   # an installed ATS2
-# make bootstrap                              # (root Makefile) src/CBOOT, then this
-# make -C src/CBOOT && \
-#   make -f Makefile_devl PATSOPT=$PWD/src/CBOOT/patsopt all
-# make -f Makefile_devl all                   # bin/patsopt exists already
 #
 # (the generated prelude sources, prelude/*/SRCGEN/*.?ats, are in git;
 # `make -f codegen/Makefile_atslib` regenerates them with bin/atsdoc (ATS2: `make -f Makefile_devl bin_atsdoc`))

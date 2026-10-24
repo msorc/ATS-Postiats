@@ -46,19 +46,18 @@
 # cd /tmp
 # sh ${PATSHOME}/share/SCRIPT/build_release.sh x.y.z KIND
 # <
-# Run with KIND for each of 'intknd', 'gmpknd', and 'contrib'.
-# Note: should not run the 'contrib' variant last.
+# KIND is 'intknd', 'gmpknd', 'both' or 'contrib'. The tarball
+# ATS2-Postiats-x.y.z.tgz is one for both kinds of integers of the
+# constraint solver: ./configure uses libgmp when <gmp.h> is there.
 #
-# Move the following built packages to some place:
-# /tmp/ATS-Postiats/doc/DISTRIB/ATS2-Postiats-gmp-x.y.z.tgz
-# /tmp/ATS-Postiats/doc/DISTRIB/ATS2-Postiats-int-x.y.z.tgz
+# The built packages:
+# /tmp/ATS-Postiats/doc/DISTRIB/ATS2-Postiats-x.y.z.tgz
 # /tmp/ATS-Postiats/doc/DISTRIB/ATS2-Postiats-contrib-x.y.z.tgz
 # /tmp/ATS-Postiats/doc/DISTRIB/ATS2-Postiats-include-x.y.z.tgz
 #
-# Copy ATS2-Postiats-int-x.y.z.tgz to ATS2-Postiats-x.y.z.tgz (the non-gmp, or "int")
-# release is the default as of 0.4.0, and since sf.net doesn't support symbolic links
-# we make a copy to make it clear which should be regarded as the default for new users.
-#
+# From a clone that is already built, `make dist` (the root Makefile; see
+# INSTALL) makes ATS2-Postiats-x.y.z.tgz and ATS2-Postiats-include-x.y.z.tgz
+# with their .sha256 files.
 # >
 # rm -rf /tmp/ATS-Postiats
 # rm -rf /tmp/ATS-Postiats-contrib
@@ -67,12 +66,11 @@
 #
 # cd ${PATSHOME}
 # make -f Makefile_devl bin_atsdoc  # atsdoc generates the packaging scripts
-# make -C src CBOOT                  # the bootstrap C bundle
+# make -C src CBOOT                  # (only to refresh the tracked bootstrap bundle)
 # cd doc/DISTRIB
 # make -f Makefile.gen
 # make atspackaging                 # fills in ATS-Postiats/
-# make atspacktarzvcf_gmp           # ATS2-Postiats-gmp-x.y.z.tgz
-# make atspacktarzvcf_int           # ATS2-Postiats-int-x.y.z.tgz
+# make atspacktarzvcf            # ATS2-Postiats-x.y.z.tgz
 # make -f Makefile_inclats tarzvcf  # ATS2-Postiats-include-x.y.z.tgz
 #
 #######
@@ -86,22 +84,17 @@
 # which writes
 # ${PATSHOME}/doc/DISTRIB/ATS-Postiats/RELEASE/ats2-postiats-x.y.z-release.html
 #
-# Uploading the following files to sourceforge and generate the md5sum and sha1sum
-# of ATS2-Postiats-x.y.z.tgz, and add these to ${PATSHOME}/CHANGES-ats2
+# Create a GitHub Release of the tag vx.y.z (github.com/msorc/ATS-Postiats)
+# and upload the following files to it, with their .sha256 files
+# (`make dist` writes them):
 #
 # ATS2-Postiats-x.y.z.tgz
-# ATS2-Postiats-gmp-x.y.z.tgz
-# ATS2-Postiats-int-x.y.z.tgz
 # ATS2-Postiats-contrib-x.y.z.tgz
 # ATS2-Postiats-include-x.y.z.tgz
 # ats2-postiats-x.y.z-release.html
 #
 # The changes for the above release.html file can be found in
 # ${PATSHOME}/CHANGES-ats2.
-#
-# Updating ats-lang.org/Documents
-# Updating ats-lang.org/Community
-# Announcing to ats-lang-users@lists.sourceforge.net
 #
 #######
 
