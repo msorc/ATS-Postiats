@@ -104,37 +104,29 @@ types in programming.
 There are many approaches to installing ATS.
 Please visit this
 <ulink url="http://www.ats-lang.org/Downloads.html">link</ulink>
-for details.\
+for details. The compiler of this dialect of ATS2 is written in ATS2
+itself, and it can be built from the sources of the ATS2 repository with
+a C compiler, GNU make and libgmp (the file #filename("README.md") of the
+repository describes the choices for the first compiler; for instance, the
+bootstrap C bundle of a release makes it possible to build everything
+with #emphasis("gcc") only).\
 
 ')
 
 #para('\
 
-I have a free account with <ulink url="http://c9.io/">Cloud-9</ulink>,
-which allows me to gain on-line access to Ubuntu boxes. With such a
-box, one can simply execute the following command-lines to install ATS
-in a couple minutes:
+After the build is done, the directory of the repository (or the directory where
+ATS2 is installed) is to be stored in an environment variable of the name
+#emphasis("PATSHOME"), and its subdirectory #filename("bin") is to be added to
+the search path:
 
 <informalexample><programlisting>
-<command>wget</command> https://ats-lang.github.io/SCRIPT/C9-ATS2-install-cs320.sh
-<command>bash</command> -v C9-ATS2-install-cs320.sh
-<command>source</command> ~/.bashrc ## this one only needs to be executed once for all
-</programlisting></informalexample>
-
-After installation is done, one can execute:
-<informalexample><programlisting>
+<command>export</command> PATSHOME=/path/to/ATS-Postiats
+<command>export</command> PATH=$PATSHOME/bin:$PATH
 <command>which</command> patscc
 </programlisting></informalexample>
 
-and expect to see the following line of output:
-
-<informalexample><programlisting>
-/home/ubuntu/workspace/ATS2/bin/patscc
-</programlisting></informalexample>
-
-Note that the home directory for ATS is
-#filename("/home/ubuntu/workspace/ATS2"), which is stored in an
-environment variable of the name #emphasis("PATSHOME").
+The last command is expected to print the path of #command("patscc").
 Please use #command("which") to check that the commands
 #command("patsopt") and #command("myatscc") are also available.\
 
@@ -142,22 +134,17 @@ Please use #command("which") to check that the commands
 
 #para('\
 
-By visiting <ulink
-url="https://ide.c9.io/c9hwxi/ats-bucs320">ats-bucs320</ulink>, one
-can browse the two installed directories of the names
-#emphasis("ATS2") and #emphasis("ATS2-contrib") and the files
-contained in them.  If re-installing ATS is ever needed, please
-remember that the installed directories #emphasis("ATS2") and
-#emphasis("ATS2-contrib") should be removed before the steps outlined
-above for installation are repeated.
-
-')
-
-
-#para('\
-
-Please note that more scripts for installing ATS can be found on-line at
-<ulink url="http://www.ats-lang.org/Downloads.html\#Scripts_for_installing_ATS_Postiats">Scripts_for_installing_ATS</ulink>.
+There is no garbage collector (GC) in this dialect of ATS2. Heap-allocated
+data have to be linear (and thus freed explicitly by the programmer): the
+compiler rejects each nonlinear heap allocation, which includes the data of a
+datatype with a non-nullary constructor (such as the lists and the options of
+the GC era), boxed tuples and records, closure-functions of the kind
+#stacode("cloref") and lazy values created by #keycode("$delay"). Therefore the
+functional lists, the arrays and the streams of this book are the linear ones
+(#stacode("list_vt"), #stacode("arrayptr"), #stacode("stream_vt"), etc.), and
+the book explains who owns what and when it is freed in each chapter where
+this matters. No special flag is needed for compiling the code of the book:
+#command("patscc") is called as in the next section.
 
 ')
 
@@ -212,7 +199,9 @@ name #filename("hello_dats") by simply executing the command-line below:
 </programlisting></informalexample>
 
 When the command #command("./hello_dats") is executed, the expected message
-is printed onto the console. Please give it a try!
+is printed onto the console. Please give it a try! The command
+#command("patscc -o hello hello.dats") does the same, and the executable
+is of the name #filename("hello") this time.
 
 ')
 
@@ -256,15 +245,11 @@ rest of the ATS code in the file:
 //
 ')
 
-For accessing the library #filename("ATSLIB/libats/ML") (which is
-somewhat an ML-like portion of #filename("ATSLIB/libats")), the following line
-can be used:
-
-#dats2xhtml('\
-//
-\#include "share/atspre_staload_libats_ML.hats"
-//
-')
+The library #filename("ATSLIB/libats/ML") (which was somewhat an ML-like portion of
+#filename("ATSLIB/libats") built on functional lists and arrays) does not exist
+in this dialect of ATS: the linear lists, arrays and streams of the prelude are
+used in this book, and the library functions that are needed are implemented
+in the book itself.
 
 Various library functions are to be introduced in the sample code presented in this book.
 

@@ -33,7 +33,7 @@ bd39d57aa0a5b1a785d02e2241aeaa99  dg  contrib/atscntrb/atscntrb-smt-libz3/SATS/D
 1f11d6eef232b2291b8c74463fc9acd1  dg  contrib/atscntrb/atscntrb-smt-libz3/SATS/DOCUGEN/z3_symbol.atxt
 1cd521a28a5e28af298ee5c65dc17f46  plain  doc/BOOK/ATS-for-APUE3/CHAP_FILE_IO/main.atxt
 884b36d171f8c966876359f6308bac3c  plain  doc/BOOK/ATS-for-APUE3/preface.atxt
-56ae24c8d54e97aa55b097c761dc5791  plain  doc/BOOK/ATS2FUNCRASH/LECTURE/01/main.atxt
+80a8bd1f9720d407b0e6648cd4243ee6  plain  doc/BOOK/ATS2FUNCRASH/LECTURE/01/main.atxt
 ce9b2396017901a76f119aa7f011882f  plain  doc/BOOK/ATS2FUNCRASH/LECTURE/02/main.atxt
 5fd892725d2a8fef7be38dd1d78d5e5a  plain  doc/BOOK/ATS2FUNCRASH/LECTURE/03-10/main.atxt
 47f6851afe908f5e201e4ea665381977  plain  doc/BOOK/ATS2FUNCRASH/LECTURE/03/main.atxt
