@@ -1,1 +1,1 @@
-CODEGEN/jansson.cats
+SRCGEN/jansson.cats

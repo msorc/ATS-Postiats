@@ -1,1 +1,1 @@
-CODEGEN/cairo.cats
+SRCGEN/cairo.cats
