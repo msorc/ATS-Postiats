@@ -3,7 +3,7 @@ CBOOT: the bootstrap C bundle of patsopt
 
 The compiler is written in ATS2. To build it without any ATS compiler, the C code that a working patsopt
 generates for every module is distributed as a bundle in this directory. Nothing here is kept in git except this
-README, Makefile, mkboot.sh and .gitignore: the bundle is generated and is part of release tarballs.
+README, Makefile, mkboot.sh, stripc.py and .gitignore: the bundle is generated and is part of release tarballs.
 
 Generating (needs a working patsopt and python3; see ../README)
 
@@ -12,7 +12,7 @@ Generating (needs a working patsopt and python3; see ../README)
 mkboot.sh generates, for C3NSTRINTKND=gmpknd and intknd, the C code of every module (pats_*_dats.c, pats_error_sats.c, the
 main module with and without main() for libatsopt, libatsopt_ext_dats.c) and writes:
 
-    *.c               the C code that does not depend on the integer kind (the time stamps of the generated code are removed)
+    *.c               the C code that does not depend on the integer kind (the time stamps and all the comments of the generated code are removed by stripc.py)
     gmpknd/*.c intknd/*.c   the modules that differ (pats_intinf, pats_lintprgm_myint, pats_constraint3_solve)
     pats_runtime_ats1.c, libatsopt_ext.c   hand-written C of src/
     inc/              the headers that the C code includes: ccomp/runtime, prelude/CATS, libats/CATS, src/*.cats
