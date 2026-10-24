@@ -14,11 +14,17 @@
 #
 PATSHOME ?= $(abspath $(CURDIR)/..)
 export PATSHOME
+# Stage 0: PATSOPT, else $(PATSHOME)/bin/patsopt, else patsopt of the PATH.
+# HOOK: a later phase adds a tracked bootstrap bundle (src/CBOOT) here, built when no patsopt is found.
 ifndef PATSOPT
 ifneq ($(wildcard $(PATSHOME)/bin/patsopt),)
 PATSOPT=$(PATSHOME)/bin/patsopt
 else
-PATSOPT=patsopt
+PATSOPT:=$(shell command -v patsopt 2>/dev/null)
+ifeq ($(PATSOPT),)
+$(error no stage-0 patsopt: give PATSOPT=/path/to/patsopt (any ATS2 compiler, e.g. an installed ats2-postiats), or build one from the bootstrap bundle: make -C src/CBOOT (see src/CBOOT/README) and PATSOPT=$$PWD/src/CBOOT/patsopt)
+endif
+$(info stage 0: PATSOPT=$(PATSOPT) (from the PATH))
 endif
 endif
 CC ?= gcc
@@ -433,13 +439,24 @@ P2OBJDIR=patsopt.obj
 #   make PATSOPT=/usr/bin/patsopt STAGE0HOME=/usr/lib/ats2-postiats-0.4.2
 # Then that prelude and run-time are used, and only libats/{SATS,DATS,CATS}/arena.* (the arena that the sources use) is added from the
 # repository through the directory stage0/ ("-IATS"): the first stage of a build is thus independent of the repository's prelude.
+# STAGE0HOME not given and PATSOPT is another ATS2 install (its ../prelude exists, and is not this repository): infer it
+ifndef STAGE0HOME
+P2PREL:=$(realpath $(dir $(realpath $(PATSOPT)))/..)
+ifneq ($(wildcard $(P2PREL)/prelude),)
+ifneq ($(P2PREL),$(realpath $(PATSHOME)))
+STAGE0HOME:=$(P2PREL)
+$(info stage 0: STAGE0HOME=$(STAGE0HOME))
+endif
+endif
+endif
 ifdef STAGE0HOME
 # the C code of an older ATS2 (0.4.2) is not safe with strict aliasing at -O2 (gcc 16: a miscompiled patsopt)
 P2OPT ?= -O2 -fno-strict-aliasing
 P2HOME=$(STAGE0HOME)
 P2ENV=env PATSHOME=$(STAGE0HOME)
 P2IATS=-IATS $(CURDIR)/stage0
-P2CINC=-I$(CURDIR)/stage0
+# (the run-time of an older ATS2 needs the memory allocator and alloca.h to be given)
+P2CINC=-I$(CURDIR)/stage0 -DATS_MEMALLOC_LIBC -include alloca.h
 STAGE0OVL=stage0/libats/SATS/arena.sats stage0/libats/DATS/arena.dats stage0/libats/CATS/arena.cats
 stage0/libats/%: ../libats/%
 	@mkdir -p $(dir $@); cp $< $@
@@ -449,7 +466,16 @@ endif
 P2OPT ?= -O2
 P2PATSOPT=$(P2ENV) $(PATSOPT) $(P2IATS)
 # what patscc does (the C compiler with the run-time), written out so that the stage-0 compiler is $(PATSOPT) alone
-P2CC=$(CC) -std=c99 -D_XOPEN_SOURCE -I$(P2HOME) -I$(P2HOME)/ccomp/runtime $(P2CINC) -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$(CURDIR) $(P2OPT)
+P2CC=$(CC) -std=c99 -D_XOPEN_SOURCE -I$(P2HOME) -I$(P2HOME)/ccomp/runtime $(P2CINC) -D_GNU_SOURCE -I$(CURDIR) $(P2OPT)
+# C3NSTRINTKND: gmpknd if <gmp.h> is there, else intknd
+ifndef C3NSTRINTKND
+ifeq ($(shell echo '\#include <gmp.h>' | $(CC) -E - >/dev/null 2>&1 && echo yes),yes)
+C3NSTRINTKND=gmpknd
+else
+C3NSTRINTKND=intknd
+$(info C3NSTRINTKND=intknd: no <gmp.h> for $(CC), building without gmp)
+endif
+endif
 ifdef C3NSTRINTKND
 P2DATS=-DATS C3NSTRINTKND=$(C3NSTRINTKND)
 endif
@@ -513,7 +539,7 @@ $(P2OBJDIR)/libatsopt_ext_c.o: libatsopt_ext.c
 $(LIBA): $(LIBOBJS)
 	$(RM) $@; ar rcs $@ $^
 libatsopttest: $(LIBA)
-	cd test/libatsopt && patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -o libatsopt_test libatsopt_test.dats ../../$(LIBA) -lgmp
+	cd test/libatsopt && patscc -o libatsopt_test libatsopt_test.dats ../../$(LIBA) -lgmp
 	cd test/libatsopt && sh run.sh
 clean::
 	$(RM) $(LIBA) test/libatsopt/libatsopt_test test/libatsopt/*_dats.c
