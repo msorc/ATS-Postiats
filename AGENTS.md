@@ -62,7 +62,7 @@ There is no unit-test framework. Regression testing compiles and runs the exampl
 make -C src check                               # typecheck every module of the compiler (patsopt only)
 make -C src test                                # check + unit tests + the md5 suites of src/test (no ATS1; needs bin/patscc; no -j; ~6 min)
 make -C utils/atsdoc test                       # atsdoc and libatsdoc: 2653 md5 cases
-make -C utils/atsdoc genall                     # regenerates the text of 390 .atxt templates and compares their md5 sums (~30 s)
+make -C utils/atsdoc genall                     # regenerates the text of 370 .atxt templates and compares their md5 sums (~30 s)
 make -C utils/libatsynmark test                 # libatsynmark and pats2xhtml: 5228 md5 cases (after make -C utils/atsynmark)
 make -C doc -f Makefile_test testall            # all subdirs listed in doc/Makefile_test
 make -C doc/EXAMPLE/INTRO regress               # one directory: build its targets and run each binary
@@ -94,7 +94,7 @@ File-suffix convention throughout: `.sats` = interface, `.dats` = implementation
 - `prelude/`, `libats/`: ATS2 standard libraries (`SATS/` interfaces, `DATS/` implementations, `CATS/` C helpers).
 - `ccomp/runtime/`: C runtime headers that generated C code includes. `ccomp/atslib/`: builds `libatslib.a`.
 - `share/`: `atspre_staload.hats`, `atsmake-*.mk`, and other shared include files.
-- `utils/`: tools built on the compiler (`atscc` = patscc source, `myatscc`, `libatsopt`, `atsynmark` and `libatsynmark` (`pats2xhtml`, the syntax highlighter that the documents use), `atexting` (a separate ATS2 text preprocessor with `##name` syntax, not compatible with `.atxt`), `atsdoc` (the `.atxt` text processor; its run-time library is `libatsdoc/`; `make -C utils/atsdoc`; `make -C utils/atsdoc genall` regenerates the 390 runnable templates of the repository and compares them with `TEST/genall.md5`), emacs mode, …).
+- `utils/`: tools built on the compiler (`atscc` = patscc source, `myatscc`, `libatsopt`, `atsynmark` and `libatsynmark` (`pats2xhtml`, the syntax highlighter that the documents use), `atexting` (a separate ATS2 text preprocessor with `##name` syntax, not compatible with `.atxt`), `atsdoc` (the `.atxt` text processor; its run-time library is `libatsdoc/`; `make -C utils/atsdoc`; `make -C utils/atsdoc genall` regenerates the 370 runnable templates of the repository and compares them with `TEST/genall.md5`), emacs mode, …).
 - `contrib/`: MIT-licensed. It holds the packages that are released *with* ATS2; the packages of the separate [ATS-Postiats-contrib](https://github.com/githwxi/ATS-Postiats-contrib) repository (`PATSCONTRIB`, packaged as `ATS-Postiats-contrib`) are not in this tree (see `contrib/README.md`). Contains the Javascript backend (`CATS-atscc2js` with its `libatscc2js` library and the shared `CATS-parsemit`/`libatscc`), the C++ mode of the C backend (`ats2cpp`), the external constraint solvers, and `afiber` (stackful cooperative green threads and channels, `contrib/afiber/README.md`; tests in `contrib/afiber/TEST`, run by `doc/Makefile_test`).
 - `doc/`: books (`BOOK/`), examples (`EXAMPLE/`), and distribution scripts (`DISTRIB/`).
 

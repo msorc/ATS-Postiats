@@ -103,8 +103,6 @@ utils/atsdoc/TEST/drv_dats.o
 !contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_atxt.dats
 !contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_atxt.txt
 !contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_data_atxt.dats
-!doc/BOOK/INT2PROGINATS/INTPROGINATS-2013-03-24/CHAPTER_DATATYPES/main_atxt.dats
-!doc/BOOK/INT2PROGINATS/INTPROGINATS-2013-03-24/CHAPTER_DATATYPES/main_atxt.txt
 
 #
 # ATSHOME/ccomp
