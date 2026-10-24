@@ -16,7 +16,8 @@
 #               without libgmp), then a hello world
 #   suites      the suites of the tools and of the examples and book code
 #   documents   the packaging scripts and the text of the templates
-#   sanitizers  the compiler and the tests under ASan and UBSan
+#   sanitizers  the compiler, src check, unit tests, examples under ASan and UBSan
+#               (sanitizers-full: the whole make -C src test, nightly)
 #   dist        make dist, then ./configure && make && make install of the
 #               tarball (with and without libgmp), make install/uninstall
 #
@@ -27,6 +28,8 @@ on:
     branches: [ master, devel ]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -37,6 +40,8 @@ permissions:
 
 env:
   LC_ALL: C
+  # the parallelism of the builds (the runners have 4 cores)
+  JOBS: 4
 
 jobs:
   gates:
@@ -216,53 +221,110 @@ jobs:
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           sh utils/atsdoc/TEST/genall.sh all
 
+  # ASan and UBSan on every push: the compiler (and so the whole build) is
+  # compiled with them, `make -C src check` type checks every module with it,
+  # the unit tests of the modules and the examples and book code run with
+  # the programs compiled by patscc under them. The full `make -C src test`
+  # (about 900 serial sanitized compiles of the modules of the compiler, hours)
+  # is the job sanitizers-full, nightly and on demand.
+  #
+  # CC (make bootstrap CC=...) is the C compiler of the bundle and of the
+  # compiler; the programs that patscc compiles in the tests use PATSCCOMP
+  # (CC in the environment would collide with the scripts of the tests that
+  # assign a CC of their own). ${PATSHOME} in PATSCCOMP is expanded by the
+  # shell of patscc.
   sanitizers:
-    name: AddressSanitizer and UndefinedBehaviorSanitizer (${{ matrix.suite }})
+    name: AddressSanitizer and UndefinedBehaviorSanitizer (${{ matrix.part }})
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    # measured on a 32-core machine: bootstrap 5 min, src check 25 min,
+    # unit tests 10 min, examples 35 min (single threaded)
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
-        suite: [ compiler, examples ]
+        part: [ compiler, examples ]
     env:
-      # every C file is compiled with the sanitizers: the bundle and the
-      # compiler (make bootstrap with CC=...) and the programs that the tests
-      # compile with patscc (PATSCCOMP is the C command of patscc; CC is not
-      # used for those because the scripts of the tests assign a CC of their
-      # own, which they would then export to patscc). -O1 keeps the build fast.
-      # The one suppression, for the examples only: the book program
-      # CHAP_FNTMPINT/gnumber computes fact(13) in int on purpose (to show the
-      # overflow), which is signed overflow in the C code. Everything else
-      # stays fatal (ASan, leaks, the other UBSan checks).
       SAN: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
       CFLAGS: -O1
       P2OPT: -O1
       ASAN_OPTIONS: detect_leaks=1:abort_on_error=0:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1
-      # the text is expanded by the shell of patscc (${PATSHOME} is exported by the steps)
       PATSCCOMP_BASE: gcc -std=c99 -D_GNU_SOURCE -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
         with:
-          key: sanitizers-${{ matrix.suite }}
+          key: sanitizers-${{ matrix.part }}
 
       - name: make bootstrap (the whole compiler under the sanitizers)
         run: make bootstrap CC="gcc $SAN"
 
-      - name: make -C src test (the compiler and the programs of the suites, sanitized; no -j)
-        if: matrix.suite == 'compiler'
+      - name: make -C src check (every module type checked by the sanitized patsopt)
+        if: matrix.part == 'compiler'
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C src check
+
+      - name: the unit tests of the modules (src/test, TESTS)
+        if: matrix.part == 'compiler'
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           export PATSCCOMP="$PATSCCOMP_BASE $SAN"
-          make -C src test
+          cd src/test
+          tests="$(sed -n '/^TESTS=/,/^$/p' Makefile | sed 's/^TESTS=//; s/\\$//')"
+          echo "tests: $tests"
+          make $tests
+          # test_symenv.dats itself leaks 128 bytes (a linmap that main does not free,
+          # 4 allocations: not the compiler module pats_symenv); the leak check is off for it alone
+          for t in $tests; do
+            echo "run $t"
+            if [ "$t" = test_symenv ]; then ASAN_OPTIONS="$ASAN_OPTIONS:detect_leaks=0" "./$t" > /dev/null
+            else "./$t" > /dev/null; fi
+          done
 
+      # The one suppression: the book program CHAP_FNTMPINT/gnumber computes
+      # fact(13) in int on purpose (to show the overflow), which is signed
+      # overflow in the C code. Everything else stays fatal (ASan, leaks, the
+      # other UBSan checks).
       - name: the examples and the book code, sanitized
-        if: matrix.suite == 'examples'
+        if: matrix.part == 'examples'
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           export PATSCCOMP="$PATSCCOMP_BASE $SAN -fno-sanitize=signed-integer-overflow"
           make -C doc -f Makefile_test testall
+
+  sanitizers-full:
+    name: sanitizers, the full make -C src test (nightly)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      SAN: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
+      CFLAGS: -O1
+      P2OPT: -O1
+      # leaks are NOT checked in this job: the test drivers of src/test leak
+      # on purpose (for example c3drv.c:c3_str strdup()s every string and never
+      # frees it: 490 KB in c3dump) and the md5 suites compare the stderr of
+      # the drivers, which would then hold the leak report. The compiler itself
+      # runs with leak detection in the job sanitizers (make bootstrap).
+      ASAN_OPTIONS: detect_leaks=0:abort_on_error=0:strict_string_checks=1
+      UBSAN_OPTIONS: print_stacktrace=1
+      PATSCCOMP_BASE: gcc -std=c99 -D_GNU_SOURCE -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: sanitizers-full
+
+      - name: make bootstrap (the whole compiler under the sanitizers)
+        run: make bootstrap CC="gcc $SAN"
+
+      # JOBS is read by the root Makefile and (when it is there) by src/test
+      - name: make -C src test
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          export PATSCCOMP="$PATSCCOMP_BASE $SAN"
+          make -C src test
 
   dist:
     name: dist, configure, make install
