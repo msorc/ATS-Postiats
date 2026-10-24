@@ -356,7 +356,7 @@ The simplest way to compile the two files #filename("acker.dats") and
 #filename("test_acker.dats") is to issue the following command-line:
 
 <informalexample><programlisting>
-<command>atscc</command> -o test_acker acker.dats test_acker.dats
+<command>patscc</command> -o test_acker acker.dats test_acker.dats
 </programlisting></informalexample>
 
 The generated excutable #filename("test_acker") is in the current
@@ -364,9 +364,9 @@ working directory.  The compilation can also be performed separately as is
 demonstrated below:
 
 <informalexample><programlisting>
-<command>atscc</command> -c acker.dats
-<command>atscc</command> -c test_acker.dats
-<command>atscc</command> -o test_acker acker_dats.o test_acker_dats.o
+<command>patscc</command> -c acker.dats
+<command>patscc</command> -c test_acker.dats
+<command>patscc</command> -o test_acker acker_dats.o test_acker_dats.o
 </programlisting></informalexample>
 
 This style of separate compilation works particularly well when it is
@@ -431,17 +431,23 @@ Generic Template Implementation
 
 Interfaces for function templates are mostly similar to those for
 functions.  For example, the following syntax declares an interface in a
-dynamic file for a function template of the name #dyncode("list0_fold_left"):
+dynamic file for a function template of the name #dyncode("mylist_fold_left"),
+where #dyncode("mylist") is the type for linear lists that was introduced in
+the chapter on parametric polymorphism (the declaration of this type is in the file
+#filename("mylist.sats"), which is available on-line):
 
 #dats2xhtml('\
 extern
 fun{
 a:t0p}{b:t0p
-} list0_fold_left
-  (xs: list0 b, f: (a, b) -<cloref1> a, init: a): a
+} mylist_fold_left
+  (xs: !mylist b, f: &(a, b) -<clo1> a, init: a): a
 ')
 
-where #stacode("t0p") is a shorthand for #stacode("t@ype").\
+where #stacode("t0p") is a shorthand for #stacode("t@ype"). The list
+#dyncode("xs") is borrowed (it is of the type #dyncode("!mylist b")) and the
+function #dyncode("f") is a flat closure, which is passed by reference (see the
+chapter on functions).\
 ")
 
 #para("\
@@ -449,31 +455,36 @@ where #stacode("t0p") is a shorthand for #stacode("t@ype").\
 If the same interface is declared in a static file, the keyword
 #keycode("extern") should be dropped. Implementing an interface for a
 function template is also mostly similar to implementing one for a
-function. The above interface for #dyncode("list0_fold_left") is given an
+function. The above interface for #dyncode("mylist_fold_left") is given an
 implementation in the following code:
 
 #dats2xhtml('\
 implement{a}{b}
-list0_fold_left
+mylist_fold_left
   (xs, f, init) = let
 //
 fun loop
 (
-  xs: list0 b, res: a
+  xs: !mylist b, f: &(a, b) -<clo1> a, res: a
 ) : a =
 (
   case+ xs of
-  | list0_nil () => res
-  | list0_cons (x, xs) => loop (xs, f (res, x))
+  | mylist_nil () => res
+  | mylist_cons (x, xs) => let
+      val res = f (res, x) in loop (xs, f, res)
+    end // end of [mylist_cons]
 ) (* end of [loop] *)
 //
 in
-  loop (xs, init)
-end // end of [list0_fold_left]
+  loop (xs, f, init)
+end // end of [mylist_fold_left]
 ')
 
 Note that template parameters are required to appear immediately after the
-keyword #dyncode("implement"), and they cannot be omitted.  Template
+keyword #dyncode("implement"), and they cannot be omitted.  Also note that the
+function #dyncode("loop") gets the closure #dyncode("f") as an argument:
+a function cannot make use of a variable that is passed by reference and
+that is declared outside of its body.  Template
 parameters can also be passed sequentially as is shown in the following
 short example:
 
@@ -481,7 +492,7 @@ short example:
 extern
 fun
 {a,b:t0p}{c:t0p}
-app2 (f: (a, b) -<cloref1> c, x: a, y: b): c
+app2 (f: &(a, b) -<clo1> c, x: a, y: b): c
 
 implement{a,b}{c} app2 (f, x, y) = f (x, y)
 ")
@@ -493,7 +504,15 @@ implement{a,b}{c} app2 (f, x, y) = f (x, y)
 The style of template implementation presented in this section is
 referred to as generic template implementation. I will later present a
 different style of template implementation, which is often referred to as
-specific template implementation.\
+specific template implementation. The code presented in this section is
+available #mycodelink("CHAP_MODULARITY/mylist.dats", "on-line"), together
+with some testing code in #mycodelink("CHAP_MODULARITY/test_mylist.dats", "test_mylist.dats").
+Note that the file containing the implementation of a function template needs
+to be statically loaded (with the form #dyncode("staload _ = ...")) in the
+files that make use of the template, as an instance of a template is
+generated where it is used; this is the reason why the file
+#filename("mylist.dats") contains the line
+#dyncode("\#define ATS_DYNLOADFLAG 0").\
 
 ")
 
@@ -528,7 +547,7 @@ implement eq_elt_elt<int> (x, y) = g0int_eq (x, y)
 implement eq_elt_elt<double> (x, y) = g0float_eq (x, y)
 ")
 
-where #dyncode("eq_int_int") and #dyncode("eq_double_double") are equality
+where #dyncode("g0int_eq") and #dyncode("g0float_eq") are equality
 functions for values of the type #stacode("int") and #stacode("double"),
 respectively. It is also possible to give the implementations as follows:
 
@@ -547,22 +566,28 @@ functions).\
 
 Let us now see a typical use of specific template implementation.  The
 following defined function template #dyncode("listeq") implements an
-equality function on lists:
+equality function on lists (both lists are borrowed):
 
 #dats2xhtml("\
 fun{
 a:t0p
 } listeq
 (
-  xs: list0 a
-, ys: list0 a
+  xs: !mylist a
+, ys: !mylist a
 ) : bool = (
-  case+ (xs, ys) of
-  | (list0_cons (x, xs),
-     list0_cons (y, ys)) => 
-      if eq_elt_elt<a> (x, y) then listeq (xs, ys) else false
-  | (list0_nil (), list0_nil ()) => true
-  | (_, _) => false
+  case+ xs of
+  | mylist_cons (x, xs) =>
+    (
+      case+ ys of
+      | mylist_cons (y, ys) =>
+          if eq_elt_elt<a> (x, y) then listeq (xs, ys) else false
+      | mylist_nil () => false
+    ) (* end of [mylist_cons] *)
+  | mylist_nil () =>
+    (
+      case+ ys of mylist_nil () => true | mylist_cons _ => false
+    ) (* end of [mylist_nil] *)
 ) (* end of [listeq] *)
 ")
 
@@ -571,10 +596,10 @@ and only if xs and ys are of the same length and each element in xs equals
 the corresponding one in ys (according to #dyncode("eq_elt_elt")).
 Given a type T, it is clear that the instance
 #dyncode("eq_elt_elt&lt;T&gt;") is needed if #dyncode("listeq") is called
-on two lists of the type #stacode("list0(T)"). In other words, a specific
+on two lists of the type #stacode("mylist(T)"). In other words, a specific
 implementation for #dyncode("eq_elt_elt&lt;T&gt;") should be given if a
 call to #dyncode("listeq") is to be made on two lists of the type
-#stacode("list0(T)"). Note that the implementation for an instance of a
+#stacode("mylist(T)"). Note that the implementation for an instance of a
 function template is required to be accessible from the file where the
 instance is called.\
 
@@ -591,16 +616,22 @@ fun{
 a:t0p
 } listeqf
 (
-  xs: list0 a
-, ys: list0 a
+  xs: !mylist a
+, ys: !mylist a
 , eq: (a, a) -> bool
 ) : bool = (
-  case+ (xs, ys) of
-  | (list0_cons (x, xs),
-     list0_cons (y, ys)) => 
-      if eq (x, y) then listeqf (xs, ys, eq) else false
-  | (list0_nil (), list0_nil ()) => true
-  | (_, _) => false
+  case+ xs of
+  | mylist_cons (x, xs) =>
+    (
+      case+ ys of
+      | mylist_cons (y, ys) =>
+          if eq (x, y) then listeqf (xs, ys, eq) else false
+      | mylist_nil () => false
+    ) (* end of [mylist_cons] *)
+  | mylist_nil () =>
+    (
+      case+ ys of mylist_nil () => true | mylist_cons _ => false
+    ) (* end of [mylist_nil] *)
 ) (* end of [listeqf] *)
 ")
 
@@ -649,34 +680,44 @@ type #stacode("intset") as follows for values representing finite sets of
 integers:
 
 #sats2xhtml("\
-abstype intset // a boxed abstract type
+absvtype intset_vtype = ptr // a boxed and linear abstract type
+vtypedef intset = intset_vtype
 ")
 
-The keyword #stacode("abstype") indicates that the declared abstract type
-#stacode("intset") is boxed, that is, the size of #stacode("intset") is the
-same as that of a pointer.  There is a related keyword #stacode("abst@ype")
-for introducing unboxed abstract types, which will be explained elsewhere.
+The keyword #stacode("absvtype") indicates that the declared abstract type
+is boxed, that is, the size of #stacode("intset") is the
+same as that of a pointer, and that it is linear: the values of this type are
+allocated in the heap, they have an owner, and they have to be freed (a
+boxed abstract type that is not linear would be declared with the keyword
+#stacode("abstype"); its values can be copied freely and are never freed, so it
+is not suitable for data that is allocated in the heap).  There is a
+related keyword #stacode("abst@ype")
+for introducing unboxed abstract types, which will be explained shortly.
 We next present an interface for each function or value that we want to
-implement in the package:
+implement in the package. Each function either consumes a set (the type
+#dyncode("intset")) or borrows it (the type #dyncode("!intset")):
 
 #sats2xhtml("\
 // empty set
-val intset_empty : intset
+fun intset_make_nil (): intset
 
 // singleton set of [x]
 fun intset_make_sing (x: int): intset
 
-// turning a list into a set
-fun intset_make_list (xs: list0 int): intset
+// turning a list into a set (the list is consumed)
+fun intset_make_list (xs: mylist int): intset
 
-// turning a set into a list
-fun intset_listize (xs: intset): list0 (int)
+// turning a set into a list (the set is consumed)
+fun intset_listize (xs: intset): mylist (int)
+
+// freeing a set
+fun intset_free (xs: intset): void
 
 // membership test
-fun intset_ismem (xs: intset, x: int): bool
+fun intset_ismem (xs: !intset, x: int): bool
 
 // computing the size of [xs]
-fun intset_size (xs: intset): size_t
+fun intset_size (xs: !intset): int
 
 // adding [x] into [xs]
 fun intset_add (xs: intset, x: int): intset
@@ -712,14 +753,14 @@ construct values of an abstract type, we need to concretize it temporarily
 by using the following form of declaration:
 
 #dats2xhtml("\
-assume intset = list0 (int)
+assume intset_vtype = mylist (int)
 ")
 
 where #stacode("assume") is a keyword. This assume-declaration equates
-#stacode("intset") with the type #stacode("list0 (int)") and this equation is
+#stacode("intset") with the type #stacode("mylist (int)") and this equation is
 valid until the end of the scope in which it is introduced. As the
 assume-declaration is at the toplevel in #filename("intset.dats"),
-the assumption that #stacode("intset") equals #stacode("list0 (int)") is valid
+the assumption that #stacode("intset") equals #stacode("mylist (int)") is valid
 until the end of the file. There is a global restriction in ATS that allows
 each abstract type to be concretized by an assume-declaration at most
 once. More specifically, if an abstract type is concretized in two files
@@ -728,29 +769,33 @@ these two files cannot be used together to generate an executable.
 
 The rest of implementation in #stacode("intset") is all standard.  For
 instance, the union operation on two given sets of integers is implemented
-as follows:
+as follows. Both sets are consumed: the cells of the lists are released by
+the patterns that start with #dyncode("~"), and the cells that are still needed
+are allocated again:
 
 #dats2xhtml("\
 implement
 intset_union
   (xs1, xs2) = (
-case+ (xs1, xs2) of
-| (list0_cons (x1, xs11),
-   list0_cons (x2, xs21)) =>
-  let
-    val sgn = compare (x1, x2)
-  in
-    case+ 0 of
-    | _ when sgn < 0 =>
-        list0_cons{int}(x1, intset_union (xs11, xs2))
-    | _ when sgn > 0 =>
-        list0_cons{int}(x2, intset_union (xs1, xs21))
-    | _ (* sgn = 0 *) =>
-        list0_cons{int}(x1, intset_union (xs11, xs21))
-    // end of [case]
-  end // end of [(cons, cons)]
-| (list0_nil (), _) => xs2
-| (_, list0_nil ()) => xs1
+case+ xs1 of
+| ~mylist_cons (x1, xs11) =>
+  (
+    case+ xs2 of
+    | ~mylist_cons (x2, xs21) => let
+        val sgn = compare (x1, x2)
+      in
+        case+ 0 of
+        | _ when sgn < 0 =>
+            mylist_cons{int}(x1, intset_union (xs11, mylist_cons{int}(x2, xs21)))
+        | _ when sgn > 0 =>
+            mylist_cons{int}(x2, intset_union (mylist_cons{int}(x1, xs11), xs21))
+        | _ (* sgn = 0 *) =>
+            mylist_cons{int}(x1, intset_union (xs11, xs21))
+        // end of [case]
+      end // end of [(cons, cons)]
+    | ~mylist_nil () => mylist_cons{int}(x1, xs11)
+  ) (* end of [mylist_cons] *)
+| ~mylist_nil () => xs2
 ) (* end of [intset_union] *)
 ")
 
@@ -776,11 +821,12 @@ Example: A Package for Rationals
 #para("\
 
 Let us represent a rational number as a pair of integers.  If we declare a
-boxed abstract type #stacode("rat") for values representing rational
-numbers, then each value of the type #stacode("rat") is stored in
-heap-allocated memory, which can only be reclaimed through garbage
-collection (GC). Instead, we follow an alternative approach by declaring
-#stacode("rat") as an unboxed abstract type. Therefore, a declaration like
+boxed abstract type for values representing rational
+numbers, then each value is stored in
+heap-allocated memory, which needs an owner and must be freed explicitly.
+Instead, we follow an alternative approach by declaring
+#stacode("rat") as an unboxed abstract type, whose values are stored
+flat (like those of #stacode("int")) and need not be freed. Therefore, a declaration like
 the following one is expected:
 
 #sats2xhtml("\
@@ -878,7 +924,7 @@ ratmul (x, y) = rat_make_int_int (x.0 * y.0, x.1 * y.1)
 implement
 ratdiv (x, y) = (
 if y.0 > 0
-  then rat_make_int_int (x.0 * y.1, x.1 * y.0) else $raise DivisionByZero()
+  then rat_make_int_int (x.0 * y.1, x.1 * y.0) else $raise DivisionByZero
 // end of [if]
 ) (* end of [ratdiv] *)
 ")
@@ -913,110 +959,100 @@ programming as it involves code duplication to a great extent.  ")
 
 The approach I employ in this section to implement a package for rational
 numbers that can address the aforementioned limitation follows the idea of
-functors in the programming language Standard ML (SML). Let us first
-introduce a type definition as follows:
+functors in the programming language Standard ML (SML), where a functor maps a
+module of integer operations to a module of rational operations. In SML (and
+in earlier versions of ATS), a module is represented as a record of
+closure functions, which are allocated in the heap and shared. Without a
+garbage collector, this style is not available: such a record is a boxed
+record of cloref closures, which the compiler rejects. In ATS the same idea is
+realized with function templates: the type of integers is a template
+parameter, and the operations on integers are function templates, which
+are implemented specifically for each type of integers. Let us first
+declare the integer operations as function templates (in a file named
+#filename("ratfun.sats")):
 
 #sats2xhtml("\
-typedef
-intmod (a:t@ype) = '{
-  ofint= int -> a
-, fprint= (FILEref, a) -> void
-, neg= (a) -> a // negation
-, add= (a, a) -> a // addition
-, sub= (a, a) -> a // subtraction
-, mul= (a, a) -> a // multiplication
-, div= (a, a) -> a // division
-, mod= (a, a) -> a // modulo operation
-, cmp= (a, a) -> int // comparison
-} // end of [intmod]
+fun{a:t0p} intmod_ofint (i: int): a
+fun{a:t0p} intmod_fprint (out: FILEref, x: a): void
+fun{a:t0p} intmod_neg (x: a): a // negation
+fun{a:t0p} intmod_add (x: a, y: a): a // addition
+fun{a:t0p} intmod_sub (x: a, y: a): a // subtraction
+fun{a:t0p} intmod_mul (x: a, y: a): a // multiplication
+fun{a:t0p} intmod_div (x: a, y: a): a // division
+fun{a:t0p} intmod_mod (x: a, y: a): a // modulo operation
+fun{a:t0p} intmod_cmp (x: a, y: a): int // comparison
 ")
 
-Given a type T, #stacode("intmod(T)") is a boxed record type in which each
-field is a function type. A value of the type #stacode("intmod(T)") is
-supposed to represent a module of integer operations on integers
-represented by values of the type T. Similarly, let us introduce another
-type definition as follows:
+Given a type T, the instances of these templates at T are supposed to
+represent a module of integer operations on integers
+represented by values of the type T. Similarly, let us introduce
+the type for rationals and the operations on them as follows:
 
 #sats2xhtml("\
 abst@ype rat(a:t@ype) = (a, a)
 
-typedef
-ratmod (a:t@ype) = '{
-  make= (a, a) -<cloref1> rat a
-, fprint= (FILEref, rat a) -<cloref1> void
-, numer= rat a -> a // numerator
-, denom= rat a -> a // denominator
-, neg= (rat a) -<cloref1> rat a // negation
-, add= (rat a, rat a) -<cloref1> rat a // addition
-, sub= (rat a, rat a) -<cloref1> rat a // subtraction
-, mul= (rat a, rat a) -<cloref1> rat a // multiplication
-, div= (rat a, rat a) -<cloref1> rat a // division
-, cmp= (rat a, rat a) -<cloref1> int // comparison
-} // end of [ratmod]
+fun{a:t0p} rat_make (p: a, q: a): rat a
+fun{a:t0p} fprint_rat (out: FILEref, x: rat a): void
+fun{a:t0p} rat_numer (x: rat a): a // numerator
+fun{a:t0p} rat_denom (x: rat a): a // denominator
+fun{a:t0p} rat_neg (x: rat a): rat a // negation
+fun{a:t0p} rat_add (x: rat a, y: rat a): rat a // addition
+fun{a:t0p} rat_sub (x: rat a, y: rat a): rat a // subtraction
+fun{a:t0p} rat_mul (x: rat a, y: rat a): rat a // multiplication
+fun{a:t0p} rat_div (x: rat a, y: rat a): rat a // division
+fun{a:t0p} rat_cmp (x: rat a, y: rat a): int // comparison
 ")
 
-Given a type T, a value of the type #stacode("ratmod(T)") is supposed to
-represent a module of rational operations on rationals represented by
-values of the type #stacode("rat(T)"). The function we need to implement can
-now be given the following interface:
+Given a type T, #stacode("rat(T)") is the type for rationals represented
+as pairs of integers of the type T. The implementation of the templates on
+rationals makes use of the templates on integers, and it is generic: it is
+available #mycodelink("CHAP_MODULARITY/ratfun.dats", "on-line"). For
+instance, here is the implementation of the addition on rationals:
 
-#sats2xhtml("\
-fun{a:t@ype}
-ratmod_make_intmod (int: intmod a): ratmod a
+#dats2xhtml("\
+implement{a}
+rat_add (x, y) =
+  rat_make<a>
+  (
+    intmod_add<a> (intmod_mul<a> (x.0, y.1), intmod_mul<a> (x.1, y.0))
+  , intmod_mul<a> (x.1, y.1)
+  ) (* end of [rat_make] *)
+// end of [rat_add]
 ")
 
-If applied to a given module of integer operations,
-#dyncode("ratmod_make_intmod") returns a module of rational operations such
-that the integers in the former and the latter modules have the same
-representation. Therefore, #dyncode("ratmod_make_intmod") behaves like a
-functor in SML.  In the following code, let us implement two modules
-#dyncode("ratmod_int") and #dyncode("ratmod_dbl") of rational operations in
-which integers are represented as values of the types #stacode("int") and
-#stacode("double"), respectively:
+Therefore, the function template #dyncode("rat_add") behaves like a functor in SML: it is
+parameterized by a module of integer operations, which is selected by the
+type argument. In the following code, let us implement two modules
+of integer operations, for integers that are represented as values of the types
+#stacode("int") and #stacode("double"), respectively:
 
 #dats2xhtml('\
-staload M = "libc/SATS/math.sats"
+staload M = "libats/libc/SATS/math.sats"
 
-val ratmod_int = let
-//
-val intmod_int = \'{
-  ofint= lam (i) => i
-, fprint= lam (out, x) => $extfcall (void, "fprintf", out, "%i", x)
-, neg= lam (x) => ~x
-, add= lam (x, y) => x + y
-, sub= lam (x, y) => x - y
-, mul= lam (x, y) => x * y
-, div= lam (x, y) => x / y
-, mod= lam (x, y) => op mod (x, y)
-, cmp= lam (x, y) => compare (x, y)
-} : intmod (int) // end of [val]
-//
-in
-  ratmod_make_intmod<int> (intmod_int)
-end // end of [val]
+implement intmod_ofint<int> (i) = i
+implement intmod_fprint<int> (out, x) = fprint_int (out, x)
+implement intmod_neg<int> (x) = ~x
+implement intmod_add<int> (x, y) = x + y
+implement intmod_sub<int> (x, y) = x - y
+implement intmod_mul<int> (x, y) = x * y
+implement intmod_div<int> (x, y) = x / y
+implement intmod_mod<int> (x, y) = x mod y
+implement intmod_cmp<int> (x, y) = compare (x, y)
 
-val ratmod_dbl = let
-//
-val intmod_dbl = \'{
-  ofint= lam (i) => g0i2f(i)
-, fprint= lam (out, x) => $extfcall (void, "fprintf", out, "%0.f", x)
-, neg= lam (x) => ~x
-, add= lam (x, y) => x + y
-, sub= lam (x, y) => x - y
-, mul= lam (x, y) => x * y
-, div= lam (x, y) => $M.trunc (x / y) // truncation
-, mod= lam (x, y) => $M.fmod (x, y)
-, cmp= lam (x, y) => compare (x, y)
-} : intmod (double) // end of [val]
-//
-in
-  ratmod_make_intmod<double> (intmod_dbl)
-end // end of [ratmod_dbl]
+implement intmod_ofint<double> (i) = g0i2f(i)
+implement intmod_fprint<double> (out, x) = fprint_double (out, x)
+implement intmod_neg<double> (x) = ~x
+implement intmod_add<double> (x, y) = x + y
+implement intmod_sub<double> (x, y) = x - y
+implement intmod_mul<double> (x, y) = x * y
+implement intmod_div<double> (x, y) = $M.trunc_double (x / y) // truncation
+implement intmod_mod<double> (x, y) = $M.fmod_double (x, y)
+implement intmod_cmp<double> (x, y) = compare (x, y)
 ')
 
-An implementation of the function #dyncode("ratmod_make_intmod") is
-available #mycodelink("CHAP_MODULARITY/ratfun.dats", "on-line") and there
-is some related testing code available
+After that, #dyncode("rat_add<int>") and #dyncode("rat_add<double>") add
+rationals based on integers of the types #stacode("int") and #stacode("double"),
+respectively. There is some related testing code available
 #mycodelink("CHAP_MODULARITY/test_ratfun.dats", "on-line") as well.\
 
 ")#comment("para")
