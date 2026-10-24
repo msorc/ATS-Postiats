@@ -177,6 +177,16 @@ jobs:
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           make -C utils/libatsynmark test
 
+      # the lectures of ATS2FUNCRASH and the DOM tests of libatscc2js run
+      # only when bin/atscc2js is built and node is there (node is on the
+      # runner image); without it they skip themselves silently
+      - name: atscc2js (the JavaScript backend)
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          node --version
+          make -C contrib/CATS-atscc2js
+          test -x contrib/CATS-atscc2js/bin/atscc2js
+
       - name: the examples and the book code
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
