@@ -4,12 +4,15 @@
 #
 ######
 #
+# This is the one document of the build and installation of ATS2.
+# README.md, CONTRIBUTING.md, src/README and AGENTS.md point here.
+#
 # Author: Hongwei Xi
 # Authoremail: gmhwxi AT gmail DOT com
 # Start time: 2013-09-02
 #
-# Last update: 2026-10-21 (the build of ATS2 is self-hosting; ATS1 is not
-# needed for anything).
+# Last update: 2026-10-24 (ATS1 is not needed for anything; the bootstrap
+# C bundle src/CBOOT is tracked)
 #
 ######
 #
@@ -18,23 +21,32 @@
 #   A. the release tarball (for the users of ATS2)
 #   B. the git repository (for the developers of ATS2)
 #
+# Both build with a C compiler and nothing else (no ATS compiler).
+#
 ######
 
 ######
 #
-# Step 0: the pre-requisites
+# Step 0: the requirements
 #
 ######
 
-* a C compiler (gcc or clang)
+* a C compiler (gcc or clang; the C99 and POSIX parts of libc)
 * GNU make
-* python3 (it generates the arena encodings of the compiler's syntax trees)
-* libgmp (the package libgmp-dev on e.g. Debian and Ubuntu)
+* python3 (it generates the arena encodings of the syntax trees of the
+  compiler; the tarball does not need it, a clone does)
+* libgmp and its header (the package libgmp-dev on Debian and Ubuntu,
+  gmp-devel on Fedora, gmp on Arch, `brew install gmp` on macOS)
 
-libgmp is needed by the default build (C3NSTRINTKND=gmpknd). It can be
-avoided by building the compiler with the integer backend instead:
+libgmp is optional: without <gmp.h> the build switches by itself to the
+integer backend of the constraint solver (it prints "KIND=intknd: no
+<gmp.h> ..."), or ask for it:
 
-  make -f Makefile_devl C3NSTRINTKND=intknd all
+  make KIND=intknd              # from a clone
+  ./configure --without-gmp     # from the tarball
+
+The integer backend is enough for almost every program; the gmp backend
+solves constraints with integers that do not fit in a machine word.
 
 ######
 #
@@ -42,43 +54,37 @@ avoided by building the compiler with the integer backend instead:
 #
 ######
 
-The current release of ATS2 can be downloaded from
+The releases are published as GitHub Releases:
 
-https://sourceforge.net/projects/ats2-lang/
+  https://github.com/msorc/ATS-Postiats/releases
 
-There are three tarballs:
+The tarball is ATS2-Postiats-x.y.z.tgz (with a .sha256 file next to it).
+The tarball ATS2-Postiats-include-x.y.z.tgz holds the headers and CATS
+files that are needed to use ATS2 from C. Say x.y.z is 0.4.3.
 
-  ATS2-Postiats-x.y.z.tgz          the compiler, the libraries and the tools
-  ATS2-Postiats-contrib-x.y.z.tgz  the packages of the external contrib
-                                   repository (ATS-Postiats-contrib)
-  ATS2-Postiats-include-x.y.z.tgz  the headers and the CATS files that are
-                                   needed to use ATS2 from C
-
-Say the tarball you download is named ATS2-Postiats-x.y.z.tgz. Untar it:
-
-  tar -vxfz ATS2-Postiats-x.y.z.tgz
-
-which creates a directory named ATS-Postiats.
-
-The tarball ships the bootstrap C bundle (src/CBOOT), so it can be built
-without any ATS2 compiler: no ATS1 is needed.
-
+  sha256sum -c ATS2-Postiats-0.4.3.tgz.sha256
+  tar -xzvf ATS2-Postiats-0.4.3.tgz
   cd ATS-Postiats
-  ./configure --prefix=/path/to/MYATS
+  ./configure --prefix=/path/to/MYATS      # --without-gmp for no libgmp
   make
   make install
 
-The install step puts the libraries in
+(the options of tar are `-xzvf`: the flag f is last, as it takes the
+file name.) The tarball ships the bootstrap C bundle (src/CBOOT).
 
-  /path/to/MYATS/lib/ats2-postiats-x.y.z
+The install step puts ATS2 in
 
-which is the PATSHOME of the installation:
+  /path/to/MYATS/lib/ats2-postiats-0.4.3     the PATSHOME of the install
+  /path/to/MYATS/bin/{patsopt,patscc,myatscc,...}   scripts that set
+                                             PATSHOME and run the programs
+  /path/to/MYATS/share/man/man1/*.1          the man pages
 
-  export PATSHOME=/path/to/MYATS/lib/ats2-postiats-x.y.z
-  export PATH=${PATH}:${PATSHOME}/bin
+so it is enough to have /path/to/MYATS/bin on the PATH:
 
-Then `patscc` (the ATS2 compiler driver) and `patsopt` (the ATS2 compiler)
-are on your path.
+  export PATH=/path/to/MYATS/bin:${PATH}
+  patscc --version
+
+You need no other environment variable. The default prefix is /usr/local.
 
 ######
 #
@@ -86,85 +92,154 @@ are on your path.
 #
 ######
 
-  git clone https://github.com/githwxi/ATS-Postiats.git
+  git clone https://github.com/msorc/ATS-Postiats.git
   cd ATS-Postiats
+  make
 
-The compiler (src/) is written in ATS2 and compiles itself, so a first
-patsopt (the stage-0 compiler) is needed. It is one of:
+The first patsopt (the stage-0 compiler) is built from the C bundle
+src/CBOOT, which is tracked in git; `make` does it by itself when there is
+no bin/patsopt (the explicit form is `make bootstrap`). It then builds the
+compiler with itself: bin/patsopt, bin/patscc, bin/myatscc, the library
+src/libatsopt.a and the runtime library ccomp/atslib/lib/libatslib.a. The
+build takes a few minutes; `make -j8` is fine.
 
-* any ATS2 compiler (an installed release or an earlier build of this
-  repository);
-* the bootstrap C bundle of this repository (src/CBOOT, tracked):
-  `make bootstrap` builds it (it needs only a C compiler, make, python3 and
-  libgmp; `make bootstrap KIND=intknd` without libgmp) and then the whole
-  of ATS2 with it, so a clone builds with `make bootstrap && make`
-  (a plain `make` does the bootstrap itself when there is no bin/patsopt).
-  The bundle is regenerated with `make -C src CBOOT` (it needs a working
-  patsopt, see src/CBOOT/README).
-
-Then the compiler and the tools are built with
-
-  make -f Makefile_devl PATSOPT=/path/to/stage0/patsopt all
-
-For an installed ATS2 as the stage-0 compiler, its own prelude is needed
-as well:
-
-  make -f Makefile_devl PATSOPT=/usr/lib/ats2-postiats-0.4.2/bin/patsopt \
-    STAGE0HOME=/usr/lib/ats2-postiats-0.4.2 all
-
-Without the argument PATSOPT, the stage-0 compiler is $PATSHOME/bin/patsopt
-if it exists, else the patsopt of your PATH.
-
-The build produces bin/patsopt, bin/patscc, bin/myatscc, the library
-src/libatsopt.a and the runtime library ccomp/atslib/lib/libatslib.a.
 The tree itself is the PATSHOME of the build:
 
   export PATSHOME=$(pwd)
   export PATH=${PATH}:${PATSHOME}/bin
 
-The other tools of the repository are built with:
+To install it (the same layout as Step A):
 
-  make -f Makefile_devl bin_atsdoc      # the .atxt text processor
-  make -f Makefile_devl bin_pats2xhtml   # the syntax highlighter
+  make install PREFIX=/path/to/MYATS
 
-######
-#
-# Step C: the tests
-#
-######
-
-There is no unit-test framework: the tests are regression suites.
-
-  make -C src check                # typecheck every module of the compiler
-  make -C src test                 # the compiler's own suites (needs bin/patscc)
-  make -C utils/atsdoc test        # atsdoc and libatsdoc
-  make -C utils/libatsynmark test  # libatsynmark and pats2xhtml
-  make -C doc -f Makefile_test testall  # the examples and the book code
+Other stage-0 compilers (an installed ATS2 release, an earlier build) are
+a developer's option: see src/README.
 
 ######
 #
-# Step D: the release tarballs
+# Hello, world
 #
 ######
 
-The release tarballs are built from the repository by
+  printf '#include "share/atspre_staload.hats"\nimplement main0 () = println! ("Hello, world!")\n' > hello.dats
+  patscc -o hello hello.dats
+  ./hello
 
-  make -f Makefile_devl bin_atsdoc    # atsdoc generates the packaging scripts
-  make -C src CBOOT                    # the bootstrap C bundle
-  make -C doc/DISTRIB atspackaging     # fills in doc/DISTRIB/ATS-Postiats
-  make -C doc/DISTRIB atspacktarzvcf_gmp   # ATS2-Postiats-x.y.z.tgz
-  make -C doc/DISTRIB -f Makefile_inclats tarzvcf  # ATS2-Postiats-include-x.y.z.tgz
-
-(use atspacktarzvcf_int instead of atspacktarzvcf_gmp for the variant that
-does not depend on libgmp).
-
-The script share/SCRIPT/build_release.sh does all of this for a given
-version; it checks that the version of the release is declared consistently
-(share/SCRIPT/check_release_version.sh).
+prints "Hello, world!". patscc needs no flag: it runs ${CC:-cc} with
+-std=c99 -D_GNU_SOURCE (set PATSCCOMP to replace the whole C command).
 
 ######
 #
-# Step E: the nix build
+# PREFIX, DESTDIR and uninstall
+#
+######
+
+  make install PREFIX=/usr                     # default: /usr/local
+  make install PREFIX=/usr DESTDIR=$PWD/stage  # for packagers: staged tree
+  make uninstall PREFIX=/usr                   # removes what install made
+
+DESTDIR is prepended to every installed path but it is not written in the
+scripts of PREFIX/bin; PREFIX is. With the tarball, `make install` takes the
+same variables (the prefix of ./configure is the default).
+
+######
+#
+# The tools and the books
+#
+######
+
+  make tools     # bin/atsdoc (the .atxt processor), bin/pats2xhtml
+                 # (the syntax highlighter), libatsdoc.a, libatsynmark.a
+  make book      # the HTML and the PDF of the books (doc/BOOK/README.md
+                 # lists what they need: xsltproc, DocBook XSL, a browser)
+
+`make install` installs the tools as well when they have been built.
+
+######
+#
+# The tests
+#
+######
+
+There is no unit-test framework: the tests are regression suites. They
+need the tools (`make tools`).
+
+  make check                             # typecheck every module of the compiler
+  make test                              # all the suites below (about 10 minutes)
+
+or one by one:
+
+  make -C src test                       # the compiler's own suites
+  make -C utils/atsdoc test              # atsdoc and libatsdoc
+  make -C utils/libatsynmark test        # libatsynmark and pats2xhtml
+  make -C doc -f Makefile_test testall   # the examples and the code of the books
+
+(put $PATSHOME/bin on the PATH first; `make test` does it). The md5 suites
+and their conventions are described in AGENTS.md.
+
+######
+#
+# The release tarballs
+#
+######
+
+  make dist      # ATS2-Postiats-x.y.z.tgz, ATS2-Postiats-include-x.y.z.tgz
+                 # and their .sha256 files, in doc/DISTRIB
+
+It needs the tools (`make tools`) and the bootstrap bundle. The script
+share/SCRIPT/build_release.sh does all of this for a given version; it
+checks that the version of the release is declared consistently
+(share/SCRIPT/check_release_version.sh). The process is described in
+doc/DISTRIB/README and CONTRIBUTING.md.
+
+######
+#
+# Cleaning
+#
+######
+
+  make clean       # the build products of the compiler and the libraries
+  make distclean   # everything: the tree is as after a clone
+
+######
+#
+# Troubleshooting
+#
+######
+
+* "gmp.h: No such file or directory" (while compiling patsopt, or a program
+  that uses the gmp library): install the libgmp development package, or
+  build without it: `make KIND=intknd` / `./configure --without-gmp`.
+  Do not mix the two: after changing the kind, run `make distclean` first.
+
+* "python3: not found" (or "python3: command not found") while building src/:
+  install python3. A clone needs it to generate the arena encodings; the
+  tarball needs no python.
+
+* A patsopt/patscc of another installation is on the PATH (a distribution
+  package of ATS2 0.4.2, an older install): the build uses the PATSOPT you
+  give, else bin/patsopt of the tree, else the bundle, so it is not
+  disturbed; but running `patscc` by name finds the first one on the PATH.
+  Check with `which patscc patsopt` and `patscc --version`; put
+  $PATSHOME/bin (or PREFIX/bin) first. The compilers of 0.4.2 cannot read
+  the prelude of this tree (it has no list.sats), and the other way round.
+
+* "The environment variable PATSHOME is undefined!" when patsopt is run
+  from bin/ directly: use the installed scripts (PREFIX/bin) or export
+  PATSHOME as in Step B.
+
+* "ATS-Postiats should have been available at '...'": the PATSHOME that the
+  wrapper script holds does not exist (the install was moved, or it is a
+  DESTDIR stage). Reinstall, or export the right PATSHOME.
+
+* Strange compiler crashes at stage 1 with gcc 16 and an installed 0.4.2 as
+  stage 0: see src/README ("-fno-strict-aliasing").
+
+* Out of memory or very slow compilation of src/: use `make -j2`.
+
+######
+#
+# Nix
 #
 ######
 
