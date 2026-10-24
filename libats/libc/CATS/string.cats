@@ -113,7 +113,15 @@
 /* ****** ****** */
 
 #define atslib_libats_libc_strerror strerror
+//
+// HX: the XSI strerror_r (returns int), also with -D_GNU_SOURCE (glibc)
+//
+#if defined(__GLIBC__) && defined(_GNU_SOURCE)
+extern int __xpg_strerror_r (int, char*, size_t) ;
+#define atslib_libats_libc_strerror_r __xpg_strerror_r
+#else
 #define atslib_libats_libc_strerror_r strerror_r
+#endif
 
 /* ****** ****** */
 
