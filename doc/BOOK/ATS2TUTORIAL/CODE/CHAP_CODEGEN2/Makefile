@@ -9,7 +9,7 @@
 #
 ######
 
-PATSCC=$(PATSHOME)/bin/patscc
+PATSCC=$(PATSHOME)/bin/patscc -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime
 PATSOPT=$(PATSHOME)/bin/patsopt
 
 ######
