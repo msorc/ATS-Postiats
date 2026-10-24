@@ -185,7 +185,7 @@ is stored in a file of the name #filename("hello.dats"):
 
 #dats2xhtml('\
 //
-val _ = print ("Hello, world!\\\\\\\\n")
+val _ = print ("Hello, world!\\\\n")
 //
 implement main0 () = () // a dummy for [main]
 //
