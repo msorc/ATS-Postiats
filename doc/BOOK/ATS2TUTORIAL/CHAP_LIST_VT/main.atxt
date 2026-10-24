@@ -59,6 +59,7 @@ list_vt_length
 case+ xs of
 | list_vt_nil() => 0
 | list_vt_cons(x, xs2) => 1 + list_vt_length(xs2)
+)
 ')
 
 When #dyncode("xs") is matched with the pattern #dyncode("list_vt_nil()"),
@@ -176,6 +177,7 @@ list_vt_free
 case+ xs of
 | ~list_vt_nil() => ()
 | ~list_vt_cons(x, xs2) => list_vt_free<a> (xs2)
+)
 ')
 
 When #dyncode("xs") is matched with the pattern #dyncode("~list_vt_nil()"),
