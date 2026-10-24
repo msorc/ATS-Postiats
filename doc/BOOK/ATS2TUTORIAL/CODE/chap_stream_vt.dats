@@ -61,7 +61,80 @@ val ((*void*)) = println! ("p1000 = ", p1000)
 
 (* ****** ****** *)
 //
-implement main0 () = {}
+extern
+fun
+{a:t0p}
+{b:t0p}
+list_vt_map$fopr(x: a): b
+//
+fun
+{a:t0p}
+{b:t0p}
+list_vt_map
+(
+xs: List0_vt(a)
+) : List0_vt(b) =
+  auxlst(xs) where
+{
+//
+fun
+auxlst
+(xs: List0_vt(a)): List0_vt(b) =
+(
+case+ xs of
+| ~list_vt_nil() =>
+  list_vt_nil()
+| ~list_vt_cons(x, xs) =>
+  list_vt_cons(list_vt_map$fopr<a><b>(x), auxlst(xs))
+)
+} (* end of [list_vt_map] *)
+//
+fun
+{a:t0p}
+{b:t0p}
+list_vt_map_stream
+  (xs: List0_vt(a)): List0_vt(b) = let
+//
+fun
+auxlst
+(
+xs: List0_vt(a)
+) : stream_vt(b) = $ldelay
+(
+(
+case+ xs of
+| ~list_vt_nil() =>
+  stream_vt_nil()
+| ~list_vt_cons(x, xs) =>
+  stream_vt_cons(list_vt_map$fopr<a><b>(x), auxlst(xs))
+) : stream_vt_con(b)
+,
+list_vt_free(xs) // [xs] is freed
+) (* end of [$ldelay] *)
+//
+in
+  stream2list_vt<b>(auxlst(xs))
+end (* end of [list_vt_map_stream] *)
+//
+(* ****** ****** *)
+//
+implement
+main0 () = {
+//
+val xs = list_make_intrange(0, 1000000)
+//
+implement
+list_vt_map$fopr<int><int>(x) = x + 1
+//
+val zs = list_vt_map<int><int>(list_make_intrange(0, 10))
+val ((*void*)) = println! ("zs = ", zs)
+val ((*void*)) = list_vt_free(zs)
+//
+val ys = list_vt_map_stream<int><int>(xs)
+val ((*void*)) = println! ("length(ys) = ", list_vt_length(ys))
+val ((*void*)) = list_vt_free(ys)
+//
+} (* end of [main0] *)
 //
 (* ****** ****** *)
 

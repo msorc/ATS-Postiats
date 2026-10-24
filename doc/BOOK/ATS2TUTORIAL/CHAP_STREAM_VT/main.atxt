@@ -20,7 +20,10 @@ id="linear-stream-based-lazy-evaluation">
 
 In ATS, there is also support for lazy evaluation based on linear
 streams. As far as I can tell, linear stream-based lazy evaluation is
-currently a unique programming feature of ATS.
+currently a unique programming feature of ATS. In this dialect of ATS2
+(which has no garbage collector), it is the only form of lazy evaluation:
+the non-linear #dyncode("$delay") and the type #stacode("stream") of the
+earlier versions of ATS2 are not available any more.
 
 ')
 
@@ -32,7 +35,9 @@ of GC can in general be very difficult to predict, lazy evaluation may not
 be suitable in a setting where great precision in control is needed.  With
 linear stream-based lazy evaluation, the need for GC to reclaim values
 representing streams is eliminated as such values can be explicitly freed
-in a safe manner.\
+in a safe manner: a stream is either consumed by the function that is
+applied to it, or it is freed by #dyncode("lazy_vt_free") (or
+#dyncode("stream_vt_free")).\
 
 ')
 
@@ -43,8 +48,8 @@ suspending the evaluation of an expression (by forming a linear thunk), and
 there are also a pair of special functions #dyncode("lazy_vt_force") and
 #dyncode("lazy_vt_free") for resuming and freeing, respectively, a
 suspended evaluation (represented by a linear thunk).  Unlike
-#dyncode("$delay"), #dyncode("$ldelay") applies to two expressions to
-form a linear lazy stream; the first expression is the one whose evaluation
+the (removed) non-linear #dyncode("$delay"), #dyncode("$ldelay") applies
+to two expressions to form a linear lazy stream; the first expression is the one whose evaluation
 is suspended; the second expression is the one whose evaluation results in
 all the linear values contained in the first expression being freed.
 
@@ -70,8 +75,8 @@ function template #dyncode("lazy_vt_force") is given as follows:
 
 #sats2xhtml('\
 fun
-{a:vt@ype}
-lazy_vt_force(lazyval: lazy_vt(a)): (a)
+{a:vt0p}
+lazy_vt_force(lazyval: lazy_vt(INV(a))):<!all> (a)
 ')
 
 Note that the special prefix operator #keycode("!") in ATS is overloaded
@@ -86,7 +91,9 @@ function #dyncode("lazy_vt_free") is given as follows:
 
 #sats2xhtml('\
 fun
-lazy_vt_free{a:vt@ype}(lazyval: lazy_vt(a)): void
+lazy_vt_free
+  {a:vt0p}
+  (lazyval: lazy_vt(a)):<!wrt> void
 ')
 
 Note that the special prefix operator #keycode("~") in ATS is overloaded
@@ -173,15 +180,17 @@ the following interface:
 #sats2xhtml('\
 fun{a:t0p}
 stream_vt_filter_cloptr
-  (xs: stream_vt(a), pred: (&a) -<cloptr> bool): stream_vt(a)
-// end of [stream_vt_filter_cloptr]
+(
+xs: stream_vt(INV(a)), pred: (&a) -<cloptr1> bool
+) : stream_vt(a) // end of [stream_vt_filter_cloptr]
 ')
 
 Given a stream #dyncode("xs") and a predicate #dyncode("pred"), the
 function #dyncode("stream_vt_filter_cloptr") returns another stream
 consisting of all the elements in the stream #dyncode("xs") satisfying
 the predicate #dyncode("pred").  Note that both #dyncode("xs") and
-#dyncode("pred") are consumed by the call to #dyncode("stream_vt_filter_cloptr").
+#dyncode("pred") are consumed by the call to #dyncode("stream_vt_filter_cloptr")
+(the closure-function is freed when the resulting stream is freed or reaches its end).
 
 ')#comment("para")
 
@@ -191,8 +200,10 @@ Given a linear stream #dyncode("xs"), the following function
 #dyncode("stream2list_vt") turns #dyncode("xs") into a (linear) list:
 
 #sats2xhtml('\
-fun{a:vt0p}
-stream2list_vt(xs: stream_vt(INV(a))): List0_vt(a)
+fun
+{a:vt0p}
+stream2list_vt
+(stream_vt(INV(a))):<!wrt> List0_vt(a)
 // end of [stream2list_vt]
 ')
 
@@ -200,36 +211,47 @@ Of course the given stream #dyncode("xs") should only contain finitely
 many elements for otherwise the call on #dyncode("xs") cannot
 terminate. The function #dyncode("stream2list_vt") can handle long
 streams without concern of stack overflow as it is implemented in a
-tail-recursive manner. As an example, let us assume that the standard
-list-map function #dyncode("list_map_cloref") is implemented as
-follows:
+tail-recursive manner. As an example, let us implement a list-map function that consumes a
+linear list. The following implementation is not tail-recursive:
 
 #dats2xhtml('\
 fun
 {a:t0p}
 {b:t0p}
-list_map_cloref
+list_vt_map
 (
-xs: List0(a), fopr: (a) -<cloref1> b
-) : List0(b) =
+xs: List0_vt(a)
+) : List0_vt(b) =
   auxlst(xs) where
 {
 //
 fun
 auxlst
-(xs: List0(a)): List0(b) =
+(xs: List0_vt(a)): List0_vt(b) =
 (
 case+ xs of
-| list_nil() =>
-  list_nil()
-| list_cons(x, xs) =>
-  list_cons(fopr(x), auxlst(xs))
+| ~list_vt_nil() =>
+  list_vt_nil()
+| ~list_vt_cons(x, xs) =>
+  list_vt_cons(list_vt_map$fopr<a><b>(x), auxlst(xs))
 )
-} (* end of [list_map_cloref] *)
+} (* end of [list_vt_map] *)
+')
+
+where the function template #dyncode("list_vt_map$fopr") is to be
+implemented by the user (it plays the role of the function argument of
+the usual list-map function):
+
+#dats2xhtml('\
+extern
+fun
+{a:t0p}
+{b:t0p}
+list_vt_map$fopr(x: a): b
 ')
 
 Clearly, the inner function #dyncode("auxlst") is not tail-recursive.
-Therefore, this implementation of #dyncode("list_map_cloref") runs the
+Therefore, this implementation of #dyncode("list_vt_map") runs the
 risk of causing stack overflow when called on a long list (e.g., one
 that contains 1 million elements). We can address the issue of potential
 stack overflow by modifying the implementation of #dyncode("auxlst") as follows:
@@ -238,35 +260,38 @@ stack overflow by modifying the implementation of #dyncode("auxlst") as follows:
 fun
 {a:t0p}
 {b:t0p}
-list_map_cloref
-(
-xs: List0(a), fopr: (a) -<cloref1> b
-) : List0(b) = let
+list_vt_map_stream
+  (xs: List0_vt(a)): List0_vt(b) = let
 //
 fun
 auxlst
 (
-xs: List0(a)
+xs: List0_vt(a)
 ) : stream_vt(b) = $ldelay
 (
+(
 case+ xs of
-| list_nil() =>
+| ~list_vt_nil() =>
   stream_vt_nil()
-| list_cons(x, xs) =>
-  stream_vt_cons(fopr(x), auxlst(xs))
-)
+| ~list_vt_cons(x, xs) =>
+  stream_vt_cons(list_vt_map$fopr<a><b>(x), auxlst(xs))
+) : stream_vt_con(b)
+,
+list_vt_free(xs) // [xs] is freed
+) (* end of [$ldelay] *)
 //
 in
-//
-// list_vt2t: for turning
-// a linear list into a non-linear one
-//
-  list_vt2t(stream2list_vt(auxlst(xs)))
-end (* end of [list_map_cloref] *)
+  stream2list_vt<b>(auxlst(xs))
+end (* end of [list_vt_map_stream] *)
 ')
 
+Note that the second expression of #dyncode("$ldelay") frees the list
+#dyncode("xs") if the stream is freed before it is forced; if it is forced,
+the first expression consumes #dyncode("xs"). In either case the linear
+list is consumed exactly once, as the type-checker verifies.
+
 As #dyncode("stream2list_vt") is tail-recursive, the stream-based
-implementation of #dyncode("list_map_cloref") can readily handle long
+implementation of #dyncode("list_vt_map_stream") can readily handle long
 lists without concern of stack overflow. In practice, this
 stream-based approach to eliminating risk of stack overflow (for large
 inputs) can play a very effective role in a programming domain (e.g.,
