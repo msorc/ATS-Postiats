@@ -32,7 +32,8 @@ quad since we have: (10*10-4)/4 = 24; (5,7,7,11) is a good quad since
 we have: (5-11/7)*7 = 24. Game-of-24 is a game that determines whether
 four given integers form a good quad or not. For a demo of
 Game-of-24, please visit <ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24.html\">this link</ulink>.
+url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24.html\">this link</ulink>
+(the demo is the JS version of the GC era).
 
 ")
 
@@ -68,16 +69,84 @@ dbl2int g0float2int_double_int
 #para("\
 
 In the case where four given integers are claimed to form a good quad,
-we may want to see a proof to justify the claim. The following
-datatype #stacode("expr") is meant for providing such a proof:
+we may want to see a proof to justify the claim. The type
+#stacode("expr") is meant for providing such a proof: an expression
+is either a number or the application of an operator to two expressions.
+In the GC era, #stacode("expr") was a datatype. Here a datatype
+with a non-nullary constructor is rejected: its values would be shared
+(a subexpression is a part of many expressions in this program) and shared
+heap-allocated values can only be reclaimed by a GC. A linear datavtype
+would require the expressions to be copied each time they are shared.
+The solution for shared data is to keep them in an #emphasis("arena"): the
+nodes are allocated in a region (the global arena of the library
+#filename("libats/arena")) and the program uses handles (which are not
+linear) to them; the nodes are never freed individually, they all live
+until the program exits (or until a region is freed, if a local region is
+used instead of the global one). The tool #command("arenagen") (the file
+#filename("utils/arenagen/arenagen.py") of the repository) generates the
+encoding of an algebraic type in an arena from a specification of the
+type:
+
+<informalexample><programlisting>
+type expr
+  EXPRnum (double)
+  EXPRbop (char, expr, expr)
+</programlisting></informalexample>
+
+The files #filename("game24_gen.hats") and #filename("game24_gen_dats.hats") of the
+code of this chapter are the output of the command
+#command("python3 arenagen.py --global sats game24.spec") and of the command with
+#command("dats") in place of #command("sats"), respectively. The interface is as follows:
+
+#sats2xhtml('\
+abstype
+expr_type = ptr
+typedef
+expr = expr_type
+
+//
+datavtype
+expr_view =
+  | EXPRnum of (double)
+  | EXPRbop of (char, expr, expr)
+//
+fun
+expr_encode(v: expr_view): expr
+fun
+expr_view(x: expr): expr_view
+fun
+expr_view_free(v: expr_view): void
+fun
+expr_tag(x: expr): int
+fun
+expr_EXPRnum(a0: double): expr
+fun
+expr_EXPRbop(a0: char, a1: expr, a2: expr): expr
+fun
+expr_is_EXPRnum(x: expr): bool
+fun
+expr_is_EXPRbop(x: expr): bool
+//
+')
+
+The type #stacode("expr") is the type of handles (it is not linear and a
+handle can be copied freely); the function #dyncode("expr_EXPRnum") and the
+function #dyncode("expr_EXPRbop") construct an expression; and to look at the
+content of an expression, the function #dyncode("expr_view") turns a handle
+into a value of the linear type #stacode("expr_view") (a datavtype with the
+constructors of the specification), which is used for pattern matching
+and is consumed by the patterns written with the symbol #keycode("~").
+In the following, the lists of expressions are linear lists of handles, and so all
+of the functions of the previous chapters on lists apply.
 
 #dats2xhtml('\
 //
-datatype expr =
-  | EXPRnum of double
-  | EXPRbop of (string(*opr*), expr, expr)
+// the arena encoding of [expr] is generated from game24.spec
 //
-typedef exprlst = list0(expr)
+staload "./game24.sats"
+\#include "./game24_gen_dats.hats"
+//
+vtypedef exprlst = List0_vt(expr)
 //
 ')
 
@@ -87,7 +156,7 @@ as a value of the type #stacode("expr"):
 #dats2xhtml('\
 //
 val myproof =
-EXPRbop("/", EXPRbop("-", EXPRbop("*", EXPRnum(10), EXPRnum(10)), EXPRnum(4)), EXPRnum(4))
+expr_EXPRbop(\'/\', expr_EXPRbop(\'-\', expr_EXPRbop(\'*\', expr_EXPRnum(10.0), expr_EXPRnum(10.0)), expr_EXPRnum(4.0)), expr_EXPRnum(4.0))
 //
 ')
 
@@ -112,17 +181,17 @@ overload eval with eval_expr
 implement
 eval_expr(x0) =
 (
-case+ x0 of
-| EXPRnum(v0) => v0
-| EXPRbop(opr, x1, x2) => let
+case+ expr_view(x0) of
+| ~EXPRnum(v0) => v0
+| ~EXPRbop(opr, x1, x2) => let
     val v1 = eval_expr(x1)
     val v2 = eval_expr(x2)
   in
     case+ opr of
-    | "+" => v1 + v2
-    | "-" => v1 - v2
-    | "*" => v1 * v2
-    | "/" => v1 / v2
+    | \'+\' => v1 + v2
+    | \'-\' => v1 - v2
+    | \'*\' => v1 * v2
+    | \'/\' => v1 / v2
     | _(*unrecognized*) =>
       let val () = assertloc(false) in 0.0 end
   end
@@ -150,7 +219,7 @@ fprint_expr : (FILEref, expr) -> void
 overload print with print_expr
 overload fprint with fprint_expr
 //
-(* ****** ****** *)
+
 //
 implement
 print_expr(x0) =
@@ -159,10 +228,10 @@ fprint_expr(stdout_ref, x0)
 implement
 fprint_expr(out, x0) =
 (
-case x0 of
-| EXPRnum(v0) =>
+case+ expr_view(x0) of
+| ~EXPRnum(v0) =>
   fprint(out, dbl2int(v0))
-| EXPRbop(opr, x1, x2) =>
+| ~EXPRbop(opr, x1, x2) =>
   fprint!(out, "(", x1, opr, x2, ")")
 )
 //
@@ -197,16 +266,16 @@ overload - with sub_expr_expr
 overload * with mul_expr_expr
 overload / with div_expr_expr
 //
-(* ****** ****** *)
+
 //
 implement
-add_expr_expr(x1, x2) = EXPRbop("+", x1, x2)
+add_expr_expr(x1, x2) = expr_EXPRbop(\'+\', x1, x2)
 implement
-sub_expr_expr(x1, x2) = EXPRbop("-", x1, x2)
+sub_expr_expr(x1, x2) = expr_EXPRbop(\'-\', x1, x2)
 implement
-mul_expr_expr(x1, x2) = EXPRbop("*", x1, x2)
+mul_expr_expr(x1, x2) = expr_EXPRbop(\'*\', x1, x2)
 implement
-div_expr_expr(x1, x2) = EXPRbop("/", x1, x2)
+div_expr_expr(x1, x2) = expr_EXPRbop(\'/\', x1, x2)
 //
 ')
 
@@ -260,7 +329,8 @@ to the algorithmic part of the task next.
 Given two expressions, the function #dyncode("combine_expr_expr")
 returns a list consisting of every expression that can be constructed
 by applying addition, subtraction, multiplication, or division to the
-two given ones:
+two given ones. The type #stacode("exprlst") is the type of the linear lists of
+expressions, and the list that is returned is to be freed by the caller:
 
 #dats2xhtml('\
 //
@@ -270,101 +340,141 @@ combine_expr_expr(expr, expr): exprlst
 //
 overload combine with combine_expr_expr
 //
-(* ****** ****** *)
+')
+
+#dats2xhtml('\
+//
+// [cons_if(b, x, res)] is [x :: res] if [b] is true or [res] otherwise
+//
+fun
+cons_if
+(b: bool, x: expr, res: exprlst): exprlst =
+if b then list_vt_cons(x, res) else res
 //
 implement
 combine_expr_expr
   (x1, x2) = res where
 {
 //
-val res = list0_nil()
-val res = list0_cons(x1+x2, res)
-val res = list0_cons(x1-x2, res)
-val res = list0_cons(x2-x1, res)
-val res = list0_cons(x1*x2, res)
-val res = if x2 = 0 then res else list0_cons(x1/x2, res)
-val res = if x1 = 0 then res else list0_cons(x2/x1, res)
+val res = list_vt_nil{expr}()
+val res = list_vt_cons(x1+x2, res)
+val res = list_vt_cons(x1-x2, res)
+val res = list_vt_cons(x2-x1, res)
+val res = list_vt_cons(x1*x2, res)
+val res = cons_if(~(x2 = 0), x1/x2, res)
+val res = cons_if(~(x1 = 0), x2/x1, res)
 //
-val res = list0_reverse(res)
+val res = list_vt_reverse(res)
 //
 } (* end of [combine_expr_expr] *)
 //
 ')
 
 Please note that the divisor must be non-zero if the division
-operation is applied.
+operation is applied (the function #dyncode("cons_if") adds an expression
+to a list only if its first argument is true).
 
 ")
 
 #para("\
 
-In practice, the following higher-order function #dyncode("list0_mapjoin")
-is of common use:
-
-#dats2xhtml('\
-//
-extern
-fun
-{a:t@ype}
-{b:t@ype}
-list0_mapjoin
-( xs: list0(INV(a))
-, fopr: cfun(a, list0(b))): list0(b)
-//
-implement
-{a}{b}
-list0_mapjoin
-  (xs, fopr) =
-(
-  list0_concat<b>(list0_map<a><list0(b)>(xs, fopr))
-)
-//
-')
-
-Given a list #dyncode("xs") and a closure-function #dyncode("fopr"),
-#dyncode("list0_mapjoin") calls #dyncode("list0_map") to obtain a list
-of lists and then calls #dyncode("list0_concat") to flatten this
-obtained list of lists.
-
-")
-
-#para("\
-
-Let #stacode("task") be an alias for #stacode("list0(expr)"). Given a
+Let #stacode("task") be an alias for #stacode("List0_vt(expr)"). Given a
 task-value #dyncode("xs") of the type #stacode("task"), we can choose
 two expressions out of #dyncode("xs") to form a new expression (by
 applying addition, subtraction, multiplication or division) and then
 combine it with the rest to construct a new task-value. By calling
-#dyncode("do_one") on #dyncode("xs"), we obtain all of the possible new task-values:
-
+#dyncode("do_one") on #dyncode("xs"), we obtain all of the possible new task-values.
+The function #dyncode("list_nchoose_rest") of the previous chapter returns a list of
+pairs of linear lists, which is consumed by the function
+#dyncode("auxlst") in the body of #dyncode("do_one"): the task #dyncode("xs")
+is only borrowed, and the new tasks are fresh lists:
 
 #dats2xhtml('\
 //
-typedef task = list0(expr)
+//
+vtypedef task = List0_vt(expr)
+//
+// the new tasks that are made of a list of expressions
+// and a task [rest] (which is copied for each expression)
+//
+fun
+tasks_make
+(es: !List0_vt(expr), rest: !task): List0_vt(task) =
+(
+case+ es of
+| list_vt_nil() => list_vt_nil()
+| list_vt_cons(e, es) =>
+  list_vt_cons(list_vt_cons(e, list_vt_copy<expr>(rest)), tasks_make(es, rest))
+)
 //
 extern
 fun
-do_one(xs: task): list0(task)
+do_one(xs: !task): List0_vt(task)
 //
 implement
 do_one(xs) = let
 //
-val x1x2xss =
-list0_nchoose_rest<expr>(xs, 2)
+// [yszs] is a list of pairs (a list of two expressions, the rest)
 //
-in
-//
-list0_mapjoin<$tup(exprlst, exprlst)><task>
+fun
+auxlst
+(yszs: List0_vt(@(task, task))): List0_vt(task) =
 (
-x1x2xss
-,
-lam
-($tup(x1x2, xs)) =>
-list0_map<expr><task>
- (combine(x1x2[0], x1x2[1]), lam(x) => list0_cons(x, xs))
+case+ yszs of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(@(x1x2, rest), yszs) => let
+    val x1 = list_get_at<expr>(x1x2, 0)
+    val x2 = list_get_at<expr>(x1x2, 1)
+    val es = combine(x1, x2)
+    val res = tasks_make(es, rest)
+    val () = list_vt_free<expr>(es)
+    val () = list_vt_free<expr>(x1x2)
+    val () = list_vt_free<expr>(rest)
+  in
+    list_vt_append<task>(res, auxlst(yszs))
+  end // end of [list_vt_cons]
 )
 //
+in
+  auxlst(list_nchoose_rest<expr>(xs, 2))
 end // end of [do_one]
+//
+')
+
+The function #dyncode("do_one_all") calls #dyncode("do_one") on each task of a
+list of tasks and concatenates the results (it plays the role of
+the combinator #dyncode("list0_mapjoin") of the GC era, which
+mapped a function that returns a list over a list and flattened the result:
+the tasks are linear here and the list of tasks is consumed), and the function
+#dyncode("do_ones") repeats it:
+
+#dats2xhtml('\
+//
+// all the tasks that are obtained by calling [do_one] on each of the given
+// tasks, which are consumed
+//
+fun
+do_one_all
+(xss: List0_vt(task)): List0_vt(task) =
+(
+case+ xss of
+| ~list_vt_nil() => list_vt_nil()
+| ~list_vt_cons(xs, xss) => let
+    val res = do_one(xs)
+    val () = list_vt_free<expr>(xs)
+  in
+    list_vt_append<task>(res, do_one_all(xss))
+  end // end of [list_vt_cons]
+)
+//
+extern
+fun
+do_ones(n: int, xss: List0_vt(task)): List0_vt(task)
+//
+implement
+do_ones(n, xss) =
+if n >= 2
+  then do_ones(n-1, do_one_all(xss)) else xss
 //
 ')
 
@@ -373,22 +483,6 @@ returns a list of expressions that are proofs showing the four
 integers being a good quad:
 
 #dats2xhtml('\
-//
-extern
-fun
-do_ones(n: int, xss: list0(task)): list0(task)
-//
-implement
-do_ones(n, xss) =
-if n >= 2
-  then
-  do_ones
-  ( n-1
-  , list0_mapjoin<task><task>(xss, lam(xs) => do_one(xs))
-  ) (* do_ones *)
-  else xss
-//
-(* ****** ****** *)
 //
 extern
 fun
@@ -402,64 +496,64 @@ implement
 play_game
   (n1, n2, n3, n4) = let
 //
-  val x1 = EXPRnum(int2dbl(n1))
-  val x2 = EXPRnum(int2dbl(n2))
-  val x3 = EXPRnum(int2dbl(n3))
-  val x4 = EXPRnum(int2dbl(n4))
+  val x1 = expr_EXPRnum(int2dbl(n1))
+  val x2 = expr_EXPRnum(int2dbl(n2))
+  val x3 = expr_EXPRnum(int2dbl(n3))
+  val x4 = expr_EXPRnum(int2dbl(n4))
+//
+  val xs = $list_vt{expr}(x1, x2, x3, x4)
+  val xss = do_ones(4, list_vt_cons(xs, list_vt_nil()))
+//
+  // only the tasks that consist of an expression
+  // of the value 24 are kept (the tasks are consumed)
+  fun
+  auxlst
+  (xss: List0_vt(task)): exprlst =
+  (
+    case+ xss of
+    | ~list_vt_nil() => list_vt_nil()
+    | ~list_vt_cons(xs, xss) => let
+        val-~list_vt_cons(x, xs) = xs
+        val () = list_vt_free<expr>(xs)
+      in
+        if (x = 24)
+          then list_vt_cons(x, auxlst(xss)) else auxlst(xss)
+      end // end of [list_vt_cons]
+  )
+//
 in
-//
-list0_mapopt<task><expr>
-(
-do_ones(4, list0_sing(g0ofg1($list{expr}(x1, x2, x3, x4))))
-,
-lam(xss) => if (xss[0] = 24) then Some0(xss[0]) else None0()
-)
-//
+  auxlst(xss)
 end // end of [play_game]
+//
 ')
 
-If we think of an option0-value as a list of length at most 1 (that
-is, #dyncode("None0") for #dyncode("list0_nil") and #dyncode("Some0")
-for #dyncode("list0_sing")), then #dyncode("list0_mapopt") behaves
-just like #dyncode("list0_mapjoin").  Note that four given integers
+If we think of an option-value as a list of length at most 1, then the
+function #dyncode("auxlst") in the body of #dyncode("play_game") behaves
+just like a combinator that maps a function returning an option over a list and
+keeps the contents of the options (the GC era had #dyncode("list0_mapopt") for this).
+Note that four given integers
 are considered a good quad if and only if the list returned by a call to
-#dyncode("play_game") on them is non-empty.
+#dyncode("play_game") on them is non-empty, and that this list is to be freed.
 
 ")
 
 #para("\
 
-The code presented in this chapter targets C.  After a bit of <ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24-js.dats\">adaption</ulink>,
-the code can also be compiled into JS for interpretation inside a
-browser.  Please see a demo of Game-of-24 <ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24.html\">on-line</ulink>,
-which is directly based on the presented code.
+The code presented in this chapter targets C.  The code of the GC era could
+also be compiled into JS for interpretation inside a
+browser after a bit of <ulink
+url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24-js.dats\">adaption</ulink>.
+The arena is a library for C and the JS version has not been ported.
 
 ")
 
 #para("\
 
 Please find #mycodelink("LECTURE/07-10/CODE", "on-line") the entirety of
-the code used in this chapter. The mentioned URL link(s) can be found as follows:
-
-<itemizedlist>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24.html\">https://ats-lang.github.io/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24.html</ulink>
-")#comment("para")
-</listitem>
-
-<listitem>
-#para("\
-<ulink
-url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24-js.dats\">https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/07-10/CODE/Game-of-24-js.dats</ulink>
-")#comment("para")
-</listitem>
-
-</itemizedlist>
+the code used in this chapter. The test in #filename("game24.dats") was
+compiled with #command("patscc") (no flag is needed) and run with the address
+sanitizer, which reports no leak: (10,10,4,4) and (5,7,7,11) are good quads and
+(1,1,1,1) is not.
 
 ")#comment("para")
 
@@ -472,4 +566,3 @@ url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FU
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
