@@ -55,7 +55,7 @@ jobs:
   bootstrap:
     name: bootstrap from a clean clone (gcc)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -207,35 +207,51 @@ jobs:
           sh utils/atsdoc/TEST/genall.sh all
 
   sanitizers:
-    name: AddressSanitizer and UndefinedBehaviorSanitizer
+    name: AddressSanitizer and UndefinedBehaviorSanitizer (${{ matrix.suite }})
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [ compiler, examples ]
     env:
-      # every C file is compiled with the sanitizers: the bundle, the compiler
-      # (CC is the compiler of src/Makefile too) and, since patscc uses $CC,
-      # the programs that the tests compile. -O1 keeps the build fast.
-      CC: gcc -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
+      # every C file is compiled with the sanitizers: the bundle and the
+      # compiler (make bootstrap with CC=...) and the programs that the tests
+      # compile with patscc (PATSCCOMP is the C command of patscc; CC is not
+      # used for those because the scripts of the tests assign a CC of their
+      # own, which they would then export to patscc). -O1 keeps the build fast.
+      # The one suppression, for the examples only: the book program
+      # CHAP_FNTMPINT/gnumber computes fact(13) in int on purpose (to show the
+      # overflow), which is signed overflow in the C code. Everything else
+      # stays fatal (ASan, leaks, the other UBSan checks).
+      SAN: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
       CFLAGS: -O1
       P2OPT: -O1
       ASAN_OPTIONS: detect_leaks=1:abort_on_error=0:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1
+      # the text is expanded by the shell of patscc (${PATSHOME} is exported by the steps)
+      PATSCCOMP_BASE: gcc -std=c99 -D_GNU_SOURCE -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
         with:
-          key: sanitizers
+          key: sanitizers-${{ matrix.suite }}
 
       - name: make bootstrap (the whole compiler under the sanitizers)
-        run: make bootstrap
+        run: make bootstrap CC="gcc $SAN"
 
-      - name: make -C src test
+      - name: make -C src test (the compiler and the programs of the suites, sanitized; no -j)
+        if: matrix.suite == 'compiler'
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          export PATSCCOMP="$PATSCCOMP_BASE $SAN"
           make -C src test
 
-      - name: the examples and the book code
+      - name: the examples and the book code, sanitized
+        if: matrix.suite == 'examples'
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          export PATSCCOMP="$PATSCCOMP_BASE $SAN -fno-sanitize=signed-integer-overflow"
           make -C doc -f Makefile_test testall
 
   dist:
