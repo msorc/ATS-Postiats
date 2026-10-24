@@ -45,26 +45,31 @@ be raised and then captured.
 #para('\
 
 Let us now take a look at the following code that implements a function
-for finding the rightmost element in a list that satisfies a given predicate:
+for finding the rightmost element in a (linear) list that satisfies a given
+predicate. The list is only borrowed (the symbol #keycode("!")), and the
+predicate is a closure-function that is stored in a stack-frame and passed
+by reference (see the chapter on stack-allocated closure-functions):
 
 #dats2xhtml('\
 extern
 fun{a:t@ype}
 list_find_rightmost
-  (List (a), (a) -<cloref1> bool): Option_vt (a)
+  (!List_vt (a), &((a) -<clo1> bool)): Option_vt (a)
 //
+(* ****** ****** *)
+
 implement{a}
 list_find_rightmost
   (xs, pred) = let
 //
 fun aux
 (
-  xs: List(a)
+  xs: !List_vt(a), pred: &((a) -<clo1> bool)
 ) : Option_vt (a) =
   case+ xs of
-  | nil () => None_vt ()
-  | cons (x, xs) => let
-      val res = aux (xs)
+  | list_vt_nil () => None_vt ()
+  | list_vt_cons (x, xs) => let
+      val res = aux (xs, pred)
     in
       case+ res of
       | Some_vt _ => res
@@ -74,7 +79,7 @@ fun aux
     end (* end of [cons] *)
 //
 in
-  aux (xs)
+  aux (xs, pred)
 end // end of [list_find_rightmost]
 ')
 
@@ -88,41 +93,50 @@ the call stack when the rightmost element satisfying the given predicate is
 found, and these frames need to be unwinded #emphasis("one-by-one") before
 the found element can be returned to the original call to
 #dyncode("list_find_rightmost"). This form of inefficiency is eliminated in
-the following exception-based implementation of
-#dyncode("list_find_rightmost"):
+an exception-based implementation. To keep the example simple (an exception
+that is raised while a linear value, such as a list, is held would abandon
+the value), it is shown on the integers #dyncode("0"), ..., #dyncode("n-1")
+instead of a list, and the predicate is an envless function:
 
 #dats2xhtml('\
-implement{a}
-list_find_rightmost
-  (xs, pred) = let
+extern
+fun
+int_find_rightmost
+  (n: int, pred: (int) -<fun1> bool): Option_vt (int)
 //
-exception Found of (a)
+implement
+int_find_rightmost
+  (n, pred) = let
+//
+exception Found of (int)
 //
 fun aux
 (
-  xs: List(a)
+  i: int
 ) : void =
-  case+ xs of
-  | nil () => ()
-  | cons (x, xs) => let
-      val () = aux (xs)
-    in
-      if pred (x) then $raise Found(x) else ()
-    end (* end of [cons] *)
+  if i < n then let
+    val () = aux (i+1)
+  in
+    if pred (i) then $raise Found(i) else ()
+  end // end of [if]
 //
 in
 //
 try let
-  val () = aux (xs)
+  val () = aux (0)
 in
   None_vt ()
 end with
   | ~Found(x) => Some_vt (x)
 //
-end // end of [list_find_rightmost]
+end // end of [int_find_rightmost]
 ')
 
-When a try-with-expression is evaluated, a label is created for the portion
+Exceptions are linear in this dialect of ATS2: the value that represents a
+raised exception is consumed by the exception-handler that captures it,
+which is why the pattern of the handler is #dyncode("~Found(x)") (the
+symbol #keycode("~") means that the value is freed). When a try-with-expression is
+evaluated, a label is created for the portion
 of the call stack needed to evaluate the clauses (often referred to as
 exception-handlers) following the keyword #keycode("with"), and this label
 is then pushed onto a designated global stack.  When an exception is
@@ -130,10 +144,10 @@ raised, the labels on the global stack are tried one-by-one until the
 raised exception is captured by an exception-handler (that is, the value
 representing the exception matches the pattern guard of the
 exception-handler) or the current program evaluation aborts. The above
-exception-based implementation of #dyncode("list_find_rightmost") uses a
+exception-based implementation of #dyncode("int_find_rightmost") uses a
 raised exception to carry the element found during a recursive call to
 #dyncode("aux") so that this element can be returned in a single jump to
-the original call to #dyncode("list_find_rightmost"), bypassing all the
+the original call to #dyncode("int_find_rightmost"), bypassing all the
 intermediate call frames (for recursive calls to #dyncode("aux")) on the
 call stack. In general, the range between the point where an exception
 is raised and the point where the raised exception is captured should span
@@ -146,10 +160,8 @@ multiple call frames. If not, then the use of exception may be questionable.
 The implementation of the run-time support for exceptions in ATS makes use
 of the function #dyncode("alloca") declared in #filename("alloca.h") and
 the functions #dyncode("setjmp") and #dyncode("longjmp") declared in
-#filename("setjmp.h"). If #command("gcc") or #command("clang") is used to
-compile the C code generated from ATS source, one can pass the flag
--D_GNU_SOURCE so as to make sure that the header file #filename("alloca.h")
-is properly included.
+#filename("setjmp.h"); the header files are included by the runtime of
+ATS and no special flag needs to be passed to the C compiler.
 
 ")
 
