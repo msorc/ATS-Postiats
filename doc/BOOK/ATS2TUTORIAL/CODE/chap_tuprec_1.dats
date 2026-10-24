@@ -95,11 +95,7 @@ implement{} myrec_set_b(x, b) =
   let val+@MYREC(_, b0, _) = x in b0 := b; fold@(x) end
 //
 implement{} myrec_get_c(x) = let val+MYREC(_, _, c) = x in c end
-(*
-//
 // there is no update for the c-field
-//
-*)
 //
 end // end of [local]
 //
