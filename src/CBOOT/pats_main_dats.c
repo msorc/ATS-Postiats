@@ -8738,6 +8738,7 @@ ATSdynexn_extdec(PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS2_EXN) ;
 ATSdynexn_extdec(PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS3_EXN) ;
 ATSdynexn_extdec(PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS4_EXN) ;
 ATSdynexn_extdec(PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn) ;
+ATSdynexn_extdec(PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
 ATSdyncst_mac(atspre_fprint_string)
 ATSdyncst_mac(atspre_fprint_newline)
 ATSdyncst_mac(atspre_fprint_int)
@@ -8851,6 +8852,7 @@ ATSdyncst_extfun(PATSHOME_057_src_057_pats_comarg_056_sats__process_PATSRELOCROO
 ATSdyncst_mac(atspre_g1int2int_int_int)
 ATSdyncst_mac(atspre_g1int_gte_int)
 ATSdyncst_extfun(libatsopt_patsopt_main, (atstkind_t0ype(atstype_int), atsrefarg1_type(atstyarr_type(atstkind_type(atstype_ptrk)))), atsvoid_t0ype) ;
+ATSdyncst_mac(atspre_exit)
 #ifndef _ATS_CCOMP_EXCEPTION_NONE_
 ATSextern()
 atsvoid_t0ype
@@ -12030,15 +12032,37 @@ atsvoid_t0ype
 mainats_0_argc_argv(atstkind_t0ype(atstype_int) arg0, atsrefarg0_type(atstkind_type(atstype_ptrk)) arg1)
 {
 ATStmpdec(tmp569, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp574, atstype_exnconptr) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_main_0_argc_argv):
 ATSINSmove(tmp569, ATSLIB_056_prelude__gte_g1int_int__121__1(arg0, ATSPMVi0nt(2))) ;
 ATSif(
 tmp569
 ) ATSthen() {
+ATStrywith_try(tmp574)
 ATSINSmove_void(tmpret568, libatsopt_patsopt_main(arg0, ATSPMVrefarg1(ATSPMVcastfn(argv_takeout_strarr, atstkind_type(atstype_ptrk), ATSPMVrefarg0(arg1))))) ;
+ATStrywith_with(tmp574)
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab145):
+ATSifnthen(ATSCKpat_exn0(tmp574, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn)) { ATSINSgoto(__atstmplab147) ; } ;
+ATSINSlab(__atstmplab146):
+ATSINSmove_void(tmpret568, atspre_exit(ATSPMVi0nt(1))) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab147):
+ATSifnthen(ATSCKpat_exn0(tmp574, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr)) { ATSINSgoto(__atstmplab149) ; } ;
+ATSINSlab(__atstmplab148):
+ATSINSmove_void(tmpret568, atspre_exit(ATSPMVi0nt(1))) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab149):
+ATSINSraise_exn(tmpret568, tmp574) ;
+ATSbranch_end()
+ATScaseof_end()
+ATStrywith_end()
 } ATSelse() {
-ATSINSmove_void(tmp574, atspre_prerr_string(ATSPMVstring("Hello from ATS2(ATS/Postiats)!"))) ;
+ATSINSmove_void(tmp575, atspre_prerr_string(ATSPMVstring("Hello from ATS2(ATS/Postiats)!"))) ;
 ATSINSmove_void(tmpret568, atspre_prerr_newline()) ;
 }
 ATSfunbody_end()
@@ -12830,6 +12854,7 @@ ATSdynexn_initize(PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS2_EXN, 
 ATSdynexn_initize(PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS3_EXN, "PATSHOME/src/pats_error.sats:PATSOPT_TRANS3_EXN") ;
 ATSdynexn_initize(PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS4_EXN, "PATSHOME/src/pats_error.sats:PATSOPT_TRANS4_EXN") ;
 ATSdynexn_initize(PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn, "PATSHOME/src/pats_error.sats:FatalErrorExn") ;
+ATSdynexn_initize(PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr, "PATSHOME/src/pats_error.sats:FatalErrorExn_interr") ;
 ATSdynloadfcall(PATSHOME_057_src_057_pats_error_056_dats__dynload) ;
 ATSdynloadfcall(PATSHOME_057_src_057_pats_basics_056_dats__dynload) ;
 ATSdynloadfcall(PATSHOME_057_src_057_pats_utils_056_dats__dynload) ;

@@ -2046,8 +2046,19 @@ if
 then let
   val
   (pf, fpf | p) = argv_takeout_strarr(argv)
+  //
+  // HX-2026-10: the compiler has reported its errors (and their number):
+  // just exit with the status 1 instead of letting the exception escape
+  // (the run-time system would print "uncaught exception: <mangled name>").
+  //
   val () =
-  patsopt_main(argc, !p)
+  try
+    patsopt_main(argc, !p)
+  with
+  | ~($ERR.FatalErrorExn()) => exit(1)
+  | ~($ERR.FatalErrorExn_interr()) => exit(1)
+  | exn => $raise(exn)
+  // end of [try]
   prval () = minus_addback(fpf, pf | argv)
 in
   // nothing
