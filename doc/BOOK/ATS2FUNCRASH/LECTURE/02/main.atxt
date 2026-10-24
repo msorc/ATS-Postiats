@@ -79,7 +79,7 @@ testfact
 if n > 0 then
 (
   testfact(n-1);
-  println! ("fact(", n-1, ") = ", n-1)
+  println! ("fact(", n-1, ") = ", fact(n-1))
 ) (* end of [if] *)
 //
 ')

@@ -3,14 +3,6 @@
 #include
 "share/atspre_staload.hats"
 //
-(*
-//
-// Not needed here:
-//
-#include
-"share/atspre_staload_libats_ML.hats"
-//
-*)
 (* ****** ****** *)
 
 fun
@@ -30,7 +22,7 @@ testfact
 if n > 0 then
 (
   testfact(n-1);
-  println! ("fact(", n-1, ") = ", n-1)
+  println! ("fact(", n-1, ") = ", fact(n-1))
 ) (* end of [if] *)
 
 (* ****** ****** *)
