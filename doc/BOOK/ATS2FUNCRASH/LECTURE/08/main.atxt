@@ -22,53 +22,38 @@ Time of Generation: #timestamp()\
 Let us start with references. A reference is precisely an
 (initialized) singleton array, that is, an array of size 1, and its
 typical use is for implementing a global variable that can be updated.
+In the absence of GC, there is no function for allocating a reference
+on heap: a reference can only be created from memory that is never
+freed, as a toplevel variable is. The function #dyncode("ref_make_viewptr")
+turns the address of such a variable (together with the proof that the
+variable is at that address) into a reference.
 
 ")
 
 #para("\
 
-The following function is for creating a reference:
-
-#sats2xhtml('\
-//
-fun
-{a:t@ype}
-ref_make_elt(x0: a): ref(a)
-//
-')
-
-where #stacode("ref") is a type constructor in ATS that takes a type T
-to form a reference type #stacode("ref(T)") for any reference holding
-a value of the type T.  The functions #dyncode("ref_get_elt") and
+The functions #dyncode("ref_get_elt") and
 #dyncode("ref_set_elt") are for fetching and updating the value stored
-in a reference, respectively:
+in a reference, respectively.
 
-#sats2xhtml('\
-//
-fun
-{a:t@ype}
-ref_get_elt(r: ref(a)): a
-fun
-{a:t@ype}
-ref_set_elt(r: ref(a), x: a): void
-//
-')
-
-A shorthand for #dyncode("ref_make_elt") is #dyncode("ref").  Also,
-both #dyncode("!") and #dyncode("[]") are overloaded with
+Both #dyncode("!") and #dyncode("[]") are overloaded with
 #dyncode("ref_get_elt") and #dyncode("ref_set_elt"). For instance, the
 following code prints out 0, 1, and 3 twice:
 
 #dats2xhtml('\
 //
-val r0 = ref<int>(0)
+var r0_var: int = 0
+val r0 = ref_make_viewptr{int}(view@ r0_var | addr@ r0_var)
+//
 val () = println! (!r0)
 val () = (!r0 := !r0 + 1)
 val () = println! (!r0)
 val () = (!r0 := !r0 + 2)
 val () = println! (!r0)
 //
-val r1 = ref<int>(0)
+var r1_var: int = 0
+val r1 = ref_make_viewptr{int}(view@ r1_var | addr@ r1_var)
+//
 val () = println! (r1[])
 val () = (r1[] := r1[] + 1)
 val () = println! (r1[])
@@ -85,106 +70,83 @@ Programmers often misuse references. This is especially true for those
 with a background in imperative programming. For instance, the
 following example shows a typical poor use of references that is often
 resulted from someone learning functional programming by \"translating\"
-code written in imperative style:
+code written in imperative style: two references are created for each call to
+a function that computes the factorial, and they are used for holding a counter and the
+product. In this dialect of ATS, such a function cannot even be written, as a
+reference cannot be made from the local variables of a function (which are
+freed when the call returns). If the imperative style is really wanted, a local
+variable of the function can be used, which lives in the stack-frame and is
+passed by reference (the symbol #dyncode("&amp;")) to a function that updates it:
 
 #dats2xhtml('\
 //
 fun
-fact_ref
+fact_var
 (n: int): int = let
 //
-val i = ref<int>(0)
-val r = ref<int>(1)
+var i: int = 0
+var r: int = 1
 //
-fun loop(): void =
-  if !i < n then (!i := !i+1; !r := !r * !i; loop())
+fun
+loop
+(n: int, i: &int >> _, r: &int >> _): void =
+  if i < n then (i := i + 1; r := r * i; loop(n, i, r))
+//
+val () = loop(n, i, r)
 //
 in
-  let val () = loop() in !r end
-end (* end of [fact_ref] *)
+  r
+end (* end of [fact_var] *)
+//
+val () = println! ("fact_var(10) = ", fact_var(10))
 //
 ')
 
-There are some obvious drawbacks in this implementation of
-#dyncode("fact_ref"). For evaluating each call to
-#dyncode("fact_ref"), two references are created, which become garbage
-after the call returns. As a reference is allocated on heap, it is not
-mapped to a register when compiled. Accessing a reference involves
-memory traffic, which is much more expensive than accessing a
-register. Compared to a tail-recursive implementation of the factorial
-function in functional style, #dyncode("fact_ref") is of great
-inefficiency both time-wise and memory-wise.
+Compared to a tail-recursive implementation of the factorial
+function in functional style, #dyncode("fact_var") needs variables in memory that are
+updated, while the tail-recursive function passes its accumulator in a register.
+The version in functional style is preferable.
 
 ")
 
 #para("\
 
-There is a type constructor #stacode("array0") in ATS that takes a
-type T to form the array type #stacode("array0(T)") for an array
-storing elements of the type T. We refer to such an array as an
-array0-value, which is essentially a pair containing a pointer (to the
-memory location where elements are stored) and an integer (indicating
-the capacity of the array). For instance, the following function can
-be called to create an array0-value:
+An array is a linear value in this dialect of ATS: the type
+#stacode("arrayptr(T, n)") is for an array of #stacode("n") cells storing
+elements of the type T, and the owner of the array is to free it by calling
+#dyncode("arrayptr_free"). The array does not store its size
+(the size is a static term that is known to the typechecker), and the
+functions below are passed the size along with the array, like in C. The array0-values of
+the GC era (an array together with its size, shared and reclaimed by GC) are not
+available. The following function is called to create an array:
 
 #sats2xhtml('\
 //
 fun
-{a:t@ype}
-array0_make_elt(asz: int, x0: a): array0(a)
+{a:t0p}
+arrayptr_make_elt
+  {n:int}
+  (asz: size_t(n), x: a):<!wrt> arrayptr(a, n)
+// end of [arrayptr_make_elt]
 //
 ')
 
 Given a non-negative integer #dyncode("asz") and an element
-#dyncode("x0"), #dyncode("array0_make_elt") returns an array0-value in
-which the array is of size #dyncode("asz") and each of its cells is
-initialized with #dyncode("x0").
+#dyncode("x"), #dyncode("arrayptr_make_elt") returns an array
+of size #dyncode("asz") in which each of its cells is
+initialized with #dyncode("x").
 
 ")
 
 #para("\
 
-Another commonly used function for creating an array0-value
-is #dyncode("array0_tabulate") of the following interface:
-
-#sats2xhtml('\
-//
-fun
-{a:t@ype}
-array0_tabulate(asz: int, fopr: cfun(int, a)): array0(a)
-//
-')
-
-Given a non-negative integer #dyncode("asz") and a closure-function
-#dyncode("fopr"), #dyncode("array0_tabulate") returns an array0-value
-in which the array is of size #dyncode("asz") and the array cells are
-initialized with the values of #dyncode("fopr") at the valid indices.
-
-")
-
-#para("\
-
-The functions #dyncode("array0_get_at") and #dyncode("array0_set_at")
-are for fetching and updating the value stored in an array0-value at a
-given index:
-
-#sats2xhtml('\
-//
-fun
-{a:t@ype}
-array0_get_at(A: array0(a), i: int): a
-fun
-{a:t@ype}
-array0_set_at(A: array0(a), i: int, x: a): void
-//
-')
-
-Note that #dyncode("array0_get_at") raises an exception
-(#dyncode("ArraySubscriptExn()")) if the given index is invalid, that
-is, not between 0 and the array size minus 1, inclusive.  And the same
-happens with respect to #dyncode("array0_set_at").  Also please note
-that the brackets #dyncode("[]") is overloaded with both
-#dyncode("array0_get_at") and #dyncode("array0_set_at").  For
+The functions #dyncode("arrayptr_get_at") and #dyncode("arrayptr_set_at")
+are for fetching and updating the value stored in an array at a
+given index. The index is required (by the type system) to be between 0 and
+the array size minus 1, inclusive, and so no exception is needed for an invalid
+index: the program is rejected if the typechecker cannot make sure that the
+index is valid. Also please note that the brackets #dyncode("[]") are overloaded with
+both #dyncode("arrayptr_get_at") and #dyncode("arrayptr_set_at"). For
 instance, evaluating the following code prints out two lines: the
 first consisting of the text #dyncode("000") and the second consisting
 of the text #dyncode("123"):
@@ -192,108 +154,183 @@ of the text #dyncode("123"):
 #dats2xhtml('\
 //
 val A =
-array0_make_elt<int>(3, 0)
+arrayptr_make_elt<int>(i2sz(3), 0)
 //
 val () =
 println! (A[0], A[1], A[2])
 //
 val () = A[0] := 1
-val () = A[1] := A[0] + 1
-val () = A[2] := A[1] + 1
+val x0 = A[0]
+val () = A[1] := x0 + 1
+val x1 = A[1]
+val () = A[2] := x1 + 1
 //
 val () =
 println! (A[0], A[1], A[2])
 //
 ')
 
+An array that is read twice in an expression (the expression
+#dyncode("A[1] := A[0] + 1") for instance) is borrowed twice in that
+expression, which the typechecker refuses; the value that is read is bound first.
+
 ")
 
 #para("\
 
-Like list0-values, there are many commonly used functions for
-processing array0-values. For instance, the following function
-#dyncode("array0_foreach") corresponds to the previouly presented
-#dyncode("list0_foreach"):
+Another commonly used function for creating an array is
+#dyncode("arrayptr_tabulate"). The function that gives the content of the cell of
+each index is not an argument but a template parameter,
+#dyncode("array_tabulate$fopr"), which is given an implementation by the
+caller for the type of the elements. The following code makes the array
+consisting of the squares of the integers from 0 to 4:
+
+#dats2xhtml('\
+//
+// The array is created by [arrayptr_tabulate], which calls
+// [array_tabulate$fopr] to make the element of each index
+//
+implement
+array_tabulate$fopr<int>(i) = sz2i(i) * sz2i(i)
+//
+val B = arrayptr_tabulate<int>(i2sz(5))
+//
+val () = (fprint_arrayptr<int>(stdout_ref, B, i2sz(5)); print_newline())
+val () = arrayptr_free(B)
+//
+')
+
+")
+
+#para("\
+
+Like lists, there are many commonly used functions for
+processing arrays. For instance, the following function
+#dyncode("arrayptr_foreach") corresponds to the previouly presented
+#dyncode("list_foreach"). The array is borrowed, its size is passed, and the function
+argument is a flat closure that is passed by reference:
 
 #dats2xhtml('\
 //
 extern
 fun
-{a:t@ype}
-array0_foreach
-(A: array0(a), fwork: cfun(a, void)): void
+{a:t0p}
+arrayptr_foreach
+  {n:nat}
+(
+A: !arrayptr(a, n), asz: int(n), fwork: &(a) -<clo1> void
+) : void // end of [arrayptr_foreach]
 //
 implement
 {a}(*tmp*)
-array0_foreach(A, fwork) =
+arrayptr_foreach{n}(A, asz, fwork) =
+loop(A, 0, fwork) where
+{
+fun
+loop
+{i:nat | i <= n}
 (
-  int_foreach<>(sz2i(A.size()), lam(i) => fwork(A[i]))
-) (* end of [array0_foreach] *)
+A: !arrayptr(a, n), i: int(i), fwork: &(a) -<clo1> void
+) : void =
+  if i < asz then (fwork(A[i]); loop(A, i+1, fwork)) else ()
+} (* end of [arrayptr_foreach] *)
 //
 ')
 
-Given an array0-value #dyncode("A"), the expression
-#dyncode("A.size()") is written in dot-notation, which returns the
-size of the array contained in #dyncode("A"). The name #dyncode("sz2i")
-refers to a cast function from the type #stacode("size_t") to the type
-#stacode("int").
-
-")
-
-#para("\
-
 The following function
-#dyncode("array0_foldleft") corresponds to the previouly presented
-#dyncode("list0_foldleft"):
+#dyncode("arrayptr_foldleft") corresponds to the previouly presented
+#dyncode("list_foldleft"):
 
 #dats2xhtml('\
 //
 extern
 fun
-{r:t@ype}
-{a:t@ype}
-array0_foldleft
-(A: array0(a), r0: r, fopr: cfun(r, a, r)): r
+{r:t0p}
+{a:t0p}
+arrayptr_foldleft
+  {n:nat}
+(
+A: !arrayptr(a, n), asz: int(n), r0: r, fopr: &(r, a) -<clo1> r
+) : r // end of [arrayptr_foldleft]
 //
 implement
 {r}{a}
-array0_foldleft
-  (A, r0, fopr) =
+arrayptr_foldleft
+  {n}(A, asz, r0, fopr) =
+loop(A, 0, r0, fopr) where
+{
+fun
+loop
+{i:nat | i <= n}
 (
-//
-int_foldleft<r>
-  (sz2i(A.size()), r0, lam(r, i) => fopr(r, A[i]))
-//
-) (* end of [array0_foldleft] *)
+A: !arrayptr(a, n), i: int(i), r0: r, fopr: &(r, a) -<clo1> r
+) : r =
+  if i < asz then loop(A, i+1, fopr(r0, A[i]), fopr) else r0
+} (* end of [arrayptr_foldleft] *)
 //
 ')
 
 The following function
-#dyncode("array0_foldright") corresponds to the previouly presented
-#dyncode("list0_foldright"):
+#dyncode("arrayptr_foldright") corresponds to the previouly presented
+#dyncode("list_foldright"):
 
 #dats2xhtml('\
 //
 extern
 fun
-{r:t@ype}
-{a:t@ype}
-array0_foldright
-(A: array0(a), fopr: cfun(a, r, r), r0: r): r
+{r:t0p}
+{a:t0p}
+arrayptr_foldright
+  {n:nat}
+(
+A: !arrayptr(a, n), asz: int(n), fopr: &(a, r) -<clo1> r, r0: r
+) : r // end of [arrayptr_foldright]
 //
 implement
 {r}{a}
-array0_foldright
-  (A, fopr, r0) = let
-  val asz = sz2i(A.size())
-in
-  int_foldleft<r>(asz, r0, lam(r, i) => fopr(A[asz-i-1], r))
-end (* end of [array0_foldright] *)
+arrayptr_foldright
+  {n}(A, asz, fopr, r0) =
+loop(A, asz, fopr, r0) where
+{
+fun
+loop
+{i:nat | i <= n}
+(
+A: !arrayptr(a, n), i: int(i), fopr: &(a, r) -<clo1> r, r0: r
+) : r =
+  if i > 0 then loop(A, i-1, fopr, fopr(A[i-1], r0)) else r0
+} (* end of [arrayptr_foldright] *)
 //
 ')
 
-Unlike #dyncode("list0_foldright"), #dyncode("array0_foldright")
-is tail-recursive.
+Unlike #dyncode("list_foldright"), #dyncode("arrayptr_foldright")
+is tail-recursive. A test of the three functions:
+
+#dats2xhtml('\
+//
+val () =
+{
+var fwork =
+lam@(x: int): void => print!(x, ";")
+val () = arrayptr_foreach<int>(A, 3, fwork)
+val () = println! ()
+}
+//
+val () =
+{
+var fopr = lam@(r: int, x: int): int => r * 10 + x
+val () = println! ("foldleft = ", arrayptr_foldleft<int><int>(A, 3, 0, fopr))
+}
+//
+val () =
+{
+var fopr = lam@(x: int, r: int): int => r * 10 + x
+val () = println! ("foldright = ", arrayptr_foldright<int><int>(A, 3, fopr, 0))
+}
+//
+val () = arrayptr_free(A)
+//
+')
 
 ")
 
@@ -301,34 +338,35 @@ is tail-recursive.
 
 In practice, matrices (that is, two dimensional arrays) are also a
 very common data structure. In ATS, there is a type constructor
-#stacode("matrix0"), which takes a type T to form the type
-#stacode("matrix0(T)") for a matrix storing elements of the type T. We
-refer to such a matrix as a matrix0-value, which is essentially a
-tuple containing a pointer (to the memory location where elements are
-stored) and two integers (indicating the number of rows and the number
-of columns of the matrix). For instance, the following function can be
-called to create a matrix0-value:
+#stacode("matrixptr"), which takes a type T and two integers m and n
+to form the type #stacode("matrixptr(T, m, n)") for a matrix of m rows
+and n columns storing elements of the type T. Like an array, a matrix is
+linear and has to be freed by calling #dyncode("matrixptr_free"), and it
+does not store its dimensions. For instance, the following function can be
+called to create a matrix:
 
 #sats2xhtml('\
 //
-fun
-{a:t@ype}
-matrix0_make_elt(nrow: int, ncol: int, x0: a): matrix0(a)
+fun{
+a:t0p
+} matrixptr_make_elt
+  {m,n:int}
+  (m: size_t m, n: size_t n, x: a):<!wrt> matrixptr(a, m, n)
+// end of [matrixptr_make_elt]
 //
 ')
 
 Given two non-negative integers #dyncode("m") and #dyncode("n") and an
-element #dyncode("x0"), #dyncode("matrix0_make_elt") returns a
-matrix0-value in which the matrix is of dimension #dyncode("m") by
-#dyncode("n") and each of its cells is initialized with
-#dyncode("x0").
+element #dyncode("x"), #dyncode("matrixptr_make_elt") returns a
+matrix of dimension #dyncode("m") by #dyncode("n") in which
+each of its cells is initialized with #dyncode("x").
 
 ")
 
 #para("\
 
 Please note that the so-called row-major representation is chosen for
-the matrix contained in each created matrix0-value. As the elements in
+the matrix contained in each created matrix. As the elements in
 each row are stored adjacently in row-major representation, it can be
 (much) more efficient to process the elements in the row-by-row fashion
 (compared to the column-by-column fashion) due to the memory-cache effect.
@@ -337,92 +375,109 @@ each row are stored adjacently in row-major representation, it can be
 
 #para("\
 
-Like #dyncode("array0_tabulate"), the following function
-#dyncode("matrix0_tabulate") is often called to create a
-matrix0-value:
+Like #dyncode("arrayptr_tabulate"), the function
+#dyncode("matrixptr_tabulate") is often called to create a
+matrix, where the template parameter #dyncode("matrix_tabulate$fopr") gives
+the content of each cell:
 
-#sats2xhtml('\
+#dats2xhtml('\
 //
-fun
-{a:t@ype}
-matrix0_tabulate
-  (nrow: int, ncol: int, fopr: cfun(int, int, a)): matrix0(a)
+implement
+matrix_tabulate$fopr<int>(i, j) = sz2i(i) * 10 + sz2i(j)
+//
+val N = matrixptr_tabulate<int>(i2sz(2), i2sz(3))
+//
+val () = (fprint_matrixptr<int>(stdout_ref, N, i2sz(2), i2sz(3)); print_newline())
+val () = matrixptr_free(N)
 //
 ')
-
-Given two non-negative integers #dyncode("m") and #dyncode("n") and a
-closure-function #dyncode("fopr"), #dyncode("matrix0_tabulate")
-returns a matrix0-value in which the matrix is of dimension
-#dyncode("m") by #dyncode("n") and the matrix cells are initialized
-with the values of #dyncode("fopr") at the valid indices.
 
 ")
 
 #para("\
 
-The functions #dyncode("matrix0_get_at") and
-#dyncode("matrix0_set_at") are for fetching and updating the value
-stored in a matrix0-value at a given position (represented by a row
-index and a column index):
+The functions #dyncode("matrixptr_get_at") and
+#dyncode("matrixptr_set_at") are for fetching and updating the value
+stored in a matrix at a given position (represented by a row
+index and a column index; the number of columns is passed along, too, as the
+matrix does not know it). The brackets #dyncode("[]") are overloaded with both
+of them, as in the following code:
 
-#sats2xhtml('\
+#dats2xhtml('\
 //
-fun{a:t0p}
-matrix0_get_at
-  (M: matrix0(a), i: int, j: int): a
-fun{a:t0p}
-matrix0_set_at
-  (M: matrix0(a), i: int, j: int, x: a): void
+val M = matrixptr_make_elt<int>(i2sz(2), i2sz(3), 0)
+//
+val () = M[0, 3, 1] := 5
+val () = M[1, 3, 2] := 7
+//
+val () =
+{
+var fwork = lam@(x: int): void => print!(x, ";")
+val () = matrixptr_foreach_clo<int>(M, 2, 3, fwork)
+val () = println! ()
+}
+//
+val () = matrixptr_free(M)
 //
 ')
-
-Note that #dyncode("matrix0_get_at") raises an exception
-(#dyncode("MatrixSubscriptExn()")) if one of the given indices is
-invalid.  And the same happens with respect to
-#dyncode("matrix0_set_at"). Also please note that the brackets
-#dyncode("[]") is overloaded with both #dyncode("matrix0_get_at") and
-#dyncode("matrix0_set_at").
 
 ")
 
 #para("\
 
-Like #dyncode("array0_foreach"), the following function
-#dyncode("matrix0_foreach") applies to each element stored in the
-matrix contained in #dyncode("M") a given closure-function
-#dyncode("fwork"):
+Like #dyncode("arrayptr_foreach"), the following function
+#dyncode("matrixptr_foreach_clo") applies to each element stored in a matrix a given
+flat closure #dyncode("fwork") (the matrix is traversed row by row). The two loops are
+written directly, since a closure that is passed by reference cannot be captured by
+another one:
 
 #dats2xhtml('\
 //
 extern
 fun
-{a:t@ype}
-matrix0_foreach
-(M: matrix0(a), fwork: cfun(a, void)): void
+{a:t0p}
+matrixptr_foreach_clo
+  {m,n:nat}
+(
+M: !matrixptr(a, m, n)
+, nrow: int(m), ncol: int(n), fwork: &(a) -<clo1> void
+) : void // end of [matrixptr_foreach_clo]
 //
 implement
 {a}(*tmp*)
-matrix0_foreach
-  (M, fwork) = let
-  val nrow = sz2i(M.nrow())
-  val ncol = sz2i(M.ncol())
-in
-  int_cross_foreach<>(nrow, ncol, lam(i, j) => fwork(M[i,j]))
-end (* end of [matrix0_foreach] *)
+matrixptr_foreach_clo
+  {m,n}(M, nrow, ncol, fwork) =
+loop1(M, 0, fwork) where
+{
+//
+fun
+loop2
+{i:nat | i < m}{j:nat | j <= n}
+(
+M: !matrixptr(a, m, n), i: int(i), j: int(j), fwork: &(a) -<clo1> void
+) : void =
+  if j < ncol then (fwork(M[i, ncol, j]); loop2(M, i, j+1, fwork)) else ()
+//
+fun
+loop1
+{i:nat | i <= m}
+(
+M: !matrixptr(a, m, n), i: int(i), fwork: &(a) -<clo1> void
+) : void =
+  if i < nrow then (loop2(M, i, 0, fwork); loop1(M, i+1, fwork)) else ()
+//
+} (* end of [matrixptr_foreach_clo] *)
 //
 ')
-
-The expression #dyncode("M.nrow()") is written in dot-notation, which
-returns the number of rows in the matrix contained in
-#dyncode("M"). And #dyncode("M.ncol()") is for the number of columns
-in the matrix.
 
 ")
 
 #para("\
 
 Please find #mycodelink("LECTURE/08/CODE", "on-line") the entirety of
-the code used in this chapter. \
+the code used in this chapter. It was compiled with #command("patscc")
+(no flag is needed) and run with the address sanitizer, which reports no
+leak. \
 
 ")#comment("para")
 
@@ -435,4 +490,3 @@ the code used in this chapter. \
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
