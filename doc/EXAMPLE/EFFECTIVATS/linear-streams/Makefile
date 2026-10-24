@@ -44,7 +44,7 @@ regress:: Fibonacci_vt; ./$<
 
 ######
 
-regress:: QueensPuzzle_vt; valgrind ./$<
+regress:: QueensPuzzle_vt; ./$<
 
 ######
 

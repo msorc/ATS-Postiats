@@ -99,9 +99,9 @@ testall:: cleanall
 
 ######
 
-all:: ; for i in $(SUBDIRS); do $(MAKE) -C "$$i" $@; done
-regress:: ; for i in $(SUBDIRS); do $(MAKE) -C "$$i" $@; done
-cleanall:: ; for i in $(SUBDIRS); do $(MAKE) -C "$$i" $@; done
+all:: ; for i in $(SUBDIRS); do $(MAKE) -C "$$i" $@ || exit 1; done
+regress:: ; for i in $(SUBDIRS); do $(MAKE) -C "$$i" $@ || exit 1; done
+cleanall:: ; for i in $(SUBDIRS); do $(MAKE) -C "$$i" $@ || exit 1; done
 
 ######
 
