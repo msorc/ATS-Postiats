@@ -190,7 +190,10 @@ midpoint
 Various coding details that are omitted for brevity can be found in
 the file <ulink
 url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/03-10/CODE/Sierpinski.dats\">Sierpinski.dats</ulink>.
-I will talk more about co-programming with ATS and JS in a chapter
+The ATS part and the two JS functions given above are in the file
+#filename("Sierpinski.dats") of the code of this chapter; the
+file is type-checked with #command("patsopt --typecheck -d") (the JS code
+needs a browser to run). I will talk more about co-programming with ATS and JS in a chapter
 presented later in this book.\
 
 ")
