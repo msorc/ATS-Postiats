@@ -37,6 +37,20 @@ mistakes.
 
 #para("\
 
+The book is written for the linear-only dialect of ATS2, which has no
+garbage collector (GC): the compiler rejects each nonlinear heap allocation.
+Consequently, the functional lists and streams of this book are linear
+(#stacode("list_vt") and #stacode("stream_vt")), a closure-function passed to
+a combinator lives in a stack-frame (and a closure that outlives its creator is a
+linear one that has to be freed), and the chapters explain who owns a value
+and when it is freed where the GC used to do the work. Each code fragment
+of the book comes from a program that is compiled and run
+(without leaks) with the compiler of the repository.
+
+")
+
+#para("\
+
 The average reader is expected to have already had some exposure
 to programming (e.g., having taken one semester of programming course
 based on Java or Python) but may not know much or anything about
