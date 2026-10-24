@@ -19,7 +19,7 @@ Time of Generation: #timestamp()\
 In ATS, the filename extensions #emphasis(".sats") and #emphasis(".dats")
 are reserved to indicate static and dynamic files, respectively. As these
 two extensions have some special meaning attached to them, which can be
-interpreted by the command #command("atscc"), they should not be replaced
+interpreted by the command #command("patscc"), they should not be replaced
 arbitrarily.\
 
 ")
