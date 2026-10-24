@@ -22,26 +22,31 @@ Time of Generation: #timestamp()\
 As the name suggests, linear lazy streams are the linear version of
 lazy streams. In ATS, a linear value is one that cannot be shared; it
 must be consumed properly for otherwise a type error is reported
-during typechecking. Before moving on to introduce programming with
-linear lazy streams, I would like to first explain a serious drawback in
-programming with (non-linear) lazy streams.
+during typechecking. The previous chapter used linear lazy streams
+without saying much about linearity. In this chapter, I would like to
+look at what makes them different from the (non-linear) lazy streams of the
+GC era, which this dialect of ATS does not have any more, and at why the
+difference is a gain for stream-based programming.
 
 ")
 
 #para("\
 
-Given an integer n and a closure-function f, the following function
+Given an integer n and a function f, the following function
 #dyncode("ftally") returns the sum of the values of f(i) for i ranging
 from 1 to n:
 
 #dats2xhtml('\
+//
+// [f] is an envless function: it is captured by the closure
+// that is stored in a stream
 //
 fun
 ftally
 (
 n : int
 ,
-f : cfun(int, double)
+f : (int) -> double
 ) : double =
   if n = 0 then 0.0 else ftally(n-1, f) + f(n)
 //
@@ -57,15 +62,17 @@ ftally2
 (
 n : int
 ,
-f : cfun(int, double)
+f : (int) -> double
 ) : double = let
 //
 val xs1 = int_stream_from(1)
 val xs2 = stream_takeLte<int>(xs1, n)
-val xs3 = stream_map<int><double>(xs2, lam(i) => f(i))
+val xs3 = stream_map<int><double>(xs2, lam(i) =<cloptr1> f(i))
+//
+var fopr = lam@(res: double, x: double): double => res + x
 //
 in
-  stream_foldleft<double><double>(xs3, 0.0, lam(res, x) => res+x)
+  stream_foldleft<double><double>(xs3, 0.0, fopr)
 end // end of [ftally2]
 //
 ')
@@ -76,10 +83,13 @@ ascendingly); #dyncode("xs2") refers to the prefix of #dyncode("xs1")
 ending with the integer n; #dyncode("xs3") refers to the stream
 consisting of f(i) for i ranging from 1 to n; and finally
 #dyncode("stream_foldleft") is called to compute the sum of all of the
-numbers in #dyncode("xs3").
+numbers in #dyncode("xs3"). The function argument of
+#dyncode("stream_foldleft") is a flat closure (it is not stored anywhere), and the
+function #dyncode("f") is envless because it is captured by the closure that is stored
+in a stream.
 For the code implementing
 #dyncode("stream_takeLte") and #dyncode("stream_foldleft"), please
-follow the link mentioned at the end of the chapter.
+see below.
 
 ")
 
@@ -114,17 +124,20 @@ the implementation of #dyncode("ftally") in order for it to benefit
 
 #para("\
 
-An often touted feature of a (non-linear) stream is its support for
+An often touted feature of a (non-linear) stream was its support for
 caching: the elements in the stream are automatically saved for
 potential subsequent use once they are generated. As with any
 programming features, a constant question is whether one needs to pay
 for this feature even if one makes no use of it. In the case of
 automatic caching associated with (non-linear) streams, one clearly
-pays dearly for the time and memory spent on caching when the elements
+paid dearly for the time and memory spent on caching when the elements
 in such a stream need only to be processed once. In stream-based
 programming, most streams created to support intermediate computation
 are processed only once. For instance, the three streams in the body
-of #dyncode("ftally2") are all processed once and only once.
+of #dyncode("ftally2") are all processed once and only once. A
+(non-linear) stream version of #dyncode("ftally2") created three streams on
+heap and left them there when it returned, such that each of the three
+left streams contained n cached elements (until GC reclaimed them).
 
 ")
 
@@ -132,7 +145,7 @@ of #dyncode("ftally2") are all processed once and only once.
 
 While one can argue that an optimizing compiler may be able to
 generate code (e.g., based on some deforestation heuristics) that
-completely eliminates caching in the case of #dyncode("ftally2"), the
+completely eliminates caching in the case of such a function, the
 very problem with such an argument is that the optimizing compiler
 also may not. This is a bit like trying to control a puppet with a
 string of one hundred meter long: The consequence of such a practice is
@@ -160,52 +173,20 @@ finally computed!
 
 Given a type T, the type #stacode("stream_vt(T)") is for a linear
 stream of elements of the type T.  Evaluating a linear stream-value
-yields a linear stream-con value of type #dyncode("stream_con(T)") for
-some T, where #dyncode("stream_vt_con") is the following declared
-linear datatype:
-
-#sats2xhtml('\
-datavtype
-stream_vt_con(a:t@ype) =
-  | steam_vt_nil of ()
-  | stream_vt_cons of (a, stream_vt(a))
-')
-
-The constructor #dyncode("stream_vt_nil"), the linear counterpart
-of #dyncode("stream_nil"), is for creating a linear empty stream-con
-value, and the constructor #dyncode("stream_vt_cons"), the linear
-counterpart of #dyncode("stream_cons"), is for creating a linear
-non-empty stream-con value.
-
-")
-
-#para("\
-
-The following code implements a function for building a linear stream
-of integers starting from a given one:
-
-#dats2xhtml('\
-//
-extern
-fun
-int_stream_vt_from(n: int): stream_vt(int)
-//
-implement
-int_stream_vt_from(n) =
-  $ldelay(stream_vt_cons(n, int_stream_vt_from(n+1)))
-//
-')
-
-Note that the keyword #keycode("$ldelay"), the linear counterpart of
-#keycode("$delay"), is for initiating the construction of a linear
-stream.
+yields a linear stream-con value of type #dyncode("stream_vt_con(T)"),
+where #dyncode("stream_vt_con") is the linear datatype that was shown in the
+previous chapter. The constructor #dyncode("stream_vt_nil") is for creating a
+linear empty stream-con value, and the constructor
+#dyncode("stream_vt_cons") is for creating a linear non-empty stream-con value.
+The keyword #keycode("$ldelay") is for initiating the construction
+of a linear stream (see #dyncode("int_stream_from") in the previous chapter).
 
 ")
 
 #para("\
 
 Given a linear stream xs and an integer n, the following function
-#dyncode("stream_vt_takeLte") returns another stream consisting of the
+#dyncode("stream_takeLte") returns another stream consisting of the
 first n elements of xs if xs contains at least n elements or all of xs
 if not:
 
@@ -214,13 +195,14 @@ if not:
 extern
 fun
 {a:t@ype}
-stream_vt_takeLte
+stream_takeLte
   (xs: stream_vt(a), n: int): stream_vt(a)
 //
 implement
 {a}(*tmp*)
-stream_vt_takeLte
+stream_takeLte
   (xs, n) = $ldelay
+(
 (
 if
 n > 0
@@ -230,12 +212,13 @@ case+ !xs of
 | ~stream_vt_nil() =>
    stream_vt_nil()
 | ~stream_vt_cons(x, xs) =>
-   stream_vt_cons(x, stream_vt_takeLte(xs, n-1))
+   stream_vt_cons(x, stream_takeLte(xs, n-1))
 )
 else (~xs; stream_vt_nil((*void*)))
+) : stream_vt_con(a)
 ,
-lazy_vt_free(xs) // called when the stream is freed
-) (* end of [stream_vt_takeLte] *)
+~(xs) // called when the stream is freed
+) (* end of [stream_takeLte] *)
 //
 ')
 
@@ -254,70 +237,51 @@ nothing. In other words, a linear stream is like an object with two
 methods: One is called to evaluate the stream to a stream-con value
 and the other to free the stream. In the actual implementation, these
 two methods are combined into one, which is passed a boolean value to
-determine which of the two methods should be called. In the body of
-the function #dyncode("stream_vt_takeLte"), the symbol #keycode("~")
+determine which of the two methods should be called. Exactly one of
+the two methods is called, and only once: the variable #dyncode("xs") is
+consumed by the first one when the stream is evaluated and by the second one
+when the stream is freed. In the body of
+the function #dyncode("stream_takeLte"), the symbol #keycode("~")
 in front of the pattern #dyncode("stream_vt_nil()") or
 #dyncode("stream_vt_cons(x, xs)") means that the stream-con value that
 matches the pattern is freed (and thus no longer available for any
-subsequent use).
+subsequent use). When the first n elements have been produced, the rest of
+the stream xs (which can be infinite, and which was never evaluated) is freed
+at once: this is how the unneeded part of a stream is reclaimed.
 
 ")
 
 #para("\
 
-The following function #dyncode("stream_vt_map") is just
-the counterpart of #dyncode("stream_map") for linear streams:
+The function #dyncode("stream_map") of the previous chapter is the
+counterpart of the function that mapped a stream in the GC era. The following
+function #dyncode("stream_foldleft") is the counterpart of
+the function that folded a stream, for linear streams: it consumes the stream, one
+node after another, and it is tail-recursive:
 
 #dats2xhtml('\
 //
 extern
 fun
+{res:t@ype}
 {a:t@ype}
-{b:t@ype}
-stream_vt_map
-(xs: stream_vt(a), fopr: cfun(a, b)): stream_vt(b)
-//
-implement
-{a}{b}
-stream_vt_map
-  (xs, fopr) = $ldelay
-(
-case+ !xs of
-| ~stream_vt_nil() =>
-   stream_vt_nil()
-| ~stream_vt_cons(x, xs) =>
-   stream_vt_cons(fopr(x), stream_vt_map<a><b>(xs, fopr))
-, ~(xs) // called when the stream is freed
-)
-//
-')
-
-The following function #dyncode("stream_vt_foldleft") is just
-the counterpart of #dyncode("stream_foldleft") for linear streams:
-
-#dats2xhtml('\
-//
-extern
-fun
-{res:t@ype
-}{a:t@ype}
-stream_vt_foldleft
+stream_foldleft
 (
 xs: stream_vt(a),
-r0: res, fopr: cfun(res, a, res)
+r0: res, fopr: &(res, a) -<clo1> res
 ) : res // end-of-function
 //
 implement
 {res}{a}
-stream_vt_foldleft(xs, r0, fopr) =
+stream_foldleft(xs, r0, fopr) =
 (
 //
 case+ !xs of
 | ~stream_vt_nil() => r0
 | ~stream_vt_cons(x, xs) =>
-   stream_vt_foldleft<res><a>(xs, fopr(r0, x), fopr)
+   stream_foldleft<res><a>(xs, fopr(r0, x), fopr)
 //
-) (* end of [stream_vt_foldleft] *)
+) (* end of [stream_foldleft] *)
 //
 ')
 
@@ -325,38 +289,16 @@ case+ !xs of
 
 #para("\
 
-The following function #dyncode("ftally2_vt") is simply
-a variant of #dyncode("ftally2") in which the combinators
-on (non-linear) streams are replaced with their counterparts
-on linear streams:
-
-#dats2xhtml('\
-//
-fun
-ftally2_vt
-(
-n : int
-,
-f : cfun(int, double)
-) : double = let
-//
-val xs1 = int_stream_vt_from(1)
-val xs2 = stream_vt_takeLte<int>(xs1, n)
-val xs3 = stream_vt_map<int><double>(xs2, lam(i) => f(i))
-//
-in
-  stream_vt_foldleft<double><double>(xs3, 0.0, lam(res, x) => res+x)
-end // end of [ftally2_vt]
-//
-')
-
-Given a natural number n, #dyncode("ftally2") creates three streams on
-heap and leave them there when it returns such that each of the three
-left streams contains n cached elements. Given the same natural
-number, #dyncode("ftally2_vt") creates three linear streams and then
-frees all of them before it returns. When compared to
-#dyncode("ftally2"), #dyncode("ftally2_vt") is clearly of greater
-efficiency both time-wise and memory-wise.
+In the function #dyncode("ftally2"), the three streams are created, the
+elements of #dyncode("xs3") are produced one by one and consumed by the
+fold, and all of the nodes, the thunks and the closure (the one created by
+#dyncode("lam(i) =<cloptr1> f(i)")) are freed before the function returns:
+when the end of #dyncode("xs2") is reached, the rest of #dyncode("xs1")
+is freed by #dyncode("stream_takeLte"), and the closure is freed by
+#dyncode("stream_map"). The program that tests the functions
+prints the same number (about 1.6439) for #dyncode("ftally") and for
+#dyncode("ftally2"), and the address sanitizer reports no leak, which shows that no node
+of the streams is left behind.
 
 ")
 
@@ -380,4 +322,3 @@ non-linear streams.  Please find #mycodelink("LECTURE/11/CODE",
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
