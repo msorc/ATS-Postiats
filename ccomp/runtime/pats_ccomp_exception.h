@@ -41,7 +41,7 @@
 /* ****** ****** */
 
 /*
-use -D_XOPEN_SOURCE
+use -D_GNU_SOURCE (or -D_XOPEN_SOURCE)
 */
 #include <setjmp.h>
 
@@ -54,9 +54,21 @@ use -D_XOPEN_SOURCE
 /* ****** ****** */
 
 /*
-#include <alloca.h>
+** HX: alloca is declared by <alloca.h> (<malloc.h> on Windows);
+** with compilers where it is a builtin macro nothing is needed
 */
-extern void *alloca (size_t bsz) ;
+#ifndef alloca
+#if defined(_WIN32)
+#include <malloc.h>
+#define alloca _alloca
+#elif defined(__has_include)
+#if __has_include(<alloca.h>)
+#include <alloca.h>
+#endif
+#else
+#include <alloca.h>
+#endif
+#endif // end of [#ifndef alloca]
 
 /* ****** ****** */
 
