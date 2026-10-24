@@ -1,3 +1,5 @@
+> **Historical notes.** This file is the detailed record of the port of the compiler from ATS1 to ATS2: the rules, the validation of every phase and the open problems at the time. For a short summary of the architecture of `src/`, read [doc/GUIDE/ARCHITECTURE.md](../doc/GUIDE/ARCHITECTURE.md).
+
 > **Note (src2 renamed to src).** This file was written while the ATS2 port of the compiler lived in `src2/` next to the ATS1 compiler in `src/`.
 > The ATS1 sources were removed and `src2/` was renamed to `src/` (`patsopt2` is now `patsopt`, `libatsopt2.a` is `libatsopt.a`, the object
 > directory `patsopt2.obj/` is `patsopt.obj/`, `make libatsopt2test` is `make libatsopttest`). The text below is kept as written: read `src2/` as `src/`
