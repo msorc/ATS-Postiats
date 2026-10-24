@@ -26,13 +26,15 @@ of a namespace populated with the declared names in a loaded package.\
 #para("\
 
 Suppose that a file named #filename('foo.sats') contains the
-following code:
+following code (the datatype #stacode("aDatatype") is an enumeration
+as the constructors of a datatype cannot take arguments without garbage
+collection; a datavtype could be declared instead):
 
 #sats2xhtml('\
 //
 datatype
 aDatatype =
-| A | B of (int, int)
+| A | B
 //
 val aValue: int
 fun aFunction: int -> int
@@ -53,7 +55,8 @@ the following code:
 
 #dats2xhtml('\
 val a: $FOO.aDatatype = $FOO.A()
-val b: $FOO.aDatatype = $FOO.B(0, $FOO.aFunction($FOO.aValue))
+val b: $FOO.aDatatype = $FOO.B()
+val c: int = $FOO.aFunction($FOO.aValue)
 ')
 
 ")#comment("para")
@@ -86,7 +89,8 @@ be referenced directly:
 
 #dats2xhtml('\
 val a: aDatatype = A()
-val b: aDatatype = B(0, aFunction(aValue))
+val b: aDatatype = B()
+val c: int = aFunction(aValue)
 ')
 
 ")#comment("para")
