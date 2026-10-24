@@ -4,7 +4,7 @@
 
 (* ****** ****** *)
 //
-datatype expr =
+datavtype expr =
   | Int of int
   | Var of string
   | Add of (expr, expr)
@@ -17,17 +17,10 @@ datatype expr =
 (* ****** ****** *)
 
 fun{}
-datcon_expr_ : (expr) -> string
+datcon_expr_ : (!expr) -> string
 fun{}
-datcontag_expr_ : (expr) -> intGte(0)
+datcontag_expr_ : (!expr) -> intGte(0)
 
-(* ****** ****** *)
-//
-fun
-fprint_expr : (FILEref, expr) -> void
-fun{}
-fprint_expr_ : (FILEref, expr) -> void
-//
 (* ****** ****** *)
 
 (* end of [expr.sats] *)

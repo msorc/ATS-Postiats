@@ -295,6 +295,16 @@ cleanall:: ; $(RMF) chap_stream_vt
 #
 ######
 
+######
+#
+# the code of the chapter on automatic code generation
+#
+all:: ; $(MAKE) -C CHAP_CODEGEN2 all
+regress:: ; $(MAKE) -C CHAP_CODEGEN2 regress
+cleanall:: ; $(MAKE) -C CHAP_CODEGEN2 cleanall
+#
+######
+
 include $(PATSHOME)/share/atsmake-post.mk
 
 ######

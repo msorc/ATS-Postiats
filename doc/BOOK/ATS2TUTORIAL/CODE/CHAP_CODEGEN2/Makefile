@@ -26,7 +26,7 @@ cleanall:: ; rm -f expr
 
 expr: \
 expr.sats expr.dats; \
-$(PATSCC) -o expr expr.dats -DATS_MEMALLOC_LIBC
+$(PATSCC) -o expr expr.dats
 
 expr_codegen2.hats: \
 expr.sats expr.dats; \

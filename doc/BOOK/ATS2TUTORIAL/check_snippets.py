@@ -10,7 +10,7 @@ def norm(s):
     return re.sub(r'\s+', '', s)
 chap = sys.argv[1]
 text = open(chap).read()
-files = sys.argv[2:] or glob.glob('CODE/*.dats') + glob.glob('CODE/*/*.dats') + glob.glob('CODE/*.sats')
+files = sys.argv[2:] or glob.glob('CODE/*.dats') + glob.glob('CODE/*/*.dats') + glob.glob('CODE/*.sats') + glob.glob('CODE/*/*.sats')
 code = norm(''.join(open(f).read() + '\n' for f in files))
 import os
 home = os.environ.get('PATSHOME', '../../..')

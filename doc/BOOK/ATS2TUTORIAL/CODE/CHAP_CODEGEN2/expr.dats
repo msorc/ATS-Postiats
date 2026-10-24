@@ -15,15 +15,10 @@ staload "./expr.sats"
 //
 extern
 fun
-datcon_expr : (expr) -> string
+datcon_expr : (!expr) -> string
 extern
 fun
-datcontag_expr : (expr) -> int
-//
-extern
-fun
-fprint_expr
-  (out: FILEref, x: expr): void
+datcontag_expr : (!expr) -> int
 //
 (* ****** ****** *)
 
@@ -33,7 +28,6 @@ CODEGEN2
 //
 #codegen2("datcon", expr)
 #codegen2("datcontag", expr)
-#codegen2("fprint", expr, fprint_expr_)
 //
 #else
 //
@@ -45,46 +39,64 @@ datcon_expr(x) = datcon_expr_(x)
 implement
 datcontag_expr(x) = datcontag_expr_(x)
 //
-implement
-fprint_expr_$carg<expr> = fprint_expr_
-//
-(*
-implement
-fprint_expr_$Int<>
-  (out, x) =
-  let val-Int(i) = x in fprint(out, i) end
-*)
-//
-implement
-fprint_expr_$Add$con<> (_, _) = ()
-implement
-fprint_expr_$Add$sep1<> (out, _) = fprint! (out, "+")
-//
-(*
-implement
-fprint_expr_$Sub$con<> (_, _) = ()
-implement
-fprint_expr_$Sub$sep1<> (out, _) = fprint! (out, "-")
-//
-implement
-fprint_expr_$Mul$con<> (_, _) = ()
-implement
-fprint_expr_$Mul$sep1<> (out, _) = fprint! (out, "*")
-//
-implement
-fprint_expr_$Div$con<> (_, _) = ()
-implement
-fprint_expr_$Div$sep1<> (out, _) = fprint! (out, "/")
-*)
-//
-implement
-fprint_expr
-  (out, x) = fprint_expr_<> (out, x)
-//
-overload fprint with fprint_expr
 //
 #endif // #ifdef(CODEGEN2)
 
+(* ****** ****** *)
+
+extern
+fun
+fprint_expr
+  (out: FILEref, x: !expr): void
+//
+implement
+fprint_expr(out, x) =
+(
+case+ x of
+| Int(i) => fprint!(out, "Int(", i, ")")
+| Var(s) => fprint!(out, "Var(", s, ")")
+| Add(x1, x2) =>
+  (fprint!(out, "("); fprint_expr(out, x1); fprint!(out, "+"); fprint_expr(out, x2); fprint!(out, ")"))
+| Sub(x1, x2) =>
+  (fprint!(out, "("); fprint_expr(out, x1); fprint!(out, "-"); fprint_expr(out, x2); fprint!(out, ")"))
+| Mul(x1, x2) =>
+  (fprint!(out, "("); fprint_expr(out, x1); fprint!(out, "*"); fprint_expr(out, x2); fprint!(out, ")"))
+| Div(x1, x2) =>
+  (fprint!(out, "("); fprint_expr(out, x1); fprint!(out, "/"); fprint_expr(out, x2); fprint!(out, ")"))
+| Ifgtz(x1, x2, x3) =>
+  (
+    fprint!(out, "Ifgtz(");
+    fprint_expr(out, x1); fprint!(out, ","); fprint_expr(out, x2); fprint!(out, ","); fprint_expr(out, x3);
+    fprint!(out, ")")
+  )
+| Ifgtez(x1, x2, x3) =>
+  (
+    fprint!(out, "Ifgtez(");
+    fprint_expr(out, x1); fprint!(out, ","); fprint_expr(out, x2); fprint!(out, ","); fprint_expr(out, x3);
+    fprint!(out, ")")
+  )
+)
+//
+(* ****** ****** *)
+
+extern
+fun
+expr_free : (expr) -> void
+//
+implement
+expr_free(x) =
+(
+case+ x of
+| ~Int _ => ()
+| ~Var _ => ()
+| ~Add(x1, x2) => (expr_free(x1); expr_free(x2))
+| ~Sub(x1, x2) => (expr_free(x1); expr_free(x2))
+| ~Mul(x1, x2) => (expr_free(x1); expr_free(x2))
+| ~Div(x1, x2) => (expr_free(x1); expr_free(x2))
+| ~Ifgtz(x1, x2, x3) => (expr_free(x1); expr_free(x2); expr_free(x3))
+| ~Ifgtez(x1, x2, x3) => (expr_free(x1); expr_free(x2); expr_free(x3))
+)
+//
 (* ****** ****** *)
 
 implement
@@ -92,14 +104,15 @@ main0 () =
 {
 //
 val E = Add(Int(10), Mul(Int(1), Int(2)))
-val () = fprintln! (stdout_ref, "E = ", E)
+val () = (fprint_expr(stdout_ref, E); fprint_newline(stdout_ref))
 val () = fprintln! (stdout_ref, "datcon(E) = ", datcon_expr(E))
 val () = fprintln! (stdout_ref, "datcontag(E) = ", datcontag_expr(E))
+val () = expr_free(E)
 //
-val E2 = Div(Int(1), Sub(E, E))
-val () = fprintln! (stdout_ref, "E2 = ", E2)
+val E2 = Div(Int(1), Sub(Int(2), Int(3)))
 val () = fprintln! (stdout_ref, "datcon(E2) = ", datcon_expr(E2))
 val () = fprintln! (stdout_ref, "datcontag(E2) = ", datcontag_expr(E2))
+val () = expr_free(E2)
 //
 } (* end of [main0] *)
 
