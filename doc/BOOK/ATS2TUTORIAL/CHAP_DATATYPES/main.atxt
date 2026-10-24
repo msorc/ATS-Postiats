@@ -45,6 +45,7 @@ values representing weekdays:
 #sats2xhtml('\
 datatype weekday =
   | Monday | Tuesday | Wednesday | Thursday | Friday
+//
 ')
 
 There are five data constructors associated with #stacode("weekday"), which
@@ -180,12 +181,14 @@ val () = let
   val () = assertloc (iseqz($UN.castvwtp1{ptr}(x)))
 in
   ab_free(x)
+end
 
 val () = let
   val x = BB(true)
   val () = assertloc (true = $UN.ptr0_get<bool>($UN.castvwtp1{ptr}(x)))
 in
   ab_free(x)
+end
 ')
 
 ')
