@@ -43,7 +43,7 @@ export PATSHOME
 #
 # the number of parallel jobs of the build of src/ (do not use make -j on this
 # Makefile: the steps of utils/atscc must not run in parallel)
-JOBS=4
+JOBS ?= $(shell nproc 2>/dev/null || echo 4)
 
 ######
 #
@@ -69,9 +69,7 @@ make -C utils/atscc -f Makefile copy build clean
 #
 ######
 #
-C3NSTRINTKND=gmpknd
-#
-#C3NSTRINTKND=intknd
+# C3NSTRINTKND (gmpknd or intknd): src/Makefile probes <gmp.h> when it is not given
 #
 ######
 
@@ -81,7 +79,7 @@ $(CPF) src/patsopt bin/patsopt
 src_patsopt: \
 src_cleanall ; \
 make -C src -f Makefile -j$(JOBS) \
-C3NSTRINTKND=$(C3NSTRINTKND) all
+$(if $(C3NSTRINTKND),C3NSTRINTKND=$(C3NSTRINTKND)) all
 #
 ######
 #
@@ -95,7 +93,7 @@ make -C utils/myatscc -f Makefile copy build clean
 #
 lib_patsopt:: bin_patsopt ; \
 make -C src -f Makefile -j$(JOBS) \
-C3NSTRINTKND=$(C3NSTRINTKND) libatsopt.a
+$(if $(C3NSTRINTKND),C3NSTRINTKND=$(C3NSTRINTKND)) libatsopt.a
 lib_patsopt:: ; $(CPF) src/libatsopt.a ccomp/atslib/lib/.
 #
 ######

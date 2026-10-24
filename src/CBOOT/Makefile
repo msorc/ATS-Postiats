@@ -30,7 +30,7 @@ OBJDIR=obj_$(KIND)
 OBJS=$(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(filter-out $(LIBONLY),$(COMMON_C) $(KIND_C))))
 LIBOBJS=$(addprefix $(OBJDIR)/,$(patsubst %.c,%.o,$(filter-out $(EXEONLY),$(COMMON_C) $(KIND_C))))
 
-ALLCFLAGS=-std=c99 -D_XOPEN_SOURCE -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -include alloca.h \
+ALLCFLAGS=-std=c99 -D_GNU_SOURCE \
   -Iinc -Iinc/ccomp/runtime -I. $(CFLAGS)
 
 patsopt: $(OBJS)

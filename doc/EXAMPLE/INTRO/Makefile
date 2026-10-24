@@ -181,13 +181,13 @@ testall:: cleanall
 
 acker1: acker1.dats ; $(PATSCC) -o $@ $<
 acker2: acker2.dats ; $(PATSCC) -o $@ $<
-acker3: acker3.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-acker4: acker4.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+acker3: acker3.dats ; $(PATSCC) -o $@ $<
+acker4: acker4.dats ; $(PATSCC) -o $@ $<
 
 ######
 
 areverse: areverse.dats ; \
-  $(PATSCC) -D_ATS_EXCEPTION_NONE -DATS_MEMALLOC_LIBC -o $@ $<
+  $(PATSCC) -D_ATS_EXCEPTION_NONE -o $@ $<
 
 ######
 
@@ -196,7 +196,7 @@ atoi: acker1.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-bintree: bintree.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+bintree: bintree.dats ; $(PATSCC) -o $@ $<
 
 ######
 
@@ -206,33 +206,33 @@ f91: f91.dats ; $(PATSCC) -o $@ $<
 #
 fact1: fact1.dats ; $(PATSCC) -o $@ $<
 fact2: fact2.dats ; $(PATSCC) -o $@ $<
-fact3: fact3.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+fact3: fact3.dats ; $(PATSCC) -o $@ $<
 #
 fact_uninterp: fact_uninterp.dats ; $(PATSCC) -o $@ $<
 #
 ######
 
 fcopy: fcopy.dats ; $(PATSCC) -o $@ $<
-fcopy2: fcopy2.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< myatslib.dats
+fcopy2: fcopy2.dats ; $(PATSCC) -o $@ $< myatslib.dats
 
 ######
 
 fib1: fib1.dats ; $(PATSCC) -o $@ $<
 fib2: fib2.dats ; $(PATSCC) -o $@ $<
-fibmem: fibmem.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+fibmem: fibmem.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-fib_lazy: fib_lazy.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
-fib_llazy: fib_llazy.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+fib_lazy: fib_lazy.dats ; $(PATSCC) -o $@ $<
+fib_llazy: fib_llazy.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-fprintlst2: fprintlst2.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+fprintlst2: fprintlst2.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-fprtuple: fprtuple.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+fprtuple: fprtuple.dats ; $(PATSCC) -o $@ $<
 
 ######
 
@@ -248,32 +248,32 @@ intecho: intecho.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-intrange: intrange.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+intrange: intrange.dats ; $(PATSCC) -o $@ $<
 
 ######
 
 linenmbr: linenmbr.dats ; \
-  $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $< myatslib.dats
+  $(PATSCC) -o $@ $< myatslib.dats
 
 ######
 
-listfuns: listfuns.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+listfuns: listfuns.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-listpermute: listpermute.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+listpermute: listpermute.dats ; $(PATSCC) -o $@ $<
 
 ######
 
-ordset: ordset.dats ; $(PATSCC) -DATS_MEMALLOC_LIBC -o $@ $<
+ordset: ordset.dats ; $(PATSCC) -o $@ $<
 
 ######
 
 sieve_lazy: sieve_lazy.dats ; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o $@ $<
+  $(PATSCC) -O2 -o $@ $<
 
 sieve_llazy: sieve_llazy_dats.c ; \
-  $(PATSCC) -cleanaft -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o $@ $<
+  $(PATSCC) -cleanaft -O2 -o $@ $<
 sieve_llazy_dats.c: sieve_llazy.dats ; $(PATSCC) -ccats $<
 
 ######

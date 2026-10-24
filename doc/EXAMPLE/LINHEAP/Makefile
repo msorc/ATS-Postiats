@@ -18,13 +18,13 @@ NEGTESTS := $(wildcard NEG_*.dats)
 all:: \
 POS_linheap
 POS_linheap: POS_linheap.dats; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o $@ $<
+  $(PATSCC) -O2 -o $@ $<
 cleanall:: ; $(RMF) POS_linheap
 
 all:: \
 POS_arena
 POS_arena: POS_arena.dats; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -O2 -o $@ $<
+  $(PATSCC) -O2 -o $@ $<
 cleanall:: ; $(RMF) POS_arena
 
 ######
@@ -53,10 +53,10 @@ done; echo "NEG_*: all rejected"
 # HX: checking for leaks with LeakSanitizer
 #
 leakcheck:: POS_linheap.dats; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -g -fsanitize=address \
+  $(PATSCC) -g -fsanitize=address \
     -o POS_linheap_asan $< && ./POS_linheap_asan
 leakcheck:: POS_arena.dats; \
-  $(PATSCC) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -g -fsanitize=address \
+  $(PATSCC) -g -fsanitize=address \
     -o POS_arena_asan $< && ./POS_arena_asan
 cleanall:: ; $(RMF) POS_linheap_asan POS_arena_asan
 #

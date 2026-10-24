@@ -86,7 +86,8 @@ EXTRAFLAGS =
 
 ######
 
-MALLOCFLAG := -DATS_MEMALLOC_LIBC
+# libc is the default allocator (the flag -DATS_MEMALLOC_LIBC is a no-op)
+MALLOCFLAG :=
 
 ######
 #

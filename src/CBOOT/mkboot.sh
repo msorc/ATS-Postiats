@@ -58,7 +58,7 @@ mkdir -p CBOOT/inc/ccomp/runtime
 cp -L $PATSHOME/ccomp/runtime/*.h $PATSHOME/ccomp/runtime/*.c CBOOT/inc/ccomp/runtime/
 : ${CC:=gcc}
 for f in CBOOT/*.c CBOOT/gmpknd/*.c CBOOT/intknd/*.c; do
-  $CC -MM -std=c99 -D_XOPEN_SOURCE -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -include alloca.h \
+  $CC -MM -std=c99 -D_GNU_SOURCE \
     -I$PATSHOME -I$PATSHOME/ccomp/runtime -I$src $f | tr ' \\' '\n\n' | grep -v '^$' | grep '/' | grep -v '^/usr'
 done | sort -u > CBOOT/gen_deps.txt
 while read d; do
