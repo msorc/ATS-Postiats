@@ -17,7 +17,7 @@ Time of Generation: #timestamp()\
  id="lecture04">
 #title("Higher-Order Functions")
 
-#para("\
+#para('\
 
 In ATS, an anonymous function can be defined as a
 lambda-abstraction. For instance, the square function on integers can
@@ -38,7 +38,7 @@ can also be implemented as follows:
 #dats2xhtml('\
 //
 val fact =
-fix f(x: int): int => if x > 0 then x * f(x) else 1
+fix f(x: int): int => if x > 0 then x * f(x-1) else 1
 //
 ')
 
@@ -50,9 +50,9 @@ function takes a first-order function as its argument; a third-order
 function takes a second-order function as its argument; etc. In
 practice, higher-order functions are overwhelmingly second-order ones.
 
-")
+')
 
-#para("\
+#para('\
 
 At this point, I want to digress a bit by advocating a so-called
 #emphasis("build-your-own-library") approach to learning
@@ -67,11 +67,57 @@ indicates that one can learn a great deal more about programming if
 one insists on calling library functions implemented by oneself. From
 this point on, I will gradually build a library for this book and I
 encourage everyone reading the book to study the source code for the library
-<ulink url=\"https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/ATS2FUNCRASH/LECTURE/MYLIB\">on-line</ulink>.
+(in this chapter, it is the file #filename("intfun.hats") in
+#mycodelink("LECTURE/04/CODE", "the directory of the code")
+of the chapter).
 
-")
+')
 
-#para("\
+#para('\
+
+There are three kinds of function values in this dialect of ATS. An
+#emphasis("envless function") is just a function in the sense of C: a
+function pointer to some memory location where a sequence of
+instructions is stored. Both #dyncode("square") and #dyncode("fact")
+above are envless functions: their types are written as
+#stacode("(int) -&gt; int") or #stacode("(int) -&lt;fun1&gt; int"), and
+creating them allocates nothing. A #emphasis("closure-function") is
+essentially a function pointer paired with an environment (represented
+as a tuple of values) for certain paramemters. A closure-function is
+either #emphasis("flat") or #emphasis("boxed").
+
+')
+
+#para('\
+
+A flat closure-function (the arrow #stacode("-&lt;clo1&gt;"), created by
+#keycode("lam@")) is stored in a left-value, in the stack-frame of a function
+for instance. Nothing is allocated on heap and nothing needs to be
+freed, but such a closure can only be passed by reference, that is,
+the argument of a function call is the address of the left-value. A
+boxed closure-function (the arrow #stacode("-&lt;cloptr1&gt;"), created by
+#keycode("lam") with this arrow) is stored on heap. As there is no garbage
+collector (GC) in this dialect of ATS2, a boxed closure-function is
+#emphasis("linear"): the programmer is responsible for freeing it, and the
+compiler refuses to compile a program that forgets to do so. The
+non-linear closure-functions of the GC era (the arrow
+#stacode("-&lt;cloref1&gt;") and the type abbreviation
+#stacode("cfun")) are not available any more.
+
+')
+
+#para('\
+
+Note that there is no generic method for turning a closure-function into
+an envless function, while turning an envless function into a closure is
+straightforward. Each function argument of a higher-order function that is
+meant to be called (but never stored) is chosen to be a flat closure-function in
+this book: it makes the higher-order function applicable to every kind of
+function value without allocating anything.
+
+')
+
+#para('\
 
 As an example of higher-order function, let us implement a commonly
 used library function of the name #dyncode("int_foreach"):
@@ -81,51 +127,32 @@ used library function of the name #dyncode("int_foreach"):
 extern
 fun
 int_foreach
-(n0: int, fwork: cfun(int, void)): void
+(n0: int, fwork: &(int) -<clo1> void): void
 //
 ')
 
-Note that the type #stacode("cfun(int, void)") is just a shorthand for
-#stacode("(int) -&lt;cloref1&gt; void"), which is assigned to a
-closure-function that takes an integer argument and returns void.
-There are two kinds of functions in ATS: envless function and
-closure-function; the former is just a function in the sense of C: a
-function pointer to some memory location where a sequence of
-instructions is stored; the latter is essentially a function pointer
-paired with an environment (represented as a tuple of values) for
-certain paramemters. For an envless function from #stacode("int") to
-#stacode("void"), its type is written as #stacode("(int) -&gt; void")
-or #stacode("(int) -&lt;fun1&gt; void").  While turning an envless
-function into a closure-function is straightforward, there is no
-generic method for turning a closure-function into an envless
-function. Note that each function argument of a higher-order function
-is usually chosen to be a closure-function so as to make the
-higher-order function more applicable.
-
-")
-
-#para("\
-
-A standard implementation of #dyncode("int_foreach") is given as
-follows:
+The symbol #dyncode("&amp;") in front of the type of #dyncode("fwork") indicates that
+the closure is passed by reference. A standard implementation of
+#dyncode("int_foreach") is given as follows:
 
 #dats2xhtml('\
 //
 implement
 int_foreach
 (n0, fwork) =
-loop(0) where {
+loop(0, fwork) where {
   fun
-  loop(i: int): void =
-    if i < n0 then (fwork(i); loop(i+1)) else ()
+  loop
+  (i: int, fwork: &(int) -<clo1> void): void =
+    if i < n0 then (fwork(i); loop(i+1, fwork)) else ()
   // end of [fun loop]
 } (* end of [int_foreach] *)
 //
 ')
 
-")
+')
 
-#para("\
+#para('\
 
 For testing #dyncode("fact") (that implements the factorial
 function), we can simply make a call to #dyncode("int_foreach")
@@ -134,14 +161,23 @@ as follows:
 #dats2xhtml('\
 //
 fun
-testfact(n: int): void =
-int_foreach(n, lam(i) => println!("fact(", i, ") = ", fact(i)))
+testfact(n: int): void = let
+//
+var fwork =
+lam@(i: int): void => println!("fact(", i, ") = ", fact(i))
+//
+in
+  int_foreach(n, fwork)
+end // end of [testfact]
 //
 ')
 
-")
+The flat closure #dyncode("fwork") lives in the stack-frame of
+#dyncode("testfact") and disappears when the call returns.
 
-#para("\
+')
+
+#para('\
 
 As another example, let us implement a higher-order function of the
 name #dyncode("int_foldleft") as follows:
@@ -153,17 +189,19 @@ fun
 {res:t@ype}
 int_foldleft
 ( n0: int
-, res: res, fopr: cfun(res, int, res)): res
+, res: res, fopr: &(res, int) -<clo1> res): res
 //
 implement
 {res}(*tmp*)
 int_foldleft
   (n0, res, fopr) =
-  loop(res, 0) where
+  loop(res, 0, fopr) where
 {
 //
-fun loop(res: res, i: int): res =
-  if i < n0 then loop(fopr(res, i), i+1) else res
+fun loop
+( res: res, i: int
+, fopr: &(res, int) -<clo1> res): res =
+  if i < n0 then loop(fopr(res, i), i+1, fopr) else res
 //
 } (* end of [int_foldleft] *)
 //
@@ -180,8 +218,14 @@ we can implement the factorial function as follows:
 #dats2xhtml('\
 //
 fun
-fact(n: int): int =
-int_foldleft<int>(n, 1, lam(res, i) => res * (i+1))
+fact2(n: int): int = let
+//
+var fopr =
+lam@(res: int, i: int): int => res * (i+1)
+//
+in
+  int_foldleft<int>(n, 1, fopr)
+end // end of [fact2]
 //
 ')
 
@@ -194,14 +238,20 @@ first #dyncode("n") positive integers for any given natural number
 fun
 sq(i: int): int = i*i
 fun
-sqsum(n: int): int =
-int_foldleft<int>(n, 0, lam(res, i) => res + sq(i+1))
+sqsum(n: int): int = let
+//
+var fopr =
+lam@(res: int, i: int): int => res + sq(i+1)
+//
+in
+  int_foldleft<int>(n, 0, fopr)
+end // end of [sqsum]
 //
 ')
 
-")
+')
 
-#para("\
+#para('\
 
 Higher-order functions like #dyncode("int_foreach") and
 #dyncode("int_foldleft") are often referred to as combinators.  By
@@ -212,9 +262,9 @@ reduce the need for directly handling minute programming details. As
 we all know too well, handling such details is a very rich source for
 programming errors.
 
-")
+')
 
-#para("\
+#para('\
 
 As the last example in this chapter, let us see
 a combinator-based implementation of matrix multiplication.
@@ -222,7 +272,7 @@ In imperative programming, the following style of code
 is common:
 
 <informalexample><programlisting>
-for (i = 0; i < m; i = i+1) for (j = 0; i < n; j = j+1) fwork(i, j);
+for (i = 0; i &lt; m; i = i+1) for (j = 0; j &lt; n; j = j+1) fwork(i, j);
 </programlisting></informalexample>
 
 where one for-loop is embedded in the body of another for-loop.  A
@@ -230,48 +280,95 @@ combinator #dyncode("int_cross_foreach") is given as follows for doing
 the same:
 
 #dats2xhtml('\
+//
 extern
 fun
 int_cross_foreach
-(m: int, n: int, fwork: cfun(int, int, void)): void
+( m: int, n: int
+, fwork: &(int, int) -<clo1> void): void
+//
+')
+
+It would be natural to implement it by calling #dyncode("int_foreach")
+twice, where the closure passed to the outer call contains a call to
+#dyncode("int_foreach") on #dyncode("fwork"). However, a closure cannot capture
+a closure that is passed by reference (the address is only valid inside the
+call), and so the two loops are written directly:
+
+#dats2xhtml('\
 //
 implement
 int_cross_foreach
   (m, n, fwork) =
-  int_foreach(m, lam(i) => int_foreach(n, lam(j) => fwork(i, j)))
+  loop1(0, fwork) where
+{
+//
+fun
+loop2
+( i: int, j: int
+, fwork: &(int, int) -<clo1> void): void =
+  if j < n then (fwork(i, j); loop2(i, j+1, fwork)) else ()
+//
+fun
+loop1
+( i: int
+, fwork: &(int, int) -<clo1> void): void =
+  if i < m then (loop2(i, 0, fwork); loop1(i+1, fwork)) else ()
+//
+} (* end of [int_cross_foreach] *)
 //
 ')
+
+')
+
+#para('\
 
 The following function #dyncode("matrix_mulby") takes six arguments
 #dyncode("p"), #dyncode("q"), #dyncode("r"), #dyncode("A"),
 #dyncode("B"), and #dyncode("C"), where it is assumed that
 #dyncode("A"), #dyncode("B"), and #dyncode("C") are matrices of
 dimensions #dyncode("p") by #dyncode("q"), #dyncode("q") by
-#dyncode("r"), and #dyncode("p") by #dyncode("r"), respectively:
+#dyncode("r"), and #dyncode("p") by #dyncode("r"), respectively. For the
+sake of simplicity, a matrix is given by the address of its first cell
+(the cells are stored in the row-major order), and the following two
+functions read and write a cell at a given row and a given column:
+
+#dats2xhtml('\
+//
+fun
+{a:t@ype}
+get_at(M: ptr, n: int, i: int, j: int): a =
+$UNSAFE.ptr0_get_at_int<a>(M, i * n + j)
+fun
+{a:t@ype}
+set_at(M: ptr, n: int, i: int, j: int, x: a): void =
+$UNSAFE.ptr0_set_at_int<a>(M, i * n + j, x)
+//
+')
+
+Then #dyncode("matrix_mulby") can be implemented as follows:
 
 #dats2xhtml('\
 fun
 {a:t@ype}
 matrix_mulby
 ( p:int, q:int, r:int
-, A:matrix0(a), B:matrix0(a), C:matrix0(a)
+, A:ptr, B:ptr, C:ptr
 ) : void = let
 //
 val add = gadd_val_val<a>
 val mul = gmul_val_val<a>
 //
-fun
-fwork(i: int, j: int): void =
-(
-  C[i,j] :=
-  int_foldleft<a>
-  ( q, C[i,j]
-  , lam(res, k) => add(res, mul(A[i,k], B[k,j]))
-  )
-)
+var fwork =
+lam@(i: int, j: int): void =>
+{
+  var fopr =
+  lam@(res: a, k: int): a => add(res, mul(get_at<a>(A, q, i, k), get_at<a>(B, r, k, j)))
+  val () = set_at<a>(C, r, i, j, int_foldleft<a>(q, get_at<a>(C, r, i, j), fopr))
+}
 //
 in
-  int_cross_foreach(p, r, lam(i, j) => fwork(i, j))
+  int_cross_foreach(p, r, fwork)
 end // end of [matrix_mulby]
 ')
 
@@ -282,13 +379,13 @@ What #dyncode("matrix_mulby") does is simply updating #dyncode("C")
 with #dyncode("C") plus the product of #dyncode("A") and
 #dyncode("B"). \
 
-")
+')
 
-#para("\
+#para('\
 
 In ATS code, dot-notation is often seen for calling combinators.
-For instance, we can introduce the following curried version of
-#dyncode("int_foreach") and #dyncode("int_foldleft") plus some
+For instance, we can introduce the following declarations of
+#dyncode("int_foreach_method") and #dyncode("int_foldleft_method") plus some
 overload declarations:
 
 #dats2xhtml('\
@@ -296,17 +393,22 @@ overload declarations:
 extern
 fun
 int_foreach_method
-(n0: int)(fwork: cfun(int, void)): void
+(n0: int, fwork: &(int) -<clo1> void): void
 //
 extern
 fun
 {res:t@ype}
 int_foldleft_method
-(n0: int, ty: TYPE(res))
-(res: res, fopr: cfun(res, int, res)): res
+(n0: int, res: res, fopr: &(res, int) -<clo1> res): res
 //
 overload .foreach with int_foreach_method
 overload .foldleft with int_foldleft_method
+//
+implement
+int_foreach_method(n0, fwork) = int_foreach(n0, fwork)
+implement
+{res}(*tmp*)
+int_foldleft_method(n0, res, fopr) = int_foldleft<res>(n0, res, fopr)
 //
 ')
 
@@ -316,30 +418,60 @@ as follows:
 
 #dats2xhtml('\
 //
-fun fact(n: int): int =
-(n).foldleft(TYPE{int})(1, lam(res, i) => res*(i+1))
+fun fact3(n: int): int = let
+  var fopr = lam@(res: int, i: int): int => res*(i+1)
+in
+  (n).foldleft(1, fopr)
+end // end of [fact3]
 //
-fun testfact(n: int): void =
-(n).foreach()(lam(i) => println! ("fact(", i+1, ") = ", fact(i+1)))
+fun testfact3(n: int): void = let
+  var fwork =
+    lam@(i: int): void => println! ("fact(", i+1, ") = ", fact3(i+1))
+in
+  (n).foreach(fwork)
+end // end of [testfact3]
 //
 ')
 
-Note that #dyncode("TYPE{int}") is a form of type-annotation; it
-indicates to the typechecker of ATS that the template parameter for
-the involved instance of #dyncode("int_foldleft_method") is
-#stacode("int").
+Note that the template parameter for the involved instance of
+#dyncode("int_foldleft_method") is inferred from the type of the second
+argument.
 
-")
+')
 
+#para('\
 
-#para("\
+Finally, a closure-function that is to be stored (or returned) cannot live in
+a stack-frame, and it has to be a boxed one. For instance, the following
+code creates a boxed closure that adds a given integer to its argument:
 
-Please find #mycodelink("LECTURE/04/CODE", "on-line") the entirety of
-the code used in this chapter. The multable example mentioned previously
+#dats2xhtml('\
+//
+val
+y = 10
+val
+add_y = lam (x: int): int =<cloptr1> x + y
+val () = println! ("add_y(5) = ", add_y(5))
+val () = cloptr_free($UNSAFE.castvwtp0{cloptr(void)}(add_y))
+//
+')
+
+The last line frees the closure; if it is deleted, the compiler reports
+that the linear variable #dyncode("add_y") is not consumed. The chapters
+on continuations and on animation use such closures.
+
+')
+
+#para('\
+
+Please find #mycodelink("LECTURE/04/CODE", "on-line") the entirety
+of the code used in this chapter. The multable example mentioned previously
 is modified a bit so as to make use of the #dyncode("int_foreach_method")
-combinator. \
+combinator. All of the code was compiled and run with
+#command("patscc") (no flag is needed) and with the address sanitizer of
+#command("gcc") (no memory leak is reported). \
 
-")#comment("para")
+')#comment("para")
 
 </chapter><!--id="lecture04"-->
 
@@ -350,4 +482,3 @@ combinator. \
 %{
 implement main0 () = fprint_filsub (stdout_ref, "main_atxt.txt")
 %}
-
