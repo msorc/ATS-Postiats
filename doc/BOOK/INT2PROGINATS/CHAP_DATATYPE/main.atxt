@@ -23,11 +23,22 @@ The feature of datatypes in ATS in largely taken from ML.
 A datatype is
 like a tagged union type. For each datatype, there are some constructors
 associated with it, and these constructors are needed for constructing
-values of the datatype.  As an example, the following syntax declares a
-datatype named #stacode("intopt"):
+values of the datatype.  There is a difference from ML that is caused by the
+absence of a garbage collector in this version of ATS2. A value that is
+constructed by a constructor with arguments lives in the heap, and someone
+has to be responsible for freeing it: such a value is said to be
+#emphasis("linear"), and it has an owner. For this reason, there are two
+kinds of datatypes. The declaration of a datatype starting with the
+keyword #dyncode("datatype") is for a type whose values can be shared freely;
+the compiler only accepts it if all of its constructors are nullary, that is,
+if the datatype is an enumeration (so that no heap memory is needed). The
+declaration of a datatype starting with the keyword #dyncode("datavtype")
+(<emphasis>data</emphasis> + <emphasis>viewtype</emphasis>, that is, a
+datatype whose values are linear) is for the general case. As an example,
+the following syntax declares a datatype named #stacode("intopt"):
 
 #sats2xhtml("\
-datatype intopt =
+datavtype intopt =
   | intopt_none of () | intopt_some of (int)
 // end of [intopt]
 ")
@@ -36,6 +47,11 @@ There are two constructors associated with #stacode("intopt"):
 #dyncode("intopt_none"), which is nullary, and #dyncode("intopt_some"),
 which is unary. For instance, #dyncode("intopt_none()") and
 #dyncode("intopt_some(1)") are two values of the type #stacode("intopt").
+Because a value of this type is linear, it can be used exactly once: it is
+either passed to a function that consumes it (for instance, one that frees
+it), or it is borrowed temporarily by a function (a borrowed value is
+written with the prefix #dyncode("!") in the type of an argument, as in
+#dyncode("!intopt")). I will demonstrate this in the examples below.
 In order for accessing components in such values, a mechanism often
 referred to as pattern-matching is provided in ATS. I will demonstrate
 through examples that datatypes plus pattern matching can offer not only
@@ -85,13 +101,13 @@ Variables are patterns.
 
 <listitem>
 #para("
-A tuple of patterns, either boxed or unboxed, is a pattern.
+A tuple of patterns is a pattern.
 ")
 </listitem>
 
 <listitem>
 #para("
-A record of patterns, either boxed or unboxed, is a pattern.
+A record of patterns is a pattern.
 ")
 </listitem>
 
@@ -237,6 +253,23 @@ from x and y to 2 and 3, respectively.\
 
 ")#comment("para")
 
+#para("\
+
+When a linear value is matched against a pattern, there are two cases. If
+the value is borrowed (that is, if it is of the type #dyncode("!T") for some
+type T), then it is still owned by someone else after the matching, and
+the variables in the pattern are bound to the components of the value
+in a way that does not give ownership of the components to anyone else. If
+the value is owned by the code that matches it, then the matching is
+expected to consume it: the pattern that matches a constructor
+#dyncode("C") is then written #dyncode("~C(...)"), where the prefix
+#dyncode("~") (tilde) indicates that the memory allocated for the value is
+freed after the components are extracted, and the components that are
+linear themselves become owned by the variables in the pattern, which must
+then be consumed in turn.\
+
+")#comment("para")
+
 </sect1><!--id="pattern-matching"-->
 
 #comment(" ****** ****** ")
@@ -297,7 +330,11 @@ through #dyncode("Sunday"), which are for constructing values of the type
 #dyncode("wday"). Given a nullary constructor C, we can write C for C() as
 a value. For instance, we can write #dyncode("Monday") for
 #dyncode("Monday()"). However, one should <emphasis>not</emphasis> assume
-that #dyncode("Tuesday") is something like #dyncode("Monday+1").\
+that #dyncode("Tuesday") is something like #dyncode("Monday+1"). A value of
+an enumerative datatype is represented by its tag, and no memory is
+allocated for it; this is the reason why such values can be copied and
+shared freely, and why enumerations are the only datatypes declared with
+the keyword #dyncode("datatype").\
 
 ")#comment("para")
 
@@ -355,11 +392,13 @@ id="recursive_datatypes">
 
 A recursively defined datatype (or recursive datatype for short) is one
 such that its associated constructors may form values by applying to values
-of the datatype itself. For instance, the following declared datatype
-#stacode("charlst") is recursive:
+of the datatype itself. A value of such a datatype consists of cells that
+are allocated in the heap, and thus the datatype must be declared with
+the keyword #dyncode("datavtype"). For instance, the following declared
+datatype #stacode("charlst") is recursive:
 
 #sats2xhtml("\
-datatype charlst =
+datavtype charlst =
   | charlst_nil of ()
   | charlst_cons of (char, charlst)
 // end of [charlst]
@@ -374,22 +413,27 @@ character list consisting of 'a', 'b' and 'c':
 charlst_cons('a', charlst_cons('b', charlst_cons('c', charlst_nil())))
 ")
 
-We can define a function #dyncode("charlst_length") as follows to compute
-the length of a given character list:
+This value consists of three cells in the heap, and whoever holds it owns
+all of them.  We can define a function #dyncode("charlst_length") as
+follows to compute the length of a given character list:
 
 #dats2xhtml("\
 fun
 charlst_length
 (
-  cs: charlst
+  cs: !charlst
 ) : int =
-  case cs of
+  case+ cs of
   | charlst_nil() => 0
   | charlst_cons(_, cs) => 1 + charlst_length(cs)
 // end of [charlst_length]
 ")
 
-Note that this implementation is recursive but not tail-recursive. By
+Note that the argument of #dyncode("charlst_length") is of the type
+#dyncode("!charlst"): the function only borrows the list, which is still
+owned by the caller after the function returns, and the sublist #dyncode("cs")
+that is bound in the second clause is borrowed in the same way.
+Also note that this implementation is recursive but not tail-recursive. By
 relying on the commutativity and associativity of integer addition, we can
 give the following implementation of #dyncode("charlst_length") that is
 tail-recursive:
@@ -397,10 +441,10 @@ tail-recursive:
 #dats2xhtml("\
 fun
 charlst_length
-  (cs: charlst): int = let
+  (cs: !charlst): int = let
 //
 fun loop
-  (cs: charlst, n: int): int = case cs of
+  (cs: !charlst, n: int): int = case+ cs of
   | charlst_nil() => n | charlst_cons (_, cs) => loop(cs, n+1)
 // end of [loop]
 //
@@ -414,6 +458,31 @@ elsewhere) mandates that only a tail-recursive function be given a name
 indicative of its being a loop. A non-tail-recursive function is not called
 a loop because it cannot be translated directly to a loop in an imperative
 programming language like C.
+
+")#comment("para")
+
+#para("\
+
+A list that is no longer needed has to be freed. The following function
+#dyncode("charlst_free") takes a list by value, that is, it consumes the
+list; the symbol #dyncode("~") in front of a constructor in a pattern
+indicates that the cell is freed as it is matched:
+
+#dats2xhtml("\
+fun
+charlst_free
+  (cs: charlst): void =
+  case+ cs of
+  | ~charlst_nil() => ()
+  | ~charlst_cons(_, cs) => charlst_free(cs)
+// end of [charlst_free]
+")
+
+If a list is dropped without being freed, or if it is freed twice, the
+compiler reports an error; so the type system makes sure that there is
+neither a memory leak nor a double free in this code. The on-line code
+for this chapter contains a program that constructs a list, computes its
+length, and frees it.\
 
 ")#comment("para")
 
@@ -440,12 +509,12 @@ said to be pattern-matching-exhaustive.\
 
 #para("\
 The following code implements a function that finds the last character
-in a non-empty character list:
+in a non-empty character list (the list is borrowed):
 
 #dats2xhtml("\
 fun
 charlst_last
-  (cs: charlst): char =
+  (cs: !charlst): char =
 (
   case cs of
   | charlst_cons (c, charlst_nil ()) => c
@@ -458,7 +527,7 @@ The body of #dyncode("charlst_last") is a case-expression, which is not
 pattern-matching-exhaustive: If #dyncode("cs") is bound to the value
 #dyncode("charlst_nil()"), that is, the empty character list, than none of
 the matching clauses in the case-expression can be chosen. When the code is
-typechecked by atsopt, a warning message is issued to indicate the
+typechecked by patsopt, a warning message is issued to indicate the
 case-expression being non-pattern-matching-exhaustive. If the programmer
 wants an error message instead, the keyword #dyncode("case") should be
 replaced with #dyncode("case+").  If the programmer wants to suppress the
@@ -475,7 +544,7 @@ The function #dyncode("charlst_last") can also be implemented as follows:
 #dats2xhtml("\
 fun
 charlst_last
-  (cs: charlst): char =
+  (cs: !charlst): char =
 (
   case cs of
   | charlst_cons (c, cs1) =>
@@ -510,13 +579,13 @@ follows:
 #dats2xhtml("\
 fun
 charlst_last
-  (cs: charlst): char = let
+  (cs: !charlst): char = let
   val charlst_cons (c, cs1) = cs in case+ cs1 of
   | charlst_nil () => c | charlst_cons _ => charlst_last (cs1)
 end // end of [charlst_last]
 ")
 
-When this implementation is typechecked by atsopt, a warning message is
+When this implementation is typechecked by patsopt, a warning message is
 issued to indicate the val-declaration being
 non-pattern-matching-exhaustive. If the programmer wants an error message
 instead, the keyword #dyncode("val") should be replaced with
@@ -562,12 +631,14 @@ maps.
 #para("\
 
 The following declaration introduces a datatype #stacode("bstree") for
-binary search trees in which the stored keys are strings:
+binary search trees in which the stored keys are strings. The nodes of a
+tree are allocated in the heap, and the datatype is therefore declared with
+the keyword #dyncode("datavtype"):
 
 ")
 
 #sats2xhtml("\
-datatype bstree =
+datavtype bstree =
   | E of () | B of (bstree, string, bstree)
 // end of [bstree]
 ")
@@ -583,7 +654,9 @@ construct a value representing a binary tree but not a binary search tree.
 #para("\
 
 The following function [bstree_inord] does a in-order traversal of a
-given binary tree:
+given binary tree. The tree is borrowed, and the function to be applied to
+the keys is a flat closure (see the chapter on functions), which is
+passed by reference:
 
 ")
 
@@ -591,7 +664,7 @@ given binary tree:
 fun
 bstree_inord
 (
-  t0: bstree, fwork: string -<cloref1> void
+  t0: !bstree, fwork: &(string) -<clo1> void
 ) : void =
 (
 case+ t0 of
@@ -615,7 +688,8 @@ keys processed by [fwork] are ordered ascendingly.
 #para("\
 
 Given a binary search tree and a key, the following function
-[bstree_search] checks whether the key is stored inside the tree:
+[bstree_search] checks whether the key is stored inside the tree. As the
+tree is only read, it is borrowed:
 
 ")
 
@@ -623,7 +697,7 @@ Given a binary search tree and a key, the following function
 fun
 bstree_search
 (
-  t0: bstree, k0: string
+  t0: !bstree, k0: string
 ) : bool =
 (
 //
@@ -651,7 +725,10 @@ found. Otherwise, it returns false.
 #para("\
 
 Given a binary search tree and a key, the following function
-[bstree_insert] inserts the key into the tree:
+[bstree_insert] inserts the key into the tree. Here the tree is
+consumed (it is passed by value) and a new tree is returned; the patterns
+with the prefix #dyncode("~") free the nodes that are visited, and the nodes
+of the new tree are allocated by the constructors:
 
 ")
 
@@ -664,14 +741,14 @@ bstree_insert
 (
 //
 case+ t0 of
-| E () => B (E, k0, E)
-| B (t1, k, t2) => let
+| ~E () => B (E, k0, E)
+| ~B (t1, k, t2) => let
     val sgn = compare (k0, k)
   in
     case+ 0 of
     | _ when sgn < 0 => B (bstree_insert (t1, k0), k, t2)
     | _ when sgn > 0 => B (t1, k, bstree_insert (t2, k0))
-    | _ (*k0 = k*) => t0 // [k0] found and no actual insertion
+    | _ (*k0 = k*) => B (t1, k, t2) // [k0] found and no actual insertion
   end // end of [B]
 //
 ) (* end of [bstree_insert] *)
@@ -681,8 +758,22 @@ case+ t0 of
 
 Note that [bstree_insert] inserts the key only if it is not already stored
 inside the given tree. Also, if inserted, the key is always stored in a newly
-created leaf node.
+created leaf node. Allocating a new node and freeing the old one for each
+node on the path is not the cheapest way to do this; I will show how to
+update a tree in place when presenting dataviewtypes. Finally, a tree that is
+no longer needed is freed by the following function:
 
+")
+
+#dats2xhtml("\
+fun
+bstree_free
+  (t0: bstree): void =
+(
+case+ t0 of
+| ~E () => ()
+| ~B (t1, _, t2) => (bstree_free (t1); bstree_free (t2))
+) (* end of [bstree_free] *)
 ")
 
 #para("\
@@ -708,7 +799,7 @@ For representing integer expressions, we declare a datatype
 #stacode("IEXP") as follows:
 
 #sats2xhtml("\
-datatype IEXP =
+datavtype IEXP =
   | IEXPcst of int // constants
   | IEXPneg of (IEXP) // negative
   | IEXPadd of (IEXP, IEXP) // addition
@@ -730,13 +821,13 @@ IEXPadd(IEXPneg(IEXPcst(1)), IEXPmul(IEXPsub(IEXPcst(2), IEXPcst(3)), IEXPcst(4)
 Translating an integer expression written in some string form into an
 abstract syntax tree is called parsing, which we will not do here. The
 following defined function #dyncode("eval_iexp") takes the abstract syntax
-tree of an integer expression and returns an integer that is the value of
-the expression:
+tree of an integer expression, which it only borrows, and returns an
+integer that is the value of the expression:
 
 #dats2xhtml("\
 fun
 eval_iexp
-  (e0: IEXP): int =
+  (e0: !IEXP): int =
 (
 case+ e0 of
 | IEXPcst (n) => n
@@ -746,6 +837,24 @@ case+ e0 of
 | IEXPmul (e1, e2) => eval_iexp (e1) * eval_iexp (e2)
 | IEXPdiv (e1, e2) => eval_iexp (e1) / eval_iexp (e2)
 ) (* end of [eval_iexp] *)
+")
+
+As the tree is allocated in the heap, it has to be freed by whoever owns it
+after the evaluation, and this is done by the following function:
+
+#dats2xhtml("\
+fun
+free_iexp
+  (e0: IEXP): void =
+(
+case+ e0 of
+| ~IEXPcst (_) => ()
+| ~IEXPneg (e) => free_iexp (e)
+| ~IEXPadd (e1, e2) => (free_iexp (e1); free_iexp (e2))
+| ~IEXPsub (e1, e2) => (free_iexp (e1); free_iexp (e2))
+| ~IEXPmul (e1, e2) => (free_iexp (e1); free_iexp (e2))
+| ~IEXPdiv (e1, e2) => (free_iexp (e1); free_iexp (e2))
+) (* end of [free_iexp] *)
 ")
 ")#comment("para")
 
@@ -760,7 +869,7 @@ boolean expressions. Furthermore, #stacode("IEXP") and #stacode("BEXP")
 should be defined mutually recursively as follows:
 
 #sats2xhtml("\
-datatype IEXP =
+datavtype IEXP =
   | IEXPcst of int // integer constants
   | IEXPneg of (IEXP) // negative
   | IEXPadd of (IEXP, IEXP) // addition
@@ -770,7 +879,7 @@ datatype IEXP =
   | IEXPif of (BEXP(*test*), IEXP(*then*), IEXP(*else*))
 // end of [IEXP]
 
-and BEXP = // [and] for combining datatype declarations
+and BEXP = // [and] for combining datavtype declarations
   | BEXPcst of bool // boolean constants
   | BEXPneg of BEXP // negation
   | BEXPconj of (BEXP, BEXP) // conjunction
@@ -787,13 +896,15 @@ and BEXP = // [and] for combining datatype declarations
 Evidently, we also need to evaluate boolean expressions when evaluating
 integer expressions. The following two functions #dyncode("eval_iexp") and
 #dyncode("eval_bexp") for evaluating integer and boolean expressions,
-respectively, are defined mutually recursively as can be expected:
+respectively, are defined mutually recursively as can be expected. Note
+that only one of the two branches of an if-then-else expression is
+evaluated:
 
 #dats2xhtml("\
 fun
 eval_iexp
 (
-  e0: IEXP
+  e0: !IEXP
 ) : int = (
 //
 case+ e0 of
@@ -802,13 +913,13 @@ case+ e0 of
 | IEXPadd (e1, e2) => eval_iexp (e1) + eval_iexp (e2)
 | IEXPsub (e1, e2) => eval_iexp (e1) - eval_iexp (e2)
 | IEXPmul (e1, e2) => eval_iexp (e1) * eval_iexp (e2)
-| IEXPdiv (e1, e2) => eval_iexp (e1) / eval_iexp (e1)
+| IEXPdiv (e1, e2) => eval_iexp (e1) / eval_iexp (e2)
 | IEXPif
   (
     e_test, e_then, e_else
   ) =>
   (
-    eval_iexp (if eval_bexp (e_test) then e_then else e_else)
+    if eval_bexp (e_test) then eval_iexp (e_then) else eval_iexp (e_else)
   ) // end of [IEXPif]
 //
 ) (* end of [eval_iexp] *)
@@ -816,7 +927,7 @@ case+ e0 of
 and
 eval_bexp
 (
-  e0: BEXP
+  e0: !BEXP
 ) : bool = (
 //
 case+ e0 of
@@ -835,6 +946,10 @@ case+ e0 of
 //
 ) (* end of [eval_bexp] *)
 ")
+
+The functions that free the two kinds of expressions are also defined
+mutually recursively (they follow the pattern of #dyncode("free_iexp")
+above and are included in the on-line code).
 ")#comment("para")
 
 #para("\
@@ -852,7 +967,8 @@ functional programming language like the core of ATS can be implemented.\
 Please find
 #mycodelink("CHAP_DATATYPE/intexp.dats", "on-line")
 the entirety of the code in this section plus some additional code for
-testing.\
+testing (the code for the second version of the datatypes is in
+#mycodelink("CHAP_DATATYPE/intexp2.dats", "intexp2.dats")).\
 
 ")
 
