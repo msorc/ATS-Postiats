@@ -77,27 +77,28 @@ fun{
 a:t@ype
 } list_concat{m,n:nat}
 (
-  xss: list (list (a, n), m)
-) : list (a, m * n) =
+  xss: list_vt (list_vt (a, n), m)
+) : list_vt (a, m * n) =
   case+ xss of
-  | list_nil () => list_nil ()
-  | list_cons (xs, xss) => list_append<a> (xs, list_concat xss)
+  | ~list_vt_nil () => list_vt_nil ()
+  | ~list_vt_cons (xs, xss) => list_vt_append<a> (xs, list_concat xss)
 // end of [list_concat]
 ")
 
-where the interface for #dyncode("list_append") is given below:
+where the interface for #dyncode("list_vt_append") is given below (both the
+lists are consumed, as the lists are linear):
 
 #sats2xhtml("\
 fun{
-a:t@ype
-} list_append {n1,n2:nat}
-  (xs: list (a, n1), ys: list (a, n2)): list (a, n1+n2)
+a:vt@ype
+} list_vt_append {n1,n2:nat}
+  (xs: list_vt (a, n1), ys: list_vt (a, n2)): list_vt (a, n1+n2)
 ")
 
 Given a list #dyncode("xss") of length #stacode("m") in which each element is of
-the type #stacode("list(T,n)") for some type T,
+the type #stacode("list_vt(T,n)") for some type T,
 #dyncode("list_concat&lt;T&gt;(xss)") constructs a list of the type
-#stacode("list(T,m*n)"). When the first matching clause in the code for
+#stacode("list_vt(T,m*n)"). When the first matching clause in the code for
 #dyncode("list_concat") is typechecked, a constraint is generated that is
 essentially like the following one:
 
@@ -109,39 +110,42 @@ This contraint may look simple, but it was once rejected by the ATS
 constraint solver as it contains nonlinear integer terms (e.g.,
 #stacode("m1*n") and #stacode("m*n")). In order to overcome (or rather
 circumvent) the limitation, we can make use of theorem-proving. Another
-implementation of #dyncode("list_concat") is given as follows:
+implementation of #dyncode("list_concat") (named #dyncode("list_concat2") in
+the on-line code, so that both can be tested together) is given as follows:
 
 #dats2xhtml("\
 fun{
 a:t@ype
 } list_concat{m,n:nat}
 (
-  xss: list(list(a, n), m)
-) : [p:nat] (MUL(m, n, p) | list(a, p)) =
+  xss: list_vt(list_vt(a, n), m)
+) : [p:nat] (MUL(m, n, p) | list_vt(a, p)) =
 (
 //
 case+ xss of
-| list_nil () =>
-    (MULbas() | list_nil())
-| list_cons (xs, xss) => let
+| ~list_vt_nil () =>
+    (MULbas() | list_vt_nil())
+| ~list_vt_cons (xs, xss) => let
     val (pf | res) = list_concat (xss)
   in
-    (MULind pf | list_append<a> (xs, res))
-  end // end of [list_cons]
+    (MULind pf | list_vt_append<a> (xs, res))
+  end // end of [list_vt_cons]
 //
 ) (* end of [list_concat] *)
 ")
 
-Given a list #dyncode("xss") of the type #stacode("list(list(T,n),m)"),
+Given a list #dyncode("xss") of the type #stacode("list_vt(list_vt(T,n),m)"),
 #dyncode("list_concat(xss)") now returns a pair #dyncode("(pf | res)") such
 that #dyncode("pf") is a proof of the prop-type #stacode("MUL(m,n,p)") for
 some natural number #stacode("p") and #dyncode("res") is a list of the type
-#stacode("list(T,p)"), where the symbol bar (|) is used to separate proofs
+#stacode("list_vt(T,p)"), where the symbol bar (|) is used to separate proofs
 from values. In other words, #dyncode("pf") acts as a witness to the
 equality #stacode("p=m*n"). After proof erasure is performed, this
 implementation of #dyncode("list_concat") is essentially translated into
 the previous one (as far as dynamic semantics is concerned). In particular,
-there is no need for proof construction at run-time.\
+there is no need for proof construction at run-time. (Please find the code
+presented in this section
+#mycodelink("CHAP_PRGTHMPRV/listconcat.dats", "on-line").)\
 
 ")#comment("para")
 
@@ -156,7 +160,7 @@ id="example_safe_matrix_subscripting">
 #para("\
 
 Internally, a matrix of the dimension m by n is represented as an array
-of the size m*n. For matrix subscripting, we need to implement a function
+of the size m*n (the array is borrowed by the function). For matrix subscripting, we need to implement a function
 template of the following interface:
 
 #sats2xhtml("\
@@ -164,7 +168,7 @@ fun{
 a:t@ype
 } matrix_get
   {m,n:int}{i,j:nat | i < m; j < n}
-  (A: arrayref (a, m*n), col: int n, i: int i, j: int j): (a)
+  (A: !arrayptr (a, m*n), col: int n, i: int i, j: int j): (a)
 // end of [matrix_get]
 ")
 
@@ -246,7 +250,7 @@ functions in #myatscodelink("prelude/DATS/arith_prf.dats", "arith_prf.dats").\
 #para("\
 
 The entirety of the above presented code is available
-#mycodelink("CHAP_PRGTHMPRV/matget.dats", "on-line").\
+#mycodelink("CHAP_PRGTHMPRV/matrix_get.dats", "on-line").\
 
 ")#comment("para")
 

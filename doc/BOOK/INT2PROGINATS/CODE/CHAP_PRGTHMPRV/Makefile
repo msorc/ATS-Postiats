@@ -16,6 +16,8 @@ ATSCCFLAGS=-O2
 
 all:: ifact
 all:: ifact23
+all:: listconcat
+all:: matrix_get
 
 ######
 
@@ -35,6 +37,18 @@ cleanall:: ; $(RMF) ifact23
 
 ######
 
+
+listconcat: listconcat.dats; $(PATSCC) $(ATSCCFLAGS) -o $@ $<
+regress:: listconcat; ./$<
+cleanall:: ; $(RMF) listconcat
+
+######
+
+matrix_get: matrix_get.dats; $(PATSCC) $(ATSCCFLAGS) -o $@ $<
+regress:: matrix_get; ./$<
+cleanall:: ; $(RMF) matrix_get
+
+######
 
 ######
 
