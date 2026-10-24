@@ -57,7 +57,7 @@ all:: \
 chap_dotoverld
 chap_dotoverld: \
 chap_dotoverld.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_dotoverld; ./$<
 cleanall:: ; $(RMF) chap_dotoverld
@@ -68,7 +68,7 @@ all:: \
 chap_recursion
 chap_recursion: \
 chap_recursion.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_recursion; ./$<
 cleanall:: ; $(RMF) chap_recursion
@@ -79,7 +79,7 @@ all:: \
 chap_datatypes
 chap_datatypes: \
 chap_datatypes.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_datatypes; ./$<
 cleanall:: ; $(RMF) chap_datatypes
@@ -90,7 +90,7 @@ all:: \
 chap_list
 chap_list: \
 chap_list.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_list; ./$<
 cleanall:: ; $(RMF) chap_list
@@ -103,7 +103,7 @@ all:: \
 chap_exception
 chap_exception: \
 chap_exception.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_exception; ./$<
 cleanall:: ; $(RMF) chap_exception
@@ -116,7 +116,7 @@ all:: \
 chap_tuprec_1
 chap_tuprec_1: \
 chap_tuprec_1.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_tuprec_1; ./$<
 cleanall:: ; $(RMF) chap_tuprec_1
@@ -135,7 +135,7 @@ all:: \
 chap_hashtable
 chap_hashtable: \
 chap_hashtable.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_hashtable; ./$<
 cleanall:: ; $(RMF) chap_hashtable
@@ -144,7 +144,7 @@ all:: \
 chap_hashtable2
 chap_hashtable2: \
 chap_hashtable2.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_hashtable2; ./$<
 cleanall:: ; $(RMF) chap_hashtable2
@@ -152,10 +152,21 @@ cleanall:: ; $(RMF) chap_hashtable2
 ######
 #
 all:: \
+chap_stream
+chap_stream: \
+chap_stream.dats ; \
+$(PATSCC2) -o $@ $<
+#
+regress:: chap_stream; ./$<
+cleanall:: ; $(RMF) chap_stream
+#
+######
+#
+all:: \
 chap_hordfun
 chap_hordfun: \
 chap_hordfun.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_hordfun; ./$<
 cleanall:: ; $(RMF) chap_hordfun
@@ -172,7 +183,7 @@ all:: \
 chap_extvar
 chap_extvar: \
 chap_extvar.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_extvar; ./$<
 cleanall:: ; $(RMF) chap_extvar
@@ -183,7 +194,7 @@ all:: \
 chap_cloptr
 chap_cloptr: \
 chap_cloptr.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_cloptr; ./$<
 cleanall:: ; $(RMF) chap_cloptr
@@ -194,7 +205,7 @@ all:: \
 chap_stkclo
 chap_stkclo: \
 chap_stkclo.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_stkclo; ./$<
 cleanall:: ; $(RMF) chap_stkclo
@@ -205,7 +216,7 @@ all:: \
 chap_stream_vt
 chap_stream_vt: \
 chap_stream_vt.dats ; \
-$(PATSCC2) -D_GNU_SOURCE -DATS_MEMALLOC_LIBC -o $@ $<
+$(PATSCC2) -o $@ $<
 #
 regress:: chap_stream_vt; ./$<
 cleanall:: ; $(RMF) chap_stream_vt
