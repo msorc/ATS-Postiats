@@ -48,3 +48,14 @@ python3 check_snippets.py LECTURE/04/main.atxt LECTURE/04/CODE/*.dats LECTURE/04
 (run in this directory with `PATSHOME` set). The fragments that it still reports
 are illustrations that are not compiled (shell commands, `#include`
 directives).
+
+The code of all of the lectures is built and run by
+
+```sh
+make -f LECTURE/Makefile_lect testall     # run in this directory
+```
+
+(`PATSHOME` defaults to the root of the repository; the JS example of
+`LECTURE/06-20` needs `atscc2js`, which is built by `make -C contrib/CATS-atscc2js`,
+and `node`; it is skipped without them). The programs were also run under
+`-fsanitize=address`: none reports a leak.

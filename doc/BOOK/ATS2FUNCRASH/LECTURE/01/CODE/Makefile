@@ -4,6 +4,9 @@
 #
 ######
 
+# PATSHOME is the root of the ATS2 repository (or of an installation of ATS2)
+PATSHOME ?= $(abspath ../../../../../..)
+export PATSHOME
 PATSCC=$(PATSHOME)/bin/patscc
 MYATSCC=$(PATSHOME)/bin/myatscc
 
