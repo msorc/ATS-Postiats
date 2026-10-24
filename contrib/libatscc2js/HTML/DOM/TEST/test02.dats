@@ -1,3 +1,5 @@
+(* SPDX-FileCopyrightText: 2026 Mikhail Sorochan *)
+(* SPDX-License-Identifier: MIT *)
 #define ATS_MAINATSFLAG 1
 #define ATS_DYNLOADNAME "test02__dynload"
 #define LIBATSCC2JS_targetloc "$PATSHOME/contrib/libatscc2js"

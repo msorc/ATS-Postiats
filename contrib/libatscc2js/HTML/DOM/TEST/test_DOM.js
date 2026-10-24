@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+// SPDX-License-Identifier: MIT
 var fs=require('fs'),vm=require('vm');var L=process.env.PATSHOME+'/contrib/libatscc2js';
 var elems={out:{innerHTML:''}};
 global.document={getElementById:function(i){return elems[i]||null},createElement:function(t){return {tag:t,innerHTML:''}}};

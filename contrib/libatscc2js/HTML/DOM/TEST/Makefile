@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
 ######
 #
 # Test of the DOM library of libatscc2js: [make regress] translates
