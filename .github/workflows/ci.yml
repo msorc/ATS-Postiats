@@ -287,6 +287,14 @@ jobs:
             "./$t" > /dev/null
           done
 
+      # libatsynmark and libatsdoc: EFFECTIVATS/MYTEXT and the book code link them
+      - name: make tools (atsdoc, pats2xhtml, the libraries), sanitized
+        if: matrix.part == 'examples'
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          export PATSCCOMP="$PATSCCOMP_BASE $SAN"
+          make tools CC="gcc $SAN"
+
       # The one suppression: the book program CHAP_FNTMPINT/gnumber computes
       # fact(13) in int on purpose (to show the overflow), which is signed
       # overflow in the C code. Everything else stays fatal (ASan, leaks, the
