@@ -48,16 +48,37 @@ int c3_line (void) {
 
 int c3_more (void) { return iword < nwords ; }
 
+/*
+** The strings that c3_str hands out stay valid for the whole run (the drivers
+** keep them in their symbols and names): they are kept in a pool that is freed at exit.
+*/
+static char **strpool = 0 ;
+static size_t nstrpool = 0, capstrpool = 0 ;
+
+static void c3_strpool_free (void) {
+  size_t i ;
+  for (i = 0 ; i < nstrpool ; i++) free (strpool[i]) ;
+  free (strpool) ;
+  strpool = 0 ; nstrpool = capstrpool = 0 ;
+}
+
 void *c3_str (void) {
+  char *s ;
   if (iword >= nwords) { fprintf (stderr, "c3dump: line %d: unexpected end of line\n", theln) ; exit (1) ; }
-  return strdup (words[iword++]) ;
+  if (nstrpool == capstrpool) {
+    if (capstrpool == 0) atexit (c3_strpool_free) ;
+    capstrpool = capstrpool ? 2 * capstrpool : 1024 ;
+    strpool = (char**)realloc (strpool, capstrpool * sizeof (char*)) ;
+    if (!strpool) { fprintf (stderr, "c3dump: out of memory\n") ; exit (1) ; }
+  }
+  s = strdup (words[iword++]) ;
+  if (!s) { fprintf (stderr, "c3dump: out of memory\n") ; exit (1) ; }
+  return strpool[nstrpool++] = s ;
 }
 
 int c3_int (void) {
-  char *s = c3_str () ;
-  int r = atoi (s) ;
-  free (s) ;
-  return r ;
+  if (iword >= nwords) { fprintf (stderr, "c3dump: line %d: unexpected end of line\n", theln) ; exit (1) ; }
+  return atoi (words[iword++]) ;
 }
 
 void c3_put (int t, int i, void *p) {

@@ -107,7 +107,7 @@ jobs:
             exit 1
           fi
 
-      - name: make -C src test (the md5 suites of the compiler; no -j)
+      - name: make -C src test (the md5 suites of the compiler; JOBS applies)
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           make -C src test
@@ -274,12 +274,9 @@ jobs:
           tests="$(sed -n '/^TESTS=/,/^$/p' Makefile | sed 's/^TESTS=//; s/\\$//')"
           echo "tests: $tests"
           make $tests
-          # test_symenv.dats itself leaks 128 bytes (a linmap that main does not free,
-          # 4 allocations: not the compiler module pats_symenv); the leak check is off for it alone
           for t in $tests; do
             echo "run $t"
-            if [ "$t" = test_symenv ]; then ASAN_OPTIONS="$ASAN_OPTIONS:detect_leaks=0" "./$t" > /dev/null
-            else "./$t" > /dev/null; fi
+            "./$t" > /dev/null
           done
 
       # The one suppression: the book program CHAP_FNTMPINT/gnumber computes
@@ -302,11 +299,13 @@ jobs:
       SAN: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
       CFLAGS: -O1
       P2OPT: -O1
-      # leaks are NOT checked in this job: the test drivers of src/test leak
-      # on purpose (for example c3drv.c:c3_str strdup()s every string and never
-      # frees it: 490 KB in c3dump) and the md5 suites compare the stderr of
-      # the drivers, which would then hold the leak report. The compiler itself
-      # runs with leak detection in the job sanitizers (make bootstrap).
+      # leaks are NOT checked in this job. c3dump (the c3_str strings and the
+      # test_symenv linmap no longer leak) still leaks on the problems that end in
+      # an exception (c3data_gmp.txt: s2varindmap_make, glist_listize in drv_icn;
+      # c3data_noexn.txt is clean), and the md5 suites compare the stderr of the
+      # drivers, which would then hold the leak report. The compiler itself
+      # runs with leak detection in the job sanitizers (make bootstrap), and so
+      # do the unit tests of src/test (TESTS) there.
       ASAN_OPTIONS: detect_leaks=0:abort_on_error=0:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1
       PATSCCOMP_BASE: gcc -std=c99 -D_GNU_SOURCE -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib

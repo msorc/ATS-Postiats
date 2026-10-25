@@ -28,5 +28,5 @@ implement main0 () = {
   val () = symenv_pervasive_insert<string> (!p, b, "BP")
   val () = (case+ symenv_pervasive_search<string> (!p, b) of ~Some_vt s => println! (s) | ~None_vt () => println! ("none"))
   val () = fprint_symenv_map<string> (stdout_ref, !p, pr)
-  prval () = $UN.castview0{void}(pf)
+  val () = symenv_free<string> (pf | p)
 }

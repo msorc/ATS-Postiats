@@ -78,6 +78,22 @@ end // end of [symmaplst_search]
 
 (* ****** ****** *)
 
+fun{itm:type}
+savedlst_free
+  {n:nat} .<n>.
+  (xs: list_vt (@(symmap itm, symmaplst itm), n)):<> void =
+  case+ xs of
+  | ~list_vt_cons (x, xs) => let
+      val () = symmap_free<itm> (x.0)
+      val () = symmaplst_free<itm> (x.1)
+    in
+      savedlst_free<itm> (xs)
+    end
+  | ~list_vt_nil () => ()
+// end of [savedlst_free]
+
+(* ****** ****** *)
+
 assume
 symenv_vt0ype
   (itm:type) = @{
@@ -102,6 +118,19 @@ symenv_make_nil
 in
   (pfat | p)
 end // end of [symenv_make_nil]
+
+implement{itm}
+symenv_free
+  {l} (pf | p) = $effmask_wrt let
+  prval pfgc = $UN.castview0{mfree_gc_v(l)}(0)
+  val () = symmap_free<itm> (p->map)
+  val () = symmaplst_free<itm> (p->maplst)
+  val () = symmap_free<itm> (p->pervasive)
+  val () = savedlst_free<itm> (p->savedlst)
+  prval pf = $UN.castview0{(symenv(itm))? @ l}(pf)
+in
+  ptr_free (pfgc, pf | p)
+end // end of [symenv_free]
 
 (* ****** ****** *)
 

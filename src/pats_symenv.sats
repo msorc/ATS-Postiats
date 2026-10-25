@@ -58,6 +58,12 @@ symenv_make_nil
   ) : [l:addr] (symenv(itm) @ l | ptr(l))
 // end of [symenv_make_nil]
 
+fun{itm:type}
+symenv_free
+  {l:addr}
+  (pf: symenv(itm) @ l | p: ptr(l)):<> void
+// end of [symenv_free]
+
 (* ****** ****** *)
 
 fun{itm:type} symenv_search
