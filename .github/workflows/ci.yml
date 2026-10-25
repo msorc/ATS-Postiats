@@ -18,6 +18,7 @@
 #   documents   the packaging scripts and the text of the templates
 #   sanitizers  the compiler, src check, unit tests, examples under ASan and UBSan
 #               (sanitizers-full: the whole make -C src test, nightly)
+#   warnings    (opt-in) make bootstrap with -Wall -Wextra; never fails the workflow
 #   dist        make dist, then ./configure && make && make install of the
 #               tarball (with and without libgmp), make install/uninstall
 #
@@ -324,6 +325,46 @@ jobs:
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           export PATSCCOMP="$PATSCCOMP_BASE $SAN"
           make -C src test
+
+  # Opt-in (workflow_dispatch and the nightly schedule): the compiler built with
+  # -Wall -Wextra so that the warnings are visible. The job never fails the
+  # workflow (continue-on-error); the warnings of the generated C (the *_dats.c
+  # files) are expected and are not fixed: the summary counts them by file.
+  warnings:
+    name: warnings, make bootstrap with -Wall -Wextra (opt-in, never fails)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          key: warnings
+          ccache: 'false'
+
+      - name: make bootstrap CC="gcc -Wall -Wextra"
+        run: |
+          make bootstrap CC="gcc -Wall -Wextra" 2>&1 | tee "$RUNNER_TEMP/warnings.log"
+
+      - name: the warnings, counted by file
+        if: always()
+        run: |
+          {
+            echo "### warnings of make bootstrap -Wall -Wextra"
+            echo
+            echo "total: $(grep -c 'warning:' "$RUNNER_TEMP/warnings.log" || true)"
+            echo
+            echo '```'
+            grep 'warning:' "$RUNNER_TEMP/warnings.log" | sed 's/:[0-9]*:[0-9]*:.*//' | sort | uniq -c | sort -rn | head -40 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: warnings-log
+          path: ${{ runner.temp }}/warnings.log
 
   dist:
     name: dist, configure, make install
