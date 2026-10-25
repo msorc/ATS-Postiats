@@ -8,7 +8,7 @@ for m in $MODS; do
   gcc -O0 --coverage -g -w -D_GNU_SOURCE -include alloca.h -DATS_MEMALLOC_LIBC -I$S -I$P -I$P/ccomp/runtime -c ${m}_dats.c -o ${m}_dats.o || exit 1
 done
 SKIP=`for m in $MODS; do printf "%s_dats\\\\|" $m; done`
-OBJS=`cd $T; ls t3g1obj/*.o | grep -v "${SKIP}NONE" | sed "s|^|$T/|"`
+OBJS=`cd $T; (ls t3g1obj/*.o; for m in \`make -s -f t3g1.mk echovar VAR=T3G1MODS\`; do echo modobj/${m}_dats.o; done) | grep -v "${SKIP}NONE" | sed "s|^|$T/|"`
 gcc -g --coverage -o t3g1dump_cov $OBJS ${D}/pats_*_dats.o -lgmp -lm || exit 1
 (cd $T && $D/t3g1dump_cov > /dev/null 2> /dev/null)
 for m in $MODS; do

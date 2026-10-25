@@ -4,7 +4,6 @@
 #
 include Makefile
 .DEFAULT_GOAL := t3g1test
-T3G1MODS=$(T3MODS) pats_dmacro2 pats_dmacro2_eval0 pats_dmacro2_eval1 pats_dmacro2_print pats_trans3_syncst pats_trans3_util pats_trans3_dynexp_up
 T3G1HATS=$(wildcard $(M)/*.hats) $(M)/pats_trans3.sats
 T3G1GEN=t3g1_gen.py t3g1hand.tmpl t3g1env.tmpl t3_gen.py t3_cases.py d2_gen.py d2_cases.py s2_cases.py s2_cases2.py t3hand.tmpl $(M)/pats_dynexp3.spec $(M)/pats_trans3_env.spec
 
@@ -14,17 +13,14 @@ t3g1gen.stamp: $(T3G1GEN)
 # the stamp is kept in git but the files it stands for are not: a fresh checkout has the stamp and none of them
 t3g1envx.hats t3g1envx1.hats t3g1hand.hats t3g1hand1.hats t3g1cases.hats:
 	rm -f t3g1gen.stamp; $(MAKE) -f t3g1.mk t3g1gen.stamp
-t3g1obj/%_dats.o: $(M)/%.dats $(T3G1HATS)
-	@mkdir -p t3g1obj
-	cd t3g1obj && $(PATSCCA) -c -o $(notdir $@) $(abspath $<)
 t3g1obj/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p t3g1obj
 	$(PATSCCA) -c -o $@ $<
 t3g1obj/t3g1dump.o: t3g1dump.dats t3g1gen.stamp t3g1stub.hats $(T3HATS) t3g1envx.hats t3g1hand.hats t3g1cases.hats $(T3G1HATS)
 	@mkdir -p t3g1obj
 	$(PATSCCA) -I$(abspath .) -c -o $@ $<
-t3g1dump: t3g1gen.stamp $(addprefix t3g1obj/,$(addsuffix _dats.o,$(T3G1MODS))) t3g1obj/pats_error_sats.o t3g1obj/t3g1dump.o
-	$(PATSCCA) -o t3g1dump $(addprefix t3g1obj/,$(addsuffix _dats.o,$(T3G1MODS))) t3g1obj/pats_error_sats.o t3g1obj/t3g1dump.o -lgmp
+t3g1dump: t3g1gen.stamp $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3G1MODS))) t3g1obj/pats_error_sats.o t3g1obj/t3g1dump.o
+	$(PATSCCA) -o t3g1dump $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3G1MODS))) t3g1obj/pats_error_sats.o t3g1obj/t3g1dump.o -lgmp
 t3g1dump1: t3g1gen.stamp
 	sh t3g1dump1.sh
 t3g1compare: t3g1dump t3g1dump1

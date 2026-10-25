@@ -20,8 +20,9 @@ M=..
 #  1. (serial) everything that is generated, once: the stamps and files of the python generators (they write files that several suites share),
 #     the arena encodings ($(M)/pats_*_gen*.hats, made by `make -C $(M)`), pats_error_sats.c;
 #  2. (make -jJOBS, PREBUILD=1) the programs. patscc writes the C file of `X.dats` as X_dats.c into the CURRENT directory, so two compilations
-#     of a module may run at the same time only if they run in different directories: the objects are made in their own object directory
-#     (`cd xobj && patscc -c`), and the programs that patscc builds from sources are built in a private directory ../cc_tmp_PROGRAM (CCIN: at
+#     of a module may run at the same time only if they run in different directories: the objects are made in an object directory
+#     (`cd xobj && patscc -c`; the modules with the default options are compiled once, in modobj, and linked by all the suites; the suites
+#     with other options have their own directories), and the programs that patscc builds from sources are built in a private directory ../cc_tmp_PROGRAM (CCIN: at
 #     the same depth as this directory, so that the "../pats_X.dats" of the sources mean the same file and give the same symbol names).
 # (c3obj_int/c3dump.o is the same program as c3obj/c3dump.o with another define, compiled in a private directory for the same reason.)
 # Without PREBUILD the whole Makefile is serial (.NOTPARALLEL), so that a `make -j N` of the caller cannot run the suites at the same time:
@@ -148,6 +149,7 @@ clean:
 	$(RM) s2dump s2dump1 s2dump_asan s2gen.stamp s2case1_[0-9][0-9]_dats.o s2case1_[0-9][0-9]_dats.c s2dump1_dats.c
 	$(RM) -r s2obj s2obj_asan
 	$(RM) $(TESTS) lexdump lexdump1 pardump pardump1 pardump_asan pardump_o2 e1xdump e1xdump1 e1xdump_asan treedump treedump1 treedump_asan d1dump d1dump1 d1dump_asan d1dump_o2 *_?ats.c *.o
+	$(RM) -r $(MODOBJ)
 	$(RM) -r d1obj d1obj_o2 d1obj_asan t1.1.o t1.1.e t1.2.o t1.2.e t1list.txt
 	$(RM) -r $(M)/cc_tmp_*
 
@@ -202,9 +204,21 @@ e1xfiles: e1xdump e1xdump1
 # d1dump LIST [START [time]]: for the lines "KIND<TAB>path" of LIST (KIND: FILEsta/FILEdyn, RAWsta/RAWdyn, RELsta/RELdyn) the driver
 #   does what pats_main.dats does for `patsopt -s/-d path` (the_fixity_load, parse_from_givename_toplevel, d0eclist_tr_errck,
 #   trans1_finalize), and dumps the whole d1eclist (d1dump.dats). d1dump1 is the same driver linked with the ATS1 objects of $ATS1REF.
-# The objects of the modules are compiled one by one (make -j) into d1obj (-O0), d1obj_o2 (d1dump_o2, -O2: the speed test),
-# d1obj_asan (d1dump_asan, -fsanitize=address).
+# The objects of the modules are compiled one by one (make -j): the -O0 ones into $(MODOBJ), shared by all the suites (see below),
+# d1obj_o2 (d1dump_o2, -O2: the speed test), d1obj_asan (d1dump_asan, -fsanitize=address).
 PATSCCA=patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$(abspath $(M))
+# The objects of the compiler modules ($(M)/pats_X.dats) that the suites link with their drivers: the *obj directories of the suites
+# (s2obj d2obj ... c3obj) have no module object of their own when the flags are the default ones, they link the ones of $(MODOBJ),
+# which are compiled once, by the rule `$(MODOBJ)/%_dats.o` below (the same patscc options for all of them, and the C text does
+# not depend on the directory, because the source is given by its absolute path). The variants with other options (the
+# *obj_asan, *obj_cov and *obj_o2 directories, and c3obj_int, which has C3NSTRINTKND=intknd) keep their own module objects;
+# their rules are made by MODRULE, which each XRULES macro calls when its second argument (the options) is not empty.
+MODOBJ=modobj
+define MODRULE
+$(1)/%_dats.o: $(M)/%.dats $(3)
+	@mkdir -p $(1)
+	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+endef
 D1MODS=pats_error pats_basics pats_utils pats_global pats_symbol pats_filename pats_location pats_label pats_syntax pats_syntax_print \
   pats_reader pats_lexbuf pats_lexing_token pats_lexing pats_lexing_error pats_lexing_print pats_tokbuf \
   pats_parsing pats_parsing_util pats_parsing_error pats_parsing_kwds pats_parsing_base pats_parsing_e0xp pats_parsing_sort \
@@ -212,12 +226,10 @@ D1MODS=pats_error pats_basics pats_utils pats_global pats_symbol pats_filename p
   pats_effect pats_fixity_prec pats_fixity_fxty pats_symmap pats_symenv pats_staexp1 pats_staexp1_print pats_dynexp1 pats_dynexp1_print \
   pats_e1xpval pats_e1xpval_error pats_trans1_env pats_trans1_e0xp pats_trans1_error pats_trans1_effect pats_trans1_sort \
   pats_trans1_staexp pats_trans1_p0at pats_trans1_syndef pats_trans1_dynexp pats_trans1_decl pats_filename_reloc
-D1OBJS=$(addprefix $(1)/,$(addsuffix _dats.o,$(D1MODS))) $(1)/pats_error_sats.o $(1)/d1dump.o
+D1OBJS=$(addprefix $(or $(2),$(1))/,$(addsuffix _dats.o,$(D1MODS))) $(1)/pats_error_sats.o $(1)/d1dump.o
 
 define D1RULES
-$(1)/%_dats.o: $(M)/%.dats
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -228,7 +240,7 @@ endef
 $(eval $(call D1RULES,d1obj,))
 $(eval $(call D1RULES,d1obj_asan,-g -fsanitize=address))
 $(eval $(call D1RULES,d1obj_o2,-O2))
-d1dump: $(call D1OBJS,d1obj)
+d1dump: $(call D1OBJS,d1obj,$(MODOBJ))
 	$(PATSCCA) -o $@ $^ -lgmp
 d1dump_asan: $(call D1OBJS,d1obj_asan)
 	$(PATSCCA) -g -fsanitize=address -o $@ $^ -lgmp
@@ -286,9 +298,7 @@ s2gen.stamp: $(S2GENFILES)
 s2gen: s2gen.stamp
 
 define S2RULES
-$(1)/%_dats.o: $(M)/%.dats $(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -304,7 +314,7 @@ $(eval $(call S2RULES,s2obj_asan,-g -fsanitize=address))
 # the objects of the chunks are listed after the generation (a recursive make)
 s2dump: s2gen.stamp
 	$(MAKE) --no-print-directory s2dump_exe
-s2dump_exe: $(addprefix s2obj/,$(addsuffix _dats.o,$(S2MODS))) s2obj/pats_error_sats.o s2obj/s2dump.o $(call S2COBJS,s2obj)
+s2dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(S2MODS))) s2obj/pats_error_sats.o s2obj/s2dump.o $(call S2COBJS,s2obj)
 	$(PATSCCA) -o s2dump $^ -lgmp
 s2dump_asan: s2gen.stamp
 	$(MAKE) --no-print-directory s2dump_asan_exe
@@ -356,9 +366,7 @@ d2gen.stamp: $(D2GENFILES)
 d2gen: d2gen.stamp
 
 define D2RULES
-$(1)/%_dats.o: $(M)/%.dats $(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats $(M)/pats_dynexp2_gen.hats $(M)/pats_dynexp2_gen_dats.hats
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats $(M)/pats_dynexp2_gen.hats $(M)/pats_dynexp2_gen_dats.hats))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -370,14 +378,14 @@ $(1)/d2dump.o: d2dump.dats d2gen.stamp $(D2HATS) s2env2.hats d2chunks.hats
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ $$<
 endef
 # the .hats files that the modules include
-$(foreach d,d2obj d2obj_asan d2obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
-$(foreach d,d2obj d2obj_asan d2obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,d2obj_asan d2obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
+$(foreach d,d2obj_asan d2obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
 $(eval $(call D2RULES,d2obj,))
 $(eval $(call D2RULES,d2obj_asan,-g -fsanitize=address))
 $(eval $(call D2RULES,d2obj_cov,-g --coverage))
 d2dump: d2gen.stamp
 	$(MAKE) --no-print-directory d2dump_exe
-d2dump_exe: $(addprefix d2obj/,$(addsuffix _dats.o,$(D2MODS))) d2obj/pats_error_sats.o d2obj/d2dump.o $(call D2COBJS,d2obj)
+d2dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(D2MODS))) d2obj/pats_error_sats.o d2obj/d2dump.o $(call D2COBJS,d2obj)
 	$(PATSCCA) -o d2dump $^ -lgmp
 d2dump_asan: d2gen.stamp
 	$(MAKE) --no-print-directory d2dump_asan_exe
@@ -409,9 +417,7 @@ all: d2test
 #   comdump1 and tooldump1 are the same drivers for the ATS1 objects of $ATS1REF (comdump1.sh). `make toolfiles|comtable|toolasan`.
 TOOLMODS=$(D1MODS) pats_intinf pats_counter pats_stamp pats_jsonize pats_depgen pats_taggen pats_comarg
 define TOOLRULES
-$(1)/%_dats.o: $(M)/%.dats
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -422,12 +428,12 @@ $(1)/tooldump.o: tooldump.dats toolmods.hats tooldump.cats pardump.cats jzdump.h
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ tooldump.dats
 endef
-TOOLOBJS=$(addprefix $(1)/,$(addsuffix _dats.o,$(TOOLMODS))) $(1)/pats_error_sats.o
+TOOLOBJS=$(addprefix $(or $(2),$(1))/,$(addsuffix _dats.o,$(TOOLMODS))) $(1)/pats_error_sats.o
 $(eval $(call TOOLRULES,tobj,))
 $(eval $(call TOOLRULES,tobj_asan,-g -fsanitize=address))
-comdump: $(call TOOLOBJS,tobj) tobj/comdump.o
+comdump: $(call TOOLOBJS,tobj,$(MODOBJ)) tobj/comdump.o
 	$(PATSCCA) -o $@ $^ -lgmp
-tooldump: $(call TOOLOBJS,tobj) tobj/tooldump.o
+tooldump: $(call TOOLOBJS,tobj,$(MODOBJ)) tobj/tooldump.o
 	$(PATSCCA) -o $@ $^ -lgmp
 comdump_asan: $(call TOOLOBJS,tobj_asan) tobj_asan/comdump.o
 	$(PATSCCA) -g -fsanitize=address -o $@ $^ -lgmp
@@ -499,9 +505,7 @@ m2gen.stamp: $(M2GENFILES)
 m2gen: m2gen.stamp
 
 define M2RULES
-$(1)/%_dats.o: $(M)/%.dats $(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats $(M)/pats_dynexp2_gen.hats $(M)/pats_dynexp2_gen_dats.hats $(M)/pats_dmacro2_gen.hats $(M)/pats_dmacro2_gen_dats.hats $(M)/pats_trans3_gen.hats $(M)/pats_trans3_gen_dats.hats
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats $(M)/pats_dynexp2_gen.hats $(M)/pats_dynexp2_gen_dats.hats $(M)/pats_dmacro2_gen.hats $(M)/pats_dmacro2_gen_dats.hats $(M)/pats_trans3_gen.hats $(M)/pats_trans3_gen_dats.hats))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -513,15 +517,15 @@ $(1)/m2dump.o: m2dump.dats m2gen.stamp $(M2HATS) m2env2.hats m2chunks.hats
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ $$<
 endef
 # the .hats files that the modules include
-$(foreach d,m2obj m2obj_asan m2obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
-$(foreach d,m2obj m2obj_asan m2obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,m2obj m2obj_asan m2obj_cov,$(eval $(d)/pats_dmacro2_eval0_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,m2obj_asan m2obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
+$(foreach d,m2obj_asan m2obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,m2obj_asan m2obj_cov,$(eval $(d)/pats_dmacro2_eval0_dats.o: $(M)/pats_syntax_token.hats))
 $(eval $(call M2RULES,m2obj,))
 $(eval $(call M2RULES,m2obj_asan,-g -fsanitize=address))
 $(eval $(call M2RULES,m2obj_cov,-g --gline --coverage))
 m2dump: m2gen.stamp
 	$(MAKE) --no-print-directory m2dump_exe
-m2dump_exe: $(addprefix m2obj/,$(addsuffix _dats.o,$(M2MODS))) m2obj/pats_error_sats.o m2obj/m2dump.o $(call M2COBJS,m2obj)
+m2dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(M2MODS))) m2obj/pats_error_sats.o m2obj/m2dump.o $(call M2COBJS,m2obj)
 	$(PATSCCA) -o m2dump $^ -lgmp
 m2dump_asan: m2gen.stamp
 	$(MAKE) --no-print-directory m2dump_asan_exe
@@ -581,9 +585,7 @@ cggen.stamp: $(CGGENFILES)
 cggen: cggen.stamp
 
 define CGRULES
-$(1)/%_dats.o: $(M)/%.dats $(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats $(M)/pats_dynexp2_gen.hats $(M)/pats_dynexp2_gen_dats.hats $(M)/pats_patcst2_gen.hats $(M)/pats_patcst2_gen_dats.hats
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(M)/pats_staexp2_gen.hats $(M)/pats_staexp2_gen_dats.hats $(M)/pats_staexp2_error_gen.hats $(M)/pats_staexp2_error_gen_dats.hats $(M)/pats_dynexp2_gen.hats $(M)/pats_dynexp2_gen_dats.hats $(M)/pats_patcst2_gen.hats $(M)/pats_patcst2_gen_dats.hats))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -594,15 +596,15 @@ $(1)/cgdump.o: cgdump.dats cggen.stamp $(CGHATS) cgenv2.hats cgchunks.hats cgenv
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ $$<
 endef
-$(foreach d,cgobj cgobj_asan cgobj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
-$(foreach d,cgobj cgobj_asan cgobj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,cgobj cgobj_asan cgobj_cov,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,cgobj_asan cgobj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
+$(foreach d,cgobj_asan cgobj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,cgobj_asan cgobj_cov,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
 $(eval $(call CGRULES,cgobj,))
 $(eval $(call CGRULES,cgobj_asan,-g -fsanitize=address))
 $(eval $(call CGRULES,cgobj_cov,-g --gline --coverage))
 cgdump: cggen.stamp
 	$(MAKE) --no-print-directory cgdump_exe
-cgdump_exe: $(addprefix cgobj/,$(addsuffix _dats.o,$(CGMODS))) cgobj/pats_error_sats.o cgobj/cgdump.o $(call CGCOBJS,cgobj)
+cgdump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(CGMODS))) cgobj/pats_error_sats.o cgobj/cgdump.o $(call CGCOBJS,cgobj)
 	$(PATSCCA) -o cgdump $^ -lgmp
 cgdump_asan: cggen.stamp
 	$(MAKE) --no-print-directory cgdump_asan_exe
@@ -640,6 +642,8 @@ T3MODS=$(S2MODS) pats_dynexp1 pats_dynexp1_print pats_dynexp2 pats_dynexp2_dcst 
   pats_trans3_env_termet pats_trans3_env_effect pats_trans3_env_lamlp pats_trans3_env_print pats_trans3_env_pfman pats_trans3_env_dvar pats_trans3_env_lstate
 T3GENFILES=t3_gen.py t3_cases.py d2_gen.py d2_cases.py s2_cases2.py t3hand.tmpl t3env.tmpl $(M)/pats_staexp2.spec $(M)/pats_dynexp2.spec $(M)/pats_dynexp3.spec $(M)/pats_trans3_env.spec
 T3OWNHATS=$(foreach s,dynexp3 trans3_env trans3_env_effect trans3_env_pfman trans3_env_dvar trans3_env_lstate,$(M)/pats_$(s)_gen.hats $(M)/pats_$(s)_gen_dats.hats)
+# the modules of t3g1dump (t3g1.mk; prebuild_t3g1 needs their objects)
+T3G1MODS=$(T3MODS) pats_dmacro2 pats_dmacro2_eval0 pats_dmacro2_eval1 pats_dmacro2_print pats_trans3_syncst pats_trans3_util pats_trans3_dynexp_up
 T3GENHATS=$(foreach s,staexp2 staexp2_error dynexp2 dmacro2 trans3,$(M)/pats_$(s)_gen.hats $(M)/pats_$(s)_gen_dats.hats) $(T3OWNHATS)
 T3HATS=t3case_pre.hats d2common1.hats d2common2.hats d2compat_hand.hats d2compat_hand2.hats d2compat_hand3.hats t3hand_leaf.hats t3hand.hats t3common.hats t3compat_gen.hats $(M)/mylibies.hats
 T3CHUNKS=$(sort $(wildcard t3case_[0-9][0-9].dats))
@@ -652,9 +656,7 @@ t3gen.stamp: $(T3GENFILES)
 t3gen: t3gen.stamp
 
 define T3RULES
-$(1)/%_dats.o: $(M)/%.dats $(T3GENHATS)
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(T3GENHATS)))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -665,16 +667,16 @@ $(1)/t3dump.o: t3dump.dats t3gen.stamp $(T3HATS) t3env.hats t3chunks.hats $(T3GE
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ $$<
 endef
-$(foreach d,t3obj t3obj_asan t3obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
-$(foreach d,t3obj t3obj_asan t3obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,t3obj t3obj_asan t3obj_cov,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,t3obj t3obj_asan t3obj_cov,$(eval $(d)/pats_trans3_env_dats.o: $(M)/pats_trans3_env.hats))
+$(foreach d,t3obj_asan t3obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
+$(foreach d,t3obj_asan t3obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,t3obj_asan t3obj_cov,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,t3obj_asan t3obj_cov,$(eval $(d)/pats_trans3_env_dats.o: $(M)/pats_trans3_env.hats))
 $(eval $(call T3RULES,t3obj,))
 $(eval $(call T3RULES,t3obj_asan,-g -fsanitize=address))
 $(eval $(call T3RULES,t3obj_cov,-g --gline --coverage))
 t3dump: t3gen.stamp
 	$(MAKE) --no-print-directory t3dump_exe
-t3dump_exe: $(addprefix t3obj/,$(addsuffix _dats.o,$(T3MODS))) t3obj/pats_error_sats.o t3obj/t3dump.o $(call T3COBJS,t3obj)
+t3dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3MODS))) t3obj/pats_error_sats.o t3obj/t3dump.o $(call T3COBJS,t3obj)
 	$(PATSCCA) -o t3dump $^ -lgmp
 t3dump_asan: t3gen.stamp
 	$(MAKE) --no-print-directory t3dump_asan_exe
@@ -715,12 +717,10 @@ T2MODS=pats_error pats_basics pats_utils pats_global pats_intinf pats_counter pa
   pats_staexp2_error pats_staexp2_print pats_staexp2_pprint pats_staexp2_szexp pats_staexp2_skexp pats_staexp2_util1 pats_staexp2_util2 pats_staexp2_util3 \
   pats_stacst2 pats_namespace pats_dynexp2 pats_dyncst2 pats_dynexp2_dcst pats_dynexp2_dmac pats_dynexp2_dvar pats_dynexp2_print pats_dynexp2_util \
   pats_trans2_env pats_trans2_error pats_trans2_sort pats_trans2_staexp pats_trans2_p1at pats_trans2_dynexp pats_trans2_impdec pats_trans2_decl
-T2OBJS=$(addprefix $(1)/,$(addsuffix _dats.o,$(T2MODS))) $(1)/pats_error_sats.o $(1)/t2dump.o
+T2OBJS=$(addprefix $(or $(2),$(1))/,$(addsuffix _dats.o,$(T2MODS))) $(1)/pats_error_sats.o $(1)/t2dump.o
 
 define T2RULES
-$(1)/%_dats.o: $(M)/%.dats $(wildcard $(M)/*.hats)
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(wildcard $(M)/*.hats)))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -731,7 +731,7 @@ endef
 $(eval $(call T2RULES,t2obj,))
 $(eval $(call T2RULES,t2obj_asan,-g -fsanitize=address))
 $(eval $(call T2RULES,t2obj_o2,-O2))
-t2dump: $(call T2OBJS,t2obj)
+t2dump: $(call T2OBJS,t2obj,$(MODOBJ))
 	$(PATSCCA) -o $@ $^ -lgmp
 t2dump_asan: $(call T2OBJS,t2obj_asan)
 	$(PATSCCA) -g -fsanitize=address -o $@ $^ -lgmp
@@ -834,9 +834,7 @@ t3g3gen.stamp: t3gen.stamp $(T3G3GENFILES)
 t3g3gen: t3g3gen.stamp
 
 define T3G3RULES
-$(1)/%_dats.o: $(M)/%.dats $(T3GENHATS)
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(T3GENHATS)))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -847,17 +845,17 @@ $(1)/t3g3dump.o: t3g3dump.dats t3g3gen.stamp $(T3G3HATS) t3env.hats t3g3env.hats
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ $$<
 endef
-$(foreach d,t3g3obj t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
-$(foreach d,t3g3obj t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,t3g3obj t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,t3g3obj t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_trans3_env_dats.o: $(M)/pats_trans3_env.hats))
-$(foreach d,t3g3obj t3g3obj_asan t3g3obj_cov,$(foreach m,p2at selab,$(eval $(d)/pats_trans3_$(m)_dats.o: $(M)/pats_trans1.hats)))
+$(foreach d,t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
+$(foreach d,t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,t3g3obj_asan t3g3obj_cov,$(eval $(d)/pats_trans3_env_dats.o: $(M)/pats_trans3_env.hats))
+$(foreach d,t3g3obj_asan t3g3obj_cov,$(foreach m,p2at selab,$(eval $(d)/pats_trans3_$(m)_dats.o: $(M)/pats_trans1.hats)))
 $(eval $(call T3G3RULES,t3g3obj,))
 $(eval $(call T3G3RULES,t3g3obj_asan,-g -fsanitize=address))
 $(eval $(call T3G3RULES,t3g3obj_cov,-g --gline --coverage))
 t3g3dump: t3g3gen.stamp
 	$(MAKE) --no-print-directory t3g3dump_exe
-t3g3dump_exe: $(addprefix t3g3obj/,$(addsuffix _dats.o,$(T3G3MODS))) t3g3obj/pats_error_sats.o t3g3obj/t3g3dump.o $(call T3G3COBJS,t3g3obj)
+t3g3dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3G3MODS))) t3g3obj/pats_error_sats.o t3g3obj/t3g3dump.o $(call T3G3COBJS,t3g3obj)
 	$(PATSCCA) -o t3g3dump $^ -lgmp
 t3g3dump_asan: t3g3gen.stamp
 	$(MAKE) --no-print-directory t3g3dump_asan_exe
@@ -892,9 +890,6 @@ g4gen.stamp: $(G4GENFILES) t3gen.stamp
 	python3 g4_gen.py
 	@touch $@
 g4gen: g4gen.stamp
-g4obj/%_dats.o: $(M)/%.dats $(M)/pats_trans3.sats $(T3GENHATS)
-	@mkdir -p g4obj
-	cd g4obj && $(PATSCCA) -c -o $(notdir $@) $(abspath $(M)/$*.dats)
 g4obj/pats_error_sats.c: $(M)/pats_error.sats
 	@mkdir -p g4obj
 	cd g4obj && patsopt --output pats_error_sats.c --static $(abspath $(M)/pats_error.sats)
@@ -911,7 +906,7 @@ g4obj/g4dump.o: g4dump.dats g4gen.stamp $(G4HATS) g4chunks.hats $(T3GENHATS)
 	$(PATSCCA) -I$(abspath .) -c -o $@ $<
 g4dump: g4gen.stamp
 	$(MAKE) --no-print-directory g4dump_exe
-g4dump_exe: $(addprefix g4obj/,$(addsuffix _dats.o,$(T3MODS) $(G4MODS))) g4obj/pats_error_sats.o g4obj/g4dump.o g4obj/g4state.o $(G4COBJS)
+g4dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3MODS) $(G4MODS))) g4obj/pats_error_sats.o g4obj/g4dump.o g4obj/g4state.o $(G4COBJS)
 	$(PATSCCA) -o g4dump $^ -lgmp
 g4dump1: g4gen.stamp
 	sh g4dump1.sh
@@ -936,13 +931,11 @@ F3MODS=$(T2MODS) pats_staexp2_solve pats_dynexp2_mapgen pats_patcst2 pats_dmacro
   pats_trans3_syncst pats_trans3_util pats_trans3_dynexp_up pats_trans3_dynexp_dn pats_trans3_appsym pats_trans3_caseof pats_trans3_patcon \
   pats_trans3_p2at pats_trans3_selab pats_trans3_fldfrat pats_trans3_lvalres pats_trans3_ptrof pats_trans3_viewat pats_trans3_deref pats_trans3_assgn \
   pats_trans3_xchng pats_trans3_looping pats_trans3_decl
-F3OBJS=$(addprefix $(1)/,$(addsuffix _dats.o,$(F3MODS))) $(1)/pats_error_sats.o $(1)/f3dump.o
+F3OBJS=$(addprefix $(or $(2),$(1))/,$(addsuffix _dats.o,$(F3MODS))) $(1)/pats_error_sats.o $(1)/f3dump.o
 F3GEN=f3_gen.py t3_gen.py d2_gen.py d2_cases.py t2_gen.py $(M)/pats_staexp2.spec $(M)/pats_dynexp2.spec $(M)/pats_dynexp3.spec $(M)/pats_trans3_env.spec
 
 define F3RULES
-$(1)/%_dats.o: $(M)/%.dats $(wildcard $(M)/*.hats) $(wildcard $(M)/*.sats)
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(wildcard $(M)/*.hats) $(wildcard $(M)/*.sats)))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -955,7 +948,7 @@ $(eval $(call F3RULES,f3obj_asan,-g -fsanitize=address))
 $(eval $(call F3RULES,f3obj_o2,-O2))
 f3dd.hats f3dd1.hats: $(F3GEN)
 	python3 f3_gen.py
-f3dump: $(call F3OBJS,f3obj)
+f3dump: $(call F3OBJS,f3obj,$(MODOBJ))
 	$(PATSCCA) -o $@ $^ -lgmp
 f3dump_asan: $(call F3OBJS,f3obj_asan)
 	$(PATSCCA) -g -fsanitize=address -o $@ $^ -lgmp
@@ -1027,9 +1020,7 @@ c3gen: c3gen.stamp
 j2gen: j2gen.stamp
 
 define C3RULES
-$(1)/%_dats.o: $(M)/%.dats $(C3GENHATS)
-	@mkdir -p $(1)
-	cd $(1) && $(PATSCCA) $(2) -c -o $$(notdir $$@) $$(abspath $$<)
+$(if $(2),$(call MODRULE,$(1),$(2),$(C3GENHATS)))
 $(1)/pats_error_sats.o: pats_error_sats.c
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -c -o $$@ $$<
@@ -1046,13 +1037,13 @@ $(1)/j2dump.o: j2dump.dats j2gen.stamp $(J2HATS) t3env.hats j2chunks.hats $(C3GE
 	@mkdir -p $(1)
 	$(PATSCCA) $(2) -I$(abspath .) -c -o $$@ $$<
 endef
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_jsonize_synent2_dats.o: $(M)/pats_syntax_token.hats))
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_trans3_env_dats.o: $(M)/pats_trans3_env.hats))
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_constraint3_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_constraint3_appenv.hats))
-$(foreach d,c3obj c3obj_asan c3obj_cov c3obj_int,$(foreach m,constraint3 constraint3_icnstr constraint3_simplify constraint3_solve constraint3_init,$(eval $(d)/pats_$(m)_dats.o: $(M)/pats_constraint3.hats)))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_dynexp2_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_dynexp2_appenv.hats))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_dynexp2_print_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_patcst2_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_jsonize_synent2_dats.o: $(M)/pats_syntax_token.hats))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_trans3_env_dats.o: $(M)/pats_trans3_env.hats))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(eval $(d)/pats_constraint3_mapgen_dats.o: $(M)/pats_staexp2_appenv.hats $(M)/pats_constraint3_appenv.hats))
+$(foreach d,c3obj_asan c3obj_cov c3obj_int,$(foreach m,constraint3 constraint3_icnstr constraint3_simplify constraint3_solve constraint3_init,$(eval $(d)/pats_$(m)_dats.o: $(M)/pats_constraint3.hats)))
 $(eval $(call C3RULES,c3obj,))
 $(eval $(call C3RULES,c3obj_asan,-g -fsanitize=address))
 $(eval $(call C3RULES,c3obj_cov,-g --gline --coverage))
@@ -1072,11 +1063,11 @@ c3obj_int/c3drv.o: c3drv.h
 C3NOTINT=$(filter-out $(C3INTMODS),$(C3MODS))
 c3dump: c3gen.stamp
 	$(MAKE) --no-print-directory c3dump_exe
-c3dump_exe: $(addprefix c3obj/,$(addsuffix _dats.o,$(C3MODS))) c3obj/pats_error_sats.o c3obj/c3drv.o c3obj/c3dump.o
+c3dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(C3MODS))) c3obj/pats_error_sats.o c3obj/c3drv.o c3obj/c3dump.o
 	$(PATSCCA) -o c3dump $^ -lgmp
 c3dump_int: c3gen.stamp
 	$(MAKE) --no-print-directory c3dump_int_exe
-c3dump_int_exe: $(addprefix c3obj_int/,$(addsuffix _dats.o,$(C3INTMODS))) $(addprefix c3obj/,$(addsuffix _dats.o,$(C3NOTINT))) c3obj/pats_error_sats.o c3obj/c3drv.o c3obj_int/c3dump.o
+c3dump_int_exe: $(addprefix c3obj_int/,$(addsuffix _dats.o,$(C3INTMODS))) $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(C3NOTINT))) c3obj/pats_error_sats.o c3obj/c3drv.o c3obj_int/c3dump.o
 	$(PATSCCA) -o c3dump_int $^ -lgmp
 c3dump_asan: c3gen.stamp
 	$(MAKE) --no-print-directory c3dump_asan_exe
@@ -1117,7 +1108,7 @@ all: c3test
 # the level-2 jsonize
 j2dump: j2gen.stamp
 	$(MAKE) --no-print-directory j2dump_exe
-j2dump_exe: $(addprefix c3obj/,$(addsuffix _dats.o,$(J2MODS))) c3obj/pats_error_sats.o c3obj/j2dump.o $(call J2COBJS,c3obj)
+j2dump_exe: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(J2MODS))) c3obj/pats_error_sats.o c3obj/j2dump.o $(call J2COBJS,c3obj)
 	$(PATSCCA) -o j2dump $^ -lgmp
 j2dump_asan: j2gen.stamp
 	$(MAKE) --no-print-directory j2dump_asan_exe
@@ -1180,6 +1171,19 @@ drvopt:
 .PHONY: drvfiles drvopt
 
 # ---------------------------------------------------------------------------------------------------------------------------------
+# The objects of the compiler modules that all the suites share (see MODOBJ above): one compilation of each module with the default options,
+# in its own directory ($(MODOBJ), whose C files do not collide with those of the other directories). Its prerequisites are those of all the
+# suites: the arena encodings and the generated headers, and every header of $(M) (a pattern rule has no list of modules).
+MODDEPS=$(sort $(T3GENHATS) $(C3GENHATS) $(M)/pats_patcst2_gen.hats $(M)/pats_patcst2_gen_dats.hats $(wildcard $(M)/*.hats $(M)/*.sats))
+$(MODOBJ)/%_dats.o: $(M)/%.dats $(MODDEPS)
+	@mkdir -p $(MODOBJ)
+	cd $(MODOBJ) && $(PATSCCA) -c -o $(notdir $@) $(abspath $<)
+# the value of a variable (the scripts that link the module objects with their own options: s2gcov.sh, t3g1gcov.sh)
+echovar:
+	@echo $($(VAR))
+.PHONY: echovar
+
+# ---------------------------------------------------------------------------------------------------------------------------------
 # The prebuild step of `all` (see the top of this file): phase 1 `pregen` (serial), phase 2 `preexes` (make -j$(JOBS), PREBUILD=1).
 # Everything that the runs of `all` need is built here, by the rules of the suites themselves, so the serial part finds it up to date
 # (the *_exe targets are phony and are only relinked). The suites that have a Makefile of their own (lp hs hd cc1 cc ca cc2 ccb) build
@@ -1193,8 +1197,10 @@ PREEXES=$(TESTS) pardump e1xdump treedump d1dump t2dump f3dump tooldump comdump 
   s2dump_exe d2dump_exe m2dump_exe cgdump_exe t3dump_exe t3g3dump_exe g4dump_exe c3dump_exe c3dump_int_exe j2dump_exe \
   prebuild_t3g1 prebuild_g2
 preexes: $(PREEXES)
-prebuild_t3g1:
+# The module objects of $(MODOBJ) are made by this make, once each, before the recursive makes and g2build.sh link them: they must not compile
+# the same module in the same directory as this make does at the same time.
+prebuild_t3g1: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3G1MODS)))
 	$(MAKE) --no-print-directory -f t3g1.mk t3g1dump
-prebuild_g2:
+prebuild_g2: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(shell cat g2mods.txt)))
 	sh g2build.sh
 .PHONY: prebuild_t3g1 prebuild_g2

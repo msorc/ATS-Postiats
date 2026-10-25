@@ -82,7 +82,7 @@ os.makedirs(W, exist_ok=True)
 names = chunks(LIST, os.path.join(W, 'lists'))
 if not os.path.exists(os.path.join(W, 'src')):
     sh('cp -a %s %s/src' % (os.path.join(here, '..'), W))
-    sh('cd %s/src/test && rm -rf f3obj f3obj_asan f3obj_o2 f3dump f3dump_asan t3obj* t2obj* d1obj* t3g* g4obj g2obj obj pats_error_sats.c *.o' % W)
+    sh('cd %s/src/test && rm -rf modobj f3obj f3obj_asan f3obj_o2 f3dump f3dump_asan t3obj* t2obj* d1obj* t3g* g4obj g2obj obj pats_error_sats.c *.o' % W)
     sh('cd %s/src/test && make -j%d f3dump > make.log 2>&1' % (W, JOBS))
 T = os.path.join(W, 'src', 'test')
 ref = os.path.join(W, 'ref')

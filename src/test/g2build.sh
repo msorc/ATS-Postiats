@@ -7,13 +7,15 @@ cd $W/test && python3 g2_gen.py || exit 1
 [ "$ST" = "$W" ] || sh $W/test/linkfarm.sh $ST || exit 1
 cd $ST/test || exit 1
 OBJ=${G2OBJ:-obj}; EXE=${G2EXE:-g2dump}
-mkdir -p $OBJ
+# the objects of the modules with the default options are the ones that the Makefile shares among the suites (MODOBJ)
+MODOBJ=$OBJ; [ "$ST" = "$W" ] && [ "$OBJ" = obj ] && [ -z "$G2CF" ] && MODOBJ=modobj
+mkdir -p $OBJ $MODOBJ
 CC="patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$ST $G2CF"
 MODS="`cat $W/test/g2mods.txt`"
 for m in $MODS; do
-  o=$OBJ/${m}_dats.o
+  o=$MODOBJ/${m}_dats.o
   if [ ! -f $o ] || [ -n "$FORCE" ] || [ $W/$m.dats -nt $o ] || [ -n "`find $W -maxdepth 1 \( -name '*.sats' -o -name '*.hats' \) -newer $o | head -1`" ]; then
-    echo "(cd $OBJ && $CC -c -o ${m}_dats.o $ST/$m.dats) || echo FAILED $m"
+    echo "(cd $MODOBJ && $CC -c -o ${m}_dats.o $ST/$m.dats) || echo FAILED $m"
   fi
 done | xargs -P ${JOBS:-8} -I{} sh -c "{}"
 [ -f $OBJ/pats_error_sats.o ] || { patsopt --output $OBJ/pats_error_sats.c --static $ST/pats_error.sats && $CC -c -o $OBJ/pats_error_sats.o $OBJ/pats_error_sats.c; }
@@ -27,5 +29,5 @@ for f in g2case_[0-9][0-9].dats; do
 done | xargs -P ${JOBS:-8} -I{} sh -c "{}"
 $CC -I$ST/test -c -o $OBJ/g2dump.o g2dump.dats || exit 1
 OBJS=""
-for m in $MODS; do OBJS="$OBJS $OBJ/${m}_dats.o"; done
+for m in $MODS; do OBJS="$OBJS $MODOBJ/${m}_dats.o"; done
 $CC -o $EXE $OBJS $OBJ/pats_error_sats.o $OBJ/g2dump.o $OBJ/g2case_[0-9][0-9].o -lgmp

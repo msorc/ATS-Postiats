@@ -21,6 +21,7 @@ test/s2gen.stamp
 test/s2dump
 test/s2dump1
 test/s2dump_asan
+test/modobj/
 test/s2obj/
 test/s2obj_asan/
 test/test_avlmap
