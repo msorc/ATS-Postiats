@@ -500,7 +500,7 @@ ifneq ($(C3NSTRINTKND),intknd)
 P2LIBS=-lgmp
 endif
 P2MODS=$(filter-out pats_lintprgm_solve pats_lintprgm_myint_gmp pats_lintprgm_myint_int pats_atspre, \
-  $(patsubst %.dats,%,$(wildcard pats_*.dats)))
+  $(patsubst %.dats,%,$(sort $(wildcard pats_*.dats))))
 P2OBJS=$(addprefix $(P2OBJDIR)/,$(addsuffix _dats.o,$(P2MODS))) $(P2OBJDIR)/pats_error_sats.o $(P2OBJDIR)/pats_runtime_ats1.o
 P2GENHATS=$(GENHATS) $(DYN2GENHATS) $(MAC2GENHATS) $(D3GENHATS) $(TR2GENHATS) $(HDGENHATS) $(T3GENHATS) $(C3GENHATS) $(CCC2GENHATS)
 .PRECIOUS: $(P2OBJDIR)/%_dats.c
