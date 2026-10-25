@@ -1,0 +1,5 @@
+# Commits that only change whitespace.
+# Use: git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# Remove trailing whitespace from the hand-written sources
+33d9d5c62bdf990daed4ee06f531b2dd0a74c18c
