@@ -225,10 +225,11 @@ jobs:
       - name: the text of the documents is up to date
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
-          sh utils/atsdoc/TEST/genall.sh all
+          sh utils/atsdoc/TEST/genall.sh -j "$JOBS" all
 
   # ASan and UBSan on every push: the compiler (and so the whole build) is
-  # compiled with them, `make -C src check` type checks every module with it,
+  # compiled with them (so the sanitized patsopt compiles every module of the
+# compiler), `make -C src checksats` type checks every interface with it,
   # the unit tests of the modules and the examples and book code run with
   # the programs compiled by patscc under them. The full `make -C src test`
   # (about 900 serial sanitized compiles of the modules of the compiler, hours)
@@ -242,8 +243,9 @@ jobs:
   sanitizers:
     name: AddressSanitizer and UndefinedBehaviorSanitizer (${{ matrix.part }})
     runs-on: ubuntu-latest
-    # measured on a 32-core machine: bootstrap 5 min, src check 25 min,
-    # unit tests 10 min, examples 35 min (single threaded)
+    # on the runners: the sanitized make bootstrap of the part compiler is
+    # about 14 min (the sanitized patsopt compiles the compiler); the
+    # unsanitized bundle of the part examples makes it about 2 min
     timeout-minutes: 180
     strategy:
       fail-fast: false
@@ -264,14 +266,31 @@ jobs:
           # doc/EXAMPLE/ATSLIB links a test with -lgdbm (the runner images no longer have it)
           packages: libgdbm-dev
 
+      # compiler: the sanitized patsopt of the bundle compiles every module
+      # of the compiler (so it also type checks them all) and the libraries.
+      # examples: the compiler of the bundle is built without the sanitizers
+      # (it only generates C; the self-compilation under the sanitizers is
+      # the part compiler), and everything it compiles is sanitized.
       - name: make bootstrap (the whole compiler under the sanitizers)
+        if: matrix.part == 'compiler'
         run: make bootstrap CC="gcc $SAN"
 
-      - name: make -C src check (every module type checked by the sanitized patsopt)
+      - name: the bundle without the sanitizers, then the tree with them
+        if: matrix.part == 'examples'
+        run: |
+          make -C src/CBOOT -j"$JOBS" patsopt
+          make -f Makefile_devl PATSOPT="$PWD/src/CBOOT/patsopt" CC="gcc $SAN" all
+
+      # the .dats of the compiler were compiled by the sanitized patsopt in
+      # make bootstrap, but for the two that src/Makefile type checks and
+      # does not compile (pats_lintprgm_solve, pats_atspre); the .sats are
+      # type checked here one by one
+      - name: make -C src checksats (every interface type checked by the sanitized patsopt)
         if: matrix.part == 'compiler'
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
-          make -C src check
+          make -C src checksats
+          make -C src PATSOPT="$PWD/bin/patsopt" checkdats DATS="pats_lintprgm_solve.dats pats_atspre.dats"
 
       - name: the unit tests of the modules (src/test, TESTS)
         if: matrix.part == 'compiler'
@@ -281,7 +300,8 @@ jobs:
           cd src/test
           tests="$(sed -n '/^TESTS=/,/^$/p' Makefile | sed 's/^TESTS=//; s/\\$//')"
           echo "tests: $tests"
-          make $tests
+          # the programs are built JOBS at a time (each in its own directory)
+          make -j"$JOBS" PREBUILD=1 $tests
           for t in $tests; do
             echo "run $t"
             "./$t" > /dev/null
