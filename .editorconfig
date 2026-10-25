@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
+#
+# https://editorconfig.org
+#
+# The generated files (SRCGEN, *_gen*.hats, src/CBOOT, the Makefile made from
+# a Makefile.atxt) and the files whose bytes the tests hash (prelude/,
+# libats/, share/, *.atxt, the corpora of src/test, utils/atsdoc/TEST,
+# utils/libatsynmark/TEST) keep the whitespace they have: do not "clean"
+# them (see share/SCRIPT/check_trailing_whitespace.sh, the CI gate).
+
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# the recipes of a Makefile need tabs
+[{Makefile,Makefile.*,Makefile_*,*.mk}]
+indent_style = tab
+
+# two trailing spaces are a line break
+[*.md]
+trim_trailing_whitespace = false
+
+# generated or hashed: leave them as they are
+[{**/SRCGEN/**,src/CBOOT/**,prelude/**,libats/**,share/**,**/*.atxt,src/test/**,utils/atsdoc/TEST/**,utils/libatsynmark/TEST/**,contrib/atscntrb/atscntrb-hx-cstream/**}]
+trim_trailing_whitespace = false
+insert_final_newline = false

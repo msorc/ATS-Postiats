@@ -58,6 +58,9 @@ jobs:
       - name: the version of the release is declared consistently
         run: sh share/SCRIPT/check_release_version.sh
 
+      - name: no trailing whitespace in the hand-written sources (.editorconfig)
+        run: sh share/SCRIPT/check_trailing_whitespace.sh
+
   bootstrap:
     name: bootstrap from a clean clone (gcc)
     runs-on: ubuntu-latest
