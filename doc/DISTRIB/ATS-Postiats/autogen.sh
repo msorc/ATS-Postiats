@@ -6,6 +6,8 @@
 #
 ######
 #
+set -e
+#
 autoheader configure.ac
 #
 aclocal

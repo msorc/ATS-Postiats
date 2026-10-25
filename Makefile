@@ -154,6 +154,11 @@ book::
 # name: bin/ of the tree is put on the PATH)
 #
 pack::
+	@for t in autoheader aclocal autoconf ; do \
+	  command -v $$t >/dev/null 2>&1 || { \
+	    echo "ERROR: $$t is missing: the release tarball needs config.h.in and configure (./autogen.sh)," && \
+	    echo "       install autoconf (autoheader, aclocal, autoconf) and run again." && exit 1 ; } ; \
+	done
 	@if [ ! -x bin/atsdoc ] ; then \
 	  echo "ERROR: bin/atsdoc is missing: build it with 'make -f $(DEVL) bin_atsdoc'." && exit 1 ; \
 	fi

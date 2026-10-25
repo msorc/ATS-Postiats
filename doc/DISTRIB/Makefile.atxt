@@ -166,6 +166,20 @@ all_script::
 #make_entry("patscontrib_kernelats")
 #
 ######
+#
+# ./autogen.sh needs autoheader, aclocal and autoconf (they make config.h.in and
+# configure): without them the tarball would have no config.h.in. Fail first,
+# before any file is copied.
+#
+atspackaging:: autotools_check
+autotools_check:: ; \\
+  for t in autoheader aclocal autoconf ; do \\
+    command -v $$t >/dev/null 2>&1 || { \\
+      echo "ERROR: $$t is missing: the release tarball needs config.h.in and configure," ; \\
+      echo "       install autoconf (autoheader, aclocal, autoconf) and run again." ; \\
+      exit 1 ; } ; \\
+  done
+#
 atspackaging:: srcget_home
 atspackaging:: srcget_share
 #
