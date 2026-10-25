@@ -555,6 +555,14 @@ end // end of [e1xplevenv_valize_main]
 macdef oprerr (e0, id) = mkerr () where {
   val () = the_valerrlst_add (valerr_VE_opr_arglst (,(e0), ,(id)))
 } // end of [oprerr]
+//
+// the arithmetic of the integers wraps around (as the C code of ATS1 did in
+// practice), computed on unsigned ints so that it is not undefined behaviour
+//
+fn uadd (i1: int, i2: int): int = $UN.cast{int}($UN.cast{uint}(i1) + $UN.cast{uint}(i2))
+fn usub (i1: int, i2: int): int = $UN.cast{int}($UN.cast{uint}(i1) - $UN.cast{uint}(i2))
+fn umul (i1: int, i2: int): int = $UN.cast{int}($UN.cast{uint}(i1) * $UN.cast{uint}(i2))
+fn uneg (i: int): int = usub (0, i)
 
 fn
 e1xplevenv_valize_neg
@@ -564,7 +572,7 @@ e1xplevenv_valize_neg
 ) : v1al = let
   val v1 = e1xplevenv_valize (lev, env, e1)
 in
-  if v1al_is_V1ALint (v1) then mkint (~(v1al_int_get (v1)))
+  if v1al_is_V1ALint (v1) then mkint (uneg (v1al_int_get (v1)))
   else if v1al_is_V1ALfloat (v1) then v1al_V1ALfloat (~(v1al_float_get (v1)))
   else oprerr (e0, id) // non-number
 end // end of [e1xplevenv_valize_neg]
@@ -581,7 +589,7 @@ e1xplevenv_valize_add
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
   if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
-    then mkint (v1al_int_get (v1) + v1al_int_get (v2))
+    then mkint (uadd (v1al_int_get (v1), v1al_int_get (v2)))
   else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
     then v1al_V1ALfloat (v1al_float_get (v1) + v1al_float_get (v2))
   else if v1al_is_V1ALstring (v1) andalso v1al_is_V1ALstring (v2)
@@ -605,7 +613,7 @@ e1xplevenv_valize_sub
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
   if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
-    then mkint (v1al_int_get (v1) - v1al_int_get (v2))
+    then mkint (usub (v1al_int_get (v1), v1al_int_get (v2)))
   else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
     then v1al_V1ALfloat (v1al_float_get (v1) - v1al_float_get (v2))
   else oprerr (e0, id)
@@ -621,7 +629,7 @@ e1xplevenv_valize_mul
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
   if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
-    then mkint (v1al_int_get (v1) * v1al_int_get (v2))
+    then mkint (umul (v1al_int_get (v1), v1al_int_get (v2)))
   else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
     then v1al_V1ALfloat (v1al_float_get (v1) * v1al_float_get (v2))
   else oprerr (e0, id)
@@ -637,7 +645,13 @@ e1xplevenv_valize_div
   val v2 = e1xplevenv_valize (lev, env, e2)
 in
   if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2)
-    then mkint (g0int_div (v1al_int_get (v1), v1al_int_get (v2)))
+    then let
+      val i1 = v1al_int_get (v1) and i2 = v1al_int_get (v2)
+    in
+      if i2 = 0 then oprerr (e0, id) // division by zero
+      else if i2 = ~1 then mkint (uneg (i1)) // INT_MIN / ~1 wraps
+      else mkint (g0int_div (i1, i2))
+    end
   else if v1al_is_V1ALfloat (v1) andalso v1al_is_V1ALfloat (v2)
     then v1al_V1ALfloat (v1al_float_get (v1) / v1al_float_get (v2))
   else oprerr (e0, id)

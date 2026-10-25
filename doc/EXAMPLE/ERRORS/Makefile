@@ -7,6 +7,8 @@
 #   tail-call cannot be compiled (the group is one C function): patsopt says so
 #   (it used to produce C code with an implicit declaration);
 # - NEG_unbound.dats: an error of the typechecker;
+# - NEG_e1xp_divzero.dats: a division by zero in a #define expression (patsopt
+#   used to die of SIGFPE there; the #define arithmetic wraps around);
 # - for both: the exit status is 1 and patsopt does not print
 #   "uncaught exception" (the exception FatalErrorExn does not escape);
 # - NEG_if_linear.dats: an [if] with linear branches and no expected type
@@ -35,6 +37,7 @@ regress:: POS_if_linear ; ./$< || (echo "$< failed" && exit 1)
 regress:: ; \
 for t in NEG_fnx_nontail:"non-tail call to a function of the same \[fnx\]-group" \
          NEG_unbound:"is unrecognized" \
+         NEG_e1xp_divzero:"the operator \[/\] cannot handle its argument" \
          NEG_if_linear:"cannot be assigned the type"; do \
   f=$${t%%:*}.dats; msg=$${t#*:}; \
   $(PATSOPT) -d $$f > $$f.c 2> $$f.out; st=$$?; \
