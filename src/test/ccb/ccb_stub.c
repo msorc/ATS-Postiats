@@ -67,6 +67,7 @@ void ccb_freecon_add (void *e0, void *pmv) {
 }
 void *ccb_lst_x (void *l) { return ((lst*)l)->x ; }
 void *ccb_lst_next (void *l) { return ((lst*)l)->next ; }
+void ccb_lst_free (void *l) { while (l) { lst *c = (lst*)l ; l = c->next ; free (c) ; } }
 
 void ccb_dvarset_push (void *e0, void *set) { stk_push (&((env*)e0)->dvarset, set) ; }
 void *ccb_dvarset_pop (void *e0) { return stk_pop (&((env*)e0)->dvarset) ; }
@@ -131,6 +132,19 @@ static void auxjoin2 (ent **xs) {
 }
 void ccb_mark_join (void *e0) { auxjoin2 (&((env*)e0)->marks) ; }
 
+/* ccompenv_free: the cells of the environment (the values that the stacks and the maps hold belong to the ATS side) */
+static void stk_free (stk *s) { while (s) { stk *c = s ; s = c->next ; free (c) ; } }
+static void kv_free (kv *m) { while (m) { kv *c = m ; m = c->next ; free (c) ; } }
+void ccb_env_free (void *e0) {
+  env *e = (env*)e0 ; stk *s ;
+  while (e->marks) { ent *c = e->marks ; e->marks = c->next ; free (c) ; }
+  kv_free (e->vball) ;
+  for (s = e->vbenv ; s ; s = s->next) kv_free ((kv*)s->x) ;
+  for (s = e->freecon ; s ; s = s->next) ccb_lst_free (s->x) ;
+  stk_free (e->vbenv) ; stk_free (e->freecon) ; stk_free (e->dvarset) ; stk_free (e->flabset) ;
+  free (e) ;
+}
+
 /* the search of ccompenv_tmpcst_match / ccompenv_tmpvar_match: the entries from the newest; the matching is done by ATS (ccb_mock.hats) */
 void *ccb_marks (void *e0) { return ((env*)e0)->marks ; }
 void *ccb_ent_next (void *c) { return ((ent*)c)->next ; }
@@ -142,7 +156,8 @@ static int the_tflag = 0 ;
 int ccb_tflag_get (void) { return the_tflag ; }
 void ccb_tflag_set (int n) { the_tflag = n ; }
 
-/* the global lists of pats_ccomp_ccompenv.dats (the_funlablst, the_exndeclst, ..): add pushes, take returns the elements in the order of the additions and empties the list;
+/* the global lists of pats_ccomp_ccompenv.dats (the_funlablst, the_exndeclst, ..): add pushes, take returns the elements in the order of the additions (a new list,
+   which the caller frees with ccb_lst_free) and empties the list;
    kinds 6 (dyncon) and 7 (dyncst) do not add an element twice */
 #define NGL 9
 static lst *gl_lists[NGL] ;
@@ -154,7 +169,7 @@ void ccb_gl_add (int kind, void *x) {
 void *ccb_gl_take (int kind) {
   lst *res = 0, *c = gl_lists[kind] ;
   for ( ; c ; c = c->next) { lst *d = (lst*)malloc (sizeof (lst)) ; d->x = c->x ; d->next = res ; res = d ; }
-  gl_lists[kind] = 0 ;
+  ccb_lst_free (gl_lists[kind]) ; gl_lists[kind] = 0 ;
   return res ;
 }
 /* the toplevel cells of the_toplevel_getref_tmpvarlst / primdeclst */

@@ -39,7 +39,15 @@ in
   env
 end // end of [ccompenv_make]
 
-implement ccompenv_free (env) = let val _ = $UN.castvwtp0{ptr} (env) in end
+implement ccompenv_free (env) = let
+  val p = $UN.castvwtp0{ptr} (env)
+  fun flabs (p: ptr): void =
+    if ccb_flabset_nonempty (p) > 0 then (funlabset_vt_free ($UN.castvwtp0{funlabset_vt} (ccb_flabset_pop p)); flabs p) else ()
+  fun dvars (p: ptr): void =
+    if ccb_dvarset_nonempty (p) > 0 then (d2envset_vt_free ($UN.castvwtp0{d2envset_vt} (ccb_dvarset_pop p)); dvars p) else ()
+in
+  flabs p; dvars p; ccb_env_free p
+end // end of [ccompenv_free]
 
 implement ccompenv_get_tmprecdepth (env) = ccb_env_tmprecdepth_get (ccb_E env)
 implement ccompenv_inc_tmprecdepth (env) = (ccb_tr "inc_tmprecdepth\n"; ccb_env_tmprecdepth_set (ccb_E env, ccb_env_tmprecdepth_get (ccb_E env) + 1))
@@ -51,8 +59,11 @@ implement ccompenv_getdec_freeconenv (env) = let
   val () = ccb_tr "getdec_freeconenv\n"
   fun loop (l: ptr): primvalist_vt =
     if ptr_is_null (l) then list_vt_nil () else list_vt_cons ($UN.cast{primval} (ccb_lst_x l), loop (ccb_lst_next l))
+  val l = ccb_freecon_pop (ccb_E env)
+  val res = loop (l)
+  val () = ccb_lst_free (l)
 in
-  loop (ccb_freecon_pop (ccb_E env))
+  res
 end
 fun ccb_add_freeconenv (env: !ccompenv, pmv: primval): void = (ccb_tr "add_freeconenv("; dd_primval pmv; dd_ps ")\n"; ccb_freecon_add (ccb_E env, $UN.cast{ptr} pmv))
 implement ccompenv_add_freetupenv_if (env, pmv, pck) = if ccb_pck_is_free (pck) then ccb_add_freeconenv (env, pmv) else ()
@@ -253,23 +264,23 @@ fun ccb_mk_hideclist (l: ptr): hideclist = if ptr_is_null (l) then LN_hideclist 
 fun ccb_mk_d2conlst (l: ptr): d2conlst = if ptr_is_null (l) then LN_d2conlst () else LC_d2conlst ($UN.cast{d2con} (ccb_lst_x l), ccb_mk_d2conlst (ccb_lst_next l))
 fun ccb_mk_d2cstlst (l: ptr): d2cstlst = if ptr_is_null (l) then LN_d2cstlst () else LC_d2cstlst ($UN.cast{d2cst} (ccb_lst_x l), ccb_mk_d2cstlst (ccb_lst_next l))
 fun ccb_mk_funlablst (l: ptr): funlablst = if ptr_is_null (l) then LN_funlablst () else LC_funlablst ($UN.cast{funlab} (ccb_lst_x l), ccb_mk_funlablst (ccb_lst_next l))
-implement the_exndeclst_get () = ccb_mk_hideclist (ccb_gl_take 0)
+implement the_exndeclst_get () = let val l = ccb_gl_take 0 val res = ccb_mk_hideclist (l) val () = ccb_lst_free (l) in res end
 implement the_exndeclst_add (x) = ccb_gl_add (0, $UN.cast{ptr} x)
-implement the_saspdeclst_get () = ccb_mk_hideclist (ccb_gl_take 1)
+implement the_saspdeclst_get () = let val l = ccb_gl_take 1 val res = ccb_mk_hideclist (l) val () = ccb_lst_free (l) in res end
 implement the_saspdeclst_add (x) = ccb_gl_add (1, $UN.cast{ptr} x)
-implement the_extypelst_get () = ccb_mk_hideclist (ccb_gl_take 2)
+implement the_extypelst_get () = let val l = ccb_gl_take 2 val res = ccb_mk_hideclist (l) val () = ccb_lst_free (l) in res end
 implement the_extypelst_add (x) = ccb_gl_add (2, $UN.cast{ptr} x)
-implement the_extcodelst_get () = ccb_mk_hideclist (ccb_gl_take 3)
+implement the_extcodelst_get () = let val l = ccb_gl_take 3 val res = ccb_mk_hideclist (l) val () = ccb_lst_free (l) in res end
 implement the_extcodelst_add (x) = ccb_gl_add (3, $UN.cast{ptr} x)
-implement the_staloadlst_get () = ccb_mk_hideclist (ccb_gl_take 4)
+implement the_staloadlst_get () = let val l = ccb_gl_take 4 val res = ccb_mk_hideclist (l) val () = ccb_lst_free (l) in res end
 implement the_staloadlst_add (x) = ccb_gl_add (4, $UN.cast{ptr} x)
-implement the_dynloadlst_get () = ccb_mk_hideclist (ccb_gl_take 5)
+implement the_dynloadlst_get () = let val l = ccb_gl_take 5 val res = ccb_mk_hideclist (l) val () = ccb_lst_free (l) in res end
 implement the_dynloadlst_add (x) = ccb_gl_add (5, $UN.cast{ptr} x)
-implement the_dynconlst_get () = ccb_mk_d2conlst (ccb_gl_take 6)
+implement the_dynconlst_get () = let val l = ccb_gl_take 6 val res = ccb_mk_d2conlst (l) val () = ccb_lst_free (l) in res end
 implement the_dynconlst_add (x) = ccb_gl_add (6, $UN.cast{ptr} x)
-implement the_dyncstlst_get () = ccb_mk_d2cstlst (ccb_gl_take 7)
+implement the_dyncstlst_get () = let val l = ccb_gl_take 7 val res = ccb_mk_d2cstlst (l) val () = ccb_lst_free (l) in res end
 implement the_dyncstlst_add (x) = ccb_gl_add (7, $UN.cast{ptr} x)
-implement the_funlablst_get () = ccb_mk_funlablst (ccb_gl_take 8)
+implement the_funlablst_get () = let val l = ccb_gl_take 8 val res = ccb_mk_funlablst (l) val () = ccb_lst_free (l) in res end
 implement the_funlablst_add (fl) = (ccb_tr "the_funlablst_add("; dd_funlab fl; dd_ps ")\n"; ccb_gl_add (8, $UN.cast{ptr} fl))
 implement the_toplevel_getref_tmpvarlst () = $UN.cast{Ptr1} (ccb_toplevel_tmpvarlst_ref ())
 implement the_toplevel_getref_primdeclst () = $UN.cast{Ptr1} (ccb_toplevel_primdeclst_ref ())

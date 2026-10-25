@@ -9,7 +9,7 @@
 #   make mutate      the mutation test (ccbmutate.py: the output of the ATS1 driver is the reference)      make asan   AddressSanitizer build and run
 #   make small       regenerate ccb.md5 from the ATS1 driver
 # The phase 1 modules of pats_ccomp.sats are the doubles of dbl/ (copies of the real ones of wt-cc0); the environments, emit and the global lists are the mocks of
-# ccb_mock.hats / ccb_stub.c (the leaks of ccb_stub.c are the mock's: suppressed in asan).
+# ccb_mock.hats / ccb_stub.c (the mock frees its cells too: make asan needs no suppression).
 #
 OUT=../ccb_out
 export CCBSCALE ?= 20
@@ -45,8 +45,7 @@ mutate: ccb_cases_00.hats
 
 asan: ccb_cases_00.hats
 	sh ccb2.sh $(OUT)_asan -g -fsanitize=address
-	printf 'leak:ccb_stub\nleak:stk_push\nleak:ccb_gl_\n' > $(OUT)_asan/lsan.supp
-	LSAN_OPTIONS=suppressions=$(abspath $(OUT)_asan)/lsan.supp $(OUT)_asan/ccb2 > /dev/null 2>&1 && echo "ccb: asan, no error and no leak (but the mock's)"
+	$(OUT)_asan/ccb2 > /dev/null 2>&1 && echo "ccb: asan, no error and no leak"
 
 clean:
 	$(RM) -r $(OUT) $(OUT)_asan ccb_compat1.hats ccb_compat2.hats ccb_common2.hats ccb_hand0_[12].hats ccb_hand_a[12].hats ccb_cdecl[12].hats ccb_stubs[12].hats \
