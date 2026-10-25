@@ -55,8 +55,7 @@ cd doc/DISTRIB
 # Then do 'make -f Makefile.gen'
 #
 make atspackaging
-make atspacktarzvcf_gmp # for ATS2-Postiats-gmp-xxx.tgz
-make atspacktarzvcf_int # for ATS2-Postiats-int-xxx.tgz
+make atspacktarzvcf # for ATS2-Postiats-xxx.tgz (one tarball: ./configure --without-gmp for the intknd kind)
 #
 make atscontribing
 make atscontribtarzvcf # for ATS2-Postiats-contrib-xxx.tgz

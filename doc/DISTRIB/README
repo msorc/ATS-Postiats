@@ -46,7 +46,8 @@
 # cd /tmp
 # sh ${PATSHOME}/share/SCRIPT/build_release.sh x.y.z KIND
 # <
-# KIND is 'intknd', 'gmpknd', 'both' or 'contrib'. The tarball
+# KIND is 'release' or 'contrib' ('intknd', 'gmpknd' and 'both' are the old
+# names of 'release'). The tarball
 # ATS2-Postiats-x.y.z.tgz is one for both kinds of integers of the
 # constraint solver: ./configure uses libgmp when <gmp.h> is there.
 #

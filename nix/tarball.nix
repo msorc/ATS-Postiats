@@ -42,7 +42,7 @@ stdenv.mkDerivation rec {
     make -C src CBOOT PATSOPT=$PWD/src/patsopt
     make -f Makefile_devl bin_atsdoc  # (atspackaging uses atsdoc to generate the packaging scripts)
     make -C doc/DISTRIB atspackaging
-    make -C doc/DISTRIB atspacktarzvcf_gmp
+    make -C doc/DISTRIB atspacktarzvcf
   '';
 
   installPhase = ''

@@ -8,6 +8,11 @@
 # the build and release of both
 # ATS2-intknd and ATS2-gmpknd
 #
+# There is now ONE tarball, ATS2-Postiats-x.y.z.tgz, for both kinds
+# of the integers of the constraint solver: ./configure uses libgmp
+# when <gmp.h> is there and falls back to intknd with --without-gmp
+# (see doc/DISTRIB/Makefile.atxt).
+#
 ######
 #
 # HX-2018-03-17:
@@ -129,39 +134,21 @@ checkout_build() {
     )
 }
 
-# The compiler (src/) is written in ATS2: the stage-0 patsopt is bin/patsopt (an
-# earlier build) or PATSOPT=... STAGE0HOME=... (an installed ATS2), see src/README.
+# The compiler (src/) is written in ATS2: the stage-0 patsopt is the bootstrap bundle
+# (make bootstrap) or PATSOPT=... STAGE0HOME=... (an installed ATS2), see src/README.
 # `make -C src CBOOT` generates the bootstrap C bundle (src/CBOOT) of the release for
-# both integer kinds. atsdoc (ATS2, `make -f Makefile_devl bin_atsdoc`) generates the
-# packaging scripts (atspackaging).
+# both integer kinds. atsdoc (ATS2, `make tools`) generates the packaging scripts
+# (atspackaging). `make dist` is the packaging of the root Makefile: it checks that
+# autoheader, aclocal and autoconf (./autogen.sh) are there, makes the single tarball
+# ATS2-Postiats-x.y.z.tgz and ATS2-Postiats-include-x.y.z.tgz and their .sha256 files.
 #
-build_release_int() {
+build_release() {
     ( cd "$PATSHOME" && \
-      make -f Makefile_devl C3NSTRINTKND=intknd && \
-      make -f Makefile_devl bin_atsdoc && \
+      make bootstrap && \
+      make && \
+      make tools && \
       make -C src CBOOT && \
-      (cp ./bin/*_env.sh.in ./doc/DISTRIB/ATS-Postiats/bin/.) && \
-      (cd ./doc/DISTRIB/ATS-Postiats && \
-        sh ./autogen.sh && ./configure) && \
-      make -C doc/DISTRIB -f Makefile atspackaging && \
-      make -C doc/DISTRIB -f Makefile atspacktarzvcf_int
-      make -C doc/DISTRIB -f Makefile_inclats tarzvcf
-    )
-}
-
-######
-
-build_release_gmp() {
-    ( cd "$PATSHOME" && \
-      make -f Makefile_devl C3NSTRINTKND=gmpknd && \
-      make -f Makefile_devl bin_atsdoc && \
-      make -C src CBOOT && \
-      (cp ./bin/*_env.sh.in ./doc/DISTRIB/ATS-Postiats/bin/.) && \
-      (cd ./doc/DISTRIB/ATS-Postiats && \
-        sh ./autogen.sh && ./configure) && \
-      make -C doc/DISTRIB -f Makefile atspackaging && \
-      make -C doc/DISTRIB -f Makefile atspacktarzvcf_gmp
-      make -C doc/DISTRIB -f Makefile_inclats tarzvcf
+      make dist
     )
 }
 
@@ -191,9 +178,10 @@ _usage() {
     echo "x.x.x         release version"
     echo
     echo "KIND"
-    echo "intknd        ATS2-int: no need for gmplib"
-    echo "gmpknd        ATS2-gmp: dependency on gmplib"
+    echo "release       ATS2: one tarball (./configure uses gmplib when it is there,"
+    echo "              ./configure --without-gmp does not need it)"
     echo "contrib       ATS2-contrib: contributed packages"
+    echo "(intknd, gmpknd and both are the old names of release)"
     exit
 }
 
@@ -211,13 +199,8 @@ main() {
     checkout_build
 
     case "$2" in
-	intknd)
-	    build_release_int && build_cleanall ;;
-	gmpknd)
-	    build_release_gmp && build_cleanall ;;
-	both)
-	    build_release_int && build_cleanall
-	    build_release_gmp && build_cleanall ;;
+	release|intknd|gmpknd|both)
+	    build_release && build_cleanall ;;
 	contrib)
 	    build_release_contrib && build_cleanall ;;
 	*) _usage ;;
