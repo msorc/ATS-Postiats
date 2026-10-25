@@ -10,9 +10,20 @@
 #
 OUT=../cc2_out
 
-test:
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build
+gen:
 	python3 cc2_gen.py
+build: gen
 	sh cc2_2.sh $(OUT) -O1
+
+test: $(TESTDEPS)
 	@a=`$(OUT)/cc2 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(OUT)/cc2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 cc2.md5`" && echo "cc2: output as expected" || { echo "cc2: output differs from cc2.md5"; exit 1; }
 	@test "`sh cc2exit.sh $(OUT)/cc2 | md5sum | awk '{print $$1}'`" = "`sed -n 2p cc2.md5`" && echo "cc2: the cases that end the process as expected" || { echo "cc2: exit cases differ from cc2.md5"; exit 1; }

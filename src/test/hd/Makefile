@@ -15,9 +15,20 @@ OUT=../hd_out
 hd_compat2.hats hd_compat1.hats hd_cases_00.hats: hd_gen.py hd_cases.py hd_ty.py ../d2_gen.py ../d2_cases.py ../../pats_hidynexp.spec ../../pats_histaexp.spec ../../pats_dynexp3.spec
 	python3 hd_gen.py
 
-test:
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build
+gen:
 	python3 hd_gen.py
+build: gen
 	sh hd2.sh $(OUT) -O1
+
+test: $(TESTDEPS)
 	@a=`$(OUT)/hd2 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(OUT)/hd2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 hd.md5`" && echo "hd: output as expected" || { echo "hd: output differs from hd.md5"; exit 1; }
 	@test "`sh hdexit.sh $(OUT)/hd2 | md5sum | awk '{print $$1}'`" = "`sed -n 2p hd.md5`" && echo "hd: the cases that end the process as expected" || { echo "hd: exit cases differ from hd.md5"; exit 1; }

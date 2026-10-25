@@ -18,10 +18,21 @@ cc_compat2.hats cc_compat1.hats cc_cases_00.hats: cc_gen.py cc_cases.py ../hd/hd
 	cd ../hd && python3 hd_gen.py
 	python3 cc_gen.py
 
-test:
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build
+gen:
 	cd ../hd && python3 hd_gen.py
 	python3 cc_gen.py
+build: gen
 	sh cc2.sh $(OUT) -O1
+
+test: $(TESTDEPS)
 	@a=`$(OUT)/cc2 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(OUT)/cc2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 cc.md5`" && echo "cc: output as expected" || { echo "cc: output differs from cc.md5"; exit 1; }
 	@test "`sh ccexit.sh $(OUT)/cc2 | md5sum | awk '{print $$1}'`" = "`sed -n 2p cc.md5`" && echo "cc: the cases that end the process as expected" || { echo "cc: exit cases differ from cc.md5"; exit 1; }

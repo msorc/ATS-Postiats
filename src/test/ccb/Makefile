@@ -18,8 +18,19 @@ export CCBSEED ?= 1
 ccb_cases_00.hats: ccb_gen.py ccb_cases.py ccb_sats.py ccb_ctab.json ../../pats_ccomp.spec ../../pats_ccomp_hitype.spec
 	python3 ccb_gen.py
 
-test: ccb_cases_00.hats
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build
+gen: ccb_cases_00.hats
+build: gen
 	sh ccb2.sh $(OUT) -O1
+
+test: $(TESTDEPS)
 	@a=`$(OUT)/ccb2 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(OUT)/ccb2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 ccb.md5`" && echo "ccb: output as expected" || { echo "ccb: output differs from ccb.md5"; exit 1; }
 

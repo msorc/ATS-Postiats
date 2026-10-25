@@ -16,9 +16,20 @@ MASK=sed 's/^\*\* The starting compilation time is: .*$$/STARTTIME/'
 ca_compat2.hats ca_compat1.hats ca_cases_00.hats: ca_gen.py ca_cases.py ../hd/hd_gen.py ../hd/hd_cases.py ../../pats_ccomp.spec ../../pats_histaexp.spec ../../pats_hidynexp.spec
 	python3 ca_gen.py
 
-test:
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build
+gen:
 	python3 ca_gen.py
+build: gen
 	sh ca2.sh $(OUT) -O1
+
+test: $(TESTDEPS)
 	@a=`$(OUT)/ca2 2>/dev/null | $(MASK) | md5sum | awk '{print $$1}'`; b=`$(OUT)/ca2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 ca.md5`" && echo "ca: output as expected" || { echo "ca: output differs from ca.md5"; exit 1; }
 	@test "`sh caexit.sh $(OUT)/ca2 | md5sum | awk '{print $$1}'`" = "`sed -n 2p ca.md5`" && echo "ca: the cases that end the process as expected" || { echo "ca: exit cases differ from ca.md5"; exit 1; }

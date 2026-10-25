@@ -1204,3 +1204,37 @@ prebuild_t3g1: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3G1MODS)))
 prebuild_g2: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(shell cat g2mods.txt)))
 	sh g2build.sh
 .PHONY: prebuild_t3g1 prebuild_g2
+
+# ---------------------------------------------------------------------------------------------------------------------------------
+# The sub-suites that have a Makefile of their own and build in a staging directory (hd cc ca cc2 ccb cc1) are built here too, so that the serial part of `all`
+# (`make -C X test`) only runs the drivers and compares the md5 sums. Each of them has `gen` (the python generators; they write files that suites share: hd's
+# generated files are used by cc, ...) and `build` (the staging copy of src, the ~80 modules and the chunks of cases, the link; in parallel inside, JOBS).
+#  * subgen (serial, part of pregen): the arena encodings of src that their scripts ask `make -C src` for (once, so that the scripts only find them up to date),
+#    and the `gen` of each suite;
+#  * prebuild_SUITE (part of preexes, parallel): `make -C SUITE build`. The six builds are chained one after the other (each one runs JOBS compilations by itself;
+#    they are not run at the same time, so that JOBS compilations at most are added to the others of preexes), and run beside the other programs of preexes.
+# SUBS_PREBUILT tells the sub-Makefiles that the program is built: it is set only for `make all` with the prebuild step (JOBS>1); `make -C X test` alone builds it.
+SUBSUITES=hd cc ca cc2 ccb cc1
+SUBHATS=pats_staexp2_gen.hats pats_staexp2_gen_dats.hats pats_staexp2_error_gen.hats pats_staexp2_error_gen_dats.hats pats_dynexp2_gen.hats pats_dynexp2_gen_dats.hats \
+  pats_dynexp3_gen.hats pats_dynexp3_gen_dats.hats pats_hidynexp_gen.hats pats_hidynexp_gen_dats.hats pats_typerase_gen.hats pats_typerase_gen_dats.hats \
+  pats_trans3_env_gen.hats pats_trans3_env_gen_dats.hats pats_trans3_gen.hats pats_trans3_gen_dats.hats pats_dmacro2_gen.hats pats_dmacro2_gen_dats.hats \
+  pats_ccomp_gen.hats pats_ccomp_gen_dats.hats pats_ccomp_claulst_gen.hats pats_ccomp_claulst_gen_dats.hats
+ifneq ($(JOBS),1)
+ifneq ($(filter all,$(MAKECMDGOALS))$(if $(MAKECMDGOALS),,x),)
+export SUBS_PREBUILT=1
+endif
+endif
+SUBEXES=$(addprefix prebuild_,$(SUBSUITES))
+subgen:
+	$(MAKE) --no-print-directory -C $(M) $(SUBHATS)
+	for d in $(SUBSUITES); do $(MAKE) --no-print-directory -C $$d gen || exit 1; done
+pregen: subgen
+preexes: $(SUBEXES)
+$(SUBEXES): prebuild_%:
+	$(MAKE) --no-print-directory -C $* build
+prebuild_cc: | prebuild_hd
+prebuild_ca: | prebuild_cc
+prebuild_cc2: | prebuild_ca
+prebuild_ccb: | prebuild_cc2
+prebuild_cc1: | prebuild_ccb
+.PHONY: subgen $(SUBEXES)

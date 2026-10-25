@@ -581,7 +581,7 @@ def main(CGm):
     for sc in scs:
         t = sc.text()
         cur.append((sc.name, t)); size += t.count('\n')
-        if size > 700 or sc.name.startswith('sc_setup'):
+        if size > 1500 or sc.name.startswith('sc_setup'):
             chunks.append(cur); cur = []; size = 0
     if cur: chunks.append(cur)
     bodies = []

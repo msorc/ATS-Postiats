@@ -14,10 +14,25 @@
 OUT=../cc1_out
 HAVE_P1=$(wildcard ../../pats_ccomp_funlab.dats ../../pats_ccomp_print.dats ../../pats_ccomp_funent.dats ../../pats_ccomp_instrseq.dats ../../pats_ccomp.dats)
 
-test:
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build
 ifeq ($(words $(HAVE_P1)),5)
+gen:
 	python3 cc1_gen.py
+build: gen
 	sh cc1_2.sh $(OUT) -O1
+else
+gen build:
+endif
+
+test: $(TESTDEPS)
+ifeq ($(words $(HAVE_P1)),5)
 	@a=`$(OUT)/cc1_2 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(OUT)/cc1_2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 cc1.md5`" && echo "cc1: output as expected" || { echo "cc1: output differs from cc1.md5"; exit 1; }
 	@test "`sh cc1_exit.sh $(OUT)/cc1_2 | md5sum | awk '{print $$1}'`" = "`sed -n 2p cc1.md5`" && echo "cc1: the cases that end the process as expected" || { echo "cc1: exit cases differ from cc1.md5"; exit 1; }
