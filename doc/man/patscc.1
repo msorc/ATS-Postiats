@@ -26,16 +26,7 @@ and the include and library paths of
 .BR PATSHOME ;
 libc
 .BR malloc (3)
-is the allocator. (The usage text printed by
-.B patscc \-\-help
-still calls the programs
-.I atscc
-and
-.IR atsopt :
-they are
-.B patscc
-and
-.BR patsopt .)
+is the allocator.
 .SH OPTIONS
 .TP
 .BR \-h ", " \-\-help
@@ -49,6 +40,15 @@ Print the usage of
 .B \-vats
 Print the version of
 .BR patsopt .
+.TP
+.BR \-v ", " \-\-version
+Print the version line of
+.B patsopt
+and then the C compilation command that
+.B patscc
+uses (the value of
+.BR PATSCCOMP ,
+or the default one).
 .TP
 .B \-ccats
 Only compile the ATS files into C files; do not run the C compiler on them.

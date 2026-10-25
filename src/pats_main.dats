@@ -416,8 +416,8 @@ val @(_, cmdname) = arg0
 //
 in
 //
-fprintln! (out, "Usage: ", cmdname, " <command> ... <command>\n");
-fprintln! (out, "where a <command> is of one of the following forms:\n");
+fprintln! (out, "Usage: ", cmdname, " [options] ...\n");
+fprintln! (out, "Options:\n");
 //
 fprintln! (out, "  -h (for printing out this help usage)");
 fprintln! (out, "  --help (for printing out this help usage)");
@@ -470,7 +470,7 @@ end // end of [patsopt_usage]
 //
 #define
 PATS_COPYRIGHT
-"Copyright (c) 2011-2021 Hongwei Xi"
+"Copyright (c) 2011-2026 Hongwei Xi"
 //
 (* ****** ****** *)
 //

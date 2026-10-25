@@ -9302,9 +9302,9 @@ ATSINSflab(__patsflab_patsopt_usage_0):
 ATSINSmove(tmp1, ATSSELfltrec(arg1, postiats_tyrec_0, atslab__1)) ;
 ATSINSmove_void(tmp2, atspre_fprint_string(arg0, ATSPMVstring("Usage: "))) ;
 ATSINSmove_void(tmp3, atspre_fprint_string(arg0, tmp1)) ;
-ATSINSmove_void(tmp4, atspre_fprint_string(arg0, ATSPMVstring(" <command> ... <command>\n"))) ;
+ATSINSmove_void(tmp4, atspre_fprint_string(arg0, ATSPMVstring(" [options] ...\n"))) ;
 ATSINSmove_void(tmp5, atspre_fprint_newline(arg0)) ;
-ATSINSmove_void(tmp6, atspre_fprint_string(arg0, ATSPMVstring("where a <command> is of one of the following forms:\n"))) ;
+ATSINSmove_void(tmp6, atspre_fprint_string(arg0, ATSPMVstring("Options:\n"))) ;
 ATSINSmove_void(tmp7, atspre_fprint_newline(arg0)) ;
 ATSINSmove_void(tmp8, atspre_fprint_string(arg0, ATSPMVstring("  -h (for printing out this help usage)"))) ;
 ATSINSmove_void(tmp9, atspre_fprint_newline(arg0)) ;
@@ -9381,7 +9381,7 @@ ATSINSmove_void(tmp70, atspre_fprint_int(arg0, ATSPMVintrep(4))) ;
 ATSINSmove_void(tmp71, atspre_fprint_string(arg0, ATSPMVstring("."))) ;
 ATSINSmove_void(tmp72, atspre_fprint_int(arg0, ATSPMVintrep(3))) ;
 ATSINSmove_void(tmp73, atspre_fprint_string(arg0, ATSPMVstring(" with "))) ;
-ATSINSmove_void(tmp74, atspre_fprint_string(arg0, ATSPMVstring("Copyright (c) 2011-2021 Hongwei Xi"))) ;
+ATSINSmove_void(tmp74, atspre_fprint_string(arg0, ATSPMVstring("Copyright (c) 2011-2026 Hongwei Xi"))) ;
 ATSINSmove_void(tmpret66, atspre_fprint_string(arg0, ATSPMVstring("\n"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret66) ;

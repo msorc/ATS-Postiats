@@ -99,12 +99,45 @@ cleanaft_exec_if
   if cont then atscc_cleanaft_exec(verb, cas)
 ) (* end of [cleanaft_exec_if] *)
 //
+//
+// HX-2026-10:
+// [patscc -v] and [patscc --version] print the version line
+// of [patsopt] and then the C-compilation command in use
+//
+fun
+argv_is_version
+{n:int}{i:nat | i <= n} .<n-i>.
+(
+  n: int n, argv: !argv(n), i: int i
+) : bool =
+(
+  if i < n
+    then (
+      if argv[i] = "-v" then true
+      else if argv[i] = "--version" then true
+      else argv_is_version(n, argv, i+1)
+    ) else false
+) (* end of [argv_is_version] *)
+//
+fun
+print_ccomp_if
+(
+  cont: bool
+) : void =
+if cont then
+{
+  val cmd = atsccomp_get()
+  val () = fprintln! (stdout_ref, "C compiler command: ", $UN.strptr2string(cmd))
+  val () = strptr_free(cmd)
+} (* end of [print_ccomp_if] *)
+//
 implement
 main0(argc, argv) =
 {
 //
 var status: int = 0
 //
+prval () = lemma_argv_param(argv)
 //
 // HX-2015-03-22:
 // [patscc] for [patscc -vats]
@@ -131,6 +164,8 @@ val () =
   status :=
   atsoptline_exec_all(verb, $UN.strptr2string(cmd), argss)
 val () = strptr_free(cmd)
+//
+val () = print_ccomp_if(argv_is_version(argc, argv, 0))
 //
 val ccomp = atsccomp_cont(cas)
 val cont =

@@ -243,6 +243,18 @@ case+ 0 of
     aux0 (n, argv, i+1, res)
   end // end of [_ when ...]
 //
+| _ when (str0="-v") => let // HX-2026-10: same as --version
+    val res = list_vt_cons{ca}(CAvats(), res)
+  in
+    aux0 (n, argv, i+1, res)
+  end // end of [_ when ...]
+//
+| _ when (str0="--version") => let
+    val res = list_vt_cons{ca}(CAvats(), res)
+  in
+    aux0 (n, argv, i+1, res)
+  end // end of [_ when ...]
+//
 | _ when (str0="-vats") => let
     val res = list_vt_cons{ca}(CAvats(), res)
   in
