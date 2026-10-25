@@ -95,14 +95,6 @@ utils/atsdoc/TEST/drv_dats.o
 *_atxt.txt
 *_atxt.dats
 *_atxt.exe
-#
-# the generated programs that are kept in git
-!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/Makefile_atxt.dats
-!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/Makefile_atxt.txt
-!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/gmp_atxt.txt
-!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_atxt.dats
-!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_atxt.txt
-!contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN/htmlgendecl_data_atxt.dats
 
 #
 # ATSHOME/ccomp

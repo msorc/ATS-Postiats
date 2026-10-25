@@ -30,8 +30,7 @@
 # edited when the backends other than C, C++ and JS were removed).
 #
 # The runs happen in the directories of the templates: the programs they leave (*_atxt.*) are
-# ignored by git (`sh genall.sh clean`), but a few tracked, generated programs (the *_atxt.dats of
-# contrib/atscntrb/atscntrb-hx-libgmp/SATS/DOCUGEN, ...) are rewritten: restore them with git.
+# ignored by git (`sh genall.sh clean`); none of them is tracked (they name the path of the tree).
 #
 # The locale is C, PATSHOME is the canonical root of this repository (the C names of
 # the dynload functions contain it: libatsdoc.a and libatsynmark.a must have been built
