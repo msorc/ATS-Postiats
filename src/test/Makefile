@@ -1022,7 +1022,7 @@ c3gen.stamp: $(C3GENFILES)
 j2gen.stamp: $(J2GENFILES)
 	python3 j2_gen.py
 	@touch $@
-.PHONY: c3gen j2gen c3dump c3dump_int c3dump_asan c3dump_cov c3dump1 c3dump1_int c3compare c3test c3asan c3cover c3mutate j2dump j2dump_asan j2dump1 j2compare j2test j2asan j2mutate
+.PHONY: c3gen j2gen c3leak c3dump c3dump_int c3dump_asan c3dump_cov c3dump1 c3dump1_int c3compare c3test c3asan c3cover c3mutate j2dump j2dump_asan j2dump1 j2compare j2test j2asan j2mutate
 c3gen: c3gen.stamp
 j2gen: j2gen.stamp
 
@@ -1089,12 +1089,22 @@ c3dump1_int: c3gen.stamp
 c3compare: c3dump c3dump_int c3dump1 c3dump1_int
 	sh c3cmp.sh
 # the test without ATS1: the md5 sums of the stdout and the stderr of the ATS1-built c3dump1 (line 1: gmp, line 2: int; c3dump.md5)
+# (the problems that end in an exception leave the linear values that are alive unfreed, by design: the md5 runs are made without the leak check of a
+# sanitized build, and c3leak checks the leaks on the problems that do not end in an exception)
+C3NOLEAK=ASAN_OPTIONS="$${ASAN_OPTIONS:+$$ASAN_OPTIONS:}detect_leaks=0"
 c3test: c3dump c3dump_int
-	@a=`./c3dump c3data_gmp.txt 2>/dev/null | md5sum | awk '{print $$1}'`; b=`./c3dump c3data_gmp.txt 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
-	c=`./c3dump_int c3data_int.txt 2>/dev/null | md5sum | awk '{print $$1}'`; e=`./c3dump_int c3data_int.txt 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
+	@a=`$(C3NOLEAK) ./c3dump c3data_gmp.txt 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(C3NOLEAK) ./c3dump c3data_gmp.txt 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
+	c=`$(C3NOLEAK) ./c3dump_int c3data_int.txt 2>/dev/null | md5sum | awk '{print $$1}'`; e=`$(C3NOLEAK) ./c3dump_int c3data_int.txt 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b $$c $$e" = "`head -1 c3dump.md5`" && echo "c3dump: output as expected"
 c3data_noexn.txt: c3data_gmp.txt c3dump c3noexn.py
-	python3 c3noexn.py ./c3dump c3data_gmp.txt $@
+	$(C3NOLEAK) python3 c3noexn.py ./c3dump c3data_gmp.txt $@
+c3data_int_noexn.txt: c3data_int.txt c3dump_int c3noexn.py
+	$(C3NOLEAK) python3 c3noexn.py ./c3dump_int c3data_int.txt $@
+# the leak check of c3dump and c3dump_int when they are built with -fsanitize=address (PATSCCOMP), on the problems that do not end in an exception
+c3leak: c3dump c3dump_int c3data_noexn.txt c3data_int_noexn.txt
+	@./c3dump c3data_noexn.txt > /dev/null 2> c3leak.err || { tail -40 c3leak.err; exit 1; }
+	@./c3dump_int c3data_int_noexn.txt > /dev/null 2> c3leak.err || { tail -40 c3leak.err; exit 1; }
+	@echo "c3leak: no leak (or not a sanitized build)"
 c3asan: c3dump_asan c3data_noexn.txt
 	LSAN_OPTIONS=suppressions=$(abspath c3lsan.supp) ./c3dump_asan c3data_noexn.txt > /dev/null 2> c3asan.err; echo "exit $$?"; grep -c "ERROR: \(Address\|Leak\)Sanitizer" c3asan.err; true
 	@LSAN_OPTIONS=detect_leaks=0 ./c3dump_asan c3data_gmp.txt > /dev/null 2> c3asan_all.err; echo "all the problems, without the leak check: exit $$?"; grep -c "ERROR: AddressSanitizer" c3asan_all.err; true

@@ -303,14 +303,13 @@ jobs:
       SAN: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g
       CFLAGS: -O1
       P2OPT: -O1
-      # leaks are NOT checked in this job. c3dump (the c3_str strings and the
-      # test_symenv linmap no longer leak) still leaks on the problems that end in
-      # an exception (c3data_gmp.txt: s2varindmap_make, glist_listize in drv_icn;
-      # c3data_noexn.txt is clean), and the md5 suites compare the stderr of the
-      # drivers, which would then hold the leak report. The compiler itself
-      # runs with leak detection in the job sanitizers (make bootstrap), and so
-      # do the unit tests of src/test (TESTS) there.
-      ASAN_OPTIONS: detect_leaks=0:abort_on_error=0:strict_string_checks=1
+      # Leaks are checked, but for one suite: c3dump and c3dump_int catch the
+      # exception that ends a problem and go on with the next one, so the linear
+      # values that were alive then are not freed (by design: in patsopt the
+      # exception ends the process). c3test compares their output without the
+      # leak check, and the step c3leak checks them on the problems that do not
+      # end in an exception (c3noexn.py).
+      ASAN_OPTIONS: detect_leaks=1:abort_on_error=0:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1
       PATSCCOMP_BASE: gcc -std=c99 -D_GNU_SOURCE -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -L${PATSHOME}/ccomp/atslib/lib
     steps:
@@ -328,6 +327,12 @@ jobs:
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           export PATSCCOMP="$PATSCCOMP_BASE $SAN"
           make -C src test
+
+      - name: the leak check of c3dump on the problems that do not end in an exception
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          export PATSCCOMP="$PATSCCOMP_BASE $SAN"
+          make -C src/test c3leak
 
   # Opt-in (workflow_dispatch and the nightly schedule): the compiler built with
   # -Wall -Wextra so that the warnings are visible. The job never fails the

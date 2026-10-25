@@ -280,6 +280,8 @@ test/j2dump1_dats.c
 test/j2dump_asan
 test/j2asan.err
 test/c3data_noexn.txt
+test/c3data_int_noexn.txt
+test/c3leak.err
 test/c3asan_all.err
 test/cc/cc_compat1.hats
 test/cc/cc_compat2.hats
