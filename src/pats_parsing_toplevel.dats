@@ -139,12 +139,6 @@ pskip_tokbuf
 val tok =
   tokbuf_get_token(buf)
 //
-(*
-//
-val () =
-println! ("pskip_tokbuf: tok = ", tok)
-//
-*)
 in
 //
 if is_toplevel_resume(tok.token_node())

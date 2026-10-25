@@ -441,12 +441,6 @@ in
   d0atsrtcon_make (ent1, ent2)
 end // end of [then]
 else let
-(*
-//
-val () =
-  the_parerrlst_add_ifnbt (bt, tok.token_loc, PE_d0atsrtcon)
-//
-*)
 in
   tokbuf_set_ntok_null<d0atsrtcon> (buf, n0)
 end // end of [else]

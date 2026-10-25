@@ -339,15 +339,6 @@ val d2pis = (
           val () = auxerr1(loc0, id, err) in glist_nil()
         end) // end of [_]
     ) // end of [Some_vt]
-(*
-//
-// HX-2014-01-30:
-// Is this design too cumbersome?
-//
-  | ~None_vt () => let
-      val () = auxerr2 (loc0, id, err) in list_nil()
-    end // end of [None_vt]
-*)
   | ~None_vt() =>
       d2pis where
     {
@@ -357,12 +348,6 @@ val d2pis = (
       // end of [val]
     } // end of [None_vt]
 ) : d2pitmlst // end of [val]
-(*
-val () = begin
-  print "overload_tr_def: def := "; print_d2itm (def); print_newline ();
-  print "overload_tr_def: d2is := "; print_d2itmlst (d2is); print_newline ();
-end // end of [val]
-*)
 in
 //
 if err = 0 then let
@@ -750,27 +735,6 @@ in
 end // end of [s1taconlst_tr]
 
 (* ****** ****** *)
-
-(*
-//
-// HX-2012-05-23: removed
-//
-fun
-s1tavar_tr
-  (d: s1tavar): s2tavar = let
-  val loc = d.s1tavar_loc
-  val s2t = s1rt_tr (d.s1tavar_srt)
-  val s2v = s2var_make_id_srt (d.s1tavar_sym, s2t)
-  val () = the_s2expenv_add_svar (s2v)
-in
-  s2tavar_make (loc, s2v)
-end // end of [s1tavar_tr]
-
-fun
-s1tavarlst_tr
-  (ds: s1tavarlst): s2tavarlst = l2l (list_map_fun (ds, s1tavar_tr))
-// end of [s1tavarlst_tr]
-*)
 
 (* ****** ****** *)
 
@@ -1866,15 +1830,6 @@ and sym = d1c.m1acdef_sym()
 val () = the_trans2_env_push ()
 val arglst = d2mac_get_arglst (d2m)
 //
-(*
-val out = stdout_ref
-val () = fprintf
-  (out, "m1acdef_tr: knd = %i\n", @(knd))
-val () =
-  fprint_string (out, "m1acdef_tr: arglst =\n")
-val () = fprint_m2acarglst (out, arglst)
-val () = fprint_newline (out)
-*)
 //
 val () = trans2_env_add_m2acarglst (arglst)
 val () = the_macdeflev_inc ()
@@ -1991,12 +1946,6 @@ f1undec_tr
   // end of [val]
   val def = d1exp_tr (f1d.f1undec_def())
   val isnot = not (d2exp_is_lam (def))
-(*
-  val () = begin
-    print "f1undec_tr: d2v = "; print d2v; print_newline ()
-    print "f1undec_tr: def = "; print def; print_newline ()
-  end // end of [val]
-*)
 //
   val () =
   if isnot then let
@@ -2330,15 +2279,6 @@ prv1ardeclst_tr
 
 (* ****** ****** *)
 
-(*
-//
-// HX:
-// it is implemented in [pats_trans2_impdec.dats]:
-//
-extern fun i1mpdec_tr (d1c: d1ecl): Option_vt (i2mpdec)
-//
-*)
-
 (* ****** ****** *)
 //
 extern
@@ -2638,12 +2578,6 @@ d1ecl_node_view(d1c0.d1ecl_node()) of // case+
       s1taconlst_tr (knd, ds) in d2ecl_stacons(loc0, knd, s2cs)
     // end of [val]
   end // end of [D1Cstacons]
-(*
-| D1Cstavars (d1s) => let
-    val s2vs =
-      s1tavarlst_tr (d1s) in d2ecl_stavars (loc0, s2vs)
-  end // end of [D1Cstavars]
-*)
 //
 | ~D1Ctkindef(d) => let
     val () = t1kindef_tr (d) in d2ecl_none (loc0)
@@ -2922,14 +2856,6 @@ d1ecl_node_view(d1c0.d1ecl_node()) of // case+
     d2ecl_local (loc0, d2cs_head, d2cs_body)
   end // end of [D1Clocal]
 //
-(*
-| _ => let
-    val () = prerr_error2_loc (loc0)
-    val () = prerrln! (": d1ecl_tr: not implemented: d1c0 = ", d2c0)
-  in
-    d2ecl_none (loc0)
-  end // end of [_]
-*)
 //
 end // end of [d1ecl_tr]
 

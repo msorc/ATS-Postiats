@@ -7467,7 +7467,7 @@ ATSifthen(ATSCKptriscons(tmp573)) { ATSINSdeadcode_fail() ; } ;
 ATSINSlab(__atstmplab93):
 ATSINSmove(tmp578, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_loc(arg1)) ;
 ATSINSmove_void(tmp575, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__6(tmp578)) ;
-ATSINSmove_void(tmp579, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 14624(line=627, offs=14) -- 14668(line=627, offs=58)"), ATSPMVstring("d1exp_tr_app_sta_dyn_dqid"))) ;
+ATSINSmove_void(tmp579, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 14519(line=621, offs=14) -- 14563(line=621, offs=58)"), ATSPMVstring("d1exp_tr_app_sta_dyn_dqid"))) ;
 ATSINSmove_void(tmp580, atspre_prerr_string(ATSPMVstring(": unrecognized dynamic identifier ["))) ;
 ATSINSmove_void(tmp581, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_d0ynq(arg3)) ;
 ATSINSmove_void(tmp582, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg4)) ;
@@ -7612,7 +7612,7 @@ ATSbranch_beg()
 ATSINSlab(__atstmplab106):
 ATSINSmove_void(tmp673, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2itm_view_free(tmp592)) ;
 ATSINSmove_void(tmp674, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__7(tmp591)) ;
-ATSINSmove_void(tmp677, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 17971(line=770, offs=5) -- 18019(line=770, offs=53)"), ATSPMVstring("d1exp_tr_app_sta_dyn_dqid_itm"))) ;
+ATSINSmove_void(tmp677, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 17277(line=742, offs=5) -- 17325(line=742, offs=53)"), ATSPMVstring("d1exp_tr_app_sta_dyn_dqid_itm"))) ;
 ATSINSmove_void(tmp678, atspre_prerr_string(ATSPMVstring(": the identifier ["))) ;
 ATSINSmove_void(tmp679, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_d0ynq(arg3)) ;
 ATSINSmove_void(tmp680, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg4)) ;
@@ -8360,7 +8360,7 @@ ATSbranch_beg()
 ATSINSlab(__atstmplab135):
 ATSINSmove_void(tmp763, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_node_view_free(tmp750)) ;
 ATSINSmove_void(tmp764, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__8(tmp749)) ;
-ATSINSmove_void(tmp767, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 23017(line=986, offs=14) -- 23056(line=986, offs=53)"), ATSPMVstring("d1exp_wths1explst_tr"))) ;
+ATSINSmove_void(tmp767, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 22163(line=952, offs=14) -- 22202(line=952, offs=53)"), ATSPMVstring("d1exp_wths1explst_tr"))) ;
 ATSINSmove_void(tmp768, atspre_prerr_string(ATSPMVstring(": the dynamic expression is expected to be ascribed a type but it is not."))) ;
 ATSINSmove_void(tmp769, atspre_prerr_newline()) ;
 ATSINSmove(tmp771, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1exp_tr(arg0)) ;
@@ -9144,7 +9144,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr1_266):
 ATSINSmove(tmp910, PATSHOME_057_src_057_pats_dynexp1_056_sats__i1nvarg_loc(arg0)) ;
 ATSINSmove_void(tmp907, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__9(tmp910)) ;
-ATSINSmove_void(tmp911, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 25985(line=1089, offs=12) -- 26019(line=1089, offs=46)"), ATSPMVstring("i1nvarglst_tr"))) ;
+ATSINSmove_void(tmp911, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 25131(line=1055, offs=12) -- 25165(line=1055, offs=46)"), ATSPMVstring("i1nvarglst_tr"))) ;
 ATSINSmove_void(tmp912, atspre_prerr_string(ATSPMVstring(": the dynamic identifier ["))) ;
 ATSINSmove(tmp914, PATSHOME_057_src_057_pats_dynexp1_056_sats__i1nvarg_sym(arg0)) ;
 ATSINSmove_void(tmp913, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(tmp914)) ;
@@ -9177,7 +9177,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr2_268):
 ATSINSmove(tmp922, PATSHOME_057_src_057_pats_dynexp1_056_sats__i1nvarg_loc(arg0)) ;
 ATSINSmove_void(tmp919, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__10(tmp922)) ;
-ATSINSmove_void(tmp923, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 26382(line=1098, offs=12) -- 26416(line=1098, offs=46)"), ATSPMVstring("i1nvarglst_tr"))) ;
+ATSINSmove_void(tmp923, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 25528(line=1064, offs=12) -- 25562(line=1064, offs=46)"), ATSPMVstring("i1nvarglst_tr"))) ;
 ATSINSmove_void(tmp924, atspre_prerr_string(ATSPMVstring(": the dynamic identifier ["))) ;
 ATSINSmove(tmp926, PATSHOME_057_src_057_pats_dynexp1_056_sats__i1nvarg_sym(arg0)) ;
 ATSINSmove_void(tmp925, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(tmp926)) ;
@@ -10298,7 +10298,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_327):
 ATSINSmove(tmp1123, PATSHOME_057_src_057_pats_dynexp1_056_sats__c1lau_loc(arg0)) ;
 ATSINSmove_void(tmp1120, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__11(tmp1123)) ;
-ATSINSmove_void(tmp1124, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 29980(line=1243, offs=12) -- 30009(line=1243, offs=41)"), ATSPMVstring("c1lau_tr"))) ;
+ATSINSmove_void(tmp1124, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 29126(line=1209, offs=12) -- 29155(line=1209, offs=41)"), ATSPMVstring("c1lau_tr"))) ;
 ATSINSmove_void(tmp1125, atspre_prerr_string(ATSPMVstring(": this clause should contain "))) ;
 ATSINSmove(tmp1128, ATSLIB_056_prelude__gte_g0int_int__43__3(arg1, arg2)) ;
 ATSif(
@@ -14204,7 +14204,7 @@ ATSbranch_beg()
 ATSINSlab(__atstmplab368):
 ATSINSmove_void(tmp2291, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_node_view_free(tmp1584)) ;
 ATSINSmove_void(tmp2292, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interror_loc__33__6(tmp1583)) ;
-ATSINSmove_void(tmp2298, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 52710(line=2189, offs=14) -- 52737(line=2189, offs=41)"), ATSPMVstring("d1exp_tr"))) ;
+ATSINSmove_void(tmp2298, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 51767(line=2149, offs=14) -- 51794(line=2149, offs=41)"), ATSPMVstring("d1exp_tr"))) ;
 ATSINSmove_void(tmp2299, atspre_prerr_string(ATSPMVstring(": not yet implemented: d1e0 = "))) ;
 ATSINSmove_void(tmp2300, PATSHOME_057_src_057_pats_dynexp1_056_sats__prerr_d1exp(arg0)) ;
 ATSINSmove_void(tmp2301, atspre_prerr_newline()) ;
@@ -17773,7 +17773,7 @@ ATSINSlab(__atstmplab440):
 ATSINSmove_void(tmp2554, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2498)) ;
 ATSINSmove(tmp2558, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(tmp2466)) ;
 ATSINSmove_void(tmp2555, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__21(tmp2558)) ;
-ATSINSmove_void(tmp2559, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 57027(line=2367, offs=14) -- 57059(line=2367, offs=46)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
+ATSINSmove_void(tmp2559, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 56084(line=2327, offs=14) -- 56116(line=2327, offs=46)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
 ATSINSmove_void(tmp2560, atspre_print_string(ATSPMVstring(": [$d2ctype] can only be applied to a declared dynamic constant."))) ;
 ATSINSmove_void(tmp2561, atspre_print_newline()) ;
 ATSINSmove(tmp2563, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_S1Ed2ctype_tr(arg0)) ;
@@ -17794,7 +17794,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_cst_698):
 ATSINSmove(tmp2471, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(env1)) ;
 ATSINSmove_void(tmp2468, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__18(tmp2471)) ;
-ATSINSmove_void(tmp2472, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 54953(line=2287, offs=12) -- 54985(line=2287, offs=44)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
+ATSINSmove_void(tmp2472, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 54010(line=2247, offs=12) -- 54042(line=2247, offs=44)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
 ATSINSmove_void(tmp2473, atspre_prerr_string(ATSPMVstring(": the dynamic constant ["))) ;
 ATSINSmove_void(tmp2474, PATSHOME_057_src_057_pats_dynexp2_056_sats__prerr_d2cst(arg0)) ;
 ATSINSmove_void(tmp2475, atspre_prerr_string(ATSPMVstring("] should be instantiated."))) ;
@@ -17824,7 +17824,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr1_tmpid_700):
 ATSINSmove(tmp2482, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove_void(tmp2479, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__19(tmp2482)) ;
-ATSINSmove_void(tmp2483, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 55256(line=2301, offs=12) -- 55288(line=2301, offs=44)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
+ATSINSmove_void(tmp2483, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 54313(line=2261, offs=12) -- 54345(line=2261, offs=44)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
 ATSINSmove_void(tmp2484, atspre_prerr_string(ATSPMVstring(": a declared dynamic constant is expected instead of ["))) ;
 ATSINSmove_void(tmp2485, PATSHOME_057_src_057_pats_dynexp2_056_sats__prerr_d2exp(arg0)) ;
 ATSINSmove_void(tmp2486, atspre_prerr_string(ATSPMVstring("]."))) ;
@@ -17853,7 +17853,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr2_tmpid_702):
 ATSINSmove(tmp2491, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove_void(tmp2488, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__48__20(tmp2491)) ;
-ATSINSmove_void(tmp2492, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 55509(line=2313, offs=12) -- 55541(line=2313, offs=44)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
+ATSINSmove_void(tmp2492, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_dynexp.dats: 54566(line=2273, offs=12) -- 54598(line=2273, offs=44)"), ATSPMVstring("S1Ed2ctype_tr"))) ;
 ATSINSmove_void(tmp2493, atspre_prerr_string(ATSPMVstring(": the dynamic constant ["))) ;
 ATSINSmove_void(tmp2494, PATSHOME_057_src_057_pats_dynexp2_056_sats__prerr_d2cst(arg1)) ;
 ATSINSmove_void(tmp2495, atspre_prerr_string(ATSPMVstring("] is required to be be fully instantiated."))) ;

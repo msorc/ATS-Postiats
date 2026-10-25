@@ -1302,12 +1302,6 @@ then let
     | _ (*dyn*) => DYNMID // HX: dyn-mid
   ) : int // end of [val]
 //
-(*
-  val () =
-  println!
-    ("lexing_EXTCODE: knd = ", knd)
-  // end of [val]
-*)
 //
   var knd: int = knd
 //
@@ -2491,18 +2485,6 @@ val sym =
 in
 //
 case+ sym of
-(*
-| LS_LTBANG () => let
-    val () = posdecby1 (pos)
-    val () = strptr_free (mystr) in
-    lexbufpos_token_reset (buf, pos, LT)
-  end // end of [LS_LTBANG]
-| LS_LTDOLLAR () => let
-    val () = posdecby1 (pos)
-    val () = strptr_free (mystr) in
-    lexbufpos_token_reset (buf, pos, LT)
-  end // end of [LS_LTDOLLOR]
-*)
 | LS_QMARKGT () => let
     val () = posdecby1 (pos)
     val () = strptr_free (mystr)

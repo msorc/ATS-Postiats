@@ -121,30 +121,6 @@ macdef l2l (xs) = glist_make_list_vt (,(xs))
 
 (* ****** ****** *)
 
-(*
-extern
-fun
-tmprimval_make_none
-  (pmv: primval): tmprimval
-extern
-fun
-tmprimval_make_some
-  (pmv: primval): tmprimval
-//
-implement
-tmprimval_make_none
-  (pmv) = TPMVnone (pmv)
-implement
-tmprimval_make_some
-  (pmv) = let
-  val loc = pmv.primval_loc
-  val hse = pmv.primval_type
-  val tmp = tmpvar_make (loc, hse)
-in
-  TPMVsome (tmp, pmv)
-end // end of [tmprimval_make_some]
-*)
-
 (* ****** ****** *)
 //
 extern
@@ -247,15 +223,6 @@ implement
 tmpmovlst_add
   (tmvlst, tpmv1, tpmv2) = let
 //
-(*
-val
-out = stdout_ref
-//
-val () =
-fprintln! (out, "tmpmovlst_add: tpmv1 = ", tpmv1)
-val () =
-fprintln! (out, "tmpmovlst_add: tpmv2 = ", tpmv2)
-*)
 //
 in
 //
@@ -268,15 +235,6 @@ case+ tmprimval_view (tpmv2) of
 end // end of [tmpmovlst_add]
 
 (* ****** ****** *)
-
-(*
-extern
-fun
-fprint_matoken (out: FILEref, x: matoken): void
-extern
-fun
-fprint_matokenlst (out: FILEref, xs: matokenlst): void
-*)
 
 (* ****** ****** *)
 //
@@ -791,13 +749,6 @@ val xs1 = glist_tail<patcomp> (xs10)
 val x2 = glist_head<patcomp> (xs20) // HX: [val+list_cons]
 val xs2 = glist_tail<patcomp> (xs20)
 //
-(*
-val out = stdout_ref
-val () = fprintln! (out, "auxlst2: x1 = ", x1)
-val () = fprintln! (out, "auxlst2: xs1 = ", xs1)
-val () = fprintln! (out, "auxlst2: x2 = ", x2)
-val () = fprintln! (out, "auxlst2: xs2 = ", xs2)
-*)
 //
 in
 //
@@ -907,14 +858,6 @@ auxmovfin
   xs2: patcomplst, tmvlst: &tmpmovlst_vt >> _
 ) : void = let
 //
-(*
-//
-val
-out = stdout_ref
-val () =
-  fprintln! (out, "auxmovfin: xs2 = ", xs2)
-//
-*)
 //
 fun ftpmv
 (
@@ -1963,12 +1906,6 @@ val () = ccompenv_pop(pf0 | env)
 //
 val inss = instrseq_get_free(res)
 //
-(*
-val () =
-fprintln!
-  (stdout_ref, "hiclaulst_ccomp: auxcl: inss =\n", inss)
-// end of [val]
-*)
 //
 in
   ibranch_make(hicl.hiclau_loc(), inss)

@@ -336,15 +336,6 @@ if token_node_is_T_DOT(tnd) then (
  let
         val () = incby1() in d0ynq_symdot(ent1, tok2)
       end
-(*
-//
-// HX-2017-01-24:
-// removed due to no use
-//
-    | T_COLON() => let
-        val () = incby1() in d0ynq_symcolon(ent1, tok2)
-      end
-*)
     
 )
 else (

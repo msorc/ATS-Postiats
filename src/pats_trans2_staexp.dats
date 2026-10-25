@@ -272,14 +272,6 @@ implement
 s1arg_trdn
   (s1a, s2t0) = let
 //
-(*
-val () =
-fprintln!
-  (stdout_ref, "s1a = ", s1a)
-val () =
-fprintln!
-  (stdout_ref, "s2t0 = ", s2t0)
-*)
 //
 fun
 auxerr
@@ -1900,18 +1892,6 @@ s1exp_trup_tyrec
   s1e0: s1exp
 , knd: int, npf: int, ls1es: labs1explst
 ) : s2exp = let
-(*
-//
-val () =
-println!
-  ("s1exp_trup_tyrec: s1e0 = ", s1e0);
-//
-val () =
-  println! ("s1exp_trup_tyrec: knd = ", knd)
-val () =
-  println! ("s1exp_trup_tyrec: npf = ", npf)
-//
-*)
 in
 //
 case+ knd of
@@ -2144,12 +2124,6 @@ s1exp_node_view(s1e0.s1exp_node()) of (* case+ *)
 //
 | ~S1Euni
     (s1qs, s1e_scope) => let
-(*
-    val () =
-    println!
-      ("s1exp_trup: S1Euni: s1e0 = ", s1e0)
-    // end of [val]
-*)
     val () = the_s2expenv_push_nil ()
     val s2q = s1qualst_tr (s1qs)
     val s2e_scope = s1exp_trdn_impred s1e_scope
@@ -2162,12 +2136,6 @@ s1exp_node_view(s1e0.s1exp_node()) of (* case+ *)
   end // end of [S1Euni]
 | ~S1Eexi
     (knd, s1qs, s1e_scope) => let
-(*
-    val () =
-    println!
-      ("s1exp_trup: S1Eexi: s1e0 = ", s1e0)
-    // end of [val]
-*)
 //
     val () =
     if knd > 0 then
@@ -3007,12 +2975,6 @@ end // end of [stasub_extend_sarglst_svarlst]
 implement
 s1vararg_bind_svarlst
   (s1va, s2vs, serr) = let
-(*
-val () = (
-  print "s1vararg_bind_svarlst: s1va = "; print_s1vararg (s1va); print_newline ();
-  print "s1vararg_bind_svarlst: s2vs = "; print_s2varlst (s2vs); print_newline ();
-) // end of [val]
-*)
 in
 //
 case+ s1vararg_view(s1va) of

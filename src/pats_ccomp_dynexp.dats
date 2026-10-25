@@ -286,12 +286,6 @@ hidexp_ccomp
 val loc0 = hde0.hidexp_loc()
 val hse0 = hde0.hidexp_type()
 //
-(*
-val () =
-println! ("hidexp_ccomp: hse0 = ", hse0)
-val () =
-println! ("hidexp_ccomp: hde0 = ", hde0)
-*)
 //
 in
 //
@@ -580,14 +574,6 @@ if glist_is_cons(lhdes) then let
   val lab = lhde.labhidexp_lab()
   val hde = lhde.labhidexp_elt()
 //
-(*
-    val () =
-      println! ("loop: hde = ", hde)
-    // end of [val]
-    val () =
-      println! ("loop: hde.type = ", hde.hidexp_type)
-    // end of [val]
-*)
 //
   val pmv =
     hidexp_ccomp (env, res, hde)
@@ -947,17 +933,6 @@ else let
     val tmpmat =
       ccompenv_tmpcst_match (env, d2c, t2mas)
     // end of [val]
-(*
-    val out = stdout_ref
-    val () =
-      println! ("hidexp_ccomp_tmpcst: d2c = ", d2c)
-    val () = println! ("hidexp_ccomp_tmpcst: t2mas =")
-    val () =
-    (
-      fpprint_t2mpmarglst (out, t2mas); fprint_newline (out)
-    )
-    val () = fprintln! (out, "hidexp_ccomp_tmpcst: mat = ", tmpmat)
-*)
   in
     ccomp_tmpcstmat (env, loc0, hse0, d2c, t2mas, tmpmat)
   end // end of [if]
@@ -986,17 +961,6 @@ else let
     val tmpmat =
       ccompenv_tmpvar_match (env, d2v, t2mas)
     // end of [val]
-(*
-    val out = stdout_ref
-    val () =
-      println! ("hidexp_ccomp_tmpvar: d2v = ", d2v)
-    val () = println! ("hidexp_ccomp_tmpvar: t2mas =")
-    val () =
-    (
-      fpprint_t2mpmarglst (out, t2mas); fprint_newline (out)
-    )
-    val () = fprintln! (out, "hidexp_ccomp_tmpvar: mat = ", tmpmat)
-*)
   in
     ccomp_tmpvarmat (env, loc0, hse0, d2v, t2mas, tmpmat)
   end // end of [if]
@@ -1340,12 +1304,6 @@ val isret =
   if tlcalopt > 0 then tmpvar_isret(tmpret) else false
 ) : bool // end of [val]
 //
-(*
-val () =
-println! ("hidexp_ccomp_ret_app: loc0 = ", loc0)
-val () =
-println! ("hidexp_ccomp_ret_app: pmv_fun = ", pmv_fun)
-*)
 //
 val () =
 if tlcalopt > 0 then
@@ -1993,14 +1951,6 @@ val () = funlab_set_funent(flab, gopt_some(fent))
 //
 val () = ccompenv_dec_tailcalenv(env)
 //
-(*
-val out = stdout_ref
-val finfls = funent_eval_flablst (fent)
-val () = fprintln! (out, "hidexp_ccomp_lam: finfls = ", finfls)
-val find2es = funent_eval_d2envlst (fent)
-val () = fprintln! (out, "hidexp_ccomp_lam: find2es = ", find2es)
-val () = fprintln! (out, "hidexp_ccomp_lam: fent = ", fent)
-*)
 //
 in
   // nothing

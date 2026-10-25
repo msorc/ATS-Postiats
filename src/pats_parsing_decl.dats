@@ -1147,15 +1147,6 @@ let val knd = token_ival_get(tok) in
   in
     if err = err0 then d0ecl_stacons (knd, tok, ent2) else synent_null<d0ecl>()
   end
-(*
-| T_STAVAR () => let
-    val bt = 0
-    val () = incby1 ()
-    val ent2 = p_s0tavarseq (buf, bt, err)
-  in
-    if err = err0 then d0ecl_stavars (tok, ent2) else synent_null()
-  end
-*)
 //
 end
 )

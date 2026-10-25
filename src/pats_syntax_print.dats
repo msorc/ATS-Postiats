@@ -169,17 +169,6 @@ fprint_s0taq (out, x) =
       val () = fprint_symbol (out, sym)
       val () = fprint_string (out, ".")
     }
-(*
-//
-// HX-2017-01-24:
-// it is never in use
-//
-  | S0TAQsymcolon(sym) =>
-    {
-      val () = fprint_symbol (out, sym)
-      val () = fprint_string (out, ":")
-    }
-*)
 // end of [fprint_s0taq]
 
 implement print_s0taq (x) = fprint_s0taq (stdout_ref, x)
@@ -205,25 +194,6 @@ d0ynq_node_view(x.d0ynq_node()) of // case+
     val () = fprint_symbol(out, sym)
     val () = fprint_string(out, ".")
   }
-(*
-//
-// HX-2017-01-24:
-// removed due to no use
-//
-| D0YNQsymcolon
-    (sym) =>
-  {
-    val () = fprint_symbol (out, sym)
-    val () = fprint_string (out, ":")
-  }
-| D0YNQsymdotcolon
-    (sym1, sym2) =>
-  {
-    val () = fprint_symbol (out, sym1)
-    val () = fprint_symbol (out, sym2)
-    val () = fprint_string (out, ":")
-  }
-*)
 ) (* end of [fprint_d0ynq] *)
 //
 implement
@@ -1279,21 +1249,6 @@ fun fprint_s0tacst (
 } // end of [fprint_s0tacst]
 
 (* ****** ****** *)
-
-(*
-//
-// HX-2012-05-23: removed
-//
-fun fprint_s0tavar
-(
-  out: FILEref, x: s0tavar
-) : void = () where {
-  val () = fprint_symbol (out, x.s0tavar_sym)
-  val () = fprint_string (out, "(")
-  val () = fprint_s0rt (out, x.s0tavar_srt)
-  val () = fprint_string (out, ")")
-} // end of [fprint_s0tavar]
-*)
 
 (* ****** ****** *)
 

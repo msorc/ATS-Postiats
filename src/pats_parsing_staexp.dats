@@ -259,15 +259,6 @@ of // case+
     val () = incby1() in i0de_make_sym(loc, symbol_BACKSLASH)
   end
 //
-(*
-//
-// HX-2015-12-10:
-// 'ref@' is removed
-//
-| T_REFAT() => let
-    val () = incby1() in i0de_make_sym(loc, symbol_REFAT)
-  end // end of [T_REFAT]
-*)
 //
 | v (*rest*) => let
     val () = token_node_view_free(v)
@@ -323,15 +314,6 @@ ptest_fun<i0de> (
     if token_node_is_T_DOT (tok2.token_node()) then let
         val () = incby1 () in s0taq_symdot (ent1, tok2)
       end
-(*
-//
-// HX-2017-01-24:
-// it is never in use
-//
-    | T_COLON () => let
-        val () = incby1 () in s0taq_symcolon (ent1, tok2)
-      end
-*)
     else (*non-DOT-COLON*) let
         val () = the_parerrlst_add_ifnbt (bt, loc, PE_s0taq)
       in

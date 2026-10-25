@@ -191,14 +191,6 @@ case+ gopt_view(s2cst_get_dconlst(s2dat)) of
 | ~GOnone() => (assertloc(false); glist_nil((*void*))) // HX: the MatchError of [val-Some]
 ) : d2conlst
 //
-(*
-val () =
-println!
-  ("codegen2_datcon: aux_datype: s2dat = ", s2dat)
-val () =
-println!
-  ("codegen2_datcon: aux_datype: d2conlst = ", d2cs)
-*)
 //
 val
 linesep =
@@ -241,13 +233,6 @@ in (* in-of-local *)
 implement
 codegen2_datcon
   (out, d2c0, xs) = let
-(*
-//
-val () =
-println!
-  ("codegen2_datcon: d2c0 = ", d2c0)
-//
-*)
 in
 //
 case+ glist_view(xs) of
@@ -386,14 +371,6 @@ case+ gopt_view(s2cst_get_dconlst(s2dat)) of
 | ~GOnone() => (assertloc(false); glist_nil((*void*))) // HX: the MatchError of [val-Some]
 ) : d2conlst
 //
-(*
-val () =
-println!
-  ("codegen2_datcontag: aux_datype: s2dat = ", s2dat)
-val () =
-println!
-  ("codegen2_datcontag: aux_datype: d2conlst = ", d2cs)
-*)
 //
 val
 linesep =
@@ -437,13 +414,6 @@ in (* in-of-local *)
 implement
 codegen2_datcontag
   (out, d2c0, xs) = let
-(*
-//
-val () =
-println!
-  ("codegen2_datcontag: d2c0 = ", d2c0)
-//
-*)
 in
 //
 case+ glist_view(xs) of

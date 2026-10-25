@@ -465,14 +465,6 @@ if ans = 0 then let
 in
   s2hnf_equal_solve_lVar_err_nck(loc0, s2f1, s2f2, s2V1, err)
 end else let // ans > 0
-(*
-  val () = (
-    println! ("s2exp_equal_solve_lVar_err: s2f1 = ", s2f1);
-    println! ("s2exp_equal_solve_lVar_err: s2f2 = ", s2f2);
-    println! ("s2exp_equal_solve_lVar_err: s2cs = ", s2cs);
-    println! ("s2exp_equal_solve_lVar_err: s2vs = ", s2vs);
-  ) // end of [val]
-*)
 in
   trans3_env_add_eqeq (loc0, s2e1, s2e2)
 end // end of [if]
@@ -578,14 +570,6 @@ then let
 in
   s2hnf_equal_solve_rVar_err_nck(loc0, s2f1, s2f2, s2V2, err)
 end else let // ans > 0
-(*
-  val () = (
-    println! ("s2exp_equal_solve_rVar_err: s2f1 = ", s2f1);
-    println! ("s2exp_equal_solve_rVar_err: s2f2 = ", s2f2);
-    println! ("s2exp_equal_solve_rVar_err: s2cs = ", s2cs);
-    println! ("s2exp_equal_solve_rVar_err: s2vs = ", s2vs);
-  ) // end of [val]
-*)
 in
   trans3_env_add_eqeq (loc0, s2e1, s2e2)
 end // end of [if]
@@ -1225,14 +1209,6 @@ s2hnf_tyleq_solve_lVar_err
   loc0, s2f1, s2f2, s2V1, err
 ) = let
 //
-(*
-val () =
-println!
-("s2hnf_tyleq_solve_lVar_err: s2f1 = ", s2f1)
-val () =
-println!
-("s2hnf_tyleq_solve_lVar_err: s2f2 = ", s2f2)
-*)
 //
 val
 s2e2 = s2hnf2exp(s2f2)
@@ -1251,13 +1227,6 @@ in
   s2hnf_tyleq_solve_lbs_err(loc0, lbs, s2f2, err)
 end // end of [val]
 //
-(*
-val () = let
-  val ub = s2VarBound_make(loc0, s2e2)
-in
-  s2Var_set_ubs(s2V1, list_cons(ub, s2Var_get_ubs(s2V1)))
-end // end of [val]
-*)
 //
 val () = s2Var_ub_insert(loc0, s2V1, s2e2)
 //
@@ -1298,13 +1267,6 @@ in
   s2hnf_tyleq_solve_ubs_err(loc0, s2f1, ubs, err)
 end // end of [val]
 //
-(*
-val () = let
-  val lb = s2VarBound_make(loc0, s2e1)
-in
-  s2Var_set_lbs(s2V2, list_cons(lb, s2Var_get_lbs(s2V2)))
-end // end of [val]
-*)
 //
 val () = s2Var_lb_insert(loc0, s2V2, s2e1)
 //
@@ -2216,14 +2178,6 @@ implement
 s2explst_hypequal_solve
   (loc0, s2es1, s2es2) = let
 //
-(*
-val () =
-println!
-  ("s2explst_hypequal_solve: s2es1 = ", s2es1)
-val () = 
-println!
-  ("s2explst_hypequal_solve: s2es2 = ", s2es2)
-*)
 //
 in
 //

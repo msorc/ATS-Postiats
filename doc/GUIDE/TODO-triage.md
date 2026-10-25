@@ -29,7 +29,7 @@ for the whole group; **leave** = a note that is fine as it is.
 
 | file:line | marker | why it may be a bug | recommendation |
 |---|---|---|---|
-| `pats_trans2_dynexp.dats:1819` | `sc2laulst_coverck (loc0, sc2ls, s2t_pat) // FIXME!!!` | the only `FIXME`: the coverage check of a static `scase` is called but the author doubts it (it may report a wrong or no error) | **issue**: write a test with an incomplete `scase` and see what the compiler says |
+| `pats_trans2_dynexp.dats:1779` | `sc2laulst_coverck (loc0, sc2ls, s2t_pat) // FIXME!!!` | the only `FIXME`: the coverage check of a static `scase` is called but the author doubts it (it may report a wrong or no error) | **issue**: write a test with an incomplete `scase` and see what the compiler says |
 | `pats_staexp2_szexp.dats:370` | `s2zexp_S2ZEbot () (* HX: really??? *)` | the size expression of an unknown application head silently becomes bottom; wrong sizes may follow | **issue** (with a test of the size of a type application of a non-constant) |
 | `pats_trans3_env.dats:383,568,585,604` | `[sub] should be properly extended first` | four places call `stasub_s2varlst_instantiate_none` with a substitution that the author says is not extended first; the instantiation may miss variables | **issue**: one for the four |
 | `pats_trans3_env_lstate.dats:380` | `assertloc (glist_is_nil (...ctrs ())) // [ctrs] should be nil!` | an `assertloc` on a state of the linear-state machinery; an abort instead of an error message if it ever fails | **group** with the `assertloc` ones below |
@@ -57,18 +57,17 @@ limits of the language implementation, not bugs.
 | `pats_staexp2_sort.dats:676`, `pats_staexp2.sats:301` | `tuple sort(s) not yet supported` (`s2rt_tup`) | **leave**, the same limit in two places |
 | `pats_e1xpval.sats:68,73` | `tuple value / function value is not supported` (commented out `VE_E1XPlist`, `VE_E1XPfun`) | **leave** |
 | `pats_ccomp_decl.dats:613` | `non-lambda function definition is not supported.` | **issue**: say what the user should write |
-| `pats_ccomp_dynexp.dats:466` | `[sif] is not supported after proof-erasure.` | **leave** |
+| `pats_ccomp_dynexp.dats:460` | `[sif] is not supported after proof-erasure.` | **leave** |
 | `pats_trans2_impdec.dats:885` | `temp guards not supported` (`tmpgua = glist_nil`) | **issue** (a feature: guards on template implementations) |
-| `pats_trans2_decl.dats:2482` | `Overloading declarations needs to be added` (HX-2017-01-30) | **issue**: check whether an overload declared in a staloaded file is seen by the includer |
-| `pats_trans2_decl.dats:2928` | `d1ecl_tr: not implemented: d1c0 = ...` | **leave** (internal error text) |
+| `pats_trans2_decl.dats:2422` | `Overloading declarations needs to be added` (HX-2017-01-30) | **issue**: check whether an overload declared in a staloaded file is seen by the includer |
 | `pats_trans2_p1at.dats:827` | `p1at_tr: not yet implemented: p1t0 = ...` | **leave** |
-| `pats_trans2_dynexp.dats:2190` | `not yet implemented: d1e0 = ...` | **leave** |
+| `pats_trans2_dynexp.dats:2150` | `not yet implemented: d1e0 = ...` | **leave** |
 | `pats_dmacro2_eval1.dats:392` | `eval1_p2at: not implemented yet` | **issue**: patterns in `eval1` macros |
 | `pats_trans3_syncst.dats:283,356,457` | `the suffix of the integer / floating point number is not supported.` | **leave** |
 | `pats_typerase_dynexp.dats:1153` | `a non-value body for static lam-abstraction is not supported.` | **leave** |
 | `pats_lintprgm_myint_gmp.dats:192` | `div11 is declared but not implemented in ATS1 (gmpknd)` | **issue**: implement it for gmpknd (or remove the declaration) |
 | `pats_filename.dats:420` | `[getcwd_gc] of libats/libc is not implemented; the C code is below` | **issue**: use the library function now that it exists |
-| `pats_trans2_decl.dats:1411`, `pats_trans3_util.dats:543` | `nonlinear heap allocation is not supported (no GC)` | **leave**: this is the no-GC rule (CLAUDE.md), not a gap |
+| `pats_trans2_decl.dats:1375`, `pats_trans3_util.dats:543` | `nonlinear heap allocation is not supported (no GC)` | **leave**: this is the no-GC rule (CLAUDE.md), not a gap |
 
 ## C. Obsolete notes (history, dead code, removed features)
 
@@ -84,21 +83,21 @@ comments (and of the code that the author calls dead).
 | `pats_staexp2_util2.dats:749` | `should be removed eventually!` | **group** |
 | `pats_ccomp_hipat.dats:479,601,738` | `[d2v] is unused` | **leave** |
 | `pats_trans3_env.dats:653` | `nerr: &int // HX: unused` | **leave** (an unused parameter) |
-| `pats_trans2_staexp.dats:1210`, `pats_trans2_decl.dats:2509` | `is this really needed?` | **group** |
+| `pats_trans2_staexp.dats:1202`, `pats_trans2_decl.dats:2449` | `is this really needed?` | **group** |
 | `pats_lexing_token.dats:122` | `HX-2015-12-10: 'ref@' is removed for now` | **leave** |
 | `pats_lexing_token.dats:516` | `[sta] is now deprecated` | **leave** |
 | `pats_parsing_base.dats:264` | `LPAREN l0ab RPAREN // this is removed for now` | **leave** |
 | `pats_parsing_decl.dats:894` | `HX-2012-05-23: removed this big hack!!!` (a commented-out `STAVAR` rule) | **leave** (delete in the dead-comment cleanup) |
-| `pats_parsing_dynexp.dats:622` | `HX-2011-04-04: deprecated?` | **issue** only if the rule is not used by any test: otherwise **leave** |
+| `pats_parsing_dynexp.dats:613` | `HX-2011-04-04: deprecated?` | **issue** only if the rule is not used by any test: otherwise **leave** |
 | `pats_parsing_sort.dats:76` | `MINUSLTGT // what is this for?` | **leave** |
 | `pats_fixity_prec.dats:73` | `for temporary infix status` | **leave** |
-| `pats_trans2_dynexp.dats:1266,1787`, `pats_trans3_util.dats:443`, `pats_ccomp_claulst.dats:882,946,1070`, `pats_dynexp2_util.dats:300` | `Fixing a bug with ...`, `bug-YYYY-MM-DD.dats` | **leave**: these point to a regression file (`doc/BUGS`); they record a fix, not an open bug |
+| `pats_trans2_dynexp.dats:1233,1748`, `pats_trans3_util.dats:443`, `pats_ccomp_claulst.dats:833,889,1013`, `pats_dynexp2_util.dats:300` | `Fixing a bug with ...`, `bug-YYYY-MM-DD.dats` | **leave**: these point to a regression file (`doc/BUGS`); they record a fix, not an open bug |
 
 ## Which to turn into issues
 
 If only some are filed, in this order:
 
-1. `pats_trans2_dynexp.dats:1819` (the `FIXME`, coverage check of `scase`).
+1. `pats_trans2_dynexp.dats:1779` (the `FIXME`, coverage check of `scase`).
 2. `pats_staexp2_util2.dats:121` (silent depth limit).
 3. `pats_staexp2_szexp.dats:370` (`really???`).
 4. `pats_trans3_env.dats` `[sub] should be properly extended first` (4 places, one issue).

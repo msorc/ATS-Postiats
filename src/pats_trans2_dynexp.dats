@@ -611,12 +611,6 @@ in
 //
 case+ ans of
 | ~Some_vt d2i => let
-(*
-    val () =
-    (
-      println! ("d1exp_tr_app_sta_dyn_dqid: d2i = ", d2i)
-    ) // end of [val]
-*)
   in
     d1exp_tr_app_sta_dyn_dqid_itm (
       d1e0, d1e1, d1e1, dq, id, d2i, sarg, locarg, npf, darg
@@ -651,18 +645,6 @@ val loc0 = d1e0.d1exp_loc()
 val loc1 = d1e1.d1exp_loc()
 val loc2 = d1e2.d1exp_loc()
 //
-(*
-val () =
-(
-  println! ("d1exp_tr_app_sta_dyn_dqid_itm: loc0 = ", loc0);
-  println! ("d1exp_tr_app_sta_dyn_dqid_itm: d1e0 = ", d1e0);
-  println! ("d1exp_tr_app_sta_dyn_dqid_itm: d1e1 = ", d1e1);
-  println! ("d1exp_tr_app_sta_dyn_dqid_itm: d1e2 = ", d1e2);
-) // end of [val]
-val () = (
-  print "d1exp_tr_app_sta_dyn_dqid_itm: dqid = "; print_dqid (dq, id); print_newline ()
-) // end of [val]
-*)
 //
 in
 //
@@ -752,16 +734,6 @@ case+ d2itm_view(d2i) of
     d2exp_app_sta_dyn (loc0, loc1, d2e2, sarg, locarg, npf, darg)    
   end // end of [D2ITEMmacdef]
 //
-(*
-| D2ITMmacvar (d2v) => let
-    val loc2 = d1e2.d1exp_loc
-    val () =
-      macvar_check (loc,d2v,dq,id)
-    // end of [val]
-  in
-    d2exp_var (loc0, d2v)
-  end // end of [D2ITEMmacvar]
-*)
 | v => (d2itm_view_free (v); let
 //
     val () =
@@ -818,12 +790,6 @@ d1exp_tr_app_sta_dyn
 (
   d1e0, d1e1, d1e2, sarg, locarg, npf, darg
 ) = let
-(*
-  val () = (
-    println! ("d1exp_tr_app_sta_dyn: d1e0 = ", d1e0);
-    fprintln! (stdout_ref, "d1exp_tr_app_sta_dyn: sarg = ", sarg);
-  ) // end of [val]
-*)
 in
 //
 case+
@@ -1284,12 +1250,6 @@ end // end of [if]
 val np2ts =
   (if np2ts > 0 then np2ts else 1): int
 //
-(*
-val () =
-(
-  printf ("c1lau_tr: n = %i and n1 = %i\n", @(n, n1))
-) // end of [val]
-*)
 //
 val () =
 if n != np2ts then
