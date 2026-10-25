@@ -92,13 +92,56 @@ SUBDIRS += BOOK/INT2PROGINATS/CODE/CHAP_FNTMPINT
 #
 ######
 
-.PHONY: testall
+######
+#
+# [testall] runs the SUBDIRS in parallel: one target per directory, which does
+# [all], [regress] and [cleanall] of that directory in this order (the clean
+# is done only after the directory passed). The directories do not share any
+# build output (every one builds in its own directory, and no Makefile or
+# program uses /tmp or a sibling directory), so no ordering is needed between
+# them, but for one pair: EFFECTIVATS/linear-streams runs the bin/mytexting
+# of EFFECTIVATS/MYTEXT, so the two are one target (MYTEXT is built first and
+# cleaned last). The makefile of a directory is run serially (-j1): some of them do not
+# declare all their dependencies (CHAP_MODULARITY links test_acker2 before its
+# objects are made when make runs the rules in parallel).
+# [testall] calls make again with -j$(JOBS) -Otarget (the output of a
+# directory is not interleaved with that of the others); JOBS=1 gives the old
+# serial run. JOBS defaults to the number of processors.
+#
+######
+
+JOBS ?= $(shell nproc 2>/dev/null || echo 1)
 
 ######
 
-testall:: all
-testall:: regress
-testall:: cleanall
+# the directories that use the build of another one (see above): their target is testdir/$(MYTEXT)
+MYTEXT := EXAMPLE/EFFECTIVATS/MYTEXT
+MYTEXTUSERS := EXAMPLE/EFFECTIVATS/linear-streams
+TESTDIRS := $(filter-out $(MYTEXTUSERS:%=testdir/%),$(SUBDIRS:%=testdir/%))
+
+######
+
+.PHONY: testall testdirs $(TESTDIRS)
+
+######
+
+testall:: ; \
+  $(MAKE) -f $(firstword $(MAKEFILE_LIST)) -j$(JOBS) -Otarget testdirs
+
+testdirs: $(TESTDIRS)
+
+$(filter-out testdir/$(MYTEXT),$(TESTDIRS)): testdir/%: ; \
+  $(MAKE) -j1 -C "$*" all && \
+  $(MAKE) -j1 -C "$*" regress && \
+  $(MAKE) -j1 -C "$*" cleanall
+
+testdir/$(MYTEXT): ; \
+  $(MAKE) -j1 -C "$(MYTEXT)" all && \
+  for i in $(MYTEXTUSERS); do \
+    $(MAKE) -j1 -C "$$i" all && $(MAKE) -j1 -C "$$i" regress && $(MAKE) -j1 -C "$$i" cleanall || exit 1; \
+  done && \
+  $(MAKE) -j1 -C "$(MYTEXT)" regress && \
+  $(MAKE) -j1 -C "$(MYTEXT)" cleanall
 
 ######
 
