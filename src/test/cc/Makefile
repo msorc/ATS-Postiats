@@ -25,11 +25,14 @@ TESTDEPS=
 else
 TESTDEPS=build
 endif
-.PHONY: gen build
+.PHONY: gen build build1
 gen:
 	cd ../hd && python3 hd_gen.py
 	python3 cc_gen.py
 build: gen
+	$(MAKE) --no-print-directory build1
+# build1: the build without the generators (the prebuild of ../Makefile has run them)
+build1:
 	sh cc2.sh $(OUT) -O1
 
 test: $(TESTDEPS)

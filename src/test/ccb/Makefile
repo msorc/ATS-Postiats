@@ -25,9 +25,12 @@ TESTDEPS=
 else
 TESTDEPS=build
 endif
-.PHONY: gen build
+.PHONY: gen build build1
 gen: ccb_cases_00.hats
 build: gen
+	$(MAKE) --no-print-directory build1
+# build1: the build without the generators (the prebuild of ../Makefile has run them)
+build1:
 	sh ccb2.sh $(OUT) -O1
 
 test: $(TESTDEPS)

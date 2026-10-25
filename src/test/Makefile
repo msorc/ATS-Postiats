@@ -48,7 +48,9 @@ TESTS=test_basics test_utils test_intinf test_intinf_int test_counter test_stamp
       test_error test_symbol test_filename test_location test_errmsg \
       test_label test_fixity test_symmap test_symenv test_syntax test_lexing test_avlmap
 
-all: $(TESTS) pardump e1xdump treedump d1dump
+# prebuild is named again here: the prerequisites of the rule that has the recipe come first, so without it the programs below were built
+# one by one (.NOTPARALLEL) before the parallel prebuild started
+all: prebuild $(TESTS) pardump e1xdump treedump d1dump
 	@for t in $(TESTS); do echo "run $$t"; ./$$t > /dev/null 2>&1 || exit 1; done
 	@./pardump parcorpus.hand 2>&1 | diff - pardump.expected && echo "pardump: output as expected"
 	@./test_syntax | diff - test_syntax.expected && echo "test_syntax: output as expected"
@@ -1186,8 +1188,9 @@ echovar:
 # ---------------------------------------------------------------------------------------------------------------------------------
 # The prebuild step of `all` (see the top of this file): phase 1 `pregen` (serial), phase 2 `preexes` (make -j$(JOBS), PREBUILD=1).
 # Everything that the runs of `all` need is built here, by the rules of the suites themselves, so the serial part finds it up to date
-# (the *_exe targets are phony and are only relinked). The suites that have a Makefile of their own (lp hs hd cc1 cc ca cc2 ccb) build
-# in a staging directory, with their own parallel compilations (JOBS), when `all` runs them; t3g1 and g2 are built from here.
+# (the *_exe targets are phony and are only relinked). The suites that have a Makefile of their own build in a staging directory, with their
+# own parallel compilations (JOBS): hd cc ca cc2 ccb cc1 are built here (see the end of this file), lp and hs when `all` runs them; t3g1 and
+# g2 are built from here.
 PREGEN=s2gen.stamp d2gen.stamp m2gen.stamp cggen.stamp t3gen.stamp t3g3gen.stamp g4gen.stamp c3gen.stamp j2gen.stamp \
   t2dd.hats f3dd.hats deepdump_t1.hats treecases.hats pats_error_sats.c $(sort $(T3GENHATS) $(C3OWNHATS))
 pregen: $(PREGEN)
@@ -1196,7 +1199,6 @@ pregen: $(PREGEN)
 PREEXES=$(TESTS) pardump e1xdump treedump d1dump t2dump f3dump tooldump comdump \
   s2dump_exe d2dump_exe m2dump_exe cgdump_exe t3dump_exe t3g3dump_exe g4dump_exe c3dump_exe c3dump_int_exe j2dump_exe \
   prebuild_t3g1 prebuild_g2
-preexes: $(PREEXES)
 # The module objects of $(MODOBJ) are made by this make, once each, before the recursive makes and g2build.sh link them: they must not compile
 # the same module in the same directory as this make does at the same time.
 prebuild_t3g1: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(T3G1MODS)))
@@ -1211,7 +1213,7 @@ prebuild_g2: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(shell cat g2mods.txt))
 # generated files are used by cc, ...) and `build` (the staging copy of src, the ~80 modules and the chunks of cases, the link; in parallel inside, JOBS).
 #  * subgen (serial, part of pregen): the arena encodings of src that their scripts ask `make -C src` for (once, so that the scripts only find them up to date),
 #    and the `gen` of each suite;
-#  * prebuild_SUITE (part of preexes, parallel): `make -C SUITE build`. The six builds are chained one after the other (each one runs JOBS compilations by itself;
+#  * prebuild_SUITE (part of preexes, parallel): `make -C SUITE build1` (the build without the generators). The six builds are chained one after the other (each one runs JOBS compilations by itself;
 #    they are not run at the same time, so that JOBS compilations at most are added to the others of preexes), and run beside the other programs of preexes.
 # SUBS_PREBUILT tells the sub-Makefiles that the program is built: it is set only for `make all` with the prebuild step (JOBS>1); `make -C X test` alone builds it.
 SUBSUITES=hd cc ca cc2 ccb cc1
@@ -1229,9 +1231,10 @@ subgen:
 	$(MAKE) --no-print-directory -C $(M) $(SUBHATS)
 	for d in $(SUBSUITES); do $(MAKE) --no-print-directory -C $$d gen || exit 1; done
 pregen: subgen
-preexes: $(SUBEXES)
+# the chain of the sub-suites is the longest part of preexes: it comes first, so that make -j starts it at once
+preexes: $(SUBEXES) $(PREEXES)
 $(SUBEXES): prebuild_%:
-	$(MAKE) --no-print-directory -C $* build
+	$(MAKE) --no-print-directory -C $* build1
 prebuild_cc: | prebuild_hd
 prebuild_ca: | prebuild_cc
 prebuild_cc2: | prebuild_ca

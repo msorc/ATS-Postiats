@@ -21,14 +21,17 @@ TESTDEPS=
 else
 TESTDEPS=build
 endif
-.PHONY: gen build
+.PHONY: gen build build1
 ifeq ($(words $(HAVE_P1)),5)
 gen:
 	python3 cc1_gen.py
 build: gen
+	$(MAKE) --no-print-directory build1
+# build1: the build without the generators (the prebuild of ../Makefile has run them)
+build1:
 	sh cc1_2.sh $(OUT) -O1
 else
-gen build:
+gen build build1:
 endif
 
 test: $(TESTDEPS)
