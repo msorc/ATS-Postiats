@@ -172,6 +172,8 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           key: suites
+          # doc/EXAMPLE/ATSLIB links a test with -lgdbm (the runner images no longer have it)
+          packages: libgdbm-dev
 
       - name: make tools (bootstraps first; atsdoc, pats2xhtml, the libraries)
         run: make tools
@@ -259,6 +261,8 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           key: sanitizers-${{ matrix.part }}
+          # doc/EXAMPLE/ATSLIB links a test with -lgdbm (the runner images no longer have it)
+          packages: libgdbm-dev
 
       - name: make bootstrap (the whole compiler under the sanitizers)
         run: make bootstrap CC="gcc $SAN"
