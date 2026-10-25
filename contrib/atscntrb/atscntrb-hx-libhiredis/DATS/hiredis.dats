@@ -49,7 +49,7 @@ staload "./../SATS/hiredis.sats"
 (* ****** ****** *)
 
 implement{}
-hiredis_version () = 
+hiredis_version () =
 (
 1000 * (1000 * HIREDIS_MAJOR + HIREDIS_MINOR) + HIREDIS_PATCH
 ) // end of [hiredis_version]

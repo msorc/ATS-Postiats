@@ -15,7 +15,7 @@
 
 extern
 fun tally{n:int}(!arrayptr(int, n), n: size_t n): int
-  
+
 (* ****** ****** *)
 
 implement

@@ -15124,7 +15124,7 @@ ATSINSflab(__patsflab_s2exp_cstapp):
 ATSINSmove(tmp1827, PATSHOME_057_src_057_pats_staexp2_056_sats__s2cst_get_srt(arg0)) ;
 ATSINSmove(tmp1828, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_cst(arg0)) ;
 ATSINSmove(tmp1829, PATSHOME_057_src_057_pats_staexp2_056_sats__s2rt_viewof(tmp1827)) ;
-ATSifnthen(ATSCKpat_con1(tmp1829, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2.dats: 8978(line=401, offs=8) -- 9030(line=401, offs=60)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1829, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2.dats: 8972(line=401, offs=8) -- 9024(line=401, offs=60)") ; } ;
 ATSINSmove(tmp1830, ATSSELcon(tmp1829, postiats_tysum_2, atslab__1)) ;
 ATSINSfreecon(tmp1829) ;
 ATSINSmove(tmpret1826, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_app_srt(tmp1830, tmp1828, arg1)) ;

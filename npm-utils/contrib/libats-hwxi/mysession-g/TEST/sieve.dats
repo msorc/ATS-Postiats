@@ -162,7 +162,7 @@ ints_filter
   (chan1neg(ssn_colist(int)), n: int): chan1neg(ssn_colist(int))
 //
 (* ****** ****** *)
-  
+
 implement
 ints_from (n) = let
 //

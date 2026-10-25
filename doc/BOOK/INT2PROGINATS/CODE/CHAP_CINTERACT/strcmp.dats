@@ -64,7 +64,7 @@ end (* end of [loop] *)
 in
   loop (string2ptr(str1), string2ptr(str2))
 end (* end of [strcmp] *)
-  
+
 (* ****** ****** *)
 
 implement

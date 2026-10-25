@@ -104,7 +104,7 @@ staload
 (* ****** ****** *)
 //
 staload
-"libats/libc/SATS/stdio.sats"  
+"libats/libc/SATS/stdio.sats"
 //
 (* ****** ****** *)
 //

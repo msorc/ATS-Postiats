@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -249,7 +249,7 @@ case+ 0 of
     cons_vt(commarg_CAhelp(arg), res)
   in
     aux(i+1, argv, res)
-  end // end of [rest-of-kind]    
+  end // end of [rest-of-kind]
 //
 | _(* rest *) => let
     val res =
@@ -278,7 +278,7 @@ aux_nsharp
     list_vt_cons(commarg_CAnsharp(arg, opt), res)
   // end of [val]
 in
-  aux(i+2, argv, res)  
+  aux(i+2, argv, res)
 end // end of [aux_nsharp]
 and
 aux_nsharp_eq
@@ -294,7 +294,7 @@ aux_nsharp_eq
     list_vt_cons(commarg_CAnsharp(arg, opt), res)
   // end of [val]
 in
-  aux(i+1, argv, res)  
+  aux(i+1, argv, res)
 end // end of [aux_nsharp_eq]
 //
 and
@@ -311,7 +311,7 @@ aux_inpfil
     list_vt_cons(commarg_CAinpfil(arg, opt), res)
   // end of [val]
 in
-  aux(i+2, argv, res)  
+  aux(i+2, argv, res)
 end // end of [aux_inpfil]
 and
 aux_inpfil_eq
@@ -327,7 +327,7 @@ aux_inpfil_eq
     list_vt_cons(commarg_CAinpfil(arg, opt), res)
   // end of [val]
 in
-  aux(i+1, argv, res)  
+  aux(i+1, argv, res)
 end // end of [aux_inpfil_eq]
 //
 and
@@ -344,7 +344,7 @@ aux_outfil
     list_vt_cons(commarg_CAoutfil(arg, opt), res)
   // end of [val]
 in
-  aux(i+2, argv, res)  
+  aux(i+2, argv, res)
 end // end of [aux_outfil]
 and
 aux_outfil_eq
@@ -360,7 +360,7 @@ aux_outfil_eq
     list_vt_cons(commarg_CAoutfil(arg, opt), res)
   // end of [val]
 in
-  aux(i+1, argv, res)  
+  aux(i+1, argv, res)
 end // end of [aux_outfil_eq]
 //
 val

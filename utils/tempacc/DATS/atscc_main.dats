@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -229,13 +229,13 @@ case+ 0 of
     val res = list_vt_cons{ca}(CAhelp(), res)
   in
     aux0 (n, argv, i+1, res)
-  end // end of [_ when ...]  
+  end // end of [_ when ...]
 //
 | _ when (str0="--help") => let
     val res = list_vt_cons{ca}(CAhelp(), res)
   in
     aux0 (n, argv, i+1, res)
-  end // end of [_ when ...]  
+  end // end of [_ when ...]
 //
 | _ when (str0="-hats") => let
     val res = list_vt_cons{ca}(CAhats(), res)
@@ -264,7 +264,7 @@ case+ 0 of
     val res = list_vt_cons{ca}(CAgline(), res)
   in
     aux0 (n, argv, i+1, res)
-  end // end of [_ when ...]  
+  end // end of [_ when ...]
 //
 | _ when (str0="-verbose") => let
     val res = list_vt_cons{ca}(CAverbose(), res)
@@ -755,7 +755,7 @@ case+ cas2 of
 //
     | CAfilats _ => let
         val res =
-          atsoptline_make (cas1, ca2) 
+          atsoptline_make (cas1, ca2)
         val () = ress := list_vt_cons{res}(res, ress)
       in
         auxlst (cas1, cas2, ress)

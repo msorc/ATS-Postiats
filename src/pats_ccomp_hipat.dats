@@ -485,7 +485,7 @@ else let
     val pmv = primval_make_tmp(loc, tmp)
     val ((*void*)) = ccompenv_add_vbindmapenvall(env, d2v, pmv)
   in
-    instrseq_add (res, ins)    
+    instrseq_add (res, ins)
   end // end of [_]
 //
 end // end of [auxvar]
@@ -618,7 +618,7 @@ else let
     val pmv = primval_make_tmp (loc, tmp)
     val () = ccompenv_add_vbindmapenvall (env, d2v, pmv)
   in
-    instrseq_add (res, ins)    
+    instrseq_add (res, ins)
   end // end of [_]
 //
 end // end of [auxvar]
@@ -827,7 +827,7 @@ end (* end of [himatch_ccomp] *)
 end // end of [local]
 
 (* ****** ****** *)
- 
+
 implement
 himatch2_ccomp
 (

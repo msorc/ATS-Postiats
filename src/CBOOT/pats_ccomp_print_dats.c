@@ -3637,7 +3637,7 @@ ATSINSmove(tmp36, ATSSELcon(tmp14, postiats_tysum_1, atslab__0)) ;
 ATSINSfreecon(tmp14) ;
 ATSINSmove(tmp262, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidecl_node(tmp36)) ;
 ATSINSmove(tmp261, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidecl_node_view(tmp262)) ;
-ATSifnthen(ATSCKpat_con1(tmp261, 16)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_print.dats: 6080(line=255, offs=9) -- 6152(line=255, offs=81)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp261, 16)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_print.dats: 6078(line=255, offs=9) -- 6150(line=255, offs=81)") ; } ;
 ATSINSmove(tmp263, ATSSELcon(tmp261, postiats_tysum_5, atslab__0)) ;
 ATSINSmove(tmp264, ATSSELcon(tmp261, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp261) ;
@@ -3683,7 +3683,7 @@ ATSINSmove(tmp40, ATSSELcon(tmp14, postiats_tysum_1, atslab__0)) ;
 ATSINSfreecon(tmp14) ;
 ATSINSmove(tmp290, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidecl_node(tmp40)) ;
 ATSINSmove(tmp289, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidecl_node_view(tmp290)) ;
-ATSifnthen(ATSCKpat_con1(tmp289, 18)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_print.dats: 6851(line=281, offs=9) -- 6906(line=281, offs=64)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp289, 18)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_print.dats: 6849(line=281, offs=9) -- 6904(line=281, offs=64)") ; } ;
 ATSINSmove(tmp291, ATSSELcon(tmp289, postiats_tysum_1, atslab__0)) ;
 ATSINSfreecon(tmp289) ;
 ATSINSmove_void(tmp292, atspre_fprint_string(arg0, ATSPMVstring("PMDdynload("))) ;
@@ -8126,7 +8126,7 @@ ATSINSmove_void(tmpret1054, atspre_fprint_string(arg0, ATSPMVstring(")"))) ;
 ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab253):
-ATSifthen(ATSCKptriscons(tmp1055)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_print.dats: 31388(line=1381, offs=1) -- 31571(line=1387, offs=30)") ; } ;
+ATSifthen(ATSCKptriscons(tmp1055)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_print.dats: 31381(line=1381, offs=1) -- 31564(line=1387, offs=30)") ; } ;
 ATSINSlab(__atstmplab254):
 ATSINSmove_void(tmpret1054, atspre_fprint_string(arg0, ATSPMVstring("None()"))) ;
 ATSbranch_end()

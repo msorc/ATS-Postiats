@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -56,7 +56,7 @@ d2varlst_app (x: d2varlst, env: !appenv): void
 extern
 fun
 d2varopt_app (x: d2varopt, env: !appenv): void
-//  
+//
 (* ****** ****** *)
 //
 extern
@@ -109,7 +109,7 @@ case+ gopt_view(opt) of
 ) (* end of [d2varopt_app] *)
 
 (* ****** ****** *)
-  
+
 implement
 d2itm_app
   (d2i, env) = let
@@ -125,7 +125,7 @@ case d2itm_view(d2i) of
 | ~D2ITMmacvar (d2v) => d2var_app (d2v, env)
 //
 end // end of [d2itm_app]
-  
+
 (* ****** ****** *)
 //
 implement
@@ -168,7 +168,7 @@ fun
 auxlst_dcon
 (
   d2cs: d2conlst, env: !appenv
-) : void = 
+) : void =
 (
 case+ glist_view(d2cs) of
 | ~GLnil() => ()
@@ -185,7 +185,7 @@ fun
 auxlst_scst
 (
   s2cs: s2cstlst, env: !appenv
-) : void = 
+) : void =
 (
 case+ glist_view(s2cs) of
 | ~GLnil() => ()
@@ -413,7 +413,7 @@ sp2at_node_view(sp2t.sp2at_node()) of
 end // end of [sp2at_app]
 
 (* ****** ****** *)
-  
+
 implement
 s2exparg_app
   (s2a0, env) = let
@@ -426,7 +426,7 @@ s2exparg_node_view(s2a0.s2exparg_node()) of
 | ~S2EXPARGseq (s2es) => s2explst_app (s2es, env)
 //
 end // end of [s2exparg_app]
-  
+
 (* ****** ****** *)
 //
 implement
@@ -839,7 +839,7 @@ case+ glist_view(lxs) of
   end // end of [list_cons]
 //
 ) (* end of [labd2exp_app] *)
-  
+
 (* ****** ****** *)
 
 implement

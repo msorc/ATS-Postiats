@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -148,7 +148,7 @@ case+ p1at_node_view(p1t0.p1at_node()) of
   ) => {
     val () = prstr "P1Tapp_dyn("
     val () = fprint_p1at (out, p1t)
-    val () = prstr "; "    
+    val () = prstr "; "
     val () = fprint_int (out, npf)
     val () = prstr "; "
     val () = fprint_p1atlst (out, p1ts)
@@ -957,7 +957,7 @@ case+ d1ecl_node_view(d1c0.d1ecl_node()) of
     val () =
     prstr "D1Cpragma("
     val () = $UT.fprintlst (out, xs, ", ", fprint_e1xp)
-    val () = prstr (")")  
+    val () = prstr (")")
   }
 | ~D1Ccodegen
     (knd, xs) => {

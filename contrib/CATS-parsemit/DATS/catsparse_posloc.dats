@@ -77,7 +77,7 @@ case+ c of
   }
 //
 end // end of [position_incby_char]
-  
+
 (* ****** ****** *)
 
 //
@@ -170,7 +170,7 @@ val () = fprint_string (out, ")")
 } (* end of [fprint_locrange] *)
 
 (* ****** ****** *)
-  
+
 implement
 location_make_pos_pos
   (p1, p2) = let
@@ -234,11 +234,11 @@ auxmain
   val () =
   if (LOC(loc1)).end_ntot >= (LOC(loc2)).end_ntot
     then begin
-      end_ntot := (LOC(loc1)).end_ntot; 
+      end_ntot := (LOC(loc1)).end_ntot;
       end_nrow := (LOC(loc1)).end_nrow; end_ncol := (LOC(loc1)).end_ncol
     end // end of [then]
     else begin
-      end_ntot := (LOC(loc2)).end_ntot; 
+      end_ntot := (LOC(loc2)).end_ntot;
       end_nrow := (LOC(loc2)).end_nrow; end_ncol := (LOC(loc2)).end_ncol
     end // end of [else]
   // end of [if]

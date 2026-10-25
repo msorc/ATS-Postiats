@@ -122,7 +122,7 @@ atspre_fprint_schar
 #define atspre_prerr_schar(c) atspre_fprint_schar(stderr, (c))
 
 /* ****** ****** */
-  
+
 ATSinline()
 atsvoid_t0ype
 atspre_fprint_int
@@ -515,7 +515,7 @@ atspre_fprint_substring
 (
   atstype_ref out
 , atstype_string x
-, atstype_size st, atstype_size ln  
+, atstype_size st, atstype_size ln
 ) {
   int err = 0 ;
   err += fwrite(((char*)x)+st, 1, ln, out) ;

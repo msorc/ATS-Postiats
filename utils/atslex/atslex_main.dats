@@ -9,7 +9,7 @@ staload "./atslex.sats"
 (* ****** ****** *)
 
 dynload "atslex_charset.dats"
-  
+
 (* ****** ****** *)
 
 implement

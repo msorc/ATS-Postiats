@@ -8,7 +8,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -62,9 +62,9 @@
 #define atscntrb_SDL2IMG_IMG_isTIF IMG_isTIF
 #define atscntrb_SDL2IMG_IMG_isXCF IMG_isXCF
 #define atscntrb_SDL2IMG_IMG_isXPM IMG_isXPM
-#define atscntrb_SDL2IMG_IMG_isXV IMG_isXV 
+#define atscntrb_SDL2IMG_IMG_isXV IMG_isXV
 #define atscntrb_SDL2IMG_IMG_isWEBP IMG_isWEBP
-  
+
 /* ****** ****** */
 
 #define atscntrb_SDL2IMG_IMG_LoadICO_RW IMG_LoadICO_RW

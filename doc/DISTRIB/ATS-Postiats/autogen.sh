@@ -2,7 +2,7 @@
 
 ######
 #
-# For making a distribution package 
+# For making a distribution package
 #
 ######
 #

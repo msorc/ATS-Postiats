@@ -4668,7 +4668,7 @@ ATSINSmove_void(tmp168, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interro
 ATSINSmove_void(tmp176, atspre_prerr_string(ATSPMVstring(": funlab_get_type_arg: hse = "))) ;
 ATSINSmove_void(tmp177, PATSHOME_057_src_057_pats_histaexp_056_sats__prerr_hisexp(tmp161)) ;
 ATSINSmove_void(tmp178, atspre_prerr_newline()) ;
-ATSINSmove_void(tmp179, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_ccomp_funlab.dats: 5610(line=246, offs=14) -- 5626(line=246, offs=30)"))) ;
+ATSINSmove_void(tmp179, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_ccomp_funlab.dats: 5608(line=246, offs=14) -- 5624(line=246, offs=30)"))) ;
 ATSINSmove(tmpret160, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__77__1()) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -4769,7 +4769,7 @@ ATSINSmove_void(tmp192, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interro
 ATSINSmove_void(tmp197, atspre_prerr_string(ATSPMVstring(": funlab_get_type_arg: hse = "))) ;
 ATSINSmove_void(tmp198, PATSHOME_057_src_057_pats_histaexp_056_sats__prerr_hisexp(tmp185)) ;
 ATSINSmove_void(tmp199, atspre_prerr_newline()) ;
-ATSINSmove_void(tmp200, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_ccomp_funlab.dats: 6157(line=269, offs=14) -- 6173(line=269, offs=30)"))) ;
+ATSINSmove_void(tmp200, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_ccomp_funlab.dats: 6155(line=269, offs=14) -- 6171(line=269, offs=30)"))) ;
 ATSINSmove(tmpret184, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__77__2()) ;
 ATSbranch_end()
 ATScaseof_end()

@@ -493,7 +493,7 @@ fun
 testing_deciexp
 (
   buf: &lexbuf
-) : intGte(0) = let  
+) : intGte(0) = let
 //
 val i = lexbuf_get_char (buf)
 //
@@ -756,7 +756,7 @@ i > 0
 then let
 //
 val c = int2char0(i)
-//  
+//
 in
 //
 case+ 0 of

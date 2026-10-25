@@ -28,7 +28,7 @@ case+ name of
     label_LABint(ar, parse_int(jsnv2))
 | "LABsym" =>
     label_LABsym(ar, parse_symbol(ar, tbls, jsnv2))
-| _(*unrecognized*) => 
+| _(*unrecognized*) =>
   let
     val () =
     prerrln!

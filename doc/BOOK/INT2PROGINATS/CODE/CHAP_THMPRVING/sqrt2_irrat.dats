@@ -6,7 +6,7 @@
 
 abstype
 MOD0(m: int, p: int) // m=p*q
-  
+
 (* ****** ****** *)
 //
 extern
@@ -94,7 +94,7 @@ sqrt2_irrat
   {m,n}((*void*)) = let
 //
 prfun
-auxmain 
+auxmain
 {m,n:nat |
  n >= 1;
  m*m==2*n*n} .<m>.

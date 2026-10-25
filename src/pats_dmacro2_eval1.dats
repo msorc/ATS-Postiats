@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -242,7 +242,7 @@ eval1_t2mpmarg
 loc0, ctx, env, t2ma
 ) = let
 //
-val s2es = 
+val s2es =
   eval1_s2explst(loc0, ctx, env, t2ma.t2mpmarg_arg ())
 //
 in
@@ -303,7 +303,7 @@ end // end of [eval1_i2nvresstate]
 (* ****** ****** *)
 
 implement
-eval1_p2at 
+eval1_p2at
 (
 loc0, ctx, env, p2t0
 ) = let
@@ -494,7 +494,7 @@ case+ glist_view (d2ls) of
 end // end of [eval1_d2lablst]
 
 (* ****** ****** *)
-  
+
 implement
 eval1_d2exparg
   (loc0, ctx, env, d2a) = let
@@ -1011,7 +1011,7 @@ fun auxlst2 (
 in
 //
 case+ glist_view (d2cs) of
-| ~GLcons 
+| ~GLcons
     (d2c, d2cs) => let
     val p2t =
       eval1_p2at (loc0, ctx, env, d2c.v2aldec_pat ())

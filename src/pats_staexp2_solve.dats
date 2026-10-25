@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -518,7 +518,7 @@ end // end of [val]
 } // end of [if] // end of [val]
 //
 in
-  // nothing  
+  // nothing
 end // end of [s2hnf_equal_solve_lVar_err_nck]
 
 (* ****** ****** *)
@@ -1672,7 +1672,7 @@ if
 then () where
 {
 //
-  val () = 
+  val () =
   the_staerrlst_add
   (staerr_STAERR_s2exp_tyleq(loc0, s2e10, s2e20))
 //
@@ -1713,7 +1713,7 @@ case+ glist_view(s2es1) of
 | ~GLnil() =>
   (
   case+ glist_view(s2es2) of
-  | ~GLnil() => 0 | ~GLcons(_, _) => ~1 
+  | ~GLnil() => 0 | ~GLcons(_, _) => ~1
   ) // end of [list_nil]
 | ~GLcons(s2e1, s2es1) =>
   (
@@ -1745,7 +1745,7 @@ val () =
 val () =
   the_staerrlst_add(staerr_STAERR_s2explst_length(loc0, sgn))
 //
-} // end of [val] 
+} // end of [val]
 in
   // nothing
 end // end of [s2explst_tyleq_solve_err]
@@ -1899,7 +1899,7 @@ loop = s2hnf_tyleq_solve_lbs_err
 (*
 val () = let
 //
-val lbs = 
+val lbs =
 list_map_fun
 ( lbs
 , lam lb =<1> s2VarBound_get_val(lb)

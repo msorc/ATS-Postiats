@@ -243,7 +243,7 @@ p2at_rec
     fun aux (
       xs: labp2atlst
     ) : p2atlst = case+ glist_view(xs) of
-      | ~GLcons(x, xs) => (case+ labp2at_view(x) of 
+      | ~GLcons(x, xs) => (case+ labp2at_view(x) of
         | ~LABP2ATnorm (l0, p2t) => glist_cons (p2t, aux xs)
         | ~LABP2ATomit (loc) => aux (xs)
         ) // end of [list_cons]
@@ -713,19 +713,19 @@ implement
 d2exp_deref
   (loc, d2s, lval) =
   d2exp_make_node(loc, d2exp_node_D2Ederef(d2s, lval))
-// end of [d2exp_assgn]  
+// end of [d2exp_assgn]
 
 implement
 d2exp_assgn (
   loc, _left, _right
 ) = d2exp_make_node(loc, d2exp_node_D2Eassgn(_left, _right))
-// end of [d2exp_assgn]  
+// end of [d2exp_assgn]
 
 implement
 d2exp_xchng (
   loc, _left, _right
 ) = d2exp_make_node(loc, d2exp_node_D2Exchng(_left, _right))
-// end of [d2exp_xchng]  
+// end of [d2exp_xchng]
 
 (* ****** ****** *)
 //

@@ -2239,7 +2239,7 @@ ATScaseof_end()
 } ATSelse() {
 ATSINSmove(tmp167, PATSHOME_057_src_057_pats_staexp1_056_sats__s1rt_loc(arg0)) ;
 ATSINSmove_void(tmp162, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54__1(tmp167)) ;
-ATSINSmove_void(tmp168, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_sort.dats: 3786(line=144, offs=14) -- 3818(line=144, offs=46)"), ATSPMVstring("s1rt_tr_app"))) ;
+ATSINSmove_void(tmp168, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_sort.dats: 3784(line=144, offs=14) -- 3816(line=144, offs=46)"), ATSPMVstring("s1rt_tr_app"))) ;
 ATSINSmove_void(tmp169, atspre_prerr_string(ATSPMVstring(": sort application is not supported."))) ;
 ATSINSmove_void(tmp170, atspre_prerr_newline()) ;
 ATSINSmove(tmp172, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1rt_tr(arg0)) ;
@@ -2851,7 +2851,7 @@ ATSbranch_beg()
 ATSINSlab(__atstmplab41):
 ATSINSmove_void(tmp179, PATSHOME_057_src_057_pats_staexp2_056_sats__s2rtext_view_free(tmp177)) ;
 ATSINSmove_void(tmp180, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54__2(tmp174)) ;
-ATSINSmove_void(tmp183, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_sort.dats: 4353(line=168, offs=16) -- 4385(line=168, offs=48)"), ATSPMVstring("s1rt_tr_qid"))) ;
+ATSINSmove_void(tmp183, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_sort.dats: 4351(line=168, offs=16) -- 4383(line=168, offs=48)"), ATSPMVstring("s1rt_tr_qid"))) ;
 ATSINSmove_void(tmp184, atspre_prerr_string(ATSPMVstring(": the identifier ["))) ;
 ATSINSmove_void(tmp185, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg2)) ;
 ATSINSmove_void(tmp186, atspre_prerr_string(ATSPMVstring("] is expected to refer to a sort (instead of a subset sort)."))) ;
@@ -2869,7 +2869,7 @@ ATSifthen(ATSCKptriscons(tmp175)) { ATSINSdeadcode_fail() ; } ;
 #endif
 ATSINSlab(__atstmplab38):
 ATSINSmove_void(tmp190, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54__3(tmp174)) ;
-ATSINSmove_void(tmp193, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_sort.dats: 4794(line=180, offs=14) -- 4826(line=180, offs=46)"), ATSPMVstring("s1rt_tr_qid"))) ;
+ATSINSmove_void(tmp193, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_sort.dats: 4791(line=180, offs=14) -- 4823(line=180, offs=46)"), ATSPMVstring("s1rt_tr_qid"))) ;
 ATSINSmove_void(tmp194, atspre_prerr_string(ATSPMVstring(": the identifier ["))) ;
 ATSINSmove_void(tmp195, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg2)) ;
 ATSINSmove_void(tmp196, atspre_prerr_string(ATSPMVstring("] does not refer to any recognized sort."))) ;

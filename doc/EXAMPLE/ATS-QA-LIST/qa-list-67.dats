@@ -25,7 +25,7 @@ fun destroy_buf
 
 implement
 destroy_buf (buf) = arrayptr_free (buf)
-  
+
 (* ****** ****** *)
 
 implement main0 () = ()

@@ -28,7 +28,7 @@ fn getinc
 } // end of [getinc]
 
 (* ****** ****** *)
-   
+
 implement
 main0 () =
 {

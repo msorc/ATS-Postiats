@@ -71,7 +71,7 @@ stadef S5 (n:int) = (n*n*n*n*n*n+15*S4(n)-20*S3(n)+15*S2(n)-6*S1(n)+S0(n))/6
 (* ****** ****** *)
 
 dataprop
-SUM1 (int, int) = 
+SUM1 (int, int) =
   | SUM1bas (0, 0)
   | {n:pos}{s:int}
     SUM1ind (n, s + n) of SUM1 (n-1, s)
@@ -108,7 +108,7 @@ end // end of [sum1]
 (* ****** ****** *)
 
 dataprop
-SUM2 (int, int) = 
+SUM2 (int, int) =
   | SUM2bas (0, 0)
   | {n:pos}{s:int}
     SUM2ind (n, s + pow2(n)) of SUM2 (n-1, s)
@@ -145,7 +145,7 @@ end // end of [sum2]
 (* ****** ****** *)
 
 dataprop
-SUM3 (int, int) = 
+SUM3 (int, int) =
   | SUM3bas (0, 0)
   | {n:pos}{s:int}
     SUM3ind (n, s + pow3(n)) of SUM3 (n-1, s)
@@ -182,7 +182,7 @@ end // end of [sum3]
 (* ****** ****** *)
 
 dataprop
-SUM4 (int, int) = 
+SUM4 (int, int) =
   | SUM4bas (0, 0)
   | {n:pos}{s:int}
     SUM4ind (n, s + pow4(n)) of SUM4 (n-1, s)
@@ -220,7 +220,7 @@ end // end of [sum4]
 (* ****** ****** *)
 
 dataprop
-SUM5 (int, int) = 
+SUM5 (int, int) =
   | SUM5bas (0, 0)
   | {n:pos}{s:int}
     SUM5ind (n, s + pow5(n)) of SUM5 (n-1, s)
@@ -258,7 +258,7 @@ end // end of [sum5]
 (* ****** ****** *)
 
 dataprop
-SUM6 (int, int) = 
+SUM6 (int, int) =
   | SUM6bas (0, 0)
   | {n:pos}{s:int}
     SUM6ind (n, s + pow6(n)) of SUM6 (n-1, s)
@@ -296,7 +296,7 @@ end // end of [sum6]
 (* ****** ****** *)
 
 dataprop
-SUM7 (int, int) = 
+SUM7 (int, int) =
   | SUM7bas (0, 0)
   | {n:pos}{s:int}
     SUM7ind (n, s + pow7(n)) of SUM7 (n-1, s)
@@ -334,7 +334,7 @@ end // end of [sum7]
 (* ****** ****** *)
 
 dataprop
-SUM8 (int, int) = 
+SUM8 (int, int) =
   | SUM8bas (0, 0)
   | {n:pos}{s:int}
     SUM8ind (n, s + pow8(n)) of SUM8 (n-1, s)
@@ -372,7 +372,7 @@ end // end of [sum8]
 (* ****** ****** *)
 
 dataprop
-SUM9 (int, int) = 
+SUM9 (int, int) =
   | SUM9bas (0, 0)
   | {n:pos}{s:int}
     SUM9ind (n, s + pow9(n)) of SUM9 (n-1, s)
@@ -410,7 +410,7 @@ end // end of [sum9]
 (* ****** ****** *)
 
 dataprop
-SUM10 (int, int) = 
+SUM10 (int, int) =
   | SUM10bas (0, 0)
   | {n:pos}{s:int}
     SUM10ind (n, s + pow10(n)) of SUM10 (n-1, s)

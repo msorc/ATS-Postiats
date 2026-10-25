@@ -8,7 +8,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -44,7 +44,7 @@ atscntrb_jsonc_json_c_version_num() ((int)(json_c_version_num()))
 
 /* ****** ****** */
 
-typedef 
+typedef
 struct
 json_object_iterator
 json_object_iterator_struct ;
@@ -148,7 +148,7 @@ atscntrb_jsonc_lh_entry_get_val (atstype_ptr ent)
 
 #define atscntrb_jsonc_json_object_get_string(jso) ((char*)(json_object_get_string(jso)))
 #define atscntrb_jsonc_json_object_get_string_len json_object_get_string_len
- 
+
 /* ****** ****** */
 
 ATSinline()

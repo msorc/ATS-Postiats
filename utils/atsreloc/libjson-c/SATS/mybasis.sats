@@ -156,7 +156,7 @@ macdef json_tokener_error_parse_string = $extval (int, "json_tokener_error_parse
 macdef json_tokener_error_parse_comment = $extval (int, "json_tokener_error_parse_comment")
 
 (* ****** ****** *)
-           
+
 typedef
 json_tokener_state = int
 macdef json_tokener_state_eatws = $extval (int, "json_tokener_state_eatws")

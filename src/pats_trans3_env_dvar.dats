@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -937,7 +937,7 @@ case+ wths2explst_view (wths2es) of
     val-~GLcons (p3t, p3ts) = glist_view (p3ts)
     val () = wthtype_aux_trans (refknd, p3t, s2e)
   in
-    wthtype_auxlst (loc0, p3ts, wths2es)     
+    wthtype_auxlst (loc0, p3ts, wths2es)
   end // end of [WTHS2EXPLSTcons_trans]
 | ~WTHS2EXPLSTcons_none
     (wths2es) => let

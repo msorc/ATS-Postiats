@@ -171,7 +171,7 @@ a:t@ype
 fn{
 a:t@ype
 } lrotate
-  {l,l_tl,l_x,l_tr:addr} 
+  {l,l_tl,l_x,l_tr:addr}
   {nl,nr:int | nl >= 0; nr > 0}
 (
   pf_tl: bstree_vt (a, nl) @ l_tl

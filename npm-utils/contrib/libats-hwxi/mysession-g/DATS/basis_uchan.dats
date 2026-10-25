@@ -11,8 +11,8 @@ UN =
 (* ****** ****** *)
 //
 staload
-"libats/SATS/athread.sats"  
-//  
+"libats/SATS/athread.sats"
+//
 (* ****** ****** *)
 //
 absvtype

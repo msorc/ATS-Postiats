@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -1264,11 +1264,11 @@ if token_node_is_T_WHERE(tnd) then (
       in
         d0ecl_datdecs_some(knd, tok, ent2, tok2, ent4)
       end // end of [T_WHERE]
-    
+
 )
 else (
  d0ecl_datdecs_none(knd, tok, ent2)
-  
+
 )
 end)end // T_DATATYPE
 //
@@ -1918,7 +1918,7 @@ if ptest_fun<token>(
         // end of [if]
       end // end of [...]
 //
-    
+
 )
 else if token_node_is_T_VAR(tnd) then (
  let
@@ -1931,7 +1931,7 @@ else if token_node_is_T_VAR(tnd) then (
           then d0ecl_extvar2 (tok2, ent1, ent3) else synent_null<d0ecl>()
         // end of [if]
       end // end of [T_VAR]
-    
+
 )
 else if token_node_is_T_TYPEDEF(tnd) then (
  let
@@ -1945,14 +1945,14 @@ else if token_node_is_T_TYPEDEF(tnd) then (
         // end of [if]
       end // end of [T_TYPEDEF]
 //
-    
+
 )
 else (
  let
         val () = err := err + 1 in synent_null<d0ecl>()
       end (* end of [_] *)
 //
-  
+
 )
 end)end // end of [T_EXTERN]
 //

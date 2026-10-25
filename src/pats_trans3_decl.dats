@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -253,7 +253,7 @@ case+ d2ecl_node_view (d2c0.d2ecl_node ()) of
 //
   in
     d3ecl_reassume(loc0, s2c)
-  end (* end of [D2Creassume] *) 
+  end (* end of [D2Creassume] *)
 //
 | ~D2Cextype
     (name, s2e_def) =>
@@ -825,7 +825,7 @@ val s2e0 = (
     | ~GOnone () => let
         val s2e = s2exp_topize_0 (s2e_ann)
         val () = d2var_set_type (d2v, gopt_some (s2e))
-      in        
+      in
         s2e_ann
       end // end of [None]
     ) // end of [Some]

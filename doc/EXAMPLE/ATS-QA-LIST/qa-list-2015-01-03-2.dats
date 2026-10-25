@@ -48,7 +48,7 @@ and
 sstream_isnot_atend
   {l:addr}{m,n:int}
   (cs: !sstream(l,m,n)): bool(m > n)
-//  
+//
 (* ****** ****** *)
 //
 extern

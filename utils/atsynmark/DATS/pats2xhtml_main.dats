@@ -96,11 +96,11 @@ PSYNMARK_HTML_FILE_BEG "\
 //
 fun
 pats2xhtml_file_beg
-  (out: FILEref): void = 
+  (out: FILEref): void =
   fprint_string(out, PSYNMARK_HTML_FILE_BEG)
 fun
 pats2xhtml_file_end
-  (out: FILEref): void = 
+  (out: FILEref): void =
   fprint_string(out, PSYNMARK_HTML_FILE_END)
 //
 (* ****** ****** *)
@@ -112,11 +112,11 @@ pats2xhtml_file_end
 //
 fun
 pats2xhtml_pre_beg
-  (out: FILEref): void = 
+  (out: FILEref): void =
   fprint_string(out, PSYNMARK_HTML_PRE_BEG)
 //
 fun pats2xhtml_pre_end
-  (out: FILEref): void = 
+  (out: FILEref): void =
   fprint_string(out, PSYNMARK_HTML_PRE_END)
 //
 (* ****** ****** *)

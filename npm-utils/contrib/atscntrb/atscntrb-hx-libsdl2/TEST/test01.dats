@@ -26,7 +26,7 @@ val ((*void*)) = assertloc (err >= 0)
 //
 val xpos = SDL_WINDOWPOS_UNDEFINED
 val ypos = SDL_WINDOWPOS_UNDEFINED
-val window = 
+val window =
 SDL_CreateWindow
 (
   "SDL2/test01", xpos, ypos, 640, 480, SDL_WINDOW_SHOWN

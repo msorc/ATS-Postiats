@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -51,11 +51,11 @@ void
 Z3_set_ast_print_mode
   (__in Z3_context c, __in Z3_ast_print_mode mode)
 Select mode for the format used for pretty-printing AST nodes.
-*) 
+*)
 fun Z3_set_ast_print_mode
   (ctx: !Z3_context, mode: Z3_ast_print_mode): void
 // end of [Z3_set_ast_print_mode]
- 
+
 (* ****** ****** *)
 
 (*
@@ -72,13 +72,13 @@ Z3_string
 Z3_pattern_to_string (__in Z3_context c, __in Z3_pattern p)
 *)
 fun Z3_pattern_to_string (ctx: !Z3_context, p: !Z3_pattern): vStrptr1
- 
+
 (* ****** ****** *)
 
 (*
 Z3_string
 Z3_func_decl_to_string (__in Z3_context c, __in Z3_func_decl d)
-*) 
+*)
 fun Z3_func_decl_to_string (ctx: !Z3_context, d: !Z3_func_decl): vStrptr1
 
 (* ****** ****** *)

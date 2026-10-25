@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -566,7 +566,7 @@ of (* case+ *)
       fxitm_FXITMatm<s1exp> (s1exp_extkind (loc0, name, s1ess))
     end // end of [S0Eextkind]
 //
-  | ~S0Eapp (_, _) => let 
+  | ~S0Eapp (_, _) => let
       val s1e_app = fixity_resolve<s1exp> (
         loc0, s1exp_get_loc, s1expitm_app (loc0), aux_itemlst s0e0
       ) // end of [val]

@@ -301,7 +301,7 @@ ulink
 in
   atext_strptr (res)
 end // end of [ulink]
-      
+
 (* ****** ****** *)
 //
 #define

@@ -115,10 +115,10 @@ val ((*void*)) = fileref_close (inp)
 
 (* ****** ****** *)
 
-val () = assertloc (test_file_isdir(".") = 1)  
+val () = assertloc (test_file_isdir(".") = 1)
 val () = assertloc (test_file_ixusr("./prelude_filebas.exe") = 1)
 val () = assertloc (test_file_isreg("./prelude_filebas.dats") = 1)
-  
+
 (* ****** ****** *)
 
 implement main0 () = ()

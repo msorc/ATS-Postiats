@@ -119,8 +119,8 @@ atspre_char_iseqz
 {
   return ((c == 0) ? atsbool_true : atsbool_false) ;
 } // end of [atspre_char_iseqz]
-#define atspre_char0_iseqz(c) atspre_char_iseqz(c) 
-#define atspre_char1_iseqz(c) atspre_char_iseqz(c) 
+#define atspre_char0_iseqz(c) atspre_char_iseqz(c)
+#define atspre_char1_iseqz(c) atspre_char_iseqz(c)
 
 ATSinline()
 atstype_bool
@@ -129,8 +129,8 @@ atspre_char_isneqz
 {
   return ((c != 0) ? atsbool_true : atsbool_false) ;
 } // end of [atspre_char_isneqz]
-#define atspre_char0_isneqz(c) atspre_char_isneqz(c) 
-#define atspre_char1_isneqz(c) atspre_char_isneqz(c) 
+#define atspre_char0_isneqz(c) atspre_char_isneqz(c)
+#define atspre_char1_isneqz(c) atspre_char_isneqz(c)
 
 /* ****** ****** */
 

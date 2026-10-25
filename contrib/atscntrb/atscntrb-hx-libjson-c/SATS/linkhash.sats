@@ -100,7 +100,7 @@ fun lh_char_equal : lh_equal_fn_type = "mac#%"
 (*
 struct lh_table*
 lh_kchar_table_new
-  (int size, const char *name, lh_entry_free_fn *free_fn)     
+  (int size, const char *name, lh_entry_free_fn *free_fn)
 *)
 fun lh_kchar_table_new
 (
@@ -164,7 +164,7 @@ int lh_table_insert
 *)
 fun lh_table_insert
   (t: !lh_table1, k: Ptr0, v: Ptr0): int(*err*) = "mac#%"
-          
+
 (* ****** ****** *)
 //
 // HX: this one is deprecated!

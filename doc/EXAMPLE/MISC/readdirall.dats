@@ -104,7 +104,7 @@ if direntp2ptr(entp) > 0 then let
     } else
       direntp_free (entp)
     // end of [if]
-  ) : void (* end of [val] *) 
+  ) : void (* end of [val] *)
 in
   loop (dirp, DA)
 end else let

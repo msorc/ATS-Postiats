@@ -30,7 +30,7 @@ absvtype channeg(type) = ptr
 
 (* ****** ****** *)
 //
-fun{} channel_cap(): intGte(1)  
+fun{} channel_cap(): intGte(1)
 //
 (* ****** ****** *)
 //

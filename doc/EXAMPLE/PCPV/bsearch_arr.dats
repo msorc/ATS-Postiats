@@ -93,7 +93,7 @@ prfun lemma2_isord_append {xs:ilist} {xs1,xs2:ilist}
 extern
 fun{a:t@ype}
 bsearch
-  {l:addr}{xs:ilist}{x0:int}{n:nat} 
+  {l:addr}{xs:ilist}{x0:int}{n:nat}
 (
   pford: ISORD (xs)
 , pflen: LENGTH (xs, n)

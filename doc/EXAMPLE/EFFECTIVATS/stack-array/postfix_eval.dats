@@ -24,7 +24,7 @@ extern fun postfix_eval (string): int
 //
 // HX: each integer is assumed to be single-digit
 // HX: every illegal expression yields a run-time exception
-// 
+//
 (* ****** ****** *)
 
 implement

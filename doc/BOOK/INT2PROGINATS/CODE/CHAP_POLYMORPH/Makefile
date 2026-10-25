@@ -26,7 +26,7 @@ ATSCCFLAGS=
 
 ######
 
-all:: 
+all::
 all:: misc
 all:: listfuns
 all:: mergesort

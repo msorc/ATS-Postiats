@@ -149,7 +149,7 @@ prfun ackf_ack_lemma
 // end of [ackf_ack_lemma]
 
 (*
-** this lemma means that applying ackf (m) n times to 1 
+** this lemma means that applying ackf (m) n times to 1
 ** yields ack (m+1, n)
 *)
 and ackf_ack_lemma2

@@ -96,13 +96,13 @@ val () = println! ("GET foo: ", str)
 prval () = fpf (str)
 val () = freeReplyObject (rep)
 //
-val rep = 
+val rep =
 $extfcall (
   redisReply0
 , "redisCommand", pctx, "DEL counter"
 ) // end of [val]
 val () = freeReplyObject (rep)
-val rep = 
+val rep =
 $extfcall (
   redisReply0
 , "redisCommand", pctx, "INCR counter"
@@ -111,7 +111,7 @@ val () = assertloc (ptrcast (rep) > 0)
 val repint = redisReply_get_integer (rep)
 val () = println! ("INCR counter: ", repint)
 val () = freeReplyObject (rep)
-val rep = 
+val rep =
 $extfcall (
   redisReply0
 , "redisCommand", pctx, "INCR counter"
@@ -131,7 +131,7 @@ val int = redisReply_get_integer (rep)
 val () = println! ("DEL mylist: ", int)
 val () = freeReplyObject(rep);
 //
-val rep = 
+val rep =
 $extfcall (
   redisReply0
 , "redisCommand", pctx, "LPUSH mylist element-%s", "0"
@@ -141,7 +141,7 @@ val repint = redisReply_get_integer (rep)
 val () = println! ("LPUSH mylist: ", repint)
 val () = freeReplyObject(rep);
 //
-val rep = 
+val rep =
 $extfcall (
   redisReply0
 , "redisCommand", pctx, "LPUSH mylist element-%s", "1"

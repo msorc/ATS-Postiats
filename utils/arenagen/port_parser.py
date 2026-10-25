@@ -323,7 +323,7 @@ def convert_one(s, msk, cs, ae, end, scrut):
     res = []
     for k, (cond, binds, body) in enumerate(chain):
         b = body.strip('\n')
-        if strip_cm(b).strip() == '()' and not binds: b = '()'; 
+        if strip_cm(b).strip() == '()' and not binds: b = '()';
         if binds:
             b = 'let %s in\n%s\nend' % (' '.join(binds), b)
         if cond is None:

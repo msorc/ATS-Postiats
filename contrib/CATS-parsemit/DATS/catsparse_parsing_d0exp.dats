@@ -574,7 +574,7 @@ parse_d0expseq
 d0exparg = '(' d0expseq ')'
 //
 *)
-  
+
 implement
 parse_d0exparg
   (buf, bt, err) = let

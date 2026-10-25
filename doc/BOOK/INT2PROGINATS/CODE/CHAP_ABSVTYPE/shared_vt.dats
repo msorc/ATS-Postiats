@@ -54,12 +54,12 @@ staload
 (* ****** ****** *)
 //
 staload
-"libats/SATS/athread.sats"  
+"libats/SATS/athread.sats"
 staload
 _ = "libats/DATS/athread.dats"
 staload
 _ = "libats/DATS/athread_posix.dats"
-//  
+//
 (* ****** ****** *)
 
 absvtype shared(a:vtype) = ptr
@@ -67,8 +67,8 @@ absvtype shared(a:vtype) = ptr
 (* ****** ****** *)
 
 extern
-fun shared_make{a:vtype}(x: a): shared(a)  
-  
+fun shared_make{a:vtype}(x: a): shared(a)
+
 (* ****** ****** *)
 //
 extern

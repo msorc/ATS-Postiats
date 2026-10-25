@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -336,7 +336,7 @@ if token_node_is_T_DOT(tnd) then (
  let
         val () = incby1() in d0ynq_symdot(ent1, tok2)
       end
-    
+
 )
 else (
         tokbuf_set_ntok_null<d0ynq>(buf, n0) where
@@ -372,7 +372,7 @@ else (
         // end of [if]
       end // end of [non-DOT-COLON]
 *)
-  
+
 )
 end)end (* end of [_ when ...] *)
 //
@@ -691,7 +691,7 @@ if token_node_is_T_LBRACKET(tnd) then (
         val () = list_vt_free (ent1) in tokbuf_set_ntok_null<d0arrind>(buf, n0)
       end // end of [if]
     end
-  
+
 )
 else (
  d0arrind_sing (l2l(ent1), ent2)
@@ -911,7 +911,7 @@ else if token_node_is_T_DLRLITERAL(tnd) then (
 //
 )
 else if ptest_fun<s0elop>(
-    buf, p_s0elop, ent 
+    buf, p_s0elop, ent
   ) then (
  let
     val bt = 0
@@ -930,7 +930,7 @@ if token_node_is_T_LBRACKET(tnd) then (
           d0exp_sel_ind (ent1, ent2) else synent_null<d0exp>()
         // end of [if]
       end // end of [T_LBRACKET]
-    
+
 )
 else if ptest_fun<l0ab>(
         buf, p_l0ab, ent
@@ -940,13 +940,13 @@ else if ptest_fun<l0ab>(
           synent_decode {l0ab} (ent) in d0exp_sel_lab (ent1, ent2)
         // end of [val]
       end // end of [when ...]
-    
+
 )
 else (
  let
         val () = err := err + 1 in synent_null<d0exp>()
       end // end of [_]
-  
+
 )
 end)end // end of [p_s0elop]
 //
@@ -1100,7 +1100,7 @@ if token_node_is_T_SEMICOLON(tnd) then (
               else synent_null<d0exp>()
             // end of [if]
           end
-        
+
 )
 else (
  let
@@ -1111,7 +1111,7 @@ else (
           in
             d0exp_list12_if (tok, ent2, ent3, err, err0)
           end
-      
+
 )
 end)end // end of [then]
       else let
@@ -1985,7 +1985,7 @@ loopi0nv ::= i0nvqua i0nvmet i0nvargstate i0nvresstateopt
 fun
 p_loopi0nv
 (
-  buf: &tokbuf, bt: int, err: &int  
+  buf: &tokbuf, bt: int, err: &int
 ) : loopi0nv = let
 //
 val
@@ -2106,7 +2106,7 @@ if token_node_is_T_LBRACE(tnd) then (
         ~SYNENT2
         (ent2, ent3) =
         pseq2_fun<a2,a3>(buf, bt, err, p_d0eclseq_dyn, p_RBRACE)
-        // end of [val]   
+        // end of [val]
 //
       in
         if
@@ -2120,7 +2120,7 @@ if token_node_is_T_LBRACE(tnd) then (
         end // end of [then]
         else tokbuf_set_ntok_null<d0exp>(buf, n0)
       end // end of [T_LBRACE]
-    
+
 )
 else (
  let
@@ -2141,7 +2141,7 @@ else (
         end // end of [then]
         else tokbuf_set_ntok_null<d0exp>(buf, n0)
       end // end of [non-LBRACE]
-  
+
 )
 end)end // end of [T_WHERE]
 )
@@ -2465,7 +2465,7 @@ p_d0exp_tok
 //
 implement
 p_d0exp
-  (buf, bt, err) = 
+  (buf, bt, err) =
 (
   ptokwrap_fun<d0exp>(buf, bt, err, p_d0exp_tok, PE_d0exp)
 ) (* end of [p_d0exp] *)

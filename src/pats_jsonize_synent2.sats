@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -89,7 +89,7 @@ fun jsonize_s2exp (flag: int, s2e: s2exp): jsonval
 fun jsonize_s2explst (flag: int, s2es: s2explst): jsonval
 fun jsonize_s2expopt (flag: int, s2eopt: s2expopt): jsonval
 //
-fun jsonize_labs2explst (flag: int, ls2es: labs2explst): jsonval  
+fun jsonize_labs2explst (flag: int, ls2es: labs2explst): jsonval
 //
 fun jsonize_wths2explst (flag: int, ws2es: wths2explst): jsonval
 //
@@ -107,7 +107,7 @@ fun jsonize1_s2explst (s2es: s2explst): jsonval // with hnfizing
 //
 fun jsonize0_s2expopt (opt: s2expopt): jsonval // w/o hnfizing
 fun jsonize1_s2expopt (opt: s2expopt): jsonval // with hnfizing
-//  
+//
 (* ****** ****** *)
 //
 // Dynamics

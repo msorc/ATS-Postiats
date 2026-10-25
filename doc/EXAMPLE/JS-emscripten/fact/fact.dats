@@ -1,4 +1,4 @@
-(*  
+(*
 ** Handling JS events within ATS.
 ** Author: Will Blair
 ** Authoremail: wdblairATcsDOTbuDOTedu

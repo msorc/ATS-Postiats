@@ -119,7 +119,7 @@ and y0 = p0.y() // point_get_y (p0)
 val () = (print! ("p0 = "); print_point (p0); print_newline ())
 //
 val () = p0.x(y0) // point_set_x (p0, y0)
-and () = p0.y(x0) // point_set_y (p0, x0)  
+and () = p0.y(x0) // point_set_y (p0, x0)
 val () = (print! ("p0 = "); print_point (p0); print_newline ())
 //
 val () = point_free (p0)

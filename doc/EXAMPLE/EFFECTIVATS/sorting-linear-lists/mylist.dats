@@ -123,7 +123,7 @@ mylist_uncons2
   (xs) = let
   val xs2 = mylist_uncons (xs) in (xs, xs2)
 end // end of [mylist_uncons2]
- 
+
 (* ****** ****** *)
 //
 extern

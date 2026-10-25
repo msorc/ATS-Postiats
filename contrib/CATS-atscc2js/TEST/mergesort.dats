@@ -177,7 +177,7 @@ end // end of [print_list0]
 //
 (* ****** ****** *)
 //
-extern 
+extern
 fun
 main_js
 (

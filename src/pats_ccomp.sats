@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -92,7 +92,7 @@ staload "./pats_staexp2.sats"
 staload
 S2EUT =
 "./pats_staexp2_util.sats"
-vtypedef stasub = $S2EUT.stasub 
+vtypedef stasub = $S2EUT.stasub
 //
 (* ****** ****** *)
 
@@ -487,7 +487,7 @@ fun the_funlablst_addlst (fls: funlablst): void
 
 (* ****** ****** *)
 
- 
+
 fun fprint_primcstsp (out: FILEref, x: primcstsp): void
 fun fprint_tmpsub (out: FILEref, x: tmpsub): void
 fun fprint_tmpsubopt (out: FILEref, x: tmpsubopt): void
@@ -1120,7 +1120,7 @@ fun instr_patck
 (
   loc: loc_t, pmv: primval, ptck: patck, ptknt: patckont
 ) : instr // pattern check
-  
+
 (* ****** ****** *)
 
 fun
@@ -1555,7 +1555,7 @@ fun ccompenv_localjoin
 fun ccompenv_add_vbindmapall
   (env: !ccompenv, d2v: d2var, pmv: primval): void
 // end of [ccompenv_add_vbindmapall]
-  
+
 fun ccompenv_find_vbindmapall
   (env: !ccompenv, d2v: d2var): Option_vt (primval)
 // end of [ccompenv_find_vbindmapall]
@@ -1655,7 +1655,7 @@ fun hidexp_ccomp_fix (env: !ccompenv, res: !instrseq, hde: hidexp): primval
 fun hidexp_ccomp_loop (env: !ccompenv, res: !instrseq, hde: hidexp): primval
 fun hidexp_ccomp_loopexn (env: !ccompenv, res: !instrseq, hde: hidexp): primval
 //
-fun hidexp_ccompv (env: !ccompenv, res: !instrseq, hde: hidexp): primval  
+fun hidexp_ccompv (env: !ccompenv, res: !instrseq, hde: hidexp): primval
 //
 (* ****** ****** *)
 

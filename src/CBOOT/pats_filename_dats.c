@@ -3634,7 +3634,7 @@ tmp361
 ) ATSthen() {
 ATSINSmove(tmp362, patsopt_getcwd_gc()) ;
 ATSINSmove(tmp364, ATSLIB_056_prelude__strptr_isnot_null__140__1(ATSPMVrefarg0(tmp362))) ;
-ATSINSmove_void(tmp363, atspre_assert_errmsg2_bool1(tmp364, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_filename.dats: 12346(line=637, offs=12) -- 12381(line=637, offs=47)"))) ;
+ATSINSmove_void(tmp363, atspre_assert_errmsg2_bool1(tmp364, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_filename.dats: 12343(line=637, offs=12) -- 12378(line=637, offs=47)"))) ;
 ATSINSmove(tmp367, patsopt_filename_dirbase(ATSPMVcastfn(strptr2string, atstkind_type(atstype_ptrk), ATSPMVrefarg0(tmp362)), arg0)) ;
 ATSINSmove_void(tmp368, atspre_strptr_free(tmp362)) ;
 ATSINSmove(tmp370, p2s_138(ATSPMVrefarg0(tmp367))) ;
@@ -4045,7 +4045,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_the_filenamelst_ppop):
 ATSINSmove(tmp440, the_filenamelst_get_152()) ;
 ATSINSmove(tmp421, ATSLIB_056_libats_056_arena__glist_view__88__3(tmp440)) ;
-ATSifthen(ATSCKptrisnull(tmp421)) { ATSINScaseof_fail("PATSHOME/src/pats_filename.dats: 14100(line=731, offs=1) -- 14152(line=731, offs=53)") ; } ;
+ATSifthen(ATSCKptrisnull(tmp421)) { ATSINScaseof_fail("PATSHOME/src/pats_filename.dats: 14097(line=731, offs=1) -- 14149(line=731, offs=53)") ; } ;
 ATSINSmove(tmp441, ATSSELcon(tmp421, postiats_tysum_1, atslab__0)) ;
 ATSINSmove(tmp442, ATSSELcon(tmp421, postiats_tysum_1, atslab__1)) ;
 ATSINSfreecon(tmp421) ;
@@ -4619,7 +4619,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_the_pathlst_pop):
 ATSINSmove(tmp541, the_pathlst_get_204()) ;
 ATSINSmove(tmp522, ATSLIB_056_libats_056_arena__glist_view__88__5(tmp541)) ;
-ATSifthen(ATSCKptrisnull(tmp522)) { ATSINScaseof_fail("PATSHOME/src/pats_filename.dats: 15843(line=836, offs=1) -- 15890(line=836, offs=48)") ; } ;
+ATSifthen(ATSCKptrisnull(tmp522)) { ATSINScaseof_fail("PATSHOME/src/pats_filename.dats: 15840(line=836, offs=1) -- 15887(line=836, offs=48)") ; } ;
 ATSINSmove(tmp542, ATSSELcon(tmp522, postiats_tysum_1, atslab__1)) ;
 ATSINSfreecon(tmp522) ;
 ATSINSmove_void(tmpret521, ATSLIB_056_prelude_056_unsafe__ptr0_set__31__12(statmp505, tmp542)) ;

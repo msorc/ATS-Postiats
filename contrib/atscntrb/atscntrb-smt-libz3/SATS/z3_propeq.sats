@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -51,10 +51,10 @@ Z3_ast Z3_mk_true (__in Z3_context c)
 Create an AST node representing true.
 *)
 fun Z3_mk_true (ctx: !Z3_context): Z3_ast = "mac#%"
- 
+
 (*
 Z3_ast Z3_mk_false (__in Z3_context c)
-Create an AST node representing false. 
+Create an AST node representing false.
 *)
 fun Z3_mk_false (ctx: !Z3_context): Z3_ast = "mac#%"
 
@@ -65,7 +65,7 @@ Z3_ast Z3_mk_eq
 (
   __in Z3_context c, __in Z3_ast l, __in Z3_ast r
 )
-Create an AST node representing l = r. 
+Create an AST node representing l = r.
 *)
 fun Z3_mk_eq
 (
@@ -77,7 +77,7 @@ fun Z3_mk_eq
 fun Z3_mk_not
   (ctx: !Z3_context, a: !Z3_ast): Z3_ast = "mac#%"
 // end of [Z3_mk_not]
-  
+
 (* ****** ****** *)
 
 fun Z3_mk_or2

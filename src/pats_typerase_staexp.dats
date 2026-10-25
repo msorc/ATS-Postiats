@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -346,7 +346,7 @@ if s2exp_node_is_S2Elam (s2e_fun.s2exp_node ()) then let
   val s2e_body = s2exp_subst (sub, s2e_body)
   val ((*freed*)) = stasub_free (sub)
 in
-  s2exp_tyer (loc0, flag, s2e_body)  
+  s2exp_tyer (loc0, flag, s2e_body)
 end else (* hnf *)
   s2exp_tyer_apphnf (loc0, flag, s2t0, s2f_fun, s2es_arg)
   // end of [_]
@@ -567,7 +567,7 @@ if glist_is_cons (s2es) then let
     val isprf = s2exp_is_prf (s2e)
   in
     if isprf then
-      s2explst_npf_tyer_labize_aux (loc0, npf, s2es, i+1)  
+      s2explst_npf_tyer_labize_aux (loc0, npf, s2es, i+1)
     else let
       val lab =
         $LAB.label_make_int (i)

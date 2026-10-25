@@ -412,7 +412,7 @@ smtenv_push{l:addr}(env: !smtenv(l)): (smtenv_push_v | void)
 //
 fun
 smtenv_solve_formula{l:addr}(env: !smtenv(l), x: form): int
-// 
+//
 (* ****** ****** *)
 
 (* end of [patsolve_z3_solving.sats] *)

@@ -74,7 +74,7 @@ then let
   channeg_list_cons
   ((*void*)) = channeg_list(chn)
 //
-  val x0 = channeg_send_val(chn) 
+  val x0 = channeg_send_val(chn)
 //
 in
   loop (chn, n-1, list_vt_cons(x0, res))

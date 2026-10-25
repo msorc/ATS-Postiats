@@ -53,7 +53,7 @@ patsolve_z3_cmdline
 //
 fun
 patsolve_z3_commarglst(arglst: commarglst_vt): void
-// 
+//
 (* ****** ****** *)
 
 (* end of [patsolve_z3_commarg.sats] *)

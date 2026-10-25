@@ -473,7 +473,7 @@ if sep(buf)
         val+list_vt_cons (_, res1) = res
         val ((*void*)) = loop (buf, res1, err)
         prval ((*void*)) = fold@ (res)
-      in    
+      in
         // nothing
       end
     // end of [case+]
@@ -693,7 +693,7 @@ parse_s0expseq
 s0exparg = '(' s0expseq ')'
 //
 *)
-  
+
 implement
 parse_s0exparg
   (buf, bt, err) = let
@@ -731,9 +731,9 @@ token_node_view(tok.token_node()) of
   end) // end of [_]
 //
 end // end of [parse_s0exparg]
-  
+
 (* ****** ****** *)
-  
+
 implement
 parse_s0expargopt
   (buf, bt, err) = let
@@ -747,7 +747,7 @@ if err0 = err
   then gopt_some(s0arg) else (err := err0; gopt_none())
 //
 end // end of [parse_s0expargopt]
-  
+
 (* ****** ****** *)
 
 implement
@@ -836,7 +836,7 @@ token_node_view(tok.token_node()) of
 | v0 (*error*) => (token_node_view_free(v0); let
     val () = err := err + 1 in synent_null ()
   end) // end of [_]
-//  
+//
 end // end of [parse_tyrec]
 
 (* ****** ****** *)
@@ -1209,7 +1209,7 @@ val () = the_parerrlst_clear ()
 //
 val d0cs = parse_toplevel (buf)
 //
-// HX: see if there are tokens 
+// HX: see if there are tokens
 //
 var err: int = 0
 val _(*EOF*) = p_EOF (buf, 0(*bt*), err)

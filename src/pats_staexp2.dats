@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -274,7 +274,7 @@ s2exp_hole (s2h) = let
   val s2t = s2hole_get_srt (s2h)
 in
   s2exp_new (s2t, s2exp_node_S2Ehole (s2h))
-end // end of [s2exp_hole]  
+end // end of [s2exp_hole]
 
 (* ****** ****** *)
 
@@ -307,7 +307,7 @@ s2exp_eff
 // end of [s2exp_eff]
 
 implement
-s2exp_eqeq 
+s2exp_eqeq
   (s2e1, s2e2) = s2exp_new (s2rt_bool, s2exp_node_S2Eeqeq (s2e1, s2e2))
 // end of [s2exp_eqeq]
 
@@ -357,7 +357,7 @@ s2exp_lam_srt
 implement
 s2exp_lamlst (
   s2vss, s2e_body
-) = 
+) =
 (
 case+ glist_view (s2vss) of
 | ~GLnil() => s2e_body

@@ -23,7 +23,7 @@ foo2 (r) =
 {
   val (vbox pf | p) = ref_get_viewptr (r)
   val ((*void*)) = $effmask_ref (foo (!p))
-} 
+}
 
 (* ****** ****** *)
 

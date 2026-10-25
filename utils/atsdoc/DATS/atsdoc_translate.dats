@@ -15,12 +15,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -252,7 +252,7 @@ ftesting_seq0
   val nchr0 = lexbufpos_diff (buf, pos)
   val nchr1 = loop (buf, nchr0, f)
   val diff = nchr1 - nchr0
-  val () = if diff > 0u 
+  val () = if diff > 0u
     then $LOC.position_incby_count (pos, diff) else ()
   // end of [val]
 } // end of [ftesting_seq0]
@@ -429,7 +429,7 @@ trans_top_PERCENT
   val i = lexbufpos_get_char (buf, pos)
   val c = (i2c)i
 in
-  case+ c of 
+  case+ c of
   | '\{' when // '%{' at the beginning
       $LOC.position_get_ncol (pos) = 1 => let
       var pos0: position

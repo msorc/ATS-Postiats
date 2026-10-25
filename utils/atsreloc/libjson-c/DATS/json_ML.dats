@@ -176,7 +176,7 @@ case+ 0 of
     json_type_null => JSONnul ()
 | _ when
     type = json_type_int => let
-    prval () = __assert_agz (jso) 
+    prval () = __assert_agz (jso)
     val i = json_object_get_int (jso)
   in
     JSONint($UN.cast2llint(i))
@@ -184,7 +184,7 @@ case+ 0 of
 | _ when type =
     json_type_boolean => let
     prval (
-    ) = __assert_agz (jso) 
+    ) = __assert_agz (jso)
     val tf = json_object_get_boolean (jso)
   in
     JSONbool(tf)
@@ -192,7 +192,7 @@ case+ 0 of
 | _ when type =
     json_type_double => let
     prval (
-    ) = __assert_agz (jso) 
+    ) = __assert_agz (jso)
     val dbl = json_object_get_double (jso)
   in
     JSONfloat(dbl)
@@ -200,7 +200,7 @@ case+ 0 of
 | _ when type =
     json_type_string => let
     prval (
-    ) = __assert_agz (jso) 
+    ) = __assert_agz (jso)
     val (
       fpf | str
     ) = json_object_get_string (jso)
@@ -212,7 +212,7 @@ case+ 0 of
 | _ when type =
     json_type_array => let
     vtypedef tenv = ptr(*list_vt*)
-    prval ((*void*)) = __assert_agz (jso) 
+    prval ((*void*)) = __assert_agz (jso)
     val asz = json_object_array_length (jso)
     local
     implement
@@ -236,7 +236,7 @@ case+ 0 of
     typedef tenv = ptr
     prval () = __assert_agz (jso)
     local
-    implement    
+    implement
     json_object_kforeach$fwork<tenv>
       (k, v, env) =
     {

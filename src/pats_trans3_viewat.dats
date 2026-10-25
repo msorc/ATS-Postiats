@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -76,7 +76,7 @@ prerr_FILENAME<>
 (* ****** ****** *)
 
 staload LAB = "./pats_label.sats"
-overload = with $LAB.eq_label_label 
+overload = with $LAB.eq_label_label
 
 (* ****** ****** *)
 
@@ -244,7 +244,7 @@ auxerr_nonatview
   loc0: loc_t, s2at_new: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": viewat-restoration cannot be performed"  
+  val () = prerr ": viewat-restoration cannot be performed"
   val () = prerr ": proof of some atview is needed but one of the following type is given: "
   val () = (prerr "["; prerr_s2exp (s2at_new); prerr "]")
   val () = prerr_newline ((*void*))
@@ -258,7 +258,7 @@ auxerr_nonwithout
   loc0: loc_t, s2e_old: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": viewat-restoration cannot be performed"  
+  val () = prerr ": viewat-restoration cannot be performed"
   val () = prerr ": the following type is expected to be a without-type but it is not: "
   val () = (prerr "["; prerr_s2exp (s2e_old); prerr "]")
   val () = prerr_newline ((*void*))
@@ -283,7 +283,7 @@ in
 //
 if ~addreq then let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": viewat-restoration cannot be performed"  
+  val () = prerr ": viewat-restoration cannot be performed"
   val () = prerr ": mismatch of bef/aft locations of atviews:\n"
   val () = (prerr "bef: ["; prerr_s2exp (s2e1); prerr "]")
   val () = prerr_newline ((*void*))

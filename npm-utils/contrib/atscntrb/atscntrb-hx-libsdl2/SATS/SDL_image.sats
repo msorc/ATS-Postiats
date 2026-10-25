@@ -8,7 +8,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -91,7 +91,7 @@ fun IMG_LoadTyped_RW_free
   (src: (SDL_RWops_ptr1), type: NSH(string)): SDL_Surface_ptr0 = "mac#%"
 
 (* ****** ****** *)
-  
+
 fun IMG_isICO (src: !SDL_RWops_ptr1): int = "mac#%"
 fun IMG_isCUR (src: !SDL_RWops_ptr1): int = "mac#%"
 fun IMG_isBMP (src: !SDL_RWops_ptr1): int = "mac#%"
@@ -106,7 +106,7 @@ fun IMG_isXCF (src: !SDL_RWops_ptr1): int = "mac#%"
 fun IMG_isXPM (src: !SDL_RWops_ptr1): int = "mac#%"
 fun IMG_isXV  (src: !SDL_RWops_ptr1): int = "mac#%"
 fun IMG_isWEBP (src: !SDL_RWops_ptr1): int = "mac#%"
-  
+
 (* ****** ****** *)
 
 fun IMG_LoadICO_RW (src: !SDL_RWops_ptr1): SDL_Surface_ptr0

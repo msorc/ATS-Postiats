@@ -33,10 +33,10 @@ implement
 acker (m, n) =
 (
 case+
-  (m, n) of 
+  (m, n) of
 | (0, _) => n + 1
 | (_, 0) => acker(m-1, 1)
-| (_, _) => acker(m-1, acker(m, n-1)) 
+| (_, _) => acker(m-1, acker(m, n-1))
 )
 //
 (* ****** ****** *)

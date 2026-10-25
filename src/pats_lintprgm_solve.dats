@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -1081,7 +1081,7 @@ a:t@ype
 ) : Ans3 (*~1/0/1*) = let
 val () =
   myintvec_elimeqlst<a> (0(*stamp*), iv, i1veqs, n)
-val sgn = myintvec_inspect_eq<a> (iv, n)  
+val sgn = myintvec_inspect_eq<a> (iv, n)
 //
 in
 //
@@ -1152,7 +1152,7 @@ auxneq {n:pos} (
 //
 val () = // HX: stamp = 0
   myintvec_elimeqlst<a> (0, iv, i1veqs, n)
-val () = sgn := myintvec_inspect_neq<a> (iv, n)  
+val () = sgn := myintvec_inspect_neq<a> (iv, n)
 //
 in
 //

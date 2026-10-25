@@ -59,7 +59,7 @@ ints_filter
   (channeg(sslist(int)), n: int): channeg(sslist(int))
 //
 (* ****** ****** *)
-  
+
 implement
 ints_from (n) = let
 //

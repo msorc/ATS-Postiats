@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -295,7 +295,7 @@ then (
     prerrln! ("] refers to a macdef in short form but one in long form is expected.")
     val () = prerr_ERROR_end()
   in
-    the_trans2errlst_add (trans2err_T2E_macdef_check(loc0, d2m0))    
+    the_trans2errlst_add (trans2err_T2E_macdef_check(loc0, d2m0))
   end else () // end of [if]
 ) (* end of [if] *)
 //
@@ -518,10 +518,10 @@ d1exp_tr_app_dyn_dqid
   d1e0: d1exp // all
 , d1e1: d1exp // sapp
 , dq: d0ynq, id: symbol // d1e1 -> dqid
-, locarg: location, npf: int, darg: d1explst 
+, locarg: location, npf: int, darg: d1explst
 ) : d2exp = let
 //
-val spdid = dynspecid_of_dqid (dq, id) 
+val spdid = dynspecid_of_dqid (dq, id)
 //
 in
 //
@@ -564,7 +564,7 @@ d1exp_tr_app_dyn_e1xp
   d1e0: d1exp // all
 , d1e1: d1exp // fun
 , exp1: e1xp // exp1 <- d1e1
-, locarg: location, npf: int, darg: d1explst 
+, locarg: location, npf: int, darg: d1explst
 ) : d2exp = let
 in
 //
@@ -604,7 +604,7 @@ d1exp_tr_app_sta_dyn_dqid
 , d1e2: d1exp // fun
 , dq: d0ynq, id: symbol
 , sarg: s1exparglst // static arg
-, locarg: location, npf: int, darg: d1explst 
+, locarg: location, npf: int, darg: d1explst
 ) : d2exp = let
   val ans = the_d2expenv_find_qua (dq, id)
 in
@@ -638,7 +638,7 @@ d1exp_tr_app_sta_dyn_dqid_itm
 , dq: d0ynq, id: symbol
 , d2i: d2itm
 , sarg: s1exparglst
-, locarg: location, npf: int, darg: d1explst 
+, locarg: location, npf: int, darg: d1explst
 ) : d2exp = let
 //
 val loc0 = d1e0.d1exp_loc()
@@ -731,7 +731,7 @@ case+ d2itm_view(d2i) of
     val darg = d1explst_tr (darg)
 //
   in
-    d2exp_app_sta_dyn (loc0, loc1, d2e2, sarg, locarg, npf, darg)    
+    d2exp_app_sta_dyn (loc0, loc1, d2e2, sarg, locarg, npf, darg)
   end // end of [D2ITEMmacdef]
 //
 | v => (d2itm_view_free (v); let
@@ -1299,7 +1299,7 @@ fun sc1lau_trdn (
   val sp2t = sp1at_trdn (sp1t, s2t_pat)
   val () = the_s2expenv_add_sp2at (sp2t)
   val body = d1exp_tr (sc1l.sc1lau_body())
-  val () = the_s2expenv_pop_free ((*none*))  
+  val () = the_s2expenv_pop_free ((*none*))
 in
   sc2lau_make (sc1l.sc1lau_loc(), sp2t, body)
 end // end of [sc1lau_tr]
@@ -1359,7 +1359,7 @@ if n < tag then (
         val () = prerr_s2cst (s2c)
         val () = prerr "] is missing."
         val () = prerr_newline ()
-        val () = 
+        val () =
           the_trans2errlst_add (trans2err_T2E_sc2laulst_coverck_missing(loc0, s2c))
         // end of [val]
       in
@@ -1421,7 +1421,7 @@ case+ sc2ls of
         loop (loc0, sc2ls, s2cs, tag+1)
       end // end of [if]
     ) else
-      loop (loc0, sc2ls, s2cs, n) // skipping SP2Terr 
+      loop (loc0, sc2ls, s2cs, n) // skipping SP2Terr
     // end of [if]
   end // end of [list_vt_cons]
 | ~list_vt_nil () => let
@@ -1693,7 +1693,7 @@ d1exp_node_view(d1e0.d1exp_node()) of
       val d2es = d1explst_tr (d1es) in d2exp_list (loc0, npf, d2es)
     end // end of [list_cons]
   | ~GLnil() => d2exp_empty (loc0)
-  ) // end of [D1Elist]  
+  ) // end of [D1Elist]
 //
 | ~D1Eifhead
   (
@@ -1791,7 +1791,7 @@ d1exp_node_view(d1e0.d1exp_node()) of
     case+ gopt_view(s1eopt) of
     | ~GOsome(s1e) => let
         val s2e = (
-          case+ lin of 
+          case+ lin of
           | 0 => s1exp_trdn_t0ype (s1e)
           | 1 => s1exp_trdn_vt0ype (s1e)
           | _ => s1exp_trdn_impred (s1e) // unspecified

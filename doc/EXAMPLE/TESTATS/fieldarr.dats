@@ -86,7 +86,7 @@ main0 () =
 var pt = point_make (0., 1., 2.)
 //
 val () = println! ("pt.x = ", pt.x())
-val () = assertloc (0. = pt.x()) 
+val () = assertloc (0. = pt.x())
 val () = println! ("pt.y = ", pt.y())
 val () = assertloc (1. = pt.y())
 val () = println! ("pt.z = ", pt.z())

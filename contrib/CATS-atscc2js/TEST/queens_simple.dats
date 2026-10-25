@@ -199,7 +199,7 @@ fun search
 
 (* ****** ****** *)
 //
-extern 
+extern
 fun
 main_js (): void = "mac#"
 //

@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -814,7 +814,7 @@ case+ d0exp_node_view (d0e0.d0exp_node ()) of
     fxitm_FXITMatm<d1exp> (d1exp_where (loc0, d1e_body, d1cs))
   end // end of [D0Ewhere]
 //
-| ~D0Eapp (_, _) => let 
+| ~D0Eapp (_, _) => let
 //
     val
     deis = aux_itemlst (d0e0)
@@ -849,7 +849,7 @@ case+ d0exp_node_view (d0e0.d0exp_node ()) of
     val _else = d0expopt_tr (_else)
     val d1e_if = d1exp_ifhead (loc0, inv, _cond, _then, _else)
   in
-    fxitm_FXITMatm<d1exp> (d1e_if)        
+    fxitm_FXITMatm<d1exp> (d1e_if)
   end // end of [D0Eifhead]
 | ~D0Esifhead (
     hd, _cond, _then, _else
@@ -861,7 +861,7 @@ case+ d0exp_node_view (d0e0.d0exp_node ()) of
     val _else = d0exp_tr (_else)
     val d1e_sif = d1exp_sifhead (loc0, i1nv, _cond, _then, _else)
   in
-    fxitm_FXITMatm<d1exp> (d1e_sif)        
+    fxitm_FXITMatm<d1exp> (d1e_sif)
   end // end of [D0Esifhead]
 //
 | ~D0Eifcasehd
@@ -1106,7 +1106,7 @@ case+ d0exp_node_view (d0e0.d0exp_node ()) of
     val post =
       d0exp_tr (itp.itp_post ())
     val body = d0exp_tr body
-  in 
+  in
     fxitm_FXITMatm<d1exp> (d1exp_for (loc0, inv, init, test, post, body))
   end // end of [D0Efor]
 | ~D0Ewhile

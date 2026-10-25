@@ -198,7 +198,7 @@ sllst_ptr_append
   {l1,l2:addr}{n1,n2:nat}
 (
   pf1lst: sllst_v (a, l1, n1)
-, pf2lst: sllst_v (a, l2, n2)  
+, pf2lst: sllst_v (a, l2, n2)
 | p1: ptr l1, p2: ptr l2
 ) : [l:addr] (sllst_v (a, l, n1+n2) | ptr l) =
   if p1 > 0 then let

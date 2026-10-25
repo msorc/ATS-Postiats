@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -884,7 +884,7 @@ of // case+
 | ~S2Evar(s2v) =>
   if (s2v0 = s2v)
     then true else aux1_s2var(s2v0, s2v)
-  // end of [if]  
+  // end of [if]
 //
 | ~S2Eapp(s2e, s2es) =>
   if aux1_s2exp(s2v0, s2e)

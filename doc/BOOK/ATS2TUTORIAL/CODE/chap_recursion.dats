@@ -49,10 +49,10 @@ fix f(x: int): int =>
 (* end of [fact] *)
 
 (* ****** ****** *)
-  
-val double = lam(x:int):int => x + x  
-val double = fix _(x:int):int => x + x  
-  
+
+val double = lam(x:int):int => x + x
+val double = fix _(x:int):int => x + x
+
 (* ****** ****** *)
 //
 fun

@@ -89,9 +89,9 @@ fun emit_text : emit_type(string)
 fun emit_symbol : emit_type(symbol)
 
 (* ****** ****** *)
-  
-fun emit_time_stamp (FILEref): void  
-  
+
+fun emit_time_stamp (FILEref): void
+
 (* ****** ****** *)
 //
 fun emit_extcode : emit_type(tokenlst)

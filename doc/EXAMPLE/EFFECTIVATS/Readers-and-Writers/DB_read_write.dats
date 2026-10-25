@@ -33,7 +33,7 @@ fun SDBshell_acquire_read2
 extern
 fun SDBshell_acquire_write2
   (sx: SDBshell, x: !DBshell >> _): (DBwrite_v | void)
-// 
+//
 (* ****** ****** *)
 
 implement

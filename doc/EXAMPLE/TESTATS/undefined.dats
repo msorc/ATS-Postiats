@@ -2,7 +2,7 @@
 //
 // HX: 2016-08-19:
 // Testing 'undefined' macro!
-// 
+//
 (* ****** ****** *)
 //
 #include

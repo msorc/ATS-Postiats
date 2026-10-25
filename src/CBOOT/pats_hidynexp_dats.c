@@ -14583,7 +14583,7 @@ ATSINSflab(__patsflab_hipat_lst):
 ATSINSmove(tmp1560, PATSHOME_057_src_057_pats_stacst2_056_sats__s2cstref_get_cst(patsopt_the_list_vt0ype_int_vtype)) ;
 ATSINSmove(tmp1561, PATSHOME_057_src_057_pats_staexp2_056_sats__s2cst_get_islst(tmp1560)) ;
 ATSINSmove(tmp1563, ATSLIB_056_libats_056_arena__gopt_is_some__448__1(tmp1561)) ;
-ATSINSmove_void(tmp1562, atspre_assert_errmsg2_bool0(tmp1563, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_hidynexp.dats: 5916(line=266, offs=10) -- 5945(line=266, offs=39)"))) ;
+ATSINSmove_void(tmp1562, atspre_assert_errmsg2_bool0(tmp1563, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_hidynexp.dats: 5914(line=266, offs=10) -- 5943(line=266, offs=39)"))) ;
 ATSINSmove(tmp1566, ATSLIB_056_libats_056_arena__gopt_unsome__450__1(tmp1561)) ;
 ATSINSmove(tmp1577, PATSHOME_057_src_057_pats_staexp2_056_sats__d2conpair_0(tmp1566)) ;
 ATSINSmove(tmp1578, PATSHOME_057_src_057_pats_staexp2_056_sats__d2conpair_1(tmp1566)) ;
@@ -15770,7 +15770,7 @@ tmp1769
 ) ATSthen() {
 ATSINSmove(tmp1772, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node(arg3)) ;
 ATSINSmove(tmp1771, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node_view(tmp1772)) ;
-ATSifnthen(ATSCKpat_con1(tmp1771, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_hidynexp.dats: 11796(line=548, offs=9) -- 11849(line=548, offs=62)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1771, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_hidynexp.dats: 11789(line=548, offs=9) -- 11842(line=548, offs=62)") ; } ;
 ATSINSmove(tmp1773, ATSSELcon(tmp1771, postiats_tysum_0, atslab__0)) ;
 ATSINSfreecon(tmp1771) ;
 ATSINSmove(tmp1768, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2cst_is_castfn(tmp1773)) ;
@@ -15782,7 +15782,7 @@ tmp1768
 ) ATSthen() {
 ATSINSmove(tmp1775, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node(arg3)) ;
 ATSINSmove(tmp1774, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node_view(tmp1775)) ;
-ATSifnthen(ATSCKpat_con1(tmp1774, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_hidynexp.dats: 11947(line=558, offs=9) -- 12000(line=558, offs=62)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1774, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_hidynexp.dats: 11940(line=558, offs=9) -- 11993(line=558, offs=62)") ; } ;
 ATSINSmove(tmp1776, ATSSELcon(tmp1774, postiats_tysum_0, atslab__0)) ;
 ATSINSfreecon(tmp1774) ;
 ATSINSmove(tmp1778, ATSLIB_056_libats_056_arena__glist_is_cons__383__5(arg4)) ;

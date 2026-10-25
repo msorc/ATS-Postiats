@@ -189,7 +189,7 @@ end // end of [emit_PMVf0loat]
 implement
 emit_PMVempty
   (out, _) = emit_text (out, "null")
-//  
+//
 implement
 emit_PMVextval
   (out, toks) = emit_tokenlst (out, toks)
@@ -346,7 +346,7 @@ in
 case+
 d0exp_node_view(d0e0.d0exp_node()) of
 //
-| ~D0Eide (tmp) => 
+| ~D0Eide (tmp) =>
   {
     val () = emit_tmpvar (out, tmp)
   }
@@ -492,7 +492,7 @@ end // end of [local]
 
 implement
 emit_d0exparg
-  (out, d0es) = 
+  (out, d0es) =
 {
 //
 val () = emit_LPAREN (out)

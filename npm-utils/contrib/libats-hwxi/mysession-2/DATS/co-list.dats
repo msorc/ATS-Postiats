@@ -64,7 +64,7 @@ val
 chan0 =
 $UN.castvwtp1{chan0}(chneg)
 //
-val () = 
+val () =
 channel0_send (chan0, $UN.int2ptr(0))
 //
 prval () = $UN.cast2void(chan0)

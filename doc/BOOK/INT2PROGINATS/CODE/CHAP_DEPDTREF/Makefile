@@ -26,7 +26,7 @@ ATSCCFLAGS=
 
 ######
 
-all:: 
+all::
 all:: listfuns
 all:: mergesort
 all:: rbtree

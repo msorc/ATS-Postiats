@@ -192,7 +192,7 @@ lexbuf_takeout
 //
 val nchr = i2sz(nchr)
 //
-val strp = 
+val strp =
   $SBF.stringbuf_takeout (buf.lexbuf_stringbuf, nchr)
 //
 val nbuf = $SBF.stringbuf_get_size (buf.lexbuf_stringbuf)

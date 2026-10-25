@@ -5,7 +5,7 @@
 (* ****** ****** *)
 //
 #include
-"share/atspre_staload.hats"  
+"share/atspre_staload.hats"
 //
 (* ****** ****** *)
 

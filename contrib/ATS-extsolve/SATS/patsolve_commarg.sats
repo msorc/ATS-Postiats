@@ -54,7 +54,7 @@ patsolve_cmdline
 //
 fun
 patsolve_commarglst(arglst: commarglst_vt): void
-// 
+//
 (* ****** ****** *)
 
 (* end of [patsolve_commarg.sats] *)

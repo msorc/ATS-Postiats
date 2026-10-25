@@ -22,7 +22,7 @@ tcc -run -DATS_MEMALLOC_LIBC -I${PATSHOME} -I${PATSHOME}/ccomp/runtime -
 
 (*
 fun
-intsqrt(n: int): int = 
+intsqrt(n: int): int =
 if
 (n >= 1)
 then let
@@ -59,7 +59,7 @@ fun
 intsqrt_cps
 (
   n: int, k: int -<lincloptr1> int
-) : int = 
+) : int =
 if
 (n >= 1)
 then let

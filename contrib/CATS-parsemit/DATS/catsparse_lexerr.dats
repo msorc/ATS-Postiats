@@ -37,10 +37,10 @@ the_lexerrlst_clear () =
 (* ****** ****** *)
 
 implement
-print_lexerr (x) = fprint (stdout_ref, x)  
+print_lexerr (x) = fprint (stdout_ref, x)
 implement
-prerr_lexerr (x) = fprint (stderr_ref, x)  
-  
+prerr_lexerr (x) = fprint (stderr_ref, x)
+
 (* ****** ****** *)
 
 implement

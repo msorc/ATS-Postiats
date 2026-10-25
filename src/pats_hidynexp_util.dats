@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -775,7 +775,7 @@ if glist_is_cons (hids) then let
       in
         case+ opt2 of
         | ~HABNDnone () =>
-            hidexp_let (loc, hse, hids, hde) 
+            hidexp_let (loc, hse, hids, hde)
         | ~HABNDsome_var
             (d2v2, hde2) =>
             if not(d2v=d2v2)
@@ -784,7 +784,7 @@ if glist_is_cons (hids) then let
             // end of [if]
         | ~HABNDsome_any _ => hidexp_let (loc, hse, hids, hde)
         | ~HABNDsome_emp _ => hidexp_let (loc, hse, hids, hde)
-      end // end of [HDEVEsome_var]        
+      end // end of [HDEVEsome_var]
     | ~HDEVEsome_emp ((*void*)) => let
         val hid = hideclist_last (hids)
         val opt2 = hidecl_is_anybind (hid)

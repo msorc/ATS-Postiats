@@ -21,7 +21,7 @@ exception C of int and C2 of int
 
 (* ****** ****** *)
 
-fun ftest 
+fun ftest
   (x: int): int =
   if x = 0 then $raise A else if x = 1 then $raise B else $raise C(x)
 // end of [ftest]

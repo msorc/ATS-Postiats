@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -54,7 +54,7 @@ Create a Z3 symbol using an integer in [0, 2^30).
 fun Z3_mk_int_symbol
   (ctx: !Z3_context, i: int): Z3_symbol = "mac#%"
 // end of [Z3_mk_int_symbol]
-   
+
 (*
 Z3_symbol
 Z3_mk_string_symbol (__in Z3_context c, __in Z3_string s)

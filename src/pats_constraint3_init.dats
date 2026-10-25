@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -118,7 +118,7 @@ end // end of [f_neg_bool]
 fun
 f_add_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
@@ -130,7 +130,7 @@ end // end of [f_add_bool_bool]
 fun
 f_mul_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
@@ -142,7 +142,7 @@ end // end of [f_mul_bool_bool]
 fun
 f_eq_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
@@ -154,7 +154,7 @@ end // end of [f_eq_bool_bool]
 fun
 f_neq_bool_bool (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3be1 = s3exp_make (env, s2e1)
@@ -168,7 +168,7 @@ end // end of [f_neq_bool_bool]
 fun
 f_neg_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
 in
@@ -178,7 +178,7 @@ end // end of [f_neg_int]
 fun
 f_add_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -190,7 +190,7 @@ end // end of [f_add_int_int]
 fun
 f_sub_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -202,7 +202,7 @@ end // end of [f_sub_int_int]
 fun
 f_mul_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -238,7 +238,7 @@ f_idiv_int_int
   val s2c = (
     if sgn != 0 then
       s2cstref_get_cst (the_ndivrel_int_int_int)
-    else 
+    else
       s2cstref_get_cst (the_idivrel_int_int_int)
   ) : s2cst // end of [val]
 //
@@ -258,7 +258,7 @@ end // end of [f_idiv_int_int]
 fun
 f_lt_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -270,7 +270,7 @@ end // end of [f_lt_int_int]
 fun
 f_lte_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -282,7 +282,7 @@ end // end of [f_lte_int_int]
 fun
 f_gt_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -294,7 +294,7 @@ end // end of [f_gt_int_int]
 fun
 f_gte_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -306,7 +306,7 @@ end // end of [f_gte_int_int]
 fun
 f_eq_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -318,7 +318,7 @@ end // end of [f_eq_int_int]
 fun
 f_neq_int_int (
   env: &s2vbcfenv, s2es: s2explst
-) : s3exp = let 
+) : s3exp = let
   val @(s2e1, s2es) = s2es_uncons (s2es)
   val @(s2e2, s2es) = s2es_uncons (s2es)
   val s3ie1 = s3exp_make (env, s2e1)
@@ -398,7 +398,7 @@ fun f_neq_addr_addr = f_neq_int_int
 fun
 f_lte_cls_cls (
   env: &s2vbcfenv, s2es0: s2explst
-) : s3exp = let 
+) : s3exp = let
 //
 val s2c = s2cstref_get_cst (the_lte_cls_cls)
 //

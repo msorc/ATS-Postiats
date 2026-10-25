@@ -76,7 +76,7 @@ c3nstr_solve_errmsg{l:addr}
 //
 (* ****** ****** *)
 
-implement 
+implement
 c3nstr_solve_errmsg
   (ar, c3t, unsolved) = 0 where
 {

@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -112,7 +112,7 @@ position_copy
 ) = () where {
   val () = pos0.ntot := pos1.ntot
   val () = pos0.nrow := pos1.nrow
-  val () = pos0.ncol := pos1.ncol  
+  val () = pos0.ncol := pos1.ncol
 } (* end of [position_copy] *)
 
 (* ****** ****** *)
@@ -245,7 +245,7 @@ fprint2_location
 in
 //
 fprint_locpragma(out, loc.locpragma());
-$FIL.fprint2_filename_full (out, loc.filename()); 
+$FIL.fprint2_filename_full (out, loc.filename());
 fprint_string (out, ": "); fprint_locrange (out, loc)
 //
 end (* end of [fprint2_location] *)
@@ -357,12 +357,12 @@ location_combine_main
     then begin
       end_nrow := loc1.end_nrow();
       end_ncol := loc1.end_ncol();
-      end_ntot := loc1.end_ntot(); 
+      end_ntot := loc1.end_ntot();
     end // end of [then]
     else begin
       end_nrow := loc2.end_nrow();
       end_ncol := loc2.end_ncol();
-      end_ntot := loc2.end_ntot(); 
+      end_ntot := loc2.end_ntot();
     end // end of [else]
   // end of [if] // end of [val]
 //

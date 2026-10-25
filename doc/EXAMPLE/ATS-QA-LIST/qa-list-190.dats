@@ -15,7 +15,7 @@
 
 extern
 fun tally{n:nat}(psz: arrpsz(int, n)): int
-  
+
 (* ****** ****** *)
 
 implement

@@ -20,7 +20,7 @@ in(*in-of-local*)
 val (pf, pfgc | p) = array_ptr_tabulate<int> (i2sz(10))
 end // end of [local]
 //
-prval (pf1, pf2) = array_v_split{int}{..}{10}{1} (pf) 
+prval (pf1, pf2) = array_v_split{int}{..}{10}{1} (pf)
 //
 val () = fprint_array_sep (stdout_ref, !p, i2sz(1), ",")
 val () = fprint_newline (stdout_ref)

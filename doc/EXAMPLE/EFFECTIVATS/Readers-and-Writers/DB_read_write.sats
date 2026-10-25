@@ -73,7 +73,7 @@ fun SDBshell_release_read (pf: DBread_v | sx: SDBshell): void
 
 (* ****** ****** *)
 
-fun SDBshell_acquire_write (sx: SDBshell): (DBwrite_v | void) 
+fun SDBshell_acquire_write (sx: SDBshell): (DBwrite_v | void)
 fun SDBshell_release_write (pf: DBwrite_v | sx: SDBshell): void
 
 (* ****** ****** *)

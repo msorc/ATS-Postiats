@@ -181,7 +181,7 @@ val
 chan0 = $UN.castvwtp1{ptr}(tchan)
 //
 var
-fwork = 
+fwork =
 lam@ (
   j: natLt(n)
 ) : void => let
@@ -196,7 +196,7 @@ lam@ (
 in
   // nothing
 end // end of [lam@]
-val () = 
+val () =
   cintset_foreach_clo(n, G, fwork)
 //
 prval ((*void*)) = $UN.castview2void(tchan)
@@ -220,7 +220,7 @@ val
 chan0 = $UN.castvwtp1{ptr}(tchan)
 //
 var
-fwork = 
+fwork =
 lam@ (
   j: natLt(n)
 ) : void => let
@@ -235,7 +235,7 @@ lam@ (
 in
   // nothing
 end // end of [lam@]
-val () = 
+val () =
   cintset_foreach_clo(n, G, fwork)
 //
 prval ((*void*)) = $UN.castview2void(tchan)
@@ -261,7 +261,7 @@ val
 chan0 = $UN.castvwtp1{ptr}(tchan)
 //
 var
-fwork = 
+fwork =
 lam@ (
   j: natLt(n)
 ) : void => let
@@ -277,7 +277,7 @@ lam@ (
 in
   // nothing
 end // end of [lam@]
-val () = 
+val () =
   intset_foreach_clo(G, fwork)
 //
 prval ((*void*)) = $UN.castview2void(tchan)

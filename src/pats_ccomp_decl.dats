@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -299,7 +299,7 @@ case+ hidecl_node_view(hid0.hidecl_node()) of
 | ~HIDstaloadloc
     (pfil, nspace, hids) => let
     val (pf | ()) = ccompenv_push (env)
-    val pmds = hideclist_ccomp (env, hids)    
+    val pmds = hideclist_ccomp (env, hids)
     val ((*void*)) = ccompenv_pop (pf | env)
   in
     primdec_staloadloc (loc0, pfil, nspace, pmds)
@@ -712,7 +712,7 @@ if isfnx then let
   val fent0 = gopt_unsome(opt_fent0)
   val () = funent_set_fnxlablst (fent0, flabs)
 in
-  ccompenv_dec_tailcalenv (env)  
+  ccompenv_dec_tailcalenv (env)
 end // end of [if]
 //
 in
@@ -893,7 +893,7 @@ val tmp = tmpvar_make_ref (loc_d2v, hse_elt)
 //
 val () = instrseq_add_tmpdec (res, loc_d2v, tmp)
 //
-val () = 
+val () =
 (
 case+
 gopt_view(hvd.hivardec_init()) of

@@ -237,7 +237,7 @@ val () = chan1pos_send(chpos, res)
 val ((*closed*)) = channel1_close(chpos)
 //
 in
-  
+
 end // end of [fserv_buyer_2]
 
 (* ****** ****** *)
@@ -376,7 +376,7 @@ channel1_send
   (chan, BUYER1, SELLER, title)
 //
 val
-price = 
+price =
 channel1_recv_val
   (chan, SELLER, BUYER1)
 val () =
@@ -464,7 +464,7 @@ val res =
 //
 in
 //
-  println! ("fserv_buyer2: res = ", res)  
+  println! ("fserv_buyer2: res = ", res)
 //
 end (* end of [fserv_buyer2] *)
 

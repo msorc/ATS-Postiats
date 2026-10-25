@@ -55,7 +55,7 @@ evhttp_request_get_input_buffer
 : [l2:agz] vtget1(evhttp_request(l), evbuffer(l2)) = "mac#%"
 
 (* ****** ****** *)
-  
+
 fun
 evhttp_request_get_response_code
   (req: !evhttp1_request): int(*code*) = "mac#%"
@@ -92,7 +92,7 @@ fun evhttp_find_header
   (headers: !evkeyvalq1, key: NSH(string)): vStrptr0 = "mac#%"
 fun evhttp_remove_header
   (headers: !evkeyvalq1, key: NSH(string)): interr = "mac#%"
-// 
+//
 fun evhttp_clear_headers (headers: !evkeyvalq1): void = "mac#%"
 //
 (* ****** ****** *)
@@ -109,7 +109,7 @@ evhttp_connection_free (evhttp0_connection): void = "mac#%"
 (* ****** ****** *)
 //
 // HX-2014-05: [req] is owned by [cnn] after this call!
-//  
+//
 fun evhttp_make_request
 (
   cnn: !evhttp1_connection
@@ -117,7 +117,7 @@ fun evhttp_make_request
 ) : interr = "mac#%" // end-of-fun
 
 fun evhttp_cancel_request (req: evhttp1_request): void = "mac#%"
-  
+
 (* ****** ****** *)
 
 fun evhttp_uri_get_port (uri: !evhttp1_uri): int = "mac#%"

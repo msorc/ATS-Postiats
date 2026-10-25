@@ -15,12 +15,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -101,7 +101,7 @@ fprint_funarg (out, x) =
     in
       // nothing
     end // end of [FAstrsub]
-  | ~FAfunres (res) => fprint_string (out, res) 
+  | ~FAfunres (res) => fprint_string (out, res)
   | ~FAnil () => fprint_string (out, "#error")
 // end of [fprint_funarg]
 
@@ -241,7 +241,7 @@ in
       val () = sbuf_add_char (out, SLASH)
       val () = sbuf_add_char (out, DQUOTE)
     in
-      trans_string (SDQ, out, buf, pos0, pos)      
+      trans_string (SDQ, out, buf, pos0, pos)
     end
   | SHARP => let
       val () = posincby1 (pos)
@@ -546,7 +546,7 @@ if neof(i) then let
   | _ => (
       if ind > 0 then (
         if c = ',' then let
-          val () = posincby1 (pos) 
+          val () = posincby1 (pos)
           val _(*uint*) = testing_spaces (buf, pos)
           val arg = trans_funarg (buf, pos)
           val args = trans_funarglst_OPEN (buf, pos0, pos, cls, err, ind+1)
@@ -597,7 +597,7 @@ if k >= 0 then let
 //
 // HX: [fres] may be supplied by the user
 //
-  val opt = trans_funres (buf, pos) 
+  val opt = trans_funres (buf, pos)
   val fres = (case+ opt of
     | ~Some_vt ide => ide | ~None_vt () => fres
   ) : string // end of [val]

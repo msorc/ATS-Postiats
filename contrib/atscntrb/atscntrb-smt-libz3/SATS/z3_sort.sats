@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -51,11 +51,11 @@ fun Z3_mk_int_sort(ctx: !Z3_context): Z3_sort = "mac#%"
 (* ****** ****** *)
 
 fun Z3_mk_bool_sort(ctx: !Z3_context): Z3_sort = "mac#%"
-  
+
 (* ****** ****** *)
 
 fun Z3_mk_real_sort(ctx: !Z3_context): Z3_sort = "mac#%"
-  
+
 (* ****** ****** *)
 //
 fun

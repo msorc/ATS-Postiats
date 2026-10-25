@@ -103,7 +103,7 @@ if nread > 0
   else let
     val _(*err*) = $STDIO.fputc ('\n', out) in ((*exit*))
   end // end of [else]
-// end of [if] 
+// end of [if]
 //
 end // end of [loop]
 //

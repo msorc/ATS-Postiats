@@ -38,7 +38,7 @@
 //
 (* ****** ****** *)
 
-fun dotprod 
+fun dotprod
 (
   A: &(@[double][3])
 , B: &(@[double][3])

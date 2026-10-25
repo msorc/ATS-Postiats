@@ -17,7 +17,7 @@ prval () = view@dummy := fpf (pfat)
 in
   // nothing
 end // end of [foo]
-  
+
 (* ****** ****** *)
 
 implement

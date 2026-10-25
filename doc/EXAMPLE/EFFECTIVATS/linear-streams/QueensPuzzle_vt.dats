@@ -23,7 +23,7 @@ block_t smem[NM];
 void
 atsruntime_mfree_user(void *p) {
 /*
-  fprintf(stderr, "atsruntime_mfree_user: p = %p\n", p);  
+  fprintf(stderr, "atsruntime_mfree_user: p = %p\n", p);
   fprintf(stderr, "atsruntime_malloc_user: nused = %d\n", nused);
   fprintf(stderr, "atsruntime_malloc_user: nused_max = %d\n", nused_max);
 */
@@ -34,7 +34,7 @@ atsruntime_mfree_user(void *p) {
 void*
 atsruntime_malloc_user(size_t bsz) {
 /*
-  fprintf(stderr, "atsruntime_malloc_user: bsz = %lu\n", bsz);  
+  fprintf(stderr, "atsruntime_malloc_user: bsz = %lu\n", bsz);
   fprintf(stderr, "atsruntime_malloc_user: nused = %d\n", nused);
   fprintf(stderr, "atsruntime_malloc_user: nused_max = %d\n", nused_max);
 */
@@ -152,7 +152,7 @@ main0(argc, argv) =
   val n0 = N
 //
   val nsol = loop(qsolve_vt(n0)) where
-  { 
+  {
     fun
     loop(xs: stream_vt(List_vt(int))): int =
       (case+ !xs of ~stream_vt_nil() => 0 | ~stream_vt_cons(xs, xss) => (list_vt_free(xs); 1 + loop(xss)))

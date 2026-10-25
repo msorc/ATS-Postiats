@@ -94,7 +94,7 @@ fun auxtest
   (sbf: !stringbuf): bool = let
 //
 var n0: size_t
-val (pf, fpf | p0) = 
+val (pf, fpf | p0) =
   stringbuf_takeout_strbuf (sbf, n0)
 //
 prval [n:int] EQINT() = g1uint_get_index (n0)
@@ -176,7 +176,7 @@ if nread > 0
       end // end of [then]
       else let
         var n0: size_t
-        val (pf, fpf | p0) = 
+        val (pf, fpf | p0) =
           stringbuf_takeout_strbuf (sbf, n0)
         prval [n:int] EQINT() = g1uint_get_index (n0)
         val _ =

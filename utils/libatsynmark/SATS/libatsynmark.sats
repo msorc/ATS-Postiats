@@ -419,7 +419,7 @@ charlst_pats2xhtmlize_embedded
   stadyn: int, code: charlst
 ) : Strptr1 =
   "ext#libatsynmark_charlst_pats2xhtmlize_embedded"
-// 
+//
 (* ****** ****** *)
 //
 // HX-2012-06:

@@ -2660,7 +2660,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab49):
 ATSINSmove_void(tmp80, PATSHOME_057_src_057_pats_lexing_056_sats__token_node_view_free(tmp75)) ;
-ATSINSmove_void(tmp81, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 3203(line=123, offs=36) -- 3219(line=123, offs=52)"))) ;
+ATSINSmove_void(tmp81, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 3201(line=123, offs=36) -- 3217(line=123, offs=52)"))) ;
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmpret74, postiats_tyrec_0, atslab__0, ATSPMVi0nt(0)) ;
 ATSINSstore_fltrec_ofs(tmpret74, postiats_tyrec_0, atslab__1, ATSPMVstring("")) ;
@@ -2703,7 +2703,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab52):
 ATSINSmove_void(tmp88, PATSHOME_057_src_057_pats_lexing_056_sats__token_node_view_free(tmp83)) ;
-ATSINSmove_void(tmp89, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 3460(line=132, offs=36) -- 3476(line=132, offs=52)"))) ;
+ATSINSmove_void(tmp89, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 3458(line=132, offs=36) -- 3474(line=132, offs=52)"))) ;
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmpret82, postiats_tyrec_0, atslab__0, ATSPMVi0nt(0)) ;
 ATSINSstore_fltrec_ofs(tmpret82, postiats_tyrec_0, atslab__1, ATSPMVstring("")) ;
@@ -3235,7 +3235,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab65):
 ATSINSmove_void(tmp174, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__50__1(arg0)) ;
-ATSINSmove_void(tmp179, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 6866(line=282, offs=18) -- 6903(line=282, offs=55)"), ATSPMVstring("intrepsfx_syn_type"))) ;
+ATSINSmove_void(tmp179, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 6864(line=282, offs=18) -- 6901(line=282, offs=55)"), ATSPMVstring("intrepsfx_syn_type"))) ;
 ATSINSmove_void(tmp180, atspre_prerr_string(ATSPMVstring(": the suffix of the integer is not supported."))) ;
 ATSINSmove_void(tmp181, atspre_prerr_newline()) ;
 ATSINSmove(tmp183, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_intsp(arg0, arg1)) ;
@@ -3376,7 +3376,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab83):
 ATSINSmove_void(tmp197, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__50__2(arg0)) ;
-ATSINSmove_void(tmp200, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 8787(line=355, offs=18) -- 8832(line=355, offs=63)"), ATSPMVstring("intbaserepsfx_syn_type_ind"))) ;
+ATSINSmove_void(tmp200, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 8785(line=355, offs=18) -- 8830(line=355, offs=63)"), ATSPMVstring("intbaserepsfx_syn_type_ind"))) ;
 ATSINSmove_void(tmp201, atspre_prerr_string(ATSPMVstring(": the suffix of the integer is not supported."))) ;
 ATSINSmove_void(tmp202, atspre_prerr_newline()) ;
 ATSINSmove(tmp204, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_intsp(arg0, arg2)) ;
@@ -3565,7 +3565,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab90):
 ATSINSmove_void(tmp236, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__50__3(arg0)) ;
-ATSINSmove_void(tmp239, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 10971(line=456, offs=18) -- 11005(line=456, offs=52)"), ATSPMVstring("f0loat_syn_type"))) ;
+ATSINSmove_void(tmp239, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_syncst.dats: 10969(line=456, offs=18) -- 11003(line=456, offs=52)"), ATSPMVstring("f0loat_syn_type"))) ;
 ATSINSmove_void(tmp240, atspre_prerr_string(ATSPMVstring(": the suffix of the floating point number is not supported."))) ;
 ATSINSmove_void(tmp241, atspre_prerr_newline()) ;
 ATSINSmove(tmp243, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_floatsp(arg0, arg1)) ;

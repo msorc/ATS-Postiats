@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -59,7 +59,7 @@ Z3_mk_solver (ctx: !Z3_context): Z3_solver = "mac#%"
 
 fun
 Z3_mk_simple_solver (ctx: !Z3_context): Z3_solver = "mac#%"
-   
+
 (* ****** ****** *)
 //
 (*
@@ -108,7 +108,7 @@ Z3_solver_get_model
 //
 (* ****** ****** *)
 
-fun Z3_solver_pop 
+fun Z3_solver_pop
 (
   ctx: !Z3_context, s: !Z3_solver, depth: uint
 ): void = "mac#%" // end of [Z3_solver_pop]
@@ -126,7 +126,7 @@ Z3_solver_assert
   ctx: !Z3_context, s: !Z3_solver, f: !Z3_ast
 ): void = "mac#%" // end of [Z3_solver_assert]
 
-fun Z3_solver_check 
+fun Z3_solver_check
 (
   ctx: !Z3_context, s: !Z3_solver
 ): Z3_lbool = "mac#%" // end of [Z3_solver_check]

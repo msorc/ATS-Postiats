@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -207,7 +207,7 @@ fun
 d2var_refval_check
 (
   loc0: loc_t, d2v: d2var, refval: int
-) : void = 
+) : void =
   if refval > 0 then let
     val () = prerr_error3_loc (loc0)
     val () = prerr ": the dynamic variable ["
@@ -457,7 +457,7 @@ case+ s2exp_node_view(s2e_fun.s2exp_node()) of
 | ~S2Efun
   (
     fc, lin, _(*s2fe*), _(*npf*), _(*arg*), _(*res*)
-  ) => 
+  ) =>
   (
   case+ fc of
   | FUNCLOfun () => false

@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -888,11 +888,11 @@ fun d2conset_add (xs: d2conset, x: d2con):<> d2conset
 fun d2conset_ismem (xs: d2conset, x: d2con):<> bool
 
 (* ****** ****** *)
-  
+
 fun d2conset_vt_nil ():<> d2conset_vt
 fun d2conset_vt_add (xs: d2conset_vt, x: d2con):<> d2conset_vt
 fun d2conset_vt_listize_free (xs: d2conset_vt):<> d2conlst_vt
-  
+
 (* ****** ****** *)
 //
 // HX: static expressions
@@ -1187,7 +1187,7 @@ fun fprint_s2kexp (out: FILEref, x: s2kexp): void
 
 overload print with print_s2kexp
 overload prerr with prerr_s2kexp
-overload fprint with fprint_s2kexp  
+overload fprint with fprint_s2kexp
 
 (* ****** ****** *)
 
@@ -1264,5 +1264,5 @@ synentlst_app
   (xs: glist(a), env: !appenv, app: synent_app(a)): void
 //
 (* ****** ****** *)
-  
+
 (* end of [pats_staexp2.sats] *)

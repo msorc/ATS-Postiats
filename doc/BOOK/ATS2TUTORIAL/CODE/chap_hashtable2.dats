@@ -31,7 +31,7 @@ extern
 fun symbol_neq (symbol, symbol): bool
 //
 extern
-fun fprint_symbol : fprint_type(symbol)  
+fun fprint_symbol : fprint_type(symbol)
 //
 overload = with symbol_eq
 overload != with symbol_neq

@@ -5950,7 +5950,7 @@ ATSINSmove(tmp289, ATSSELcon(tmp270, postiats_tysum_5, atslab__0)) ;
 ATSINSmove(tmp290, ATSSELcon(tmp270, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp270) ;
 ATSINSmove(tmp291, ATSLIB_056_libats_056_arena__glist_view__12__3(arg1)) ;
-ATSifthen(ATSCKptrisnull(tmp291)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 4915(line=202, offs=11) -- 4961(line=203, offs=39)") ; } ;
+ATSifthen(ATSCKptrisnull(tmp291)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 4912(line=202, offs=11) -- 4958(line=203, offs=39)") ; } ;
 ATSINSmove(tmp310, ATSSELcon(tmp291, postiats_tysum_5, atslab__0)) ;
 ATSINSmove(tmp311, ATSSELcon(tmp291, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp291) ;
@@ -7491,7 +7491,7 @@ ATSINSmove(tmp567, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_hole(tmp566
 ATSINSmove(tmp568, PATSHOME_057_src_057_pats_staexp2_056_sats__labs2exp_new(tmp561, tmp562, tmp567)) ;
 ATSINSmove(tmp569, ATSLIB_056_libats_056_arena__glist_cons__38__3(tmp568, tmp560)) ;
 ATSINSmove(tmp586, ATSderef(arg2, atstype_boxed)) ;
-ATSifthen(ATSCKptriscons(tmp586)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 12182(line=533, offs=11) -- 12203(line=533, offs=32)") ; } ;
+ATSifthen(ATSCKptriscons(tmp586)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 12178(line=533, offs=11) -- 12199(line=533, offs=32)") ; } ;
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmp588, postiats_tyrec_15, atslab__0, tmp569) ;
 ATSINSstore_fltrec_ofs(tmp588, postiats_tyrec_15, atslab__1, tmp566) ;
@@ -7881,7 +7881,7 @@ ATSINSfreecon(tmp627) ;
 ATSINSmove(tmp631, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_srt(tmp617)) ;
 ATSINSmove(tmp632, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec_srt(tmp631, tmp620, tmp621, tmp629)) ;
 ATSINSmove(tmp633, ATSderef(arg3, atstype_boxed)) ;
-ATSifthen(ATSCKptriscons(tmp633)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 13332(line=579, offs=15) -- 13353(line=579, offs=36)") ; } ;
+ATSifthen(ATSCKptriscons(tmp633)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 13328(line=579, offs=15) -- 13349(line=579, offs=36)") ; } ;
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmp635, postiats_tyrec_15, atslab__0, tmp632) ;
 ATSINSstore_fltrec_ofs(tmp635, postiats_tyrec_15, atslab__1, tmp630) ;
@@ -8218,7 +8218,7 @@ ATSINSmove(tmp755, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_srt(arg0)) 
 ATSINSmove(tmp756, PATSHOME_057_src_057_pats_staexp2_056_sats__s2hole_make_srt(tmp755)) ;
 ATSINSmove(tmp757, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_hole(tmp756)) ;
 ATSINSmove(tmp758, ATSderef(arg2, atstype_boxed)) ;
-ATSifthen(ATSCKptriscons(tmp758)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 17108(line=724, offs=7) -- 17129(line=724, offs=28)") ; } ;
+ATSifthen(ATSCKptriscons(tmp758)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 17104(line=724, offs=7) -- 17125(line=724, offs=28)") ; } ;
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmp760, postiats_tyrec_15, atslab__0, tmp757) ;
 ATSINSstore_fltrec_ofs(tmp760, postiats_tyrec_15, atslab__1, tmp756) ;
@@ -9186,7 +9186,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_d2var_trup_selab_mut):
 ATSINSmove(tmp876, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_addr(arg2)) ;
 ATSINSmove(tmp868, ATSLIB_056_libats_056_arena__gopt_view__149__4(tmp876)) ;
-ATSifthen(ATSCKptrisnull(tmp868)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 20643(line=904, offs=5) -- 20691(line=905, offs=41)") ; } ;
+ATSifthen(ATSCKptrisnull(tmp868)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 20639(line=904, offs=5) -- 20687(line=905, offs=41)") ; } ;
 ATSINSmove(tmp877, ATSSELcon(tmp868, postiats_tysum_10, atslab__0)) ;
 ATSINSfreecon(tmp868) ;
 ATSINSmove(tmp878, PATSHOME_057_src_057_pats_trans3_056_sats__d2lablst_trup(arg3)) ;
@@ -9625,13 +9625,13 @@ ATSINSmove(tmp972, d3lablst_take_251(arg3, arg5)) ;
 ATSINSmove(tmp973, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp970)) ;
 ATSINSmove(tmp975, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_node(tmp970)) ;
 ATSINSmove(tmp974, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_node_view(tmp975)) ;
-ATSifnthen(ATSCKpat_con1(tmp974, 26)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 22397(line=985, offs=13) -- 22472(line=985, offs=88)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp974, 26)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 22393(line=985, offs=13) -- 22468(line=985, offs=88)") ; } ;
 ATSINSmove(tmp976, ATSSELcon(tmp974, postiats_tysum_12, atslab__0)) ;
 ATSINSmove(tmp977, ATSSELcon(tmp974, postiats_tysum_12, atslab__1)) ;
 ATSINSmove(tmp978, ATSSELcon(tmp974, postiats_tysum_12, atslab__2)) ;
 ATSINSfreecon(tmp974) ;
 ATSINSmove(tmp979, ATSLIB_056_libats_056_arena__glist_view__12__9(tmp978)) ;
-ATSifthen(ATSCKptrisnull(tmp979)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 22485(line=986, offs=13) -- 22535(line=986, offs=63)") ; } ;
+ATSifthen(ATSCKptrisnull(tmp979)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_selab.dats: 22481(line=986, offs=13) -- 22531(line=986, offs=63)") ; } ;
 ATSINSmove(tmp998, ATSSELcon(tmp979, postiats_tysum_5, atslab__0)) ;
 ATSINSmove(tmp999, ATSSELcon(tmp979, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp979) ;

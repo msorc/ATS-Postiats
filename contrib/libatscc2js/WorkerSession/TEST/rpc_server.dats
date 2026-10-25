@@ -10,7 +10,7 @@ ATS_MAINATSFLAG 1
 ATS_DYNLOADNAME "theWorker_start"
 //
 (* ****** ****** *)
-//  
+//
 #include
 "share/atspre_define.hats"
 #include

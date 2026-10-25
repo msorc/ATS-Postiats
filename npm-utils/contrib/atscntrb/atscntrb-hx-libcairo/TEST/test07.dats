@@ -124,7 +124,7 @@ fn draw_clock
   val () = cairo_restore (pf | cr)
 //
   val () = cairo_new_sub_path (cr)
-  val () = cairo_arc (cr, 0.0, 0.0, 7.2, 0.0, 2 * M_PI)  
+  val () = cairo_arc (cr, 0.0, 0.0, 7.2, 0.0, 2 * M_PI)
   val () = cairo_set_source_rgb (cr, 0.0, 0.0, 0.0)
   val () = cairo_fill (cr)
   val () = cairo_restore (pf0 | cr)
@@ -142,7 +142,7 @@ staload
 implement
 main0 () = () where {
 //
-  val wd0 = 300 and ht0 = 300  
+  val wd0 = 300 and ht0 = 300
 //
   var t: time_t // unintialized
   val yn = time_getset (t)

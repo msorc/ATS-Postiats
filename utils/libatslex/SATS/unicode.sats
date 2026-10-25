@@ -8,7 +8,7 @@
 
 (*
 ** Author: Artyom Shalkhakov
-** Authoremail: 
+** Authoremail:
 ** Start Time: February 2013
 *)
 
@@ -16,7 +16,7 @@
 
 (*
 ** Author: Hongwei Xi
-** Authoremail: 
+** Authoremail:
 ** Start Time: April 2, 2013
 *)
 
@@ -91,5 +91,5 @@ fun{}
 utf8_decode_err (err: &int >> _): int
 
 (* ****** ****** *)
-    
+
 (* end of [unicode.sats] *)

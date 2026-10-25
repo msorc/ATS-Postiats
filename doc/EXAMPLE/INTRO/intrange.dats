@@ -39,7 +39,7 @@ fun loop
     val () = loop (m+1, n, res1)
     prval ((*folded*)) = fold@ (res)
   in
-    // nothing 
+    // nothing
   end else
     (res := list_vt_nil ())
   // end of [if]

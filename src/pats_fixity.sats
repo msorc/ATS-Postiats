@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -72,40 +72,40 @@ val select_prec : prec = "ext#patsopt_select_prec" // the precedence value for s
 
 (* ****** ****** *)
 
-val backslash_prec : prec = "ext#patsopt_backslash_prec" 
+val backslash_prec : prec = "ext#patsopt_backslash_prec"
 val infixtemp_prec : prec = "ext#patsopt_infixtemp_prec" // for temp infix status
 
 (* ****** ****** *)
 
-val exi_prec_sta : prec = "ext#patsopt_exi_prec_sta" 
+val exi_prec_sta : prec = "ext#patsopt_exi_prec_sta"
 val uni_prec_sta : prec = "ext#patsopt_uni_prec_sta"
 
 (* ****** ****** *)
 
-val delay_prec_dyn : prec = "ext#patsopt_delay_prec_dyn" 
+val delay_prec_dyn : prec = "ext#patsopt_delay_prec_dyn"
 
-val exist_prec_dyn : prec = "ext#patsopt_exist_prec_dyn" 
-
-(* ****** ****** *)
-
-val ptrof_prec_dyn : prec = "ext#patsopt_ptrof_prec_dyn" 
-val addrat_prec_dyn : prec = "ext#patsopt_addrat_prec_dyn" 
-
-val foldat_prec_dyn : prec = "ext#patsopt_foldat_prec_dyn" 
-val freeat_prec_dyn : prec = "ext#patsopt_freeat_prec_dyn" 
-val viewat_prec_dyn : prec = "ext#patsopt_viewat_prec_dyn" 
+val exist_prec_dyn : prec = "ext#patsopt_exist_prec_dyn"
 
 (* ****** ****** *)
 
-val invar_prec_sta : prec = "ext#patsopt_invar_prec_sta" 
+val ptrof_prec_dyn : prec = "ext#patsopt_ptrof_prec_dyn"
+val addrat_prec_dyn : prec = "ext#patsopt_addrat_prec_dyn"
 
-val qmark_prec_sta : prec = "ext#patsopt_qmark_prec_sta" 
+val foldat_prec_dyn : prec = "ext#patsopt_foldat_prec_dyn"
+val freeat_prec_dyn : prec = "ext#patsopt_freeat_prec_dyn"
+val viewat_prec_dyn : prec = "ext#patsopt_viewat_prec_dyn"
 
-val qmarkbang_prec_sta : prec = "ext#patsopt_qmarkbang_prec_sta" 
+(* ****** ****** *)
+
+val invar_prec_sta : prec = "ext#patsopt_invar_prec_sta"
+
+val qmark_prec_sta : prec = "ext#patsopt_qmark_prec_sta"
+
+val qmarkbang_prec_sta : prec = "ext#patsopt_qmarkbang_prec_sta"
 
 val trans_prec_sta : prec = "ext#patsopt_trans_prec_sta" // for >>
 
-val deref_prec_dyn : prec = "ext#patsopt_deref_prec_dyn" 
+val deref_prec_dyn : prec = "ext#patsopt_deref_prec_dyn"
 
 (* ****** ****** *)
 
@@ -139,7 +139,7 @@ fun fprint_fxty
 
 (* ****** ****** *)
 
-val fxty_non : fxty = "ext#patsopt_fxty_non" 
+val fxty_non : fxty = "ext#patsopt_fxty_non"
 fun fxty_inf (p: prec, a: assoc): fxty
 fun fxty_pre (p: prec): fxty
 fun fxty_pos (p: prec): fxty
@@ -173,7 +173,7 @@ typedef
 fxfn2(a:type) = @(ptr, (ptr, a, a) -> fxitm(a)) // (env, fun)
 //
 datavtype
-fxopr_view(a:type) = 
+fxopr_view(a:type) =
   | FXOPRinf of (prec, assoc, fxfn2(a))
   | FXOPRpre of (prec, fxfn1(a))
   | FXOPRpos of (prec, fxfn1(a))

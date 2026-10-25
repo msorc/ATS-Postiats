@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -168,7 +168,7 @@ case+ ans of
       val () = filprerr_ifdebug ("s1rt_tr_qid")
       val () = prerr ": the identifier ["
       val () = $SYM.prerr_symbol (id)
-      val () = prerr "] is expected to refer to a sort (instead of a subset sort)." 
+      val () = prerr "] is expected to refer to a sort (instead of a subset sort)."
       val () = prerr_newline ()
       val () = the_trans2errlst_add (trans2err_T2E_s1rt_tr(s1t0))
     in
@@ -208,7 +208,7 @@ case+ s1rt_node_view(s1t0.s1rt_node()) of
   ) => s1rt_tr_app (s1t0, s1t, s1ts)
 | ~S1RTtype (impknd) => s2rt_impred (impknd)
 | ~S1RTqid (q, id) => s1rt_tr_qid (s1t0, q, id)
-| ~S1RTlist (s1ts) => s2rt_S2RTtup(s1rtlst_tr s1ts) 
+| ~S1RTlist (s1ts) => s2rt_S2RTtup(s1rtlst_tr s1ts)
 | ~S1RTerr () => s2rt_err ()
 //
 end // end of [s1rt_tr]

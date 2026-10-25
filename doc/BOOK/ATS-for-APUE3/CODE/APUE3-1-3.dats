@@ -38,7 +38,7 @@ val dp = opendir (argv[1])
 val () =
 if
 ptrcast(dp) = 0
-then 
+then
 $extfcall (void, "err_sys", "can't open %s", argv[1])
 // end of [if] // end of [val]
 //

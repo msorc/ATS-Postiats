@@ -5912,7 +5912,7 @@ ATSINSmove_void(tmp231, atspre_print_newline()) ;
 ATSINSmove_void(tmp232, atspre_print_string(ATSPMVstring("p3at_tyer: p3t0 = "))) ;
 ATSINSmove_void(tmp233, PATSHOME_057_src_057_pats_dynexp3_056_sats__print_p3at(arg0)) ;
 ATSINSmove_void(tmp234, atspre_print_newline()) ;
-ATSINSmove_void(tmp235, atspre_prerr_string(ATSCSTSPmyloc("PATSHOME/src/pats_typerase_dynexp.dats: 6888(line=312, offs=5) -- 6898(line=312, offs=15)"))) ;
+ATSINSmove_void(tmp235, atspre_prerr_string(ATSCSTSPmyloc("PATSHOME/src/pats_typerase_dynexp.dats: 6886(line=312, offs=5) -- 6896(line=312, offs=15)"))) ;
 ATSINSmove_void(tmp236, atspre_prerr_newline()) ;
 ATSINSmove_void(tmpret179, atspre_exit(ATSPMVi0nt(1))) ;
 ATSbranch_end()
@@ -9435,7 +9435,7 @@ ATSINSmove_void(tmp957, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interro
 ATSINSmove_void(tmp967, atspre_prerr_string(ATSPMVstring(": d3exp_tyer: d3e0 = "))) ;
 ATSINSmove_void(tmp968, PATSHOME_057_src_057_pats_dynexp3_056_sats__prerr_d3exp(arg0)) ;
 ATSINSmove_void(tmp969, atspre_prerr_newline()) ;
-ATSINSmove_void(tmp970, atspre_prerr_string(ATSCSTSPmyloc("PATSHOME/src/pats_typerase_dynexp.dats: 27410(line=1225, offs=10) -- 27420(line=1225, offs=20)"))) ;
+ATSINSmove_void(tmp970, atspre_prerr_string(ATSCSTSPmyloc("PATSHOME/src/pats_typerase_dynexp.dats: 27406(line=1225, offs=10) -- 27416(line=1225, offs=20)"))) ;
 ATSINSmove_void(tmp971, atspre_prerr_newline()) ;
 ATSINSmove_void(tmpret668, atspre_exit(ATSPMVi0nt(1))) ;
 ATSbranch_end()

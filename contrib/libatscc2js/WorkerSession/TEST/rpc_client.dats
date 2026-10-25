@@ -12,7 +12,7 @@
 "share/atspre_define.hats"
 #include
 "{$LIBATSCC2JS}/mylibies.hats"
-//  
+//
 (* ****** ****** *)
 //
 staload

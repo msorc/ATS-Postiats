@@ -55,7 +55,7 @@ fun draw_rounded_rectangle .<>.
 in
   // nothing
 end // end of [draw_rounded_rectangle]
-   
+
 (* ****** ****** *)
 
 implement
@@ -72,7 +72,7 @@ and y = 50.0
 val w = 100.0
 and h = 100.0
 val r = 10.0
-//  
+//
 val () =
 draw_rounded_rectangle (xr, x, y, w, h, r)
 //

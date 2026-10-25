@@ -26,7 +26,7 @@ give_str(char* buf, size_t* len)
 }
 
 %}
-    
+
 extern
 fun give_str
   {l1,l2: addr}{m:nat}

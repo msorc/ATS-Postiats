@@ -63,7 +63,7 @@ fun array_int_ptr_set
 
 atstype_ptr
 ats_array_int_ptr_make (atstype_int n) {
-  return calloc (n, sizeof(int)) ;  
+  return calloc (n, sizeof(int)) ;
 }
 
 atsvoid_t0ype

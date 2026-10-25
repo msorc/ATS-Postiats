@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -1452,7 +1452,7 @@ else emit_text(out, "ATSPMVvararg1(")
 val () = emit_primvalist(out, pmvs)
 //
 val ((*closing*)) = emit_RPAREN(out)
-  
+
 } (* end of [emit_primval_vararg] *)
 
 (* ****** ****** *)
@@ -2046,7 +2046,7 @@ instr_node_view (ins.instr_node ()) of
     val () = emit_tmpvar (out, tmp)
     val () = emit_text (out, ", ")
     val () = emit_hisexp (out, hse)
-    val () = emit_text (out, ") ;")     
+    val () = emit_text (out, ") ;")
   } // end of [INSupdate_ptrinc]
 | ~INSupdate_ptrdec
     (tmp, hse) => {
@@ -2173,7 +2173,7 @@ end // end of [loop]
 //
 in
   loop (out, inss, "\n", 0)
-end // end of [emit_instrlst]    
+end // end of [emit_instrlst]
 
 implement
 emit_instrlst_ln
@@ -2200,7 +2200,7 @@ if
 islst
 then let
   val () =
-    emit_text (out, "ATSINSmove_nil(")  
+    emit_text (out, "ATSINSmove_nil(")
   val () = emit_tmpvar (out, tmp)
   val ((*closing*)) = emit_text (out, ") ;\n")
 in
@@ -2413,7 +2413,7 @@ in
 //
 if isnul then let
   val () = if iscon then auxcon0 (out, tmp, d2c)
-  val () = if isexn then auxexn0 (out, tmp, d2c) 
+  val () = if isexn then auxexn0 (out, tmp, d2c)
 in
   // nothing
 end else let

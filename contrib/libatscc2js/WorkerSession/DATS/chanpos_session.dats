@@ -9,7 +9,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -111,7 +111,7 @@ end // end of [chanpos1_session_recv]
 implement
 {}(*tmp*)
 chanpos1_session_initize
-  (fwork, ssp) = let  
+  (fwork, ssp) = let
 //
 val
 fnullify =
@@ -129,13 +129,13 @@ end // end of [let]
 ) (* chanpos1_session_encode *)
 //
 end // end of [channpos1_session_initize]
-  
+
 (* ****** ****** *)
 
 implement
 {}(*tmp*)
 chanpos1_session_finalize
-  (ssp, fwork) = let  
+  (ssp, fwork) = let
 //
 val
 fnullify =

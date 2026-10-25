@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -79,7 +79,7 @@ case+ s3exp_view (x) of
     val () = fprint_s2cst (out, s2c)
     val () = prstr ":"
     val () = fprint_s2rt (out, s2cst_get_srt (s2c))
-    val () = prstr ")" 
+    val () = prstr ")"
   } // end of [S3Ecst]
 //
 | ~S3Evar (s2v) => {
@@ -87,7 +87,7 @@ case+ s3exp_view (x) of
     val () = fprint_s2var (out, s2v)
     val () = prstr ":"
     val () = fprint_s2rt (out, s2var_get_srt (s2v))
-    val () = prstr ")" 
+    val () = prstr ")"
   } // end of [S3Evar]
 //
 | ~S3Enull () => prstr "0"
@@ -99,7 +99,7 @@ case+ s3exp_view (x) of
 | ~S3Ebvar (s2v) => {
     val () = prstr "S3Ebvar("
     val () = fprint_s2var (out, s2v)
-    val () = prstr ")" 
+    val () = prstr ")"
   } // end of [S3Ebvar]
 | ~S3Ebneg (s3e) => {
     val () = prstr "S3Ebneg("
@@ -190,7 +190,7 @@ case+ s3exp_view (x) of
     val () = fprint_s3exp (out, s3e)
     val () = prstr "; "
     val () = fprint_s3explst (out, s3es)
-    val () = prstr ")" 
+    val () = prstr ")"
   } // end of [S3Eapp]
 //
 | ~S3Eerr (s2t) => {

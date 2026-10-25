@@ -283,7 +283,7 @@ end // end of [fserv]
 in
   chan1neg_create_exn{ssn_list(bit)}(llam(chp) => fserv(chp, chn))
 end // end of [succ_bits]
-  
+
 (* ****** ****** *)
 
 extern

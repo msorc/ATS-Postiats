@@ -106,6 +106,6 @@ cleanall:: clean
 cleanall:: ; $(RMF) ./bin/atscc2js
 cleanall:: ; $(RMF) ./libatscc2js.a
 cleanall:: ; $(RMF) ./npm/CATS/catsparse_sats.c
-cleanall:: ; $(RMF) ./npm/CATS/atscc2js_*_dats.c 
+cleanall:: ; $(RMF) ./npm/CATS/atscc2js_*_dats.c
 #
 ###### end of [Makefile] ######

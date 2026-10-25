@@ -5137,7 +5137,7 @@ ATSINSmove_void(tmp284, PATSHOME_057_src_057_pats_dynexp2_056_sats__p2at_node_vi
 ATSINSmove_void(tmp285, atspre_print_string(ATSPMVstring("eval1_p2at: not implemented yet: p2t0 = "))) ;
 ATSINSmove_void(tmp286, PATSHOME_057_src_057_pats_dynexp2_056_sats__print_p2at(arg3)) ;
 ATSINSmove_void(tmp287, atspre_print_newline()) ;
-ATSINSmove_void(tmp288, atspre_prerr_string(ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 9894(line=387, offs=5) -- 9904(line=387, offs=15)"))) ;
+ATSINSmove_void(tmp288, atspre_prerr_string(ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 9890(line=387, offs=5) -- 9900(line=387, offs=15)"))) ;
 ATSINSmove_void(tmp289, atspre_prerr_newline()) ;
 ATSINSmove_void(tmpret252, atspre_exit(ATSPMVi0nt(1))) ;
 ATSbranch_end()
@@ -7038,7 +7038,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab75):
 ATSINSmove_void(tmp604, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp600)) ;
-ATSINSmove_void(tmp605, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 13139(line=532, offs=38) -- 13155(line=532, offs=54)"))) ;
+ATSINSmove_void(tmp605, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 13133(line=532, offs=38) -- 13149(line=532, offs=54)"))) ;
 ATSINSmove(tmp599, arg3) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -7056,7 +7056,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab78):
 ATSINSmove_void(tmp611, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp607)) ;
-ATSINSmove_void(tmp612, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 13306(line=537, offs=38) -- 13322(line=537, offs=54)"))) ;
+ATSINSmove_void(tmp612, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 13300(line=537, offs=38) -- 13316(line=537, offs=54)"))) ;
 ATSINSmove(tmp606, ATSLIB_056_libats_056_arena__glist_nil__22__11()) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -7745,7 +7745,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab86):
 ATSINSmove_void(tmp740, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp736)) ;
-ATSINSmove_void(tmp741, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 14844(line=593, offs=40) -- 14860(line=593, offs=56)"))) ;
+ATSINSmove_void(tmp741, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 14838(line=593, offs=40) -- 14854(line=593, offs=56)"))) ;
 ATSINSmove_con0(tmp735, 0) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -7763,7 +7763,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab89):
 ATSINSmove_void(tmp747, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp743)) ;
-ATSINSmove_void(tmp748, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 15038(line=598, offs=40) -- 15054(line=598, offs=56)"))) ;
+ATSINSmove_void(tmp748, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 15032(line=598, offs=40) -- 15048(line=598, offs=56)"))) ;
 ATSINSmove(tmp742, arg3) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -9683,7 +9683,7 @@ ATSINSfreecon(tmp1124) ;
 ATSINSmove(tmp1146, PATSHOME_057_src_057_pats_dynexp2_056_sats__v2aldec_pat(tmp1143)) ;
 ATSINSmove(tmp1145, PATSHOME_057_src_057_pats_dmacro2_eval1_056_dats__eval1_p2at(arg0, ATSPMVrefarg0(arg1), ATSPMVrefarg1(arg2), tmp1146)) ;
 ATSINSmove(tmp1148, ATSLIB_056_libats_056_arena__glist_is_cons__331__1(arg4)) ;
-ATSINSmove_void(tmp1147, atspre_assert_errmsg2_bool0(tmp1148, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 25861(line=1019, offs=14) -- 25893(line=1019, offs=46)"))) ;
+ATSINSmove_void(tmp1147, atspre_assert_errmsg2_bool0(tmp1148, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 25854(line=1019, offs=14) -- 25886(line=1019, offs=46)"))) ;
 ATSINSmove(tmp1151, ATSLIB_056_libats_056_arena__glist_head__333__1(arg4)) ;
 ATSINSmove(tmp1167, ATSLIB_056_libats_056_arena__glist_tail__339__1(arg4)) ;
 ATSINSmove(tmp1182, PATSHOME_057_src_057_pats_dynexp2_056_sats__v2aldec_ann(tmp1143)) ;
@@ -10368,7 +10368,7 @@ ATSINSfreecon(tmp1247) ;
 ATSINSmove(tmp1269, PATSHOME_057_src_057_pats_dynexp2_056_sats__v2aldec_def(tmp1266)) ;
 ATSINSmove(tmp1268, PATSHOME_057_src_057_pats_dmacro2_056_sats__eval1_d2exp(arg0, ATSPMVrefarg0(arg1), ATSPMVrefarg1(arg2), tmp1269)) ;
 ATSINSmove(tmp1271, ATSLIB_056_libats_056_arena__glist_is_cons__331__2(arg4)) ;
-ATSINSmove_void(tmp1270, atspre_assert_errmsg2_bool0(tmp1271, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 27193(line=1068, offs=16) -- 27225(line=1068, offs=48)"))) ;
+ATSINSmove_void(tmp1270, atspre_assert_errmsg2_bool0(tmp1271, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_dmacro2_eval1.dats: 27186(line=1068, offs=16) -- 27218(line=1068, offs=48)"))) ;
 ATSINSmove(tmp1273, ATSLIB_056_libats_056_arena__glist_head__333__2(arg4)) ;
 ATSINSmove(tmp1286, ATSLIB_056_libats_056_arena__glist_tail__339__2(arg4)) ;
 ATSINSmove(tmp1297, PATSHOME_057_src_057_pats_dynexp2_056_sats__v2aldec_ann(tmp1266)) ;

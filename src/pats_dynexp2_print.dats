@@ -1122,7 +1122,7 @@ d2ecl_node_view(x0.d2ecl_node()) of // case+
     (name, s2e) => {
     val () = (fprint_string (out, "D2Cextype("); fprint_string (out, name); fprint_string (out, " = "); fprint_s2exp (out, s2e); fprint_string (out, ")"))
   } (* end of [D2Cextype] *)
-| ~D2Cextvar 
+| ~D2Cextvar
     (name, d2e) => {
     val () = (fprint_string (out, "D2Cextvar("); fprint_string (out, name); fprint_string (out, " = "); fprint_d2exp (out, d2e); fprint_string (out, ")"))
   } (* end of [D2Cextvar] *)
@@ -1134,7 +1134,7 @@ d2ecl_node_view(x0.d2ecl_node()) of // case+
     val () =
     prstr "D2Cpragma("
     val () = $UT.fprintlst<e1xp> (out, xs, ", ", fprint_e1xp)
-    val () = prstr (")")  
+    val () = prstr (")")
   }
 | ~D2Ccodegen
     (knd, xs) => {
@@ -1206,30 +1206,30 @@ d2ecl_node_view(x0.d2ecl_node()) of // case+
     val () = prstr "\n"
     val () = prstr "..."
     val () = prstr "\n)"
-  } // end of [D2Cinclude]    
+  } // end of [D2Cinclude]
 //
 | ~D2Cstaload _ => {
     val () = prstr "D2Cstaload(\n"
     val () = prstr "..."
     val () = prstr "\n)"
-  } // end of [D2Cstaload]    
+  } // end of [D2Cstaload]
 | ~D2Cstaloadloc _ => {
     val () = prstr "D2Cstaloadloc(\n"
     val () = prstr "..."
     val () = prstr "\n)"
-  } // end of [D2Cstaload]    
+  } // end of [D2Cstaload]
 //
 | ~D2Cdynload _ => {
     val () = prstr "D2Cdynload(\n"
     val () = prstr "..."
     val () = prstr "\n)"
-  } // end of [D2Cdynload]    
+  } // end of [D2Cdynload]
 //
 | ~D2Clocal _ => {
     val () = prstr "D2Clocal(\n"
     val () = prstr "..."
     val () = prstr "\n)"
-  } // end of [D2Clocal]    
+  } // end of [D2Clocal]
 //
 | ~D2Cerrdec () => prstr "D2Cerrdec()"
 //

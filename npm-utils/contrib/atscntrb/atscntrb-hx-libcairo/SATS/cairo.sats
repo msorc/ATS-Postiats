@@ -12,7 +12,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -90,7 +90,7 @@ cairo_pattern_t — Sources for drawing
 Regions — Representing a pixel-aligned area
 Transformations — Manipulating the current transformation matrix
 text — Rendering text and glyphs
-Raster Sources — Supplying arbitrary image data 
+Raster Sources — Supplying arbitrary image data
 *)
 #include "./Drawing/cairo-cairo-t.sats"
 #include "./Drawing/cairo-Paths.sats"
@@ -110,7 +110,7 @@ cairo_font_options_t — How a font should be rendered
 FreeType Fonts — Font support for FreeType
 Win32 Fonts — Font support for Microsoft Windows
 Quartz (CGFont) Fonts — Font support via CGFont on OS X
-User Fonts — Font support with font data provided by the user 
+User Fonts — Font support with font data provided by the user
 *)
 #include "./Fonts/cairo-cairo-font-face-t.sats"
 
@@ -131,7 +131,7 @@ Quartz Surfaces — Rendering to Quartz surfaces
 XCB Surfaces — X Window System rendering using the XCB library
 XLib Surfaces — X Window System rendering using XLib
 XLib-XRender Backend — X Window System rendering using XLib and the X Render extension
-Script Surfaces — Rendering to replayable scripts 
+Script Surfaces — Rendering to replayable scripts
 *)
 #include "./Surfaces/cairo-cairo-device-t.sats"
 #include "./Surfaces/cairo-cairo-surface-t.sats"
@@ -146,7 +146,7 @@ Script Surfaces — Rendering to replayable scripts
 Utilities
 cairo_matrix_t — Generic matrix operations
 Error handling — Decoding cairo's status
-Types — Generic data types 
+Types — Generic data types
 *)
 #include "./Utilities/cairo-cairo-matrix-t.sats"
 #include "./Utilities/cairo-Error-Handling.sats"

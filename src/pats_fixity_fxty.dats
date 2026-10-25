@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -236,7 +236,7 @@ fxopr_associativity (x) = begin
   | ~FXOPRpre _ => ASSOCnon ()
   | ~FXOPRpos _ => ASSOCnon ()
 end // end of [fxopr_associativity]
-        
+
 implement{a}
 fxopr_precedence (x) = begin case+ fxopr_view<a> (x) of
   | ~FXOPRinf (p, _, _) => p | ~FXOPRpre (p, _) => p | ~FXOPRpos (p, _) => p
@@ -307,7 +307,7 @@ fxopr_make (
     fxitm_FXITMatm<a> (appf (loc, opr, loc_x, glist_sing (x)))
   end // end of [f_pos]
 //
-in 
+in
 //
 case+ fxty_view (fxty) of
 | ~FXTYnon () => fxitm_FXITMatm<a> (opr)

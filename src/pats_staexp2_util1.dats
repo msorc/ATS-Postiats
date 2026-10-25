@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -282,7 +282,7 @@ then (
 //
 ) (* end of [else] *)
 //
-end // end of [s2rt_npf_lin_prf_prgm_boxed_labs2explst]  
+end // end of [s2rt_npf_lin_prf_prgm_boxed_labs2explst]
 
 (* ****** ****** *)
 
@@ -1070,7 +1070,7 @@ case+ s2exp_node_view(s2e0.s2exp_node()) of
   end // end of [S2Efun]
 | ~S2Emetfun
     (opt(*stamp*), s2es_met, s2e_body) => let
-    val f0 = flag    
+    val f0 = flag
     val s2es_met = s2explst_subst_flag (sub, s2es_met, flag)
     val s2e_body = s2exp_subst_flag (sub, s2e_body, flag)
   in
@@ -1184,7 +1184,7 @@ s2explstlst_subst_flag
   | ~GLcons(s2es, s2ess) => let
       val f0 = flag
       val s2es = s2explst_subst_flag (sub, s2es, flag)
-      val s2ess = s2explstlst_subst_flag (sub, s2ess, flag) 
+      val s2ess = s2explstlst_subst_flag (sub, s2ess, flag)
     in
       if flag > f0 then glist_cons(s2es, s2ess) else s2ess0
     end // end of [list_cons]
@@ -1419,7 +1419,7 @@ s2zexplst_subst_flag
 // end of [s2zexplst_subst_flag]
 
 (* ****** ****** *)
-  
+
 implement
 labs2zexplst_subst_flag
   (sub, ls2zes0, flag) =

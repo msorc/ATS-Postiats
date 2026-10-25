@@ -199,7 +199,7 @@ prval () = nW (w)
 prval () = fpf (pf)
 //
 in
-  // nothing  
+  // nothing
 end // end of [main0]
 
 (* ****** ****** *)

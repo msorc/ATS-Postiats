@@ -69,7 +69,7 @@ eval(fs.readFileSync('./libatscc2js/CATS/Node.js/process_cats.js').toString());
 %{$
 process_test_dynload()
 %} // end of [%{$]
-  
+
 (* ****** ****** *)
 
 (* end of [process.dats] *)

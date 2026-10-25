@@ -209,7 +209,7 @@ val psmss =
 //
 val env = libatsynmark_sbuf_make ()
 val putc = putc_make (env, libatsynmark_sbuf_putc)
-val () = 
+val () =
   string_psynmarklstlst_process<> (code, psmss, putc)
 //
 in
@@ -222,7 +222,7 @@ implement{}
 charlst_pats2xhtmlize
   (stadyn, code) = let
   val sbp = libatsynmark_strptr_make_charlst (code)
-  val str = $UN.castvwtp1 {string} (sbp) 
+  val str = $UN.castvwtp1 {string} (sbp)
   val res = string_pats2xhtmlize<> (stadyn, str)
   val () = strptr_free (sbp)
 in

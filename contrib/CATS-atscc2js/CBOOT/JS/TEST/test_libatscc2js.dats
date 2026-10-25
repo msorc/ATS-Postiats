@@ -261,7 +261,7 @@ val () = if nerr >= 2 then alert("Atscc2js encountered some errors!")
 (* ****** ****** *)
 //
 implement
-theExample_atscc2js_onclick() = 
+theExample_atscc2js_onclick() =
   theExample_atscc2js_arglst(theExample_atscc2js_getarg())
 //
 (* ****** ****** *)

@@ -772,7 +772,7 @@ tmpvar_is_apy(tmp) =
 (
   $STRING.strncmp(symbol_get_name(tmp), "apy", i2sz(3)) = 0
 ) (* end of [tmpvar_is_apy] *)
-//  
+//
 implement
 tmpvar_is_env(tmp) =
 (
@@ -1907,7 +1907,7 @@ val loc = tok1.token_loc() ++ tok2.token_loc()
 in
   d0ecl_make_node (loc, D0Cifdef (id, d0cs))
 end // end of [d0ecl_ifdef]
-  
+
 (* ****** ****** *)
 
 implement
@@ -1921,7 +1921,7 @@ val loc = tok1.token_loc() ++ tok2.token_loc()
 in
   d0ecl_make_node (loc, D0Cifdef (id, d0cs))
 end // end of [d0ecl_ifndef]
-  
+
 (* ****** ****** *)
 
 implement

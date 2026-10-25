@@ -305,12 +305,12 @@ val stderr = patsoptres_get_stderr(res)
 *)
 (*
 //
-val () = 
+val () =
 if nerr > 0 then
   alert("patsopt_main_arglst: nerr="+String(nerr))
 // end of [if]
 //
-val () = 
+val () =
 if nerr > 0 then
 (
   alert("patsoptres_main_arglst: nerr="+String(nerr))
@@ -336,7 +336,7 @@ val () = if nerr > 1 then alert("Patsopt encountered some errors!")
 (* ****** ****** *)
 //
 implement
-theExample_patsopt_onclick() = 
+theExample_patsopt_onclick() =
   theExample_patsopt_arglst(theExample_patsopt_getarg())
 //
 (* ****** ****** *)

@@ -4,11 +4,11 @@
 "share/atspre_staload.hats"
 //
 (* ****** ****** *)
-  
+
 %{^
 #include <pthread.h>
 %} // end of [%{^]
-  
+
 (* ****** ****** *)
 //
 staload
@@ -47,7 +47,7 @@ implement
 main0 () =
 {
 //
-val () = 
+val () =
 println! ("test_spinref: enter")
 //
 val SPNR = spinref_create_exn<int> (0)
@@ -78,7 +78,7 @@ val () =
   val () = if n < 2 then (ignoret(sleep(1u)); loop (spnr))
 } ) (SPNR) // end of [val]
 //
-val () = 
+val () =
 println! ("test_spinref: leave")
 //
 } (* end of [main0] *)

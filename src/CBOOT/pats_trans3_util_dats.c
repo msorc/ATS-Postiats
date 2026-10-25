@@ -7857,7 +7857,7 @@ ATSif(
 tmp545
 ) ATSthen() {
 ATSINSmove_void(tmp550, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__179__1(tmp538)) ;
-ATSINSmove_void(tmp555, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_util.dats: 9945(line=424, offs=12) -- 9974(line=424, offs=41)"), ATSPMVstring("d3exp_trdn"))) ;
+ATSINSmove_void(tmp555, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_util.dats: 9942(line=424, offs=12) -- 9971(line=424, offs=41)"), ATSPMVstring("d3exp_trdn"))) ;
 ATSINSmove_void(tmp556, atspre_prerr_string(ATSPMVstring(": the dynamic expression cannot be assigned the type ["))) ;
 ATSINSmove_void(tmp557, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2exp(tmp542)) ;
 ATSINSmove_void(tmp558, atspre_prerr_string(ATSPMVstring("]."))) ;

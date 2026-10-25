@@ -193,9 +193,9 @@ fun is_STRING (x: tnode): bool
 //
 (* ****** ****** *)
 
-fun p_SRPendif : parser (token)  
+fun p_SRPendif : parser (token)
 fun is_SRPendif (x: tnode): bool
-  
+
 (* ****** ****** *)
 
 fun p_ATSbranch_end : parser (token)

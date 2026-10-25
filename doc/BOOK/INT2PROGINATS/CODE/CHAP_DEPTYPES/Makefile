@@ -26,7 +26,7 @@ ATSCCFLAGS=
 
 ######
 
-all:: 
+all::
 all:: strings
 all:: bsearch_arr
 all:: terminate

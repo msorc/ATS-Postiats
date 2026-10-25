@@ -20,7 +20,7 @@ vtypedef
 nwaiter_ticket = $NWAITER.nwaiter_ticket
 //
 (* ****** ****** *)
-//  
+//
 #staload
 "libats/libc/SATS/unistd.sats"
 //
@@ -63,7 +63,7 @@ val err =
 val err =
   $FWS.fworkshop_add_worker(ws0)
 //
-val nworker = 
+val nworker =
   $FWS.fworkshop_get_nworker(ws0)
 val ((*void*)) =
   println! ("nworker(bef) = ", nworker)

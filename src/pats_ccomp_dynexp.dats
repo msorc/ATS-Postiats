@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -70,7 +70,7 @@ prerr_FILENAME<> () = prerr "pats_ccomp_dynexp"
 //
 staload
 GLOBAL = "./pats_global.sats"
-//  
+//
 (* ****** ****** *)
 
 staload
@@ -657,7 +657,7 @@ hidexp_node_view(hde0.hidexp_node()) of (* case+ *)
   hidexp_ccomp_ret_extmcall(env, res, tmpret, hde0)
   (* end of [HDEextmcall] *)
 //
-| ~HDEcon _ => 
+| ~HDEcon _ =>
     hidexp_ccomp_ret_con(env, res, tmpret, hde0)
   (* end of [HDEcon] *)
 //
@@ -871,7 +871,7 @@ val hse0 = hde0.hidexp_type()
 val-~HDEcstsp(x) = hidexp_node_view(hde0.hidexp_node())
 //
 val pmc = (
-  case+ x of 
+  case+ x of
   | $SYN.CSTSPmyfil () => let
       val fil =
         $LOC.location_get_filename (loc0)
@@ -1606,7 +1606,7 @@ end // end of [local]
 (* ****** ****** *)
 
 local
- 
+
 fun
 auxlst
 (

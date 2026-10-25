@@ -98,7 +98,7 @@ fun aux {x:nat}.<x>. // non-tail-recursive
 in
   aux (x)
 end // end of [intsqrt]
-      
+
 (* ****** ****** *)
 
 implement

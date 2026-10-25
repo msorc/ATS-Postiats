@@ -20,7 +20,7 @@ block_t smem[NM];
 void
 atsruntime_mfree_user(void *p) {
 /*
-  fprintf(stderr, "atsruntime_mfree_user: p = %p\n", p);  
+  fprintf(stderr, "atsruntime_mfree_user: p = %p\n", p);
 */
   void *p0 = &smem[0];
   used[((char*)p - (char*)p0)/sizeof(block_t)] = 0;
@@ -29,7 +29,7 @@ atsruntime_mfree_user(void *p) {
 void*
 atsruntime_malloc_user(size_t bsz) {
 /*
-  fprintf(stderr, "atsruntime_malloc_user: bsz = %d\n", (int)bsz);  
+  fprintf(stderr, "atsruntime_malloc_user: bsz = %d\n", (int)bsz);
 */
   int i;
   for (i = 0; i < NM; i += 1)

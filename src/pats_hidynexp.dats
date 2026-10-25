@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -430,7 +430,7 @@ hidexp_f0loat
 
 implement
 hidexp_cstsp
-  (loc, hse, x) = 
+  (loc, hse, x) =
   hidexp_make_node (loc, hse, hidexp_node_HDEcstsp(x))
 // end of [hidexp_cstsp]
 
@@ -438,25 +438,25 @@ hidexp_cstsp
 
 implement
 hidexp_tyrep
-  (loc, hse, x) = 
+  (loc, hse, x) =
   hidexp_make_node (loc, hse, hidexp_node_HDEtyrep(x))
 // end of [hidexp_cstsp]
 
 (* ****** ****** *)
 
 implement
-hidexp_top(loc, hse) = 
+hidexp_top(loc, hse) =
   hidexp_make_node (loc, hse, hidexp_node_HDEtop())
 // end of [hidexp_top]
 
 implement
-hidexp_empty(loc, hse) = 
+hidexp_empty(loc, hse) =
   hidexp_make_node (loc, hse, hidexp_node_HDEempty())
 // end of [hidexp_empty]
 
 implement
 hidexp_ignore
-  (loc, hse, hde) = 
+  (loc, hse, hde) =
   hidexp_make_node (loc, hse, hidexp_node_HDEignore(hde))
 // end of [hidexp_ignore]
 

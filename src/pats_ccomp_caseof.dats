@@ -94,7 +94,7 @@ case+ glist_view(hdes) of
     val pmvs = hidexplst_ccompv_caseof(env, res, hdes)
   in
     glist_cons<primval>(pmv, pmvs)
-  end // end of [list_cons]    
+  end // end of [list_cons]
 //
 end // end of [hidexplst_ccompv_caseof]
 

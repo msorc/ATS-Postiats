@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -46,7 +46,7 @@ ATSCNTRB_SMT_Z3_Z3_HEADER
 //
 (* ****** ****** *)
 /*
-// Declare and create a constant. 
+// Declare and create a constant.
 */
 fun Z3_mk_const
 (
@@ -98,14 +98,14 @@ Z3_mk_func_decl_2
 ) : Z3_func_decl = "mac#%" // end-of-function
 
 (* ****** ****** *)
-  
+
 fun
 Z3_mk_app{n:nat}
 (
   ctx: !Z3_context
 , fd: !Z3_func_decl, n: int(n), args: &RD(array(Z3_ast, n))
 ) : Z3_ast = "mac#%" // end-of-fun
-  
+
 (* ****** ****** *)
 
 fun

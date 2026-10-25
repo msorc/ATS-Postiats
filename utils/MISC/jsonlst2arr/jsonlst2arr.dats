@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -193,7 +193,7 @@ fun{
 extern
 fun jsonlst2arr_cmdline
   {n:int} (argc: int n, argv: !argv(n)): commarglst
-// 
+//
 (* ****** ****** *)
 
 local
@@ -426,7 +426,7 @@ case+ inplst of
         val n = jsonlst2arr_main(out2, x, delim2, n) in auxlst (inplst, n)
       end // end of [Some_vt]
     | ~None_vt ((*void*)) => auxlst (inplst, n)
-  end // end of [list_vt_cons] 
+  end // end of [list_vt_cons]
 //
 | ~list_vt_nil((*void*)) => (n)
 //

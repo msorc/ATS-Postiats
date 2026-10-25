@@ -58,9 +58,9 @@ int main(int argc, char* argv[]) {
   for(i=0;i<LEN;i++) {
     my_array[i] = LEN - i;
   }
-            
+
   display_numbers(my_array, LEN);//--> from my external lib
-              
+
   free(my_array);
 }
 

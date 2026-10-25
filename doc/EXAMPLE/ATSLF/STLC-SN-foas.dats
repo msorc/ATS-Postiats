@@ -88,7 +88,7 @@ datasort tp = tpbas | tpfun of (tp, tp)
 
 datasort tps = tpsnil | tpsmore of (tps, tp)
 
-dataprop TP (tp, int) = 
+dataprop TP (tp, int) =
   | TPbas (tpbas, 0)
   | {T1,T2:tp} {n1,n2:nat}
     TPfun (tpfun (T1, T2), n1+n2+1) of (TP (T1, n1), TP (T2, n2))
@@ -156,7 +156,7 @@ extern prval backwardSN : {t:tm} ({t':tm} RED0 (t, t') -<fun> SN0 t') -<fun> SN0
 ** Reducibility
 *)
 dataprop
-R (tm, tp) = 
+R (tm, tp) =
   | {t:tm} Rbas(t, tpbas) of SN0 t
   | {t:tm} {T1,T2:tp}
     Rfun (t, tpfun (T1, T2)) of ({t1:tm} R (t1, T1) -<fun> R (tmapp (t, t1), T2))
@@ -166,7 +166,7 @@ R (tm, tp) =
 dataprop
 RS (tms, tps, int) =
   | RSnil (tmsnil, tpsnil, 0)
-  | {ts:tms} {t:tm} {G:tps} {T:tp} {n:nat} 
+  | {ts:tms} {t:tm} {G:tps} {T:tp} {n:nat}
     RSmore (tmsmore (ts, t), tpsmore(G, T), n+1) of (RS(ts, G, n), R(t, T))
 // end of [RS]
 
@@ -248,7 +248,7 @@ and cr3 {t:tm} {T:tp} {n:nat} .<n, 1>. (
     neu: NEU(t)
   , tp: TP(T, n)
   , fr : {t':tm} RED0(t, t') -<fun> R(t', T)
-  ) : R(t, T) = let 
+  ) : R(t, T) = let
   prval fsn = lam {t':tm} => lam (red:RED0(t, t')) =<> cr1 (tp, fr red)
   prval sn = backwardSN fsn
 in
@@ -348,7 +348,7 @@ case+ der of
   in
     fr1 r2
   end // end of [DERapp]
-| DERlam (der0) => let 
+| DERlam (der0) => let
     prval TPfun
       {T1,T2}{s1,s2}(tp1, tp2) = der2tp (der)
     // end of [prval]

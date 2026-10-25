@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -187,15 +187,15 @@ fn name_is_prf
   (name: string): bool = name = "prf"
 // end of [name_is_prf]
 
-fn name_is_lin0 (name: string): bool = 
+fn name_is_lin0 (name: string): bool =
   if name = "lin" then true else name = "lin0"
 fn name_is_lin1 (name: string): bool = name = "lin1"
 
-fn name_is_fun0 (name: string): bool = 
+fn name_is_fun0 (name: string): bool =
   if name = "fun" then true else name = "fun0"
 fn name_is_fun1 (name: string): bool = name = "fun1"
 
-fn name_is_linfun0 (name: string): bool = 
+fn name_is_linfun0 (name: string): bool =
   if name = "linfun" then true else name = "linfun0"
 fn name_is_linfun1 (name: string): bool = name = "linfun1"
 
@@ -207,15 +207,15 @@ fn name_is_linclo0 (name: string): bool =
   if name = "linclo" then true else name = "linclo0"
 fn name_is_linclo1 (name: string): bool = name = "linclo1"
 
-fn name_is_cloptr0 (name: string): bool = 
+fn name_is_cloptr0 (name: string): bool =
   if name = "cloptr" then true else name = "cloptr0"
 fn name_is_cloptr1 (name: string): bool = name = "cloptr1"
 
-fn name_is_lincloptr0 (name: string): bool = 
+fn name_is_lincloptr0 (name: string): bool =
   if name = "lincloptr" then true else name = "lincloptr0"
 fn name_is_lincloptr1 (name: string): bool = name = "lincloptr1"
 
-fn name_is_cloref0 (name: string): bool = 
+fn name_is_cloref0 (name: string): bool =
   if name = "cloref" then true else name = "cloref0"
 fn name_is_cloref1 (name: string): bool = name = "cloref1"
 

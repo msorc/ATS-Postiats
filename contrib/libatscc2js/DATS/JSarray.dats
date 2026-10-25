@@ -105,7 +105,7 @@ end (* end of [JSarray_tabulate_cloptr] *)
 //
 implement
 {a}(*tmp*)
-JSarray_sort_1(A) = 
+JSarray_sort_1(A) =
 JSarray_sort_2
   (A, lam(x1, x2) =<cloptr1> gcompare_val_val<a>(x1, x2))
 //

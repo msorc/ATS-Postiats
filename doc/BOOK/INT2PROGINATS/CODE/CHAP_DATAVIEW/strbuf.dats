@@ -136,7 +136,7 @@ end // end of [loop]
 //
 in
   loop(str.0 | str.1, i2sz(0))
-end // end of [strptr_length]  
+end // end of [strptr_length]
 
 (* ****** ****** *)
 

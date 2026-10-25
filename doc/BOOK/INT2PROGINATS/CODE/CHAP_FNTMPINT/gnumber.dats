@@ -67,7 +67,7 @@ end (* end of [gfact] *)
 
 implement fact(n) = gfact<int>(n)
 implement factd(n) = gfact<double>(n)
-  
+
 (* ****** ****** *)
 //
 val () =

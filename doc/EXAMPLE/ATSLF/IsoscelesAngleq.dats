@@ -263,5 +263,5 @@ in
 end // end of [Isosceles_CONGangle]
 
 (* ****** ****** *)
-  
+
 (* end of [IsoscelesAngleq.dats] *)

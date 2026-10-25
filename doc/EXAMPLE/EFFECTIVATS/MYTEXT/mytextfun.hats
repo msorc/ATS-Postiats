@@ -4,14 +4,14 @@
 // for writing EFFECTIVATS series
 //
 (* ****** ****** *)
-  
+
 (*
 
 Author: Hongwei Xi (gmhwxiATgmailDOTcom)
 Author: Sami Zeinelabdin (https://github.com/sazl)
 
-*)  
-  
+*)
+
 (* ****** ****** *)
 //
 //

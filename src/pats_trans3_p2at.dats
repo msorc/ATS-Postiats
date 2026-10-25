@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -195,7 +195,7 @@ case+ p2at_node_view(p2t0.p2at_node()) of
 | ~P2Terrpat ((*void*)) => s2exp_t0ype_err ()
 //
 end // end of [aux_p2at]
-  
+
 implement
 aux_labp2atlst
   (lp2ts) = let
@@ -451,7 +451,7 @@ fun aux (
       end // end of [list_cons]
     else glist_nil ()
   ) // end of [list_nil]
-// end of [aux]  
+// end of [aux]
 in
   aux (loc0, npf, p2ts, s2es, serr)
 end (* end of [p2atlst_trdn_arg] *)
@@ -945,7 +945,7 @@ in
 //
 case+ s2exp_node_view(s2e.s2exp_node()) of
 | ~S2Eapp (s2e_fun, s2es_arg) => let
-    val () = 
+    val () =
       $SOL.s2exp_tyleq_solve_err (loc0, s2e_pat_fun, s2e_fun, nerr)
     // end of [val]
   in

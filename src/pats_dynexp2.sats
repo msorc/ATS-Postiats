@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -369,7 +369,7 @@ fun d2var_set_mastype (x: d2var, opt: s2expopt): void
 fun d2var_get_hisexp (x: d2var):<> hisexpopt
 fun d2var_set_hisexp (x: d2var, opt: hisexpopt): void
 //
-fun d2var_exch_type (x: d2var, opt: s2expopt): s2expopt 
+fun d2var_exch_type (x: d2var, opt: s2expopt): s2expopt
 //
 fun d2var_get_utimes (x: d2var):<> int
 fun d2var_set_utimes (x: d2var, nused: int):<> void
@@ -972,7 +972,7 @@ d2exp_tup
 fun
 d2exp_tup_flt
 (
-  loc: location, npf: int, d2es: d2explst  
+  loc: location, npf: int, d2es: d2explst
 ) : d2exp // end of [d2exp_tup_flt]
 //
 fun
@@ -1543,7 +1543,7 @@ fun
 d2eclist_mapgen_all
 (
   d2cs: d2eclist
-) : 
+) :
 @( s2cstset_vt // static
  , s2varset_vt // static
  , s2Varset_vt // static

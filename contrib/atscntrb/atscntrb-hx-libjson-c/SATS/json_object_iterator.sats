@@ -92,7 +92,7 @@ json_object_iter_notequal{l:addr}
 //
 overload = with json_object_iter_equal
 overload != with json_object_iter_notequal
-//     
+//
 (* ****** ****** *)
 
 (* end of [json_object_iterator.sats] *)

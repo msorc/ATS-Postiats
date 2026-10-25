@@ -10,7 +10,7 @@ staload
 (* ****** ****** *)
 //
 fun{}
-channel_cap(): intGte(1)  
+channel_cap(): intGte(1)
 //
 (* ****** ****** *)
 //

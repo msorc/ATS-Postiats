@@ -1029,7 +1029,7 @@ ATSINSlab(__atstmplab11):
 ATSifthen(ATSCKptriscons(tmp71)) { ATSINSdeadcode_fail() ; } ;
 #endif
 ATSINSlab(__atstmplab12):
-ATSINSmove_void(tmp84, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_codegen2_datype.dats: 4066(line=191, offs=17) -- 4081(line=191, offs=32)"))) ;
+ATSINSmove_void(tmp84, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_codegen2_datype.dats: 4064(line=191, offs=17) -- 4079(line=191, offs=32)"))) ;
 ATSINSmove(tmp70, ATSLIB_056_libats_056_arena__glist_nil__27__1()) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -1859,7 +1859,7 @@ ATSINSlab(__atstmplab36):
 ATSifthen(ATSCKptriscons(tmp199)) { ATSINSdeadcode_fail() ; } ;
 #endif
 ATSINSlab(__atstmplab37):
-ATSINSmove_void(tmp209, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_codegen2_datype.dats: 7203(line=371, offs=17) -- 7218(line=371, offs=32)"))) ;
+ATSINSmove_void(tmp209, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_codegen2_datype.dats: 7201(line=371, offs=17) -- 7216(line=371, offs=32)"))) ;
 ATSINSmove(tmp198, ATSLIB_056_libats_056_arena__glist_nil__27__2()) ;
 ATSbranch_end()
 ATScaseof_end()

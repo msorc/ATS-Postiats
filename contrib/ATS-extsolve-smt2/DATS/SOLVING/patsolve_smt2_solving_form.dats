@@ -103,7 +103,7 @@ formula_int
 implement
 formula_intrep
   (ar, rep) = form_FORMintrep(ar, rep)
-//  
+//
 (* ****** ****** *)
 //
 implement

@@ -97,7 +97,7 @@ fun{}
 fprint_token_node_$TOKeol$rpar: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKeol(out, arg0) = 
+fprint_token_node_$TOKeol(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKeol$con<>(out, arg0)
@@ -123,7 +123,7 @@ fun{}
 fprint_token_node_$TOKeof$rpar: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKeof(out, arg0) = 
+fprint_token_node_$TOKeof(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKeof$con<>(out, arg0)
@@ -152,7 +152,7 @@ fun{}
 fprint_token_node_$TOKint$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKint(out, arg0) = 
+fprint_token_node_$TOKint(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKint$con<>(out, arg0)
@@ -185,7 +185,7 @@ fun{}
 fprint_token_node_$TOKide$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKide(out, arg0) = 
+fprint_token_node_$TOKide(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKide$con<>(out, arg0)
@@ -218,7 +218,7 @@ fun{}
 fprint_token_node_$TOKspchr$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKspchr(out, arg0) = 
+fprint_token_node_$TOKspchr(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKspchr$con<>(out, arg0)
@@ -251,7 +251,7 @@ fun{}
 fprint_token_node_$TOKbslash$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKbslash(out, arg0) = 
+fprint_token_node_$TOKbslash(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKbslash$con<>(out, arg0)
@@ -284,7 +284,7 @@ fun{}
 fprint_token_node_$TOKspace$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKspace(out, arg0) = 
+fprint_token_node_$TOKspace(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKspace$con<>(out, arg0)
@@ -317,7 +317,7 @@ fun{}
 fprint_token_node_$TOKsharp$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKsharp(out, arg0) = 
+fprint_token_node_$TOKsharp(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKsharp$con<>(out, arg0)
@@ -347,7 +347,7 @@ fun{}
 fprint_token_node_$TOKsquote$rpar: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKsquote(out, arg0) = 
+fprint_token_node_$TOKsquote(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKsquote$con<>(out, arg0)
@@ -376,7 +376,7 @@ fun{}
 fprint_token_node_$TOKdquote$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKdquote(out, arg0) = 
+fprint_token_node_$TOKdquote(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKdquote$con<>(out, arg0)
@@ -409,7 +409,7 @@ fun{}
 fprint_token_node_$TOKcode_beg$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKcode_beg(out, arg0) = 
+fprint_token_node_$TOKcode_beg(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKcode_beg$con<>(out, arg0)
@@ -442,7 +442,7 @@ fun{}
 fprint_token_node_$TOKcode_end$arg1: $d2ctype(fprint_token_node_<>)
 //
 implement{}
-fprint_token_node_$TOKcode_end(out, arg0) = 
+fprint_token_node_$TOKcode_end(out, arg0) =
 {
 //
 val () = fprint_token_node_$TOKcode_end$con<>(out, arg0)

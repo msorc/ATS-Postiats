@@ -49,7 +49,7 @@ val p_t2 = addr@t2
 end // end of [local]
 
 (* ****** ****** *)
-  
+
 local
 
 var acc: mpz
@@ -66,7 +66,7 @@ val p_num = addr@num
 val p_den = addr@den
 
 end // end of [local]
-  
+
 (* ****** ****** *)
 
 extern

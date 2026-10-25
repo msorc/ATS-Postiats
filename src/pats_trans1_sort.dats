@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -154,13 +154,13 @@ in
 end // end of [s0rt_tr_errmsg_opr]
 
 in // in of [local]
-  
+
 implement s0rt_tr (s0t0) = let
 //
 fun aux_item
   (s0t0: s0rt): s1rtitm = let
   val loc0 = s0t0.s0rt_loc () in case+ s0rt_node_view (s0t0.s0rt_node ()) of
-  | ~S0RTapp (_, _) => let 
+  | ~S0RTapp (_, _) => let
       val s1t0 = fixity_resolve<s1rt> (
         loc0, s1rt_get_loc, s1rtitm_app (loc0), aux_itemlst (s0t0)
       ) // end of [val]

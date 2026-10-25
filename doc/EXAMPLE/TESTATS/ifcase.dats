@@ -1,8 +1,8 @@
 (* ****** ****** *)
 //
 // HX: 2016-05-15:
-// A simple exercise of syntax design 
-// 
+// A simple exercise of syntax design
+//
 (* ****** ****** *)
 //
 #include

@@ -176,7 +176,7 @@ implement
 fcountlst_make_nil
   (cap) =
   $HT.hashtbl_make_nil<key,itm>(i2sz(cap))
-//  
+//
 (* ****** ****** *)
 
 implement
@@ -416,7 +416,7 @@ case+ !xs of
 | ~stream_vt_nil() => ()
 | ~stream_vt_cons(x0, xs) =>
   (
-    fcountlst_add_fname(fcs, x0); 
+    fcountlst_add_fname(fcs, x0);
     fcountlst_add_fnames(fcs, xs);
   )
 )

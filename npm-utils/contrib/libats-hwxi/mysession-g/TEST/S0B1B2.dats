@@ -236,7 +236,7 @@ channel1_send
   (chan, BUYER1, SELLER, title)
 //
 val
-price = 
+price =
 channel1_recv_val
   (chan, SELLER, BUYER1)
 val () =

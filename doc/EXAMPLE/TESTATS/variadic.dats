@@ -20,7 +20,7 @@ stadef tcons = types_cons
 (*
 datatype
 ints(types) =
-| ints_nil(tnil) of () 
+| ints_nil(tnil) of ()
 | {ts:types}
   ints_cons(tcons(int, ts)) of ints(ts)
 *)

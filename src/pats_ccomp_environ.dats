@@ -135,7 +135,7 @@ case+ glist_view(xs) of
         auxtrclo(flvl0, xs, xss, res)
       ) else let
         val res = funlabset_vt_add(res, x)
-        val xs_new = aux_funlab_get_flablst(x) 
+        val xs_new = aux_funlab_get_flablst(x)
       in
         auxtrclo(flvl0, xs_new, list_vt_cons(xs, xss), res)
       end (* end of [if] *)

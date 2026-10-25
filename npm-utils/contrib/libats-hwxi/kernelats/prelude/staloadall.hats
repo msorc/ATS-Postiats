@@ -1,7 +1,7 @@
 (* ****** ****** *)
 //
 // Templates for
-// kernel programming 
+// kernel programming
 //
 (* ****** ****** *)
 //

@@ -19,7 +19,7 @@ $(MAKE) -C BUILD -f ../Makefile_build
 
 ######
 
-testall:: ; $(MAKE) -C TEST testall 
+testall:: ; $(MAKE) -C TEST testall
 
 ######
 

@@ -6248,7 +6248,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab118):
 ATSINSmove_void(tmp468, PATSHOME_057_src_057_pats_lexing_056_sats__token_node_view_free(tmp464)) ;
-ATSINSmove_void(tmp469, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans1_decl.dats: 9494(line=395, offs=14) -- 9510(line=395, offs=30)"))) ;
+ATSINSmove_void(tmp469, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans1_decl.dats: 9492(line=395, offs=14) -- 9508(line=395, offs=30)"))) ;
 ATSINSmove_con0(tmpret463, 0) ;
 ATSbranch_end()
 ATScaseof_end()

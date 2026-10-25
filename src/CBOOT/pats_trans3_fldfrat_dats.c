@@ -3968,7 +3968,7 @@ ATSINSmove(tmp130, ATSSELfltrec(tmp128, postiats_tyrec_4, atslab__1)) ;
 ATSINSmove_void(tmp131, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_proplst_vt(arg0, tmp130)) ;
 ATSINSmove(tmp133, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp129)) ;
 ATSINSmove(tmp132, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp133)) ;
-ATSifnthen(ATSCKpat_con1(tmp132, 19)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_fldfrat.dats: 4721(line=189, offs=9) -- 4821(line=191, offs=47)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp132, 19)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_fldfrat.dats: 4719(line=189, offs=9) -- 4819(line=191, offs=47)") ; } ;
 ATSINSmove(tmp134, ATSSELcon(tmp132, postiats_tysum_6, atslab__4)) ;
 ATSINSmove(tmp135, ATSSELcon(tmp132, postiats_tysum_6, atslab__5)) ;
 ATSINSfreecon(tmp132) ;
@@ -4247,7 +4247,7 @@ ATSINSflab(__patsflab_d2exp_trup_foldat):
 ATSINSmove(tmp197, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove(tmp199, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
 ATSINSmove(tmp198, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp199)) ;
-ATSifnthen(ATSCKpat_con1(tmp198, 23)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_fldfrat.dats: 6866(line=267, offs=5) -- 6924(line=267, offs=63)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp198, 23)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_fldfrat.dats: 6864(line=267, offs=5) -- 6922(line=267, offs=63)") ; } ;
 ATSINSmove(tmp200, ATSSELcon(tmp198, postiats_tysum_7, atslab__0)) ;
 ATSINSmove(tmp201, ATSSELcon(tmp198, postiats_tysum_7, atslab__1)) ;
 ATSINSfreecon(tmp198) ;
@@ -4275,7 +4275,7 @@ ATSINSflab(__patsflab_d2exp_trup_freeat):
 ATSINSmove(tmp204, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove(tmp206, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
 ATSINSmove(tmp205, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp206)) ;
-ATSifnthen(ATSCKpat_con1(tmp205, 24)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_fldfrat.dats: 7120(line=280, offs=5) -- 7178(line=280, offs=63)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp205, 24)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_fldfrat.dats: 7118(line=280, offs=5) -- 7176(line=280, offs=63)") ; } ;
 ATSINSmove(tmp207, ATSSELcon(tmp205, postiats_tysum_7, atslab__0)) ;
 ATSINSmove(tmp208, ATSSELcon(tmp205, postiats_tysum_7, atslab__1)) ;
 ATSINSfreecon(tmp205) ;

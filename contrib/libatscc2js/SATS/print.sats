@@ -72,7 +72,7 @@ print_val (x: a): void = "mac#%"
 fun
 {a:t0p}
 fprint_val (JSfilr, x: a): void = "mac#%"
-//  
+//
 (* ****** ****** *)
 //
 // HX-2014-09-19:

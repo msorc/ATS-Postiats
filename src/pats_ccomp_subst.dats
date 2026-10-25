@@ -843,7 +843,7 @@ primval_node_view (pmv0.primval_node ()) of
       ccomp_tmpvarmat (env, loc0, hse0, d2v, t2mas, tmpmat)
     end else
       pmv0 // HX-2013-01: maximal tmprecdepth is reached!
-    // end of [if]    
+    // end of [if]
   end // end of [PMVtmpltvar]
 //
 | v (* rest-of-primval *) => (primval_node_view_free (v); pmv0)

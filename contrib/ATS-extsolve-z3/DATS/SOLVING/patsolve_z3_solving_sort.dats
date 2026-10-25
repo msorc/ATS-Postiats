@@ -57,7 +57,7 @@ prval ((*void*)) = fpf(ctx)
 
 (* ****** ****** *)
 //
-implement 
+implement
 sort_int () = res where
 {
 //
@@ -66,7 +66,7 @@ val () =
   println! ("sort_int")
 *)
 //
-val (fpf | ctx) = 
+val (fpf | ctx) =
   the_Z3_context_vget()
 // end of [val]
 val res =
@@ -78,7 +78,7 @@ prval ((*void*)) = fpf (ctx)
 //
 (* ****** ****** *)
 //
-implement 
+implement
 sort_bool () = res where
 {
 //
@@ -87,7 +87,7 @@ val () =
   println! ("sort_bool")
 *)
 //
-val (fpf | ctx) = 
+val (fpf | ctx) =
   the_Z3_context_vget()
 // end of [val]
 val res =
@@ -98,7 +98,7 @@ prval ((*void*)) = fpf (ctx)
 //
 (* ****** ****** *)
 //
-implement 
+implement
 sort_real () = res where
 {
 //
@@ -107,7 +107,7 @@ val () =
   println! ("sort_real")
 *)
 //
-val (fpf | ctx) = 
+val (fpf | ctx) =
   the_Z3_context_vget()
 // end of [val]
 val res =
@@ -156,7 +156,7 @@ sort_mk_abstract
   (name) = res where
 {
 //
-val (fpf | ctx) = 
+val (fpf | ctx) =
   the_Z3_context_vget()
 // end of [val]
 val sym =

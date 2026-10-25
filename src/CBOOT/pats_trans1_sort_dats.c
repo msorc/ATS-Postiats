@@ -10437,7 +10437,7 @@ ATStmpdec(tmp1269, atstype_exnconptr) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_errapp_343):
 ATSINSmove(tmp1262, PMVtmpltcst(fxitm_view<S2Evar(a(7838))>)(arg1)) ;
-ATSifnthen(ATSCKpat_con1(tmp1262, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 11189(line=392, offs=7) -- 11224(line=392, offs=42)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1262, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 11178(line=392, offs=7) -- 11213(line=392, offs=42)") ; } ;
 ATSINSmove(tmp1263, ATSSELcon(tmp1262, postiats_tysum_7, atslab__0)) ;
 ATSINSfreecon(tmp1262) ;
 ATSINSmove(tmp1265, ATSfunclo_fun(arg0, (atstype_boxed), atstkind_type(atstype_ptrk))(tmp1263)) ;
@@ -10568,7 +10568,7 @@ ATSINSlab(__atstmplab68):
 ATSINSmove(tmp1290, ATSSELcon(tmp1289, postiats_tysum_16, atslab__0)) ;
 ATSINSfreecon(tmp1289) ;
 ATSINSmove(tmp1292, PMVtmpltcst(fxitm_view<S2Evar(a(7838))>)(tmp1290)) ;
-ATSifnthen(ATSCKpat_con1(tmp1292, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 12299(line=439, offs=19) -- 12332(line=439, offs=52)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1292, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 12288(line=439, offs=19) -- 12321(line=439, offs=52)") ; } ;
 ATSINSmove(tmp1293, ATSSELcon(tmp1292, postiats_tysum_7, atslab__0)) ;
 ATSINSfreecon(tmp1292) ;
 ATSINSmove(tmpret1280, tmp1293) ;
@@ -11527,7 +11527,7 @@ ATStmpdec(tmp1269__1, atstype_exnconptr) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_errapp_343):
 ATSINSmove(tmp1262__1, PATSHOME_057_src_057_pats_fixity_056_sats__fxitm_view__359__1(arg1)) ;
-ATSifnthen(ATSCKpat_con1(tmp1262__1, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 11189(line=392, offs=7) -- 11224(line=392, offs=42)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1262__1, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 11178(line=392, offs=7) -- 11213(line=392, offs=42)") ; } ;
 ATSINSmove(tmp1263__1, ATSSELcon(tmp1262__1, postiats_tysum_6, atslab__0)) ;
 ATSINSfreecon(tmp1262__1) ;
 ATSINSmove(tmp1265__1, ATSfunclo_fun(arg0, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk))(tmp1263__1)) ;
@@ -12017,7 +12017,7 @@ ATSINSlab(__atstmplab68):
 ATSINSmove(tmp1290__1, ATSSELcon(tmp1289__1, postiats_tysum_16, atslab__0)) ;
 ATSINSfreecon(tmp1289__1) ;
 ATSINSmove(tmp1292__1, PATSHOME_057_src_057_pats_fixity_056_sats__fxitm_view__359__3(tmp1290__1)) ;
-ATSifnthen(ATSCKpat_con1(tmp1292__1, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 12299(line=439, offs=19) -- 12332(line=439, offs=52)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1292__1, 0)) { ATSINScaseof_fail("PATSHOME/src/pats_fixity_fxty.dats: 12288(line=439, offs=19) -- 12321(line=439, offs=52)") ; } ;
 ATSINSmove(tmp1293__1, ATSSELcon(tmp1292__1, postiats_tysum_6, atslab__0)) ;
 ATSINSfreecon(tmp1292__1) ;
 ATSINSmove(tmpret1280__1, tmp1293__1) ;

@@ -132,7 +132,7 @@ void cairo_font_extents
 fun cairo_font_extents
 (
   xr: !xr1
-, extents: &cairo_font_extents_t? >> cairo_font_extents_t  
+, extents: &cairo_font_extents_t? >> cairo_font_extents_t
 ) : void = "mac#%" // end of [cairo_font_extents]
 
 (* ****** ****** *)

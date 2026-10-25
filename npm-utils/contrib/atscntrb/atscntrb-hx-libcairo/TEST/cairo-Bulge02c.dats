@@ -10,7 +10,7 @@
 *)
 (* ****** ****** *)
 
-(* 
+(*
 ** Author: William Blair
 ** Authoremail: wdblairATbuDOTedu
 *)
@@ -76,8 +76,8 @@ fun draw_horizontal{l:agz} (cr: !cairo_ref l, i:int, j:int, color:int) : void
 (* ****** ****** *)
 
 implement
-quadrant (i,j) = 
-  if (i > 7 && j < 7)      then 1 
+quadrant (i,j) =
+  if (i > 7 && j < 7)      then 1
   else if (i < 7 && j < 7) then 2
   else if (i < 7 && j > 7) then 3
   else if (i > 7 && j > 7) then 4
@@ -107,7 +107,7 @@ if (i != 7 || j != 7) then
   val x1 =
   (
     if (i > 7 && j = 7)
-      then int2dbl(i)+OFFSET else int2dbl(i+1)-OFFSET 
+      then int2dbl(i)+OFFSET else int2dbl(i+1)-OFFSET
   ) : double
   val y1 =
   (
@@ -161,7 +161,7 @@ val width = SUBSIZE
 val width1 = ~SUBSIZE
 val height1 =
   (if (quad_mod = 1) then ~SUBSIZE else SUBSIZE): double
-//  
+//
 val () = cairo_rectangle(cr, x, y, width, height)
 val () = cairo_set_source_rgb(cr, new_color, new_color, new_color)
 val () = cairo_fill(cr)
@@ -172,7 +172,7 @@ val () = cairo_fill(cr)
 in
   // nothing
 end // end of [draw_diagonal]
-  
+
 (* ****** ****** *)
 
 implement
@@ -186,7 +186,7 @@ in
 (x <= 1 && y <= 6) || (x <= 3 && y <= 5) || (x <= 4 && y <= 4) || (x <= 5 && y <= 3) || (x <= 6 && y <= 1)
 //
 end // end of [in_range]
-  
+
 (* ****** ****** *)
 
 implement
@@ -248,7 +248,7 @@ fun loop
   cr: !cairo_ref l, height:int, i:int
 ) : void = let
   val() = draw_row(cr,i)
-in 
+in
   if i < height then loop(cr,height, i+1)
 end (* end of [loop] *)
 //

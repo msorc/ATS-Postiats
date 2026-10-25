@@ -1,6 +1,6 @@
 (* ****** ****** *)
 //
-// An Array-based implementation of circular buffer 
+// An Array-based implementation of circular buffer
 //
 (* ****** ****** *)
 

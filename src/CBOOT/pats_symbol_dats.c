@@ -3865,7 +3865,7 @@ ATSINSmove(statmpref398, ATSPMVi0nt(0u)) ;
 ATSINSmove(statmp415, PATSHOME_057_src_057_pats_symbol_056_sats__symbol_make_string(ATSPMVstring(""))) ;
 ATSINSmove(statmp418, PATSHOME_057_src_057_pats_symbol_056_sats__symbol_get_stamp(statmp415)) ;
 ATSINSmove(statmp417, atspre_g0uint_eq_uint(statmp418, ATSPMVi0nt(0u))) ;
-ATSINSmove_void(statmp416, atspre_assert_errmsg2_bool0(statmp417, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_symbol.dats: 4623(line=182, offs=12) -- 4660(line=182, offs=49)"))) ;
+ATSINSmove_void(statmp416, atspre_assert_errmsg2_bool0(statmp417, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_symbol.dats: 4621(line=182, offs=12) -- 4658(line=182, offs=49)"))) ;
 ATSINSdyncst_valbind(patsopt_symbol_empty, statmp415) ;
 ATSINSmove(statmp419, PATSHOME_057_src_057_pats_symbol_056_sats__symbol_make_string(ATSPMVstring("~"))) ;
 ATSINSdyncst_valbind(patsopt_symbol_NEG, statmp419) ;

@@ -487,7 +487,7 @@ of // case+
   (
     npf, s2es_arg, s2e_res
   ) => let
-    val isarg = 
+    val isarg =
       alist_is_cons(s2es_arg)
     // end of [val]
     val () =
@@ -543,7 +543,7 @@ of // case+
     val () = fprint(out, " ")
     val () = emit_s2rt(ar, out, s2t_res)
   }
-| v0(*non-fun*) => 
+| v0(*non-fun*) =>
   (
     s2rt_view_free(v0);
     fprint(out, "() "); emit_s2rt(ar, out, s2t)

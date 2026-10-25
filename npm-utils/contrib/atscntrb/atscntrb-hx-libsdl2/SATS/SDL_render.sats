@@ -8,7 +8,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -64,7 +64,7 @@ SDL_RENDERER_TARGETTEXTURE =
 $extval (SDL_RendererFlags, "SDL_RENDERER_TARGETTEXTURE")
 //
 (* ****** ****** *)
-//  
+//
 typedef SDL_TextureAccess = int
 //
 macdef
@@ -155,7 +155,7 @@ SDL_CreateTexture
 fun
 SDL_CreateTextureFromSurface
   (rndr: !SDL_Renderer_ptr1, sf: !SDL_Surface_ptr1): SDL_Texture_ptr0 = "mac#%"
-// end of [SDL_CreateTextureFromSurface]  
+// end of [SDL_CreateTextureFromSurface]
 
 (* ****** ****** *)
 

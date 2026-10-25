@@ -27,7 +27,7 @@ implement
 main0 () =
 {
 //
-val () = 
+val () =
 println! ("test_nwaiter: enter")
 //
 val NW = nwaiter_create_exn ()
@@ -43,7 +43,7 @@ val () = nwaiter_waitfor (NW)
 //
 val () = nwaiter_destroy (NW)
 //
-val () = 
+val () =
 println! ("test_nwaiter: leave")
 //
 } (* end of [main0] *)

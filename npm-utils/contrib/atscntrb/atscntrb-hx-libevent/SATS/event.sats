@@ -4,7 +4,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -22,7 +22,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -209,7 +209,7 @@ fun
 event_enable_debug_mode ((*void*)): void = "mac#%"
 //
 fun event_debug_unassign (ev: !event1): void = "mac#%"
-//  
+//
 (* ****** ****** *)
 //
 fun event_config_new (): event0_config = "mac#%"
@@ -271,7 +271,7 @@ event_base_new_with_config
 fun event_base_free (evb: event0_base): void = "mac#%"
 //
 (* ****** ****** *)
-  
+
 #define _EVENT_LOG_DEBUG 0
 #define _EVENT_LOG_MSG   1
 #define _EVENT_LOG_WARN  2
@@ -292,9 +292,9 @@ fun event_base_set (evb: !event1_base, ev: !event1): int = "mac#%"
 
 #define EVLOOP_ONCE 0x01
 #define EVLOOP_NONBLOCK 0x02
-  
+
 (* ****** ****** *)
-//  
+//
 fun
 event_base_loop
   (evb: !event1_base, flag: int): interr2 = "mac#%"

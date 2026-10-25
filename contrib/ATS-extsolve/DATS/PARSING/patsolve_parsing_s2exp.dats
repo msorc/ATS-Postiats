@@ -146,7 +146,7 @@ case+ name of
 | "S2Eextkind" =>
     s2exp_node_S2Eextkind(ar, symbol(JAG(x0, 0)))
 | "S2Eignored" => s2exp_node_S2Eerror(ar)
-| _(*unrecognized*) => 
+| _(*unrecognized*) =>
   let
     val () =
     prerrln!
@@ -179,7 +179,7 @@ case+ name of
   in
     labs2exp_SLABELED(ar, lab, s2e)
   end // end of [SL0ABELED]
-| _(*unrecognized*) => 
+| _(*unrecognized*) =>
   let
     val () =
     prerrln!

@@ -215,7 +215,7 @@ in
 //
 ifcase
 | (c = '\\') => let
-    val c1 = 
+    val c1 =
     $UN.ptr0_get<char>(p1)
     val c1 = g1ofg0_char(c1)
   in
@@ -276,7 +276,7 @@ in
 //
 ifcase
 | (c = '\\') => let
-    val c1 = 
+    val c1 =
     $UN.ptr0_get<char>(p1)
     val c1 = g1ofg0_char(c1)
   in

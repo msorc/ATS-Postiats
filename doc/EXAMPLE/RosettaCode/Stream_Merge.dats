@@ -10,7 +10,7 @@
 (*
 **
 ** RosettaCode:
-** Stream-Merge 
+** Stream-Merge
 *)
 (*
 //
@@ -20,7 +20,7 @@
   Common algorithm: keep 1 buffered item from each source, select
   minimal of them, write it, fetch another item from that stream from
   which the written item was.
-//         
+//
 N-stream merge
   The same as above, but reading from N sources.  Common algorithm:
   same as above, but keep buffered items and their source descriptors

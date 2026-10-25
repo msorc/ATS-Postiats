@@ -202,7 +202,7 @@ atspre_eq_ptr_intz
 } // end of [atspre_eq_ptr_intz]
 #define atspre_eq_ptr0_intz atspre_eq_ptr_intz
 #define atspre_eq_ptr1_intz atspre_eq_ptr_intz
-  
+
 ATSinline()
 atstype_bool
 atspre_neq_ptr_intz

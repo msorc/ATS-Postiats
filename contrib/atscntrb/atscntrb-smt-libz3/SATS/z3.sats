@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -66,8 +66,8 @@ ATSCNTRB_SMT_Z3_Z3_HEADER
 #include "./z3_header.sats"
 //
 (* ****** ****** *)
-  
-(*  
+
+(*
 void
 Z3_API
 Z3_get_version
@@ -84,7 +84,7 @@ Z3_get_version
   major: &uint? >> _, minor: &uint? >> _
 , build: &uint? >> _, revision: &uint? >> _
 ) : void = "mac#%"
-  
+
 (* ****** ****** *)
 
 (*
@@ -93,7 +93,7 @@ Create a configuration.
 *)
 fun Z3_mk_config (): Z3_config = "mac#%"
 
-(* 
+(*
 void Z3_del_config (__in Z3_config c)
 Delete the given configuration object.
 *)
@@ -110,7 +110,7 @@ fun Z3_set_param_value
 (
   cfg: !Z3_config, p_id: Z3_string, p_val: Z3_string
 ) : void = "mac#%" // end of [Z3_set_param_value]
-   
+
 (* ****** ****** *)
 
 (*
@@ -121,7 +121,7 @@ Create a context using the given configuration.
 fun Z3_mk_context (cfg: !Z3_config): Z3_context = "mac#%"
 *)
 
-(* 
+(*
 Z3_context Z3_mk_context_rc (__in Z3_config c)
 Create a context using the given configuration. This function is similar to
 Z3_mk_context. However, in the context returned by this function, the user
@@ -143,7 +143,7 @@ Z3_del_context (__in Z3_context c)
 Delete the given logical context.
 *)
 fun Z3_del_context (ctx: Z3_context): void = "mac#%"
- 
+
 (* ****** ****** *)
 
 (*
@@ -155,7 +155,7 @@ was created using Z3_mk_context.
 fun Z3_inc_ref{l:addr}
   (ctx: !Z3_context, a: !Z3_ast l): Z3_ast (l) = "mac#%"
 // end of [Z3_inc_ref]
- 
+
 (*
 void
 Z3_dec_ref (__in Z3_context c, __in Z3_ast a)
@@ -166,7 +166,7 @@ was created using Z3_mk_context.
 fun Z3_dec_ref (ctx: !Z3_context, a: Z3_ast): void = "mac#%"
 
 (* ****** ****** *)
- 
+
 (*
 Z3_bool
 Z3_get_param_value
@@ -179,7 +179,7 @@ fun Z3_get_param_value
 (
   ctx: !Z3_context, p_id: Z3_string, p_val: &ptr? >> opt (Z3_string, b)
 ) : #[b:bool] bool (b) = "mac#%"
- 
+
 (*
 void
 Z3_update_param_value
@@ -196,7 +196,7 @@ void
 Z3_interrupt (__in Z3_context c)
 Interrupt the execution of a Z3 procedure. This procedure can be used to
 interrupt: solvers, simplifiers and tactics.
-*) 
+*)
 fun Z3_interrupt (ctx: !Z3_context): void = "mac#%"
 
 (* ****** ****** *)

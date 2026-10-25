@@ -292,7 +292,7 @@ end // end of [local]
 (* ****** ****** *)
 
 implement
-tostring_strsub (sub) = 
+tostring_strsub (sub) =
   tostring_fprint<string> ("libatsdoc_tostring_strsub", fprint_strsub, sub)
 // end of [tostring_strsub]
 
@@ -546,7 +546,7 @@ fun aux (
   if cur != ~1 then let
     val fst = (i2c)cur
     val () = cur := rd_get (inp)
-  in 
+  in
     case+ fst of
     | '#' => aux_SHARP (out, inp, cur)
     | '\\' => aux_SLASH (out, inp, cur)

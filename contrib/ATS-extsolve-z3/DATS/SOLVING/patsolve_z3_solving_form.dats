@@ -94,7 +94,7 @@ formula_int(i) = i2 where
   val () = Z3_sort_dec_ref(ctx, ty)
   prval ((*void*)) = fpf(ctx)
 }
-  
+
 (* ****** ****** *)
 
 implement
@@ -108,7 +108,7 @@ formula_intrep(rep) = i2 where
   val () = Z3_sort_dec_ref(ctx, ty)
   prval ((*void*)) = fpf(ctx)
 }
-  
+
 (* ****** ****** *)
 
 implement
@@ -1002,7 +1002,7 @@ case+
 s2cinterp_view(ar, s2ci)
 of // case+
 | ~S2CINTnone() => let
-    val s2e = 
+    val s2e =
     formula_make_s2cst_fresh(ar, env, s2c0)
     val s2e_ = formula_incref(s2e)
     val s2ci =
@@ -1318,7 +1318,7 @@ then formula_ilt(s2e1, s2e2)
 else let
   val s2e1_ = formula_incref (s2e1)
   val s2e2_ = formula_incref (s2e2)
-  val s2e_ilt = formula_ilt(s2e1, s2e2) 
+  val s2e_ilt = formula_ilt(s2e1, s2e2)
   val s2e_ilte = formula_ilte(s2e1_, s2e2_)
 in
   formula_disj

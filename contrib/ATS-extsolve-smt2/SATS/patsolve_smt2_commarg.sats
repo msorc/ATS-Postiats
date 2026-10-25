@@ -72,7 +72,7 @@ patsolve_smt2_cmdline
 fun
 patsolve_smt2_commarglst
   (arglst: commarglst_vt): void
-// 
+//
 (* ****** ****** *)
 //
 fun

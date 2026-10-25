@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -100,7 +100,7 @@ case+ v1al_view(v0) of
     val () = prstr "V1ALstring("
     val () = fprint_string (out, x)
     val () = prstr ")"
-  }  
+  }
 | ~V1ALfloat(x) => {
     val () = prstr "V1ALdouble("
     val () = fprint_double (out, x)
@@ -241,7 +241,7 @@ case+ effcst_view(efc) of
     val () = prstr ")"
   } // end of [EFFCSTset]
 //
-end // end of [fprint_effcst]  
+end // end of [fprint_effcst]
 
 (* ****** ****** *)
 

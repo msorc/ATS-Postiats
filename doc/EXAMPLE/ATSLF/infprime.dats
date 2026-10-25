@@ -46,7 +46,7 @@ lemma10
 (* ****** ****** *)
 
 dataprop
-FACT (int, int) = 
+FACT (int, int) =
   | FACTbas (0, 1)
   | {n:nat}{r,r1:int}
     FACTind (n+1, r) of (FACT (n, r1), MUL (n+1, r1, r))

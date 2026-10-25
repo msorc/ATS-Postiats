@@ -649,7 +649,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_lexbuf_get_substrptr1):
 ATSINSmove(tmp75, PATSHOME_057_src_057_pats_lexbuf_056_sats__lexbuf_get_substrptr0(ATSPMVrefarg1(arg0), arg1, arg2)) ;
 ATSINSmove(tmp77, ATSLIB_056_prelude__strptr_isnot_null__33__1(ATSPMVrefarg0(tmp75))) ;
-ATSINSmove_void(tmp76, atspre_assert_errmsg2_bool1(tmp77, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lexbuf.dats: 7286(line=348, offs=20) -- 7321(line=348, offs=55)"))) ;
+ATSINSmove_void(tmp76, atspre_assert_errmsg2_bool1(tmp77, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lexbuf.dats: 7280(line=348, offs=20) -- 7315(line=348, offs=55)"))) ;
 ATSINSmove(tmpret74, ATSPMVcastfn(castvwtp0, atstkind_type(atstype_ptrk), tmp75)) ;
 ATSfunbody_end()
 ATSreturn(tmpret74) ;

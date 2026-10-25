@@ -29,7 +29,7 @@ case+
 s2rt_view(ar, s2t0)
 of // case+
 | ~S2RTtype() => true
-| ~S2RTvtype() => true 
+| ~S2RTvtype() => true
 | ~S2RTt0ype() => true
 | ~S2RTvt0ype() => true
 | ~S2RTprop() => true

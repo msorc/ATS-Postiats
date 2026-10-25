@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -795,7 +795,7 @@ fun
 s1expdef_tr_def
 (
   xs: s1marglst, res: s2rtopt, def: s1exp
-) : s2exp = let 
+) : s2exp = let
 //
 val () = the_s2expenv_push_nil ()
 //
@@ -813,7 +813,7 @@ val () = the_s2expenv_pop_free ((*none*))
 val s2e_def = s2exp_lamlst (s2vss, s2e_body)
 //
 in
-  s2e_def  
+  s2e_def
 end // end of [s1expdef_tr_def]
 
 in (* in-of-local *)
@@ -1151,7 +1151,7 @@ case+ ans of
           Some_vt(s2aspdec_make(loc, s2c, s2e_def))
         end // end of [list_vt_cons]
     end // end of [S2ITEMcst]
-  | v => (s2itm_view_free (v); 
+  | v => (s2itm_view_free (v);
     (
       let val () = auxerr2(d1c, q0, id) in None_vt((*void*)) end
     ) (* end of [non-S2ITMcst] *))
@@ -1256,7 +1256,7 @@ case+ ans of
           val ((*freed*)) = list_vt_free(s2cs)
         } (* end of [list_vt_cons] *)
     end // end of [S2ITMcst]
-  | v => (s2itm_view_free (v); 
+  | v => (s2itm_view_free (v);
     let val () = auxerr2(qid, q0, id) in None_vt((*void*)) end)
   ) (* end of [Some_vt] *)
 //
@@ -2364,7 +2364,7 @@ d1ecl_unstaloadnm
   | v => (d1ecl_node_view_free (v); $ERR.abort_interr<@(symbolopt, symbol)> ((*MatchError*)))
 ) // end of [d1ecl_unstaloadnm]
 
-extern  
+extern
 fun
 s1taloadnm_tr
 (
@@ -2430,7 +2430,7 @@ case+ ans of
   ) (* end of [Some_vt] *)
 //
 end // end of [s1taloadnm_tr]
-  
+
 (* ****** ****** *)
 
 implement

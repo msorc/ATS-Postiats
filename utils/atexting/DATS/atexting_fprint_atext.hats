@@ -89,7 +89,7 @@ fun{}
 fprint_atext_node_$TEXTnil$rpar: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTnil(out, arg0) = 
+fprint_atext_node_$TEXTnil(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTnil$con<>(out, arg0)
@@ -118,7 +118,7 @@ fun{}
 fprint_atext_node_$TEXTtoken$arg1: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTtoken(out, arg0) = 
+fprint_atext_node_$TEXTtoken(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTtoken$con<>(out, arg0)
@@ -151,7 +151,7 @@ fun{}
 fprint_atext_node_$TEXTstring$arg1: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTstring(out, arg0) = 
+fprint_atext_node_$TEXTstring(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTstring$con<>(out, arg0)
@@ -184,7 +184,7 @@ fun{}
 fprint_atext_node_$TEXTerrmsg$arg1: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTerrmsg(out, arg0) = 
+fprint_atext_node_$TEXTerrmsg(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTerrmsg$con<>(out, arg0)
@@ -217,7 +217,7 @@ fun{}
 fprint_atext_node_$TEXTlist$arg1: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTlist(out, arg0) = 
+fprint_atext_node_$TEXTlist(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTlist$con<>(out, arg0)
@@ -250,7 +250,7 @@ fun{}
 fprint_atext_node_$TEXTsquote$arg1: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTsquote(out, arg0) = 
+fprint_atext_node_$TEXTsquote(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTsquote$con<>(out, arg0)
@@ -289,7 +289,7 @@ fun{}
 fprint_atext_node_$TEXTdquote$arg2: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTdquote(out, arg0) = 
+fprint_atext_node_$TEXTdquote(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTdquote$con<>(out, arg0)
@@ -341,7 +341,7 @@ fun{}
 fprint_atext_node_$TEXTextcode$arg3: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTextcode(out, arg0) = 
+fprint_atext_node_$TEXTextcode(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTextcode$con<>(out, arg0)
@@ -394,7 +394,7 @@ fun{}
 fprint_atext_node_$TEXTdefname$arg2: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTdefname(out, arg0) = 
+fprint_atext_node_$TEXTdefname(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTdefname$con<>(out, arg0)
@@ -446,7 +446,7 @@ fun{}
 fprint_atext_node_$TEXTfuncall$arg3: $d2ctype(fprint_atext_node_<>)
 //
 implement{}
-fprint_atext_node_$TEXTfuncall(out, arg0) = 
+fprint_atext_node_$TEXTfuncall(out, arg0) =
 {
 //
 val () = fprint_atext_node_$TEXTfuncall$con<>(out, arg0)

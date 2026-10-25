@@ -752,7 +752,7 @@ if glist_is_cons (fls) then let
       end else ()
     ) : void // end of [val]
   in
-    loop(fls)        
+    loop(fls)
   end // end of [list_cons]
 else ()
 //

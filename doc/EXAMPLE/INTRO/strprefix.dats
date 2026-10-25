@@ -34,7 +34,7 @@ staload UN = "prelude/SATS/unsafe.sats"
 //
 fun string_tail
   {n:int | n > 0}
-  (str: string n): string (n-1) = 
+  (str: string n): string (n-1) =
   $UN.cast{string(n-1)} (ptr_succ<char> (string2ptr (str)))
 // end of [string_tail]
 *)

@@ -11,7 +11,7 @@ ATS_DYNLOADNAME
 "the_libatsopt_worker_start"
 //
 (* ****** ****** *)
-//  
+//
 #define
 LIBATSCC2JS_targetloc
 "$PATSHOME\

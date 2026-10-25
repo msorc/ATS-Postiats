@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -240,7 +240,7 @@ of (* case+ *)
 | ~P0Tfloat (x) => fxitm_FXITMatm<p1at> (p1at_f0loat (loc0, x))
 | ~P0Tstring (x) => fxitm_FXITMatm<p1at> (p1at_s0tring (loc0, x))
 //
-| ~P0Tapp (_, _) => let 
+| ~P0Tapp (_, _) => let
     val p1t_app =
     fixity_resolve<p1at> (
       loc0, p1at_get_loc, p1atitm_app(loc0), aux_itemlst p0t0

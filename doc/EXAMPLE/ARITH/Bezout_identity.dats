@@ -39,7 +39,7 @@ absprop GCD (int, int, int)
 // Euclid's gcd algorithm
 //
 dataprop
-EGCD (int(*m*), int(*n*), int(*g*)) = 
+EGCD (int(*m*), int(*n*), int(*g*)) =
 | {m:nat}
   EGCD0 (m, 0, m)
 | {m:nat;n:pos}{r:int}{g:int}

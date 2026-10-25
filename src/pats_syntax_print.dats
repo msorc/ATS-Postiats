@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -229,7 +229,7 @@ in
 case+ p0rec_view(p0rec) of
 | ~P0RECint(i0) => prstr "P0RECint(...)"
 | ~P0RECi0de(id) => prstr "P0RECi0de(...)"
-| ~P0RECi0de_adj _ => prstr "P0RECi0de_adj(...)" 
+| ~P0RECi0de_adj _ => prstr "P0RECi0de_adj(...)"
 //
 end // end of [fprint_p0rec]
 

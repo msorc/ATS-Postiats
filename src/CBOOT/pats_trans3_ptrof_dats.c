@@ -4415,7 +4415,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab30):
 ATSINSmove_void(tmp204, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp201)) ;
-ATSINSmove_void(tmp205, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_ptrof.dats: 7409(line=321, offs=33) -- 7425(line=321, offs=49)"))) ;
+ATSINSmove_void(tmp205, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_ptrof.dats: 7407(line=321, offs=33) -- 7423(line=321, offs=49)"))) ;
 ATSINSmove(tmp206, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove(tmpret200, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(tmp206)) ;
 ATSbranch_end()
@@ -4451,7 +4451,7 @@ tmp208
 ATSINSmove(tmp209, PATSHOME_057_src_057_pats_trans3_056_sats__d2lablst_trup(arg2)) ;
 ATSINSmove(tmp214, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_type(arg1)) ;
 ATSINSmove(tmp211, ATSLIB_056_libats_056_arena__gopt_is_some__65__1(tmp214)) ;
-ATSINSmove_void(tmp210, atspre_assert_errmsg2_bool0(tmp211, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_ptrof.dats: 7716(line=335, offs=12) -- 7763(line=335, offs=59)"))) ;
+ATSINSmove_void(tmp210, atspre_assert_errmsg2_bool0(tmp211, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_ptrof.dats: 7714(line=335, offs=12) -- 7761(line=335, offs=59)"))) ;
 ATSINSmove(tmp226, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_type(arg1)) ;
 ATSINSmove(tmp215, ATSLIB_056_libats_056_arena__gopt_unsome__67__1(tmp226)) ;
 ATSINSmove(tmp227, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_ptrofvar(arg0, tmp215, arg1)) ;
@@ -4461,7 +4461,7 @@ tmp228
 ) ATSthen() {
 ATSINSmove(tmp233, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_addr(arg1)) ;
 ATSINSmove(tmp231, ATSLIB_056_libats_056_arena__gopt_is_some__65__2(tmp233)) ;
-ATSINSmove_void(tmp230, atspre_assert_errmsg2_bool0(tmp231, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_ptrof.dats: 7937(line=341, offs=14) -- 7984(line=341, offs=61)"))) ;
+ATSINSmove_void(tmp230, atspre_assert_errmsg2_bool0(tmp231, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_ptrof.dats: 7935(line=341, offs=14) -- 7982(line=341, offs=61)"))) ;
 ATSINSmove(tmp242, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_addr(arg1)) ;
 ATSINSmove(tmp234, ATSLIB_056_libats_056_arena__gopt_unsome__67__2(tmp242)) ;
 ATSINSmove(tmp244, PATSHOME_057_src_057_pats_trans3_ptrof_056_dats__s2addr_ptrof(arg0, tmp234, tmp209, ATSPMVrefarg1(ATSPMVptrof(tmpref243)))) ;

@@ -64,7 +64,7 @@ end // end of [then]
 else (FACTbas () | 1)
 //
 ) (* end of [fact] *)
-  
+
 (* ****** ****** *)
 
 (*

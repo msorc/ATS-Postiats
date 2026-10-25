@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -402,7 +402,7 @@ let val lin = token_ival_get(tok) in
     ) : List0_vt(p0at) // end of [val]
     val ent4 = pif_fun<token>(buf, bt, err, p_RPAREN, err0)
   in
-    if err = err0 then 
+    if err = err0 then
       p0at_lst (lin, tok, l2l(ent3), ent4)
     else let
       val () = list_vt_free (ent3) in synent_null<p0at>()
@@ -420,7 +420,7 @@ let val knd = token_ival_get(tok) in
     val ent3 = p_p0atseq_BAR_p0atseq (buf, bt, err)
     val ent4 = p_RPAREN (buf, bt, err) // err = err0
   in
-    if err = err0 then 
+    if err = err0 then
       p0at_tup12 (knd, tok, ent3, ent4)
     else let
       val () = list12_free<p0at>(ent3) in synent_null<p0at>()
@@ -438,7 +438,7 @@ let val knd = token_ival_get(tok) in
     val ent3 = p_labp0atseq_BAR_labp0atseq (buf, bt, err)
     val ent4 = p_RBRACE (buf, bt, err) // err = err0
   in
-    if err = err0 then 
+    if err = err0 then
       p0at_rec12 (knd, tok, ent3, ent4)
     else let
       val () = list12_free<labp0at>(ent3) in synent_null<p0at>()
@@ -596,9 +596,9 @@ if token_node_is_T_AS(tnd) then (
       in
         if err = err0 then
           p0at_refas (p0t, ent3) else tokbuf_set_ntok_null<p0at>(buf, n0)
-        // end of [if]        
+        // end of [if]
       end
-    
+
 )
 else if token_node_is_T_COLON(tnd) then (
  let
@@ -607,13 +607,13 @@ else if token_node_is_T_COLON(tnd) then (
       in
         if err = err0 then
           p0at_ann (p0t, ent3) else tokbuf_set_ntok_null<p0at>(buf, n0)
-        // end of [if]        
+        // end of [if]
       end
-    
+
 )
 else (
  p0t
-  
+
 )
 end)end
 )
@@ -848,19 +848,19 @@ fun p_c0lau (
 if token_node_is_T_EQGT(tnd) then ()
 else if token_node_is_T_EQGTGT(tnd) then (
  seq := 1
-      
+
 )
 else if token_node_is_T_EQSLASHEQGT(tnd) then (
  neg := 1
-      
+
 )
 else if token_node_is_T_EQSLASHEQGTGT(tnd) then (
  (seq := 1; neg := 1)
-      
+
 )
 else (
  (err := err + 1)
-    
+
 )
 end)) : void // end of [val]
   in

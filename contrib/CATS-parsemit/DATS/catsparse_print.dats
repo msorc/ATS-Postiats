@@ -25,7 +25,7 @@ print_symbol
 implement
 prerr_symbol
   (sym) = fprint_symbol (stderr_ref, sym)
-// 
+//
 (* ****** ****** *)
 //
 implement
@@ -34,7 +34,7 @@ print_filename
 implement
 prerr_filename
   (fil) = fprint_filename (stderr_ref, fil)
-// 
+//
 (* ****** ****** *)
 //
 (*
@@ -45,7 +45,7 @@ implement
 prerr_position
   (pos) = fprint_position (stderr_ref, pos)
 *)
-// 
+//
 (* ****** ****** *)
 //
 implement
@@ -54,7 +54,7 @@ print_location
 implement
 prerr_location
   (loc) = fprint_location (stderr_ref, loc)
-// 
+//
 (* ****** ****** *)
 
 implement
@@ -368,7 +368,7 @@ end // end of [fprint_s0exp]
 
 implement
 fprint_s0explst (out, xs) = fprint_glist_sep (out, xs, ", ")
-  
+
 (* ****** ****** *)
 
 implement
@@ -459,9 +459,9 @@ d0exp_node_view(d0e.d0exp_node()) of
 | ~ATSextmcall (_obj, _mtd, _arg) =>
     fprint! (out, "ATSextmcall(", _obj, "; ", _mtd, "; ", _arg, ")")
 //
-| ~ATSfunclo_fun (d0e, arg, res) => 
+| ~ATSfunclo_fun (d0e, arg, res) =>
     fprint! (out, "ATSfunclo_fun(", d0e, ";", arg, ";", res, ")")
-| ~ATSfunclo_clo (d0e, arg, res) => 
+| ~ATSfunclo_clo (d0e, arg, res) =>
     fprint! (out, "ATSfunclo_clo(", d0e, ";", arg, ";", res, ")")
 //
 end // end of [fprint_d0exp]

@@ -146,7 +146,7 @@ end // end of [val]
 extvar "theCounts" = theCounts
 //
 (* ****** ****** *)
-    
+
 %{$
 //
 function

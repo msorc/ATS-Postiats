@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -485,7 +485,7 @@ in
         val () = the_trans2errlst_add (trans2err_T2E_p1at_tr(p1t0))
       in
         p2at_errpat (loc0)
-      end) // end of [_] 
+      end) // end of [_]
     ) end // end of [list_cons]
   else let
       val () = prerr_error2_loc (loc0)
@@ -530,7 +530,7 @@ case+ ans of
     end // end of [_]
   ) // end of [None_vt]
 //
-end // end of [p1at_tr_app_dyn_dqid]  
+end // end of [p1at_tr_app_dyn_dqid]
 
 end // end of [local]
 
@@ -714,7 +714,7 @@ val lp2ts =
 in
   p2at_rec (loc0, knd, npf, lp2ts)
 end // end of [p1at_tr_tup]
-  
+
 (* ****** ****** *)
 
 implement
@@ -773,7 +773,7 @@ p1at_node_view(p1t0.p1at_node()) of
 | ~P1Trec (
     knd, npf, lp1ts
   ) => let
-    val lp2ts = 
+    val lp2ts =
       glist_map_fun<labp1at,labp2at> (lp1ts, labp1at_tr)
     // end of [val]
   in

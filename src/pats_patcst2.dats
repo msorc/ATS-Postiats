@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -326,7 +326,7 @@ fprint_p2atcst
   (out, p2tc) = let
 //
 macdef
-prstr (s) = fprint_string (out, ,(s))  
+prstr (s) = fprint_string (out, ,(s))
 //
 in
 //
@@ -954,7 +954,7 @@ end // end of [labp2atcst_comp]
 (* ****** ****** *)
 
 implement
-labp2atcstlst_comp 
+labp2atcstlst_comp
   (lp2tcs0) = let
 in
 //
@@ -1157,7 +1157,7 @@ in
       else if sgn > 0 then
         labp2atcstlst_inter_test (lxs10, lxs2)
       else (
-        if p2atcst_inter_test (x1, x2) then 
+        if p2atcst_inter_test (x1, x2) then
           labp2atcstlst_inter_test (lxs1, lxs2) else false
         // end of [if]
       ) // end of [if]

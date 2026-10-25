@@ -72,7 +72,7 @@ fun{}
 fprint_commarg_$CAhelp$arg1: $d2ctype(fprint_commarg_<>)
 //
 implement{}
-fprint_commarg_$CAhelp(out, arg0) = 
+fprint_commarg_$CAhelp(out, arg0) =
 {
 //
 val () = fprint_commarg_$CAhelp$con<>(out, arg0)
@@ -105,7 +105,7 @@ fun{}
 fprint_commarg_$CAgitem$arg1: $d2ctype(fprint_commarg_<>)
 //
 implement{}
-fprint_commarg_$CAgitem(out, arg0) = 
+fprint_commarg_$CAgitem(out, arg0) =
 {
 //
 val () = fprint_commarg_$CAgitem$con<>(out, arg0)
@@ -144,7 +144,7 @@ fun{}
 fprint_commarg_$CAnsharp$arg2: $d2ctype(fprint_commarg_<>)
 //
 implement{}
-fprint_commarg_$CAnsharp(out, arg0) = 
+fprint_commarg_$CAnsharp(out, arg0) =
 {
 //
 val () = fprint_commarg_$CAnsharp$con<>(out, arg0)
@@ -190,7 +190,7 @@ fun{}
 fprint_commarg_$CAinpfil$arg2: $d2ctype(fprint_commarg_<>)
 //
 implement{}
-fprint_commarg_$CAinpfil(out, arg0) = 
+fprint_commarg_$CAinpfil(out, arg0) =
 {
 //
 val () = fprint_commarg_$CAinpfil$con<>(out, arg0)
@@ -236,7 +236,7 @@ fun{}
 fprint_commarg_$CAoutfil$arg2: $d2ctype(fprint_commarg_<>)
 //
 implement{}
-fprint_commarg_$CAoutfil(out, arg0) = 
+fprint_commarg_$CAoutfil(out, arg0) =
 {
 //
 val () = fprint_commarg_$CAoutfil$con<>(out, arg0)

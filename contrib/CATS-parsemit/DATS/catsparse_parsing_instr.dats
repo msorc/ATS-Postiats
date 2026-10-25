@@ -622,7 +622,7 @@ token_node_view(tok.token_node()) of
         ATSINSextvar_assign_make (tok, ent2, ent4, ent6)
       ) else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
-  end // end of [ATSINSextvar_assign]  
+  end // end of [ATSINSextvar_assign]
 | ~T_KWORD(ATSINSdyncst_valbind()) => let
     val bt = 0
     val () = incby1 ()
@@ -638,7 +638,7 @@ token_node_view(tok.token_node()) of
         ATSINSdyncst_valbind_make (tok, ent2, ent4, ent6)
       ) else tokbuf_set_ntok_null (buf, n0)
     // end of [if]
-  end // end of [ATSINSdyncst_valbind]  
+  end // end of [ATSINSdyncst_valbind]
 //
 | ~T_KWORD(ATSINScaseof_fail()) => let
     val bt = 0
@@ -650,7 +650,7 @@ token_node_view(tok.token_node()) of
   in
     if (err = err0) then
       ATSINScaseof_fail_make(tok,ent2,ent4) else tokbuf_set_ntok_null(buf,n0)
-  end // end of [ATSINScaseof_fail]  
+  end // end of [ATSINScaseof_fail]
 //
 | ~T_KWORD(ATSINSdeadcode_fail()) => let
     val bt = 0
@@ -661,7 +661,7 @@ token_node_view(tok.token_node()) of
   in
     if (err = err0) then
       ATSINSdeadcode_fail_make (tok, ent3) else tokbuf_set_ntok_null (buf, n0)
-  end // end of [ATSINSdeadcode_fail]  
+  end // end of [ATSINSdeadcode_fail]
 //
 | ~T_KWORD(ATSdynload()) => let
     val bt = 0
@@ -708,7 +708,7 @@ token_node_view(tok.token_node()) of
     if (err = err0)
       then ATSdynloadflag_sta_make(tok,ent2,ent4) else tokbuf_set_ntok_null(buf,n0)
     // end of [if]
-  end // end of [ATSdynloadflag_sta]    
+  end // end of [ATSdynloadflag_sta]
 //
 | ~T_KWORD(ATSdynloadflag_ext()) => let
     val bt = 0

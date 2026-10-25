@@ -68,7 +68,7 @@ fun json_parse_double
 (
   buf: string, retval: &double? >> opt(double, i==0)
 ) : #[i:int | i >= 0] int(i) = "mac#%"
-     
+
 (* ****** ****** *)
 
 fun json_type_to_name (type: json_type): string = "mac#%"

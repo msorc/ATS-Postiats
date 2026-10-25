@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -1536,7 +1536,7 @@ s1exp_trup_app_sqid
 , xs: List0_vt (locs1explst)
 ) : s2exp = let
 //
-val spsid = staspecid_of_sqid (sq, id) 
+val spsid = staspecid_of_sqid (sq, id)
 //
 in
 //
@@ -1951,7 +1951,7 @@ s1exp_trup_tyrec_ext
 , name: string, npf: int, ls1es: labs1explst
 ) : s2exp = let
   var lin: int = 0
-  var prf: int = 0 and prgm: int = 0      
+  var prf: int = 0 and prgm: int = 0
   val ls2es =
     aux01(0, npf, ls1es, lin, prf, prgm)
   // end of [val]
@@ -2031,7 +2031,7 @@ s1exp_node_view(s1e0.s1exp_node()) of (* case+ *)
     case+
     s1exp_node_view(s1opr.s1exp_node()) of (* case+ *)
     | ~S1Eide (id) => let
-        val sq = $SYN.the_s0taq_none in 
+        val sq = $SYN.the_s0taq_none in
         s1exp_trup_app_sqid (s1e0, s1opr, sq, id, xs)
       end // end of [S1Eide]
     | ~S1Esqid (sq, id) =>
@@ -2062,7 +2062,7 @@ s1exp_node_view(s1e0.s1exp_node()) of (* case+ *)
         end // end of [Some]
       | ~GOnone() => s1exp_trup (s1e_body)
     ) : s2exp // end of [val]
-    val ((*popped*)) = the_s2expenv_pop_free ((*none*))  
+    val ((*popped*)) = the_s2expenv_pop_free ((*none*))
   in
     s2exp_lam (s2vs, s2e_body)
   end // end of [S1Elam]
@@ -2250,7 +2250,7 @@ fun auxerr
   val () = the_s2expenv_push_nil ()
   val () = the_s2expenv_add_svarlst (s2vs)
   val s2e_body = s1exp_trdn (s1e_body, s2t_res)
-  val () = the_s2expenv_pop_free ((*none*))  
+  val () = the_s2expenv_pop_free ((*none*))
 //
 in
   s2exp_lam_srt (s2t_fun, s2vs, s2e_body)

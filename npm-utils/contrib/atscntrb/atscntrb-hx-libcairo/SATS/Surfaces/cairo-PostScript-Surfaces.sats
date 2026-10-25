@@ -45,7 +45,7 @@ macdef
 CAIRO_PS_LEVEL_2 = $extval (cairo_ps_level_t, "CAIRO_PS_LEVEL_2")
 macdef
 CAIRO_PS_LEVEL_3 = $extval (cairo_ps_level_t, "CAIRO_PS_LEVEL_3")
-//        
+//
 (* ****** ****** *)
 
 /*

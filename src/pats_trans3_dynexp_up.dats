@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -84,9 +84,9 @@ staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 
 (* ****** ****** *)
-  
+
 staload "./pats_stacst2.sats"
-  
+
 (* ****** ****** *)
 
 staload "./pats_patcst2.sats"
@@ -232,12 +232,12 @@ extern
 fun d2exp_trup_macsyn (d2e0: d2exp): d3exp
 
 (* ****** ****** *)
-  
+
 extern
 fun d2exp_trup_solassert (d2e0: d2exp): d3exp
 extern
 fun d2exp_trup_solverify (d2e0: d2exp): d3exp
-  
+
 (* ****** ****** *)
 
 fun
@@ -1392,7 +1392,7 @@ case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
     end // end of [let] // end of [val]
 //
     val loc_app = $LOC.location_combine (loc_fun, locarg)
-    val s2es_fun_arg = 
+    val s2es_fun_arg =
       s2fun_opninv_and_add (locarg, s2es_fun_arg, s2e_fun_res)
     val d3es_arg = d23explst_trdn (locarg, d23es_arg, s2es_fun_arg)
 //

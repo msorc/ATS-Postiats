@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -183,7 +183,7 @@ case+ s2rt_viewof (s2t0) of
 | ~S2RTerr((*void*)) => jsonval_conarg0 ("S2RTerr")
 //
 end // end of [jsonize_s2rt]
-  
+
 (* ****** ****** *)
 
 implement
@@ -229,7 +229,7 @@ case+ $SYN.scstextdef_view (opt) of
 //
 end // end of [extdef]
 //
-val supcls = 
+val supcls =
   jsonize0_s2explst(s2cst_get_supcls(s2c))
 //
 val
@@ -410,7 +410,7 @@ case+ tyreckind_view (knd) of
 | ~TYRECKINDbox_lin () => jsonval_conarg0 ("TYRECKINDbox_lin")
 //
 | ~TYRECKINDflt0 () => jsonval_conarg0 ("TYRECKINDflt0")
-| ~TYRECKINDflt1 (x) => 
+| ~TYRECKINDflt1 (x) =>
     jsonval_conarg1 ("TYRECKINDflt1", jsonize_stamp (x))
 | ~TYRECKINDflt_ext (name) =>
     jsonval_conarg1 ("TYRECKINDflt_ext", jsonval_string (name))
@@ -418,14 +418,14 @@ case+ tyreckind_view (knd) of
 end // end of [jsonize_tyreckind]
 
 (* ****** ****** *)
-// 
+//
 implement
 jsonize0_s2exp
   (s2e) = jsonize_s2exp (0(*hnfize*), s2e)
 implement
 jsonize1_s2exp
   (s2e) = jsonize_s2exp (1(*hnfize*), s2e)
-// 
+//
 (* ****** ****** *)
 //
 implement
@@ -434,7 +434,7 @@ jsonize0_s2explst
 implement
 jsonize1_s2explst
   (s2es) = jsonize_s2explst (1(*hnfize*), s2es)
-// 
+//
 (* ****** ****** *)
 //
 implement
@@ -443,7 +443,7 @@ jsonize0_s2expopt
 implement
 jsonize1_s2expopt
   (opt) = jsonize_s2expopt (1(*hnfize*), opt)
-// 
+//
 (* ****** ****** *)
 
 implement
@@ -807,7 +807,7 @@ extern
 fun jsonize_d2explst : jsonize_ftype (d2explst)
 extern
 fun jsonize_d2expopt : jsonize_ftype (d2expopt)
-  
+
 (* ****** ****** *)
 
 extern
@@ -944,7 +944,7 @@ val sym =
 val _type =
   jsonize0_s2exp (d2cst_get_type (d2c))
 //
-val extdef = 
+val extdef =
   jsonize_dcstextdef(d2cst_get_extdef(d2c))
 //
 val stamp =
@@ -1132,7 +1132,7 @@ p2at_node_view (p2t0.p2at_node ()) of
 | ~P2Tintrep (rep) =>
     jsonval_conarg1 ("P2Tintrep", jsonval_string (rep))
 //
-| ~P2Tbool (b) => 
+| ~P2Tbool (b) =>
     jsonval_conarg1 ("P2Tbool", jsonval_bool (b))
 | ~P2Tchar (c) =>
     jsonval_conarg1 ("P2Tchar", jsonval_int (char2int0(c)))
@@ -1500,7 +1500,7 @@ in
 end // end of [jsonize_d2exp]
 
 (* ****** ****** *)
-  
+
 implement
 jsonize_d2explst
   (d2es) =
@@ -1569,7 +1569,7 @@ case+ d2exparg_view (d2a) of
   end // end of [D2EXPARGdyn]
 //
 end // end of [jsonize_d2exparg]
-  
+
 (* ****** ****** *)
 
 implement

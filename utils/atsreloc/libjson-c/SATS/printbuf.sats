@@ -35,7 +35,7 @@ fun printbuf_get_buf
 struct printbuf *printbuf_new (void)
 *)
 fun printbuf_new (): printbuf0 = "mac#%"
- 
+
 (* ****** ****** *)
 
 (*
@@ -68,7 +68,7 @@ fun printbuf_memappend
 
 (* ****** ****** *)
 
-(*  
+(*
 int printbuf_memset
   (struct printbuf *pb, int offset, int charvalue, int len)
 *)
@@ -82,7 +82,7 @@ fun printbuf_memset
 (*
 int sprintbuf (struct printbuf *p, const char *msg,...)
 *)
-    
+
 (* ****** ****** *)
 
 (* end of [printbuf.sats] *)

@@ -324,7 +324,7 @@ comarg_warning
 } (* end of [comarg_warning] *)
 //
 (* ****** ****** *)
-  
+
 fun
 atscc2js_usage
   (cmd: string): void = {
@@ -356,7 +356,7 @@ val () =
 println! ("  --help : for printing out this help usage")
 //
 } (* end of [atscc2js_usage] *)
-  
+
 (* ****** ****** *)
 
 fun
@@ -559,7 +559,7 @@ loop
 {i:nat|i <= n} .<n-i>.
 (
   str: string(n), n: int(n), i: int(i)
-) :<(*void*)> comarg = 
+) :<(*void*)> comarg =
 (
 if
 (i < n)
@@ -568,7 +568,7 @@ then (
   (str[i] != '-')
   then @(i, str) else loop(str, n, i+1)
 ) else @(n, str)
-) (* end of [if] *)  
+) (* end of [if] *)
 // end of [loop]
 //
 val str = g1ofg0(str)

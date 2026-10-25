@@ -30,7 +30,7 @@ val W = 640
 val H = 480
 val xpos = SDL_WINDOWPOS_UNDEFINED
 val ypos = SDL_WINDOWPOS_UNDEFINED
-val window = 
+val window =
 SDL_CreateWindow
 (
   "SDL2/test02", xpos, ypos, W, H, SDL_WINDOW_SHOWN

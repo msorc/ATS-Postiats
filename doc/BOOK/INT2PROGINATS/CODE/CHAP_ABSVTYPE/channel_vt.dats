@@ -52,12 +52,12 @@ staload
 (* ****** ****** *)
 //
 staload
-"libats/SATS/athread.sats"  
+"libats/SATS/athread.sats"
 staload
 _ = "libats/DATS/athread.dats"
 staload
 _ = "libats/DATS/athread_posix.dats"
-//  
+//
 (* ****** ****** *)
 //
 absvtype

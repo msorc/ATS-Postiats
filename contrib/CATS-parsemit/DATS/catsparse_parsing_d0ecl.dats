@@ -215,7 +215,7 @@ token_node_view(tok.token_node()) of
 | ~T_KWORD(SRPifdef()) => let
     val bt = 0
     val () = incby1 ()
-    val ent1 = parse_i0dex (buf, bt, err) 
+    val ent1 = parse_i0dex (buf, bt, err)
     val ent2 = pif_fun (buf, bt, err, parse_d0eclseq, err0)
     val ent3 = pif_fun (buf, bt, err, p_SRPendif, err0)
   in
@@ -229,7 +229,7 @@ token_node_view(tok.token_node()) of
 | ~T_KWORD(SRPifndef()) => let
     val bt = 0
     val () = incby1 ()
-    val ent1 = parse_i0dex (buf, bt, err) 
+    val ent1 = parse_i0dex (buf, bt, err)
     val ent2 = pif_fun (buf, bt, err, parse_d0eclseq, err0)
     val ent3 = pif_fun (buf, bt, err, p_SRPendif, err0)
   in

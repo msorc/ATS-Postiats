@@ -1,6 +1,6 @@
 (* ****** ****** *)
 (*
-HX-2018-05-26: 
+HX-2018-05-26:
 https://stackoverflow.com/questions/50503884/implementing-getenv-in-ats
 *)
 (* ****** ****** *)

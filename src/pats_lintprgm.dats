@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -833,7 +833,7 @@ val (pf1 | p1) = myintvec_takeout {a} (iv1)
 val (pf2 | p2) = myintvec_takeout {a} (iv2)
 val () = loop (pf1, pf2 | p1, p2, n)
 prval () = myintvecout_addback {a} (pf1 | iv1)
-prval () = myintvecout_addback {a} (pf2 | iv2)  
+prval () = myintvecout_addback {a} (pf2 | iv2)
 //
 in
   // nothing
@@ -872,7 +872,7 @@ val (pf1 | p1) = myintvec_takeout {a} (iv1)
 val (pf2 | p2) = myintvec_takeout {a} (iv2)
 val () = loop (pf1, pf2 | p1, cff, p2, n)
 prval () = myintvecout_addback {a} (pf1 | iv1)
-prval () = myintvecout_addback {a} (pf2 | iv2)  
+prval () = myintvecout_addback {a} (pf2 | iv2)
 //
 in
   // nothing

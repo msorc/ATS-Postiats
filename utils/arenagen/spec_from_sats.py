@@ -18,13 +18,13 @@ def strip(s):
     while i<n:
         if s.startswith('(*',i): depth+=1;i+=2;continue
         if depth and s.startswith('*)',i): depth-=1;i+=2;continue
-        if depth: 
+        if depth:
             if s[i]=='\n': out.append('\n')
             i+=1;continue
         if s.startswith('/*',i):
             j=s.index('*/',i);out.append('\n'*s[i:j].count('\n'));i=j+2;continue
         if s.startswith('//',i):
-            j=s.find('\n',i); 
+            j=s.find('\n',i);
             if j<0:j=n
             i=j;continue
         out.append(s[i]);i+=1

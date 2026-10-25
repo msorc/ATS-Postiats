@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -319,7 +319,7 @@ case+ glist_view(d3as) of
       ) = s2exp_node_view(s2e_fun.s2exp_node()) // end of[val]
 //
       val loc_app = $LOC.location_combine (loc_fun, locarg)
-      val s2es_fun_arg = 
+      val s2es_fun_arg =
         s2fun_opninv_and_add (locarg, s2es_fun_arg, s2e_fun_res)
       val d3es_arg = d3explst_trdn_arg (d3es_arg, s2es_fun_arg)
 //
@@ -663,7 +663,7 @@ auxeq_d3pitm_remdup
 case+ glist_view(d3pis) of
 | ~GLnil() => glist_nil()
 | ~GLcons(d3pi0, d3pis) => let
-    val 
+    val
     d3pis =
     auxeq_d3pitm_filter(d3pi0, d3pis, list_vt_nil())
     // end of [val]
@@ -838,7 +838,7 @@ case+ glist_view(d2as) of
       in
         glist_cons(d2a, d2as)
       end // end of [D2EXPARGdyn]
-  ) (* end of [list_cons] *)  
+  ) (* end of [list_cons] *)
 //
 ) (* end of [auxins2] *)
 

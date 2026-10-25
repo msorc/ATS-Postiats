@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -186,7 +186,7 @@ auxerr
   val ((*void*)) = prerr_newline ()
 in
   the_trans3errlst_add(trans3err_T3E_d3exp_arrdim(loc0, s2es_dim, d3es_ind))
-end // end of [auxerr] 
+end // end of [auxerr]
 //
 val nind = glist_length(ind)
 val ndim = glist_length(dim)
@@ -359,7 +359,7 @@ of // case+
     case+ gopt_view(opt) of
     | ~GOsome(d2s) => let
         val () =
-        prerr_error3_loc(loc0) 
+        prerr_error3_loc(loc0)
         val () = prerr ": overloaded dot-symbol: ["
         val () = prerr_d2sym (d2s)
         val () = prerr "] should be applied."

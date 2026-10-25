@@ -257,7 +257,7 @@ in
 end // end of [rbtree_free]
 
 (* ****** ****** *)
-  
+
 fun{
 a:t@ype
 } print_rbtree
@@ -291,7 +291,7 @@ in
 end // end of [print_rbtree]
 
 overload print with print_rbtree
-  
+
 (* ****** ****** *)
 
 implement

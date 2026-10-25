@@ -44,7 +44,7 @@ istot
 //
 in
   sif m >= 0 then istot {m,n} () else MULneg (istot {~m,n} ())
-end // end of [mul_istot]  
+end // end of [mul_istot]
 
 (* ****** ****** *)
 

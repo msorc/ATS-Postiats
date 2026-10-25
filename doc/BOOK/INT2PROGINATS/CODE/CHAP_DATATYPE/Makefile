@@ -26,7 +26,7 @@ ATSCCFLAGS=
 
 ######
 
-all:: 
+all::
 all:: wday
 all:: charlst
 all:: bstree

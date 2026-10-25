@@ -5766,7 +5766,7 @@ ATSifnthen(ATSCKpat_con0(arg1, 2)) { ATSINSgoto(__atstmplab79) ; } ;
 ATSINSlab(__atstmplab78):
 ATSINSmove(tmp370, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_loc(arg0)) ;
 ATSINSmove_void(tmp367, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__5(tmp370)) ;
-ATSINSmove_void(tmp371, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 9104(line=325, offs=18) -- 9144(line=325, offs=58)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
+ATSINSmove_void(tmp371, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 9102(line=325, offs=18) -- 9142(line=325, offs=58)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
 ATSINSmove_void(tmp372, atspre_prerr_string(ATSPMVstring(": the function cannot be given an unboxed closure type."))) ;
 ATSINSmove_void(tmp373, atspre_prerr_newline()) ;
 ATSINSmove(tmp374, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1exp_tr(arg0)) ;
@@ -5808,7 +5808,7 @@ tmp377
 ) ATSthen() {
 ATSINSmove(tmp380, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_loc(arg0)) ;
 ATSINSmove_void(tmp381, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__6(tmp380)) ;
-ATSINSmove_void(tmp384, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 9655(line=344, offs=16) -- 9695(line=344, offs=56)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
+ATSINSmove_void(tmp384, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 9653(line=344, offs=16) -- 9693(line=344, offs=56)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
 ATSINSmove(tmp386, ATSLIB_056_prelude__lt_g0int_int__62__2(arg1, arg2)) ;
 ATSif(
 tmp386
@@ -5901,7 +5901,7 @@ tmp400
 ) ATSthen() {
 ATSINSmove(tmp401, PATSHOME_057_src_057_pats_dynexp1_056_sats__p1at_loc(arg1)) ;
 ATSINSmove_void(tmp402, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__7(tmp401)) ;
-ATSINSmove_void(tmp405, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 10435(line=368, offs=16) -- 10475(line=368, offs=56)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
+ATSINSmove_void(tmp405, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 10432(line=368, offs=16) -- 10472(line=368, offs=56)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
 ATSINSmove_void(tmp406, atspre_prerr_string(ATSPMVstring(": the function argument cannot be ascribed refval types."))) ;
 ATSINSmove_void(tmp407, atspre_prerr_newline()) ;
 ATSINSmove(tmp408, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1exp_tr(arg0)) ;
@@ -6049,7 +6049,7 @@ tmp439
 ) ATSthen() {
 ATSINSmove(tmp445, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_loc(arg0)) ;
 ATSINSmove_void(tmp442, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__8(tmp445)) ;
-ATSINSmove_void(tmp446, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 11191(line=392, offs=16) -- 11231(line=392, offs=56)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
+ATSINSmove_void(tmp446, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 11188(line=392, offs=16) -- 11228(line=392, offs=56)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
 ATSINSmove_void(tmp447, atspre_prerr_string(ATSPMVstring(": proof arity mismatch"))) ;
 ATSINSmove_void(tmp448, atspre_prerr_string(ATSPMVstring(": the expected number of proof arguments is ["))) ;
 ATSINSmove_void(tmp449, atspre_prerr_int(arg1)) ;
@@ -6099,7 +6099,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_124):
 ATSINSmove(tmp455, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_loc(arg0)) ;
 ATSINSmove_void(tmp456, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__9(tmp455)) ;
-ATSINSmove_void(tmp459, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 11783(line=413, offs=15) -- 11823(line=413, offs=55)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
+ATSINSmove_void(tmp459, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 11780(line=413, offs=15) -- 11820(line=413, offs=55)"), ATSPMVstring("d1exp_tr_arg_body_ann"))) ;
 ATSINSmove_void(tmp460, atspre_prerr_string(ATSPMVstring(": arity mismatch"))) ;
 ATSINSmove(tmp462, ATSLIB_056_prelude__lt_g0int_int__62__3(arg1, ATSPMVi0nt(0))) ;
 ATSif(
@@ -7437,7 +7437,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr1_191):
 ATSINSmove(tmp653, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1ecl_loc(env0)) ;
 ATSINSmove_void(tmp650, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__11(tmp653)) ;
-ATSINSmove_void(tmp654, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 15404(line=563, offs=12) -- 15438(line=563, offs=46)"), ATSPMVstring("i1mpdec_tr_main"))) ;
+ATSINSmove_void(tmp654, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 15401(line=563, offs=12) -- 15435(line=563, offs=46)"), ATSPMVstring("i1mpdec_tr_main"))) ;
 ATSINSmove_void(tmp655, atspre_prerr_string(ATSPMVstring(": the implementation is overly applied."))) ;
 ATSINSmove_void(tmp656, atspre_prerr_newline()) ;
 ATSINSmove(tmp657, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1ecl_tr_impdec(env0)) ;
@@ -7466,7 +7466,7 @@ ATStmpdec(tmp671, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr2_193):
 ATSINSmove_void(tmp659, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__12(arg0)) ;
-ATSINSmove_void(tmp662, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 15715(line=575, offs=12) -- 15749(line=575, offs=46)"), ATSPMVstring("i1mpdec_tr_main"))) ;
+ATSINSmove_void(tmp662, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 15712(line=575, offs=12) -- 15746(line=575, offs=46)"), ATSPMVstring("i1mpdec_tr_main"))) ;
 ATSINSmove_void(tmp663, atspre_prerr_string(ATSPMVstring(": the implementation argument group is expected to contain "))) ;
 ATSINSmove(tmp666, ATSLIB_056_prelude__gt_g0int_int__66__5(arg1, ATSPMVi0nt(0))) ;
 ATSif(
@@ -10031,7 +10031,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_348):
 ATSINSmove(tmp1096, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1ecl_loc(env0)) ;
 ATSINSmove_void(tmp1093, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__13(tmp1096)) ;
-ATSINSmove_void(tmp1097, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 18363(line=666, offs=14) -- 18397(line=666, offs=48)"), ATSPMVstring("i1mpdec_tr_main"))) ;
+ATSINSmove_void(tmp1097, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 18360(line=666, offs=14) -- 18394(line=666, offs=48)"), ATSPMVstring("i1mpdec_tr_main"))) ;
 ATSINSmove_void(tmp1098, atspre_prerr_string(ATSPMVstring(": the implementation is expected to be fully applied."))) ;
 ATSINSmove_void(tmp1099, atspre_prerr_newline()) ;
 ATSINSmove(tmp1100, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1ecl_tr_impdec(env0)) ;
@@ -11869,7 +11869,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr1_458):
 ATSINSmove(tmp1389, PATSHOME_057_src_057_pats_staexp1_056_sats__t1mpmarg_loc(arg0)) ;
 ATSINSmove_void(tmp1386, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__14(tmp1389)) ;
-ATSINSmove_void(tmp1390, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 20828(line=767, offs=14) -- 20882(line=767, offs=68)"), ATSPMVstring("i1mpdec_tr_main: aux_tmparg_marglst"))) ;
+ATSINSmove_void(tmp1390, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 20823(line=767, offs=14) -- 20877(line=767, offs=68)"), ATSPMVstring("i1mpdec_tr_main: aux_tmparg_marglst"))) ;
 ATSINSmove_void(tmp1391, atspre_prerr_string(ATSPMVstring(": the template argument group is expected to be contain "))) ;
 ATSINSmove(tmp1393, ATSLIB_056_prelude__gt_g0int_int__66__6(arg1, ATSPMVi0nt(0))) ;
 ATSif(
@@ -11940,7 +11940,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr2_462):
 ATSINSmove(tmp1406, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1ecl_loc(env0)) ;
 ATSINSmove_void(tmp1403, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__15(tmp1406)) ;
-ATSINSmove_void(tmp1407, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 21303(line=778, offs=14) -- 21357(line=778, offs=68)"), ATSPMVstring("i1mpdec_tr_main: aux_tmparg_marglst"))) ;
+ATSINSmove_void(tmp1407, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 21298(line=778, offs=14) -- 21352(line=778, offs=68)"), ATSPMVstring("i1mpdec_tr_main: aux_tmparg_marglst"))) ;
 ATSINSmove_void(tmp1408, atspre_prerr_string(ATSPMVstring(": the template is expected to be fully applied but it is not."))) ;
 ATSINSmove_void(tmp1409, atspre_prerr_newline()) ;
 ATSINSmove(tmp1410, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1ecl_tr_impdec(env0)) ;
@@ -11969,7 +11969,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr3_464):
 ATSINSmove(tmp1415, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1ecl_loc(env0)) ;
 ATSINSmove_void(tmp1412, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__16(tmp1415)) ;
-ATSINSmove_void(tmp1416, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 21658(line=787, offs=14) -- 21712(line=787, offs=68)"), ATSPMVstring("i1mpdec_tr_main: aux_tmparg_marglst"))) ;
+ATSINSmove_void(tmp1416, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 21653(line=787, offs=14) -- 21707(line=787, offs=68)"), ATSPMVstring("i1mpdec_tr_main: aux_tmparg_marglst"))) ;
 ATSINSmove_void(tmp1417, atspre_prerr_string(ATSPMVstring(": the template is overly applied."))) ;
 ATSINSmove_void(tmp1418, atspre_prerr_newline()) ;
 ATSINSmove(tmp1419, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1ecl_tr_impdec(env0)) ;
@@ -12484,7 +12484,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_tmparg_500):
 ATSINSmove(tmp1516, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1ecl_loc(arg0)) ;
 ATSINSmove_void(tmp1513, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__17(tmp1516)) ;
-ATSINSmove_void(tmp1517, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 22862(line=835, offs=3) -- 22896(line=835, offs=37)"), ATSPMVstring("i1mpdec_tr_main"))) ;
+ATSINSmove_void(tmp1517, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 22857(line=835, offs=3) -- 22891(line=835, offs=37)"), ATSPMVstring("i1mpdec_tr_main"))) ;
 ATSINSmove_void(tmp1518, atspre_prerr_string(ATSPMVstring(": the redundantly provided template arguments are ignored."))) ;
 ATSINSmove_void(tmp1519, atspre_prerr_newline()) ;
 ATSINSmove(tmp1520, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1ecl_tr_impdec_tmparg(arg0)) ;
@@ -12513,7 +12513,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_nontop_502):
 ATSINSmove(tmp1525, PATSHOME_057_src_057_pats_dynexp1_056_sats__d1ecl_loc(arg0)) ;
 ATSINSmove_void(tmp1522, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__26__18(tmp1525)) ;
-ATSINSmove_void(tmp1526, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 23223(line=848, offs=3) -- 23257(line=848, offs=37)"), ATSPMVstring("i1mpdec_tr_main"))) ;
+ATSINSmove_void(tmp1526, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_impdec.dats: 23218(line=848, offs=3) -- 23252(line=848, offs=37)"), ATSPMVstring("i1mpdec_tr_main"))) ;
 ATSINSmove_void(tmp1527, atspre_prerr_string(ATSPMVstring(": the implementation should be at the top-level but it is not."))) ;
 ATSINSmove_void(tmp1528, atspre_prerr_newline()) ;
 ATSINSmove(tmp1529, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_d1ecl_tr_impdec_nontop(arg0)) ;

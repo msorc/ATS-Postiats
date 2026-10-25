@@ -5069,7 +5069,7 @@ ATSINSmove(tmp291, ATSSELcon(tmp289, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp289) ;
 ATSINSmove(tmp303, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_addr(tmp290)) ;
 ATSINSmove(tmp301, ATSLIB_056_libats_056_arena__gopt_is_some__36__2(tmp303)) ;
-ATSINSmove_void(tmp300, atspre_assert_errmsg2_bool0(tmp301, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_assgn.dats: 13322(line=627, offs=7) -- 13369(line=627, offs=54)"))) ;
+ATSINSmove_void(tmp300, atspre_assert_errmsg2_bool0(tmp301, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_assgn.dats: 13320(line=627, offs=7) -- 13367(line=627, offs=54)"))) ;
 ATSINSmove(tmp315, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_addr(tmp290)) ;
 ATSINSmove(tmp304, ATSLIB_056_libats_056_arena__gopt_unsome__81__1(tmp315)) ;
 ATSINSmove(tmp316, PATSHOME_057_src_057_pats_trans3_056_sats__d2lablst_trup(tmp291)) ;
@@ -6565,7 +6565,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab45):
 ATSINSmove_void(tmp595, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp591)) ;
-ATSINSmove_void(tmp596, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_assgn.dats: 16421(line=736, offs=33) -- 16437(line=736, offs=49)"))) ;
+ATSINSmove_void(tmp596, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_assgn.dats: 16419(line=736, offs=33) -- 16435(line=736, offs=49)"))) ;
 ATSINSmove(tmp597, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove(tmpret590, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(tmp597)) ;
 ATSbranch_end()

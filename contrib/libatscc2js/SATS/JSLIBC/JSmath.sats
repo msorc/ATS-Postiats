@@ -48,11 +48,11 @@ fun JSmath_pow : (double, double) -<> double = "mac#%"
 fun JSmath_log : double -<> double = "mac#%"
 
 (* ****** ****** *)
-  
+
 fun JSmath_ceil : double -<> double = "mac#%"
 fun JSmath_floor : double -<> double = "mac#%"
 fun JSmath_round : double -<> double = "mac#%"
-  
+
 (* ****** ****** *)
 //
 fun JSmath_sin : double -<> double = "mac#%"

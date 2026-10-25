@@ -2871,7 +2871,7 @@ ATSINSflab(__patsflab_hidexp_ccomp_ret_case):
 ATSINSmove(tmp67, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_loc(arg3)) ;
 ATSINSmove(tmp69, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node(arg3)) ;
 ATSINSmove(tmp68, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node_view(tmp69)) ;
-ATSifnthen(ATSCKpat_con1(tmp68, 28)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_caseof.dats: 2914(line=109, offs=5) -- 2982(line=110, offs=60)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp68, 28)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_caseof.dats: 2910(line=109, offs=5) -- 2978(line=110, offs=60)") ; } ;
 ATSINSmove(tmp70, ATSSELcon(tmp68, postiats_tysum_2, atslab__0)) ;
 ATSINSmove(tmp71, ATSSELcon(tmp68, postiats_tysum_2, atslab__1)) ;
 ATSINSmove(tmp72, ATSSELcon(tmp68, postiats_tysum_2, atslab__2)) ;

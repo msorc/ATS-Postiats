@@ -33,7 +33,7 @@ val () = assertloc(x_tup.0 = x_rec.a)
 //
 (* ****** ****** *)
 //
-absvtype myrec = ptr  
+absvtype myrec = ptr
 //
 extern
 fun{}

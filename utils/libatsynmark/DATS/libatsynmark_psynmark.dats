@@ -1539,13 +1539,13 @@ d0ecl_mark
 val loc0 = d0c0.d0ecl_loc()
 //
 macdef
-neuexploc_ins () = 
+neuexploc_ins () =
   psynmark_ins_begend (SMneuexp, loc0, res)
 macdef
-staexploc_ins () = 
+staexploc_ins () =
   psynmark_ins_begend (SMstaexp, loc0, res)
 macdef
-dynexploc_ins () = 
+dynexploc_ins () =
   psynmark_ins_begend (SMdynexp, loc0, res)
 //
 in
@@ -1621,7 +1621,7 @@ case+ d0ecl_node_view(d0c0.d0ecl_node()) of
     val () = q0marglst_mark (qmas, res)
     val () = d0cstdeclst_mark (decs, res)
     val () = psynmark_ins_end (sm, loc0, res)
-  in 
+  in
     // nothing
   end // end of [D0Cdcstdecs]
 //

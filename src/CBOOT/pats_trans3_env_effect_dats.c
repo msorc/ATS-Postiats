@@ -5343,7 +5343,7 @@ ATStmpdec(tmp307, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_check_set_auxerr_112):
 ATSINSmove_void(tmp298, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__113__1(arg0)) ;
-ATSINSmove_void(tmp303, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_env_effect.dats: 5731(line=228, offs=12) -- 5770(line=228, offs=51)"), ATSPMVstring("the_effenv_check_set"))) ;
+ATSINSmove_void(tmp303, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_env_effect.dats: 5729(line=228, offs=12) -- 5768(line=228, offs=51)"), ATSPMVstring("the_effenv_check_set"))) ;
 ATSINSmove_void(tmp304, atspre_prerr_string(ATSPMVstring(": some disallowed effects may be incurred: "))) ;
 ATSINSmove_void(tmp305, PATSHOME_057_src_057_pats_effect_056_sats__prerr_effset(arg2)) ;
 ATSINSmove_void(tmp306, atspre_prerr_newline()) ;
@@ -5817,7 +5817,7 @@ ATStmpdec(tmp374, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_check_sexp_auxerr_137):
 ATSINSmove_void(tmp367, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__113__2(arg0)) ;
-ATSINSmove_void(tmp370, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_env_effect.dats: 8712(line=337, offs=12) -- 8752(line=337, offs=52)"), ATSPMVstring("the_effenv_check_sexp"))) ;
+ATSINSmove_void(tmp370, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_env_effect.dats: 8710(line=337, offs=12) -- 8750(line=337, offs=52)"), ATSPMVstring("the_effenv_check_sexp"))) ;
 ATSINSmove_void(tmp371, atspre_prerr_string(ATSPMVstring(": some disallowed effects may be incurred: "))) ;
 ATSINSmove_void(tmp372, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2exp(arg1)) ;
 ATSINSmove_void(tmp373, atspre_prerr_newline()) ;

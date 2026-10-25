@@ -4584,7 +4584,7 @@ ATSif(
 tmp360
 ) ATSthen() {
 ATSINSmove(tmp361, PATSHOME_057_src_057_pats_staexp2_056_sats__s2rt_viewof(arg0)) ;
-ATSifnthen(ATSCKpat_con1(tmp361, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_util1.dats: 9130(line=416, offs=16) -- 9177(line=416, offs=63)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp361, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_util1.dats: 9126(line=416, offs=16) -- 9173(line=416, offs=63)") ; } ;
 ATSINSmove(tmp362, ATSSELcon(tmp361, postiats_tysum_5, atslab__0)) ;
 ATSINSmove(tmp363, ATSSELcon(tmp361, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp361) ;

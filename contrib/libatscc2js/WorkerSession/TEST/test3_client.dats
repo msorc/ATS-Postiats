@@ -7,12 +7,12 @@
 #define ATS_DYNLOADFLAG 0
 
 (* ****** ****** *)
-  
+
 #include
 "share/atspre_define.hats"
 #include
 "{$LIBATSCC2JS}/mylibies.hats"
-  
+
 (* ****** ****** *)
 staload
 UN = "prelude/SATS/unsafe.sats"

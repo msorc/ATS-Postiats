@@ -84,7 +84,7 @@ in
 end // end of [sif]
 //
 end // end of [pigenhole]
-                                                                                      
+
 (* ****** ****** *)
-                                                                                      
+
 (* end of [pigeonhole.dats] *)

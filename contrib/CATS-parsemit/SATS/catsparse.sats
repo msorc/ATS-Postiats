@@ -111,7 +111,7 @@ fun the_filename_get ((*void*)): fil_t
 //
 abstype
 position_type = ptr
-typedef pos_t = position_type  
+typedef pos_t = position_type
 //
 (* ****** ****** *)
 //
@@ -155,7 +155,7 @@ fun position_incby_char (pos: &position >> _, c: char): void
 //
 abstype
 location_type = ptr
-typedef loc_t = location_type  
+typedef loc_t = location_type
 //
 (* ****** ****** *)
 
@@ -619,7 +619,7 @@ tokbuf_initize_fileref
 fun tokbuf_reset (buf: &tokbuf >> _): void
 
 (* ****** ****** *)
-  
+
 fun tokbuf_uninitize (buf: &tokbuf >> _?): void
 
 (* ****** ****** *)
@@ -653,7 +653,7 @@ tokbuf_get_location (buf: &tokbuf >> _): loc_t
 
 (* ****** ****** *)
 
-  
+
 (* ****** ****** *)
 
 fun symbol_make (name: string): symbol
@@ -793,7 +793,7 @@ overload fprint with fprint_instrlst of 10
 //
 (* ****** ****** *)
 
-  
+
 (* ****** ****** *)
 
 

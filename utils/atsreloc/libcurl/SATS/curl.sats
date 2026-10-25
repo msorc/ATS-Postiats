@@ -157,10 +157,10 @@ fun
 curl_global_init (flags: lint): CURLcode = "mac#%"
 
 (* ****** ****** *)
-  
+
 macdef
 CURL_GLOBAL_DEFAULT = $extval(lint, "CURL_GLOBAL_DEFAULT")
-  
+
 (* ****** ****** *)
 
 /*

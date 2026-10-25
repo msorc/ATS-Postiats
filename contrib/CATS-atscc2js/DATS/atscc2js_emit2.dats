@@ -608,7 +608,7 @@ instr_node_view(ins0.instr_node()) of
     val () = emit_nspc (out, ind)
     val () = emit_tmpvar (out, tmp)
     val () = emit_text (out, " = ")
-    val () = emit_d0exp (out, d0e)  
+    val () = emit_d0exp (out, d0e)
     val () = emit_SEMICOLON (out)
   } (* end of [ATSINSmove_tlcal] *)
 //
@@ -814,7 +814,7 @@ case+ glist_view(inss) of
 val-~ATSINSmove_con1(inss) = instr_node_view(ins0.instr_node())
 //
 val-~GLcons (ins, inss) = glist_view(inss)
-val-~ATSINSmove_con1_new (tmp, _) = instr_node_view(ins.instr_node())  
+val-~ATSINSmove_con1_new (tmp, _) = instr_node_view(ins.instr_node())
 //
 var opt: tokenopt = gopt_none()
 //
@@ -886,7 +886,7 @@ case+ glist_view(inss) of
 val-~ATSINSmove_boxrec(inss) = instr_node_view(ins0.instr_node())
 //
 val-~GLcons (ins, inss) = glist_view(inss)
-val-~ATSINSmove_boxrec_new (tmp, _) = instr_node_view(ins.instr_node())  
+val-~ATSINSmove_boxrec_new (tmp, _) = instr_node_view(ins.instr_node())
 //
 val d0es = getarglst (inss)
 //
@@ -930,7 +930,7 @@ case+ glist_view(inss) of
 //
 val-~ATSINSmove_fltrec(inss) = instr_node_view(ins0.instr_node())
 //
-val-~ATSINSstore_fltrec_ofs(tmp, _, _, _) = instr_node_view((glist_head(inss)).instr_node())  
+val-~ATSINSstore_fltrec_ofs(tmp, _, _, _) = instr_node_view((glist_head(inss)).instr_node())
 //
 val d0es = getarglst (inss)
 //
@@ -1522,7 +1522,7 @@ in
 //
 case+
 f0decl_node_view(fdec.f0decl_node()) of
-| ~F0DECLnone (fhd) => () 
+| ~F0DECLnone (fhd) => ()
 | ~F0DECLsome (fhd, fbody) =>
   {
     val () = emit_ENDL (out)

@@ -20,10 +20,10 @@ _(*INTSET*) =
 (* ****** ****** *)
 //
 #staload
-SSNTYPE = 
+SSNTYPE =
 "./SATS/basis_ssntype.sats"
 #staload
-SSNTYPE2R = 
+SSNTYPE2R =
 "./SATS/basis_ssntype2r.sats"
 //
 (* ****** ****** *)

@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -940,7 +940,7 @@ p_s0exp_tok ( // no annotation
 //
 implement
 p_s0exp
-  (buf, bt, err) = 
+  (buf, bt, err) =
 (
   ptokwrap_fun<s0exp>
     (buf, bt, err, p_s0exp_tok, PE_s0exp)
@@ -1222,7 +1222,7 @@ cona0rgopt ::= | /*(empty)*/ | OF s0exp
 *)
 fun
 p_cona0rgopt (
-  buf: &tokbuf, bt: int, err: &int  
+  buf: &tokbuf, bt: int, err: &int
 ) : s0expopt = p_ofs0expopt (buf, bt, err)
 
 (*
@@ -1230,7 +1230,7 @@ coni0ndopt ::= /*(empty)*/ | LPAREN s0expseq RPAREN
 *)
 fun
 p_coni0ndopt (
-  buf: &tokbuf, bt: int, err: &int  
+  buf: &tokbuf, bt: int, err: &int
 ) : s0expopt = let
 //
 val
@@ -1324,7 +1324,7 @@ conq0uaseq di0de coni0ndopt cona0rgopt
 //
 fun
 p_d0atcon (
-  buf: &tokbuf, bt: int, err: &int  
+  buf: &tokbuf, bt: int, err: &int
 ) : d0atcon = let
 //
 val

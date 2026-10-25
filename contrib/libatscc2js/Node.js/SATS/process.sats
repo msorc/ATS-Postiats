@@ -73,9 +73,9 @@ fun process_setuid (id: int): void = "mac#%"
 
 (* ****** ****** *)
 
-fun process_uptime (): int = "mac#%"  
-fun process_hrtime (): JSarray(int) = "mac#%"  
-  
+fun process_uptime (): int = "mac#%"
+fun process_hrtime (): JSarray(int) = "mac#%"
+
 (* ****** ****** *)
 
 (* end of [process.sats] *)

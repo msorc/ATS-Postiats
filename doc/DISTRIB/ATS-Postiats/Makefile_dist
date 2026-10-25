@@ -199,7 +199,7 @@ install_files_60: ; \
 # make -C ccomp/atslib clean
 # make -C ccomp/atslib atslib
 #
-reinstall_atslib: install_files_50  
+reinstall_atslib: install_files_50
 #
 ######
 uninstall:: uninstall_bin

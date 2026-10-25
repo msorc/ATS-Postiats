@@ -28,7 +28,7 @@ loop {n:nat} {l:addr} (
 ): void =
 (
 if n = 0
-  then 
+  then
     ()
   else let
     prval

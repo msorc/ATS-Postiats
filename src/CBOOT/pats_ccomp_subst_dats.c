@@ -13396,7 +13396,7 @@ ATSINSmove(tmpret1095, arg3) ;
 } ATSelse() {
 ATSINSmove(tmp1099, PATSHOME_057_src_057_pats_ccomp_056_sats__primlab_node(arg3)) ;
 ATSINSmove(tmp1098, PATSHOME_057_src_057_pats_ccomp_056_sats__primlab_node_view(tmp1099)) ;
-ATSifnthen(ATSCKpat_con1(tmp1098, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 19393(line=885, offs=9) -- 19450(line=885, offs=66)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1098, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 19389(line=885, offs=9) -- 19446(line=885, offs=66)") ; } ;
 ATSINSmove(tmp1100, ATSSELcon(tmp1098, postiats_tysum_10, atslab__0)) ;
 ATSINSfreecon(tmp1098) ;
 ATSINSmove(tmp1101, PATSHOME_057_src_057_pats_ccomp_056_sats__primlab_loc(arg3)) ;
@@ -14402,7 +14402,7 @@ ATSINSmove(tmp1285, ATSSELcon(tmp1266, postiats_tysum_10, atslab__0)) ;
 ATSINSfreecon(tmp1266) ;
 ATSINSmove(tmp1302, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidecl_node(tmp1285)) ;
 ATSINSmove(tmp1301, PATSHOME_057_src_057_pats_hidynexp_056_sats__hidecl_node_view(tmp1302)) ;
-ATSifnthen(ATSCKpat_con1(tmp1301, 16)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 24565(line=1146, offs=9) -- 24646(line=1147, offs=70)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1301, 16)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 24561(line=1146, offs=9) -- 24642(line=1147, offs=70)") ; } ;
 ATSINSmove(tmp1303, ATSSELcon(tmp1301, postiats_tysum_24, atslab__3)) ;
 ATSINSfreecon(tmp1301) ;
 ATSINSmove_void(tmp1304, PATSHOME_057_src_057_pats_ccomp_056_sats__ccompenv_add_staload(ATSPMVrefarg0(arg0), tmp1303)) ;
@@ -16485,7 +16485,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_primval_lamfix_subst):
 ATSINSmove(tmp1754, PATSHOME_057_src_057_pats_ccomp_056_sats__primval_node(arg2)) ;
 ATSINSmove(tmp1753, PATSHOME_057_src_057_pats_ccomp_056_sats__primval_node_view(tmp1754)) ;
-ATSifnthen(ATSCKpat_con1(tmp1753, 34)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 37841(line=1723, offs=5) -- 37909(line=1726, offs=45)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1753, 34)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 37837(line=1723, offs=5) -- 37905(line=1726, offs=45)") ; } ;
 ATSINSmove(tmp1755, ATSSELcon(tmp1753, postiats_tysum_20, atslab__0)) ;
 ATSINSmove(tmp1756, ATSSELcon(tmp1753, postiats_tysum_20, atslab__1)) ;
 ATSINSfreecon(tmp1753) ;
@@ -16497,7 +16497,7 @@ ATSif(
 tmp1761
 ) ATSthen() {
 ATSINSmove(tmp1762, PATSHOME_057_src_057_pats_ccomp_056_sats__primval_node_view(tmp1759)) ;
-ATSifnthen(ATSCKpat_con1(tmp1762, 31)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 38072(line=1736, offs=7) -- 38113(line=1736, offs=48)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1762, 31)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 38068(line=1736, offs=7) -- 38109(line=1736, offs=48)") ; } ;
 ATSINSmove(tmp1763, ATSSELcon(tmp1762, postiats_tysum_10, atslab__0)) ;
 ATSINSfreecon(tmp1762) ;
 ATSINSmove(tmp1760, tmp1763) ;
@@ -16507,13 +16507,13 @@ ATSif(
 tmp1764
 ) ATSthen() {
 ATSINSmove(tmp1765, PATSHOME_057_src_057_pats_ccomp_056_sats__primval_node_view(tmp1759)) ;
-ATSifnthen(ATSCKpat_con1(tmp1765, 32)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 38180(line=1738, offs=7) -- 38227(line=1738, offs=54)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1765, 32)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 38176(line=1738, offs=7) -- 38223(line=1738, offs=54)") ; } ;
 ATSINSmove(tmp1766, ATSSELcon(tmp1765, postiats_tysum_11, atslab__1)) ;
 ATSINSfreecon(tmp1765) ;
 ATSINSmove(tmp1760, tmp1766) ;
 } ATSelse() {
 ATSINSmove(tmp1767, PATSHOME_057_src_057_pats_ccomp_056_sats__primval_node_view(tmp1759)) ;
-ATSifnthen(ATSCKpat_con1(tmp1767, 33)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 38253(line=1740, offs=7) -- 38302(line=1740, offs=56)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1767, 33)) { ATSINScaseof_fail("PATSHOME/src/pats_ccomp_subst.dats: 38249(line=1740, offs=7) -- 38298(line=1740, offs=56)") ; } ;
 ATSINSmove(tmp1768, ATSSELcon(tmp1767, postiats_tysum_20, atslab__1)) ;
 ATSINSfreecon(tmp1767) ;
 ATSINSmove(tmp1760, tmp1768) ;

@@ -1305,7 +1305,7 @@ ATSINSmove_void(tmp91, prerr_interror_10()) ;
 ATSINSmove_void(tmp92, atspre_prerr_string(ATSPMVstring(": s2rt_impred: knd = "))) ;
 ATSINSmove_void(tmp93, atspre_prerr_int(arg0)) ;
 ATSINSmove_void(tmp94, atspre_prerr_newline()) ;
-ATSINSmove_void(tmp95, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_staexp2_sort.dats: 7696(line=268, offs=14) -- 7712(line=268, offs=30)"))) ;
+ATSINSmove_void(tmp95, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_staexp2_sort.dats: 7694(line=268, offs=14) -- 7710(line=268, offs=30)"))) ;
 ATSINSmove(tmpret90, patsopt_s2rt_t0ype) ;
 ATSbranch_end()
 ATScaseof_end()

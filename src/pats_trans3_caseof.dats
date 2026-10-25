@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -102,7 +102,7 @@ gm2at_trup
   val d2e = gm2t.gm2at_exp()
   val d3e = d2exp_trup (d2e)
   val s2e = d3exp_get_type (d3e)
-  val op2t = gm2t.gm2at_pat() 
+  val op2t = gm2t.gm2at_pat()
   val op3t = (
     case+ gopt_view(op2t) of
     | ~GOsome p2t => let

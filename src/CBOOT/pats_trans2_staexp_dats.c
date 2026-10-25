@@ -7972,7 +7972,7 @@ ATSINSlab(__atstmplab91):
 ATSINSmove_void(tmp185, PATSHOME_057_src_057_pats_staexp2_056_sats__s2itm_view_free(tmp181)) ;
 ATSINSmove(tmp186, PATSHOME_057_src_057_pats_staexp2_056_sats__s2rt_err()) ;
 ATSINSmove_void(tmp187, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__1(tmp177)) ;
-ATSINSmove_void(tmp192, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 4602(line=203, offs=16) -- 4630(line=203, offs=44)"), ATSPMVstring("effvar_tr"))) ;
+ATSINSmove_void(tmp192, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 4600(line=203, offs=16) -- 4628(line=203, offs=44)"), ATSPMVstring("effvar_tr"))) ;
 ATSINSmove_void(tmp193, atspre_prerr_string(ATSPMVstring(": the static identifier ["))) ;
 ATSINSmove_void(tmp194, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(tmp178)) ;
 ATSINSmove_void(tmp195, atspre_prerr_string(ATSPMVstring("] should refer to a variable or constant."))) ;
@@ -7991,7 +7991,7 @@ ATSifthen(ATSCKptriscons(tmp179)) { ATSINSdeadcode_fail() ; } ;
 ATSINSlab(__atstmplab86):
 ATSINSmove(tmp199, PATSHOME_057_src_057_pats_staexp2_056_sats__s2rt_err()) ;
 ATSINSmove_void(tmp200, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__2(tmp177)) ;
-ATSINSmove_void(tmp203, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 5001(line=214, offs=14) -- 5031(line=214, offs=44)"), ATSPMVstring("effvar_tr"))) ;
+ATSINSmove_void(tmp203, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 4999(line=214, offs=14) -- 5029(line=214, offs=44)"), ATSPMVstring("effvar_tr"))) ;
 ATSINSmove_void(tmp204, atspre_prerr_string(ATSPMVstring(": unrecognized static identifier ["))) ;
 ATSINSmove_void(tmp205, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(tmp178)) ;
 ATSINSmove_void(tmp206, atspre_prerr_string(ATSPMVstring("]."))) ;
@@ -9324,7 +9324,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_115):
 ATSINSmove(tmp396, PATSHOME_057_src_057_pats_staexp1_056_sats__s1arg_loc(arg0)) ;
 ATSINSmove_void(tmp393, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__3(tmp396)) ;
-ATSINSmove_void(tmp397, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 6467(line=286, offs=1) -- 6498(line=286, offs=32)"), ATSPMVstring("s1arg_trdn"))) ;
+ATSINSmove_void(tmp397, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 6465(line=286, offs=1) -- 6496(line=286, offs=32)"), ATSPMVstring("s1arg_trdn"))) ;
 ATSINSmove_void(tmp398, atspre_prerr_string(ATSPMVstring(": the argument is assigned the sort ["))) ;
 ATSINSmove_void(tmp399, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(arg1)) ;
 ATSINSmove_void(tmp400, atspre_prerr_string(ATSPMVstring("] but it is expected to accept a static term of the sort ["))) ;
@@ -9982,7 +9982,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_156):
 ATSINSmove(tmp508, PATSHOME_057_src_057_pats_staexp1_056_sats__s1marg_loc(arg0)) ;
 ATSINSmove_void(tmp509, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__4(tmp508)) ;
-ATSINSmove_void(tmp512, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 8026(line=356, offs=12) -- 8056(line=356, offs=42)"), ATSPMVstring("s1marg_trdn"))) ;
+ATSINSmove_void(tmp512, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 8024(line=356, offs=12) -- 8054(line=356, offs=42)"), ATSPMVstring("s1marg_trdn"))) ;
 ATSINSmove_void(tmp513, atspre_prerr_string(ATSPMVstring(": the static argument group is expected to contain "))) ;
 ATSINSmove(tmp516, ATSLIB_056_prelude__gt_g0int_int__158__1(arg2, ATSPMVi0nt(0))) ;
 ATSif(
@@ -11745,7 +11745,7 @@ ATStmpdec(tmp802, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr1_258):
 ATSINSmove_void(tmp791, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__6(env2)) ;
-ATSINSmove_void(tmp794, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 10083(line=458, offs=3) -- 10114(line=458, offs=34)"), ATSPMVstring("sp1at_trdn"))) ;
+ATSINSmove_void(tmp794, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 10081(line=458, offs=3) -- 10112(line=458, offs=34)"), ATSPMVstring("sp1at_trdn"))) ;
 ATSINSmove_void(tmp795, atspre_prerr_string(ATSPMVstring(": the static identifier ["))) ;
 ATSINSmove_void(tmp796, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0taq(arg0)) ;
 ATSINSmove_void(tmp797, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg1)) ;
@@ -11777,7 +11777,7 @@ ATStmpdec(tmp813, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr2_260):
 ATSINSmove_void(tmp804, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__7(env2)) ;
-ATSINSmove_void(tmp807, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 10496(line=477, offs=3) -- 10527(line=477, offs=34)"), ATSPMVstring("sp1at_trdn"))) ;
+ATSINSmove_void(tmp807, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 10494(line=477, offs=3) -- 10525(line=477, offs=34)"), ATSPMVstring("sp1at_trdn"))) ;
 ATSINSmove_void(tmp808, atspre_prerr_string(ATSPMVstring(": the static identifier ["))) ;
 ATSINSmove_void(tmp809, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0taq(arg0)) ;
 ATSINSmove_void(tmp810, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg1)) ;
@@ -11807,7 +11807,7 @@ ATStmpdec(tmp824, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr3_262):
 ATSINSmove_void(tmp815, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__8(env2)) ;
-ATSINSmove_void(tmp818, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 10865(line=496, offs=3) -- 10896(line=496, offs=34)"), ATSPMVstring("sp1at_trdn"))) ;
+ATSINSmove_void(tmp818, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 10863(line=496, offs=3) -- 10894(line=496, offs=34)"), ATSPMVstring("sp1at_trdn"))) ;
 ATSINSmove_void(tmp819, atspre_prerr_string(ATSPMVstring(": the static identifier ["))) ;
 ATSINSmove_void(tmp820, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0taq(arg0)) ;
 ATSINSmove_void(tmp821, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg1)) ;
@@ -12661,7 +12661,7 @@ ATSifthen(ATSCKptriscons(tmp961)) { ATSINSdeadcode_fail() ; } ;
 #endif
 ATSINSlab(__atstmplab179):
 ATSINSmove_void(tmp1026, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__10(tmp960)) ;
-ATSINSmove_void(tmp1029, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 16267(line=704, offs=7) -- 16301(line=704, offs=41)"), ATSPMVstring("s1exp_trup_sqid"))) ;
+ATSINSmove_void(tmp1029, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 16265(line=704, offs=7) -- 16299(line=704, offs=41)"), ATSPMVstring("s1exp_trup_sqid"))) ;
 ATSINSmove_void(tmp1030, atspre_prerr_string(ATSPMVstring(": the static identifier ["))) ;
 ATSINSmove_void(tmp1031, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0taq(arg1)) ;
 ATSINSmove_void(tmp1032, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg2)) ;
@@ -13024,7 +13024,7 @@ ATSINSmove(tmpret1045, tmp1046) ;
 } ATSelse() {
 ATSINSmove(tmp1052, PATSHOME_057_src_057_pats_staexp2_056_sats__locs2exp_loc(arg1)) ;
 ATSINSmove_void(tmp1049, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__11(tmp1052)) ;
-ATSINSmove_void(tmp1053, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 17351(line=757, offs=14) -- 17384(line=757, offs=47)"), ATSPMVstring("s1exp_app_wind"))) ;
+ATSINSmove_void(tmp1053, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 17349(line=757, offs=14) -- 17382(line=757, offs=47)"), ATSPMVstring("s1exp_app_wind"))) ;
 ATSINSmove_void(tmp1054, atspre_prerr_string(ATSPMVstring(": the static expression is of the sort ["))) ;
 ATSINSmove(tmp1056, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_srt(tmp1046)) ;
 ATSINSmove_void(tmp1055, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(tmp1056)) ;
@@ -13107,7 +13107,7 @@ ATSifthen(ATSCKptriscons(tmp1085)) { ATSINSdeadcode_fail() ; } ;
 ATSINSlab(__atstmplab204):
 ATSINSmove(tmp1127, PATSHOME_057_src_057_pats_staexp2_056_sats__locs2exp_loc(tmp1083)) ;
 ATSINSmove_void(tmp1124, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__12(tmp1127)) ;
-ATSINSmove_void(tmp1128, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 18092(line=783, offs=16) -- 18125(line=783, offs=49)"), ATSPMVstring("s1exp_app_wind"))) ;
+ATSINSmove_void(tmp1128, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 18090(line=783, offs=16) -- 18123(line=783, offs=49)"), ATSPMVstring("s1exp_app_wind"))) ;
 ATSINSmove_void(tmp1129, atspre_prerr_string(ATSPMVstring(": arity mismatch: the static argument is discarded."))) ;
 ATSINSmove_void(tmp1130, atspre_prerr_newline()) ;
 ATSINSmove(tmp1132, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1exp_trup(arg0)) ;
@@ -13141,7 +13141,7 @@ ATSINSmove(tmp1153, ATSSELcon(tmp1133, postiats_tysum_10, atslab__1)) ;
 ATSINSfreecon(tmp1133) ;
 ATSINSmove(tmp1157, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp1154, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__13(tmp1157)) ;
-ATSINSmove_void(tmp1158, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 18561(line=797, offs=16) -- 18594(line=797, offs=49)"), ATSPMVstring("s1exp_app_wind"))) ;
+ATSINSmove_void(tmp1158, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 18559(line=797, offs=16) -- 18592(line=797, offs=49)"), ATSPMVstring("s1exp_app_wind"))) ;
 ATSINSmove_void(tmp1159, atspre_prerr_string(ATSPMVstring(": arity mismatch: more static arguments are needed."))) ;
 ATSINSmove_void(tmp1160, atspre_prerr_newline()) ;
 ATSINSmove(tmp1162, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1exp_trup(arg0)) ;
@@ -13754,7 +13754,7 @@ ATStailcal_end()
 } ATSelse() {
 ATSINSmove(tmp1214, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp1211, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__14(tmp1214)) ;
-ATSINSmove_void(tmp1215, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 19575(line=835, offs=18) -- 19608(line=835, offs=51)"), ATSPMVstring("s1exp_app_wind"))) ;
+ATSINSmove_void(tmp1215, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 19573(line=835, offs=18) -- 19606(line=835, offs=51)"), ATSPMVstring("s1exp_app_wind"))) ;
 ATSINSmove_void(tmp1216, atspre_prerr_string(ATSPMVstring(": the static term is overly applied."))) ;
 ATSINSmove_void(tmp1217, atspre_prerr_newline()) ;
 ATSINSmove(tmp1219, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1exp_trup(arg0)) ;
@@ -14744,7 +14744,7 @@ ATSINSlab(__atstmplab253):
 ATSINSmove_void(tmp1359, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_node_view_free(tmp1353)) ;
 ATSINSmove(tmp1363, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(tmp1350)) ;
 ATSINSmove_void(tmp1360, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__15(tmp1363)) ;
-ATSINSmove_void(tmp1364, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 24797(line=1045, offs=16) -- 24830(line=1045, offs=49)"), ATSPMVstring("s1exp_trup_arg"))) ;
+ATSINSmove_void(tmp1364, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 24795(line=1045, offs=16) -- 24828(line=1045, offs=49)"), ATSPMVstring("s1exp_trup_arg"))) ;
 ATSINSmove_void(tmp1365, atspre_prerr_string(ATSPMVstring(": a refval-type must begin with !(call-by-value) or &(call-by-reference)"))) ;
 ATSINSmove_void(tmp1366, atspre_prerr_newline()) ;
 ATSINSmove(tmp1368, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1exp_trup(arg0)) ;
@@ -14994,11 +14994,11 @@ ATSINSmove(tmp1463, ATSSELfltrec(tmp1461, postiats_tyrec_1, atslab__1)) ;
 ATSINSmove_void(tmp1464, auxerr2_424(arg0, tmp1463)) ;
 ATSINSmove(tmp1465, ATSSELfltrec(tmp1462, postiats_tyrec_0, atslab__1)) ;
 ATSINSmove(tmp1467, ATSLIB_056_libats_056_arena__glist_is_cons__28__2(tmp1465)) ;
-ATSINSmove_void(tmp1466, atspre_assert_errmsg2_bool0(tmp1467, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 28805(line=1206, offs=10) -- 28837(line=1206, offs=42)"))) ;
+ATSINSmove_void(tmp1466, atspre_assert_errmsg2_bool0(tmp1467, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 28803(line=1206, offs=10) -- 28835(line=1206, offs=42)"))) ;
 ATSINSmove(tmp1469, ATSLIB_056_libats_056_arena__glist_head__30__2(tmp1465)) ;
 ATSINSmove(tmp1482, ATSLIB_056_libats_056_arena__glist_tail__444__1(tmp1465)) ;
 ATSINSmove(tmp1497, ATSLIB_056_libats_056_arena__glist_is_cons__28__3(tmp1482)) ;
-ATSINSmove_void(tmp1496, atspre_assert_errmsg2_bool0(tmp1497, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 28927(line=1209, offs=10) -- 28964(line=1209, offs=47)"))) ;
+ATSINSmove_void(tmp1496, atspre_assert_errmsg2_bool0(tmp1497, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 28925(line=1209, offs=10) -- 28962(line=1209, offs=47)"))) ;
 ATSINSmove(tmp1499, ATSLIB_056_libats_056_arena__glist_head__30__3(tmp1482)) ;
 ATSINSmove(tmpref1512, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 ATSINSmove(tmpref1513, ATSLIB_056_libats_056_arena__glist_nil__95__16()) ;
@@ -15108,7 +15108,7 @@ tmp1409
 ) ATSthen() {
 ATSINSmove(tmp1415, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp1412, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__16(tmp1415)) ;
-ATSINSmove_void(tmp1416, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 27472(line=1157, offs=16) -- 27507(line=1157, offs=51)"), ATSPMVstring("s1exp_trup_arrow"))) ;
+ATSINSmove_void(tmp1416, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 27470(line=1157, offs=16) -- 27505(line=1157, offs=51)"), ATSPMVstring("s1exp_trup_arrow"))) ;
 ATSINSmove_void(tmp1417, atspre_prerr_string(ATSPMVstring(": illegal static application."))) ;
 ATSINSmove_void(tmp1418, atspre_prerr_newline()) ;
 ATSINSmove(tmp1419, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1exp_trup(arg0)) ;
@@ -15192,7 +15192,7 @@ tmp1421
 ) ATSthen() {
 ATSINSmove(tmp1442, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp1439, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__17(tmp1442)) ;
-ATSINSmove_void(tmp1443, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 27915(line=1175, offs=16) -- 27950(line=1175, offs=51)"), ATSPMVstring("s1exp_trup_arrow"))) ;
+ATSINSmove_void(tmp1443, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 27913(line=1175, offs=16) -- 27948(line=1175, offs=51)"), ATSPMVstring("s1exp_trup_arrow"))) ;
 ATSINSmove_void(tmp1444, atspre_prerr_string(ATSPMVstring(": illegal static application."))) ;
 ATSINSmove_void(tmp1445, atspre_prerr_newline()) ;
 ATSINSmove(tmp1446, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_s1exp_trup(arg0)) ;
@@ -15407,7 +15407,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr3_436):
 ATSINSmove(tmp1451, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg1)) ;
 ATSINSmove_void(tmp1448, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__18(tmp1451)) ;
-ATSINSmove_void(tmp1452, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 28301(line=1192, offs=5) -- 28336(line=1192, offs=40)"), ATSPMVstring("s1exp_trup_arrow"))) ;
+ATSINSmove_void(tmp1452, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 28299(line=1192, offs=5) -- 28334(line=1192, offs=40)"), ATSPMVstring("s1exp_trup_arrow"))) ;
 ATSINSmove_void(tmp1453, atspre_prerr_string(ATSPMVstring(": the static expression needs to be impredicative"))) ;
 ATSINSmove_void(tmp1454, atspre_prerr_string(ATSPMVstring(" but is assigned the sort ["))) ;
 ATSINSmove_void(tmp1455, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(arg2)) ;
@@ -16170,7 +16170,7 @@ ATStmpdec(tmp1634, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr1_484):
 ATSINSmove_void(tmp1622, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__19(arg1)) ;
-ATSINSmove_void(tmp1625, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 31609(line=1315, offs=5) -- 31642(line=1315, offs=38)"), ATSPMVstring("s1exp_trup_app"))) ;
+ATSINSmove_void(tmp1625, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 31607(line=1315, offs=5) -- 31640(line=1315, offs=38)"), ATSPMVstring("s1exp_trup_app"))) ;
 ATSINSmove_void(tmp1626, atspre_prerr_string(ATSPMVstring(": the static application needs "))) ;
 ATSINSmove(tmp1629, ATSLIB_056_prelude__gt_g0int_int__158__7(arg2, ATSPMVi0nt(0))) ;
 ATSif(
@@ -16221,7 +16221,7 @@ ATStmpdec(tmp1647, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr2_487):
 ATSINSmove_void(tmp1636, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__20(arg1)) ;
-ATSINSmove_void(tmp1639, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 32013(line=1331, offs=5) -- 32046(line=1331, offs=38)"), ATSPMVstring("s1exp_trup_app"))) ;
+ATSINSmove_void(tmp1639, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 32011(line=1331, offs=5) -- 32044(line=1331, offs=38)"), ATSPMVstring("s1exp_trup_app"))) ;
 ATSINSmove_void(tmp1640, atspre_prerr_string(ATSPMVstring(": the static expression ["))) ;
 ATSINSmove_void(tmp1641, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2exp(arg2)) ;
 ATSINSmove_void(tmp1642, atspre_prerr_string(ATSPMVstring("] is expected to be of a functional sort but it is assigned the sort ["))) ;
@@ -16875,7 +16875,7 @@ ATScaseof_end()
 ATSINSmove_void(tmp1796, auxck2_521(arg0, arg2, tmp1786)) ;
 ATSINSmove(tmp1797, PATSHOME_057_src_057_pats_trans2_056_sats__s1explst_trdn_addr(tmp1786)) ;
 ATSINSmove(tmp1799, ATSLIB_056_libats_056_arena__glist_is_cons__28__4(tmp1797)) ;
-ATSINSmove_void(tmp1798, atspre_assert_errmsg2_bool0(tmp1799, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 36631(line=1520, offs=10) -- 36663(line=1520, offs=42)"))) ;
+ATSINSmove_void(tmp1798, atspre_assert_errmsg2_bool0(tmp1799, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 36629(line=1520, offs=10) -- 36661(line=1520, offs=42)"))) ;
 ATSINSmove(tmp1801, ATSLIB_056_libats_056_arena__glist_head__30__4(tmp1797)) ;
 ATSINSmove(tmp1814, ATSLIB_056_libats_056_arena__glist_tail__444__2(tmp1797)) ;
 ATSINSmove(tmpret1742, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_datconptr(arg2, tmp1801, tmp1814)) ;
@@ -17307,7 +17307,7 @@ ATSINSlab(__atstmplab321):
 ATSINSmove_void(tmp1832, ATSLIB_056_prelude__list_vt_free__427__4(arg4)) ;
 ATSINSmove(tmp1842, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg1)) ;
 ATSINSmove_void(tmp1839, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__25(tmp1842)) ;
-ATSINSmove_void(tmp1843, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 37536(line=1561, offs=11) -- 37574(line=1561, offs=49)"), ATSPMVstring("s1exp_trup_app_sqid"))) ;
+ATSINSmove_void(tmp1843, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 37533(line=1561, offs=11) -- 37571(line=1561, offs=49)"), ATSPMVstring("s1exp_trup_app_sqid"))) ;
 ATSINSmove_void(tmp1844, atspre_prerr_string(ATSPMVstring(": unrecognized static identifier ["))) ;
 ATSINSmove_void(tmp1845, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0taq(arg2)) ;
 ATSINSmove_void(tmp1846, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg3)) ;
@@ -17372,7 +17372,7 @@ ATSifthen(ATSCKptriscons(tmp1929)) { ATSINSdeadcode_fail() ; } ;
 ATSINSlab(__atstmplab342):
 ATSINSmove(tmp1954, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp1951, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__26(tmp1954)) ;
-ATSINSmove_void(tmp1955, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 39195(line=1623, offs=18) -- 39237(line=1623, offs=60)"), ATSPMVstring("s1exp_trup_app_sqid_itm"))) ;
+ATSINSmove_void(tmp1955, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 39192(line=1623, offs=18) -- 39234(line=1623, offs=60)"), ATSPMVstring("s1exp_trup_app_sqid_itm"))) ;
 ATSINSmove_void(tmp1956, atspre_prerr_string(ATSPMVstring(": none of the static constants referred to by ["))) ;
 ATSINSmove_void(tmp1957, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0taq(arg2)) ;
 ATSINSmove_void(tmp1958, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg3)) ;
@@ -18839,7 +18839,7 @@ ATSINSmove(tmpret2096, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec_s
 ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab359):
-ATSINSmove_void(tmp2108, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 43212(line=1793, offs=14) -- 43228(line=1793, offs=30)"))) ;
+ATSINSmove_void(tmp2108, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 43209(line=1793, offs=14) -- 43225(line=1793, offs=30)"))) ;
 ATSINSmove(tmpret2096, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_t0ype_err()) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -19765,7 +19765,7 @@ ATSINSmove(tmpret2264, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec_s
 ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab384):
-ATSINSmove_void(tmp2281, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 47437(line=1943, offs=24) -- 47452(line=1943, offs=39)"))) ;
+ATSINSmove_void(tmp2281, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 47434(line=1943, offs=24) -- 47449(line=1943, offs=39)"))) ;
 ATSINSmove(tmpret2264, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_t0ype_err()) ;
 ATSbranch_end()
 ATScaseof_end()
@@ -23100,7 +23100,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_849):
 ATSINSmove(tmp2833, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp2830, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__30(tmp2833)) ;
-ATSINSmove_void(tmp2834, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 54674(line=2224, offs=12) -- 54707(line=2224, offs=45)"), ATSPMVstring("s1exp_trdn_lam"))) ;
+ATSINSmove_void(tmp2834, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 54662(line=2224, offs=12) -- 54695(line=2224, offs=45)"), ATSPMVstring("s1exp_trdn_lam"))) ;
 ATSINSmove_void(tmp2835, atspre_prerr_string(ATSPMVstring(": the body of the static function is given the sort ["))) ;
 ATSINSmove_void(tmp2836, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(arg1)) ;
 ATSINSmove_void(tmp2837, atspre_prerr_string(ATSPMVstring("] but it is expected to be of the sort ["))) ;
@@ -23193,7 +23193,7 @@ tmp2871
 ATSINSmove(tmpret2869, arg1) ;
 } ATSelse() {
 ATSINSmove_void(tmp2872, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__31(arg0)) ;
-ATSINSmove_void(tmp2875, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 56068(line=2272, offs=7) -- 56097(line=2272, offs=36)"), ATSPMVstring("s2exp_trdn"))) ;
+ATSINSmove_void(tmp2875, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 56054(line=2272, offs=7) -- 56083(line=2272, offs=36)"), ATSPMVstring("s2exp_trdn"))) ;
 ATSINSmove_void(tmp2876, atspre_prerr_string(ATSPMVstring(": the static expression is of the sort ["))) ;
 ATSINSmove_void(tmp2877, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(tmp2870)) ;
 ATSINSmove_void(tmp2878, atspre_prerr_string(ATSPMVstring("] but it is expected to be of the sort ["))) ;
@@ -23303,7 +23303,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_857):
 ATSINSmove(tmp2889, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp2886, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__32(tmp2889)) ;
-ATSINSmove_void(tmp2890, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 56639(line=2293, offs=12) -- 56670(line=2293, offs=43)"), ATSPMVstring("s1exp_trdn"))) ;
+ATSINSmove_void(tmp2890, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 56625(line=2293, offs=12) -- 56656(line=2293, offs=43)"), ATSPMVstring("s1exp_trdn"))) ;
 ATSINSmove_void(tmp2891, atspre_prerr_string(ATSPMVstring(": the static term (extype) cannot be given the sort ["))) ;
 ATSINSmove_void(tmp2892, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(arg1)) ;
 ATSINSmove_void(tmp2893, atspre_prerr_string(ATSPMVstring("]."))) ;
@@ -24023,7 +24023,7 @@ ATSINSmove(tmpret3012, tmp3013) ;
 } ATSelse() {
 ATSINSmove(tmp3020, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp3017, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__33(tmp3020)) ;
-ATSINSmove_void(tmp3021, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 58200(line=2347, offs=14) -- 58236(line=2347, offs=50)"), ATSPMVstring("s1exp_trdn_impred"))) ;
+ATSINSmove_void(tmp3021, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 58186(line=2347, offs=14) -- 58222(line=2347, offs=50)"), ATSPMVstring("s1exp_trdn_impred"))) ;
 ATSINSmove_void(tmp3022, atspre_prerr_string(ATSPMVstring(": the static expression needs to be impredicative"))) ;
 ATSINSmove_void(tmp3023, atspre_prerr_string(ATSPMVstring(" but is assigned the sort ["))) ;
 ATSINSmove_void(tmp3024, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(tmp3014)) ;
@@ -27696,7 +27696,7 @@ tmp3595
 ) ATSthen() {
 ATSINSmove(tmp3599, PATSHOME_057_src_057_pats_staexp1_056_sats__s1exp_loc(arg0)) ;
 ATSINSmove_void(tmp3596, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__34(tmp3599)) ;
-ATSINSmove_void(tmp3600, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 60248(line=2432, offs=5) -- 60290(line=2432, offs=47)"), ATSPMVstring("s1exp_trdn_arg_impred"))) ;
+ATSINSmove_void(tmp3600, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 60234(line=2432, offs=5) -- 60276(line=2432, offs=47)"), ATSPMVstring("s1exp_trdn_arg_impred"))) ;
 ATSINSmove_void(tmp3601, atspre_prerr_string(ATSPMVstring(": the static expression needs to be impredicative"))) ;
 ATSINSmove_void(tmp3602, atspre_prerr_string(ATSPMVstring(" but it is assigned the sort ["))) ;
 ATSINSmove_void(tmp3603, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2rt(tmp3592)) ;
@@ -29503,7 +29503,7 @@ ATSINSmove(tmpret3880, tmp3881) ;
 } ATSelse() {
 ATSINSmove(tmp3886, PATSHOME_057_src_057_pats_staexp1_056_sats__q1marg_loc(arg0)) ;
 ATSINSmove_void(tmp3887, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__1218__1(tmp3886)) ;
-ATSINSmove_void(tmp3892, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 63986(line=2593, offs=3) -- 64018(line=2593, offs=35)"), ATSPMVstring("q1marg_tr_dec"))) ;
+ATSINSmove_void(tmp3892, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 63972(line=2593, offs=3) -- 64004(line=2593, offs=35)"), ATSPMVstring("q1marg_tr_dec"))) ;
 ATSINSmove_void(tmp3893, atspre_prerr_string(ATSPMVstring(": template arguments cannot be constrained."))) ;
 ATSINSmove_void(tmp3894, atspre_prerr_newline()) ;
 ATSINSmove(tmp3896, PATSHOME_057_src_057_pats_trans2_056_sats__trans2err_T2E_q1marg_tr_dec(arg0)) ;
@@ -29728,7 +29728,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_1222):
 ATSINSmove(tmp3905, PATSHOME_057_src_057_pats_staexp1_056_sats__s1rt_loc(arg0)) ;
 ATSINSmove_void(tmp3902, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__45__35(tmp3905)) ;
-ATSINSmove_void(tmp3906, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 64581(line=2621, offs=3) -- 64610(line=2621, offs=32)"), ATSPMVstring("s1rtext_tr"))) ;
+ATSINSmove_void(tmp3906, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans2_staexp.dats: 64567(line=2621, offs=3) -- 64596(line=2621, offs=32)"), ATSPMVstring("s1rtext_tr"))) ;
 ATSINSmove_void(tmp3907, atspre_prerr_string(ATSPMVstring(": the identifier ["))) ;
 ATSINSmove_void(tmp3908, PATSHOME_057_src_057_pats_syntax_056_sats__prerr_s0rtq(arg1)) ;
 ATSINSmove_void(tmp3909, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(arg2)) ;

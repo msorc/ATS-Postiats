@@ -202,7 +202,7 @@ end // end of [fserv]
 in
   channeg_create_exn{sslist(bit)}(llam(chp) => fserv (chp, chn))
 end // end of [succ_bits]
-  
+
 (* ****** ****** *)
 
 extern

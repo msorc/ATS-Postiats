@@ -30,7 +30,7 @@
 (*
 ** Start Time: April, 2013
 **
-** Author: William Blair 
+** Author: William Blair
 ** Authoremail: wdblair AT bu DOT edu
 **
 ** Author: Hongwei Xi
@@ -45,13 +45,13 @@ macdef Z3_true = $extval(Z3_bool, "Z3_true")
 macdef Z3_false = $extval(Z3_bool, "Z3_false")
 //
 (* ****** ****** *)
-//  
+//
 typedef Z3_lbool = int // -1/0/1: false/undef/true
 //
 macdef Z3_L_TRUE = $extval(Z3_lbool, "Z3_L_TRUE")
 macdef Z3_L_FALSE = $extval(Z3_lbool, "Z3_L_FALSE")
 macdef Z3_L_UNDEF = $extval(Z3_lbool, "Z3_L_UNDEF")
-//  
+//
 (* ****** ****** *)
 
 typedef Z3_string = string

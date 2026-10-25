@@ -49,7 +49,7 @@ fun json_tokener_get_error
 struct json_tokener* json_tokener_new (void)
 *)
 fun json_tokener_new (): json_tokener0 = "mac#%"
-   
+
 (*
 struct json_tokener* json_tokener_new_ex (int depth)
 *)

@@ -10,7 +10,7 @@
  *)
 
 // March 2005:
-// The code is completed by Sa Cui with some help from Hongwei Xi 
+// The code is completed by Sa Cui with some help from Hongwei Xi
 
 // January 2007:
 // The code is ported to ATS/Geizella by Hongwei Xi
@@ -42,16 +42,16 @@ datasort seq = (* sort for sequents *)
 
 dataprop FM (form, int) =
 
-  | {A1,A2:form} {n1,n2:nat} 
+  | {A1,A2:form} {n1,n2:nat}
     FMand1 (ltimes (A1, A2), n1+n2+1) of (FM (A1, n1), FM (A2, n2))
-  
-  | {A1,A2:form} {n1,n2:nat} 
+
+  | {A1,A2:form} {n1,n2:nat}
     FMand2 (land (A1, A2), n1+n2+1) of (FM (A1, n1), FM (A2, n2))
 
-  | {A1,A2:form} {n1,n2:nat} 
-    FMor (lor (A1, A2), n1+n2+1) of (FM (A1, n1), FM (A2, n2))   
+  | {A1,A2:form} {n1,n2:nat}
+    FMor (lor (A1, A2), n1+n2+1) of (FM (A1, n1), FM (A2, n2))
 
-  | {A1,A2:form} {n1,n2:nat} 
+  | {A1,A2:form} {n1,n2:nat}
     FMimp (limp (A1, A2), n1+n2+1) of (FM (A1, n1), FM (A2, n2))
 
 propdef FM0 (A : form) = [n:nat] FM (A, n)
@@ -107,7 +107,7 @@ and DERL (seq, form, int) =
 
   | {G1,G2:seq} {A1,A2,A3:form} {n:nat}
       DERLtimes (G2, A3, n+1) of
-        (DER (more (more (G1, A1, 1), A2, 1), A3, n), 
+        (DER (more (more (G1, A1, 1), A2, 1), A3, n),
               ADD0 (G1, ltimes (A1, A2), G2))
 
   | {G1,G2:seq} {A1,A2,A3:form} {n:nat}
@@ -120,7 +120,7 @@ and DERL (seq, form, int) =
 
   | {G1,G2:seq} {A1,A2,A3:form} {n1,n2:nat}
       DERLor (G2, A3, n1+n2+1) of
-        (DER (more (G1, A1, 1), A3, n1), DER (more (G1, A2, 1), A3, n2), 
+        (DER (more (G1, A1, 1), A3, n1), DER (more (G1, A2, 1), A3, n2),
          ADD0 (G1, lor (A1, A2), G2))
 
   | {G1,G2,G3,G4:seq} {A1,A2,A3:form} {n1,n2:nat}
@@ -133,7 +133,7 @@ and DERR (seq, form, int) =
   | {G1,G2,G3:seq} {A1,A2:form} {n1,n2:nat}
       DERRand1 (G3, ltimes (A1, A2), n1+n2+1) of
         (DER (G1, A1, n1), DER (G2, A2, n2), COMB0 (G1, G2, G3))
-  
+
   | {G:seq} {A1,A2:form} {n1,n2:nat}
       DERRand2 (G, land (A1, A2), n1+n2+1) of
         (DER (G, A1, n1), DER (G, A2, n2))
@@ -153,7 +153,7 @@ propdef DER0 (G:seq, A:form) = [n:nat] DER(G, A, n)
 
 dataprop EXCH (seq, seq, int) =
 
-  | {G:seq} {A1,A2:form} {i1,i2:two} 
+  | {G:seq} {A1,A2:form} {i1,i2:two}
     EXCHone (more (more (G, A1, i1), A2, i2), more (more (G, A2, i2), A1, i1), 0)
 
   | {G1,G2:seq} {A:form} {n,i:nat | i < 2}
@@ -190,7 +190,7 @@ prfun lemma02 {G,G':seq} {n,w:nat} .<n>.
 //
 
 prfun lemma03 {G1,G2,G3,G3':seq} {n:nat} .<n>.
-  (c: COMB (G1, G2, G3, n), ex: EXCH0 (G3, G3')): [n >= 2] void = 
+  (c: COMB (G1, G2, G3, n), ex: EXCH0 (G3, G3')): [n >= 2] void =
   case+ ex of
     | EXCHone () => let prval COMBmore (COMBmore c') = c in () end
     | EXCHshi ex' => let
@@ -222,11 +222,11 @@ prfun lemma11 {G1,G2,G3:seq} {n:nat} .<n>.
 
 prfun lemma12 {G1,G2,G12,G3,G123:seq} {n:nat} .<n>.
   (c12: COMB (G1, G2, G12, n), c123: COMB0 (G12, G3, G123))
-  : [G23:seq] (COMB0 (G2, G3, G23), COMB0 (G1, G23, G123)) = 
+  : [G23:seq] (COMB0 (G2, G3, G23), COMB0 (G1, G23, G123)) =
   case+ (c12, c123) of
     | (COMBnone (), COMBnone ()) => (COMBnone, COMBnone)
 
-    | (COMBmore (c1), COMBmore (c2)) => 
+    | (COMBmore (c1), COMBmore (c2)) =>
       let
          prval (pf1, pf2) = lemma12 (c1, c2)
       in
@@ -235,24 +235,24 @@ prfun lemma12 {G1,G2,G12,G3,G123:seq} {n:nat} .<n>.
 
 prfn lemma13 {G1,G2,G3,G21,G22:seq}
   (c1: COMB0 (G1, G2, G3), c2: COMB0 (G21, G22, G2))
-  : [G:seq] (COMB0 (G1, G22, G), COMB0 (G21, G, G3)) = let 
-     prval (c3, c4) = lemma12 (c2, lemma11 c1) 
+  : [G:seq] (COMB0 (G1, G22, G), COMB0 (G21, G, G3)) = let
+     prval (c3, c4) = lemma12 (c2, lemma11 c1)
   in
      (lemma11 c3, c4)
   end
 
 prfn lemma14 {G1,G2,G3,G21,G22:seq}
   (c1: COMB0 (G1, G2, G3), c2: COMB0 (G21, G22, G2))
-  : [G:seq] (COMB0 (G1, G21, G), COMB0 (G, G22, G3)) = let 
-     prval (c3, c4) = lemma13 (c1, lemma11 c2) 
+  : [G:seq] (COMB0 (G1, G21, G), COMB0 (G, G22, G3)) = let
+     prval (c3, c4) = lemma13 (c1, lemma11 c2)
   in
      (c3, lemma11 c4)
   end
 
 prfn lemma15 {G1,G2,G3,G21,G22:seq}
   (c1: COMB0 (G1, G2, G3), c2: COMB0 (G21, G22, G2))
-  : [G:seq] (COMB0 (G21, G1, G), COMB0 (G, G22, G3)) = let 
-     prval (c3, c4) = lemma14 (c1, c2) 
+  : [G:seq] (COMB0 (G21, G1, G), COMB0 (G, G22, G3)) = let
+     prval (c3, c4) = lemma14 (c1, c2)
   in
      (lemma11 c3, c4)
   end
@@ -278,7 +278,7 @@ prfun lemma21 {G1,G2,G3:seq} {m:nat} .<m>.
 prfun lemma30 {G1,G2:seq} {n,w:nat} .<n>.
   (g: SEQ (G1, n, w), ex: EXCH0 (G1, G2)) : SEQ (G2, n, w) =
   case+ g of
-  | SEQnone () =/=> let prval () = lemma02 (g, ex) in () end 
+  | SEQnone () =/=> let prval () = lemma02 (g, ex) in () end
   | SEQmore (SEQnone ()) =/=> let prval () = lemma02 (g, ex) in () end
   | SEQmore (SEQmore g') => begin case+ ex of
     | EXCHone () =>  SEQmore (SEQmore g')
@@ -308,20 +308,20 @@ prfun lemma32 {G1,G2,G1',G2':seq} {A:form} {n:nat} .<n>.
   case+ (ex, add) of
   | (EXCHone (), ADDone ()) => (EXCHone, ADDshi ADDone)
   | (EXCHone (), ADDshi (ADDone ())) => (EXCHone, ADDone)
-  | (EXCHone (), ADDshi (ADDshi add')) => 
-      (EXCHone, ADDshi (ADDshi add'))	
+  | (EXCHone (), ADDshi (ADDshi add')) =>
+      (EXCHone, ADDshi (ADDshi add'))
   | (EXCHshi ex', ADDone ()) => (EXCHshi ex', ADDone)
   | (EXCHshi ex', ADDshi add') => let
       prval (ex1, add1) = lemma32 (add', ex')
     in
       (EXCHshi ex1, ADDshi add1)
-    end 
+    end
 
 //
 
 prfun lemma33 {G1,G2,G3,G3':seq} {n:nat} .<n>.
   (c: COMB (G1, G2, G3, n), ex: EXCH0 (G3, G3'))
-  : [G1',G2':seq] 
+  : [G1',G2':seq]
       (EXCH0 (G1, G1'), EXCH0 (G2, G2'), COMB (G1', G2', G3', n)) =
   case+ c of
   | COMBnone () =/=> let prval () = lemma03 (c, ex) in () end
@@ -347,14 +347,14 @@ prfun exchGeneral {G1,G2:seq} {A:form} {n:nat} .<n>.
     in
       DERleft (DERLtimes (d1', add1))
     end
-     
+
   | DERleft (DERLand1 (d1, add)) => let
       prval (ex1, add1) = lemma32 (add, ex)
       prval d1' = exchGeneral (d1, EXCHshi ex1)
     in
       DERleft (DERLand1 (d1', add1))
     end
-    
+
   | DERleft (DERLand2 (d1, add)) => let
       prval (ex1, add1) = lemma32 (add, ex)
       prval d1' = exchGeneral (d1, EXCHshi ex1)
@@ -371,7 +371,7 @@ prfun exchGeneral {G1,G2:seq} {A:form} {n:nat} .<n>.
     end
 
   | DERleft (DERLimp (d1, d2, c, add)) => let
-      prval (ex1, add1) = lemma32 (add, ex) 
+      prval (ex1, add1) = lemma32 (add, ex)
       prval (ex11, ex21, c1) = lemma33 (c, ex1)
       prval d1' = exchGeneral (d1, ex11)
       prval d2' = exchGeneral (d2, EXCHshi ex21)
@@ -408,7 +408,7 @@ prfun exchGeneral {G1,G2:seq} {A:form} {n:nat} .<n>.
 
   | DERright (DERRimp d1) => let
       prval d1' = exchGeneral (d1, EXCHshi ex)
-    in 
+    in
       DERright (DERRimp d1')
     end
 
@@ -422,7 +422,7 @@ prfn exch {G:seq} {A1,A2,A3:form} {n,i1,i2:nat | i1 < 2; i2 < 2}
 //
 
 prfun thin {G:seq} {A,A':form} {n:nat} .<n>.
-  (d: DER (G, A, n)) : DER (more (G, A', 0), A, n) = 
+  (d: DER (G, A, n)) : DER (more (G, A', 0), A, n) =
   case+ d of
   | DERaxi (g, i) => DERaxi (SEQmore g, INshi i)
 
@@ -439,7 +439,7 @@ prfun thin {G:seq} {A,A':form} {n:nat} .<n>.
     in
       DERleft (DERLand1 (d1', add'))
     end
-  
+
   | DERleft (DERLand2 (d1, add)) => let
       prval d1' = exch (thin d1)
       prval add' = ADDshi add
@@ -457,14 +457,14 @@ prfun thin {G:seq} {A,A':form} {n:nat} .<n>.
 
   | DERleft (DERLimp (d1, d2, c, add)) => let
       prval d1' = thin d1
-      prval d2' = exch (thin d2) 
+      prval d2' = exch (thin d2)
       prval c' = COMBmore c
-      prval add' = ADDshi add 
+      prval add' = ADDshi add
     in
       DERleft (DERLimp (d1', d2', c', add'))
     end
 
-  | DERright (DERRand1 (d1, d2, c)) => 
+  | DERright (DERRand1 (d1, d2, c)) =>
       DERright (DERRand1 (thin d1, thin d2, COMBmore c))
 
   | DERright (DERRand2 (d1, d2)) => DERright (DERRand2 (thin d1, thin d2))
@@ -477,7 +477,7 @@ prfun thin {G:seq} {A,A':form} {n:nat} .<n>.
 
 //
 
-prfun thick {G:seq} {A,A1:form} {n:nat} .<n>. 
+prfun thick {G:seq} {A,A1:form} {n:nat} .<n>.
   (d: DER (more (G, A1, 0), A, n)) : DER (G, A, n) = begin
   case+ d of
   | DERaxi (g, i) => let
@@ -487,18 +487,18 @@ prfun thick {G:seq} {A,A1:form} {n:nat} .<n>.
     end
 
   | DERleft (DERLtimes (d1, add)) => let
-      prval ADDshi add' = add	
+      prval ADDshi add' = add
       prval d1' = thick (exch (exchGeneral (d1, EXCHshi EXCHone)))
     in
       DERleft (DERLtimes (d1', add'))
     end
- 
+
   | DERleft (DERLand1 (d1, add)) => let
       prval ADDshi add' = add
       prval d1' = thick (exch d1)
     in
       DERleft (DERLand1 (d1', add'))
-    end  
+    end
 
   | DERleft (DERLand2 (d1, add)) => let
       prval ADDshi add' = add
@@ -517,21 +517,21 @@ prfun thick {G:seq} {A,A1:form} {n:nat} .<n>.
 
   | DERleft (DERLimp (d1, d2, c, add)) => let
       prval ADDshi add' = add
-      prval COMBmore c' = c 
+      prval COMBmore c' = c
       prval d1' = thick d1
       prval d2' = thick (exch d2)
-    in 
-      DERleft (DERLimp (d1', d2', c', add')) 
+    in
+      DERleft (DERLimp (d1', d2', c', add'))
     end
 
   | DERright (DERRand1 (d1, d2, c)) => let
       prval COMBmore c' = c
       prval d1' = thick d1
-      prval d2' = thick d2 
+      prval d2' = thick d2
     in
       DERright (DERRand1 (d1', d2', c'))
     end
-    
+
  | DERright (DERRand2 (d1, d2)) => DERright (DERRand2 (thick d1, thick d2))
  | DERright (DERRor1 d1) => DERright (DERRor1 (thick d1))
  | DERright (DERRor2 d1) => DERright (DERRor2 (thick d1))
@@ -544,18 +544,18 @@ prfun lemma40 {G1,G2,G3,G21:seq} {A:form} {n:nat} .<n>.
   (c: COMB (G1, G2, G3, n), add: ADD0 (G21, A, G2))
   : [G4:seq] (COMB (G1, G21, G4, n), ADD0 (G4, A, G3)) = begin
   case+ add of
-  | ADDone () => let 
-      prval COMBmore c' = c 
-    in 
+  | ADDone () => let
+      prval COMBmore c' = c
+    in
       (COMBmore c', ADDone)
     end
-     
+
   | ADDshi add' => let
       prval COMBmore c' = c
       prval (c1, add1) = lemma40 (c', add')
     in
       (COMBmore c1, ADDshi add1)
-    end 
+    end
 end // end of [lemma40]
 
 //
@@ -563,8 +563,8 @@ end // end of [lemma40]
 prfun lemma41
   {G11,G22,G33,G1,G2,G3:seq} {A1,A2:form} {n:nat} .<n>.
   (c1: COMB0 (G11, G22, G33), add: ADD (G33, limp (A1, A2), G1, n), c2: COMB0 (G1, G2, G3))
-  : [Gtmp1,Gtmp2:seq] 
-      (COMB0 (G22, G2, Gtmp1), COMB0 (G11, Gtmp1, Gtmp2), ADD0 (Gtmp2, limp (A1, A2), G3)) =   
+  : [Gtmp1,Gtmp2:seq]
+      (COMB0 (G22, G2, Gtmp1), COMB0 (G11, Gtmp1, Gtmp2), ADD0 (Gtmp2, limp (A1, A2), G3)) =
   case+ add of
   | ADDone () => let
       prval COMBmore c1' = c1
@@ -592,7 +592,7 @@ prfun lemma42 {G1,G2,G3:seq} {A:form} {k:nat} .<k>.
     in
       ADDone
     end
-   
+
   | INshi i' => let
       prval SEQmore g' = g
       prval () = lemma01 (g', i')
@@ -647,7 +647,7 @@ prfun cut
           prval d = exch (exchGeneral (d21, EXCHshi EXCHone))
           prval d21' = thick d
           prval d12' = thin d12
-          prval d3 = cut (a2, d12', d21', COMBmore c2) 
+          prval d3 = cut (a2, d12', d21', COMBmore c2)
         in
           cut (a1, d11, d3, c3)
         end
@@ -749,7 +749,7 @@ prfun cut
 
     | ADDshi add2' => let
         prval (c2, add3) = lemma40 (c, add2')
-        prval d11' = thin d1 
+        prval d11' = thin d1
         prval d21' = cut (a, d11', exch d21, COMBmore c2)
         prval d12' = thin d1
         prval d22' = cut (a, d12', exch d22, COMBmore c2)
@@ -769,13 +769,13 @@ prfun cut
           DERleft (DERLimp (d21', d22', c2', add3))
         end
 
-      | DERleft d1 => cutAux (a, d1, d2, c) 
-                  
+      | DERleft d1 => cutAux (a, d1, d2, c)
+
       | DERright (DERRimp d1') => let
           prval COMBmore c2' = c2
           prval (c3, c4) = lemma15 (c, c2')
           prval FMimp (a1, a2) = a
-          prval d3 = cut (a1, thick d21, d1', c3) 
+          prval d3 = cut (a1, thick d21, d1', c3)
         in
           cut (a2, d3, thick (exch d22), c4)
         end
@@ -788,10 +788,10 @@ prfun cut
           prval d1' = thin d1
           prval d22' = exch d22
           prval (c3, add3) = lemma40 (c, add2')
-          prval (c4, c5) = lemma13 (c3, c2')	            
+          prval (c4, c5) = lemma13 (c3, c2')
           prval d3 = cut (a, d1', d22', COMBmore c4)
           prval d21' = thick d21
-        in 
+        in
           DERleft (DERLimp (d21', d3, c5, add3))
         end else let
           prval (c3, add3) = lemma40 (c, add2')
@@ -831,11 +831,11 @@ prfun cut
       DERright (DERRor1 (cut (a, d1, d21, c)))
 
   | DERright (DERRor2 d22) =>
-      DERright (DERRor2 (cut (a, d1, d22, c))) 
+      DERright (DERRor2 (cut (a, d1, d22, c)))
 
   | DERright (DERRimp d2') => let
       prval d1' = thin d1 and d3 = exch d2'
-    in 
+    in
       DERright (DERRimp (cut (a, d1', d3, COMBmore c)))
     end
 end // end of [cut]
@@ -850,9 +850,9 @@ and cutAux
   | DERLtimes (d1', add) => let
       prval (c1, add1) = lemma43 (c, add)
       prval d2' = exch (thin (exch (thin d2)))
-      prval d = cut (a, d1', d2', COMBmore (COMBmore c1))  
+      prval d = cut (a, d1', d2', COMBmore (COMBmore c1))
     in
-      DERleft (DERLtimes (d, add1)) 
+      DERleft (DERLtimes (d, add1))
     end
 
   | DERLand1 (d1', add) => let

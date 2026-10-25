@@ -6,7 +6,7 @@
 // append(xs, reverse(xs)) is a palindrome
 //
 (* ****** ****** *)
-//  
+//
 // Author: HX-2015-06-09
 //
 (* ****** ****** *)

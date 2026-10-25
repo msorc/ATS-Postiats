@@ -167,8 +167,8 @@ struct json_object*
 json_object_new_int64 (int64_t i)
 *)
 fun json_object_new_int64 (i: int64): json_object0 = "mac#%"
-    
-(*     
+
+(*
 int64_t
 json_object_get_int64 (struct json_object *obj)
 *)
@@ -355,7 +355,7 @@ fun json_object_object_add
 
 (*
 void
-json_object_object_del (struct json_object *jso, const char *key)     
+json_object_object_del (struct json_object *jso, const char *key)
 *)
 fun json_object_object_del (jso: !json_object1, key: string): void = "mac#%"
 

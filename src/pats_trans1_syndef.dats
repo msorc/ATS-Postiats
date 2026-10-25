@@ -13,12 +13,12 @@
 ** the terms of  the GNU GENERAL PUBLIC LICENSE (GPL) as published by the
 ** Free Software Foundation; either version 3, or (at  your  option)  any
 ** later version.
-** 
+**
 ** ATS is distributed in the hope that it will be useful, but WITHOUT ANY
 ** WARRANTY; without  even  the  implied  warranty  of MERCHANTABILITY or
 ** FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License
 ** for more details.
-** 
+**
 ** You  should  have  received  a  copy of the GNU General Public License
 ** along  with  ATS;  see the  file COPYING.  If not, please write to the
 ** Free Software Foundation,  51 Franklin Street, Fifth Floor, Boston, MA
@@ -330,7 +330,7 @@ case+ glist_view (d1es) of
     (d1e1, d1es2) => let
     val dq = $SYN.d0ynq_none(loc0)
     val fid = d1exp_dqid(loc0, dq, sym)
-    val d1e1_res = 
+    val d1e1_res =
       d1exp_seq
         (loc0, aux3lst(loc0, fid, d1e1, d1es2))
       // d1exp_seq

@@ -6265,7 +6265,7 @@ ATSif(
 tmp603
 ) ATSthen() {
 ATSINSmove(tmp604, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp570)) ;
-ATSifnthen(ATSCKpat_con1(tmp604, 22)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_solve.dats: 28673(line=1381, offs=7) -- 28719(line=1381, offs=53)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp604, 22)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_solve.dats: 28669(line=1381, offs=7) -- 28715(line=1381, offs=53)") ; } ;
 ATSINSmove(tmp605, ATSSELcon(tmp604, postiats_tysum_4, atslab__0)) ;
 ATSINSmove(tmp606, ATSSELcon(tmp604, postiats_tysum_4, atslab__1)) ;
 ATSINSfreecon(tmp604) ;
@@ -6303,7 +6303,7 @@ ATSif(
 tmp618
 ) ATSthen() {
 ATSINSmove(tmp619, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp571)) ;
-ATSifnthen(ATSCKpat_con1(tmp619, 22)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_solve.dats: 29126(line=1397, offs=7) -- 29172(line=1397, offs=53)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp619, 22)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_solve.dats: 29122(line=1397, offs=7) -- 29168(line=1397, offs=53)") ; } ;
 ATSINSmove(tmp620, ATSSELcon(tmp619, postiats_tysum_4, atslab__0)) ;
 ATSINSfreecon(tmp619) ;
 ATSINSmove(tmp621, ATSLIB_056_prelude__eq_g0int_int__21__8(tmp620, ATSPMVi0nt(0))) ;

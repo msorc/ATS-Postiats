@@ -9,7 +9,7 @@
 ** Permission to use, copy, modify, and distribute this software for any
 ** purpose with or without fee is hereby granted, provided that the above
 ** copyright notice and this permission notice appear in all copies.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 ** WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 ** MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -111,7 +111,7 @@ end // end of [channeg1_session_send]
 implement
 {}(*tmp*)
 channeg1_session_initize
-  (fwork, ssn) = let  
+  (fwork, ssn) = let
 //
 val
 fnullify =
@@ -135,7 +135,7 @@ end // end of [channneg1_session_initize]
 implement
 {}(*tmp*)
 channeg1_session_finalize
-  (ssn, fwork) = let  
+  (ssn, fwork) = let
 //
 val
 fnullify =

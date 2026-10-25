@@ -36,7 +36,7 @@ local
 //
 var
 the_context : Z3_context
-//  
+//
 val config = Z3_mk_config ()
 (*
 val config_ = $UN.castvwtp1{ptr}(config)
