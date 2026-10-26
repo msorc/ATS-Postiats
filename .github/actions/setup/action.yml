@@ -7,7 +7,17 @@
 #
 # The only cache is ccache (the C objects of the bundle and of the compiler,
 # keyed by the content of the compiled files, so a stale entry cannot be used;
-# the cache key only decides which entries are restored).
+# the cache key only decides which entries are restored). The key hashes the
+# inputs of the C compilation (the bootstrap bundle, the sources of the
+# compiler, the CATS and .cats of the libraries and the runtime headers), so
+# a change in them means new entries: a hash of the bundle alone would make
+# a change of the compiler sources reuse a cache of a build that recompiles
+# almost everything. The Makefiles that drive the C compilation and the
+# share/atsmake-*.mk variables are hashed as well. The restore-keys may fall
+# back on the cache of one of the other jobs: ccache hashes again inside the
+# entry, the objects are not warm to a different job, and a full cache
+# evicts the entries it needs less; CCACHE_MAXSIZE (2G) holds the C objects
+# of two compilers (about 1G of C out of the tree).
 #
 name: setup
 description: the packages of the build of ATS2 and the ccache cache
@@ -50,9 +60,10 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/ccache
-        key: ccache-${{ runner.os }}-${{ inputs.key }}-${{ hashFiles('src/CBOOT/**') }}
+        key: ccache-${{ runner.os }}-${{ inputs.key }}-${{ hashFiles('src/CBOOT/**', 'src/*.dats', 'src/*.sats', 'src/*.hats', 'src/*.cats', 'prelude/CATS/*', 'libats/CATS/*', 'ccomp/runtime/*', 'src/Makefile', 'Makefile_devl', 'share/atsmake-pre.mk', 'share/atsmake-post.mk') }}
         restore-keys: |
           ccache-${{ runner.os }}-${{ inputs.key }}-
+          ccache-${{ runner.os }}-
 
     - name: ccache in front of the compilers
       if: runner.os == 'Linux' && inputs.ccache == 'true'
@@ -60,5 +71,5 @@ runs:
       run: |
         # /usr/lib/ccache holds gcc, cc, clang, ... that run ccache; CC=gcc and the cc of patscc find them first
         echo "/usr/lib/ccache" >> "$GITHUB_PATH"
-        echo "CCACHE_MAXSIZE=500M" >> "$GITHUB_ENV"
+        echo "CCACHE_MAXSIZE=2G" >> "$GITHUB_ENV"
         echo "CCACHE_DIR=$HOME/.cache/ccache" >> "$GITHUB_ENV"

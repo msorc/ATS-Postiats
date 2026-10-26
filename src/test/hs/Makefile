@@ -14,9 +14,23 @@ COUNT=3000
 hs_cases.hats hs_compat1.hats hs_compat2.hats: hs_gen.py ../../pats_histaexp.spec
 	python3 hs_gen.py $(SEED) $(COUNT)
 
-test:
+# gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
+# the program in its prebuild step (SUBS_PREBUILT, only for `make all` with JOBS>1) `test` only runs and compares.
+ifdef SUBS_PREBUILT
+TESTDEPS=
+else
+TESTDEPS=build
+endif
+.PHONY: gen build build1
+gen:
 	python3 hs_gen.py 1 400
+build: gen
+	$(MAKE) --no-print-directory build1
+# build1: the build without the generators (the prebuild of ../Makefile has run them)
+build1:
 	sh hsdrv2.sh $(OUT) -O1
+
+test: $(TESTDEPS)
 	@a=`$(OUT)/hs2 2>/dev/null | md5sum | awk '{print $$1}'`; b=`$(OUT)/hs2 2>&1 >/dev/null | md5sum | awk '{print $$1}'`; \
 	test "$$a $$b" = "`head -1 hs_small.md5`" && echo "hs: output as expected" || { echo "hs: output differs from hs_small.md5"; exit 1; }
 

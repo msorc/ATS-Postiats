@@ -1,13 +1,29 @@
 #!/bin/sh
 # usage: ccb2.sh OUTDIR [CFLAGS...]    Builds OUTDIR/ccb2 (the ATS2 driver of the ccomp group B test) in a staging directory (a copy of src, so that the generated files
 # and the objects stay out of the tree): the ports of src/, the doubles of test/ccb/dbl (the phase 1 modules of pats_ccomp.sats), the generated cases. -j via JOBS.
-# REUSE=1 keeps the objects of the modules of src (only the driver and the chunks are rebuilt).
+# REUSE=1 keeps the objects of the modules of src (only the driver and the chunks are rebuilt). Without REUSE the objects of the last build of the
+# same OUTDIR are reused automatically when nothing that the staging copy is built from has changed since (the stamp $OUT/stage2.stamp, as in
+# ../hd/hd2.sh: the spec and the arenagen of the pats_ccomp encodings and the dbl doubles belong to the stamp). The stamp is rewritten only by a
+# build that started from the wipe below.
 OUT=$1; shift
 L=`cd \`dirname $0\` && pwd`
 T=`cd $L/../.. && pwd`
 mkdir -p $OUT; OUT=`cd $OUT && pwd`
 W=$OUT/stage2
-if [ -z "$REUSE" ] || [ ! -d $W/obj ]; then REUSE=; rm -rf $W; mkdir -p $W/ccb $W/obj; fi
+stamp=$OUT/stage2.stamp
+pb=`command -v patsopt 2>/dev/null`; cb=`command -v patscc 2>/dev/null`
+cur=`{ echo "$*"; md5sum $pb $cb $T/pats_ccomp.spec $T/../utils/arenagen/arenagen.py \
+  $T/*.sats $T/*.dats $T/*.hats $T/*.cats $L/*.dats $L/*.hats $L/ccb_stub.c $L/ccb_stub.h $L/dbl/*.dats \
+  $L/../d2common1.hats $L/../d2compat_hand3.hats $L/../s2env2.hats $L/../hd/hd_common.hats $L/../hd/hd_hand_b2.hats \
+  2>/dev/null; } | md5sum | awk '{print $1}'`
+wiped=
+if [ -n "$REUSE" ]; then
+  [ -d $W/obj ] || { wiped=1; REUSE=; rm -rf $W; mkdir -p $W/ccb $W/obj; }
+elif [ -f "$stamp" ] && [ -d $W/obj ] && [ "`cat $stamp`" = "$cur" ]; then
+  REUSE=1
+else
+  wiped=1; REUSE=; rm -rf $W; mkdir -p $W/ccb $W/obj
+fi
 mkdir -p $W/ccb
 if [ -z "$REUSE" ]; then
   make -C $T pats_staexp2_gen.hats pats_staexp2_gen_dats.hats pats_staexp2_error_gen.hats pats_staexp2_error_gen_dats.hats pats_dynexp2_gen.hats pats_dynexp2_gen_dats.hats \
@@ -31,3 +47,4 @@ grep -q FAILED $OUT/build2.log && { cat $OUT/build2.log | head -60; exit 1; }
 [ -n "$REUSE" ] || $CC -c -o pats_error_sats.o pats_error_sats.c || exit 1
 $CC -c -o ccb_stub.o ../ccb/ccb_stub.c || exit 1
 $CC -o $OUT/ccb2 *.o -lgmp || exit 1
+[ -z "$wiped" ] || echo "$cur" > $stamp

@@ -1189,7 +1189,7 @@ echovar:
 # The prebuild step of `all` (see the top of this file): phase 1 `pregen` (serial), phase 2 `preexes` (make -j$(JOBS), PREBUILD=1).
 # Everything that the runs of `all` need is built here, by the rules of the suites themselves, so the serial part finds it up to date
 # (the *_exe targets are phony and are only relinked). The suites that have a Makefile of their own build in a staging directory, with their
-# own parallel compilations (JOBS): hd cc ca cc2 ccb cc1 are built here (see the end of this file), lp and hs when `all` runs them; t3g1 and
+# own parallel compilations (JOBS): hd cc ca cc2 ccb cc1 lp hs are built here (see the end of this file); t3g1 and
 # g2 are built from here.
 PREGEN=s2gen.stamp d2gen.stamp m2gen.stamp cggen.stamp t3gen.stamp t3g3gen.stamp g4gen.stamp c3gen.stamp j2gen.stamp \
   t2dd.hats f3dd.hats deepdump_t1.hats treecases.hats pats_error_sats.c $(sort $(T3GENHATS) $(C3OWNHATS))
@@ -1216,7 +1216,7 @@ prebuild_g2: $(addprefix $(MODOBJ)/,$(addsuffix _dats.o,$(shell cat g2mods.txt))
 #  * prebuild_SUITE (part of preexes, parallel): `make -C SUITE build1` (the build without the generators). The six builds are chained one after the other (each one runs JOBS compilations by itself;
 #    they are not run at the same time, so that JOBS compilations at most are added to the others of preexes), and run beside the other programs of preexes.
 # SUBS_PREBUILT tells the sub-Makefiles that the program is built: it is set only for `make all` with the prebuild step (JOBS>1); `make -C X test` alone builds it.
-SUBSUITES=hd cc ca cc2 ccb cc1
+SUBSUITES=hd cc ca cc2 ccb cc1 lp hs
 SUBHATS=pats_staexp2_gen.hats pats_staexp2_gen_dats.hats pats_staexp2_error_gen.hats pats_staexp2_error_gen_dats.hats pats_dynexp2_gen.hats pats_dynexp2_gen_dats.hats \
   pats_dynexp3_gen.hats pats_dynexp3_gen_dats.hats pats_hidynexp_gen.hats pats_hidynexp_gen_dats.hats pats_typerase_gen.hats pats_typerase_gen_dats.hats \
   pats_trans3_env_gen.hats pats_trans3_env_gen_dats.hats pats_trans3_gen.hats pats_trans3_gen_dats.hats pats_dmacro2_gen.hats pats_dmacro2_gen_dats.hats \
@@ -1228,7 +1228,7 @@ endif
 endif
 SUBEXES=$(addprefix prebuild_,$(SUBSUITES))
 subgen:
-	$(MAKE) --no-print-directory -C $(M) $(SUBHATS)
+	$(MAKE) --no-print-directory -j$(JOBS) -C $(M) $(SUBHATS)
 	for d in $(SUBSUITES); do $(MAKE) --no-print-directory -C $$d gen || exit 1; done
 pregen: subgen
 # the chain of the sub-suites is the longest part of preexes: it comes first, so that make -j starts it at once
@@ -1240,4 +1240,6 @@ prebuild_ca: | prebuild_cc
 prebuild_cc2: | prebuild_ca
 prebuild_ccb: | prebuild_cc2
 prebuild_cc1: | prebuild_ccb
+prebuild_lp: | prebuild_cc1
+prebuild_hs: | prebuild_lp
 .PHONY: subgen $(SUBEXES)
