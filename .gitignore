@@ -52,6 +52,8 @@ bin/patsopt
 bin/pats2xhtml
 bin/atsdoc
 bin/myatscc
+bin/patslint
+bin/patslint-diff
 bin/atsreloc_curl
 bin/atsreloc_wget
 bin/atscc2js
@@ -85,6 +87,11 @@ utils/libatsynmark/BUILD/libatsynmark.a
 utils/libatsynmark/TEST/test01
 utils/libatsynmark/TEST/test02
 utils/libatsynmark/TEST/test03
+#
+# The linter
+#
+utils/atslint/BUILD/*
+!utils/atslint/BUILD/.keeper
 libatsdoc/BUILD/*
 !libatsdoc/BUILD/.keeper
 utils/atsdoc/BUILD/*

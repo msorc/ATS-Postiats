@@ -1,0 +1,22 @@
+$ patslint --source --enable=comma-space a.dats --no-source a.dats
+a.dats: 1(10): warning(lint:trailing-ws): trailing white space
+    1 | val x = 1\x20
+      |          ^
+a.dats: 2(1): warning(lint:tab): a tab character
+    2 | \tval\ty = "\xc3\xa9t\xc3\xa9"\t// x
+      | ^
+a.dats: 3(12): info(lint:comma-space): no space after the comma
+    3 | val z = f(a,b)
+      |            ^
+a.dats: 3(15): warning(lint:crlf): a CRLF line end
+    3 | val z = f(a,b)
+      |               ^
+a.dats: 4(1): error(lint:lex-error): the comment block is unclosed
+    4 | (* open
+      | ^
+a.dats: 1(10): warning(lint:trailing-ws): trailing white space
+a.dats: 2(1): warning(lint:tab): a tab character
+a.dats: 3(12): info(lint:comma-space): no space after the comma
+a.dats: 3(15): warning(lint:crlf): a CRLF line end
+a.dats: 4(1): error(lint:lex-error): the comment block is unclosed
+exit: 1

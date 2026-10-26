@@ -1,0 +1,8 @@
+$ patslint a.dats b.dats
+a.dats: 1(4): warning(lint:tab): a tab character
+b.dats: 1(4): warning(lint:tab): a tab character
+stderr: @TMP@/.patslint: 1: error(patslint): no [=] in the line
+stderr: @TMP@/.patslint: 2: error(patslint): [max-col] needs a positive number
+stderr: @TMP@/.patslint: 3: error(patslint): unknown rule or key [nope]
+stderr: @TMP@/.patslint: 4: error(patslint): unknown severity [loud]
+exit: 2

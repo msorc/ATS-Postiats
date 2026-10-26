@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 1(10): warning(lint:crlf): a CRLF line end
+exit: 1

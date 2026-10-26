@@ -149,7 +149,8 @@ same variables (the prefix of ./configure is the default).
 ######
 
   make tools     # bin/atsdoc (the .atxt processor), bin/pats2xhtml
-                 # (the syntax highlighter), libatsdoc.a, libatsynmark.a
+                 # (the syntax highlighter), bin/patslint (the linter,
+                 # utils/atslint/README), libatsdoc.a, libatsynmark.a
   make book      # the HTML and the PDF of the books (doc/BOOK/README.md
                  # lists what they need: xsltproc, DocBook XSL, a browser)
 
@@ -172,6 +173,7 @@ or one by one:
   make -C src test                       # the compiler's own suites
   make -C utils/atsdoc test              # atsdoc and libatsdoc
   make -C utils/libatsynmark test        # libatsynmark and pats2xhtml
+  make -C utils/atslint test             # patslint
   make -C doc -f Makefile_test testall   # the examples and the code of the books
 
 (put $PATSHOME/bin on the PATH first; `make test` does it). The md5 suites

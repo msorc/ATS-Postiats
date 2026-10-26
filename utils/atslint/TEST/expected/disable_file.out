@@ -1,0 +1,4 @@
+$ patslint a.dats
+a.dats: 1(10): warning(lint:trailing-ws): trailing white space
+a.dats: 3(10): warning(lint:trailing-ws): trailing white space
+exit: 1

@@ -1,0 +1,3 @@
+$ patslint nonexistent.dats
+stderr: error(patslint): cannot read the file [nonexistent.dats]
+exit: 2

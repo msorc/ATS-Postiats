@@ -1,0 +1,4 @@
+$ patslint a.dats
+a.dats: 1(12): info(lint:if-const): the condition of the if is a constant
+a.dats: 3(13): info(lint:if-const): the condition of the if is a constant
+exit: 0

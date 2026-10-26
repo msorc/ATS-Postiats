@@ -1,0 +1,5 @@
+$ patslint --enable=comma-space a.dats
+a.dats: 1(12): info(lint:comma-space): no space after the comma
+a.dats: 3(12): info(lint:comma-space): no space after the comma
+a.dats: 3(14): info(lint:comma-space): no space after the comma
+exit: 0

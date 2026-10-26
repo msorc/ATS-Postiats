@@ -1,0 +1,221 @@
+SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+SPDX-License-Identifier: GPL-3.0-or-later
+
+patslint: a linter for ATS2 source files
+========================================
+
+patslint checks the style of .sats, .dats and .hats files. It is an ATS2
+program (no GC) built on libatsynmark and libatsopt: the text of a file is
+lexed by the lexer of the compiler, so it knows which bytes are in
+comments, strings and chars, or embedded C code (%{ ... %}), exactly as
+patsopt does, and it can tell an unclosed comment or string. It works on
+any ATS2 code; nothing in it is specific to this repository.
+
+Build and install
+-----------------
+
+  make tools                          # the root Makefile: atsdoc, pats2xhtml, patslint
+  make -f Makefile_devl bin_patslint  # patslint only (after `make all`)
+  make -C utils/atslint               # the same, from this directory
+
+They make bin/patslint and bin/patslint-diff; `make install` installs both.
+
+Usage
+-----
+
+  patslint [option | file] ...
+
+An option applies to the files that follow it on the command line. A
+finding is printed as
+
+  FILE: LINE(COL): SEVERITY(lint:RULE): MESSAGE
+
+(LINE and COL count from 1; COL counts characters, not bytes), or as one
+JSON object per line with --format=json. The exit status is 0 if no
+finding has the severity of --fail-on (warning by default) or a higher
+one, 1 if one has, and 2 if an option or a configuration file is wrong
+or a file cannot be read.
+
+  --list-rules          the rules and their default severities
+  --enable=RULE,...     turn rules on (at their default severity)
+  --disable=RULE,...    turn rules off
+  --severity=RULE:SEV   off, info, warning or error
+  --max-col=N           the maximal length of a line (default 80)
+  --indent-width=N      the unit of indentation (default 2)
+  --lines=N-M,...       report only the findings on these lines
+  --all-lines           report the findings on all the lines again
+  --fail-on=SEV         the least severity that makes the exit status 1
+  --format=text|json
+  --source              (text) each finding is followed by its line and a
+                        caret under its column; the default when the
+                        output is a terminal
+  --no-source           (text) the findings only
+  --semantic            also the rules after the binding of the names
+                        (below; PATSHOME is needed)
+  --fix                 fix in place: trailing-ws, crlf, final-newline,
+                        blank-eof and the tabs of an indentation (to the
+                        next multiple of 8); the other findings are
+                        reported as usual
+
+Rules
+-----
+
+The text rules apply to any file; the other ones to the ATS files
+(.sats, .dats, .hats) only. `patslint --list-rules` prints them.
+
+On the text:
+
+  rule           default  what it reports
+  tab            warning  a tab (a tab in a string or a char is not)
+  trailing-ws    warning  white space at the end of a line (in a string
+                          that goes on to the next line it is kept)
+  line-length    warning  a line longer than max-col (a tab goes to the
+                          next multiple of 8); a line that is one word (a
+                          long string or name) or holds a URL is not
+  crlf           warning  CRLF line ends (once in a file)
+  final-newline  warning  no newline at the end of the file
+  blank-eof      warning  blank lines at the end of the file
+  indent         off      an indentation (of a line that starts with
+                          code) that is not a multiple of indent-width
+                          (info when it is turned on)
+  non-ascii      off      a non-ASCII character outside comments and
+                          strings (warning when it is turned on)
+
+On the tokens (the lexer of the compiler):
+
+  lex-error           error    a message of the lexer (an unclosed comment,
+                               string, char or %{ ... %}, a character that
+                               ATS does not have, ...); one for a line
+  footer              warning  a comment (* end of [NAME] *) whose NAME, a
+                               file name, is not the name of the file
+  separator           off      a comment of stars that is not
+                               (* ****** ****** *) (info)
+  comma-space         off      a comma with the next token right after it
+                               on the line (info)
+  trailing-semicolon  off      a semicolon right before end, in, ), ] or }
+                               (info; note that (e;) is of type void)
+
+On the syntax tree (the parser of the compiler; a .hats file is parsed
+as dynamic code, else as static code):
+
+  parse-error     error    the first message of the parser (not when the
+                           lexer reports an error)
+  staload-dup     warning  a file staloaded again with the same name, at
+                           the top level
+  staload-unused  warning  a named staload (X = "...") whose $X does not
+                           occur in the file (not in a .hats file)
+  let-empty       off      let in E end (info)
+  case-single     off      a case with one clause (info)
+  case-unchecked  off      a case that is not case+ or case- (info)
+  end-comment     info     an `end of [NAME]` comment right after a
+                           function or an implementation, on its last
+                           line, that names another function of the file
+  fnx-template    warning  fnx on a template (the compiler makes it a fun)
+  if-const        info     an if on true or false
+  naming          off      a linear type (datavtype, vtypedef, absvtype)
+                           whose name has no _vt suffix, or a view
+                           (dataview, viewdef, absview) with no _v (info)
+
+After the binding of the names (--semantic):
+
+  unused-var     warning  a local val, var or pattern variable (of a case
+                          clause, a val, ...) that is never used
+  unused-fun     warning  a local function (in a let, a where or the
+                          head of a local) that is never used; its own
+                          recursive calls count as uses
+  unused-arg     off      an argument of a function or a lambda that is
+                          never used (info)
+  shadow         off      a local name that hides a local name of an
+                          enclosing block (info); a rebinding in the same
+                          block, as in `val x = f (x)`, is not reported
+  nonexhaustive  warning  a plain `case` (or the pattern of a plain
+                          `val`) whose clauses do not cover all the
+                          values, with the patterns that are missing
+                          (three at most); the types may still exclude
+                          them, as for a list_vt(a, 2): case+ is checked
+                          by the compiler with the types, case- never
+
+A name that starts with `_` is never reported. With --semantic, each ATS
+file (not a .hats) is translated as patsopt does up to the binding of the
+names (the parse, trans1 and trans2; the prelude is loaded once, which
+needs PATSHOME), in a child process: a file that patsopt rejects (or that
+needs -IATS paths) is skipped with a note on stderr, and does not change
+the exit status. The tree of level 2 then gives the variable of every
+name: the uses are counted, and a macro (macdef) counts as a use of the
+variables of its body where it is used. It is slower (about 40 ms for a
+file, most of it in the staloaded files).
+
+Disabling rules in the source
+-----------------------------
+
+A comment (of any form) that holds
+
+  lint: disable=RULE,...       disables the rules on its line and the next
+  lint: disable-file=RULE,...  disables the rules in the whole file
+
+RULE may be `all`. The text in strings does not count; the comments are
+read in the ATS files only.
+
+The configuration file
+----------------------
+
+The nearest file named .patslint in the directory of the checked file or
+in one of its parents configures the check of the file (only that one is
+read). Its lines are `KEY = VALUE`; `#` starts a comment line.
+
+  RULE = off | on | info | warning | error
+  max-col = N
+  indent-width = N
+  exclude = GLOB      # the file is not checked (it may be repeated)
+
+A GLOB is matched (fnmatch, `*` matches `/` too) against the path of the
+file relative to the directory of .patslint; a GLOB without `/` is also
+matched against the name of the file. The options of the command line
+take precedence over the configuration. The .patslint at the root of this
+repository excludes the generated files.
+
+The changed lines of a git repository
+-------------------------------------
+
+  patslint-diff [BASE] [patslint options]
+
+runs patslint on the lines of the ATS files that differ from the merge
+base of BASE (default origin/HEAD, else HEAD) and HEAD, the changes not yet
+committed included; its exit status is the highest one of patslint. In
+this repository:
+
+  make lint [LINTBASE=origin/devel] [LINTFLAGS=...]  # the changed lines
+  make lint-all [LINTFLAGS=...]  # the number of findings of each rule
+                                 # in all the tracked ATS files
+
+The CI runs `make lint` on the lines that a pull request changes.
+
+Tests
+-----
+
+  make -C utils/atslint test     # the cases of TEST/suite.py
+  make -C utils/atslint update   # rewrite TEST/expected/*.out from the
+                                 # current patslint: review the diff
+
+Each case writes its inputs (bytes, in suite.py) into a temporary
+directory, runs patslint or patslint-diff there, and compares the exit
+status, the output and the fixed files with TEST/expected/NAME.out.
+
+Files
+-----
+
+  SATS/patslint.sats         the interface: the rules, the settings, the text
+  DATS/patslint_main.dats    the command line
+  DATS/patslint_text.dats    the masks of the tokens and the rules on the lines
+  DATS/patslint_token.dats   the rules on the tokens
+  DATS/patslint_tree.dats    the parse and the rules on the syntax tree
+  DATS/patslint_sema.dats    --semantic: the translation and the rules on
+                             the tree of level 2
+  DATS/patslint_rules.dats   the table of the rules
+  DATS/patslint_util.dats    the C part: the settings, .patslint, the output,
+                             the text of a file, --fix
+  CATS/patslint.cats         the declarations of the C part
+  patslint-diff              the changed lines of a git repository (POSIX sh)
+
+The no-GC rules are not lint rules: the compiler rejects the nonlinear
+heap allocation itself.

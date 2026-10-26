@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 1(1): warning(lint:fnx-template): fnx on a template: the compiler treats it as fun
+exit: 1

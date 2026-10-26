@@ -1,0 +1,5 @@
+$ patslint a.dats
+a.dats: 1(81): warning(lint:line-length): the line is 165 columns long (max-col is 80)
+a.dats: 2(81): warning(lint:line-length): the line is 103 columns long (max-col is 80)
+a.dats: 2(103): warning(lint:trailing-ws): trailing white space
+exit: 1

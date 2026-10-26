@@ -1,0 +1,4 @@
+$ patslint --enable=non-ascii a.dats
+a.dats: 3(11): warning(lint:non-ascii): a non-ASCII character outside comments and strings
+a.dats: 3(11): error(lint:lex-error): unsupported char: \xc3
+exit: 1

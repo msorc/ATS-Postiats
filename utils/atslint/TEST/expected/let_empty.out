@@ -1,0 +1,3 @@
+$ patslint --enable=let-empty a.dats
+a.dats: 1(9): info(lint:let-empty): let with no declarations
+exit: 0

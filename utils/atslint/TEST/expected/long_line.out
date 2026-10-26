@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 1(81): warning(lint:line-length): the line is 12005 columns long (max-col is 80)
+exit: 1

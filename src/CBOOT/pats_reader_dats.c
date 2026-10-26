@@ -90,9 +90,8 @@ ATSdyncst_mac(atspre_g0uint2uint_size_size)
 ATSdyncst_mac(atspre_g0uint_mul_size)
 ATSdyncst_mac(atspre_neq_char0_char0)
 ATSdyncst_mac(atspre_g0uint_succ_size)
-ATSdyncst_mac(atspre_char2int0)
-ATSdyncst_mac(atspre_g1int_neg_int)
 ATSdyncst_mac(atspre_uchar2int0)
+ATSdyncst_mac(atspre_g1int_neg_int)
 ATSdyncst_mac(atspre_fileref_close)
 ATSdyncst_mac(atspre_cloptr_free)
 #ifndef _ATS_CCOMP_EXCEPTION_NONE_
@@ -312,7 +311,7 @@ tmp31
 ) ATSthen() {
 ATSINSmove(tmp32, atspre_g0uint_succ_size(tmp20)) ;
 ATSINSstore(ATSSELfltrec(ATSderef(arg0, pats_reader_struct), pats_reader_struct, ridx), tmp32) ;
-ATSINSmove(tmpret4, atspre_char2int0(tmp21)) ;
+ATSINSmove(tmpret4, atspre_uchar2int0(ATSPMVcastfn(char2uchar0, atstkind_t0ype(atstype_uchar), tmp21))) ;
 } ATSelse() {
 ATSINSmove(tmpret4, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 }

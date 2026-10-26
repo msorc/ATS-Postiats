@@ -1,0 +1,3 @@
+$ patslint --enable=tab --max-col=100 a.dats
+a.dats: 1(4): warning(lint:tab): a tab character
+exit: 1

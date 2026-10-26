@@ -1,0 +1,4 @@
+$ patslint --fix a.dats
+exit: 0
+--- a.dats
+| val x = 1$

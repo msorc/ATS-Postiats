@@ -1,0 +1,4 @@
+$ patslint a.dats
+a.dats: 4(8): info(lint:end-comment): the comment names [g], the function is [f]
+a.dats: 16(8): info(lint:end-comment): the comment names [f], the function is [k]
+exit: 0

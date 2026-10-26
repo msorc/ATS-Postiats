@@ -1,0 +1,3 @@
+$ patslint --enable=indent --indent-width=4 a.dats
+a.dats: 2(1): info(lint:indent): the indentation (2) is not a multiple of 4
+exit: 0

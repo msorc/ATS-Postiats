@@ -1,0 +1,5 @@
+$ patslint --severity=tab --severity=tab:loud --severity=nope:error a.dats
+stderr: error(patslint): expected RULE:SEV: [--severity=tab]
+stderr: error(patslint): unknown severity: [--severity=tab:loud]
+stderr: error(patslint): expected RULE:SEV: [--severity=nope:error]
+exit: 2

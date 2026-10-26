@@ -1,0 +1,3 @@
+$ patslint a.dats b.dats c.dats
+a.dats: 2(12): warning(lint:footer): the footer names [b.dats], not [a.dats]
+exit: 1

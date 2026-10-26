@@ -1,0 +1,4 @@
+$ patslint a.dats
+a.dats: 1(10): error(lint:lex-error): unsupported char:
+a.dats: 2(10): warning(lint:trailing-ws): trailing white space
+exit: 1

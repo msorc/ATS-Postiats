@@ -1,0 +1,2 @@
+$ patslint --semantic a.sats b.hats
+exit: 0

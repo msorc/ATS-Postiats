@@ -1,0 +1,10 @@
+$ patslint --lines=2,4-5 a.dats --all-lines a.dats
+a.dats: 2(4): warning(lint:tab): a tab character
+a.dats: 4(4): warning(lint:tab): a tab character
+a.dats: 5(4): warning(lint:tab): a tab character
+a.dats: 1(4): warning(lint:tab): a tab character
+a.dats: 2(4): warning(lint:tab): a tab character
+a.dats: 3(4): warning(lint:tab): a tab character
+a.dats: 4(4): warning(lint:tab): a tab character
+a.dats: 5(4): warning(lint:tab): a tab character
+exit: 1

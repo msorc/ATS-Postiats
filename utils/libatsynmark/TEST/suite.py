@@ -22,6 +22,12 @@
 #
 # HX-2026-10
 #
+# The 96 [api] cases of the inputs with non-ASCII bytes (the string API of
+# test03: tok1, psm, lvl1s, html, proc1-3) are recorded from ATS2: the string
+# reader of the compiler (src/pats_reader.dats) sign-extended a byte, so that
+# ATS1 (and ATS2 before the fix) stopped at the first byte >= 128; the string
+# API now gives what the FILE and char-list APIs give.
+#
 import sys, os, json, subprocess, hashlib, shutil, tempfile, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))

@@ -1,0 +1,8 @@
+$ patslint --fix a.dats
+a.dats: 4(4): warning(lint:tab): a tab character
+exit: 1
+--- a.dats
+|         val x = 1$
+|         val s = "a\tb  $
+| c"$
+| val\ty = 2$

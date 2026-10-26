@@ -1,0 +1,3 @@
+$ patslint --semantic a.dats
+stderr: patslint: --semantic: [a.dats] has errors (see patsopt): skipped
+exit: 0

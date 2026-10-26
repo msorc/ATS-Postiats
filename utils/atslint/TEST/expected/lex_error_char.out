@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 1(9): error(lint:lex-error): the char constant is unclosed
+exit: 1

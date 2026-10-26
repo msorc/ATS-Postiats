@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 1(5): error(lint:lex-error): unsupported char: \xc3
+exit: 1

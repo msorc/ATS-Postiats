@@ -1,0 +1,10 @@
+$ patslint --semantic --enable=unused-arg,shadow a.dats
+a.dats: 6(7): warning(lint:unused-var): [unused] is never used
+a.dats: 8(7): warning(lint:unused-fun): [helper] is never used
+a.dats: 10(7): info(lint:shadow): [x] hides an enclosing [x]
+a.dats: 16(3): warning(lint:nonexhaustive): the patterns do not cover Blue()
+a.dats: 30(7): warning(lint:nonexhaustive): the patterns do not cover Green() | Blue()
+a.dats: 38(22): info(lint:unused-arg): [b] is never used
+a.dats: 43(7): warning(lint:unused-var): [n] is never used
+a.dats: 51(36): warning(lint:unused-var): [z] is never used
+exit: 1

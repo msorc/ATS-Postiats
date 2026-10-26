@@ -1,0 +1,3 @@
+$ patslint --disable=parse-error a.dats
+a.dats: 1(2): warning(lint:final-newline): no newline at the end of the file
+exit: 1

@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 1(1): warning(lint:blank-eof): blank lines at the end of the file
+exit: 1

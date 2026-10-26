@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 2(1): error(lint:lex-error): the external code block is unclosed
+exit: 1

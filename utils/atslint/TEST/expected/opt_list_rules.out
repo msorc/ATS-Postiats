@@ -1,0 +1,30 @@
+$ patslint --list-rules
+tab (warning): a tab character (outside strings)
+trailing-ws (warning): white space at the end of a line
+line-length (warning): a line longer than max-col
+crlf (warning): CRLF line ends
+final-newline (warning): no newline at the end of the file
+blank-eof (warning): blank lines at the end of the file
+indent (off): an indentation that is not a multiple of indent-width
+non-ascii (off): a non-ASCII character outside comments and strings
+lex-error (error): an error of the lexer (an unclosed comment, string, ...)
+parse-error (error): the first error of the parser
+footer (warning): a comment (* end of [NAME] *) that names another file
+separator (off): a separator comment that is not (* ****** ****** *)
+comma-space (off): no space after a comma
+trailing-semicolon (off): a semicolon before end, in, ), ] or }
+staload-dup (warning): a file that is staloaded twice
+staload-unused (warning): a named staload (X = ...) whose $X is never used
+let-empty (off): let in E end (no declarations)
+case-single (off): a case with one clause
+case-unchecked (off): a case that is not case+ or case-
+end-comment (info): an // end of [NAME] after a function named otherwise
+fnx-template (warning): fnx on a template (it is treated as fun)
+if-const (info): an if on true or false
+naming (off): a linear type without _vt, a view without _v
+unused-var (warning, --semantic): a local val or var that is never used
+unused-fun (warning, --semantic): a local function that is never used
+unused-arg (off, --semantic): an argument that is never used
+shadow (off, --semantic): a local name that hides another local name
+nonexhaustive (warning, --semantic): a case+ or case whose clauses do not cover all values
+exit: 0

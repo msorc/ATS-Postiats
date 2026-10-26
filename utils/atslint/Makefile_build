@@ -1,0 +1,66 @@
+#
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Makefile for patslint (run in BUILD/: make -C BUILD -f ../Makefile_build)
+#
+# patslint is written in ATS2 (no GC) and built by patsopt and the C compiler,
+# with libatsynmark.a (utils/libatsynmark) and libatsopt.a (the compiler as a
+# library); both are built if they are missing.
+#
+# Targets: patslint (the default), check (typecheck the files), clean, cleanall
+#
+# Variables: PATSHOME, PATSOPT, CC, CCFLAGS, LIBATSOPT, LIBGMP (see
+# ../libatsynmark/Makefile_vars)
+#
+
+######
+
+HERE:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+SATS=$(HERE)SATS
+DATS=$(HERE)DATS
+
+include $(HERE)../libatsynmark/Makefile_vars
+
+######
+
+all:: patslint
+
+######
+
+MODULES=patslint_main patslint_text patslint_token patslint_tree patslint_sema patslint_rules patslint_util
+OBJECTS=$(MODULES:%=%_dats.o)
+
+patslint: $(OBJECTS) $(LIBSYNMARK) $(LIBATSOPT)
+	$(PATSCC) -o $@ $(OBJECTS) $(LIBSYNMARK) $(LIBATSOPT) $(LIBGMP)
+
+######
+
+$(MODULES:%=%_dats.c): %_dats.c: $(DATS)/%.dats $(SATS)/patslint.sats $(HERE)CATS/patslint.cats
+	$(PATSOPT) --output $@ --dynamic $<
+
+$(OBJECTS): $(HERE)CATS/patslint.cats
+
+%_dats.o: %_dats.c
+	$(PATSCC) -c -o $@ $<
+
+.PRECIOUS: %_dats.c
+
+######
+
+check::
+	@echo "typecheck $(SATS)/patslint.sats"; $(PATSOPT) --typecheck -s $(SATS)/patslint.sats >/dev/null || exit 1
+	@for m in $(MODULES); do \
+	  echo "typecheck $(DATS)/$$m.dats"; $(PATSOPT) --typecheck -d $(DATS)/$$m.dats >/dev/null || exit 1; done
+
+######
+
+clean:: ; $(RMF) *~
+clean:: ; $(RMF) *_dats.c *_dats.o
+
+cleanall:: clean
+cleanall:: ; $(RMF) patslint
+
+distclean:: cleanall
+
+###### end of [Makefile for patslint] ######

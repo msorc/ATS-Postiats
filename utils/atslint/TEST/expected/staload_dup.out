@@ -1,0 +1,4 @@
+$ patslint a.dats
+a.dats: 3(1): warning(lint:staload-dup): the file is staloaded again (line 1)
+a.dats: 4(1): warning(lint:staload-dup): the file is staloaded again (line 2)
+exit: 1

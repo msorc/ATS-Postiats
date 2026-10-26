@@ -1,0 +1,4 @@
+$ patslint --format=json a "q".dats
+{"file": "a \"q\".dats", "line": 1, "col": 4, "severity": "warning", "rule": "tab", "message": "a tab character"}
+{"file": "a \"q\".dats", "line": 2, "col": 1, "severity": "error", "rule": "lex-error", "message": "the comment block is unclosed"}
+exit: 1

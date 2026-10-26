@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: MIT
+#
+# The configuration of patslint (utils/atslint) for this repository: the
+# defaults (see `patslint --help` and `patslint --list-rules`), without the
+# generated files and the test inputs that are wrong on purpose.
+#
+# the arena encodings that utils/arenagen generates (in any directory)
+exclude = *_gen*.hats
+exclude = prelude/*/SRCGEN/*
+exclude = src/CBOOT/*
+exclude = src/test/lexerr/*

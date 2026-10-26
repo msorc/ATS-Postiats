@@ -1,0 +1,4 @@
+$ patslint --enable=case-single,case-unchecked a.dats
+a.dats: 1(9): info(lint:case-unchecked): a case that is not case+ (the clauses are not checked)
+a.dats: 2(9): info(lint:case-single): a case with one clause (a val may do)
+exit: 0

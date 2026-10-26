@@ -126,7 +126,9 @@ case+ 0 of
       then let
         val () = r.ridx := succ(i)
       in
-        char2int0 (c)
+        // HX-2026-10: a byte >= 128 is not negative (EOF), as for
+        // KIND_CHARLST (char2int0 sign-extended it)
+        uchar2int0 (char2uchar0 (c))
       end // end of [then]
       else ~1 (*EOF*) // end of [else]
   end // end of [KIND_STRING]

@@ -1,0 +1,4 @@
+$ patslint --enable=separator a.dats
+a.dats: 3(1): info(lint:separator): a separator that is not (* ****** ****** *)
+a.dats: 4(1): info(lint:separator): a separator that is not (* ****** ****** *)
+exit: 0

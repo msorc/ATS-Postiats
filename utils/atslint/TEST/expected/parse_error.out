@@ -1,0 +1,3 @@
+$ patslint a.dats
+a.dats: 2(5): error(lint:parse-error): the syntactic entity [p0at] is needed
+exit: 1

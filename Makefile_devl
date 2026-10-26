@@ -106,6 +106,15 @@ $(MAKE1) -C utils/libatsynmark -f Makefile install && $(MAKE1) -C utils/atsynmar
 #
 ######
 #
+# patslint (utils/atslint), the linter of ATS2 source files, written in ATS2 and
+# built on libatsynmark.a and src/libatsopt.a: not part of [all]; use `make -f
+# Makefile_devl bin_patslint` after [all] (it builds bin/patslint and bin/patslint-diff)
+#
+bin_patslint: lib_patsopt ; \
+$(MAKE1) -C utils/libatsynmark -f Makefile install && $(MAKE1) -C utils/atslint -f Makefile build
+#
+######
+#
 # atsdoc (utils/atsdoc) and libatsdoc (libatsdoc), written in ATS2 and built on
 # src/libatsopt.a: not part of [all]; use `make -f Makefile_devl bin_atsdoc` after [all]
 # (it builds bin/atsdoc and ccomp/atslib/lib/libatsdoc.a)

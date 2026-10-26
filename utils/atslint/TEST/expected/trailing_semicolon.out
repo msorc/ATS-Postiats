@@ -1,0 +1,6 @@
+$ patslint --enable=trailing-semicolon a.dats
+a.dats: 1(21): info(lint:trailing-semicolon): a semicolon before the end of the block
+a.dats: 3(26): info(lint:trailing-semicolon): a semicolon before the end of the block
+a.dats: 4(25): info(lint:trailing-semicolon): a semicolon before the end of the block
+a.dats: 5(15): info(lint:trailing-semicolon): a semicolon before the end of the block
+exit: 0

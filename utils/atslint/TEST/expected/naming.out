@@ -1,0 +1,6 @@
+$ patslint --enable=naming a.sats
+a.sats: 2(11): info(lint:naming): the linear type [mylist] has no _vt suffix
+a.sats: 4(10): info(lint:naming): the linear type [buf] has no _vt suffix
+a.sats: 5(10): info(lint:naming): the linear type [obj] has no _vt suffix
+a.sats: 8(10): info(lint:naming): the view [arr] has no _v suffix
+exit: 0

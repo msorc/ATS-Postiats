@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# SPDX-FileCopyrightText: 2026 Mikhail Sorochan
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# patslint-diff [BASE] [patslint options]
+#
+# Runs patslint on the ATS files (.sats, .dats, .hats) of a git repository
+# that differ from BASE (default: origin/HEAD, else HEAD), and reports only
+# the findings on the changed lines. The working tree is compared with the
+# merge base of BASE and HEAD, so the changes not yet committed count too.
+# The options are given to patslint (before the files).
+#
+# PATSLINT: the patslint to run (default: the one next to this script,
+# else patslint of the PATH)
+#
+# The exit status is the highest one of the runs of patslint (0, 1 or 2).
+#
+
+set -u
+
+base=""
+case "${1:-}" in
+  -h|--help)
+    sed -n '6,19p' "$0" | sed 's/^# \{0,1\}//'
+    exit 0 ;;
+  -*|"") ;;
+  *) base=$1; shift ;;
+esac
+
+if [ -z "${PATSLINT:-}" ]; then
+  here=$(dirname "$0")
+  if [ -x "$here/patslint" ]; then PATSLINT=$here/patslint; else PATSLINT=patslint; fi
+fi
+
+top=$(git rev-parse --show-toplevel) || exit 2
+cd "$top" || exit 2
+
+if [ -z "$base" ]; then
+  if git rev-parse -q --verify origin/HEAD >/dev/null; then base=origin/HEAD; else base=HEAD; fi
+fi
+mbase=$(git merge-base "$base" HEAD) || {
+  echo "patslint-diff: no merge base of [$base] and HEAD" >&2; exit 2; }
+
+# one line per file: PATH<TAB>N-M,N-M,...
+ranges=$(git -c core.quotePath=false diff -U0 --no-color --no-ext-diff \
+    --diff-filter=d "$mbase" -- '*.sats' '*.dats' '*.hats' |
+  awk '
+    function flush() { if (file != "" && lines != "") print file "\t" lines }
+    /^\+\+\+ / {
+      flush(); lines = ""
+      file = substr($0, 5)
+      if (file == "/dev/null") file = ""; else sub(/^b\//, "", file)
+      next
+    }
+    /^@@ / {
+      # @@ -a[,b] +c[,d] @@
+      split($3, p, ",")
+      c = substr(p[1], 2) + 0
+      d = (2 in p) ? p[2] + 0 : 1
+      if (d > 0) lines = lines (lines == "" ? "" : ",") c "-" (c + d - 1)
+    }
+    END { flush() }
+  ') || exit 2
+
+status=0
+tab=$(printf '\t')
+while IFS="$tab" read -r file lines; do
+  [ -n "$file" ] || continue
+  [ -f "$file" ] || continue
+  "$PATSLINT" "$@" --lines="$lines" "$file"
+  rc=$?
+  [ "$rc" -gt "$status" ] && status=$rc
+done <<EOF
+$ranges
+EOF
+
+exit "$status"

@@ -1,0 +1,3 @@
+$ patslint --semantic a.dats
+a.dats: 2(17): warning(lint:unused-var): [y] is never used
+exit: 1

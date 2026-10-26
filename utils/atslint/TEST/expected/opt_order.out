@@ -1,0 +1,3 @@
+$ patslint a.dats --disable=tab b.dats
+a.dats: 1(4): warning(lint:tab): a tab character
+exit: 1

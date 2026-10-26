@@ -1,0 +1,2 @@
+$ patslint-diff HEAD
+exit: 0

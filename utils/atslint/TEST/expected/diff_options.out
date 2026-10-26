@@ -1,0 +1,3 @@
+$ patslint-diff HEAD --disable=tab --format=json
+{"file": "x.dats", "line": 2, "col": 10, "severity": "warning", "rule": "trailing-ws", "message": "trailing white space"}
+exit: 1

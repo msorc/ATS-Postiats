@@ -1,0 +1,6 @@
+$ patslint-diff HEAD
+new.dats: 1(10): warning(lint:trailing-ws): trailing white space
+x.dats: 2(10): warning(lint:trailing-ws): trailing white space
+x.dats: 4(4): warning(lint:tab): a tab character
+y z.sats: 2(4): warning(lint:tab): a tab character
+exit: 1

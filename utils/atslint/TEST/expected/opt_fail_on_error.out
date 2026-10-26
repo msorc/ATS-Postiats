@@ -1,0 +1,3 @@
+$ patslint --fail-on=error a.dats
+a.dats: 1(4): warning(lint:tab): a tab character
+exit: 0

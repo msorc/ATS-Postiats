@@ -1,0 +1,4 @@
+$ patslint --max-col=zero --indent-width=-2 a.dats
+stderr: error(patslint): expected a positive number: [--max-col=zero]
+stderr: error(patslint): expected a positive number: [--indent-width=-2]
+exit: 2

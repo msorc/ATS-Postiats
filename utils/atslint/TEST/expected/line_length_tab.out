@@ -1,0 +1,2 @@
+$ patslint --disable=tab a.dats
+exit: 0

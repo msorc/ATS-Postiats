@@ -1,0 +1,2 @@
+$ patslint --disable=tab,trailing-ws a.dats
+exit: 0

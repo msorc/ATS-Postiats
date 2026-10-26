@@ -1,0 +1,3 @@
+$ patslint --enable=tabs,indent a.dats
+stderr: error(patslint): unknown rule: [--enable=tabs,indent]
+exit: 2

@@ -1,0 +1,39 @@
+$ patslint --help
+usage: patslint [option | file] ...
+
+Check the style of ATS source files (.sats, .dats, .hats).
+
+options (an option applies to the files that follow it):
+  -h, --help           print this help
+  --list-rules         print the rules and their default severities
+  --enable=RULE,...    turn rules on (at their default severity)
+  --disable=RULE,...   turn rules off
+  --severity=RULE:SEV  set the severity of a rule
+                       (off, info, warning, error)
+  --max-col=N          the maximal length of a line (default 80)
+  --indent-width=N     the unit of indentation (default 2)
+  --lines=N-M,...      report only the findings on these lines
+  --all-lines          report the findings on all the lines (default)
+  --fail-on=SEV        the least severity that makes the exit status 1
+                       (default warning)
+  --format=text|json   the output: one finding per line, text or JSON
+  --source             (text) each finding is followed by its line and
+                       a caret under its column (the default when the
+                       output is a terminal)
+  --no-source          (text) the findings only
+  --fix                fix trailing-ws, crlf, final-newline, blank-eof
+                       and the tabs of indentations in place
+  --semantic           also the rules after the binding of the names
+                       (unused-var, ...; slower: the prelude is loaded)
+
+The nearest .patslint file in the directory of a file or above it
+configures its check (lines of the form KEY = VALUE, # for comments):
+  RULE = off | on | info | warning | error
+  max-col = N
+  indent-width = N
+  exclude = GLOB       (relative to the directory of .patslint)
+The options of the command line take precedence over it.
+A comment [lint: disable=RULE,...] disables rules on its line and the
+next one, [lint: disable-file=RULE,...] in the whole file (RULE can
+be [all]).
+exit: 0

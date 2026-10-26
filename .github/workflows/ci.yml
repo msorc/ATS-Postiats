@@ -14,7 +14,8 @@
 #               make -C src test
 #   portability make bootstrap with gcc and clang on Linux and macOS (and
 #               without libgmp), then a hello world
-#   suites      the suites of the tools and of the examples and book code
+#   suites      the suites of the tools and of the examples and book code;
+#               on a pull request, patslint on the lines it changes (make lint)
 #   documents   the packaging scripts and the text of the templates
 #   sanitizers  the compiler, src check, unit tests, examples under ASan and UBSan
 #               (sanitizers-full: the whole make -C src test, nightly)
@@ -169,13 +170,16 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          # make lint needs the merge base of the pull request and its base branch
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
       - uses: ./.github/actions/setup
         with:
           key: suites
           # doc/EXAMPLE/ATSLIB links a test with -lgdbm (the runner images no longer have it)
           packages: libgdbm-dev
 
-      - name: make tools (bootstraps first; atsdoc, pats2xhtml, the libraries)
+      - name: make tools (bootstraps first; atsdoc, pats2xhtml, patslint, the libraries)
         run: make tools
 
       - name: atsdoc and libatsdoc
@@ -187,6 +191,17 @@ jobs:
         run: |
           export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
           make -C utils/libatsynmark test
+
+      - name: patslint (the linter)
+        run: |
+          export PATSHOME="$PWD" PATH="$PWD/bin:$PATH"
+          make -C utils/atslint test
+
+      # the style of the lines of the ATS files that the pull request changes
+      # (.patslint excludes the generated files)
+      - name: patslint on the changed lines (make lint)
+        if: github.event_name == 'pull_request'
+        run: make lint LINTBASE="origin/${{ github.base_ref }}"
 
       # the lectures of ATS2FUNCRASH and the DOM tests of libatscc2js run
       # only when bin/atscc2js is built and node is there (node is on the

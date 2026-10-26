@@ -1,0 +1,5 @@
+$ patslint a.dats
+a.dats: 1(4): warning(lint:tab): a tab character
+a.dats: 2(5): warning(lint:tab): a tab character
+a.dats: 3(1): warning(lint:tab): a tab character
+exit: 1

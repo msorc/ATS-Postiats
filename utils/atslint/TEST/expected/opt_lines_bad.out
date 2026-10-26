@@ -1,0 +1,4 @@
+$ patslint --lines=3-1 --lines=x a.dats
+stderr: error(patslint): expected N-M,...: [--lines=3-1]
+stderr: error(patslint): expected N-M,...: [--lines=x]
+exit: 2

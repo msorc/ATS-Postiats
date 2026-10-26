@@ -1,0 +1,4 @@
+$ patslint --severity=tab:error --severity=trailing-ws:info a.dats
+a.dats: 1(4): error(lint:tab): a tab character
+a.dats: 1(10): info(lint:trailing-ws): trailing white space
+exit: 1

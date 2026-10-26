@@ -1,0 +1,5 @@
+$ patslint a.dats
+a.dats: 1(21): warning(lint:line-length): the line is 34 columns long (max-col is 20)
+a.dats: 1(30): error(lint:trailing-ws): trailing white space
+a.dats: 3(1): info(lint:indent): the indentation (3) is not a multiple of 4
+exit: 1

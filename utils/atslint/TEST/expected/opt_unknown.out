@@ -1,0 +1,3 @@
+$ patslint --frobnicate a.dats
+stderr: error(patslint): unknown option: [--frobnicate]
+exit: 2

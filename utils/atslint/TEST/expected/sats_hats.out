@@ -1,0 +1,4 @@
+$ patslint a.sats b.hats
+a.sats: 1(14): warning(lint:trailing-ws): trailing white space
+b.hats: 1(1): warning(lint:tab): a tab character
+exit: 1

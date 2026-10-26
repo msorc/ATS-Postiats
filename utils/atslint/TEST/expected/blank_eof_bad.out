@@ -1,0 +1,4 @@
+$ patslint a.dats
+a.dats: 2(1): warning(lint:blank-eof): blank lines at the end of the file
+a.dats: 3(1): warning(lint:trailing-ws): trailing white space
+exit: 1

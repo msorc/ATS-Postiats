@@ -9,8 +9,10 @@
 #   make bootstrap  # a clone with no ATS2 compiler: build patsopt from the C bundle src/CBOOT (a C compiler, make and python3; libgmp or KIND=intknd), then everything
 #   make            # the same as `make all` (it bootstraps when there is no bin/patsopt and no PATSOPT)
 #   make check      # typecheck every module of the compiler
-#   make tools      # atsdoc, pats2xhtml and the libraries they need (not part of `make all`)
+#   make tools      # atsdoc, pats2xhtml, patslint and the libraries they need (not part of `make all`)
 #   make test       # the regression suites of the repository (builds `all` and `tools` first)
+#   make lint       # patslint on the lines of the ATS files changed since LINTBASE (default origin/devel)
+#   make lint-all   # patslint on all the ATS files of the repository: the number of findings of each rule
 #   make install    # PREFIX=/usr/local DESTDIR=: lib/ats2-postiats-<version>/ and the wrappers bin/{patsopt,patscc,myatscc,...}
 #   make uninstall  # removes what `make install` made
 #   make dist       # the release tarballs and their .sha256
@@ -71,7 +73,7 @@ C3_ARG=C3NSTRINTKND=intknd
 endif
 endif
 
-.PHONY: all bootstrap tools check test doc book pack dist install uninstall clean cleanall distclean
+.PHONY: all bootstrap tools check test lint lint-all doc book pack dist install uninstall clean cleanall distclean
 
 ######
 
@@ -100,11 +102,11 @@ bootstrap::
 
 ######
 #
-# atsdoc, pats2xhtml, libatsdoc.a and libatsynmark.a (they are built on
-# libatsopt.a, so `all` comes first)
+# atsdoc, pats2xhtml, patslint, libatsdoc.a and libatsynmark.a (they are
+# built on libatsopt.a, so `all` comes first)
 #
 tools:: all
-	$(MAKE) -f $(DEVL) bin_atsdoc bin_pats2xhtml
+	$(MAKE) -f $(DEVL) bin_atsdoc bin_pats2xhtml bin_patslint
 
 ######
 #
@@ -122,7 +124,29 @@ test:: all tools
 	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C src test
 	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C utils/atsdoc test
 	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C utils/libatsynmark test
+	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C utils/atslint test
 	PATH=$(PATSHOME)/bin:$$PATH $(MAKE) -C doc -f Makefile_test testall
+
+######
+#
+# the linter (utils/atslint, built by `make tools`): `make lint` checks the
+# lines of the ATS files that differ from the merge base of LINTBASE and HEAD
+# (the changes not yet committed included); `make lint-all` reports, without
+# failing, the number of findings of each rule in all the tracked ATS files.
+# The configuration of the repository is .patslint (the generated files are
+# excluded).
+#
+LINTBASE ?= origin/devel
+#
+lint::
+	@test -x $(PATSHOME)/bin/patslint || { echo "ERROR: bin/patslint is not built: run 'make tools'." ; exit 1 ; }
+	PATSLINT=$(PATSHOME)/bin/patslint $(PATSHOME)/utils/atslint/patslint-diff $(LINTBASE) $(LINTFLAGS)
+
+lint-all::
+	@test -x $(PATSHOME)/bin/patslint || { echo "ERROR: bin/patslint is not built: run 'make tools'." ; exit 1 ; }
+	@cd $(PATSHOME) && git ls-files -z '*.sats' '*.dats' '*.hats' \
+	  | xargs -0 $(PATSHOME)/bin/patslint $(LINTFLAGS) \
+	  | sed -n 's/.*(lint:\([a-z-]*\)).*/\1/p' | sort | uniq -c | sort -rn ; true
 
 ######
 #
@@ -178,8 +202,8 @@ pack::
 # libats/, share/, contrib/, ccomp/runtime/, ccomp/atslib/lib/*.a); the
 # scripts $(PREFIX)/bin/{patsopt,patscc,myatscc,...} set PATSHOME to it (when
 # the caller has not) and exec the real programs. atsdoc, pats2xhtml,
-# libatsopt.a, libatsdoc.a and libatsynmark.a are installed when they were
-# built (make tools). The manual pages doc/man/*.1 go to $(PREFIX)/share/man/man1.
+# patslint, libatsopt.a, libatsdoc.a and libatsynmark.a are installed when
+# they were built (make tools). The manual pages doc/man/*.1 go to $(PREFIX)/share/man/man1.
 # DESTDIR is for packagers: it is not in the scripts.
 #
 VERSION := $(shell cat $(PATSHOME)/VERSION 2>/dev/null)
@@ -194,7 +218,7 @@ INST_MAN_D := $(DESTDIR)$(PREFIX)/share/man/man1
 # the manual pages (doc/man/*.1)
 INST_MANS := $(notdir $(wildcard $(PATSHOME)/doc/man/*.1))
 # the programs of bin/ that are installed when they exist (with a script in $(PREFIX)/bin)
-INST_PROGS := patsopt patscc myatscc atsdoc pats2xhtml
+INST_PROGS := patsopt patscc myatscc atsdoc pats2xhtml patslint patslint-diff
 # the trees that are copied (symbolic links are kept; the build products are not)
 INST_TREES := share ccomp/runtime prelude libats contrib
 #
@@ -273,6 +297,7 @@ distclean:: cleanall
 	-$(MAKE) -C utils/atsdoc cleanall
 	-$(MAKE) -C utils/atsynmark cleanall
 	-$(MAKE) -C utils/libatsynmark cleanall
+	-$(MAKE) -C utils/atslint cleanall
 
 ######
 

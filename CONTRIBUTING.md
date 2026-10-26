@@ -22,9 +22,10 @@ The targets of the root `Makefile`:
 | --- | --- |
 | `all` (default) | the compiler, the tools and the runtime library |
 | `bootstrap` | `patsopt` from `src/CBOOT`, then `all` |
-| `tools` | `atsdoc`, `pats2xhtml` and their libraries |
+| `tools` | `atsdoc`, `pats2xhtml`, `patslint` and their libraries |
 | `check` | the type checking of every module of the compiler |
 | `test` | the regression suites of the repository |
+| `lint`, `lint-all` | `patslint` on the changed lines; the findings of the whole tree |
 | `install`, `uninstall` | `PREFIX`, `DESTDIR` |
 | `dist` | the release tarballs and their checksums |
 | `doc`, `book` | the generated library sources; the books |
@@ -43,6 +44,7 @@ make -C src check                          # the type checking of the compiler
 make -C src test                           # the suites of the compiler
 make -C utils/atsdoc test                  # atsdoc and libatsdoc
 make -C utils/libatsynmark test            # libatsynmark and pats2xhtml
+make -C utils/atslint test                 # patslint
 make -C doc -f Makefile_test testall       # the examples and the book code
 make -C utils/atsdoc genall                # the .atxt templates of the repository
 sh share/SCRIPT/check_tree_hygiene.sh      # dangling links, absolute paths
@@ -81,7 +83,11 @@ so in the commit message.
 * ATS: indent by two spaces, no tabs, no trailing white space, lines of at
   most about 80 columns, LF line ends and a final newline. Follow the
   neighbouring file: the style of the sources is not uniform and a change
-  should not reformat what it does not touch.
+  should not reformat what it does not touch. `make lint` (after `make
+  tools`) checks these rules with `patslint` on the lines that you changed
+  since `devel`, as the CI does on a pull request; see
+  [utils/atslint/README](utils/atslint/README) for the rules and for the
+  comments that disable one.
 * File suffixes: `.sats` is an interface, `.dats` an implementation, `.hats`
   an included file, `.cats` an inline C file. An interface goes first, its
   implementation in the `.dats`; comments of the form `(* ... *)` and `//`
