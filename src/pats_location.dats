@@ -232,6 +232,9 @@ static long patsopt_errloc_beg = -1 ;
 static long patsopt_errloc_end = -1 ;
 static int patsopt_errloc_row = 0 ; // 1-based
 static int patsopt_errloc_atexit = 0 ;
+static char *patsopt_errloc_lfile = (char*)0 ; // the last echo flushed
+static long patsopt_errloc_lbeg = -1 ;
+static long patsopt_errloc_lend = -1 ;
 //
 static char *patsopt_errloc_cname = (char*)0 ; // cache
 static char *patsopt_errloc_cbuf = (char*)0 ;
@@ -274,6 +277,12 @@ patsopt_errloc_flush()
   char num[32] ;
   if (!file) return ;
   patsopt_errloc_file = (char*)0 ; patsopt_errloc_beg = -1 ;
+  if (patsopt_errloc_lfile && !strcmp(patsopt_errloc_lfile, file)
+      && patsopt_errloc_lbeg == beg && patsopt_errloc_lend == end)
+    { free(file) ; return ; } // the same echo again: skipped
+  free(patsopt_errloc_lfile) ;
+  patsopt_errloc_lfile = strdup(file) ;
+  patsopt_errloc_lbeg = beg ; patsopt_errloc_lend = end ;
   patsopt_errloc_load(file) ; free(file) ;
   if (patsopt_errloc_clen < 0) return ;
   buf = patsopt_errloc_cbuf ; len = patsopt_errloc_clen ;
@@ -348,18 +357,16 @@ implement
 prerr_errloc_flush () = patsopt_errloc_flush ()
 
 implement
-prerr_errloc (loc) = let
+prerr_location_short (loc) = let
   val err = stderr_ref
 in
 //
 if patsopt_legacyerrors_get() > 0
   then fprint_location (err, loc)
   else let
-    val b = loc.beg_ntot() and e = loc.end_ntot()
     val nr1 = loc.beg_nrow()+1 and nr2 = loc.end_nrow()+1
     val nc1 = loc.beg_ncol()+1 and nc2 = loc.end_ncol()+1
     val fil = loc.filename()
-    val () = patsopt_errloc_flush ()
     val () = fprint_locpragma (err, loc.locpragma())
     val () = $FIL.fprint_filename_full (err, fil)
     val () = fprint_string (err, ":")
@@ -370,6 +377,25 @@ if patsopt_legacyerrors_get() > 0
     val () =
     if nr2 > nr1 then (fprint_int (err, nr2); fprint_string (err, ":"))
     val () = fprint_int (err, nc2)
+  in
+    // nothing
+  end // end of [else]
+//
+end // end of [prerr_location_short]
+
+implement
+prerr_errloc (loc) = let
+  val err = stderr_ref
+in
+//
+if patsopt_legacyerrors_get() > 0
+  then fprint_location (err, loc)
+  else let
+    val b = loc.beg_ntot() and e = loc.end_ntot()
+    val nr1 = loc.beg_nrow()+1
+    val fil = loc.filename()
+    val () = patsopt_errloc_flush ()
+    val () = prerr_location_short (loc)
     val () =
     if b >= 0L then
       patsopt_errloc_pending

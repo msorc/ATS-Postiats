@@ -142,22 +142,45 @@ end // end of [local]
 
 local
 
+fn funclo_word (fc: funclo): string =
+  case+ fc of
+  | FUNCLOfun () => "a function"
+  | FUNCLOcloptr () => "a linear closure (cloptr)"
+  | FUNCLOclo0 () => "a flat closure (lam@)"
+  | FUNCLOcloref () => "a cloref (not allowed)"
+// end of [funclo_word]
+
+fn clokind_word (knd: int): string =
+  if knd > 0 then "a linear closure (cloptr)"
+  else (if knd < 0 then "a cloref (not allowed)" else "a flat closure (lam@)")
+// end of [clokind_word]
+
 fn prerr_staerr_funclo_equal (
   loc: location, fc1: funclo, fc2: funclo
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": function/closure mismatch:\n";
   prerr "The actual funclo kind is: "; prerr_funclo fc1; prerr_newline ();
   prerr "The needed funclo kind is: "; prerr_funclo fc2; prerr_newline ();
+end else begin // HX-2026-10: surface words
+  prerr_error3_loc (loc);
+  prerr ": function kind mismatch: expected "; prerr (funclo_word fc2);
+  prerr ", actual "; prerr (funclo_word fc1); prerr_newline ();
 end // end of [prerr_staerr_funclo_equal]
 
 fn prerr_staerr_clokind_equal (
   loc: location, knd1: int, knd2: int
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": closure mismatch:\n";
   prerr "The actual closure kind is: "; prerr_int knd1; prerr_newline ();
   prerr "The needed closure kind is: "; prerr_int knd2; prerr_newline ();
+end else begin
+  prerr_error3_loc (loc);
+  prerr ": closure kind mismatch: expected "; prerr (clokind_word knd2);
+  prerr ", actual "; prerr (clokind_word knd1); prerr_newline ();
 end // end of [prerr_staerr_clokind_equal]
 
 fn prerr_staerr_linearity_equal (
@@ -175,11 +198,21 @@ end // end of [prerr_staerr_linearity_equal]
 
 fn prerr_staerr_pfarity_equal (
   loc: location, npf1: int, npf2: int
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": proof arity mismatch:\n";
   prerr "The actual proof arity is: "; prerr_int npf1; prerr_newline ();
   prerr "The needed proof arity is: "; prerr_int npf2; prerr_newline ();
+end else let
+  // HX-2026-10: a negative arity means that no proof part is given
+  fn pr (n: int): void =
+    if n < 0 then prerr "none given" else prerr_int n
+in
+  prerr_error3_loc (loc);
+  // the callers do not agree on the order: say it symmetrically
+  prerr ": proof arity mismatch: "; pr npf1;
+  prerr " vs "; pr npf2; prerr_newline ();
 end // end of [prerr_staerr_pfarity_equal]
 
 (* ****** ****** *)

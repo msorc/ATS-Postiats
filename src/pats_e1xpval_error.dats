@@ -63,6 +63,16 @@ staload "./pats_e1xpval.sats"
 
 (* ****** ****** *)
 
+(*
+** HX-2026-10: on stderr the location is the readable one (and echoes the
+** source line); [prerr_errloc] prints the old form in the legacy mode
+*)
+fn fprint_loc_err
+  (out: FILEref, loc: $LOC.location): void =
+  if $UN.cast{ptr}(out) = $UN.cast{ptr}(stderr_ref)
+    then $LOC.prerr_errloc (loc) else $LOC.fprint_location (out, loc)
+// end of [fprint_loc_err]
+
 implement
 fprint_valerr
   (out, x) = let
@@ -71,29 +81,29 @@ in
 //
 case+ valerr_view (x) of
 | ~VE_valize (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression cannot be evaluated to a value."
     val () = fprint_newline (out)
   }
 | ~VE_valize_defined (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression is expected to be an indentifer."
     val () = fprint_newline (out)
   }
 | ~VE_valize_undefined (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression is expected to be an indentifer."
     val () = fprint_newline (out)
   }
 | ~VE_maxlevel (lev, e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the maximal evaluation depth ("
     val () = fprint_int (out, lev)
     val () = prstr ") has been reached."
     val () = fprint_newline (out)
   }
 | ~VE_opr_arglst (e0, id) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the operator ["
     val () = $SYM.fprint_symbol (out, id)
     val () = prstr "] cannot handle its argument(s)."
@@ -106,53 +116,53 @@ case+ valerr_view (x) of
       | ~E1XPide (id) => id
       | v => (e1xp_node_view_free (v); assertloc (false); $SYM.symbol_make_string ("?"))
     ) : symbol // HX: [val-E1XPide (id) = e0.e1xp_node]
-    val () = $LOC.fprint_location (out, loc0)
+    val () = fprint_loc_err (out, loc0)
     val () = prstr ": error(1): the identifier ["
     val () = $SYM.fprint_symbol (out, id)
     val () = prstr "] is unbound."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPundef (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression cannot be evaluated as it is un-defined."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPlist (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression cannot be evaluated as it is a tuple."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPapp_fun (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the applied expression is required to be an identifier."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPappid_fun (e0, id) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the applied identifier ["
     val () = $SYM.fprint_symbol (out, id)
     val () = prstr "] does not refer to a function."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPappid_opr (e0, id) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the applied identifier ["
     val () = $SYM.fprint_symbol (out, id)
     val () = prstr "] does not refer to a supported operator."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPappid_arity (e0, id) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): arity mismatch for this function application."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPfun (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression cannot be evaluated as it is a function."
     val () = fprint_newline (out)
   }
 | ~VE_E1XPerr (e0) => {
-    val () = $LOC.fprint_location (out, e0.e1xp_loc())
+    val () = fprint_loc_err (out, e0.e1xp_loc())
     val () = prstr ": error(1): the expression cannot be evaluated as it indicates an error."
     val () = fprint_newline (out)
   }
