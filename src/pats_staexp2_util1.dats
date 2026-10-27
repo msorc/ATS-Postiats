@@ -683,7 +683,6 @@ case+ xs of
     val () = fprint_string (out, "->")
     val () = fprint_s2exp (out, x.1)
     val () = loop (out, xs1, i+1)
-    prval () = fold@ (xs)
   in
     // nothing
   end // end of [list_vt_cons]
@@ -742,12 +741,10 @@ case+ xs of
 | @list_vt_cons (x, xs1) =>
     if eq_s2var_s2var (x.0, s2v) then let
       val res = x.1
-      prval () = fold@ (xs)
     in
       Some_vt (res)
     end else let
       val ans = loop (xs1, s2v)
-      prval () = fold@ (xs)
     in
       ans
     end // end of [list_vt_cons]
@@ -774,11 +771,8 @@ case+ xs of
     val s2Vs = s2var_get_sVarset (x.0)
     val ismem = s2Varset_ismem (s2Vs, s2V)
   in
-    if ismem then let
-      prval () = fold@ (xs) in true
-    end else let
+    if ismem then true else let
       val ans = loop (xs1, s2V)
-      prval () = fold@ (xs)
     in
       ans
     end (* end of [if] *)

@@ -179,14 +179,14 @@ case+ env of
       // end of [if]
     ) : Option_vt (s2var) // end of [val]
   in
-    fold@ (env); ans
+    ans
   end
 | @ALPHENVdadd
     (_key, _val, env1) => let
-    val ans = loop (env1, key) in fold@ (env); ans
+    val ans = loop (env1, key) in ans
   end // end of [ALPHENVdadd]
 | @ALPHENVmark (env1) => let
-    val ans = loop (env1, key) in fold@ (env); ans
+    val ans = loop (env1, key) in ans
   end // end of [ALPHENVmark]
 | ALPHENVnil () => None_vt ()
 end // end of [loop]
@@ -209,7 +209,7 @@ in
 case+ env of
 | @ALPHENVsadd
     (_key, _val, env1) => let
-    val ans = loop (env1, key) in fold@ (env); ans
+    val ans = loop (env1, key) in ans
   end // end of [ALPHENVsadd]
 | @ALPHENVdadd
     (_key, _val, env1) => let
@@ -219,10 +219,10 @@ case+ env of
       // end of [if]
     ) : Option_vt (d2var) // end of [val]
   in
-    fold@ (env); ans
+    ans
   end
 | @ALPHENVmark (env1) => let
-    val ans = loop (env1, key) in fold@ (env); ans
+    val ans = loop (env1, key) in ans
   end // end of [ALPHENVmark]
 | ALPHENVnil () => None_vt ()
 end // end of [loop]
@@ -289,7 +289,6 @@ case+ ctx of
     val () = fprint_m2val (out, m2v)
     val () = fprint_newline (out)
     val () = fprint_evalctx (out, ctx1)
-    prval () = fold@ (ctx)
   in
     // nothing
   end // end of [EVALCTXsadd]
@@ -301,7 +300,6 @@ case+ ctx of
     val () = fprint_m2val (out, m2v)
     val () = fprint_newline (out)
     val () = fprint_evalctx (out, ctx1)
-    prval () = fold@ (ctx)
   in
     // nothing
   end // end of [EVALCTXsadd]
@@ -340,7 +338,6 @@ case+ ctx of
     _key, _val, ctx1
   ) => let
     val ans = evalctx_dfind (ctx1, d2v)
-    prval () = fold@ (ctx)
   in
     ans
   end // end of [EVALCTXsadd]
@@ -350,12 +347,10 @@ case+ ctx of
   in
     if d2v = _key then let
       val ans = Some_vt (_val)
-      prval () = fold@ (ctx)
     in
       ans
     end else let
       val ans = evalctx_dfind (ctx1, d2v)
-      prval () = fold@ (ctx)
     in
       ans
     end // end of [if]
@@ -401,13 +396,13 @@ in
       val s2e = s2exp_make_m2val (_val)
       val () = stasub_add (sub, s2v, s2e)
     in
-      fold@ (ctx)
+      ()
     end
   | @EVALCTXdadd
       (_key, _val, ctx1) => let
       val () = aux (ctx1, sub)
     in
-      fold@ (ctx)
+      ()
     end
   | EVALCTXnil () => ()
 end // end of [aux]

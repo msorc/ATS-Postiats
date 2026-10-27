@@ -182,18 +182,18 @@ icnstr_copy (ic, n) =
       val iv_new = myintvec_copy<a> (iv, n)
       val knd1 = knd
     in
-      fold@ (ic); ICvec (knd1, iv_new)
+      ICvec (knd1, iv_new)
     end // end of [ICvec]
   | @ICveclst (knd, ics) => let
       val ics_new = icnstrlst_copy<a> (ics, n)
       val knd1 = knd
     in
-      fold@ (ic); ICveclst (knd1, ics_new)
+      ICveclst (knd1, ics_new)
     end // end of [ICveclst]
   | @ICerr (loc, s3e) => let
       val loc1 = loc and s3e1 = s3e
     in
-      fold@ (ic); ICerr (loc1, s3e1)
+      ICerr (loc1, s3e1)
     end // end of [ICerr]
 // end of [icnstr_copy]
 
@@ -204,7 +204,6 @@ icnstrlst_copy (ics, n) =
       (ic, ics1) => let
       val ic_new = icnstr_copy<a> (ic, n)
       val ics1_new = icnstrlst_copy<a> (ics1, n)
-      prval () = fold@ (ics)
     in
       list_vt_cons (ic_new, ics1_new)
     end // end of [list_vt_cons]
@@ -217,15 +216,15 @@ implement{a}
 icnstr_negate (ic) =
   case+ ic of
   | @ICvec (knd, _) => (
-      knd := ~(knd); fold@ (ic); ic
+      knd := ~(knd); ic
     ) // end of [ICvec]
   | @ICveclst (knd, ics) => let
       val () = knd := 1-knd
       val () = ics := icnstrlst_negate<a> (ics)
     in
-      fold@ (ic); ic
+      ic
     end // end of [ICveclst]
-  | @ICerr _ => (fold@ (ic); ic)
+  | @ICerr _ => ic
 // end of [icnstr_negate]
 
 implement{a}
@@ -235,7 +234,7 @@ icnstrlst_negate (ics) =
       val () = ic := icnstr_negate<a> (ic)
       val () = ics1 := icnstrlst_negate<a> (ics1)
     in
-      fold@ (ics); ics
+      ics
     end // end of [list_vt_cons]
   | list_vt_nil () => ics
 // end of [icnstrlst_negate]
@@ -401,7 +400,6 @@ case+ ivs of
     end else let
       val ans =
         myintveclst_inspect_gte<a> (ivs1, n)
-      prval () = fold@ (ivs)
     in
       ans // the final answers
     end // end of [if]
@@ -554,7 +552,7 @@ case+ ivs of
     val () = myintvec_normalize_gte<a> (iv, n)
     val () = myintveclst_normalize_gte<a> (ivs1, n)
   in
-    fold@ (ivs)
+    ()
   end // end of [list_vt_cons]
 | list_vt_nil () => ()
 //

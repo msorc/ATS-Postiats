@@ -67,10 +67,9 @@ symmaplst_search {n:nat} .<n>. (
       val ans = symmap_search<itm> (m, k)
     in
       case+ ans of
-      | ~Some_vt (x) => (fold@ ms0; Some_vt (x))
+      | ~Some_vt (x) => Some_vt (x)
       | ~None_vt () => ans where {
           val ans = symmaplst_search<itm> (ms, k)
-          val () = fold@ ms0
         } // end of [None_vt]
     end (* end of [list_vt_cons] *)
   | list_vt_nil () => None_vt ()

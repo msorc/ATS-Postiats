@@ -111,9 +111,9 @@ fun loop
       prval () = opt_clear (res)
       val n = loop (s2vs1, nk+1, vmap)
     in
-      fold@ (s2vs); n
+      n
     end // end of [list_vt_cons]
-  | @list_vt_nil () => (fold@ (s2vs); nk)
+  | @list_vt_nil () => nk
 // end of [loop]
 //
 var vim

@@ -177,12 +177,10 @@ case+ poss of
     in
       if (sgn >= 0) then let
         val ans = auxcomb (n, i, neus, poss1, neg)
-        prval () = fold@ (poss)
       in
         ans
-      end else let
-        prval () = fold@ (poss) in ~1(*CONTRADITION*)
-      end // end of [if]
+      end else ~1(*CONTRADITION*)
+      // end of [if]
     end (* end of [list_vt_cons] *)
 //
 end // end of [auxcomb]
@@ -562,7 +560,7 @@ myintveclst_elimeq_at
       val () = myintvec_elimeq_at<a> (iv, iveq, n, i)
       val () = myintveclst_elimeq_at<a> (ivs1, iveq, n, i)
     in
-      fold@ (ivs)
+      ()
     end // end of [list_vt_cons]
   | list_vt_nil () => ()
 ) // end of [myintveclst_elimeq_at]
@@ -719,8 +717,8 @@ case+ x of
 | MYIVEQLSTnil
     ((*void*)) => ()
 | @MYIVEQLSTcons
-    (_, _, _, prev, _) => (prev := p; fold@ (x))
-| @MYIVEQLSTmark (prev, _) => (prev := p; fold@ (x))
+    (_, _, _, prev, _) => prev := p
+| @MYIVEQLSTmark (prev, _) => prev := p
 //
 ) (* end of [myiveqlst_set_prev] *)
 
@@ -753,7 +751,7 @@ myiveqlst_cons
   val () = (
     case+ res of
     | @MYIVEQLSTcons (_, _, _, _, next) =>
-        (myiveqlst_set_prev<a> (next, resp); fold@ (res))
+        (myiveqlst_set_prev<a> (next, resp))
     | MYIVEQLSTnil () => ()
     | MYIVEQLSTmark _ => ()
   ) : void
@@ -782,7 +780,7 @@ val resp = myiveqlst2ptr(res)
 val () = (
   case+ res of
   | @MYIVEQLSTmark (_, next) =>
-      (myiveqlst_set_prev<a> (next, resp); fold@ (res))
+      (myiveqlst_set_prev<a> (next, resp))
   | MYIVEQLSTnil () => ()
   | MYIVEQLSTcons _ => ()
 ) : void
@@ -841,10 +839,10 @@ case+ xs of
   // end of [MYIVEQLSTnil]
 | @MYIVEQLSTcons
     (_, _, _, _, xs1) => let
-    val res = loop (pcur, xs1) in fold@ (xs); res
+    val res = loop (pcur, xs1) in res
   end // end of [MYIVEQLSTcons]
 | @MYIVEQLSTmark(_, xs1) => let
-    val res = loop (pcur, xs1) in fold@ (xs); res
+    val res = loop (pcur, xs1) in res
   end // end of [MYIVEQLSTmark]
 //
 end // end of [loop]
@@ -889,13 +887,11 @@ case+ i1veqs of
     val () = if
       stamp0 <= stamp then myintvec_elimeq_at<a> (iv, i1veq, n, i)
     // end of [val]
-    prval () = fold@ (i1veqs)
   } (* end of [MYIVEQLSTcons] *)
 | @MYIVEQLSTmark
     (prev, _) => prev1 where
   {
     val prev1 = prev
-    prval () = fold@ (i1veqs)
   } (* end of [MYIVEQLSTmark] *)
 //
 ) : ptr // end of [val]
@@ -957,13 +953,13 @@ case+ i1vs of
     val () = myintvec_elimeqlst<a> (stamp, iv_new, i1veqs, n)
     val res = loop (i1vs1, i1veqs, n, list_vt_cons (iv_new, acc))
   in
-    fold@ (i1vs); res
+    res
   end // end of [MYIVLSTcons]
 | @MYIVLSTmark
     (i1vs1) => let
     val res = loop (i1vs1, i1veqs, n, acc)
   in
-    fold@ (i1vs); res
+    res
   end // end of [MYIVLSTmark]
 //
 end // end of [loop]
@@ -1209,7 +1205,6 @@ case+ ic of
       prval () = fold@ (ic)
       val ans3 = auxlt<a> (stamp, i1vs, i1veqs, iv_new, n)
       val ans2 = auxcont<a> (stamp, iset, i1vs, i1veqs, n, ics1, ans3)
-      prval () = fold@ (ics)
     in
       ans2
     end // end of [knd=~2]
@@ -1218,7 +1213,6 @@ case+ ic of
       prval () = fold@ (ic)
       val ans3 = auxgte<a> (stamp, i1vs, i1veqs, iv_new, n)
       val ans2 = auxcont<a> (stamp, iset, i1vs, i1veqs, n, ics1, ans3)
-      prval () = fold@ (ics)
     in
       ans2
     end // end of [knd = 2]
@@ -1227,7 +1221,6 @@ case+ ic of
       prval () = fold@ (ic)
       val ans3 = auxeq<a> (stamp, i1vs, i1veqs, iv_new, n)
       val ans2 = auxcont<a> (stamp, iset, i1vs, i1veqs, n, ics1, ans3)
-      prval () = fold@ (ics)
     in
       ans2
     end // end of [knd = 1]
@@ -1257,7 +1250,7 @@ case+ ic of
         auxmain_conj<a> (
         stamp, iset, i1vs, i1veqs, n, ics1, ics2
       ) // end of [val]
-      prval () = fold@ (ic); prval () = fold@ (ics)
+      prval () = fold@ (ic)
     in
       ans2
     end // end of [conj]
@@ -1266,13 +1259,13 @@ case+ ic of
         auxmain_disj<a> (
         stamp, iset, i1vs, i1veqs, n, ics1, ics2, list_vt_nil
       ) // end of [val]
-      prval () = fold@ (ic); prval () = fold@ (ics)
+      prval () = fold@ (ic)
     in
       ans2
     end // end of [disj]
   end // end of [ICveclst]
 | @ICerr (loc, s3e) => let
-    prval () = fold@ (ic); prval () = fold@ (ics) in 0(*undecided*)
+    prval () = fold@ (ic) in 0(*undecided*)
   end // end of [ICerr]
 //
 ) (* end of [list_vt_cons] *)

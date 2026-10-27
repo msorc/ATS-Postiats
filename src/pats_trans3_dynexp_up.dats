@@ -721,10 +721,10 @@ d23exp_open_and_add
   (d23e: !d23exp): void = (
 //
   case+ d23e of
-  | @D23Ed2exp (d2e) => fold@(d23e)
+  | @D23Ed2exp (d2e) => ()
   | @D23Ed3exp (d3e) => let
       val () =
-        d3exp_open_and_add(d3e) in fold@(d23e)
+        d3exp_open_and_add(d3e) in ()
       // end of [val]
     end // end of [D23Ed3exp]
 //
@@ -740,7 +740,6 @@ d23explst_open_and_add
       (d23e, d23es1) => let
       val () = d23exp_open_and_add(d23e)
       val () = d23explst_open_and_add(d23es1)
-      prval ((*folded*)) = fold@(d23es)
     in
       // nothing
     end // end of [cons]

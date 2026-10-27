@@ -454,7 +454,6 @@ case+ xs of
     val rest = strptrlst_concat (xs1)
     val res = string0_append (p2s(x), p2s(rest))
     val ((*freed*)) = strptr_free (rest)
-    prval ((*folded*)) = fold@ (xs)
   in
     res
   end // end of [list_vt_cons]

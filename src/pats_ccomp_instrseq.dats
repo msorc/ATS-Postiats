@@ -90,7 +90,7 @@ in
 //
 case+ res of
 | @INSTRSEQ (xs) => let
-    val () = xs := list_vt_cons (x, xs) in fold@ (res)
+    val () = xs := list_vt_cons (x, xs) in ()
   end // end of [INSTRSEQ]
 //
 end // end of [instrseq_add]

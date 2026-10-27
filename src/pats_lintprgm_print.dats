@@ -92,7 +92,7 @@ fprint_myintveclst
       val () = fprint_newline (out)
       val () = fprint_myintveclst<a> (out, xs1, n)
     in
-      fold@ (xs)
+      ()
     end // end of [list_vt]
   | list_vt_nil () => ()
 // end of [fprint_myintveclst]
@@ -126,7 +126,7 @@ case+ ic of
     val () = fprint_myintvec<a> (out, ivec, n)
     val () = prstr ")"
   in
-    fold@ (ic)
+    ()
   end // end of [ICvec]
 | @ICveclst
     (knd, ics1) => let
@@ -142,7 +142,7 @@ case+ ic of
     val () = fprint_icnstrlst<a> (out, ics1, n)
     val () = prstr ")"
   in
-    fold@ (ic)
+    ()
   end // end of [ICveclst]
 //
   | @ICerr _ => let
@@ -150,7 +150,7 @@ case+ ic of
       val () = fprint_string (out, "...")
       val () = prstr ")"
     in
-      fold@ (ic)
+      ()
     end // end of [ICerr]
 //
 end // end of [fprint_icnstr]
@@ -172,7 +172,7 @@ fprint_icnstrlst
       val () = fprint_newline (out)
       val () = fprint_icnstrlst<a> (out, ics1, n)
     in
-      fold@ (ics)
+      ()
     end // end of [list_vt_cons]
   | list_vt_nil () => ()
 ) // end of [fprint_icnstrlst]
