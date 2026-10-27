@@ -48,6 +48,10 @@ typedef filename = $FIL.filename
 
 (* ****** ****** *)
 
+staload SYM = "./pats_symbol.sats"
+
+(* ****** ****** *)
+
 staload "./pats_location.sats"
 
 (* ****** ****** *)
@@ -198,6 +202,184 @@ implement
 prerr_location
   (loc) = fprint_location(stderr_ref, loc)
 //
+(* ****** ****** *)
+//
+%{^
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+//
+static int patsopt_legacyerrors_state = -1 ;
+//
+int
+patsopt_legacyerrors_get()
+{
+  if (patsopt_legacyerrors_state < 0)
+  {
+    char *e = getenv("PATSOPT_LEGACY_ERRORS") ;
+    patsopt_legacyerrors_state = (e && *e) ? 1 : 0 ;
+  }
+  return patsopt_legacyerrors_state ;
+}
+void
+patsopt_legacyerrors_set(int flag)
+{
+  patsopt_legacyerrors_state = flag ; return ;
+}
+//
+static char *patsopt_errloc_file = (char*)0 ; // pending
+static long patsopt_errloc_beg = -1 ;
+static long patsopt_errloc_end = -1 ;
+static int patsopt_errloc_row = 0 ; // 1-based
+static int patsopt_errloc_atexit = 0 ;
+//
+static char *patsopt_errloc_cname = (char*)0 ; // cache
+static char *patsopt_errloc_cbuf = (char*)0 ;
+static long patsopt_errloc_clen = -1 ;
+//
+static
+void
+patsopt_errloc_load(const char *name)
+{
+  FILE *fp ; long n ;
+  if (patsopt_errloc_cname && !strcmp(patsopt_errloc_cname, name)) return ;
+  free(patsopt_errloc_cname) ; free(patsopt_errloc_cbuf) ;
+  patsopt_errloc_cname = (char*)0 ; patsopt_errloc_cbuf = (char*)0 ;
+  patsopt_errloc_clen = -1 ;
+  fp = fopen(name, "rb") ;
+  if (!fp) return ;
+  if (fseek(fp, 0L, SEEK_END) != 0 ||
+      (n = ftell(fp)) < 0 || fseek(fp, 0L, SEEK_SET) != 0)
+    { fclose(fp) ; return ; }
+  patsopt_errloc_cbuf = (char*)malloc((size_t)n+1) ;
+  if (!patsopt_errloc_cbuf) { fclose(fp) ; return ; }
+  if (fread(patsopt_errloc_cbuf, 1, (size_t)n, fp) != (size_t)n)
+    { free(patsopt_errloc_cbuf) ;
+      patsopt_errloc_cbuf = (char*)0 ; fclose(fp) ; return ; }
+  fclose(fp) ;
+  patsopt_errloc_cbuf[n] = 0 ;
+  patsopt_errloc_clen = n ;
+  patsopt_errloc_cname = strdup(name) ;
+  return ;
+}
+//
+void
+patsopt_errloc_flush()
+{
+  char *file = patsopt_errloc_file ;
+  long beg = patsopt_errloc_beg, end = patsopt_errloc_end ;
+  int row = patsopt_errloc_row ;
+  const char *buf ; long len, ls, le, p ;
+  int nshown = 0, w, k ;
+  char num[32] ;
+  if (!file) return ;
+  patsopt_errloc_file = (char*)0 ; patsopt_errloc_beg = -1 ;
+  patsopt_errloc_load(file) ; free(file) ;
+  if (patsopt_errloc_clen < 0) return ;
+  buf = patsopt_errloc_cbuf ; len = patsopt_errloc_clen ;
+  if (beg < 0 || beg > len) return ;
+  if (end < beg) end = beg ;
+  if (end > len) end = len ;
+  ls = beg ; while (ls > 0 && buf[ls-1] != '\n') ls -= 1 ;
+  { // width of the gutter
+    int r = row, lines = 1 ; long q ;
+    for (q = beg ; q < end && lines < 3 ; q += 1)
+      if (buf[q] == '\n') lines += 1 ;
+    sprintf(num, "%d", r + lines - 1) ;
+    w = (int)strlen(num) ; if (w < 5) w = 5 ;
+  }
+  for (;;)
+  {
+    long a, b ; // highlighted bytes [a,b) of the line
+    le = ls ; while (le < len && buf[le] != '\n') le += 1 ;
+    p = le ; if (p > ls && buf[p-1] == '\r') p -= 1 ;
+    a = (beg > ls) ? beg : ls ;
+    if (beg < ls) while (a < p && (buf[a] == ' ' || buf[a] == '\t')) a += 1 ;
+    b = (end < p) ? end : p ;
+    if (b < a) b = a ;
+    fprintf(stderr, "%*d | ", w, row) ;
+    fwrite(buf+ls, 1, (size_t)(p-ls), stderr) ; fputc('\n', stderr) ;
+    if (p > ls)
+    {
+      fprintf(stderr, "%*s | ", w, "") ;
+      for (k = ls ; k < a ; k += 1)
+        if (((unsigned char)buf[k] & 0xC0) != 0x80)
+          fputc(buf[k] == '\t' ? '\t' : ' ', stderr) ;
+      if (b == a) fputc('^', stderr) ;
+      else {
+        int first = 1 ;
+        for (k = a ; k < b ; k += 1)
+          if (((unsigned char)buf[k] & 0xC0) != 0x80)
+            { fputc(first ? '^' : '~', stderr) ; first = 0 ; }
+      }
+      fputc('\n', stderr) ;
+    }
+    nshown += 1 ;
+    if (le + 1 >= end || le >= len) break ;
+    if (nshown >= 3) { fprintf(stderr, "%*s ...\n", w, "") ; break ; }
+    ls = le + 1 ; row += 1 ;
+  }
+  return ;
+}
+//
+void
+patsopt_errloc_pending(const char *file, long beg, long end, int row)
+{
+  patsopt_errloc_flush() ;
+  if (beg < 0 || end < beg || !file) return ;
+  patsopt_errloc_file = strdup(file) ;
+  patsopt_errloc_beg = beg ; patsopt_errloc_end = end ;
+  patsopt_errloc_row = row ;
+  if (!patsopt_errloc_atexit)
+    { patsopt_errloc_atexit = 1 ; atexit(patsopt_errloc_flush) ; }
+  return ;
+}
+%}
+//
+extern fun patsopt_legacyerrors_get (): int = "mac#"
+extern fun patsopt_errloc_flush (): void = "mac#"
+extern
+fun patsopt_errloc_pending
+  (file: string, beg: lint, fin: lint, row: int): void = "mac#"
+//
+(* ****** ****** *)
+
+implement
+prerr_errloc_flush () = patsopt_errloc_flush ()
+
+implement
+prerr_errloc (loc) = let
+  val err = stderr_ref
+in
+//
+if patsopt_legacyerrors_get() > 0
+  then fprint_location (err, loc)
+  else let
+    val b = loc.beg_ntot() and e = loc.end_ntot()
+    val nr1 = loc.beg_nrow()+1 and nr2 = loc.end_nrow()+1
+    val nc1 = loc.beg_ncol()+1 and nc2 = loc.end_ncol()+1
+    val fil = loc.filename()
+    val () = patsopt_errloc_flush ()
+    val () = fprint_locpragma (err, loc.locpragma())
+    val () = $FIL.fprint_filename_full (err, fil)
+    val () = fprint_string (err, ":")
+    val () = fprint_int (err, nr1)
+    val () = fprint_string (err, ":")
+    val () = fprint_int (err, nc1)
+    val () = fprint_string (err, "-")
+    val () =
+    if nr2 > nr1 then (fprint_int (err, nr2); fprint_string (err, ":"))
+    val () = fprint_int (err, nc2)
+    val () =
+    if b >= 0L then
+      patsopt_errloc_pending
+      ($SYM.symbol_get_name($FIL.filename_get_fullname(fil)), b, e, nr1)
+  in
+    // nothing
+  end // end of [else]
+//
+end // end of [prerr_errloc]
+
 (* ****** ****** *)
 
 implement
