@@ -87,7 +87,6 @@ refcnt_incref
 //
 val+@REFCNT (u, _) = rfc
 val ((*void*)) = u := succ (u)
-prval () = fold@(rfc)
 //
 in
   $UN.castvwtp1{refcnt(a)}(rfc)
@@ -152,7 +151,6 @@ refcnt_vtakeout
 //
 val+@REFCNT (_, x) = rfc
 val p_x = addr@x
-prval () = fold@(rfc)
 //
 val (pf, fpf | p_x) = $UN.ptr_vtake{a}(p_x)
 //

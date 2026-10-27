@@ -210,17 +210,15 @@ btree_btree_merge
   val sgn = compare_elt_elt<a> (x1, x2)
 in
   if sgn <= 0 then let
-    prval () = fold@ (bt2)
     val () = n1 := n1 + 1
     val () = bts1 := btlst_cons{a}(bt2, bts1)
   in
-    fold@ (bt1); bt1
+    bt1
   end else let
-    prval () = fold@ (bt1)
     val () = n2 := n2 + 1
     val () = bts2 := btlst_cons{a}(bt1, bts2)
   in
-    fold@ (bt2); bt2
+    bt2
   end // end of [if]
 end // end of [btree_btree_merge]
 
@@ -242,11 +240,10 @@ btree_bheap_merge
   | @bheap_cons (pf1 | bt1, hp1) => let
       val n1 = btree_rank<a> (bt1)
     in
-      if n < n1 then let
-        prval () = fold@ (hp) in bheap_cons{a}(pf | bt, hp)
-      end else if n > n1 then let
+      if n < n1 then
+        bheap_cons{a}(pf | bt, hp)
+      else if n > n1 then let
         val () = hp1 := btree_bheap_merge<a> (pf | bt, n, hp1)
-        prval () = fold@ (hp) 
       in
         hp
       end else let
@@ -276,7 +273,7 @@ case+ hp1 of
 | ~bheap_nil () => hp2
 | @bheap_cons (pf1 | bt1, hp11) => (
   case+ hp2 of
-  | ~bheap_nil () => (fold@ (hp1); hp1)
+  | ~bheap_nil () => hp1
   | @bheap_cons (pf2 | bt2, hp21) => let
 //
       prval pf1 = pf1 and pf2 = pf2
@@ -286,15 +283,11 @@ case+ hp1 of
       and n2 = btree_rank<a> (bt2)
     in
       if n1 < n2 then let
-        prval () = fold@ (hp2)
         val () = hp11 := bheap_bheap_merge<a> (hp11, hp2)
-        prval () = fold@ (hp1)
       in
         hp1
       end else if n1 > n2 then let
-        prval () = fold@ (hp1)
         val () = hp21 := bheap_bheap_merge<a> (hp1, hp21)
-        prval () = fold@ (hp2)
       in
         hp2
       end else let
@@ -341,7 +334,6 @@ case+ hp0 of
       if sgn > 0 then search (hp, addr@(x)) else search (hp, p_x0)
     ) : Ptr1 // end of [val]
     prval () = fold@ (bt)
-    prval () = fold@ (hp0)
   in
     res
   end // end of [bheap_cons]
@@ -354,7 +346,6 @@ val+ @bheap_cons
 val+ @btnode (_, x0, _) = bt0
 prval () = fold@ (bt0)
 val res = search (hp1, addr@(x0))
-prval () = fold@ (hp0)
 //
 in
   $UN.ptr2p2tr{a}(res)
@@ -397,7 +388,6 @@ case+ hp0 of
     end // end of [val]
     prval () = fold@ (bt)
     val () = search (hp, x0, pos)
-    prval () = fold@ (hp0)
   in
     // nothing
   end // [bheap_cons]
@@ -443,7 +433,6 @@ in
 //
 if pos > 0 then let
   val (pfmin | ()) = remove (hp, pos-1, btmin)
-  prval () = fold@ (hp0)
 in
   (pfmin | ())
 end else let

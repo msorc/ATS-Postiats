@@ -469,7 +469,6 @@ prval () = arrayptr_addback (pf0 | A)
 //
 val () = if ans then n := pred(n) // removed
 //
-prval () = fold@ (tbl)
 //
 in
   ans
@@ -517,7 +516,6 @@ end // end of [local]
 //
 val () = n := i2sz(0)
 //
-prval () = fold@ (tbl)
 //
 in
   $UN.castvwtp0{tenv2}(env)
@@ -569,7 +567,6 @@ val () = arrayptr_free ($UN.castvwtp0{arrayptr(ptr,0)}(A))
 val () = A0 := A2
 val () = cap0 := cap2
 //
-prval () = fold@ (tbl)
 //
 in
   true(*always*)

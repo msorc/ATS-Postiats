@@ -247,7 +247,6 @@ val () = arrayptr_free (A)
 val () = m := m2
 val () = p := add_ptr_bsz (p_A2, n)
 val () = A := $UN.castvwtp0{arrayptr(char,m2+1)}(A2)
-prval () = fold@ (sbf)
 //
 in
   true
@@ -311,13 +310,11 @@ case+ 0 of
 | _ when n < m => let
     val () = $UN.ptr0_set<char> (p, x)
     val () = p := ptr_succ<char> (p)
-    prval () = fold@ (sbf)
   in
     1
   end // end of [n < m]
 | _ (*n >= m*) => let
     val recap = stringbuf$recapacitize ()
-    prval () = fold@ (sbf)
   in
     if recap >= 1 then let
       val _ = stringbuf_reset_capacity (sbf, m+m) in stringbuf_insert_char (sbf, x)
@@ -371,13 +368,11 @@ case+ 0 of
     val _(*ptr*) =
       memcpy (p, string2ptr(x), nx)
     val () = p := ptr_add<char> (p, nx)
-    prval () = fold@ (sbf)
   in
     sz2i(nx)
   end // end of [n2 <= m]
 | _ (*n2 >= m*) => let
     val recap = stringbuf$recapacitize()
-    prval () = fold@ (sbf)
   in
     if recap >= 1 then let
       val m2 = _stringbuf_pow2min(m, n2)
@@ -467,7 +462,6 @@ val nread = $STDIO.fread(!p1, i2sz(1), nb, inp)
 val ((*void*)) = (p := ptr_add<char>(p, nread))
 //
 prval () = fpf(pf)
-prval () = fold@(sbf)
 //
 in
   sz2i(nread)
@@ -517,7 +511,6 @@ else (~1) // HX: failure
 prval () = view@last := pf2
 //
 prval () = fpf(pf)
-prval () = fold@(sbf)
 //
 in
   n2
@@ -595,7 +588,6 @@ val ni = (n - i)
 val p0 = memmove(p0, ptr_add<char>(p0, i), ni)
 val () = (p1 := ptr_add<char>(p0, ni))
 //
-prval () = fold@(sbf)
 prval () = lemma_strnptr_param(str)
 //
 in
@@ -622,7 +614,6 @@ val str = string_make_substring($UN.cast{string(n)}(p0), i2sz(0), n)
 //
 val () = p1 := p0
 //
-prval () = fold@(sbf)
 prval () = lemma_strnptr_param(str)
 //
 in
@@ -651,7 +642,6 @@ val ni = n - min(i, n)
 val p0 = memmove(p0, ptr_add<char>(p0, i), ni)
 val () = (p1 := ptr_add<char>(p0, ni))
 //
-prval () = fold@(sbf)
 //
 } (* end of [stringbuf_remove] *)
   
@@ -668,7 +658,6 @@ val+
 //
 val ((*void*)) = (p1 := ptrcast(A))
 //
-prval ((*void*)) = fold@(sbf)
 //
 } (* end of [stringbuf_remove_all] *)
 
@@ -692,13 +681,11 @@ then let
   val p2 =
     ptr_add<char>(p0, n2)
   val ((*void*)) = (p1 := p2)
-  prval ((*folded*)) = fold@(sbf)
 in
   true
 end // end of [then]
-else let
-  prval ((*folded*)) = fold@(sbf) in false
-end // end of [else]
+else
+  false // end of [else]
 //
 end // end of [stringbuf_truncate]
 
@@ -738,13 +725,11 @@ then let
     ptr_add<char> (p0, n2)
   val res = aux (p2, n1-n2)
   val ((*void*)) = (p1 := p2)
-  prval ((*folded*)) = fold@ (sbf)
 in
   res
 end // end of [then]
-else let
-  prval ((*folded*)) = fold@(sbf) in strptr_null()
-end // end of [else]
+else
+  strptr_null() // end of [else]
 //
 end // end of [stringbuf_truncout]
 
@@ -786,7 +771,7 @@ _stringbuf_get_ptrcur
 implement
 _stringbuf_set_ptrcur
   (sbf, p2) =
-  let val+@STRINGBUF(_, p, _) = sbf in p := p2; fold@(sbf) end
+  let val+@STRINGBUF(_, p, _) = sbf in p := p2 end
 // end of [_stringbuf_set_ptrcur]
 //
 implement

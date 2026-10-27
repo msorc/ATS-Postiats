@@ -192,7 +192,6 @@ if m > n then let
   val () = $UN.ptr0_set<a> (p1, x)
   val () = n := succ(n)
 //
-prval () = fold@(DA)
 prval () = opt_none{a}(res)
 //
 in
@@ -200,7 +199,6 @@ in
 end else let
   val m = m
 //
-prval () = fold@(DA)
 //
   val recap = dynarray$recapacitize<>()
 in
@@ -228,7 +226,6 @@ end else let
 //
   val () = res := x
 //
-prval () = fold@(DA)
 prval () = opt_some{a}(res)
 //
 in
@@ -313,7 +310,6 @@ if n + n2 <= m then let
   val ptr =
     memcpy (p1, addr@(xs), n2*sizeof<a>)
   val () = n := n+n2
-  prval () = fold@ (DA)
   prval () =
   __assert (xs) where
   {
@@ -328,7 +324,6 @@ in
   false
 end else let
   val m = m and n = n
-  prval () = fold@ (DA)
   val recap = dynarray$recapacitize<>()
 in
 //
@@ -344,7 +339,6 @@ end (* end of [if] *)
 end // end of [if]
 //
 end else let
-  prval () = fold@ (DA)
   prval () = arrayopt_some{a}(xs) in true
 end // end of [if]
 //
@@ -369,13 +363,11 @@ if i < n then let
   val x = $UN.ptr0_get<a> (p1)
   val ptr = memmove (p1, p2, (n1-i)*sizeof<a>)
   val () = n := n1
-  prval () = fold@ (DA)
   val () = res := x
   prval () = opt_some{a}(res)
 in
   true
 end else let
-  prval () = fold@ (DA)
   prval () = opt_none{a}(res)
 in
   false
@@ -497,7 +489,7 @@ val xs =
 //
 prval ((*returned*)) = $UN.cast2void((pf, fpf | p0))
 //
-val+@DYNARRAY(A,m,n)=DA; val()=(n := i2sz(0)); prval()=fold@(DA)
+val+@DYNARRAY(A,m,n)=DA; val()=(n := i2sz(0))
 //
 } // end of [dynarray_listize0]
 
@@ -557,17 +549,11 @@ val () = arrayptr_free (A1)
 val () = A := A2
 val () = m := m2
 //
-prval () = fold@ (DA)
 //
 in
   true
-end else let
-//
-prval () = fold@ (DA)
-//
-in
-  false
-end // end of [if]
+end else
+  false // end of [if]
 //
 end // end of [dynarray_reset_capacity]
 

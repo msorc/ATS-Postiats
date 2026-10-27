@@ -197,7 +197,6 @@ val () =
 val () = if :(nx0: g2node0 (a)) => sgn < 0 then nx0 := nx2
 val () = N := succ (N)
 //
-prval () = fold@ (hp)
 //
 in
   // nothing
@@ -244,7 +243,6 @@ val () =
 val () = if :(nx1: g2node0 (a)) => (sgn > 0) then nx1 := nx2
 val () = N1 := N1 + N2
 //
-prval () = fold@ (hp1)
 //
 } // end of [linheap_merge]
 
@@ -442,13 +440,11 @@ if N > 0SZ then let
   val () = nx0_ref := nx1
 //
   prval () = opt_some {a} (res)
-  prval () = fold@ (hp0)
 //
 in
   true (*removed*)
 end else let
   prval () = opt_none {a} (res)
-  prval () = fold@ (hp0)
 in
   false (*~removed*)
 end // end of [if]

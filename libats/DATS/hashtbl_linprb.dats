@@ -409,7 +409,6 @@ then let
   prval ((*void*)) = fpf (pf)
   val () = res := x2
   prval () = opt_some{itm}(res)
-  prval () = fold@ (tbl)
 in
   true
 end // end of [then]
@@ -435,7 +434,6 @@ in
   end else let
     val () = res := x
     prval () = opt_some{itm}(res)
-    prval () = fold@ (tbl)
   in
     true
   end // end of [if]
@@ -475,13 +473,11 @@ then let
   prval pf_A = arrayptr_takeout(A)
   val () = keyitmarr_reinserts<key,itm> (!p_A, cap, ptr_succ<ki> (p_kx))
   prval ((*void*)) = arrayptr_addback (pf_A | A)
-  prval () = fold@ (tbl)
   prval () = opt_some{itm}(res)
 in
   true
 end // end of [then]
 else let
-  prval () = fold@ (tbl)
   prval () = opt_none{itm}(res)
 in
   false
@@ -568,16 +564,12 @@ arrayptr_free ($UN.castvwtp0{arrayptr(ki?,m)}(A))
 //
 val () = A := A2
 val () = cap := cap2
-prval () = fold@ (tbl)
 //
 in
   true
 end // end of [then]
-else let
-  prval () = fold@ (tbl)
-in
-  false
-end // end of [else]
+else
+  false // end of [else]
 //
 end // end of [hashtbl_reset_capacity]
 

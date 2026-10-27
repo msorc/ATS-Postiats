@@ -79,7 +79,6 @@ then let
     () = opt_unsome(x)
   // end of [prval]
   val () = loop(res1)
-  prval () = fold@(res)
 in
   // nothing
 end // end of [then]
