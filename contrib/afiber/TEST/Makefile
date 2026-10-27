@@ -1,7 +1,7 @@
 #
 # MS-2026-10: afiber tests
 # POS_*.dats must compile and run; NEG_consume_*.dats must be rejected
-# with "needs to be consumed", NEG_uaf_*.dats with "is no longer available".
+# with "needs to be consumed" (legacy) or "is not consumed", NEG_uaf_*.dats with "is no longer available".
 # To add a test: append it to POSTESTS (one worker) or MNTESTS (M:N).
 # MNFLAGS are the flags of M:N programs (workers need the exception-frame
 # head in the fiber record); they are added to every test, so the one-worker
@@ -49,7 +49,7 @@ for f in $(NEGCONSUME); do \
   if $(PATSOPT) --typecheck -d $$f > $$f.out 2>&1; then \
     echo "$$f: accepted but should be rejected"; exit 1; \
   fi; \
-  grep -q "needs to be consumed" $$f.out || \
+  grep -q "needs to be consumed\|is not consumed" $$f.out || \
     { echo "$$f: rejected for another reason"; cat $$f.out; exit 1; }; \
   $(RMF) $$f.out; \
 done; echo "NEG_consume_*: all rejected"

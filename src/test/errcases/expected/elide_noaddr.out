@@ -1,0 +1,5 @@
+elide_noaddr.dats:17:16-19: error(3): the address of the omitted proof argument 1 of type int @ ?1 cannot be inferred from the other arguments; pass the proof explicitly.
+   17 |   val r = peek (2) // error: l cannot be inferred
+      |                ^~~
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

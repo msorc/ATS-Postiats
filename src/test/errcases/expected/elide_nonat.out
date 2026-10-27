@@ -1,0 +1,20 @@
+elide_nonat.dats:28:11-15: error(3): proof arity mismatch: the function requires 1 proof arguments.
+   28 |   val r = read (addr@ x) // error: the proof of [cell_v] is needed
+      |           ^~~~
+elide_nonat.dats:28:11-15: error(3): proof arity mismatch: 1 vs none given
+  the proof arguments cannot be omitted: proof argument 1 is of type cell_v(?1), which is not an at-view (T @ l).
+  (only proofs of preserved at-views, !T @ l, can be omitted.)
+elide_nonat.dats:28:17-24: error(3): the dynamic expression cannot be assigned the type cell_v(?1)
+   28 |   val r = read (addr@ x) // error: the proof of [cell_v] is needed
+      |                 ^~~~~~~
+elide_nonat.dats:28:17-24: error(3): type mismatch:
+  expected: cell_v(?1)
+  actual:   ptr(x)
+elide_nonat.dats:28:16-25: error(3): arity mismatch: more arguments are expected.
+   28 |   val r = read (addr@ x) // error: the proof of [cell_v] is needed
+      |                ^~~~~~~~~
+elide_nonat.dats:28:17-24: error(3): the function argument needs to be a left-value.
+   28 |   val r = read (addr@ x) // error: the proof of [cell_v] is needed
+      |                 ^~~~~~~
+patsopt(TRANS3): there are [4] errors in total.
+exit 1
