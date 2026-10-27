@@ -55,6 +55,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement prerr_FILENAME<> () = prerr "pats_trans3_env_scst"
@@ -63,6 +64,7 @@ implement prerr_FILENAME<> () = prerr "pats_trans3_env_scst"
 
 staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
@@ -123,10 +125,20 @@ case+ gopt_view (isasp) of
     val () =
     prerr_warning3_loc(loc0)
     val () =
-    (
-      prerr ": the static constant ["; prerr_s2cst (s2c);
-      prerr "] is not abstract at this point."; prerr_newline ()
-    ) (* prerrln! *)
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () =
+      (
+        prerr ": the static constant ["; prerr_s2cst (s2c);
+        prerr "] is not abstract at this point."; prerr_newline ()
+      ) (* prerrln! *)
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () =
+      (
+        prerr ": the static constant "; prerr_s2cst_s (s2c);
+        prerr " is not abstract at this point."; prerr_newline ()
+      ) (* prerrln! *)
+    } (* end of [if] *)
   } (* end of [if] // end of [val] *)
 ) (* end of [val] *)
 //

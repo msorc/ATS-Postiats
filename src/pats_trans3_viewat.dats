@@ -64,6 +64,7 @@ typedef loc_t = $LOC.location
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 //
@@ -81,6 +82,7 @@ overload = with $LAB.eq_label_label
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 
@@ -107,10 +109,21 @@ auxerr_pfobj
   loc0: loc_t, s2l: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": [view@] operation cannot be performed"
-  val () = prerr ": the proof search for view located at ["
-  val () = prerr_s2exp (s2l)
-  val () = prerr "] failed to turn up a result."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then
+    prerr ": [view@] operation cannot be performed" else
+    prerr ": view@ operation cannot be performed" // HX-2026-10
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the proof search for view located at ["
+    val () = prerr_s2exp (s2l)
+    val () = prerr "] failed to turn up a result."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": no view is available at the address "
+    val () = prerr_s2exp_s (s2l)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline ((*void*))
 in
   the_trans3errlst_add (trans3err_T3E_pfobj_search_none (loc0, s2l))
@@ -122,7 +135,10 @@ auxerr_context
   loc0: loc_t, s2e: s2exp, d3ls: d3lablst
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": [view@] operation cannot be performed"
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then
+    prerr ": [view@] operation cannot be performed" else
+    prerr ": view@ operation cannot be performed" // HX-2026-10
   val () = prerr ": context cannot be formed for the atview being taken."
   val () = prerr_newline ((*void*))
 in
@@ -246,7 +262,13 @@ auxerr_nonatview
   val () = prerr_error3_loc (loc0)
   val () = prerr ": viewat-restoration cannot be performed"
   val () = prerr ": proof of some atview is needed but one of the following type is given: "
-  val () = (prerr "["; prerr_s2exp (s2at_new); prerr "]")
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = (prerr "["; prerr_s2exp (s2at_new); prerr "]")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr_s2exp_s (s2at_new)
+  } (* end of [if] *)
   val () = prerr_newline ((*void*))
 in
   the_trans3errlst_add (trans3err_T3E_s2exp_set_viewat_atview (loc0, s2at_new))
@@ -260,7 +282,13 @@ auxerr_nonwithout
   val () = prerr_error3_loc (loc0)
   val () = prerr ": viewat-restoration cannot be performed"
   val () = prerr ": the following type is expected to be a without-type but it is not: "
-  val () = (prerr "["; prerr_s2exp (s2e_old); prerr "]")
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = (prerr "["; prerr_s2exp (s2e_old); prerr "]")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr_s2exp_s (s2e_old)
+  } (* end of [if] *)
   val () = prerr_newline ((*void*))
 in
   the_trans3errlst_add (trans3err_T3E_s2exp_set_viewat_without (loc0, s2e_old))
@@ -284,10 +312,19 @@ in
 if ~addreq then let
   val () = prerr_error3_loc (loc0)
   val () = prerr ": viewat-restoration cannot be performed"
-  val () = prerr ": mismatch of bef/aft locations of atviews:\n"
-  val () = (prerr "bef: ["; prerr_s2exp (s2e1); prerr "]")
-  val () = prerr_newline ((*void*))
-  val () = (prerr "aft: ["; prerr_s2exp (s2e2); prerr "]")
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": mismatch of bef/aft locations of atviews:\n"
+    val () = (prerr "bef: ["; prerr_s2exp (s2e1); prerr "]")
+    val () = prerr_newline ((*void*))
+    val () = (prerr "aft: ["; prerr_s2exp (s2e2); prerr "]")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": mismatch of bef/aft locations of atviews:\n"
+    val () = (prerr "bef: "; prerr_s2exp_s (s2e1))
+    val () = prerr_newline ((*void*))
+    val () = (prerr "aft: "; prerr_s2exp_s (s2e2))
+  } (* end of [if] *)
   val () = prerr_newline ((*void*))
 in
   the_trans3errlst_add (trans3err_T3E_s2addr_viewat_addreq (loc0, s2e1, d3ls, s2e2))
@@ -367,9 +404,16 @@ fun auxerr1
   loc0: loc_t, d2v: d2var
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": the dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] is not mutable and thus [view@] cannot be applied."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the dynamic variable ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] is not mutable and thus [view@] cannot be applied."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " is not mutable and thus view@ cannot be applied."
+  } (* end of [if] *)
   val () = prerr_newline ((*void*))
 in
   the_trans3errlst_add (trans3err_T3E_d2var_nonmut (loc0, d2v))

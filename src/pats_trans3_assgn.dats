@@ -59,6 +59,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -73,6 +74,7 @@ typedef loc_t = $LOC.location
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
@@ -102,8 +104,15 @@ auxerr_proof
   loc0: loc_t, s2e: s2exp, d3ls: d3lablst, s2e_sel: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": a non-proof component is replaced of the type"
-  val () = (prerr ": ["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": a non-proof component is replaced of the type"
+    val () = (prerr ": ["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": a non-proof component is replaced of the type: "
+    val () = (prerr_s2exp_s (s2e_sel); prerr "."; prerr_newline ())
+  } (* end of [if] *)
 in
   the_trans3errlst_add(trans3err_T3E_s2addr_assgn_deref_proof(loc0, s2e, d3ls))
 end // end of [auxerr_proof]
@@ -114,8 +123,15 @@ auxerr_linsel
   loc0: loc_t, s2e: s2exp, d3ls: d3lablst, s2e_sel: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": a linear component is abandoned of the type"
-  val () = (prerr ": ["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": a linear component is abandoned of the type"
+    val () = (prerr ": ["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": a linear component is abandoned of the type: "
+    val () = (prerr_s2exp_s (s2e_sel); prerr "."; prerr_newline ())
+  } (* end of [if] *)
 in
   the_trans3errlst_add(trans3err_T3E_s2addr_assgn_deref_linsel(loc0, s2e, d3ls))
 end // end of [auxerr_linsel]
@@ -126,8 +142,15 @@ auxerr_context
   loc0: loc_t, s2e: s2exp, d3ls: d3lablst, s2e_sel: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": the type of the selected component cannot be changed"
-  val () = (prerr ": ["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the type of the selected component cannot be changed"
+    val () = (prerr ": ["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the type of the selected component cannot be changed: "
+    val () = (prerr_s2exp_s (s2e_sel); prerr "."; prerr_newline ())
+  } (* end of [if] *)
 in
   the_trans3errlst_add (trans3err_T3E_s2addr_assgn_deref_context (loc0, s2e, d3ls))
 end // end of [auxerr_context]
@@ -249,10 +272,17 @@ auxerr_pfobj
   val () =
   prerr (": assignment cannot be performed")
   val () =
-  (
-    prerr ": proof search for the view at [";
-    prerr_s2exp (s2l); prerr "] failed."; prerr_newline ()
-  ) (* prerrln! *)
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () =
+    (
+      prerr ": proof search for the view at [";
+      prerr_s2exp (s2l); prerr "] failed."; prerr_newline ()
+    ) (* prerrln! *)
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": no view is available at the address "
+    val () = (prerr_s2exp_s (s2l); prerr "."; prerr_newline ())
+  } (* end of [if] *)
 in
   the_trans3errlst_add(trans3err_T3E_pfobj_search_none(loc0, s2l))
 end // end of [auxerr_pfobj]
@@ -287,7 +317,13 @@ auxerr_linsel
   prerr (
     ": a linear component of the following type is abandoned: "
   ) (* prerr *)
-  val () = (prerr "["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = (prerr "["; prerr_s2exp (s2e_sel); prerr "]."; prerr_newline ())
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = (prerr_s2exp_s (s2e_sel); prerr "."; prerr_newline ())
+  } (* end of [if] *)
 in
   the_trans3errlst_add
     (trans3err_T3E_s2addr_assgn_deref_linsel(loc0, s2e_elt, d3ls))
@@ -312,11 +348,21 @@ if ~tszeq then let
   prerr_error3_loc (loc0)
 //
   val () = prerr ": assignment cannot be performed"
-  val () = prerr ": mismatch of bef/aft type-sizes:\n"
-  val () = (prerr "bef: ["; prerr_s2exp (s2e1); prerr "]")
-  val () = prerr_newline ((*void*))
-  val () = (prerr "aft: ["; prerr_s2exp (s2e2); prerr "]")
-  val () = prerr_newline ((*void*))
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": mismatch of bef/aft type-sizes:\n"
+    val () = (prerr "bef: ["; prerr_s2exp (s2e1); prerr "]")
+    val () = prerr_newline ((*void*))
+    val () = (prerr "aft: ["; prerr_s2exp (s2e2); prerr "]")
+    val () = prerr_newline ((*void*))
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": mismatch of bef/aft type-sizes:\n"
+    val () = (prerr "bef: "; prerr_s2exp_s (s2e1))
+    val () = prerr_newline ((*void*))
+    val () = (prerr "aft: "; prerr_s2exp_s (s2e2))
+    val () = prerr_newline ((*void*))
+  } (* end of [if] *)
 //
 in
   the_trans3errlst_add(trans3err_T3E_s2exp_assgn_tszeq(loc0, s2e1, s2e2))
@@ -472,7 +518,13 @@ auxerr_reflinsel
     ": a linear component of the following type is abandoned: "
   ) (* prerr *)
 //
-  val () = (prerr "["; prerr_s2exp (s2e_sel); prerr "]"; prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = (prerr "["; prerr_s2exp (s2e_sel); prerr "]"; prerr_newline ())
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = (prerr_s2exp_s (s2e_sel); prerr_newline ())
+  } (* end of [if] *)
 //
 in
   the_trans3errlst_add(trans3err_T3E_d3exp_assgn_deref_reflinsel(d3e_l, d3ls))
