@@ -6,8 +6,12 @@ look like `file.dats:7:32-43: error(3): ...` (`file:line:col-col`, or
 source line(s) of the range with the range underlined; the older form
 `file.dats: 180(line=7, offs=32) -- 191(line=7, offs=43): error(3): ...`
 without the source line is selected by `--legacy-errors` or by the
-environment variable `PATSOPT_LEGACY_ERRORS=1`. Only the part after
-`error(N):` is quoted. The code of the rejected
+environment variable `PATSOPT_LEGACY_ERRORS=1`. The messages are quoted
+with their location and source lines (the closing line `patsopt(TRANS3):
+there are [1] errors in total.` and the messages that only follow from the
+first one are left out). Types and constraints are printed in the syntax of
+the source language; `?1` stands for a type that the compiler has not
+determined yet. The code of the rejected
 programs is in [doc/EXAMPLE/LINHEAP](../EXAMPLE/LINHEAP) (`NEG_*.dats`),
 and the replacements are shown in the [migration guide](migrating-from-0.4.2.md).
 
@@ -21,7 +25,9 @@ prove that it is ever freed and refuses to allocate it.
 ### a datatype with a non-nullary constructor
 
 ```
-error(2): nonlinear heap allocation is not supported (no GC): the datatype [intlst] has a non-nullary constructor; use [datavtype] instead.
+NEG_datatype.dats:6:10-46: error(2): nonlinear heap allocation is not supported (no GC): the datatype [intlst] has a non-nullary constructor; use [datavtype] instead.
+    6 | datatype intlst = nil | cons of (int, intlst)
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
 
 For `datatype intlst = nil | cons of (int, intlst)`. Write `datavtype`
@@ -33,7 +39,9 @@ See [datavtype.dats](examples/datavtype.dats).
 ### a cloref closure
 
 ```
-error(3): nonlinear heap allocation is not supported (no GC): a cloref closure is constructed; use a linear closure (cloptr) or a function instead.
+NEG_cloref_lam.dats:9:11-45: error(3): nonlinear heap allocation is not supported (no GC): a cloref closure is constructed; use a linear closure (cloptr) or a function instead.
+    9 |   val f = lam (x: int): int =<cloref1> x + y
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
 
 For `lam (x: int): int =<cloref1> x + y`, or a function declared
@@ -45,7 +53,9 @@ See [cloptr.dats](examples/cloptr.dats).
 ### a boxed tuple
 
 ```
-error(3): nonlinear heap allocation is not supported (no GC): a boxed tuple is constructed (and could never be freed); use a flat tuple @(...) or a datavtype instead.
+NEG_boxtup.dats:7:32-39: error(3): nonlinear heap allocation is not supported (no GC): a boxed tuple is constructed (and could never be freed); use a flat tuple @(...) or a datavtype instead.
+    7 | implement main0 () = { val t = '(1, 2) val () = println! (t.0) }
+      |                                ^~~~~~~
 ```
 
 For `'(1, 2)`, `$tup(1, 2)` and also the linear `$tup_vt(1, 2)`: a box
@@ -55,7 +65,9 @@ declare a `datavtype` with one constructor.
 ### a boxed record
 
 ```
-error(3): nonlinear heap allocation is not supported (no GC): a boxed record is constructed (and could never be freed); use a flat record @{...} or a datavtype instead.
+NEG_boxrec.dats:7:32-43: error(3): nonlinear heap allocation is not supported (no GC): a boxed record is constructed (and could never be freed); use a flat record @{...} or a datavtype instead.
+    7 | implement main0 () = { val r = '{a=1, b=2} val () = println! (r.a) }
+      |                                ^~~~~~~~~~~
 ```
 
 For `'{a=1, b=2}`, `$rec(...)`. Write `@{a=1, b=2}`.
@@ -64,7 +76,13 @@ See [flat.dats](examples/flat.dats).
 ### $delay
 
 ```
-error(3): nonlinear heap allocation is not supported (no GC): $delay constructs a nonlinear lazy value; use $ldelay instead.
+NEG_delay.dats:7:32-41: error(3): nonlinear heap allocation is not supported (no GC): $delay constructs a nonlinear lazy value; use $ldelay instead.
+    7 | implement main0 () = { val x = $delay(1) }
+      |                                ^~~~~~~~~
+NEG_delay.dats:7:22-43: error(3): the linear variable x of type lazy_vt(int(1)) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    7 | implement main0 () = { val x = $delay(1) }
+      |                      ^~~~~~~~~~~~~~~~~~~~~
 ```
 
 Write `$ldelay` and the type `stream_vt`/`lazy_vt`. The result is linear:
@@ -75,7 +93,9 @@ See [stream_vt.dats](examples/stream_vt.dats).
 ### $list_t
 
 ```
-error(3): nonlinear heap allocation is not supported (no GC): a nonlinear list is constructed; use $list(...) or $list_vt(...) instead.
+NEG_list_t.dats:7:33-51: error(3): nonlinear heap allocation is not supported (no GC): a nonlinear list is constructed; use $list(...) or $list_vt(...) instead.
+    7 | implement main0 () = { val xs = $list_t{int}(1, 2) }
+      |                                 ^~~~~~~~~~~~~~~~~~
 ```
 
 For `$list_t{int}(1, 2)`. Write `$list_vt{int}(1, 2)` (`$list(...)` makes
@@ -86,7 +106,15 @@ a `list_vt` too). See [list_vt.dats](examples/list_vt.dats).
 ### a linear value is not consumed (a leak)
 
 ```
-error(3): the linear dynamic variable [xs$3303(-1)] needs to be consumed but it is preserved with the type [...] instead.
+sum.dats:8:22-11:2: error(3): the linear variable xs of type list_vt(int, 4) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    8 | implement main0 () = {
+      |                      ^
+    9 |   val xs = $list_vt{int}(1, 2, 3, 4)
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   10 |   val () = println! ("sum = ", sum (xs))
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ...
 ```
 
 You made or received a linear value (a `list_vt`, a `datavtype`, an
@@ -100,7 +128,9 @@ only reads its argument, declare it borrowed with `!`:
 ### a linear value is used twice, or after it is freed
 
 ```
-error(3): the linear dynamic variable [ar$3500(-1)] is no longer available.
+NEGUAF_arena.dats:15:27-29: error(3): the linear variable ar is no longer available (it has been consumed)
+   15 |   val () = astring_fprint(ar, stdout_ref, s)
+      |                           ^~
 ```
 
 The value was consumed (freed, passed to a consuming function, or matched
@@ -112,7 +142,9 @@ twice, borrow it (`!`) or make a copy (`list_vt_copy`).
 ### a borrowed value is consumed
 
 ```
-error(3): the linear dynamic variable [xs$3304(-1)] needs to be preserved but it is consumed instead.
+example.dats:2:43-45: error(3): the linear variable xs must still be available here, but it was consumed
+    2 | fun f (xs: !List_vt(int)): List_vt(int) = xs
+      |                                           ^~
 ```
 
 A parameter `xs: !List_vt(int)` is borrowed: the caller keeps it. Returning
@@ -130,30 +162,30 @@ and free or rebuild every part.
 ### an `if` or `case` whose branches are linear, inside a `val`
 
 ```
-error(3): the dynamic expression cannot be assigned the type [S2EVar(3947)].
-error(3): mismatch of sorts in unification:
-The sort of variable is: S2RTbas(S2RTBASimp(1; t@ype))
-The sort of solution is: S2RTbas(S2RTBASimp(2; viewtype))
+NEG_if_linear.dats:11:27-30: error(3): the dynamic expression cannot be assigned the type ?1
+   11 |   val res = if x = 0 then res else list_vt_cons(1, res)
+      |                           ^~~
+NEG_if_linear.dats:11:27-30: error(3): sort mismatch: expected t@ype, actual vtype (of list_vt(int, n))
 ```
 
 for
 
 ```
-val res = if x2 = 0 then res else list_vt_cons(x1/x2, res)
+val res = if x = 0 then res else list_vt_cons(1, res)
 ```
 
 The `=` is not the problem (a plain `bool` condition fails the same way, and
 so does the compiler of 0.4.2): when an `if` or a `case` has no expected
-type, its type is a variable of sort `t@ype`, which a linear type (a
-`list_vt`, ...) cannot instantiate. Give the expected type, either by
-writing the `if` as the body of a function with a declared result type, or
+type, its type is a variable (`?1`) of sort `t@ype`, which a linear type (a
+`list_vt`, ...: sort `vtype`) cannot instantiate, as the message says.
+Give the expected type, either by writing the `if` as the body of a function with a declared result type, or
 with an ascription:
 
 ```
-val res = (if x2 = 0 then res else list_vt_cons(x1/x2, res)): List0_vt(expr)
+val res = (if x = 0 then res else list_vt_cons(1, res)): List0_vt(int)
 ```
 
-(`val res: List0_vt(expr) = if ...` is not enough.) See
+(`val res: List0_vt(int) = if ...` is not enough.) See
 [POS_if_linear.dats](../EXAMPLE/ERRORS/POS_if_linear.dats) and
 [NEG_if_linear.dats](../EXAMPLE/ERRORS/NEG_if_linear.dats).
 
@@ -176,9 +208,15 @@ produced C code with an implicit declaration of the function. Use
 ### unrecognized identifier: list0, option0, arrayref, ref
 
 ```
-error(2): unrecognized dynamic identifier [list0_nil].
-error(2): the dynamic identifier [arrayref_make_elt] is unrecognized.
-error(2): the dynamic identifier [ref] is unrecognized.
+example.dats:2:10-24: error(2): unrecognized dynamic identifier [list0_nil].
+    2 | val xs = list0_nil{int}()
+      |          ^~~~~~~~~~~~~~
+example.dats:2:9-31: error(2): the dynamic identifier [arrayref_make_elt] is unrecognized.
+    2 | val a = arrayref_make_elt<int>(10, 0)
+      |         ^~~~~~~~~~~~~~~~~~~~~~
+example.dats:2:9-17: error(2): the dynamic identifier [ref] is unrecognized.
+    2 | val r = ref<int>(0)
+      |         ^~~~~~~~
 ```
 
 `list`, `list0`, `option`, `option0`, `stream`, `lazy`, `arrayref` and
@@ -191,7 +229,9 @@ instead. See the table in the [migration guide](migrating-from-0.4.2.md).
 ### the file libats/ML/... is not available
 
 ```
-error(1): the file [libats/ML/SATS/basis.sats] is not available for staloading.
+example.dats:1:1-36: error(1): the file [libats/ML/SATS/basis.sats] is not available for staloading.
+    1 | staload "libats/ML/SATS/basis.sats"
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
 
 `libats/ML` is removed. Use the linear containers of `libats`

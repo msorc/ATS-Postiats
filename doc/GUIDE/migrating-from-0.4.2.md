@@ -134,6 +134,29 @@ A function that rebuilds a tree takes it by value and returns the new one
 (`insert` in the example). A tree that is used twice has to be copied
 explicitly, since a datavtype value is never shared.
 
+## fold@ is implied
+
+In 0.4.2 a variable unfolded by an `@Con` pattern had to be folded back
+with `fold@` before it was used again as a whole or before the clause
+ended. In 0.4.3 the type checker folds it where the folded type is
+required: when the variable is returned, passed as an argument or assigned,
+and at the end of the scope of the pattern.
+
+```ats
+fun bump_head {n:nat} (xs: list_vt (int, n)): list_vt (int, n) =
+  case+ xs of
+  | @list_vt_cons (x, _) => (x := x + 1; xs)   // no fold@ (xs) before xs
+  | list_vt_nil () => xs
+```
+
+The code you already have still compiles: an explicit `fold@` is accepted,
+and it is still needed between field writes, and when `fold@` is given
+explicit static arguments. When the fold cannot be done, the error says
+why (for example "the view of field 1 is consumed", or a field of a type
+that the constructor does not accept). See
+[doc/EXAMPLE/AUTOFOLD](../EXAMPLE/AUTOFOLD) for the programs that are
+accepted and the ones that are rejected with their hints.
+
 ## cloref becomes cloptr or lam@
 
 Before:
