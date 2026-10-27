@@ -1,0 +1,14 @@
+view_assgn.dats:3:50-60: error(3): assignment cannot be performed: mismatch of bef/aft type-sizes:
+bef: int
+aft: bool(true)
+    3 | fun f {l:addr} (pf: !int @ l | p: ptr l): void = !p := true
+      |                                                  ^~~~~~~~~~
+view_assgn.dats:3:50-60: error(3): the linear variable pf does not have the required type at the end of its scope
+view_assgn.dats:3:50-60: error(3): type mismatch:
+  expected: int
+  actual:   bool(true)
+view_assgn.dats:3:50-60: error(3): type mismatch:
+  expected: int @ l
+  actual:   bool(true) @ l
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

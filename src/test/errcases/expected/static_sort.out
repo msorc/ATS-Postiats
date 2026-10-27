@@ -1,0 +1,9 @@
+static_sort.dats:3:16-24: error(2): none of the static constants referred to by [+] is applicable.
+    3 | fun f {n:int | n + true > 0} (x: int n): void = ()
+      |                ^~~~~~~~
+static_sort.dats:3:16-28: error(2): none of the static constants referred to by [>] is applicable.
+    3 | fun f {n:int | n + true > 0} (x: int n): void = ()
+      |                ^~~~~~~~~~~~
+static_sort.dats:3:16-28: error(2): the static term is of the sort <error> but it is expected to be of the sort bool.
+patsopt(TRANS2): there are [3] errors in total.
+exit 1

@@ -1,0 +1,7 @@
+termet_dec.dats:4:18-18: error(3): the termination metric must decrease: unsolved n + 1 < n
+  where n: int
+  assuming: n >= 0, n > 0
+    4 |   if n > 0 then f (n+1) else 0
+      |                  ^
+typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
+exit 1

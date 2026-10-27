@@ -1,0 +1,6 @@
+nonexhaustive.dats:4:3-53: error(3): pattern match is nonexhaustive:
+list_vt_nil()
+    4 |   case+ xs of ~list_vt_cons (x, xs) => (free(xs); x)
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
+exit 1

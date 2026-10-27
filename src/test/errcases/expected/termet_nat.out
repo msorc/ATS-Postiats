@@ -1,0 +1,8 @@
+termet_nat.dats:3:15-4:31: error(3): the termination metric n must be a natural number: unsolved n >= 0
+  where n: int
+    3 | fun f {n:int} .<n>. (n: int n): int =
+      |               ^~~~~~~~~~~~~~~~~~~~~~~
+    4 |   if n > 0 then f (n-1) else 0
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
+exit 1

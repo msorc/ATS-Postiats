@@ -1,0 +1,5 @@
+linear_preserve.dats:3:38-54: error(3): the linear variable xs must still be available here, but it was consumed
+    3 | fun f (xs: !list_vt(int, 1)): void = list_vt_free (xs)
+      |                                      ^~~~~~~~~~~~~~~~
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

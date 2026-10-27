@@ -1,0 +1,7 @@
+constraint_twovars.dats:4:37-38: error(3): unsolved constraint: n == n#2
+  where n: int, n#2: int
+  assuming: n >= 0, n#2 >= 0
+    4 |   fun h {n:nat} (y: int n): int n = x
+      |                                     ^
+typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
+exit 1

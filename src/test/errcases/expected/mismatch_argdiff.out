@@ -1,0 +1,12 @@
+mismatch_argdiff.dats:3:49-51: error(3): the dynamic expression cannot be assigned the type list_vt(bool, 3)
+    3 | fun f (xs: list_vt(int, 3)): list_vt(bool, 3) = xs
+      |                                                 ^~
+mismatch_argdiff.dats:3:49-51: error(3): type mismatch:
+  expected: bool
+  actual:   int
+mismatch_argdiff.dats:3:49-51: error(3): type mismatch:
+  expected: list_vt(bool, 3)
+  actual:   list_vt(int, 3)
+  the types differ in argument 1: bool vs int
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

@@ -1,0 +1,4 @@
+freeat_linear.dats:3:44-46: error(3): [free@] operation cannot be performed: unfolded datatype constructor is expected.
+    3 | fun f (xs: list_vt(int, 1)): void = free@ (xs)
+      |                                            ^~
+exit 0
