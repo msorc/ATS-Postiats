@@ -60,7 +60,7 @@ prerr_interror() =
 implement{}
 prerr_interror_loc(loc) =
 {
-  val () = $LOC.prerr_location (loc)
+  val () = $LOC.prerr_errloc (loc)
   val () = (
     prerr ": INTERROR("; prerr_FILENAME<> (); prerr ")"
   ) (* end of [val] *)
@@ -71,31 +71,31 @@ prerr_interror_loc(loc) =
 implement{}
 prerr_error1_loc(loc) =
 (
-  $LOC.prerr_location(loc); prerr ": error(1)"
+  $LOC.prerr_errloc(loc); prerr ": error(1)"
 ) // end of [prerr_error1_loc]
 
 implement{}
 prerr_error2_loc(loc) =
 (
-  $LOC.prerr_location(loc); prerr ": error(2)"
+  $LOC.prerr_errloc(loc); prerr ": error(2)"
 ) // end of [prerr_error2_loc]
 
 implement{}
 prerr_errmac_loc(loc) =
 (
-  $LOC.prerr_location(loc); prerr ": error(mac)"
+  $LOC.prerr_errloc(loc); prerr ": error(mac)"
 ) // end of [prerr_errmac_loc]
 
 implement{}
 prerr_error3_loc(loc) =
 (
-  $LOC.prerr_location(loc); prerr ": error(3)"
+  $LOC.prerr_errloc(loc); prerr ": error(3)"
 ) // end of [prerr_error3_loc]
 
 implement{}
 prerr_error4_loc(loc) =
 (
-  $LOC.prerr_location(loc); prerr ": error(4)"
+  $LOC.prerr_errloc(loc); prerr ": error(4)"
 ) // end of [prerr_error4_loc]
 
 (* ****** ****** *)
@@ -103,7 +103,7 @@ prerr_error4_loc(loc) =
 implement{}
 prerr_errccomp_loc (loc) =
 (
-  $LOC.prerr_location (loc); prerr ": error(ccomp)"
+  $LOC.prerr_errloc(loc); prerr ": error(ccomp)"
 ) // end of [prerr_errccomp_loc]
 
 (* ****** ****** *)
@@ -111,25 +111,25 @@ prerr_errccomp_loc (loc) =
 implement{}
 prerr_warning1_loc (loc) =
 (
-  $LOC.prerr_location (loc); prerr ": warning(1)"
+  $LOC.prerr_errloc(loc); prerr ": warning(1)"
 ) // end of [prerr_warning1_loc]
 
 implement{}
 prerr_warning2_loc (loc) =
 (
-  $LOC.prerr_location (loc); prerr ": warning(2)"
+  $LOC.prerr_errloc(loc); prerr ": warning(2)"
 ) // end of [prerr_warning2_loc]
 
 implement{}
 prerr_warning3_loc (loc) =
 (
-  $LOC.prerr_location (loc); prerr ": warning(3)"
+  $LOC.prerr_errloc(loc); prerr ": warning(3)"
 ) // end of [prerr_warning3_loc]
 
 implement{}
 prerr_warning4_loc (loc) =
 (
-  $LOC.prerr_location (loc); prerr ": warning(4)"
+  $LOC.prerr_errloc(loc); prerr ": warning(4)"
 ) // end of [prerr_warning4_loc]
 
 (* ****** ****** *)
@@ -137,7 +137,7 @@ prerr_warning4_loc (loc) =
 implement{}
 prerr_warnccomp_loc (loc) =
 (
-  $LOC.prerr_location (loc); prerr ": warning(ccomp)"
+  $LOC.prerr_errloc(loc); prerr ": warning(ccomp)"
 ) // end of [prerr_warnccomp_loc]
 
 (* ****** ****** *)

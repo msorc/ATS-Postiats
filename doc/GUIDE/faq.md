@@ -1,8 +1,13 @@
 # FAQ: what the compiler says, and what to write instead
 
 The messages below are copied from `patsopt` (0.4.3). Source locations
-look like `file.dats: 180(line=7, offs=32) -- 191(line=7, offs=43): error(3): ...`;
-only the part after `error(N):` is quoted. The code of the rejected
+look like `file.dats:7:32-43: error(3): ...` (`file:line:col-col`, or
+`file:line:col-line:col` when the range spans lines), followed by the
+source line(s) of the range with the range underlined; the older form
+`file.dats: 180(line=7, offs=32) -- 191(line=7, offs=43): error(3): ...`
+without the source line is selected by `--legacy-errors` or by the
+environment variable `PATSOPT_LEGACY_ERRORS=1`. Only the part after
+`error(N):` is quoted. The code of the rejected
 programs is in [doc/EXAMPLE/LINHEAP](../EXAMPLE/LINHEAP) (`NEG_*.dats`),
 and the replacements are shown in the [migration guide](migrating-from-0.4.2.md).
 

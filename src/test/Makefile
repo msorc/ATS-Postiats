@@ -7,6 +7,8 @@
 # comes from shell globs (t1cases/*.sats ...): fix the collation, whatever the
 # locale of the caller is.
 export LC_ALL := C
+# HX-2026-10: the recorded sums are those of the numeric error locations
+export PATSOPT_LEGACY_ERRORS := 1
 # The cases print the location of the prelude files relative to PATSHOME: use the
 # canonical root of this repository, whatever PATSHOME the caller has (e.g. one
 # with ".." segments), so that the md5 sums do not depend on it.

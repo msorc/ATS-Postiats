@@ -83,7 +83,7 @@ staload "./pats_staexp2_util.sats"
 
 fn prerr_error2_loc
   (loc: location): void = (
-  $LOC.prerr_location loc; prerr ": error(2)"
+  $LOC.prerr_errloc loc; prerr ": error(2)"
 ) // end of [prerr_error2_loc]
 
 (* ****** ****** *)

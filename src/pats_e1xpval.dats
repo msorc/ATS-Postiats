@@ -115,7 +115,7 @@ staload "./pats_e1xpval.sats"
 fun
 prerr_error1_loc
   (loc: location): void = (
-  $LOC.prerr_location loc; prerr ": error(1)"
+  $LOC.prerr_errloc loc; prerr ": error(1)"
 ) // end of [prerr_error1_loc]
 
 (* ****** ****** *)
@@ -813,7 +813,7 @@ in
   if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2) then let
       val i1 = v1al_int_get (v1) and i2 = v1al_int_get (v2)
       val () = if (i2 < 0) then {
-        val () = prerr_location (e0.e1xp_loc ())
+        val () = $LOC.prerr_errloc (e0.e1xp_loc ())
 //
         val () = if isdebug () then prerr ": e1xplevenv_valize_asl"
 //
@@ -837,7 +837,7 @@ in
   if v1al_is_V1ALint (v1) andalso v1al_is_V1ALint (v2) then let
       val i1 = v1al_int_get (v1) and i2 = v1al_int_get (v2)
       val () = if (i2 < 0) then {
-        val () = prerr_location (e0.e1xp_loc ())
+        val () = $LOC.prerr_errloc (e0.e1xp_loc ())
 //
         val () = if isdebug () then prerr ": e1xplevenv_valize_asl"
 //

@@ -66,6 +66,7 @@ staload _(*anon*) = "./pats_utils.dats"
 
 (* ****** ****** *)
 
+staload LOC = "./pats_location.sats"
 staload ERR = "./pats_error.sats"
 staload _(*anon*) = "./pats_error.dats"
 
@@ -1110,6 +1111,7 @@ in
 //
 if unsolved = 0u then () // nothing
 else let (* unsolved > 0 *)
+    val () = $LOC.prerr_errloc_flush ()
     val () = prerr "typechecking has failed"
     val () =
     if unsolved <= 1u
