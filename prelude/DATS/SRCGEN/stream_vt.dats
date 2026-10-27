@@ -36,7 +36,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/list.atxt
-** Time of generation: Wed Oct 21 23:29:37 2026
+** Time of generation: Wed Oct 28 01:00:16 2026
 *)
 
 (* ****** ****** *)
@@ -148,7 +148,6 @@ in
         stream2list_vt_cons(xs_con)
       ) // end of [val]
       val ((*void*)) = loop(xs1_, xs1)
-      prval ((*folded*)) = fold@(res)
     } (* end of [stream_vt_cons] *)
 end // end of [loop]
 //
@@ -206,7 +205,7 @@ case+ xs_con of
       xs := auxmain(xs, n-1)
     // end of [val]
   in
-    fold@(xs_con); xs_con
+    xs_con
   end // end of [stream_vt_cons]
 //
 end // end of [then]
@@ -510,7 +509,7 @@ case+ xs_con of
     (
       xs := auxmain(xs, ys)
     ) (* end of [val] *)
-    prval () = fold@{a}(xs_con) in xs_con
+    in xs_con
   end // end of [stream_vt_cons]
 //
 end // end-of-let
@@ -668,7 +667,6 @@ case+ xs_con of
       {
         val () =
         (xs1 := auxmain(xs1))
-        prval () = fold@{a}(xs_con)
       } (* end of [then] *)
       else
       auxmain_con(xs1) where
@@ -768,7 +766,6 @@ case+ xs_con of
       {
         val () =
         xs1 := auxmain(xs1, pred)
-        val () = fold@{a}(xs_con)
       } (* end of [then] *)
       else
       auxmain_con(xs1, pred) where
@@ -850,7 +847,7 @@ case+ xs_con of
           i0+1, xs1, pred
         ) (* end-of-val *)
       in
-        fold@{a}(xs_con); xs_con
+        xs_con
       end // end of [then]
       else let
         val xs1 = xs1
@@ -916,7 +913,7 @@ case+ xs_con of
         val () =
         xs1 := auxmain(xs1)
       in
-        fold@{a}(xs_con); xs_con
+        xs_con
       end // end of [then]
       else let
         val () =
@@ -1683,7 +1680,7 @@ case+ xs_con of
       in
         loop(xs1, env)
       end else let
-        prval((*folded*)) = fold@(xs_con) in xs_con
+        in xs_con
       end // end of [if]
   end // end of [stream_vt_cons]
 | ~stream_vt_nil((*void*)) => stream_vt_nil()
@@ -2089,7 +2086,7 @@ case+ opt of
       )
     | ~stream_vt_cons(x0, xs1) =>
       (
-        xs := xs1; fold@(opt); fold@(xser); x0
+        xs := xs1; fold@(opt); x0
       )
   ) (* end of [Some_vt] *)
 end // end of [streamer_vt_eval_exn]
@@ -2107,21 +2104,18 @@ in
 //
 case+ opt of
 | None_vt() =>
-  None_vt() where
-  {
-    prval () = fold@(xser)
-  } (* end of [None_vt] *)
+  None_vt() (* end of [None_vt] *)
 | @Some_vt(xs) =>
   (
     case+ !xs of
     | ~stream_vt_nil() =>
       (
         free@(opt);
-        opt := None_vt(); fold@(xser); None_vt()
+        opt := None_vt(); None_vt()
       )
     | ~stream_vt_cons(x0, xs1) =>
       (
-        xs := xs1; fold@(opt); fold@(xser); Some_vt(x0)
+        xs := xs1; fold@(opt); Some_vt(x0)
       )
   ) (* end of [Some_vt] *)
 end // end of [streamer_vt_eval_opt]

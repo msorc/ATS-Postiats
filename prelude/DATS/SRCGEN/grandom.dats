@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/grandom.atxt
-** Time of generation: Wed Oct 21 23:29:36 2026
+** Time of generation: Wed Oct 28 00:56:39 2026
 *)
 
 (* ****** ****** *)
@@ -102,7 +102,7 @@ val () = grandom_ref<a> (x)
 val () = loop (pred (n), res1)
 //
 in
-  fold@ (res)
+  // nothing
 end else res := nil_vt((*void*))
 //
 end // end of [loop]

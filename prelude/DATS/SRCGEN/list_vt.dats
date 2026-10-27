@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/list_vt.atxt
-** Time of generation: Wed Oct 21 23:29:36 2026
+** Time of generation: Wed Oct 28 01:00:16 2026
 *)
 
 (* ****** ****** *)
@@ -263,8 +263,6 @@ case+ xs of
 //
     val () = loop(xs1, res1)
 //
-    prval ((*folded*)) = fold@ (xs)
-    prval ((*folded*)) = fold@ (res)
 //
   in
     // nothing
@@ -329,7 +327,6 @@ then res where
   @list_vt_cons(_, xs1) = xs
   val res =
   loop{n-1,i-1}(xs1, pred(i))
-  prval ((*folded*)) = fold@ (xs)
 } (* end of [then] *)
 else $UN.cast2Ptr1(addr@(xs))
 //
@@ -389,7 +386,7 @@ val+@list_vt_cons(x1, xs1) = !pi
 //
 val () = x1 := x0
 //
-prval() = fold@(!pi); prval() = fpf(pf)
+prval() = fpf(pf)
 //
 prval() = let
   extern
@@ -426,7 +423,7 @@ val+@list_vt_cons(x1, xs1) = !pi
 val t = x1
 val () = x1 := x0
 val () = x0 := t
-prval() = fold@(!pi); prval() = fpf(pf)
+prval() = fpf(pf)
 //
 prval() =
 __unref(xs) where
@@ -599,14 +596,13 @@ xs: !list_vt(a, n) >> list_vt(a?, n)
 (
   case+ xs of
   | @list_vt_nil
-      () => fold@{a?}(xs)
+      () => ()
     // end of [list_vt_nil]
   | @list_vt_cons
       (x, xs1) => let
       val () =
         list_vt_uninitize$clear(x)
       val () = loop(xs1)
-      prval ((*folded*)) = fold@{a?}(xs)
     in
       // nothing
     end // end of [list_vt_cons]
@@ -646,7 +642,7 @@ case+ xs of
   // end of [list_vt_nil]
 | @list_vt_cons
     (x, xs1) => let
-    val () = loop(xs1, ys); prval() = fold@(xs) in (*none*)
+    val () = loop(xs1, ys) in (*none*)
   end // end of [list_vt_cons]
 //
 end (* end of [loop] *)
@@ -693,7 +689,7 @@ case+ xs1 of
   end // end of [list_vt_nil]
 | list_vt_cons _ => let
     val x = loop(xs1)
-    prval() = fold@ (xs) in (x)
+    in (x)
   end // end of [list_vt_cons]
 //
 end // end of [loop]
@@ -733,7 +729,7 @@ xs: list_vt(a, m), ys: list_vt(a, n)
   | @list_vt_cons
       (_, xs1) => let
       val xs1_ = xs1
-      val () = xs1 := ys; prval() = fold@ (xs)
+      val () = xs1 := ys
     in
       loop(xs1_, xs)
     end // end of [cons]
@@ -762,7 +758,6 @@ if i > 0 then let
 val+@cons_vt(x, xs1) = xs
 //
 val res = loop(xs1, i-1)
-prval ((*folded*)) = fold@ (xs)
 //
 in
   res
@@ -917,7 +912,7 @@ in
 //
 case+ xs of
 | @list_vt_nil
-    () => fold@ (xs)
+    () => ()
   // list_vt_nil
 | @list_vt_cons
     (x, xs1) => let
@@ -928,7 +923,7 @@ case+ xs of
     if test then let
       val () = loop(xs1)
     in
-      fold@ (xs)
+      // nothing
     end else let
       val xs1 = xs1
       val () =
@@ -991,12 +986,12 @@ case+ xs of
       val () = res1 := xs
       val () = loop(xs_tl_, n1, xs_tl, res2)
     in
-      fold@(res1)
+      // nothing
     end else let
       val () = res2 := xs
       val () = loop(xs_tl_, n1, res1, xs_tl)
     in
-      fold@(res2)
+      // nothing
     end // end of [if]
   end // end of [list_vt_cons]
 //
@@ -1050,14 +1045,14 @@ case+ xs of
       res1 := list_vt_nil
       val () = res2 := xs
     in
-      fold@(res2) // folded
+      // nothing
     end else let
       val xs_tl_ = xs_tl
       val () = n1 := n1+1
       val () = res1 := xs
       val () = loop(xs_tl_, n1, xs_tl, res2)
     in
-      fold@(res1) // folded
+      // nothing
     end // end of [if]
   end // end of [list_vt_cons]
 //
@@ -1094,7 +1089,6 @@ case+ xs of
     val () =
     list_vt_app$fwork<a>(x)
     val () = loop(xs1)
-    prval ((*folded*)) = fold@(xs)
   } (* end of [cons] *)
 | list_vt_nil((*void*)) => ()
 )
@@ -1151,7 +1145,6 @@ case+ xs of
     val () =
     list_vt_iapp$fwork<a>(i0, x)
     val () = loop(i0+1, xs1)
-    prval ((*folded*)) = fold@(xs)
   } (* end of [cons] *)
 | list_vt_nil((*void*)) => ((*void*))
 )
@@ -1217,8 +1210,6 @@ in
       res := list_vt_cons{b}{0}(y, _)
       val+list_vt_cons(_, res1) = res
       val () = loop(xs1, res1)
-      prval ((*folded*)) = fold@ (xs)
-      prval ((*folded*)) = fold@ (res)
     in
       // nothing
     end // end of [list_vt_cons]
@@ -1257,7 +1248,6 @@ in
       res := list_vt_cons{b}{0}(y, _)
       val+list_vt_cons(_, res1) = res
       val () = loop(xs1_val, res1)
-      prval ((*folded*)) = fold@(res)
     in
       // nothing
     end // end of [list_vt_cons]
@@ -1305,11 +1295,10 @@ case+ xs of
       val () =
         list_vt_foreach$fwork<x><env>(x, env)
       val () = loop(xs1, env)
-      prval ((*void*)) = fold@ (xs)
     in
       // nothing
     end else let
-      prval ((*void*)) = fold@ (xs) in (*nothing*)
+      in (*nothing*)
     end // end of [if]
   end // end of [cons]
 | list_vt_nil((*void*)) => ()
@@ -1352,7 +1341,7 @@ loop
       val () = f0 (pf | x, env)
       val () = loop(pf | xs1, f0, env)
     in
-      fold@ (xs)
+      // nothing
     end // end of [cons]
   | list_vt_nil ((*void*)) => ()
 // end of [loop]
@@ -1401,11 +1390,9 @@ in
           (i, x, env)
         // end of [val]
         val i = loop(succ(i), xs1, env)
-        prval ((*folded*)) = fold@ (xs)
       in
         i // the number of processed elements
       end else let
-        prval ((*folded*)) = fold@ (xs)
       in
         i // the number of processed elements
       end // end of [if]
@@ -1625,7 +1612,6 @@ val+
 list_vt_cons(_, xs_tl) = xs
 //
 val () = (xs_tl := res)
-prval((*folded*)) = fold@(xs)
 //
 in
   loop2(pz, pred(i0), xs(*res*))
@@ -1709,7 +1695,6 @@ then let
     list_vt_cons{elt}{0}(l, _)
   val+list_vt_cons(_, res1) = res
   val () = loop(l+1, r, res1)
-  prval ((*folded*)) = fold@(res)
 in
   // nothing
 end else (res := list_vt_nil())
@@ -1761,12 +1746,11 @@ then let
   val () = x := !p0
   val p1 = ptr1_succ<a>(p0)
   val () =
-    loop(pf2 | p1, pred(n0), res1)
+    loop(p1, pred(n0), res1)
   // end of [val]
   prval () =
     pf := array_v_cons{a?!}(pf1, pf2)
   // end of [prval]
-  prval ((*folded*)) = fold@ (res)
 in
   // nothing
 end // end of [then]
@@ -1783,7 +1767,7 @@ var
 res: ptr // uninitialized
 //
 val ((*void*)) =
-  loop(view@(A) | addr@(A), n0, res)
+  loop(addr@(A), n0, res)
 //
 in
   res
@@ -1838,7 +1822,6 @@ fun loop
     val+list_vt_cons
       (_, res1) = res // res1 = res.1
     val () = loop(n, succ(i), res1)
-    prval ((*folded*)) = fold@ (res)
   in
     // nothing
   end else (res := list_vt_nil)

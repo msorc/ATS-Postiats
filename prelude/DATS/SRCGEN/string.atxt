@@ -1014,7 +1014,7 @@ then let
   // end of [val]
   val ((*void*)) = loop (x1, res1)
 in
-  fold@(res)
+  // nothing
 end // end of [then]
 else let
   prval() =

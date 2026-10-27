@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/strptr.atxt
-** Time of generation: Wed Oct 21 23:29:28 2026
+** Time of generation: Wed Oct 28 01:00:15 2026
 *)
 
 (* ****** ****** *)
@@ -347,7 +347,6 @@ case+ xs of
   in
     if isnot then let
       val () = loop (xs1)
-      prval () = fold@ (xs)
     in
       // nothing
     end else let
@@ -360,7 +359,7 @@ case+ xs of
       loop (xs)
     end // end of [if]
   end // end of [list_vt_cons]
-| @list_vt_nil () => fold@ (xs)
+| @list_vt_nil () => ()
 //
 end // end of [loop]
 //

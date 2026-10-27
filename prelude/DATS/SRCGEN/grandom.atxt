@@ -87,7 +87,7 @@ val () = grandom_ref<a> (x)
 val () = loop (pred (n), res1)
 //
 in
-  fold@ (res)
+  // nothing
 end else res := nil_vt((*void*))
 //
 end // end of [loop]

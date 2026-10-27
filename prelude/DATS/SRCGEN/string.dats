@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/string.atxt
-** Time of generation: Wed Oct 21 23:29:27 2026
+** Time of generation: Wed Oct 28 01:00:15 2026
 *)
 
 (* ****** ****** *)
@@ -1029,7 +1029,7 @@ then let
   // end of [val]
   val ((*void*)) = loop (x1, res1)
 in
-  fold@(res)
+  // nothing
 end // end of [then]
 else let
   prval() =

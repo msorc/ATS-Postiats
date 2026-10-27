@@ -101,7 +101,6 @@ case+ opt of
     ) = fprint_string (out, "Some_vt(")
     val () = fprint_ref<a> (out, x)
     val () = fprint_string (out, ")")
-    prval () = fold@ (opt)
   } (* end of [Some_vt] *)
 | None_vt () => {
     val () = fprint_string (out, "None_vt()")
