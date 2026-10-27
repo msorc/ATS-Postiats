@@ -93,7 +93,9 @@ staload "./pats_syntax.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 
@@ -1488,13 +1490,25 @@ fun auxerr1
   val s2t1 = s2var_get_srt (s2v1)
   val s2t2 = s2var_get_srt (s2v2)
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": the static variable [";
-  val () = prerr_s2var (s2v1)
-  val () = prerr "] is of the sort ["
-  val () = prerr_s2rt (s2t1)
-  val () = prerr "] but it is bound to a term of the sort ["
-  val () = prerr_s2rt (s2t2)
-  val () = prerr "]."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the static variable [";
+    val () = prerr_s2var (s2v1)
+    val () = prerr "] is of the sort ["
+    val () = prerr_s2rt (s2t1)
+    val () = prerr "] but it is bound to a term of the sort ["
+    val () = prerr_s2rt (s2t2)
+    val () = prerr "]."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the static variable "
+    val () = prerr_s2var_s (s2v1)
+    val () = prerr " is of the sort "
+    val () = prerr_s2rt_s (s2t1)
+    val () = prerr " but it is bound to a term of the sort "
+    val () = prerr_s2rt_s (s2t2)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   // nothing
@@ -1505,9 +1519,16 @@ fun auxerr2
   loc0: loc_t, s2v1: s2var
 ) : void = let
    val () = prerr_error3_loc (loc0)
-   val () = prerr ": there is no binding for the static variable [";
-   val () = prerr_s2var (s2v1)
-   val () = prerr "]"
+   val () =
+   if $GLOB.the_LEGACYERRORS_get () > 0 then {
+     val () = prerr ": there is no binding for the static variable [";
+     val () = prerr_s2var (s2v1)
+     val () = prerr "]"
+   } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+     val () = sprint_reset ()
+     val () = prerr ": there is no binding for the static variable "
+     val () = prerr_s2var_s (s2v1)
+   } (* end of [if] *)
    val () = prerr_newline ()
 in
   // nothing
@@ -1592,9 +1613,17 @@ case+ s2exp_node_view(s2e0.s2exp_node()) of
 | v => let
     val () = s2exp_node_view_free (v)
     val () = prerr_error3_loc (loc0)
-    val () = prerr ": the pattern is given the type ["
-    val () = prerr_s2exp (s2e0)
-    val () = prerr "] but an existentially quantified type is expected."
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the pattern is given the type ["
+      val () = prerr_s2exp (s2e0)
+      val () = prerr "] but an existentially quantified type is expected."
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr ": the pattern is given the type "
+      val () = prerr_s2exp_s (s2e0)
+      val () = prerr " but an existentially quantified type is expected."
+    } (* end of [if] *)
     val () = prerr_newline ()
     val () = the_trans3errlst_add (trans3err_T3E_p2at_trdn (p2t0, s2e0))
   in
@@ -1636,9 +1665,17 @@ case+ opt of
 //
 | ~None_vt ((*void*)) => let
     val () = prerr_error3_loc (loc0)
-    val () = prerr ": the pattern is given the type ["
-    val () = prerr_s2exp (s2e0)
-    val () = prerr "] but a vbox type is expected instead."
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the pattern is given the type ["
+      val () = prerr_s2exp (s2e0)
+      val () = prerr "] but a vbox type is expected instead."
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr ": the pattern is given the type "
+      val () = prerr_s2exp_s (s2e0)
+      val () = prerr " but a vbox type is expected instead."
+    } (* end of [if] *)
     val () = prerr_newline ()
     val () = the_trans3errlst_add (trans3err_T3E_p2at_trdn (p2t0, s2e0))
   in
