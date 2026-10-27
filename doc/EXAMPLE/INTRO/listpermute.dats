@@ -93,7 +93,7 @@ case+ xss of
     val () = print_newline ()
     val () = intlstlst_print (xss1)
   in
-    fold@ (xss)
+    // nothing
   end // end of [list_vt_cons]
 ) (* end of [intlstlst_print] *)
 //

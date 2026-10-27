@@ -72,14 +72,12 @@ case+ xs0 of
     if sgn <= 0
       then let
         val () = insord (pf1, pf2 | xs1, nx0, p1, p2)
-        prval () = fold@ (xs0)
       in
         // nothing
       end // end of [then]
       else let
         prval () = fold@ (xs0)
         val () = (!p2 := xs0; xs0 := nx0)
-        prval () = fold@ (xs0)
       in
         // nothing
       end // end of [else]
@@ -89,7 +87,6 @@ case+ xs0 of
   {
     val () = xs0 := nx0
     val () = !p2 := list_vt_nil ()
-    prval () = fold@ (xs0)
   }
 //
 end (* end of [insord] *)
@@ -151,7 +148,7 @@ if n1 > 0 then let
   val+@list_vt_cons (_, xs1) = xs
   val () = split (xs1, n1-1, res)
 in
-  fold@ (xs)
+  // nothing
 end else let
   val () = res := xs
   val () = xs := list_vt_nil ()
@@ -183,21 +180,17 @@ case+ xs1 of
       in
         if sgn <= 0 then let
             val () = res := xs1
-          prval () = fold@{a}(xs2)
             val () = merge (xs11, xs2, xs11)
-          prval () = fold@{a}(res)
         in
           // nothing
         end else let
             val () = res := xs2
-          prval () = fold@{a}(xs1)
             val () = merge (xs1, xs21, xs21)
-          prval () = fold@{a}(res)
         in
           // nothing
         end // end of [if]
       end // end of [list_vt_cons]
-    | ~list_vt_nil () => (fold@ (xs1); res := xs1)
+    | ~list_vt_nil () => (res := xs1)
   ) // end of [list_vt_cons]
 | ~list_vt_nil () => (res := xs2)
 //
@@ -216,7 +209,6 @@ then let
   val+@list_vt_cons (_, xs1) = xs
   var res: List_vt a? // uninitialized
   val () = split (xs1, n1-1, res)
-  prval () = fold@ (xs)
   val xs1 = msort (xs, n1)
   and xs2 = msort (res, n-n1)
   val () = merge (xs1, xs2, res)

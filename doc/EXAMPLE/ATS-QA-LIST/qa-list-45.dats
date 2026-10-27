@@ -38,13 +38,13 @@ val (pf, pfgc | p) = array_ptr_alloc<toto> (asz)
 //
 val p1 = p
 prval (pf1, pf) = array_v_uncons (pf)
-val () = ptr_set<toto> (pf1 | p1, t1)
+val () = ptr_set<toto> (p1, t1)
 val p2 = ptr_succ<toto> (p1)
 prval (pf2, pf) = array_v_uncons (pf)
-val () = ptr_set<toto> (pf2 | p2, t2)
+val () = ptr_set<toto> (p2, t2)
 val p3 = ptr_succ<toto> (p2)
 prval (pf3, pf) = array_v_uncons (pf)
-val () = ptr_set<toto> (pf3 | p3, t3)
+val () = ptr_set<toto> (p3, t3)
 //
 prval pf = array_v_unnil_nil{toto?,toto}(pf)
 //

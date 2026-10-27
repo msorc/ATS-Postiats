@@ -36,7 +36,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/filebas.atxt
-** Time of generation: Wed Oct 21 23:29:33 2026
+** Time of generation: Wed Oct 28 01:00:15 2026
 *)
 
 (* ****** ****** *)
@@ -415,7 +415,6 @@ if (c != EOL) then let
   )
   val+list_vt_cons (_, res1) = res
   val () = loop (inp, res1)
-  prval () = fold@ (res)
 in
   // nothing
 end else (res := list_vt_nil)
@@ -461,7 +460,6 @@ end else let
   )
   val+list_vt_cons (_, res1) = res
   val () = loop (inp, res1)
-  prval () = fold@ (res)
 in
   // nothing
 end // end of [if]
@@ -503,7 +501,6 @@ in
     )
     val+list_vt_cons (_, res1) = res
     val n = loop (inp, pred(n), res1)
-    prval () = fold@ (res)
   in
     n
   end else let
@@ -664,7 +661,6 @@ end else let
   val+
   list_vt_cons(_, res1) = res
   val () = loop(inp, res1) // tail-call
-  prval ((*folded*)) = fold@ (res)
 in
   // nothing
 end // end of [if]
@@ -962,14 +958,14 @@ if bsz2 > 0 then
   val () =
     fileref_foreach$fworkv<env>(!pA, bsz2, env)
   prval ((*returned*)) = fpfA(pfA)
-  val ((*void*)) = loop (pf | inp, bufp, bsz, env)
+  val ((*void*)) = loop (inp, bufp, bsz, env)
 } (* end of [if] *)
 //
 end // end of [loop]
 //
 val bsz = fileref_foreach$bufsize<>((*void*))
 val (pf1, pf2 | bufp) = memory$alloc<>( bsz )
-val ((*void*)) = loop(pf1 | inp, bufp, bsz, env)
+val ((*void*)) = loop(inp, bufp, bsz, env)
 val ((*void*)) = memory$free<>(pf1, pf2 | bufp)
 //
 in

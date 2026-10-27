@@ -151,7 +151,6 @@ then let
   // end of [val]
   val+list_vt_cons(_, res1) = res0
   val () = loop(argv, i0+1, res1)
-  prval ((*folded*)) = fold@(res0)
 in
   // nothing
 end // end of [then]

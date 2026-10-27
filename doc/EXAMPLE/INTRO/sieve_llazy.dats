@@ -81,7 +81,7 @@ fun sieve_con
   ) (* end of [val] *)
   val () = (ns2 := ps)
 in
-  fold@ ns_con; ns_con
+  ns_con
 end // end of [sieve_con]
 
 and sieve

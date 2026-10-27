@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/list_vt_quicksort.atxt
-** Time of generation: Wed Oct 21 23:29:47 2026
+** Time of generation: Wed Oct 28 01:00:17 2026
 *)
 
 (* ****** ****** *)
@@ -78,7 +78,7 @@ case+ xs of
     ) = $UN.ptr0_set<a> (p, $UN.ptr0_get<a> (addr@(x)))
     val () = copyout (xs1, ptr0_succ<a> (p))
   in
-    fold@ (xs)
+    // nothing
   end // end of [list_vt_cons]
 | list_vt_nil ((*void*)) => ()
 //
@@ -98,7 +98,7 @@ case+ xs of
     ) = $UN.ptr0_set<a> (addr@(x), $UN.ptr0_get<a> (p))
     val () = copyinto (xs1, ptr0_succ<a> (p))
   in
-    fold@ (xs)
+    // nothing
   end // end of [list_vt_cons]
 | list_vt_nil ((*void*)) => ()
 //

@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/array.atxt
-** Time of generation: Wed Oct 21 23:29:38 2026
+** Time of generation: Wed Oct 28 01:00:16 2026
 *)
 
 (* ****** ****** *)
@@ -406,7 +406,7 @@ fun loop
       prval
       (pf1, pf2) = array_v_uncons(pf)
       val () = !p0 := x
-      val () = loop(pf2 | ptr1_succ<a>(p0), xs)
+      val () = loop(ptr1_succ<a>(p0), xs)
       prval () = (pf := array_v_cons(pf1, pf2))
     in
       // nothing
@@ -414,7 +414,7 @@ fun loop
 ) (* end of [loop] *)
 //
 in
-  loop(view@(A) | addr@(A), xs)
+  loop(addr@(A), xs)
 end // end of [array_copy_from_list]
 
 (* ****** ****** *)
@@ -446,7 +446,7 @@ fun loop
       (pf1, pf2) = array_v_uncons(pf)
       val () = !p0 := x
       val () =
-        loop(pf2 | ptr1_succ<a>(p0), xs)
+        loop(ptr1_succ<a>(p0), xs)
       // end of [val]
       prval () = pf := array_v_cons(pf1, pf2)
     in
@@ -455,7 +455,7 @@ fun loop
 ) (* end of [loop] *)
 //
 in
-  loop(view@(A) | addr@(A), xs)
+  loop(addr@(A), xs)
 end // end of [array_copy_from_list_vt]
 
 (* ****** ****** *)
@@ -484,9 +484,8 @@ then let
     res := list_vt_cons{a}{0}(!p0, _)
   // end of [val]
   val+list_vt_cons(_, res1) = res
-  val () = loop(pf2 | ptr1_succ<a>(p0), pred(nz), res1)
+  val () = loop(ptr1_succ<a>(p0), pred(nz), res1)
   prval () = (pf := array_v_cons(pf1, pf2))
-  prval () = fold@ (res)
 in
   // nothing
 end else let
@@ -497,7 +496,7 @@ end // end of [if]
 ) (* end of [loop] *)
 //
 var res: ptr
-val () = loop(view@(A) | addr@(A), n, res)
+val () = loop(addr@(A), n, res)
 //
 } // end of [array_copy_to_list_vt]
 
@@ -551,7 +550,7 @@ in
       array_foreach$fwork<a><env>(!p0, env)
     // end of [val]
     val res =
-      loop(pf2 | ptr1_succ<a>(p0), pred(nz), env)
+      loop(ptr1_succ<a>(p0), pred(nz), env)
     // end of [val]
     prval () = (pf := array_v_cons(pf1, pf2))
   in
@@ -565,7 +564,7 @@ end // end of [loop]
 //
 val p0 = addr@(A)
 //
-val nz = loop(view@(A) | p0, asz, env)
+val nz = loop(p0, asz, env)
 //
 in
   asz - nz
@@ -733,7 +732,7 @@ in
     val () =
       array_iforeach$fwork<a><env>(i0, !p0, env)
     val res =
-      loop(pf2 | ptr1_succ<a>(p0), pred(nz), succ(i0), env)
+      loop(ptr1_succ<a>(p0), pred(nz), succ(i0), env)
     prval () = pf := array_v_cons{a}(pf1, pf2)
   in
     res
@@ -746,7 +745,7 @@ else nz(*0*) // end of [else]
 end // end of [loop]
 //
 val p0 = addr@(A)
-val nz = loop(view@(A) | p0, asz, g0int2uint(0), env)
+val nz = loop(p0, asz, g0int2uint(0), env)
 //
 in
   asz - nz
@@ -871,7 +870,7 @@ then let
     array_initize$init<a>(i0, !p0)
   // end of [val]
   val () =
-    loop(pf2 | ptr1_succ<a>(p0), pred(nz), succ(i0))
+    loop(ptr1_succ<a>(p0), pred(nz), succ(i0))
   // end of [val]
 //
   prval () = pf := array_v_cons{a}(pf1, pf2)
@@ -888,7 +887,7 @@ end // end of [if]
 prval() = lemma_g1uint_param(asz)
 //
 in
-  loop(view@ (A) | addr@(A), asz, g0int2uint(0))
+  loop(addr@(A), asz, g0int2uint(0))
 end // end of [array_initize]
 
 (* ****** ****** *)
@@ -1135,7 +1134,7 @@ then let
   val () =
     array_uninitize$clear<a>(i0, !p0)
   val () =
-    loop(pf2 | ptr_succ<a>(p0), pred(nz), succ(i0))
+    loop(ptr_succ<a>(p0), pred(nz), succ(i0))
 //
   prval () = (pf := array_v_cons(pf1, pf2))
 //
@@ -1153,7 +1152,7 @@ prval() = lemma_array_param(A)
 //
 prval pf = view@ (A)
 //
-val () = loop(pf | addr@(A), asz, i2sz(0))
+val () = loop(addr@(A), asz, i2sz(0))
 //
 prval () = view@ (A) := pf
 //
@@ -1271,7 +1270,7 @@ then let
   $UN.ptr0_exch<a>
     (ptr0_add_guint<a>(p0, i), !p0)
   // end of [if]
-  val () = loop(pf2 | ptr1_succ<a>(p0), pred(nz))
+  val () = loop(ptr1_succ<a>(p0), pred(nz))
 //
   prval((*returned*)) = pf := array_v_cons(pf1, pf2)
 in
@@ -1281,7 +1280,7 @@ end else ((*void*)) // end of [if]
 end // end of [loop]
 //
 in
-  loop(view@ (A) | addr@(A), asz)
+  loop(addr@(A), asz)
 end // end of [array_permute]
 
 (* ****** ****** *)

@@ -103,7 +103,7 @@ fn test_one {n:nat} {l:addr}
   (pf: ! @[Nat][n+1] @ l | A: ptr l, n: int n): void = let
   val cnt = heads_many (n)
 in
-  array_int_ptr_set (pf | A, cnt, array_int_ptr_get (pf | A, cnt) + 1)
+  array_int_ptr_set (A, cnt, array_int_ptr_get (A, cnt) + 1)
 end // end of [test_one]
 
 fun test_many
@@ -114,7 +114,7 @@ fun test_many
 in
 //
 if m > 0 then
-  (test_one (pf | A, n); test_many (pf | A, m-1, n))
+  (test_one (A, n); test_many (A, m-1, n))
 else () // end of [if]
 //
 end // end of [test_many]
@@ -131,7 +131,7 @@ end // end of [test_show_one]
 fun test_show_all {n,i:nat | i <= n+1} {l:addr} .<n+1-i>.
   (pf: ! @[Nat][n+1] @ l | A: ptr l, n: int n, i: int i): void =
   if i <= n then
-    (test_show_one (array_int_ptr_get (pf | A, i)); test_show_all (pf | A, n, i+1))
+    (test_show_one (array_int_ptr_get (A, i)); test_show_all (A, n, i+1))
   else ()
 // end of [test_show_all]
 
@@ -152,8 +152,8 @@ val (pf | A) = array_int_ptr_make (N+1)
 //
 val clock_sta = $UN.cast{double}($TIME.clock ())
 //
-val () = test_many (pf | A, M, N)
-val () = test_show_all (pf | A, N, 1)
+val () = test_many (A, M, N)
+val () = test_show_all (A, N, 1)
 val () = array_int_ptr_free (pf | A)
 //
 val clock_fin = $UN.cast{double}($TIME.clock ())

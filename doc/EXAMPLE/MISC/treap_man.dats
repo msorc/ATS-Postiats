@@ -68,7 +68,7 @@ case+ tl of
   (
     case+ tr of
     | ~treap_vt_nil() =>
-       (fold@tl; res := tl)
+       (res := tl)
     | @treap_vt_cons
        (tr_x, tr_y, trl, trr) =>
       (
@@ -77,14 +77,14 @@ case+ tl of
         then let
           val tlr_ = tlr
         in
-          res := tl; fold@tr;
-          loop(tlr_, tr, tlr); fold@res
+          res := tl;
+          loop(tlr_, tr, tlr)
         end
         else let
           val trl_ = trl
         in
           res := tr;
-          fold@tl; loop(tl, trl_, trl); fold@res
+          loop(tl, trl_, trl)
         end
       )
   )
@@ -134,13 +134,13 @@ case+ t0 of
       val tr_ = tr
     in
       tl_res := t0;
-      loop(tr_, x0, tr, tr_res); fold@(tl_res)
+      loop(tr_, x0, tr, tr_res)
     end
     else let
       val tl_ = tl
     in
       tr_res := t0;
-      loop(tl_, x0, tl_res, tl); fold@(tr_res)
+      loop(tl_, x0, tl_res, tl)
     end
   end // end of [treap_vt_cons]
 )
@@ -204,7 +204,7 @@ in
   | ~treap_vt_nil() =>
      (treap_merge2<a>(lt, gt), false)
   | @treap_vt_cons _ =>
-     (fold@eq; (treap_merge3<a>(lt, eq, gt), true))
+     (treap_merge3<a>(lt, eq, gt), true)
 end // end of [treap_has_value]
 
 (* ****** ****** *)
@@ -245,7 +245,7 @@ in
   | ~treap_vt_nil() =>
      treap_merge3<a>(lt,new_treap(x0), gt)
   | @treap_vt_cons _ =>
-     (fold@eq; treap_merge3<a>(lt, eq, gt))
+     treap_merge3<a>(lt, eq, gt)
 end // end of [treap_insert]
 
 (* ****** ****** *)

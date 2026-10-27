@@ -26,24 +26,24 @@ theCount_get
   (): int = let
   prval vbox(pf) = pfbox
 in
-  $effmask_ref(ptr_get<int>(pf | addr@(_count_)))
+  $effmask_ref(ptr_get<int>(addr@(_count_)))
 end // end of [theCount_get]
 
 fun
 theCount_inc
   (): void = let
   prval vbox(pf) = pfbox
-  val n = $effmask_ref(ptr_get<int>(pf | addr@(_count_)))
+  val n = $effmask_ref(ptr_get<int>(addr@(_count_)))
 in
-  $effmask_ref(ptr_set<int>(pf | addr@(_count_), n + 1))
+  $effmask_ref(ptr_set<int>(addr@(_count_), n + 1))
 end // end of [theCount_inc]
 
 fun
 theCount_getinc
   (): int = let
   prval vbox(pf) = pfbox
-  val n = $effmask_ref(ptr_get<int>(pf | addr@(_count_)))
-  val () = $effmask_ref(ptr_set<int>(pf | addr@(_count_), n + 1))
+  val n = $effmask_ref(ptr_get<int>(addr@(_count_)))
+  val () = $effmask_ref(ptr_set<int>(addr@(_count_), n + 1))
 in
   (n)
 end // end of [theCount_getinc]
@@ -53,7 +53,7 @@ theCount_reset
   (): void = let
   prval vbox(pf) = pfbox
 in
-  $effmask_ref(ptr_set<int>(pf | addr@(_count_), 0))
+  $effmask_ref(ptr_set<int>(addr@(_count_), 0))
 end // end of [theCount_reset]
 
 end // end of [local]

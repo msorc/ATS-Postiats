@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/option_vt.atxt
-** Time of generation: Wed Oct 21 23:29:37 2026
+** Time of generation: Wed Oct 28 01:00:16 2026
 *)
 
 (* ****** ****** *)
@@ -116,7 +116,6 @@ case+ opt of
     ) = fprint_string (out, "Some_vt(")
     val () = fprint_ref<a> (out, x)
     val () = fprint_string (out, ")")
-    prval () = fold@ (opt)
   } (* end of [Some_vt] *)
 | None_vt () => {
     val () = fprint_string (out, "None_vt()")

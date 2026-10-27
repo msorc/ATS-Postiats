@@ -333,7 +333,6 @@ case+ xs of
   in
     if isnot then let
       val () = loop (xs1)
-      prval () = fold@ (xs)
     in
       // nothing
     end else let
@@ -346,7 +345,7 @@ case+ xs of
       loop (xs)
     end // end of [if]
   end // end of [list_vt_cons]
-| @list_vt_nil () => fold@ (xs)
+| @list_vt_nil () => ()
 //
 end // end of [loop]
 //

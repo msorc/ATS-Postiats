@@ -130,7 +130,7 @@ let
   val x0 = x0
   val () = (xs := sieve(stream_vt_filter_cloptr(xs, lam x => x % x0 > 0)))
 in
-  fold@(xs_con); xs_con
+  xs_con
 end
 ,
 (~xs) // it is called if the stream is freed

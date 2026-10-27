@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/basics.atxt
-** Time of generation: Wed Oct 21 23:29:34 2026
+** Time of generation: Wed Oct 28 01:00:15 2026
 *)
 
 (* ****** ****** *)
@@ -166,7 +166,6 @@ then let
   // end of [val]
   val+list_vt_cons(_, res1) = res0
   val () = loop(argv, i0+1, res1)
-  prval ((*folded*)) = fold@(res0)
 in
   // nothing
 end // end of [then]
