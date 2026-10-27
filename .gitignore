@@ -498,6 +498,10 @@ doc/EXAMPLE/INTRO/strprefix
 doc/EXAMPLE/INTRO/tally
 doc/EXAMPLE/LINHEAP/POS_arena
 doc/EXAMPLE/LINHEAP/POS_linheap
+doc/EXAMPLE/AUTOFOLD/POS_*
+!doc/EXAMPLE/AUTOFOLD/POS_*.dats
+doc/EXAMPLE/AUTOFOLD/*.hint
+doc/EXAMPLE/AUTOFOLD/*.out
 doc/EXAMPLE/RosettaCode/Remove_lines_from_a_file
 doc/EXAMPLE/RosettaCode/Stream_Merge
 doc/EXAMPLE/TESTATS/arrinit
