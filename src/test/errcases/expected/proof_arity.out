@@ -2,6 +2,8 @@ proof_arity.dats:4:35-36: error(3): proof arity mismatch: the function requires 
     4 | fun f {l:addr} (p: ptr l): void = g (p)
       |                                   ^
 proof_arity.dats:4:35-36: error(3): proof arity mismatch: 1 vs none given
+  the proof arguments cannot be omitted: proof argument 1 is of type int @ ?1, which is consumed (no !).
+  (only proofs of preserved at-views, !T @ l, can be omitted.)
 proof_arity.dats:4:38-39: error(3): the dynamic expression cannot be assigned the type int @ ?1
     4 | fun f {l:addr} (p: ptr l): void = g (p)
       |                                      ^

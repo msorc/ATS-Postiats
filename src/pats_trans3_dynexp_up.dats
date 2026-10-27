@@ -1370,6 +1370,237 @@ in
 end // end of [d2exp_trup_applst_sta]
 
 (* ****** ****** *)
+//
+// HX-2026-10: proof-argument elision
+//
+// A call with no proof arguments (no [|]: npf = ~1) of a function whose proof
+// parameters are all preserved at-views (!T @ l, or !T @ l >> T' @ l)
+// gets them from the proof search: the other arguments are checked
+// first (they determine each address l), then the view at l is taken
+// as [view@] does and restored after the call (d3explst_arg_restore).
+// Such calls were errors (proof arity mismatch) before.
+//
+fun
+s2exp_elide_atview
+(
+  s2e: s2exp
+) : bool =
+(
+case+
+s2exp_node_view(s2e.s2exp_node())
+of // case+
+| ~S2Erefarg
+    (refval, s2e_v) =>
+  (
+    if refval = 0
+      then let
+        val s2f_v = s2exp_hnfize (s2e_v)
+      in
+        case+
+        s2exp_node_view(s2f_v.s2exp_node())
+        of // case+
+        | ~S2Eat (_, _) => true
+        | v => (s2exp_node_view_free (v); false)
+      end // end of [then]
+      else false
+    // end of [if]
+  ) (* end of [S2Erefarg] *)
+| v => (s2exp_node_view_free (v); false)
+) (* end of [s2exp_elide_atview] *)
+
+fun
+s2explst_elide_test_loop
+(
+  k: int, npf: int, s2es: s2explst
+) : int =
+(
+if k > npf then 0 else
+(
+case+ glist_view(s2es) of
+| ~GLnil () => k
+| ~GLcons (s2e, s2es) =>
+    if s2exp_elide_atview (s2e)
+      then s2explst_elide_test_loop (k+1, npf, s2es) else k
+    // end of [if]
+)
+) (* end of [s2explst_elide_test_loop] *)
+
+implement
+s2explst_elide_test
+  (npf, s2es) = s2explst_elide_test_loop (1, npf, s2es)
+// end of [s2explst_elide_test]
+
+implement
+s2explst_elide_drop
+  (npf, s2es) =
+(
+if npf > 0 then
+(
+  if glist_is_cons (s2es)
+    then s2explst_elide_drop (npf-1, glist_tail (s2es)) else s2es
+  // end of [if]
+) else s2es
+) (* end of [s2explst_elide_drop] *)
+
+fun
+s2explst_elide_nth
+(
+  k: int, s2es: s2explst
+) : s2exp =
+(
+case+ glist_view(s2es) of
+| ~GLnil () => s2exp_errexp (s2rt_view)
+| ~GLcons (s2e, s2es) =>
+    if k <= 1 then s2e else s2explst_elide_nth (k-1, s2es)
+) (* end of [s2explst_elide_nth] *)
+
+// the line appended to [proof arity mismatch] for a call with no
+// proof arguments when the proofs cannot be omitted
+fun
+prerr_elide_hint
+(
+  k: int, s2es: s2explst
+) : void = let
+  val s2e = s2explst_elide_nth (k, s2es)
+  val () = sprint_reset ()
+  val () = prerr "  the proof arguments cannot be omitted: proof argument "
+  val () = prerr_int (k)
+  val () =
+  (
+    case+
+    s2exp_node_view(s2e.s2exp_node())
+    of // case+
+    | ~S2Erefarg
+        (refval, s2e_v) => let
+        val () = prerr " is of type "
+        val () = prerr_s2exp_s (s2exp_hnfize (s2e_v))
+      in
+        if refval = 0
+          then prerr ", which is not an at-view (T @ l)."
+          else prerr ", which is passed by reference (&)."
+        // end of [if]
+      end // end of [S2Erefarg]
+    | v => let
+        val () = s2exp_node_view_free (v)
+        val () = prerr " is of type "
+        val () = prerr_s2exp_s (s2exp_hnfize (s2e))
+      in
+        prerr ", which is consumed (no !)."
+      end // end of [_]
+  ) : void // end of [val]
+  val () = prerr_newline ()
+  val () =
+    prerr "  (only proofs of preserved at-views, !T @ l, can be omitted.)"
+in
+  prerr_newline ()
+end // end of [prerr_elide_hint]
+
+fun
+auxerr_elide_noaddr
+(
+  locarg: loc_t, k: int, s2e: s2exp
+) : void = let
+  val () = sprint_reset ()
+  val () = prerr_error3_loc (locarg)
+  val () = prerr ": the address of the omitted proof argument "
+  val () = prerr_int (k)
+  val () = prerr " of type "
+  val () = prerr_s2exp_s (s2e)
+  val () = prerr " cannot be inferred from the other arguments"
+  val () = prerr "; pass the proof explicitly."
+  val () = prerr_newline ()
+in
+  the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_elide (locarg, k))
+end // end of [auxerr_elide_noaddr]
+
+fun
+s2exp_is_errexp
+  (s2e: s2exp): bool =
+(
+case+
+s2exp_node_view(s2e.s2exp_node())
+of // case+
+| ~S2Eerrexp () => true
+| v => (s2exp_node_view_free (v); false)
+) (* end of [s2exp_is_errexp] *)
+
+// the omitted proof of the parameter [s2e_arg] (!T @ l), of position [k]
+fun
+d3exp_elide_proof
+(
+  locarg: loc_t, k: int, s2e_arg: s2exp
+) : d3exp = let
+  val-~S2Erefarg
+    (_, s2e_v) = s2exp_node_view(s2e_arg.s2exp_node())
+  val s2f_v = s2exp_hnfize (s2e_v)
+  val-~S2Eat
+    (_, s2l) = s2exp_node_view(s2f_v.s2exp_node())
+  val s2l = s2exp_hnfize (s2l)
+  val unsolved =
+  (
+    case+
+    s2exp_node_view(s2l.s2exp_node())
+    of // case+
+    | ~S2EVar _ => true
+    | v => (s2exp_node_view_free (v); false)
+  ) : bool // end of [val]
+//
+// HX-2026-10: on an error, the pointer of the [view@] is an error
+// expression (not of a pointer type), so that the restoration
+// after the call (d3lval_set_type_err) reports nothing more
+//
+in
+//
+if unsolved then let
+  val () = auxerr_elide_noaddr (locarg, k, s2f_v)
+in
+  d3exp_viewat
+  (
+    locarg, s2exp_errexp (s2rt_view), d3exp_errexp (locarg), glist_nil ()
+  )
+end else let
+  val s2e_at =
+    s2addr_viewat_deref (locarg, s2l, glist_nil ())
+  // end of [val]
+in
+  if s2exp_is_errexp (s2e_at) then
+    d3exp_viewat (locarg, s2e_at, d3exp_errexp (locarg), glist_nil ())
+  else let
+    val s2e_ptr = s2exp_ptr_addr_type (s2l)
+    val d3e_ptr = d3exp_empty (locarg, s2e_ptr)
+    val d3e_pf = d3exp_viewat (locarg, s2e_at, d3e_ptr, glist_nil ())
+  in
+    d3exp_trdn (d3e_pf, s2e_arg)
+  end // end of [if]
+end // end of [if]
+//
+end // end of [d3exp_elide_proof]
+
+fun
+d3explst_elide_proofs_loop
+(
+  locarg: loc_t, k: int, npf: int, s2es: s2explst
+) : d3explst =
+(
+if k > npf then glist_nil () else
+(
+case+ glist_view(s2es) of
+| ~GLnil () => glist_nil ()
+| ~GLcons (s2e, s2es) => let
+    val d3e = d3exp_elide_proof (locarg, k, s2e)
+  in
+    glist_cons (d3e, d3explst_elide_proofs_loop (locarg, k+1, npf, s2es))
+  end // end of [GLcons]
+)
+) (* end of [d3explst_elide_proofs_loop] *)
+
+implement
+d3explst_elide_proofs
+  (locarg, npf, s2es) =
+  d3explst_elide_proofs_loop (locarg, 1, npf, s2es)
+// end of [d3explst_elide_proofs]
+
+(* ****** ****** *)
 
 fun
 d23exp_trup_app23
@@ -1397,9 +1628,28 @@ case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
     fc, _(*lin*), s2fe_fun, npf_fun, s2es_fun_arg, s2e_fun_res
   ) => let
 //
+//
+// HX-2026-10: [npf] is ~1 for a call with no [|] (the parser).
+// [elide] = 0: the proofs are omitted and found by the
+// proof search; [elide] = k > 0: they are omitted but parameter k is
+// not a preserved at-view; [elide] = ~1: the proofs are not omitted
+//
+    val elide =
+    (
+      if npf < 0 // HX: no [|] in the call
+        then (
+          if npf_fun > 0
+            then s2explst_elide_test (npf_fun, s2es_fun_arg) else ~1
+          // end of [if]
+        ) else ~1
+      // end of [if]
+    ) : int // end of [val]
+//
     val err =
-      $SOL.pfarity_equal_solve (loc_fun, npf_fun, npf)
-    (* end of [val] *)
+    (
+      if elide = 0 then 0
+      else $SOL.pfarity_equal_solve (loc_fun, npf_fun, npf)
+    ) : int // end of [val]
 //
     val () =
     if (err > 0) then let
@@ -1411,6 +1661,13 @@ case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
       val () = prerr (" proof arguments.")
       val () = prerr_newline ()
       val () = prerr_the_staerrlst ()
+//
+// HX-2026-10: the hint is new text (ATS1 has none): legacy mode omits it
+//
+      val () =
+      if (elide > 0 && $GLOB.the_LEGACYERRORS_get () = 0)
+        then prerr_elide_hint (elide, s2es_fun_arg)
+      // end of [if]
     in
       the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_npf (loc_fun, npf))
     end // end of [let] // end of [val]
@@ -1418,7 +1675,21 @@ case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
     val loc_app = $LOC.location_combine (loc_fun, locarg)
     val s2es_fun_arg =
       s2fun_opninv_and_add (locarg, s2es_fun_arg, s2e_fun_res)
-    val d3es_arg = d23explst_trdn (locarg, d23es_arg, s2es_fun_arg)
+    val d3es_arg =
+    (
+      if elide = 0
+        then let
+          val s2es_dyn =
+            s2explst_elide_drop (npf_fun, s2es_fun_arg)
+          val d3es_dyn = d23explst_trdn (locarg, d23es_arg, s2es_dyn)
+          val d3es_pf = d3explst_elide_proofs (locarg, npf_fun, s2es_fun_arg)
+        in
+          glist_append (d3es_pf, d3es_dyn)
+        end // end of [then]
+        else d23explst_trdn (locarg, d23es_arg, s2es_fun_arg)
+      // end of [if]
+    ) : d3explst // end of [val]
+    val npf = (if elide = 0 then npf_fun else npf): int
 //
     val (
       iswth

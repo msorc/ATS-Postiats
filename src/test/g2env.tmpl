@@ -105,6 +105,11 @@ in
   d3es
 end
 //
+// HX-2026-10: proof-argument elision (pats_trans3_dynexp_up, after the port; ATS1 has none): unavailable, silent
+2|implement s2explst_elide_test (npf, s2es) = ~1
+2|implement s2explst_elide_drop (npf, s2es) = s2es
+2|implement d3explst_elide_proofs (locarg, npf, s2es) = glist_nil ()
+//
 2|implement p2at_trdn (p2t, s2e) = let
 2|  val () = (dd_ps "T3 p2at_trdn "; dd_p2at p2t; dd_ps " : "; dd_s2exp s2e; dd_nl ())
 2|  val loc = g2_ploc p2t

@@ -2876,3 +2876,29 @@ available and `free@` is never implied. The code is in `pats_trans3_fldfrat.dats
   `the variable xs is unfolded (pattern at LOC) and fold@ xs cannot be applied: the view of field K is consumed` /
   `field K has type [T] but the constructor needs [T']`.
 * **Tests**: `doc/EXAMPLE/AUTOFOLD` (`make regress leakcheck`).
+
+## Proof-argument elision (trans3, after the port)
+
+A call with no `|` (the parser gives `npf = ~1`) of a function whose proof parameters are all preserved at-views
+(`!T @ l`, `!T @ l >> T' @ l`, and the viewdefs that expand to one, e.g. `array_v (a, l, n)`) gets its proofs from the proof
+search: `get (p)` is checked as `get (view@ ... | p)` with the view found at the address of `p`. The code is in
+`pats_trans3_dynexp_up.dats` (`s2explst_elide_test`, `d3explst_elide_proofs`, before `d23exp_trup_app23`).
+
+* **Steps** (`d23exp_trup_app23`, when `npf < 0` and `npf_fun > 0`): the parameters are tested (each is
+  `S2Erefarg (0, V)` with the hnf of `V` an `S2Eat`); the non-proof arguments are checked first, against the parameters
+  after the `npf_fun` first ones (this solves the unification variable of each address); then, for each proof parameter,
+  the address is hnfized (an unsolved `S2EVar` is an error: it cannot be inferred), the view is taken with
+  `s2addr_viewat_deref` (its error when no view is at the address) and a `D3Eviewat` is built whose pointer is a
+  `D3Eempty` of type `ptr (l)` (the restoration only reads that type), and checked against the parameter (`d3exp_trdn`).
+  The proofs are prepended to the arguments, the node gets `npf = npf_fun`, and `d3explst_arg_restore` restores the views
+  as for an explicit `view@` argument. Typerase drops the `npf` first arguments: the C is the one of the explicit call.
+* **Neutrality.** Such a call was an error (proof arity mismatch); every other call takes the old path. When the
+  parameters are not all preserved at-views, the arity error is kept and one line names the parameter that prevents the
+  elision (consumed, not an at-view, by reference). Checked: the C of the 188 modules of `src` and of the 157
+  `prelude`/`libats` DATS files is identical with the compiler before the change; stage 3 = stage 2.
+* **Overloading** (`pats_trans3_appsym.dats`): only when no candidate passes the arity test, the candidates whose first
+  dynamic arguments omit preserved at-view proofs are selected (`aritest_elide_d2exparglst_s2exp`) and resolved on the
+  dynamic arguments (their `s2kexp` without the proof arguments); `d3exp_trup_applst` elides as above. Candidates that
+  differ only in their views are ambiguous (the views are not used for the resolution).
+* **Tests**: `doc/EXAMPLE/AUTOFOLD` (`POS_elide`, `POS_elide_overload`, `NEG_elide_noaddr`, `NEG_elide_nonat`,
+  `NEG_elide_consumed`).

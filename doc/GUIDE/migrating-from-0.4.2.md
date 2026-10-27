@@ -157,6 +157,36 @@ that the constructor does not accept). See
 [doc/EXAMPLE/AUTOFOLD](../EXAMPLE/AUTOFOLD) for the programs that are
 accepted and the ones that are rejected with their hints.
 
+## The proofs of at-views may be omitted
+
+In 0.4.2 a call of a function with a proof parameter wrote the proof
+before the bar: `get (pf | p)`. In 0.4.3 the proof can be left out when
+every proof parameter of the function is a preserved at-view (`!T @ l`):
+the type checker takes the view from the environment, at the address that
+the other arguments give.
+
+```ats
+fun get {l:addr} (pf: !int @ l | p: ptr l): int = !p
+
+fun use (x: &int): int = get (addr@ x)   // was: get (view@ x | addr@ x)
+```
+
+The explicit form is still accepted. The proof must still be written
+when:
+
+- the proof is consumed (`pf: int @ l`, no `!`), for example when the
+  function frees or stores it;
+- the proof is passed by reference (`&`);
+- the view is not an at-view, for example a `dataview` of your own (an
+  `array_v (a, l, n)` is an at-view, `@[a][n] @ l`, and can be omitted);
+- the other arguments do not determine the address `l`.
+
+The error then adds a line that names the proof argument and the reason
+("which is consumed (no !)", "which is not an at-view (T @ l)", and so
+on), or says that the address cannot be inferred. See
+[doc/EXAMPLE/AUTOFOLD](../EXAMPLE/AUTOFOLD) (`POS_elide*.dats`,
+`NEG_elide_*.dats`).
+
 ## cloref becomes cloptr or lam@
 
 Before:

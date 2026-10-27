@@ -185,6 +185,24 @@ fun d3explst_trdn_arg
 
 (* ****** ****** *)
 //
+// HX-2026-10: proof-argument elision (pats_trans3_dynexp_up.dats):
+// a call with no proof arguments of a function whose [npf] proof
+// parameters are all preserved at-views (!T @ l)
+//
+// 0 if the first [npf] parameters are all preserved at-views;
+// otherwise the position (1-based) of the first that is not
+// (~1: elision unavailable, the test doubles of src/test)
+fun s2explst_elide_test (npf: int, s2es: s2explst): int
+// the parameters after the first [npf] ones
+fun s2explst_elide_drop (npf: int, s2es: s2explst): s2explst
+// the proofs found at the addresses of the first [npf] parameters
+// (once the other arguments are checked: they determine the addresses)
+fun d3explst_elide_proofs
+  (locarg: $LOC.location, npf: int, s2es: s2explst): d3explst
+//
+
+(* ****** ****** *)
+//
 fun d2exp_trup_int (d2e0: d2exp, i: int): d3exp
 //
 fun intrep_syn_type // for dyn-patterns

@@ -15,7 +15,7 @@ OUT=../ccb_out
 export CCBSCALE ?= 20
 export CCBSEED ?= 1
 
-ccb_cases_00.hats: ccb_gen.py ccb_cases.py ccb_sats.py ccb_ctab.json ../../pats_ccomp.spec ../../pats_ccomp_hitype.spec
+ccb_cases_00.hats: ccb_gen.py ../hd/hddump.dats ccb_cases.py ccb_sats.py ccb_ctab.json ../../pats_ccomp.spec ../../pats_ccomp_hitype.spec
 	python3 ccb_gen.py
 
 # gen: the generated files (python); build: the staging directory and the program, no run. `make test` does both and then runs and compares; when the top Makefile has built
