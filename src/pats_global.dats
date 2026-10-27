@@ -191,6 +191,15 @@ the_DEBUGATS_dbgline_set(flag) = cell_set_int (the_DEBUGATS_dbgline, flag)
 
 (* ****** ****** *)
 
+val the_LEGACYERRORS = cell_make_int (0)
+
+implement
+the_LEGACYERRORS_get() = cell_get_int (the_LEGACYERRORS)
+implement
+the_LEGACYERRORS_set(flag) = cell_set_int (the_LEGACYERRORS, flag)
+
+(* ****** ****** *)
+
 val the_CCOMPATS_tlcalopt = cell_make_int (1)
 
 implement

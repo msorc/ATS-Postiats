@@ -94,6 +94,14 @@ fun the_DEBUGATS_dbgline_set(flag: int): void
 //
 (* ****** ****** *)
 //
+// HX-2026-10: 1 = the error messages of 0.4.2 (internal
+// printers, numeric locations); 0 = the readable messages
+//
+fun the_LEGACYERRORS_get(): int
+fun the_LEGACYERRORS_set(flag: int): void
+//
+(* ****** ****** *)
+//
 // HX-2015-04-26:
 // for managing tail-call optimization
 //
