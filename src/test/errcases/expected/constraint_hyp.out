@@ -1,0 +1,7 @@
+constraint_hyp.dats:3:46-51: error(3): unsolved constraint: n - 1 >= 0
+  where n: int
+  assuming: n >= 0
+    3 | fun pred {n:nat} (n: int n): [m:nat] int m = n - 1
+      |                                              ^~~~~
+typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
+exit 1

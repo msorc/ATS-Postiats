@@ -1,0 +1,28 @@
+autofold_fieldtype.dats:7:16-24: error(3): assignment cannot be performed: mismatch of bef/aft type-sizes:
+bef: ptr
+aft: int(0)
+    7 |       val () = xs1 := 0
+      |                ^~~~~~~~
+autofold_fieldtype.dats:8:8-10: error(3): the dynamic expression cannot be assigned the type [n:int | n >= 0] list_vt(int, n)
+    8 |     in xs end
+      |        ^~
+autofold_fieldtype.dats:8:8-10: error(3): type mismatch:
+  expected: list_vt(int, ?1)
+  actual:   list_vt_cons@_(_, xs1)
+autofold_fieldtype.dats:8:8-10: error(3): type mismatch:
+  expected: [n:int | n >= 0] list_vt(int, n)
+  actual:   list_vt_cons@_(_, xs1)
+the variable xs is unfolded (pattern at autofold_fieldtype.dats:5:5-27) and fold@ xs cannot be applied: field 2 has type int(0) but the constructor needs list_vt(?1, ?2)
+autofold_fieldtype.dats:5:5-8:14: error(3): the linear variable view@ _ of type int @ _ is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    5 |   | @list_vt_cons (_, xs1) => let
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    6 |       val () = list_vt_free (xs1)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+    7 |       val () = xs1 := 0
+      |       ^~~~~~~~~~~~~~~~~
+      ...
+autofold_fieldtype.dats:5:5-8:14: error(3): the linear variable view@ xs1 of type int(0) @ xs1 is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+patsopt(TRANS3): there are [4] errors in total.
+exit 1

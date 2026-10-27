@@ -1,0 +1,11 @@
+selab_label.dats:3:32-34: error(3): the record-type @(int, int) is expected to contain the label 2 but it does not.
+    3 | fun f (p: @(int, int)): int = p.2
+      |                                ^~
+selab_label.dats:3:31-34: error(3): the dynamic expression cannot be assigned the type int
+    3 | fun f (p: @(int, int)): int = p.2
+      |                               ^~~
+selab_label.dats:3:31-34: error(3): type mismatch:
+  expected: int
+  actual:   <error>
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

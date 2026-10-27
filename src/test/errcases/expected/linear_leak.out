@@ -1,0 +1,6 @@
+linear_leak.dats:4:3-48: error(3): the linear variable xs of type list_vt(int, 3) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    4 |   let val xs = $list_vt{int}(1, 2, 3) in () end
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

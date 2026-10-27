@@ -56,6 +56,7 @@ staload UN = "prelude/SATS/unsafe.sats"
 
 (* ****** ****** *)
 //
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload
 _(*anon*) = "./pats_errmsg.dats"
@@ -742,9 +743,12 @@ case+ glist_view(d3pis) of
     val () =
       prerr_error3_loc (loc0)
     // end of [val]
-    val () = prerr_string ": the symbol [";
+    val leg = $GLOB.the_LEGACYERRORS_get () > 0
+    val () = prerr_string (if leg then ": the symbol [" else ": the symbol ")
     val () = fprint_d2sym(stderr_ref, d2s)
-    val () = prerr_string "] cannot be resolved as no match is found."
+    val () = prerr_string
+      (if leg then "] cannot be resolved as no match is found."
+       else " cannot be resolved as no match is found.")
     val () = prerr_newline((*void*))
     val () =
     the_trans3errlst_add
@@ -767,9 +771,12 @@ case+ glist_view(d3pis) of
   | ~GLcons(d3pi2, _) => let
       val d3pi1 = d3pi
       val () = prerr_error3_loc(loc0)
-      val () = prerr_string ": the symbol [";
+      val leg = $GLOB.the_LEGACYERRORS_get () > 0
+    val () = prerr_string (if leg then ": the symbol [" else ": the symbol ")
       val () = fprint_d2sym(stderr_ref, d2s)
-      val () = prerr_string "] cannot be resolved due to too many matches:\n"
+      val () = prerr_string
+        (if leg then "] cannot be resolved due to too many matches:\n"
+         else " cannot be resolved due to too many matches:\n")
       val () = fprint_d3pitm(stderr_ref, d3pi1)
       val () = prerr_newline()
       val () = fprint_d3pitm(stderr_ref, d3pi2)

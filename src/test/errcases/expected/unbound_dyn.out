@@ -1,0 +1,5 @@
+unbound_dyn.dats:3:9-25: error(2): the dynamic identifier [nonexistent_name] is unrecognized.
+    3 | val x = nonexistent_name + 1
+      |         ^~~~~~~~~~~~~~~~
+patsopt(TRANS2): there are [1] errors in total.
+exit 1

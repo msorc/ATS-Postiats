@@ -1,0 +1,11 @@
+lstate_branch.dats:4:13-29: error(3): the variable xs is consumed but it should be retained with the type list_vt(int, 1) instead.
+    4 |   if b then list_vt_free (xs) else ()
+      |             ^~~~~~~~~~~~~~~~
+lstate_branch.dats:3:7-4:38: error(3): the linear variable xs of type list_vt(int, 1) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    3 | fun f (b: bool, xs: list_vt(int, 1)): void =
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    4 |   if b then list_vt_free (xs) else ()
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

@@ -1,0 +1,35 @@
+errcases: the suite of the error messages
+=========================================
+
+What it pins: the text of the diagnostics of `patsopt --typecheck -d` for about 40 small
+programs that fail to typecheck, one per message family (type mismatch, sorts, linear
+variables, constraints with `where`/`assuming`, termination metrics, views, selections,
+fold on demand with its hints, the aliases of the printed types, trans2 errors, the no-GC
+rejection, a warning, a range of several lines, tabs in the echoed line) and one case
+(`legacy.dats`) run with `--legacy-errors` to pin the old form. Each program has a comment
+line that says what it tests.
+
+Run it:
+
+    make -C src/test errtest          # also part of `make -C src test`
+    sh src/test/errcases/run.sh       # the same; `run.sh NAME...` runs some cases
+
+The runner prints `errcases: N cases, M failed` and exits non-zero on failure. It needs only
+src/patsopt (override with PATSOPT=...). It runs `patsopt --typecheck -d NAME.dats` from this
+directory with LC_ALL=C and PATSOPT_LEGACY_ERRORS unset (src/test/Makefile exports it for the
+md5 suites, that is why this suite has its own Makefile and is started with `$(MAKE) -C`),
+stdout and stderr together, and appends the exit status as a last line `exit N`.
+patsopt prints the absolute path of the file even for a relative argument, so the runner
+removes the directory of the suite from the output.
+
+Update the expected files after a change of the messages:
+
+    sh src/test/errcases/run.sh update          # or NAME...
+
+then REVIEW every changed file in expected/ by hand (`git diff`): these files are the record
+of what the user sees, they are not recorded from another implementation. Check that the text
+is correct and readable: no raw S2E.../S2RT... text, no $stamp suffixes, no (-1), the source
+echo is present and under the right message, wording is plain. Known defects that the expected
+files still show are the ones to fix in the compiler, then update them.
+
+A new case: add NAME.dats (under 15 lines, first line a comment) and run `run.sh update NAME`.

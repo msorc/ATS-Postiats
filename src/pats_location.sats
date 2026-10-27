@@ -148,6 +148,12 @@ overload fprint with fprint_location
 fun prerr_errloc (loc: location): void
 fun prerr_errloc_flush ((*void*)): void
 //
+// [prerr_location_short] prints the same prefix as [prerr_errloc] (the old
+// form in the legacy mode) but registers no echo: for a location that is
+// quoted inside a message.
+//
+fun prerr_location_short (loc: location): void
+//
 (* ****** ****** *)
 
 fun

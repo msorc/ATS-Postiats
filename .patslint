@@ -10,3 +10,4 @@ exclude = *_gen*.hats
 exclude = prelude/*/SRCGEN/*
 exclude = src/CBOOT/*
 exclude = src/test/lexerr/*
+exclude = src/test/errcases/tabs.dats

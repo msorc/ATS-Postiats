@@ -1,0 +1,5 @@
+warning.dats:3:23-39: warning(3): pattern match is nonexhaustive:
+[^0]
+    3 | fun f (x: int): int = case x of 0 => 1
+      |                       ^~~~~~~~~~~~~~~~
+exit 0

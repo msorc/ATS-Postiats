@@ -1005,9 +1005,11 @@ val d2s = d2exp_get_D2Esym (d2e0) // [val-D2Esym(d2s) = d2e0.d2exp_node]
 val () = prerr_error3_loc (loc0)
 val () = filprerr_ifdebug "d2exp_trup_sym"
 //
-val () = prerr (": the symbol [")
+val leg = $GLOB.the_LEGACYERRORS_get () > 0
+val () = prerr_string (if leg then ": the symbol [" else ": the symbol ")
 val () = prerr_d2sym (d2s)
-val () = prerr ("] cannot be resolved.")
+val () =
+  prerr_string (if leg then "] cannot be resolved." else " cannot be resolved.")
 val () = prerr_newline ()
 //
 val () =

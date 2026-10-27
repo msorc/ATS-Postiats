@@ -1,0 +1,9 @@
+alias_fun.dats:3:55-56: error(3): the dynamic expression cannot be assigned the type (int) -<cloptr1> int
+    3 | fun f (g: (int, bool) -> int): (int) -<cloptr1> int = g
+      |                                                       ^
+alias_fun.dats:3:55-56: error(3): function kind mismatch: expected a linear closure (cloptr), actual a function
+alias_fun.dats:3:55-56: error(3): type mismatch:
+  expected: (int) -<cloptr1> int
+  actual:   (int, bool) -> int
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

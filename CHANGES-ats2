@@ -97,11 +97,39 @@ NEW
     templates of the repository: the text that they generate is identical
     to the one of the ATS1 toolchain. `make -f codegen/Makefile_atslib`
     regenerates the prelude sources with the new atsdoc.
+14. Readable error messages. A location is printed as
+    file:line:col-col: error(N): (file:line:col-line:col when the range
+    spans lines) and the source lines of the range follow the message,
+    with the range underlined (three lines at most, then "..."). Types,
+    sorts and constraints are printed in the syntax of the source
+    language: list_vt(int, 3), n - 1 >= 0, t@ype, and the aliases made by
+    stadef/typedef print by name. The messages are reworded: a type
+    mismatch shows "expected:" and "actual:" (and the argument that
+    differs), an unsolved constraint is printed in infix form with the
+    sorts of its variables ("where") and the hypotheses in scope
+    ("assuming"), a linear variable that is not consumed at the end of its
+    scope gets a hint, and the termination, view, selection and loop
+    messages are worded the same way. --legacy-errors (or the environment
+    variable PATSOPT_LEGACY_ERRORS=1) selects the old numeric locations
+    and the constructor syntax of the terms; the md5 suites of src/test
+    use it. The suite src/test/errcases pins the new text (about 40
+    failing programs); the emacs flycheck/flymake modes parse both forms.
+    See doc/GUIDE/faq.md.
+15. Fold on demand. A variable unfolded by an @Con pattern is folded by
+    the type checker itself, as fold@ would do, where its folded type is
+    required (a return, an argument, an assignment) and at the end of the
+    scope that holds the views of its fields, so the fold@ that ends a
+    clause or a let is no longer written (explicit fold@ still works, and
+    is needed between field writes or to give static arguments). A
+    program that typechecked before is unchanged (the C code of src/ and
+    libats/ is identical). When the fold fails, the error carries a hint
+    that says why (a field view is consumed, a field has the wrong
+    type). See doc/EXAMPLE/AUTOFOLD and doc/GUIDE/migrating-from-0.4.2.md.
 
 REMOVED
 
-14. GC-only examples and experimental packages in doc/ and npm-utils/.
-15. Only the C, C++ and JavaScript backends are kept. The transpilers
+16. GC-only examples and experimental packages in doc/ and npm-utils/.
+17. Only the C, C++ and JavaScript backends are kept. The transpilers
     atscc2clj, atscc2erl, atscc2php, atscc2pl, atscc2py3, atscc2r34 and
     atscc2scm, along with their runtime libraries libatscc2clj,
     libatscc2erl, libatscc2php, libatscc2pl, libatscc2py3, libatscc2r34 and
@@ -109,12 +137,12 @@ REMOVED
     its C++ mode (contrib/ats2cpp) and the JavaScript backend
     (contrib/CATS-atscc2js and contrib/libatscc2js, with the shared
     contrib/CATS-parsemit and contrib/libatscc).
-16. SourceForge is no longer the distribution channel; the tarballs are
+18. SourceForge is no longer the distribution channel; the tarballs are
     GitHub Releases.
 
 MIGRATION
 
-17. Read doc/GUIDE/migrating-from-0.4.2.md. In short: list/list0 become
+19. Read doc/GUIDE/migrating-from-0.4.2.md. In short: list/list0 become
     list_vt, option become option_vt, datatype becomes datavtype, cloref
     becomes cloptr or lam@, $delay becomes $ldelay (stream_vt), arrayref
     becomes arrayptr, libats/ML becomes the linear containers of libats,

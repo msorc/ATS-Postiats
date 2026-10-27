@@ -40,7 +40,7 @@ endif
 CCIN=mkdir -p $(M)/cc_tmp_$(1) && cd $(M)/cc_tmp_$(1) && patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$(M) -I../test -IATS ../test $(2) -o ../test/$(1) $(foreach f,$(3),$(if $(filter ../%,$(f)),$(f),../test/$(f))) $(4)
 
 all: prebuild
-.PHONY: prebuild pregen preexes
+.PHONY: prebuild pregen preexes errtest
 prebuild:
 ifneq ($(JOBS),1)
 	@$(MAKE) --no-print-directory pregen
@@ -1245,3 +1245,9 @@ prebuild_cc1: | prebuild_ccb
 prebuild_lp: | prebuild_cc1
 prebuild_hs: | prebuild_lp
 .PHONY: subgen $(SUBEXES)
+
+# HX-2026-10: the error messages (src/test/errcases/README). It has its own Makefile because this one exports PATSOPT_LEGACY_ERRORS;
+# it needs only ../patsopt.
+errtest:
+	$(MAKE) --no-print-directory -C errcases test
+all: errtest

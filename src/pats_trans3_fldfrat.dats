@@ -793,7 +793,7 @@ val () = (
   case+ opt of
   | ~Some_vt (ploc) => {
       val () = prerr " (pattern at "
-      val () = $LOC.prerr_location (ploc)
+      val () = $LOC.prerr_location_short (ploc)
       val () = prerr ")"
     } (* end of [Some_vt] *)
   | ~None_vt () => ()
@@ -811,11 +811,20 @@ val () =
 if why = 2 then {
   val () = prerr "field "
   val () = prerr_int (k)
-  val () = prerr " has type ["
-  val () = prerr_s2exp (gcell_get<s2exp> (the_aft1))
-  val () = prerr "] but the constructor needs ["
-  val () = prerr_s2exp (gcell_get<s2exp> (the_aft2))
-  val () = prerr "]"
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr " has type ["
+    val () = prerr_s2exp (gcell_get<s2exp> (the_aft1))
+    val () = prerr "] but the constructor needs ["
+    val () = prerr_s2exp (gcell_get<s2exp> (the_aft2))
+    val () = prerr "]"
+  } else {
+    val () = sprint_reset ()
+    val () = prerr " has type "
+    val () = prerr_s2exp_s (gcell_get<s2exp> (the_aft1))
+    val () = prerr " but the constructor needs "
+    val () = prerr_s2exp_s (gcell_get<s2exp> (the_aft2))
+  } (* end of [if] *)
 } (* end of [if] *)
 val () =
 if why = 3 then prerr "the constructor has no fields"

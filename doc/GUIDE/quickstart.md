@@ -71,7 +71,15 @@ it and gives it back. `main0` owns `xs` and has to free it. Delete the line
 with `list_vt_free` and the compiler refuses the program:
 
 ```
-error(3): the linear dynamic variable [xs$3303(-1)] needs to be consumed but it is preserved with the type [...] instead.
+sum.dats:8:22-11:2: error(3): the linear variable xs of type list_vt(int, 4) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    8 | implement main0 () = {
+      |                      ^
+    9 |   val xs = $list_vt{int}(1, 2, 3, 4)
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   10 |   val () = println! ("sum = ", sum (xs))
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ...
 ```
 
 That is the whole idea; the leak is a compile-time error. To check a

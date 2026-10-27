@@ -1,0 +1,6 @@
+constraint_andand.dats:3:61-62: error(3): unsolved constraint: a > 0 && a < 10
+  where a: int
+    3 | fun f {a:int} (x: int a): [c:int | c > 0 && c < 10] int c = x
+      |                                                             ^
+typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
+exit 1

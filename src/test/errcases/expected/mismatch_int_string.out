@@ -1,0 +1,8 @@
+mismatch_int_string.dats:3:5-11: error(3): the pattern cannot be given the ascribed type.
+    3 | val x: int = "hello"
+      |     ^~~~~~
+mismatch_int_string.dats:3:5-11: error(3): type mismatch:
+  expected: int
+  actual:   string(5)
+patsopt(TRANS3): there are [1] errors in total.
+exit 1
