@@ -55,6 +55,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -70,6 +71,7 @@ staload SYM = "./pats_symbol.sats"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 staload "./pats_dynexp2.sats"
@@ -109,10 +111,21 @@ case+ glist_view(s2es) of
     val () = if islin then let
       val () = nerr := nerr + 1
       val () = prerr_error3_loc (loc0)
-      val () = prerr ": [free@] operation cannot be performed"
-      val () = prerr ": a linear component of the type ["
-      val () = prerr_s2exp (s2e)
-      val () = prerr "] may be abandoned."
+      val () =
+      if $GLOB.the_LEGACYERRORS_get () > 0 then
+        prerr ": [free@] operation cannot be performed" else
+        prerr ": free@ operation cannot be performed" // HX-2026-10
+      val () =
+      if $GLOB.the_LEGACYERRORS_get () > 0 then {
+        val () = prerr ": a linear component of the type ["
+        val () = prerr_s2exp (s2e)
+        val () = prerr "] may be abandoned."
+      } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+        val () = sprint_reset ()
+        val () = prerr ": a linear component of the type "
+        val () = prerr_s2exp_s (s2e)
+        val () = prerr " may be abandoned."
+      } (* end of [if] *)
       val () = prerr_newline ()
     in
       // nothing

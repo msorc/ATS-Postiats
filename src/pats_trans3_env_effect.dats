@@ -56,6 +56,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement prerr_FILENAME<> () = prerr "pats_trans3_env_effect"
@@ -68,6 +69,7 @@ staload "./pats_effect.sats"
 
 staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 
@@ -335,7 +337,17 @@ check_sexp_auxerr (
 ) : void = let
   val () = prerr_error3_loc (loc0)
   val () = filprerr_ifdebug "the_effenv_check_sexp"
-  val () = (prerr ": some disallowed effects may be incurred: "; prerr_s2exp (s2e0); prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": some disallowed effects may be incurred: "
+    val () = prerr_s2exp (s2e0)
+    val () = prerr_newline ()
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": some disallowed effects may be incurred: "
+    val () = prerr_s2exp_s (s2e0)
+    val () = prerr_newline ()
+  } (* end of [if] *)
 in
   the_trans3errlst_add (trans3err_T3E_effenv_check_sexp (loc0, s2e0))
 end (* end of [check_sexp_auxerr] *)

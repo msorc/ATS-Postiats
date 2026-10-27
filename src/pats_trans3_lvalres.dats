@@ -60,6 +60,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 //
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 //
@@ -79,6 +80,7 @@ staload "./pats_syntax.sats"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 
@@ -112,9 +114,17 @@ auxerr_pfobj
   val () = prerr_error3_loc (loc0)
   val () = prerr ": type-restoration cannot be performed"
   val () = prerr_newline ()
-  val () = prerr ": the proof search for view located at ["
-  val () = prerr_s2exp (s2l)
-  val () = prerr "] failed to turn up a result."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the proof search for view located at ["
+    val () = prerr_s2exp (s2l)
+    val () = prerr "] failed to turn up a result."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": no view is available at the address "
+    val () = prerr_s2exp_s (s2l)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   the_trans3errlst_add (trans3err_T3E_pfobj_search_none (loc0, s2l))
@@ -197,7 +207,13 @@ auxerr_linold
 ) : void = let
   val () = prerr_error3_loc (loc0)
   val () = prerr ": a linear component of the following type is abandoned: "
-  val () = (prerr "["; prerr_s2exp (s2e_old); prerr "].")
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = (prerr "["; prerr_s2exp (s2e_old); prerr "].")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = (prerr_s2exp_s (s2e_old); prerr ".")
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   the_trans3errlst_add (trans3err_T3E_d3lval_exch_type_linold (loc0, d3e, d3ls))
@@ -210,9 +226,18 @@ d2var_refval_check
 ) : void =
   if refval > 0 then let
     val () = prerr_error3_loc (loc0)
-    val () = prerr ": the dynamic variable ["
-    val () = prerr_d2var (d2v)
-    val () = prerr "] is required to be mutable in order to support call-by-reference."
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the dynamic variable ["
+      val () = prerr_d2var (d2v)
+      val () = prerr "] is required to be mutable"
+      val () = prerr " in order to support call-by-reference."
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = prerr ": the variable "
+      val () = prerr_d2var_s (d2v)
+      val () = prerr " is required to be mutable"
+      val () = prerr " in order to support call-by-reference."
+    } (* end of [if] *)
     val () = prerr_newline ()
   in
     the_trans3errlst_add (trans3err_T3E_d3lval_refval (loc0, d2v))

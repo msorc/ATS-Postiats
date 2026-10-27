@@ -62,6 +62,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -76,6 +77,7 @@ LOC = "./pats_location.sats"
 
 staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 
@@ -518,11 +520,21 @@ lstaftc3nstr_auxerr_some
   loc: loc_t, d2v: d2var, s2e0: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc)
-  val () = prerr ": the dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] is consumed but it should be retained with the type ["
-  val () = prerr_s2exp (s2e0)
-  val () = prerr "] instead."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the dynamic variable ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] is consumed but it should be retained with the type ["
+    val () = prerr_s2exp (s2e0)
+    val () = prerr "] instead."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " is consumed but it should be retained with the type "
+    val () = prerr_s2exp_s (s2e0)
+    val () = prerr " instead."
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   the_trans3errlst_add (trans3err_T3E_d2var_some (loc, d2v, s2e0))
@@ -534,11 +546,21 @@ lstaftc3nstr_auxerr_none
   loc: loc_t, d2v: d2var, s2e: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc)
-  val () = prerr ": the dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] is retained with the type ["
-  val () = prerr_s2exp (s2e)
-  val () = prerr "] but it should be consumed instead."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the dynamic variable ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] is retained with the type ["
+    val () = prerr_s2exp (s2e)
+    val () = prerr "] but it should be consumed instead."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " is retained with the type "
+    val () = prerr_s2exp_s (s2e)
+    val () = prerr " but it should be consumed instead."
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   the_trans3errlst_add (trans3err_T3E_d2var_some (loc, d2v, s2e))
@@ -550,9 +572,16 @@ lstaftc3nstr_auxerr_some2
   loc: loc_t, d2v: d2var, s2e0: s2exp, s2e: s2exp
 ) : void = let
   val () = prerr_error3_loc (loc)
-  val () = prerr ": the dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] is retained but with a type that fails to merge."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the dynamic variable ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] is retained but with a type that fails to merge."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " is retained but with a type that fails to merge."
+  } (* end of [if] *)
   val () = prerr_newline ()
   val () = prerr_the_staerrlst ()
 in

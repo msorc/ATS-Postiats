@@ -63,6 +63,7 @@ typedef loc_t = $LOC.location
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement prerr_FILENAME<> () = prerr "pats_trans3_deref"
@@ -70,6 +71,7 @@ implement prerr_FILENAME<> () = prerr "pats_trans3_deref"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 staload "./pats_dynexp2.sats"
@@ -91,9 +93,17 @@ auxerr_pfobj
 ) : void = let
   val () = prerr_error3_loc (loc0)
   val () = prerr ": dereference cannot be performed"
-  val () = prerr ": the proof search for view located at ["
-  val () = prerr_s2exp (s2l)
-  val () = prerr "] failed to turn up a result."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the proof search for view located at ["
+    val () = prerr_s2exp (s2l)
+    val () = prerr "] failed to turn up a result."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": no view is available at the address "
+    val () = prerr_s2exp_s (s2l)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   the_trans3errlst_add (trans3err_T3E_pfobj_search_none (loc0, s2l))
