@@ -82,7 +82,9 @@ staload "./pats_symmap.sats"
 staload _(*anon*) = "./pats_symmap.dats"
 staload "./pats_symenv.sats"
 staload _(*anon*) = "./pats_symenv.dats"
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_dynexp2.sats"
 staload "./pats_namespace.sats"
 staload _(*anon*) = "./pats_namespace.dats"
@@ -771,9 +773,17 @@ in
     in
       if lev < tmplev then let
         val () = prerr_error2_loc (loc)
-        val () = prerr ": the static variable ["
-        val () = prerr_s2var (s2v)
-        val () = prerr "] is out of scope."
+        val () =
+        if $GLOB.the_LEGACYERRORS_get () > 0 then {
+          val () = prerr ": the static variable ["
+          val () = prerr_s2var (s2v)
+          val () = prerr "] is out of scope."
+        } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+          val () = sprint_reset ()
+          val () = prerr ": the static variable "
+          val () = prerr_s2var_s (s2v)
+          val () = prerr " is out of scope."
+        } (* end of [if] *)
         val () = prerr_newline ()
       in
         the_trans2errlst_add (trans2err_T2E_s2var_check_tmplev (s2v))

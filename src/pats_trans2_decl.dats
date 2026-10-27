@@ -1010,11 +1010,22 @@ d0: s1aspdec, s2t1: s2rt, s2t2: s2rt
   filprerr_ifdebug("s1aspdec_tr_res")
 //
   val () =
-  prerr(": the static assumption is given the sort [")
-  val () = prerr_s2rt(s2t1)
-  val () = prerr "] but it is expected to be of the sort ["
-  val () = prerr_s2rt(s2t2)
-  val () = prerr "]."
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () =
+    prerr(": the static assumption is given the sort [")
+    val () = prerr_s2rt(s2t1)
+    val () = prerr "] but it is expected to be of the sort ["
+    val () = prerr_s2rt(s2t2)
+    val () = prerr "]."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () =
+    prerr(": the static assumption is given the sort ")
+    val () = prerr_s2rt_s(s2t1)
+    val () = prerr " but it is expected to be of the sort "
+    val () = prerr_s2rt_s(s2t2)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline((*void*))
 //
   val () = the_trans2errlst_add(trans2err_T2E_s1aspdec_tr_res(d0, s2t1, s2t2))

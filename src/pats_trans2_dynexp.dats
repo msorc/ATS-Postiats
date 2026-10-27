@@ -121,7 +121,9 @@ staload "./pats_syntax.sats"
 staload "./pats_staexp1.sats"
 staload "./pats_e1xpval.sats"
 staload "./pats_dynexp1.sats"
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
@@ -1355,9 +1357,17 @@ if n < tag then (
         auxerr_gts (loc0, s2cs, n-1, tag-1)
       else let
         val () = prerr_error2_loc (loc0)
-        val () = prerr ": the static clause associated with ["
-        val () = prerr_s2cst (s2c)
-        val () = prerr "] is missing."
+        val () =
+        if $GLOB.the_LEGACYERRORS_get () > 0 then {
+          val () = prerr ": the static clause associated with ["
+          val () = prerr_s2cst (s2c)
+          val () = prerr "] is missing."
+        } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+          val () = sprint_reset ()
+          val () = prerr ": the static clause associated with "
+          val () = prerr_s2cst_s (s2c)
+          val () = prerr " is missing."
+        } (* end of [if] *)
         val () = prerr_newline ()
         val () =
           the_trans2errlst_add (trans2err_T2E_sc2laulst_coverck_missing(loc0, s2c))
@@ -1461,9 +1471,18 @@ auxerr1 (
 ) : void = let
   val () = prerr_error2_loc (loc0)
   val () =
-  prerr ": the static expression being analyzed is of the sort ["
-  val () = prerr_s2rt (s2t_pat)
-  val () = prerrln! ("], which is not a base sort as is required.")
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () =
+    prerr ": the static expression being analyzed is of the sort ["
+    val () = prerr_s2rt (s2t_pat)
+    val () = prerrln! ("], which is not a base sort as is required.")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () =
+    prerr ": the static term being analyzed is of the sort "
+    val () = prerr_s2rt_s (s2t_pat)
+    val () = prerrln! (", which is not a base sort as is required.")
+  } (* end of [if] *)
 in
   the_trans2errlst_add (trans2err_T2E_sc2laulst_coverck_sort(loc0, s2t_pat))
 end // end of [auxerr1]
@@ -1473,9 +1492,18 @@ auxerr2 (
 ) : void = let
   val () = prerr_error2_loc (loc0)
   val () =
-  prerr ": the static expression being analyzed is of the sort ["
-  val () = prerr_s2rt (s2t_pat)
-  val () = prerrln! ("], which is not a datasort as is required.")
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () =
+    prerr ": the static expression being analyzed is of the sort ["
+    val () = prerr_s2rt (s2t_pat)
+    val () = prerrln! ("], which is not a datasort as is required.")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () =
+    prerr ": the static term being analyzed is of the sort "
+    val () = prerr_s2rt_s (s2t_pat)
+    val () = prerrln! (", which is not a datasort as is required.")
+  } (* end of [if] *)
 in
   the_trans2errlst_add (trans2err_T2E_sc2laulst_coverck_sort(loc0, s2t_pat))
 end // end of [auxerr2]

@@ -119,7 +119,9 @@ staload "./pats_lexing.sats"
 staload "./pats_syntax.sats"
 staload "./pats_staexp1.sats"
 staload "./pats_e1xpval.sats"
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 
@@ -755,9 +757,19 @@ if test
   else let
     val () = prerr_error2_loc (x.locs2exp_loc())
     val () = filprerr_ifdebug "s1exp_app_wind"
-    val () = prerr ": the static expression is of the sort ["
-    val () = prerr_s2rt (s2e.s2exp_srt())
-    val () = prerrln! ("] but it is expected to be of the sort [", s2t, "].")
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the static expression is of the sort ["
+      val () = prerr_s2rt (s2e.s2exp_srt())
+      val () = prerrln! ("] but it is expected to be of the sort [", s2t, "].")
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr ": the static term is of the sort "
+      val () = prerr_s2rt_s (s2e.s2exp_srt())
+      val () = prerr " but it is expected to be of the sort "
+      val () = prerr_s2rt_s (s2t)
+      val () = prerrln! (".")
+    } (* end of [if] *)
     val () = the_trans2errlst_add (trans2err_T2E_s1exp_trup(s1e0))
   in
     s2exp_errexp(s2t)
@@ -2222,9 +2234,19 @@ fun auxerr
   val () =
     prerr_error2_loc (s1e.s1exp_loc())
   val () = filprerr_ifdebug "s1exp_trdn_lam"
-  val () = prerr ": the body of the static function is given the sort ["
-  val () = prerr_s2rt (s2t1)
-  val () = prerrln! ("] but it is expected to be of the sort [", s2t2, "].")
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the body of the static function is given the sort ["
+    val () = prerr_s2rt (s2t1)
+    val () = prerrln! ("] but it is expected to be of the sort [", s2t2, "].")
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the body of the static function is given the sort "
+    val () = prerr_s2rt_s (s2t1)
+    val () = prerr " but it is expected to be of the sort "
+    val () = prerr_s2rt_s (s2t2)
+    val () = prerrln! (".")
+  } (* end of [if] *)
   val () = the_trans2errlst_add (trans2err_T2E_s1exp_trdn(s1e_lam, s2t_fun))
 } // end of [auxerr]
 //
@@ -2271,9 +2293,19 @@ if test
     val () =
       filprerr_ifdebug "s2exp_trdn" // for debugging
     // end of [val]
-    val () = prerr ": the static expression is of the sort ["
-    val () = prerr_s2rt (s2t_new)
-    val () = prerrln! ("] but it is expected to be of the sort [", s2t, "].")
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the static expression is of the sort ["
+      val () = prerr_s2rt (s2t_new)
+      val () = prerrln! ("] but it is expected to be of the sort [", s2t, "].")
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr ": the static term is of the sort "
+      val () = prerr_s2rt_s (s2t_new)
+      val () = prerr " but it is expected to be of the sort "
+      val () = prerr_s2rt_s (s2t)
+      val () = prerrln! (".")
+    } (* end of [if] *)
     val () = the_trans2errlst_add (trans2err_T2E_s2exp_trdn(loc0, s2e, s2t))
   in
     s2exp_errexp(s2t)
@@ -2346,10 +2378,20 @@ if isimp
     val () = prerr_error2_loc (s1e.s1exp_loc())
     val () = filprerr_ifdebug "s1exp_trdn_impred"
     val () =
-      prerr ": the static expression needs to be impredicative"
-    val () = (
-      prerr " but is assigned the sort ["; prerr_s2rt (s2t); prerr "]."
-    ) (* end of [val] *)
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () =
+        prerr ": the static expression needs to be impredicative"
+      val () = (
+        prerr " but is assigned the sort ["; prerr_s2rt (s2t); prerr "]."
+      ) (* end of [val] *)
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () =
+        prerr ": the static term needs to be impredicative"
+      val () = (
+        prerr " but is assigned the sort "; prerr_s2rt_s (s2t); prerr "."
+      ) (* end of [val] *)
+    } (* end of [if] *)
     val () = prerr_newline ()
     val () = the_trans2errlst_add (trans2err_T2E_s1exp_trdn_impred(s1e))
   in

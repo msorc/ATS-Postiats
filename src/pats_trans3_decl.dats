@@ -76,7 +76,9 @@ typedef loc_t = $LOC.location
 //
 (* ****** ****** *)
 //
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 //
 staload "./pats_patcst2.sats"
@@ -232,12 +234,18 @@ case+ d2ecl_node_view (d2c0.d2ecl_node ()) of
           val () =
           prerr_error3_loc(loc0);
           val () =
-          (
+          if $GLOB.the_LEGACYERRORS_get () > 0 then (
             prerr ": the abstype type [";
             prerr_s2cst (s2c);
             prerr "] is not yet assumed.";
             prerr_newline ()
-          ) (* println! *)
+          ) else ( // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+            sprint_reset ();
+            prerr ": the abstype type ";
+            prerr_s2cst_s (s2c);
+            prerr " is not yet assumed.";
+            prerr_newline ()
+          ) (* end of [if] *)
         in
           the_trans3errlst_add
           (
@@ -780,14 +788,27 @@ in
 //
 if ~tszeq then let
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": initialization for ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] cannot be performed properly"
-  val () = prerr ": mismatch of var/val type-sizes:\n"
-  val () = (prerr "var: ["; prerr_s2exp (s2e1); prerr "]")
-  val () = prerr_newline ()
-  val () = (prerr "val: ["; prerr_s2exp (s2e2); prerr "]")
-  val () = prerr_newline ()
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": initialization for ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] cannot be performed properly"
+    val () = prerr ": mismatch of var/val type-sizes:\n"
+    val () = (prerr "var: ["; prerr_s2exp (s2e1); prerr "]")
+    val () = prerr_newline ()
+    val () = (prerr "val: ["; prerr_s2exp (s2e2); prerr "]")
+    val () = prerr_newline ()
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": initialization for "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " cannot be performed properly"
+    val () = prerr ": mismatch of var/val type-sizes:\n"
+    val () = (prerr "var: "; prerr_s2exp_s (s2e1))
+    val () = prerr_newline ()
+    val () = (prerr "val: "; prerr_s2exp_s (s2e2))
+    val () = prerr_newline ()
+  } (* end of [if] *)
 in
   the_trans3errlst_add (trans3err_T3E_s2exp_assgn_tszeq (loc0, s2e1, s2e2))
 end // end of [if] // end of [val]
