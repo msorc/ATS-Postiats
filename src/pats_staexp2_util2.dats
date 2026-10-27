@@ -1319,7 +1319,6 @@ case+ env1 of
         else aux1_f (env1_tl, env2, s2v10, s2v20)
       // end of [if]
     ) : bool
-    prval () = fold@ (env1)
   in
     ans
   end (* end of [list_vt_cons] *)
@@ -1344,7 +1343,6 @@ case+ env2 of
         then false else aux1_0(env1, env2_tl, s2v10, s2v20)
       // end of [if]
     ) : bool
-    prval () = fold@ (env2)
   in
     ans
   end (* end of [list_vt_cons] *)
@@ -1363,7 +1361,6 @@ case+ env2 of
 | list_vt_nil() => false
 | @list_vt_cons(s2v2, env2_tl) => let
     val ans = (if s2v2 = s2v20 then true else false): bool
-    prval () = fold@ (env2)
   in
     ans
   end (* end of [list_vt_cons] *)
@@ -1387,7 +1384,6 @@ case+ env2 of
         then false else aux0(env1, env2_tl, s2v10, s2v20)
       // end of [if]
     ) : bool
-    prval () = fold@ (env2)
   in
     ans
   end (* end of [list_vt_cons] *)
@@ -1413,7 +1409,6 @@ case+ env1 of
         then false else aux2_0(env1_tl, env2, s2v10, s2v20)
       // end of [if]
     ) : bool
-    prval () = fold@ (env1)
   in
     ans
   end (* end of [list_vt_cons] *)

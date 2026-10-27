@@ -60,9 +60,14 @@ and `pats_basics.hats` are verbatim copies.
    libats/arena/linear code need `$effmask_all` / `$effmask_wrt` in the body (the checks are stricter:
    a `&`-argument assignment is `wrt`). `-<fun>` means *pure* function in ATS2 (the old
    `-<fun>` = non-closure is `->`): write `(a, a) -> int`.
-8. Patterns on linear lists: `list_vt_cons (x, !p_xs)` -> `@list_vt_cons (x, xs1)`; `fold@` only after
-   an `@` pattern (never after `list_vt_nil`). `List_vt(T)` can have negative length for `&`
-   arguments: use `List0_vt(T)`.
+8. Patterns on linear lists: `list_vt_cons (x, !p_xs)` -> `@list_vt_cons (x, xs1)`. The port wrote a
+   `fold@ (xs)` after every `@` pattern (never after `list_vt_nil`); the compiler now folds an unfolded
+   variable itself where the folded type is required (a return, a `!T` argument, the end of the scope; see
+   "Fold on demand" at the end), and the `src/pats_*.dats` have no such `fold@` any more. The ones that
+   remain are needed: a fold before a write to a field of the owner or to a nested owner (`fold@ (p.field)`
+   of `pats_ccomp_ccompenv.dats`, the `env2` of the `mapgen` modules), and the sole statement of a branch
+   whose other branches leave the variable unfolded (`pats_constraint3.dats`, `pats_lintprgm_solve.dats`).
+   `List_vt(T)` can have negative length for `&` arguments: use `List0_vt(T)`.
 
 ### No-GC data (see CLAUDE.md "No GC")
 9. `List(T)`/`Option(T)` -> `glist(T)`/`gopt(T)` (`staload "libats/SATS/arena.sats"` in the `.sats`;

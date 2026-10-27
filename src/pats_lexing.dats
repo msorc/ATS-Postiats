@@ -1188,7 +1188,6 @@ feof
   val+ @list_vt_cons(x, _) = xs
   val loc =
     $LOC.location_make_pos_pos(x, pos)
-  prval () = fold@ (xs)
   val () = list_vt_free<position> (xs)
   val err = lexerr_make (loc, lexerr_node_LE_COMMENT_block_unclose())
   val () = the_lexerrlst_add (err)

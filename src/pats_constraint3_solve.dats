@@ -174,7 +174,7 @@ loop
 in
   case+ s3ps of
   | @list_vt_nil
-      ((*void*)) => (fold@ (s3ps); res)
+      ((*void*)) => res
   | @list_vt_cons
       (s3p, s3ps1) => let
       val ic =
@@ -182,7 +182,7 @@ in
       // end ofl[val]
       val res = loop (loc0, vim, n, s3ps1, list_vt_cons (ic, res))
     in
-      fold@ (s3ps); res
+      res
     end // end of [list_cons]
 end // end of [loop]
 //

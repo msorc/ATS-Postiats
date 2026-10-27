@@ -1619,7 +1619,7 @@ case+ s2itm_view(s2i0) of
           val y = f1 (x.1)
           val ys = f (xs1)
         in
-          fold@ (xs); glist_cons (y, ys)
+          glist_cons (y, ys)
         end // end of [list_vt_cons]
       | list_vt_nil () => glist_nil ()
     val ys = f (xs)

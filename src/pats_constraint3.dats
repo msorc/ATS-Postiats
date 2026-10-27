@@ -752,14 +752,14 @@ case+ env0 of
     (_, env) => let
     val ans = s2vbcfenv_find_cstapp (env, s2c0, s3es0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTsvar]
 //
 | @S2VBCFLSTsbexp
     (_, env) => let
     val ans = s2vbcfenv_find_cstapp (env, s2c0, s3es0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTsbexp]
 //
 | @S2VBCFLSTcons
@@ -772,11 +772,12 @@ case+ env0 of
   in
     if test then let
       val s2v = s2v
-      prval () = fold@ env0 in Some_vt (s2v)
+    in
+      Some_vt (s2v)
     end else let
       val ans = s2vbcfenv_find_cstapp (env, s2c0, s3es0)
     in
-      fold@ env0; ans
+      ans
     end (* end of [if] *)
   end // end of [S2VBCFLSTcons]
 //
@@ -784,17 +785,15 @@ case+ env0 of
     (_, _, env) => let
     val ans = s2vbcfenv_find_cstapp (env, s2c0, s3es0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTnonlin]
 //
 | @S2VBCFLSTmark (env) => let
     val ans = s2vbcfenv_find_cstapp (env, s2c0, s3es0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTmark]
-| @S2VBCFLSTnil () => let
-    prval () = fold@ (env0) in None_vt ()
-  end // end of [S2VBCFLSTnil]
+| @S2VBCFLSTnil () => None_vt () // end of [S2VBCFLSTnil]
 //
 end // end of [s2vbcfenv_find_cstapp]
 
@@ -811,21 +810,21 @@ case+ env0 of
     (_, env) => let
     val ans = s2vbcfenv_find_nonlin (env, s3e0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTsvar]
 //
 | @S2VBCFLSTsbexp
     (_, env) => let
     val ans = s2vbcfenv_find_nonlin (env, s3e0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTsbexp]
 //
 | @S2VBCFLSTcons
     (_, _, _, _, env) => let
     val ans = s2vbcfenv_find_nonlin (env, s3e0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTcons]
 //
 | @S2VBCFLSTnonlin
@@ -837,17 +836,15 @@ case+ env0 of
       // end of [if]
     ) : Option_vt (s2var)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTnonlin]
 //
 | @S2VBCFLSTmark (env) => let
     val ans = s2vbcfenv_find_nonlin (env, s3e0)
   in
-    fold@ env0; ans
+    ans
   end // end of [S2VBCFLSTmark]
-| @S2VBCFLSTnil () => let
-    prval () = fold@ (env0) in None_vt ()
-  end // end of [S2VBCFLSTnil]
+| @S2VBCFLSTnil () => None_vt () // end of [S2VBCFLSTnil]
 //
 end // end of [s2vbcfenv_find_nonlin]
 
@@ -871,12 +868,12 @@ case+ env of
     if isb then
       s3bes := list_vt_cons (s3exp_S3Ebdom (s2v), s3bes)
     // end of [val]
-    val () = loop (env1, s2vs, s3bes) in fold@ (env)
+    val () = loop (env1, s2vs, s3bes) in ()
   end // end of [S2VBCFLSTsvar]
 | @S2VBCFLSTsbexp
     (s3be, env1) => let
     val () = s3bes := list_vt_cons (s3be, s3bes)
-    val () = loop (env1, s2vs, s3bes) in fold@ (env)
+    val () = loop (env1, s2vs, s3bes) in ()
   end // end of [S2VBCFLSTsbexp]
 | @S2VBCFLSTcons (
     s2c, arg, res, rel, env1
@@ -884,23 +881,23 @@ case+ env of
     val () = (
       case+ rel of
       | @Some_vt (s3be) => let
-          val () = s3bes := list_vt_cons (s3be, s3bes) in fold@ (rel)
+          val () = s3bes := list_vt_cons (s3be, s3bes) in ()
         end // end of [Some_vt]
       | @None_vt () => fold@ (rel)
     ) : void // end of [val]
     val () = loop (env1, s2vs, s3bes)
   in
-    fold@ (env)
+    ()
   end // end of [S2VBCFLSTcons]
 | @S2VBCFLSTnonlin
     (s2v, _, env1) => let
     val () = s2vs := list_vt_cons (s2v, s2vs)
-    val () = loop (env1, s2vs, s3bes) in fold@ (env)
+    val () = loop (env1, s2vs, s3bes) in ()
   end // end of [S2VBCFLSTnonlin]
 | @S2VBCFLSTmark (env1) => let
-    val () = loop (env1, s2vs, s3bes) in fold@ (env)
+    val () = loop (env1, s2vs, s3bes) in ()
   end // end of [S2VBCFLSTmark]
-| @S2VBCFLSTnil () => fold@ (env)
+| @S2VBCFLSTnil () => ()
 //
 end // [end of loop]
 //

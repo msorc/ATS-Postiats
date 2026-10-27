@@ -161,7 +161,6 @@ case+ env of
     val () = fprint_string (out, " -> ")
     val () = fprint_s2hnf (out, s2f)
     val () = loop (out, env1, i+1)
-    prval ((*folded*)) = fold@ (env)
   in
     // nothing
   end // end of [IMPENVcons]
@@ -192,14 +191,12 @@ case+ env of
   ) => (
     if eq_s2var_s2var (s2v, s2v1) then let
       val s2f = s2f
-      prval () = fold@ (env)
     in
       s2f
     end else let
       val s2f =
         impenv_find (env1, s2v)
       // end of [val]
-      prval () = fold@ (env)
     in
       s2f
     end // end of [if]
@@ -232,13 +229,10 @@ case+ env of
       val () =
         (s2f1 := s2f)
       // end of [val]
-      prval () = fold@ (env)
     in
       true
-    end else let
-      val ans = impenv_update_aux(env1, s2v, s2f)
-      prval () = fold@(env) in ans
-    end // end of [if]
+    end else impenv_update_aux(env1, s2v, s2f)
+    // end of [if]
   ) (* end of [IMPENVcons] *)
 //
 implement
@@ -420,14 +414,13 @@ case+ env of
     if eq_s2var_s2var (s2v, s2v0)
       then
       (
-      fold@env;false
+      false
       )
       else ans where
       {
         val ans =
           auxfvar(env1, s2v0)
         // end of [val]
-        prval ((*void*)) = fold@env
       } (* end of [else] *)
   ) (* end of [list_vt_cons] *)
 ) (* end of [auxfvar] *)

@@ -246,10 +246,8 @@ lenvfind (env: !lenv (a), x: symbol): Option_vt (a) =
       val k = kv.0 and v = kv.1
     in
       if $SYM.eq_symbol_symbol (k, x)
-        then (fold@ env; Some_vt (v))
-        else let
-          val ans = lenvfind<a> (env1, x) in fold@ env; ans
-        end // end of [else]
+        then Some_vt (v)
+        else lenvfind<a> (env1, x) // end of [else]
     end // end of [list_vt_cons]
   | list_vt_nil () => None_vt ()
 // end of [lenvfind]
@@ -267,7 +265,6 @@ lenvmake_v1alist
     | @list_vt_cons (v, vs1) => let
         val v0 = v
         val res = lenvmake_v1alist (xs1, vs1)
-        prval () = fold@ (vs)
       in
         list_vt_cons ((x, v0), res)
       end // end of [list_vt_cons]
@@ -386,8 +383,8 @@ v1alist_exists_err (vs: !List0_vt (v1al)): bool = let
     | @list_vt_cons (v, vs1) => let
         val iserr = v1al_is_err (v)
       in
-        if iserr then (fold@ (vs); true)
-        else let val res = loop (vs1) in fold@ (vs); res end
+        if iserr then true
+        else loop (vs1)
       end
     | list_vt_nil () => false
 in
