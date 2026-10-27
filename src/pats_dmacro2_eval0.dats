@@ -103,7 +103,9 @@ staload "./pats_syntax.sats"
 
 staload "./pats_basics.sats"
 staload "./pats_avlmap.sats"
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_dynexp2.sats"
 
 (* ****** ****** *)
@@ -708,10 +710,14 @@ auxerr
   val () =
   prerr_errmac_loc(loc)
   val () =
-  (
+  if $GLOB.the_LEGACYERRORS_get () > 0 then (
     prerr ": the variable [";
     prerr_d2var(d2v); prerr "] is unbound."
-  ) (* end of [val] *)
+  ) else ( // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    sprint_reset ();
+    prerr ": the variable ";
+    prerr_d2var_s(d2v); prerr " is unbound."
+  ) (* end of [if] *)
   val () = prerr_newline()
 in
   m2val_M2Verr((*void*))

@@ -7,6 +7,8 @@
 # comes from shell globs (t1cases/*.sats ...): fix the collation, whatever the
 # locale of the caller is.
 export LC_ALL := C
+# HX-2026-10: the recorded sums are those of the numeric error locations
+export PATSOPT_LEGACY_ERRORS := 1
 # The cases print the location of the prelude files relative to PATSHOME: use the
 # canonical root of this repository, whatever PATSHOME the caller has (e.g. one
 # with ".." segments), so that the md5 sums do not depend on it.
@@ -38,7 +40,7 @@ endif
 CCIN=mkdir -p $(M)/cc_tmp_$(1) && cd $(M)/cc_tmp_$(1) && patscc -DATS_MEMALLOC_LIBC -D_GNU_SOURCE -include alloca.h -I$(M) -I../test -IATS ../test $(2) -o ../test/$(1) $(foreach f,$(3),$(if $(filter ../%,$(f)),$(f),../test/$(f))) $(4)
 
 all: prebuild
-.PHONY: prebuild pregen preexes
+.PHONY: prebuild pregen preexes errtest
 prebuild:
 ifneq ($(JOBS),1)
 	@$(MAKE) --no-print-directory pregen
@@ -287,7 +289,7 @@ S2MODS=pats_error pats_basics pats_utils pats_global pats_intinf pats_counter pa
   pats_location pats_effect pats_reader pats_lexbuf pats_lexing_token pats_lexing pats_lexing_error pats_lexing_print pats_tokbuf \
   pats_syntax pats_syntax_print pats_staexp1 pats_staexp1_print pats_avlmap pats_staexp2_sort pats_staexp2 pats_staexp2_scst \
   pats_staexp2_svar pats_staexp2_svvar pats_staexp2_dcon pats_staexp2_hole pats_staexp2_ctxt pats_staexp2_error pats_staexp2_print \
-  pats_staexp2_pprint pats_staexp2_szexp pats_staexp2_skexp pats_staexp2_util1 pats_staexp2_util2 pats_staexp2_util3 pats_stacst2 pats_staexp2_solve pats_namespace
+  pats_staexp2_pprint pats_staexp2_sprint pats_staexp2_szexp pats_staexp2_skexp pats_staexp2_util1 pats_staexp2_util2 pats_staexp2_util3 pats_stacst2 pats_staexp2_solve pats_namespace
 S2GENFILES=s2_gen.py s2_cases.py $(M)/pats_staexp2.spec $(M)/pats_staexp2_error.spec
 S2HATS=s2case_pre.hats s2common1.hats s2common2.hats s2glue2_pre.hats s2glue2_mid.hats s2glue2_post.hats s2compat_gen.hats $(M)/mylibies.hats
 S2CHUNKS=$(sort $(wildcard s2case_[0-9][0-9].dats))
@@ -716,7 +718,7 @@ T2MODS=pats_error pats_basics pats_utils pats_global pats_intinf pats_counter pa
   pats_e1xpval pats_e1xpval_error pats_trans1_env pats_trans1_e0xp pats_trans1_error pats_trans1_effect pats_trans1_sort \
   pats_trans1_staexp pats_trans1_p0at pats_trans1_syndef pats_trans1_dynexp pats_trans1_decl pats_filename_reloc \
   pats_avlmap pats_staexp2_sort pats_staexp2 pats_staexp2_scst pats_staexp2_svar pats_staexp2_svvar pats_staexp2_dcon pats_staexp2_hole pats_staexp2_ctxt \
-  pats_staexp2_error pats_staexp2_print pats_staexp2_pprint pats_staexp2_szexp pats_staexp2_skexp pats_staexp2_util1 pats_staexp2_util2 pats_staexp2_util3 \
+  pats_staexp2_error pats_staexp2_print pats_staexp2_pprint pats_staexp2_sprint pats_staexp2_szexp pats_staexp2_skexp pats_staexp2_util1 pats_staexp2_util2 pats_staexp2_util3 \
   pats_stacst2 pats_namespace pats_dynexp2 pats_dyncst2 pats_dynexp2_dcst pats_dynexp2_dmac pats_dynexp2_dvar pats_dynexp2_print pats_dynexp2_util \
   pats_trans2_env pats_trans2_error pats_trans2_sort pats_trans2_staexp pats_trans2_p1at pats_trans2_dynexp pats_trans2_impdec pats_trans2_decl
 T2OBJS=$(addprefix $(or $(2),$(1))/,$(addsuffix _dats.o,$(T2MODS))) $(1)/pats_error_sats.o $(1)/t2dump.o
@@ -1243,3 +1245,9 @@ prebuild_cc1: | prebuild_ccb
 prebuild_lp: | prebuild_cc1
 prebuild_hs: | prebuild_lp
 .PHONY: subgen $(SUBEXES)
+
+# HX-2026-10: the error messages (src/test/errcases/README). It has its own Makefile because this one exports PATSOPT_LEGACY_ERRORS;
+# it needs only ../patsopt.
+errtest:
+	$(MAKE) --no-print-directory -C errcases test
+all: errtest

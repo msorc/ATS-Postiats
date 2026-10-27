@@ -1,0 +1,11 @@
+alias_record.dats:3:49-50: error(3): the dynamic expression cannot be assigned the type @{a=int, b=char}
+    3 | fun f (x: @{a=int, b=bool}): @{a=int, b=char} = x
+      |                                                 ^
+alias_record.dats:3:49-50: error(3): type mismatch:
+  expected: char
+  actual:   bool
+alias_record.dats:3:49-50: error(3): type mismatch:
+  expected: @{a=int, b=char}
+  actual:   @{a=int, b=bool}
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

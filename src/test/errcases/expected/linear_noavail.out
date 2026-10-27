@@ -1,0 +1,12 @@
+linear_noavail.dats:4:51-53: error(3): the linear variable xs is no longer available (it has been consumed)
+    4 |   let val () = list_vt_free (xs) in list_vt_free (xs) end
+      |                                                   ^~
+linear_noavail.dats:4:51-53: error(3): the dynamic expression cannot be assigned the type [n:int] list_vt(?1, n)
+linear_noavail.dats:4:51-53: error(3): type mismatch:
+  expected: list_vt(?1, ?2)
+  actual:   <error>
+linear_noavail.dats:4:51-53: error(3): type mismatch:
+  expected: [n:int] list_vt(?1, n)
+  actual:   <error>
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

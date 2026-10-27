@@ -1,0 +1,8 @@
+pattern_type.dats:3:34-38: error(3): the boolean pattern is ill-typed.
+    3 | fun f (x: int): int = case+ x of true => 1 | _ => 0
+      |                                  ^~~~
+pattern_type.dats:3:34-38: error(3): type mismatch:
+  expected: int
+  actual:   bool(true)
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

@@ -55,6 +55,7 @@ staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 //
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -76,6 +77,7 @@ stadef loc_t = $LOC.location
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 staload "./pats_dynexp2.sats"
@@ -127,9 +129,17 @@ auxerr
   val s2e = d3exp_get_type (d3e)
   val () = prerr_error3_loc (loc)
   val () = prerr ": the type of the array index is not "
-  val () = prerr "a generic (signed or unsigned) integer type: ["
-  val () = prerr_s2exp (s2e)
-  val () = prerr "]."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr "a generic (signed or unsigned) integer type: ["
+    val () = prerr_s2exp (s2e)
+    val () = prerr "]."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr "a generic (signed or unsigned) integer type: "
+    val () = prerr_s2exp_s (s2e)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline ()
 in
   the_trans3errlst_add (trans3err_T3E_d3exp_arrind (d3e))
@@ -331,11 +341,21 @@ of // case+
     val () =
     if (err > 0) then let
       val () = prerr_error3_loc (loc0)
-      val () = prerr ": the record-type ["
-      val () = prerr_s2exp (s2e)
-      val () = prerr "] is expected to contain the label ["
-      val () = $LAB.prerr_label (lab0)
-      val () = prerr "] but it does not."
+      val () =
+      if $GLOB.the_LEGACYERRORS_get () > 0 then {
+        val () = prerr ": the record-type ["
+        val () = prerr_s2exp (s2e)
+        val () = prerr "] is expected to contain the label ["
+        val () = $LAB.prerr_label (lab0)
+        val () = prerr "] but it does not."
+      } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+        val () = sprint_reset ()
+        val () = prerr ": the record-type "
+        val () = prerr_s2exp_s (s2e)
+        val () = prerr " is expected to contain the label "
+        val () = $LAB.prerr_label (lab0)
+        val () = prerr " but it does not."
+      } (* end of [if] *)
       val () = prerr_newline ()
     in
       the_trans3errlst_add (trans3err_T3E_s2exp_selab_labnot(loc0, s2e, lab0))
@@ -374,9 +394,17 @@ of // case+
         val () = prerr ": ["
         val () = $LAB.prerr_label (lab0)
         val () = prerr "] cannot be found"
-        val () = prerr ": the type ["
-        val () = prerr_s2exp (s2e)
-        val () = prerr "] is expected to be a tyrec(record)."
+        val () =
+        if $GLOB.the_LEGACYERRORS_get () > 0 then {
+          val () = prerr ": the type ["
+          val () = prerr_s2exp (s2e)
+          val () = prerr "] is expected to be a tyrec(record)."
+        } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+          val () = sprint_reset ()
+          val () = prerr ": the type "
+          val () = prerr_s2exp_s (s2e)
+          val () = prerr " is expected to be a tyrec(record)."
+        } (* end of [if] *)
         val () = prerr_newline ()
         val () = the_trans3errlst_add(trans3err_T3E_s2exp_selab_tyrec(loc0, s2e))
       in
@@ -424,9 +452,17 @@ case+
     val () =
       prerr_error3_loc (loc0)
     // end of [val]
-    val () = prerr ": the type ["
-    val () = prerr_s2exp (s2e)
-    val () = prerr "] is expected to be a tyarr (array-type)."
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the type ["
+      val () = prerr_s2exp (s2e)
+      val () = prerr "] is expected to be a tyarr (array-type)."
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr ": the type "
+      val () = prerr_s2exp_s (s2e)
+      val () = prerr " is expected to be a tyarr (array-type)."
+    } (* end of [if] *)
     val () = prerr_newline ()
     val () = the_trans3errlst_add (trans3err_T3E_s2exp_selab_tyarr (loc0, s2e))
     val s2e_elt = s2exp_t0ype_err ()
@@ -584,11 +620,21 @@ s2exp_node_view(s2e.s2exp_node()) of
     ) : void // end of [val]
     val () = if (err > 0) then let
       val () = prerr_error3_loc (loc0)
-      val () = prerr ": the record-type ["
-      val () = prerr_s2exp (s2e)
-      val () = prerr "] is expected to contain the label ["
-      val () = $LAB.prerr_label (lab0)
-      val () = prerr "] but it does not."
+      val () =
+      if $GLOB.the_LEGACYERRORS_get () > 0 then {
+        val () = prerr ": the record-type ["
+        val () = prerr_s2exp (s2e)
+        val () = prerr "] is expected to contain the label ["
+        val () = $LAB.prerr_label (lab0)
+        val () = prerr "] but it does not."
+      } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+        val () = sprint_reset ()
+        val () = prerr ": the record-type "
+        val () = prerr_s2exp_s (s2e)
+        val () = prerr " is expected to contain the label "
+        val () = $LAB.prerr_label (lab0)
+        val () = prerr " but it does not."
+      } (* end of [if] *)
       val () = prerr_newline ()
     in
       the_trans3errlst_add (trans3err_T3E_s2exp_selab_labnot (loc0, s2e, lab0))
@@ -600,9 +646,17 @@ s2exp_node_view(s2e.s2exp_node()) of
 | v => let
     val () = s2exp_node_view_free (v)
     val () = prerr_error3_loc (loc0)
-    val () = prerr ": the type ["
-    val () = prerr_s2exp (s2e)
-    val () = prerr "] is expected to be a tyrec(record)."
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr ": the type ["
+      val () = prerr_s2exp (s2e)
+      val () = prerr "] is expected to be a tyrec(record)."
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr ": the type "
+      val () = prerr_s2exp_s (s2e)
+      val () = prerr " is expected to be a tyrec(record)."
+    } (* end of [if] *)
     val () = prerr_newline ()
     val () = the_trans3errlst_add (trans3err_T3E_s2exp_selab_tyrec (loc0, s2e))
   in

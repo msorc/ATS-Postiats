@@ -1,0 +1,13 @@
+foldat_hint.dats:6:29-51: error(3): the linear variable xs does not have the required type at the end of its scope
+    6 |   | @list_vt_cons (x, _) => consume_view (view@ x)
+      |                             ^~~~~~~~~~~~~~~~~~~~~~
+foldat_hint.dats:6:29-51: error(3): type mismatch:
+  expected: list_vt(int, n + 1)
+  actual:   list_vt_cons@_(x, _)
+the variable xs is unfolded (pattern at foldat_hint.dats:6:5-25) and fold@ xs cannot be applied: the view of field 1 is consumed
+foldat_hint.dats:6:5-51: error(3): the linear variable view@ _ of type list_vt(int, n) @ _ is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    6 |   | @list_vt_cons (x, _) => consume_view (view@ x)
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

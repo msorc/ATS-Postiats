@@ -55,6 +55,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -70,6 +71,7 @@ staload SYM = "./pats_symbol.sats"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 staload "./pats_dynexp2.sats"
@@ -109,10 +111,21 @@ case+ glist_view(s2es) of
     val () = if islin then let
       val () = nerr := nerr + 1
       val () = prerr_error3_loc (loc0)
-      val () = prerr ": [free@] operation cannot be performed"
-      val () = prerr ": a linear component of the type ["
-      val () = prerr_s2exp (s2e)
-      val () = prerr "] may be abandoned."
+      val () =
+      if $GLOB.the_LEGACYERRORS_get () > 0 then
+        prerr ": [free@] operation cannot be performed" else
+        prerr ": free@ operation cannot be performed" // HX-2026-10
+      val () =
+      if $GLOB.the_LEGACYERRORS_get () > 0 then {
+        val () = prerr ": a linear component of the type ["
+        val () = prerr_s2exp (s2e)
+        val () = prerr "] may be abandoned."
+      } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+        val () = sprint_reset ()
+        val () = prerr ": a linear component of the type "
+        val () = prerr_s2exp_s (s2e)
+        val () = prerr " may be abandoned."
+      } (* end of [if] *)
       val () = prerr_newline ()
     in
       // nothing
@@ -780,7 +793,7 @@ val () = (
   case+ opt of
   | ~Some_vt (ploc) => {
       val () = prerr " (pattern at "
-      val () = $LOC.prerr_location (ploc)
+      val () = $LOC.prerr_location_short (ploc)
       val () = prerr ")"
     } (* end of [Some_vt] *)
   | ~None_vt () => ()
@@ -798,11 +811,20 @@ val () =
 if why = 2 then {
   val () = prerr "field "
   val () = prerr_int (k)
-  val () = prerr " has type ["
-  val () = prerr_s2exp (gcell_get<s2exp> (the_aft1))
-  val () = prerr "] but the constructor needs ["
-  val () = prerr_s2exp (gcell_get<s2exp> (the_aft2))
-  val () = prerr "]"
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr " has type ["
+    val () = prerr_s2exp (gcell_get<s2exp> (the_aft1))
+    val () = prerr "] but the constructor needs ["
+    val () = prerr_s2exp (gcell_get<s2exp> (the_aft2))
+    val () = prerr "]"
+  } else {
+    val () = sprint_reset ()
+    val () = prerr " has type "
+    val () = prerr_s2exp_s (gcell_get<s2exp> (the_aft1))
+    val () = prerr " but the constructor needs "
+    val () = prerr_s2exp_s (gcell_get<s2exp> (the_aft2))
+  } (* end of [if] *)
 } (* end of [if] *)
 val () =
 if why = 3 then prerr "the constructor has no fields"

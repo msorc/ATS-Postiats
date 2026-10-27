@@ -1,0 +1,14 @@
+loop_merge.dats:5:12-57: error(3): the variable xs is consumed but it should be retained with the type list_vt(int, 1) instead.
+    5 |   val () = while (i < 3) (list_vt_free (xs); i := i + 1)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+loop_merge.dats:3:7-6:10: error(3): the linear variable xs of type list_vt(int, 1) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    3 | fun f (xs: list_vt(int, 1)): void = let
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    4 |   var i: int = 0
+      |   ^~~~~~~~~~~~~~
+    5 |   val () = while (i < 3) (list_vt_free (xs); i := i + 1)
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ...
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

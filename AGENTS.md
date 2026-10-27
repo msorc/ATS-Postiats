@@ -64,6 +64,7 @@ There is no unit-test framework. Regression testing compiles and runs the exampl
 ```sh
 make -C src check                               # typecheck every module of the compiler (patsopt only)
 make -C src test [JOBS=N]                       # check + unit tests + the md5 suites of src/test (no ATS1; needs bin/patscc; ~9 min with JOBS=nproc=32, 35 to 50 min with JOBS=1)
+make -C src/test errtest                      # the error messages: ~40 failing programs, expected stderr in src/test/errcases/expected (reviewed by hand; `sh src/test/errcases/run.sh update`; part of `make -C src test`)
 make -C utils/atsdoc test                       # atsdoc and libatsdoc: 2653 md5 cases
 make -C utils/atsdoc genall                     # regenerates the text of 370 .atxt templates and compares their md5 sums (~30 s)
 make -C utils/libatsynmark test                 # libatsynmark and pats2xhtml: 5228 md5 cases (after make -C utils/atsynmark)

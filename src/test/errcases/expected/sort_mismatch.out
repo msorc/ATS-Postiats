@@ -1,0 +1,5 @@
+sort_mismatch.dats:3:25-29: error(2): the static term is of the sort bool but it is expected to be of the sort int.
+    3 | fun f (xs: list_vt(int, true)): void = ()
+      |                         ^~~~
+patsopt(TRANS2): there are [1] errors in total.
+exit 1

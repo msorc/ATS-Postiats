@@ -51,6 +51,7 @@ staload "libats/SATS/arena.sats"
 
 (* ****** ****** *)
 
+staload LOC = "./pats_location.sats"
 staload ERR = "./pats_error.sats"
 staload _(*ERR*) = "./pats_error.dats"
 
@@ -244,6 +245,7 @@ dynload "./pats_staexp2_ctxt.dats"
 dynload "./pats_staexp2_error.dats"
 dynload "./pats_staexp2_print.dats"
 dynload "./pats_staexp2_pprint.dats"
+dynload "./pats_staexp2_sprint.dats"
 dynload "./pats_staexp2_szexp.dats"
 dynload "./pats_staexp2_skexp.dats"
 dynload "./pats_staexp2_util1.dats"
@@ -448,6 +450,9 @@ fprintln! (out, "  --depgen (for generating information on file dependencices)")
 fprintln! (out, "  --taggen (for generating tagging information on syntactic entities)");
 //
 fprintln! (out, "  --gline (for generating line pragma information in target code)");
+//
+fprintln! (out, "  --legacy-errors (old numeric locations, no source line;");
+fprintln! (out, "    also selected by the variable PATSOPT_LEGACY_ERRORS)");
 //
 fprintln! (out, "  --debug (for enabling the generation of more informative error messages)");
 fprintln! (out, "  --debug2 (for enabling the generation of debugging information in target code)");
@@ -1309,6 +1314,8 @@ auxexn
 , given: string, d0cs: d0eclist, exn: exn
 ) : void = let
 //
+val () = $LOC.prerr_errloc_flush ()
+//
 val
 (pf, fpf | p) =
 $UN.ptr0_vtake{cmdstate}(p0)
@@ -1828,6 +1835,10 @@ case+ key of
 //
 | "--compile" => (state.typecheckflag := 0)
 | "--typecheck" => (state.typecheckflag := 1)
+//
+| "--legacy-errors" => {
+    val () = $GLOB.the_LEGACYERRORS_set(1)
+  } // end of [--legacy-errors]
 //
 | "--gline" => {
     val () = $GLOB.the_DEBUGATS_dbgline_set(1)

@@ -55,6 +55,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -72,6 +73,7 @@ staload SYN = "./pats_syntax.sats"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 
@@ -422,9 +424,16 @@ then let
     prerr_error3_loc(loc)
   // end of [val]
   val () = filprerr_ifdebug "d3exp_trdn"
-  val () = prerr ": the dynamic expression cannot be assigned the type ["
-  val () = prerr_s2exp (s2e2)
-  val () = prerr "]."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the dynamic expression cannot be assigned the type ["
+    val () = prerr_s2exp (s2e2)
+    val () = prerr "]."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the dynamic expression cannot be assigned the type "
+    val () = prerr_s2exp_s (s2e2)
+  } (* end of [if] *)
   val () = prerr_newline ()
   val () = prerr_the_staerrlst ()
 //

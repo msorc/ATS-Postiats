@@ -56,6 +56,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 //
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 //
@@ -82,6 +83,7 @@ staload "./pats_lexing.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
+staload "./pats_staexp2_sprint.sats"
 
 (* ****** ****** *)
 
@@ -835,8 +837,10 @@ fun auxerr
 //
   val () = prerr_error3_loc (loc0)
 //
+  val legacy = $GLOB.the_LEGACYERRORS_get () > 0
+//
   val () =
-  if islin then let
+  if islin && legacy then let
     val () = prerr (": the linear dynamic variable [")
     val () = prerr_d2var (d2v)
     val () = prerr ("] is no longer available.")
@@ -845,10 +849,28 @@ fun auxerr
   end // end of [if]
 //
   val () =
-  if not(islin) then let
+  if not(islin) && legacy then let
     val () = prerr (": the (non-linear) dynamic variable [")
     val () = prerr_d2var (d2v)
     val () = prerr ("] is not available for external use.")
+  in
+    prerr_newline ()
+  end // end of [if]
+//
+// HX-2026-10: the surface syntax (pats_staexp2_sprint)
+//
+  val () =
+  if not(legacy) then let
+    val () = sprint_reset ()
+    val () =
+    if islin
+      then prerr (": the linear variable ") else prerr (": the variable ")
+    val () = prerr_d2var_s (d2v)
+    val () =
+    if islin
+      then prerr (" is no longer available (it has been consumed)")
+      else prerr (" is not available for external use")
+    // end of [if]
   in
     prerr_newline ()
   end // end of [if]
@@ -983,9 +1005,11 @@ val d2s = d2exp_get_D2Esym (d2e0) // [val-D2Esym(d2s) = d2e0.d2exp_node]
 val () = prerr_error3_loc (loc0)
 val () = filprerr_ifdebug "d2exp_trup_sym"
 //
-val () = prerr (": the symbol [")
+val leg = $GLOB.the_LEGACYERRORS_get () > 0
+val () = prerr_string (if leg then ": the symbol [" else ": the symbol ")
 val () = prerr_d2sym (d2s)
-val () = prerr ("] cannot be resolved.")
+val () =
+  prerr_string (if leg then "] cannot be resolved." else " cannot be resolved.")
 val () = prerr_newline ()
 //
 val () =

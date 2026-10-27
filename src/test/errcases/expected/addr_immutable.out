@@ -1,0 +1,5 @@
+addr_immutable.dats:4:9-16: error(3): the variable x is not mutable and thus addr@ cannot be applied.
+    4 | val p = addr@ x
+      |         ^~~~~~~
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

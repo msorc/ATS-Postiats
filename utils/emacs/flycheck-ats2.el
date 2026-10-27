@@ -56,6 +56,21 @@
   :command ("patscc" "-tcats" source-inplace)
   :error-patterns
   ((error
+    ;; The default form: file:line:col-col or file:line:col-line:col
+    ;; (the source lines that follow the message are not matched):
+    ;;
+    ;; filename:151:1-5: error(3): the applied dynamic expression is of non-function type: S2Ecst(bool_t0ype)
+    ;; filename:151:1-153:5: error(3): mismatch of static terms (tyleq):
+    ;;
+    ;; The same multi-line grouping as below applies.
+    bol (file-name) ?: line ?: column ?-
+    (? (1+ num) ?:) (1+ num) ?: space
+    (message
+     (+? not-newline)
+     (or (: ?: ?\n (repeat 2 (: (1+ not-newline) ?\n)))
+         ?\n)))
+   (error
+    ;; The old form (patsopt --legacy-errors, PATSOPT_LEGACY_ERRORS=1).
     ;; This will catch all single-line messages:
     ;;
     ;; filename: 3120(line=151, offs=1) -- 3124(line=151, offs=5): error(3): the applied dynamic expression is of non-function type: S2Ecst(bool_t0ype)

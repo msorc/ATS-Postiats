@@ -1,0 +1,8 @@
+alias_bool.dats:3:24-25: error(3): the dynamic expression cannot be assigned the type int
+    3 | fun f (x: bool): int = x
+      |                        ^
+alias_bool.dats:3:24-25: error(3): type mismatch:
+  expected: int
+  actual:   bool
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

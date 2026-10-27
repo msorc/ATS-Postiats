@@ -136,6 +136,7 @@ staload "./pats_dynexp1.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_stacst2.sats"
 staload "./pats_staexp2_util.sats"
+staload "./pats_staexp2_sprint.sats"
 
 (* ****** ****** *)
 
@@ -765,6 +766,9 @@ s2cst_make (
 , gopt_some(def) // definition
 ) (* end of [s2cst_make] *)
 //
+// HX-2026-10: the alias for the error messages (pats_staexp2_sprint)
+val () = if the_d2varlev_get () = 0 then sprint_alias_add_tkind (s2c)
+//
 in
   the_s2expenv_add_scst (s2c)
 end // end of [t1kindef_tr]
@@ -867,8 +871,7 @@ case+ gopt_view(res) of
 //
 val def2 = s1expdef_tr_def (arg, res2, def)
 //
-in
-//
+val s2c =
 s2cst_make
 (
   sym // name
@@ -884,6 +887,12 @@ s2cst_make
 , gopt_some(def2) // definition
 ) (* end of [s2cst_make] *)
 //
+// HX-2026-10: the alias for the error messages (pats_staexp2_sprint);
+// the local ones of the functions and implementations are not used
+val () = if the_d2varlev_get () = 0 then sprint_alias_add_s2cst (s2c)
+//
+in
+  s2c
 end // end of [s1expdef_tr]
 
 fun
@@ -1001,11 +1010,22 @@ d0: s1aspdec, s2t1: s2rt, s2t2: s2rt
   filprerr_ifdebug("s1aspdec_tr_res")
 //
   val () =
-  prerr(": the static assumption is given the sort [")
-  val () = prerr_s2rt(s2t1)
-  val () = prerr "] but it is expected to be of the sort ["
-  val () = prerr_s2rt(s2t2)
-  val () = prerr "]."
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () =
+    prerr(": the static assumption is given the sort [")
+    val () = prerr_s2rt(s2t1)
+    val () = prerr "] but it is expected to be of the sort ["
+    val () = prerr_s2rt(s2t2)
+    val () = prerr "]."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () =
+    prerr(": the static assumption is given the sort ")
+    val () = prerr_s2rt_s(s2t1)
+    val () = prerr " but it is expected to be of the sort "
+    val () = prerr_s2rt_s(s2t2)
+    val () = prerr "."
+  } (* end of [if] *)
   val () = prerr_newline((*void*))
 //
   val () = the_trans2errlst_add(trans2err_T2E_s1aspdec_tr_res(d0, s2t1, s2t2))

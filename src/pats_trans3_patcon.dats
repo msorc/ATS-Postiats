@@ -65,7 +65,9 @@ staload LOC = "./pats_location.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
 
@@ -272,9 +274,19 @@ case+ gopt_view(opt) of
 | ~GOsome (s2e) => let
     val () = prerr_error3_loc (loc)
     val () = prerr_string ": a value matching this pattern may not be freed";
-    val () = prerr_string ": it contains a linear component of the following type [";
-    val () = pprerr_s2exp (s2e)
-    val () = prerr_string "]."
+    val () =
+    if $GLOB.the_LEGACYERRORS_get () > 0 then {
+      val () = prerr_string ": it contains a linear component";
+      val () = prerr_string " of the following type [";
+      val () = pprerr_s2exp (s2e)
+      val () = prerr_string "]."
+    } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+      val () = sprint_reset ()
+      val () = prerr_string ": it contains a linear component"
+      val () = prerr_string " of the following type "
+      val () = prerr_s2exp_s (s2e)
+      val () = prerr_string "."
+    } (* end of [if] *)
     val () = prerr_newline ()
   in
     the_trans3errlst_add (trans3err_T3E_p2at_free_update (p3t))
@@ -477,9 +489,19 @@ val () =
 if (flag < 0) then let
   val (
   ) = prerr_error3_loc (loc0)
-  val () = prerr_string ": the constructor pattern cannot be assigned the type ["
-  val () = pprerr_s2exp (s2e)
-  val () = prerr_string "]."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr_string ": the constructor pattern cannot be"
+    val () = prerr_string " assigned the type ["
+    val () = pprerr_s2exp (s2e)
+    val () = prerr_string "]."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr_string ": the constructor pattern cannot be"
+    val () = prerr_string " assigned the type "
+    val () = prerr_s2exp_s (s2e)
+    val () = prerr_string "."
+  } (* end of [if] *)
   val () = prerr_newline ((*void*))
 in
   the_trans3errlst_add (trans3err_T3E_p2at_trdn (p2t0, s2e0))

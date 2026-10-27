@@ -1,0 +1,5 @@
+patcon_type.dats:3:34-48: error(3): the constructor pattern cannot be assigned the type int.
+    3 | fun f (x: int): int = case+ x of list_vt_nil () => 1 | _ => 0
+      |                                  ^~~~~~~~~~~~~~
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

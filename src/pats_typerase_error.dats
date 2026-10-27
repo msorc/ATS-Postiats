@@ -50,6 +50,7 @@ staload _(*arena*) = "libats/DATS/arena.dats"
 
 (* ****** ****** *)
 
+staload LOC = "./pats_location.sats"
 staload ERR = "./pats_error.sats"
 staload _(*ERR*) = "./pats_error.dats"
 
@@ -112,6 +113,7 @@ the_trans4errlst_finalize
   val () =
   if nxs > 0 then {
     val err = stderr_ref
+    val () = $LOC.prerr_errloc_flush ()
     val () = fprint_string (err, "patsopt(TYPERASE): there are [")
     val () = fprint_int (err, nxs)
     val () = fprint_string (err, "] errors in total.\n")

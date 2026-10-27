@@ -1,0 +1,5 @@
+linheap_datatype.dats:3:10-26: error(2): nonlinear heap allocation is not supported (no GC): the datatype [t] has a non-nullary constructor; use [datavtype] instead.
+    3 | datatype t = A of int | B
+      |          ^~~~~~~~~~~~~~~~
+patsopt(TRANS2): there are [1] errors in total.
+exit 1

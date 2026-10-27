@@ -82,6 +82,7 @@ staload _(*avlmap*) = "./pats_avlmap.dats"
 
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 
 (* ****** ****** *)
 
@@ -306,6 +307,33 @@ val () = fprint_int (out, d2var_get_level d2v)
 val () = fprint_string (out, ")")
 //
 } (* end of [fprint_d2var] *)
+
+%{^
+#include <string.h>
+static
+atstype_bool
+patsopt_dvar_is_view (atstype_string s)
+{
+  size_t n = strlen ((const char*)s) ;
+  if (n > 5 && !strcmp ((const char*)s + n - 5, "$view")) return atsbool_true ;
+  return atsbool_false ;
+}
+%} // end of [%{^]
+extern
+fun name_is_view (s: string): bool = "mac#patsopt_dvar_is_view"
+
+implement
+fsprint_d2var (out, d2v) = let
+  // HX-2026-10: the view of a variable [x] (named [x$view]) prints as [view@ x]
+  val sym = d2var_get_sym (d2v)
+  val () =
+    if name_is_view ($SYM.symbol_get_name (sym))
+      then fprint_string (out, "view@ ")
+in
+  fsprint_varname (out, 1, sym, $UN.cast{ptr} (d2v))
+end // end of [fsprint_d2var]
+implement
+prerr_d2var_s (d2v) = fsprint_d2var (stderr_ref, d2v)
 
 implement
 fprint_d2varlst

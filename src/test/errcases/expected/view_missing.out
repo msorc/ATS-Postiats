@@ -1,0 +1,5 @@
+view_missing.dats:3:25-26: error(3): the dynamic expression cannot be dereferenced.
+    3 | fun f (p: ptr): void = !p := true
+      |                         ^
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

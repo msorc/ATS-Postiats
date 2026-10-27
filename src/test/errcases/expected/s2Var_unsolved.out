@@ -1,0 +1,6 @@
+s2Var_unsolved.dats:3:18-55: error(3): the linear variable xs of type list_vt(?1, 0) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+    3 | fun f (): void = let val xs = list_vt_nil () in () end
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

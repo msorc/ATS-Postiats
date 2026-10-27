@@ -1,0 +1,11 @@
+linear_preserve_ref.dats:3:38-54: error(3): the linear variable view@ xs does not have the required type at the end of its scope
+    3 | fun f (xs: &list_vt(int, 1)): void = list_vt_free (xs)
+      |                                      ^~~~~~~~~~~~~~~~
+linear_preserve_ref.dats:3:38-54: error(3): type mismatch:
+  expected: list_vt(int, 1)
+  actual:   ptr
+linear_preserve_ref.dats:3:38-54: error(3): type mismatch:
+  expected: list_vt(int, 1) @ xs
+  actual:   ptr @ xs
+patsopt(TRANS3): there are [1] errors in total.
+exit 1

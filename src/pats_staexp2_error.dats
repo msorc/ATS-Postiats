@@ -56,6 +56,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement prerr_FILENAME<> () = prerr "pats_staexp2_error"
@@ -71,6 +72,8 @@ macdef print_location = $LOC.print_location
 staload "./pats_staexp1.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_error.sats"
+staload "./pats_staexp2_sprint.sats"
+staload "./pats_staexp2_util.sats"
 
 (* ****** ****** *)
 
@@ -139,22 +142,45 @@ end // end of [local]
 
 local
 
+fn funclo_word (fc: funclo): string =
+  case+ fc of
+  | FUNCLOfun () => "a function"
+  | FUNCLOcloptr () => "a linear closure (cloptr)"
+  | FUNCLOclo0 () => "a flat closure (lam@)"
+  | FUNCLOcloref () => "a cloref (not allowed)"
+// end of [funclo_word]
+
+fn clokind_word (knd: int): string =
+  if knd > 0 then "a linear closure (cloptr)"
+  else (if knd < 0 then "a cloref (not allowed)" else "a flat closure (lam@)")
+// end of [clokind_word]
+
 fn prerr_staerr_funclo_equal (
   loc: location, fc1: funclo, fc2: funclo
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": function/closure mismatch:\n";
   prerr "The actual funclo kind is: "; prerr_funclo fc1; prerr_newline ();
   prerr "The needed funclo kind is: "; prerr_funclo fc2; prerr_newline ();
+end else begin // HX-2026-10: surface words
+  prerr_error3_loc (loc);
+  prerr ": function kind mismatch: expected "; prerr (funclo_word fc2);
+  prerr ", actual "; prerr (funclo_word fc1); prerr_newline ();
 end // end of [prerr_staerr_funclo_equal]
 
 fn prerr_staerr_clokind_equal (
   loc: location, knd1: int, knd2: int
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": closure mismatch:\n";
   prerr "The actual closure kind is: "; prerr_int knd1; prerr_newline ();
   prerr "The needed closure kind is: "; prerr_int knd2; prerr_newline ();
+end else begin
+  prerr_error3_loc (loc);
+  prerr ": closure kind mismatch: expected "; prerr (clokind_word knd2);
+  prerr ", actual "; prerr (clokind_word knd1); prerr_newline ();
 end // end of [prerr_staerr_clokind_equal]
 
 fn prerr_staerr_linearity_equal (
@@ -172,22 +198,41 @@ end // end of [prerr_staerr_linearity_equal]
 
 fn prerr_staerr_pfarity_equal (
   loc: location, npf1: int, npf2: int
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": proof arity mismatch:\n";
   prerr "The actual proof arity is: "; prerr_int npf1; prerr_newline ();
   prerr "The needed proof arity is: "; prerr_int npf2; prerr_newline ();
+end else let
+  // HX-2026-10: a negative arity means that no proof part is given
+  fn pr (n: int): void =
+    if n < 0 then prerr "none given" else prerr_int n
+in
+  prerr_error3_loc (loc);
+  // the callers do not agree on the order: say it symmetrically
+  prerr ": proof arity mismatch: "; pr npf1;
+  prerr " vs "; pr npf2; prerr_newline ();
 end // end of [prerr_staerr_pfarity_equal]
 
 (* ****** ****** *)
 
 fn prerr_staerr_s2eff_subeq (
   loc: location, s2fe1: s2eff, s2fe2: s2eff
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": maybe incurring disallowed effects:\n";
   prerr "The actual effects are: "; prerr_s2eff s2fe1; prerr_newline ();
   prerr "The allowed effects are: "; prerr_s2eff s2fe2; prerr_newline ();
+end else begin // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+  sprint_reset ();
+  prerr_error3_loc (loc);
+  prerr ": maybe incurring disallowed effects:\n";
+  prerr "  actual:  <"; fsprint_s2eff (stderr_ref, s2fe1); prerr ">";
+  prerr_newline ();
+  prerr "  allowed: <"; fsprint_s2eff (stderr_ref, s2fe2); prerr ">";
+  prerr_newline ();
 end // end of [prerr_staerr_s2eff_subeq]
 
 (* ****** ****** *)
@@ -221,22 +266,90 @@ end // end of [prerr_staerr_boxity_equal]
 
 (* ****** ****** *)
 
+(*
+** HX-2026-10: the line [the types differ in argument k: a vs b] when
+** [s2e1] (expected) and [s2e2] (actual) apply the same constant
+*)
+fn prerr_s2exp_argdiff (
+  s2e1: s2exp, s2e2: s2exp
+) : void = let
+  var s2c1: s2cst
+  var s2c2: s2cst
+  var s2es1: s2explst
+  var s2es2: s2explst
+  val ok1 = s2exp_sprint_head (s2e1, s2c1, s2es1)
+  val ok2 = s2exp_sprint_head (s2e2, s2c2, s2es2)
+//
+fun loop (
+  xs: s2explst, ys: s2explst, k: int, res: &int
+) : void =
+  if glist_is_cons (xs) then (
+    if glist_is_cons (ys) then let
+      val x = glist_head<s2exp> (xs) and y = glist_head<s2exp> (ys)
+    in
+      if s2exp_syneq (x, y)
+        then loop (glist_tail<s2exp> (xs), glist_tail<s2exp> (ys), k+1, res)
+        else res := k
+    end else ()
+  ) else ()
+//
+fun nth (xs: s2explst, k: int): s2exp =
+  if k > 0 then nth (glist_tail<s2exp> (xs), k-1) else glist_head<s2exp> (xs)
+//
+in
+//
+if ok1 && ok2 then (
+  if eq_s2cst_s2cst (s2c1, s2c2) then let
+    var k: int = ~1
+    val () = loop (s2es1, s2es2, 0, k)
+    val nlead = s2exp_sprint_nlead (s2c1, s2es1)
+  in
+    if k >= nlead then {
+      val () = prerr "  the types differ in argument "
+      val () = prerr_int (k - nlead + 1)
+      val () = prerr ": "
+      val () = prerr_s2exp_s (nth (s2es1, k))
+      val () = prerr " vs "
+      val () = prerr_s2exp_s (nth (s2es2, k))
+      val () = prerr_newline ()
+    } (* end of [if] *)
+  end // end of [if]
+) (* end of [if] *)
+//
+end // end of [prerr_s2exp_argdiff]
+
 fn prerr_staerr_s2exp_equal (
   loc: location, s2e1: s2exp, s2e2: s2exp
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": mismatch of static terms (equal):\n";
   prerr "The actual term is: "; pprerr_s2exp (s2e1); prerr_newline ();
   prerr "The needed term is: "; pprerr_s2exp (s2e2); prerr_newline ();
+end else begin // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+  sprint_reset ();
+  prerr_error3_loc (loc);
+  prerr ": the static terms differ:\n";
+  prerr "  expected: "; prerr_s2exp_s (s2e2); prerr_newline ();
+  prerr "  actual:   "; prerr_s2exp_s (s2e1); prerr_newline ();
+  prerr_s2exp_argdiff (s2e2, s2e1);
 end // end of [prerr_staerr_s2exp_equal]
 
 fn prerr_staerr_s2exp_tyleq (
   loc: location, s2e1: s2exp, s2e2: s2exp
-) : void = begin
+) : void =
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": mismatch of static terms (tyleq):\n";
   prerr "The actual term is: "; pprerr_s2exp (s2e1); prerr_newline ();
   prerr "The needed term is: "; pprerr_s2exp (s2e2); prerr_newline ();
+end else begin // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+  sprint_reset ();
+  prerr_error3_loc (loc);
+  prerr ": type mismatch:\n";
+  prerr "  expected: "; prerr_s2exp_s (s2e2); prerr_newline ();
+  prerr "  actual:   "; prerr_s2exp_s (s2e1); prerr_newline ();
+  prerr_s2exp_argdiff (s2e2, s2e1);
 end // end of [prerr_staerr_s2exp_tyleq]
 
 fn prerr_staerr_s2Var_s2exp_solve (
@@ -247,10 +360,19 @@ fn prerr_staerr_s2Var_s2exp_solve (
   // end of [val]
   val s2t2 = s2exp_srt (s2e2)
 in
+if $GLOB.the_LEGACYERRORS_get () > 0 then begin
   prerr_error3_loc (loc);
   prerr ": mismatch of sorts in unification:\n";
   prerr "The sort of variable is: "; prerr_s2rt (s2t1); prerr_newline ();
   prerr "The sort of solution is: "; prerr_s2rt (s2t2); prerr_newline ();
+end else begin // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+  sprint_reset ();
+  prerr_error3_loc (loc);
+  prerr ": sort mismatch: expected "; prerr_s2rt_s (s2t1);
+  prerr ", actual "; prerr_s2rt_s (s2t2);
+  prerr " (of "; prerr_s2exp_s (s2e2); prerr ")";
+  prerr_newline ();
+end // end of [if]
 end // end of [prerr_staerr_s2Var_s2exp_solve]
 
 in // in of [local]

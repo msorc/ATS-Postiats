@@ -76,6 +76,7 @@ SATS= \
   pats_staexp2.sats \
   pats_staexp2_util.sats \
   pats_staexp2_error.sats \
+  pats_staexp2_sprint.sats \
   pats_stacst2.sats \
   pats_trans2_env.sats \
   pats_trans3_env.sats \
@@ -150,6 +151,7 @@ DATS= \
   pats_staexp2_error.dats \
   pats_staexp2_print.dats \
   pats_staexp2_pprint.dats \
+  pats_staexp2_sprint.dats \
   pats_staexp2_szexp.dats \
   pats_staexp2_skexp.dats \
   pats_staexp2_util1.dats \

@@ -1,0 +1,9 @@
+linear_consumed.dats:4:44-46: error(3): the linear variable xs is no longer available (it has been consumed)
+    4 | fun f (xs: list_vt(int, 1)): void = g (xs, xs)
+      |                                            ^~
+linear_consumed.dats:4:44-46: error(3): the dynamic expression cannot be assigned the type list_vt(int, 1)
+linear_consumed.dats:4:44-46: error(3): type mismatch:
+  expected: list_vt(int, 1)
+  actual:   <error>
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

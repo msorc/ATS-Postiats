@@ -71,6 +71,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement prerr_FILENAME<> () = prerr "pats_trans3_env"
@@ -86,6 +87,7 @@ LAB = "./pats_label.sats"
 
 staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_stacst2.sats"
 staload "./pats_patcst2.sats"
@@ -290,9 +292,20 @@ auxerr2
 ) : void = let
   val () = prerr_error3_loc (locarg)
   val () = filprerr_ifdebug "stasub_s2varlst_instantiate_some"
-  val () = prerr ": mismatch of sorts:\n"
-  val () = (prerr "the needed sort is ["; prerr_s2rt (s2t1); prerr "];"; prerr_newline ())
-  val () = (prerr "the actual sort is ["; prerr_s2rt (s2t2); prerr "]."; prerr_newline ())
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": mismatch of sorts:\n"
+    val () = prerr "the needed sort is ["
+    val () = (prerr_s2rt (s2t1); prerr "];"; prerr_newline ())
+    val () = prerr "the actual sort is ["
+    val () = (prerr_s2rt (s2t2); prerr "]."; prerr_newline ())
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = prerr ": sort mismatch: expected "
+    val () = prerr_s2rt_s (s2t1)
+    val () = prerr ", actual "
+    val () = prerr_s2rt_s (s2t2)
+    val () = prerr_newline ()
+  } (* end of [if] *)
 in
   the_trans3errlst_add (trans3err_T3E_s2varlst_instantiate_srtck (locarg, s2t1, s2t2))
 end // end of [auxerr2]
