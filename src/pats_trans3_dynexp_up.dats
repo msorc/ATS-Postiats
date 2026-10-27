@@ -1462,6 +1462,7 @@ prerr_elide_hint
   k: int, s2es: s2explst
 ) : void = let
   val s2e = s2explst_elide_nth (k, s2es)
+  val () = sprint_reset ()
   val () = prerr "  the proof arguments cannot be omitted: proof argument "
   val () = prerr_int (k)
   val () =
@@ -1471,24 +1472,25 @@ prerr_elide_hint
     of // case+
     | ~S2Erefarg
         (refval, s2e_v) => let
-        val () = prerr " is of type ["
-        val () = prerr_s2exp (s2e_v)
+        val () = prerr " is of type "
+        val () = prerr_s2exp_s (s2exp_hnfize (s2e_v))
       in
         if refval = 0
-          then prerr "], which is not an at-view (T @ l)."
-          else prerr "], which is passed by reference (&)."
+          then prerr ", which is not an at-view (T @ l)."
+          else prerr ", which is passed by reference (&)."
         // end of [if]
       end // end of [S2Erefarg]
     | v => let
         val () = s2exp_node_view_free (v)
-        val () = prerr " is of type ["
-        val () = prerr_s2exp (s2e)
+        val () = prerr " is of type "
+        val () = prerr_s2exp_s (s2exp_hnfize (s2e))
       in
-        prerr "], which is consumed (no !)."
+        prerr ", which is consumed (no !)."
       end // end of [_]
   ) : void // end of [val]
   val () = prerr_newline ()
-  val () = prerr "  (only proofs of preserved at-views, !T @ l, can be omitted.)"
+  val () =
+    prerr "  (only proofs of preserved at-views, !T @ l, can be omitted.)"
 in
   prerr_newline ()
 end // end of [prerr_elide_hint]
@@ -1498,12 +1500,13 @@ auxerr_elide_noaddr
 (
   locarg: loc_t, k: int, s2e: s2exp
 ) : void = let
+  val () = sprint_reset ()
   val () = prerr_error3_loc (locarg)
   val () = prerr ": the address of the omitted proof argument "
   val () = prerr_int (k)
-  val () = prerr " of type ["
-  val () = prerr_s2exp (s2e)
-  val () = prerr "] cannot be inferred from the other arguments"
+  val () = prerr " of type "
+  val () = prerr_s2exp_s (s2e)
+  val () = prerr " cannot be inferred from the other arguments"
   val () = prerr "; pass the proof explicitly."
   val () = prerr_newline ()
 in
@@ -1658,7 +1661,13 @@ case+ s2exp_node_view (s2e_fun.s2exp_node ()) of
       val () = prerr (" proof arguments.")
       val () = prerr_newline ()
       val () = prerr_the_staerrlst ()
-      val () = if elide > 0 then prerr_elide_hint (elide, s2es_fun_arg)
+//
+// HX-2026-10: the hint is new text (ATS1 has none): legacy mode omits it
+//
+      val () =
+      if (elide > 0 && $GLOB.the_LEGACYERRORS_get () = 0)
+        then prerr_elide_hint (elide, s2es_fun_arg)
+      // end of [if]
     in
       the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_npf (loc_fun, npf))
     end // end of [let] // end of [val]

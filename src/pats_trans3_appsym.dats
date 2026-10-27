@@ -200,9 +200,12 @@ in
         ) else false
       end else false // end of [if]
     // end of [S2Efun]
-  | ~S2Eexi (_(*s2vs*), _(*s2ps*), s2e) => aritest_elide_loop (d2as, s2e, npf, d2es)
-  | ~S2Euni (_(*s2vs*), _(*s2ps*), s2e) => aritest_elide_loop (d2as, s2e, npf, d2es)
-  | ~S2Emetfun (_(*opt*), _(*met*), s2e) => aritest_elide_loop (d2as, s2e, npf, d2es)
+  | ~S2Eexi (_(*s2vs*), _(*s2ps*), s2e) =>
+      aritest_elide_loop (d2as, s2e, npf, d2es)
+  | ~S2Euni (_(*s2vs*), _(*s2ps*), s2e) =>
+      aritest_elide_loop (d2as, s2e, npf, d2es)
+  | ~S2Emetfun (_(*opt*), _(*met*), s2e) =>
+      aritest_elide_loop (d2as, s2e, npf, d2es)
   | v => (s2exp_node_view_free (v); false) // end of [_]
 end // end of [aritest_elide_loop]
 
@@ -829,7 +832,7 @@ case+ glist_view(d3pis) of
   in
     auxmap_xy_elide(d3pis, list_vt_cons(xy, res))
   end // end of [GLcons]
-) (* end of [auxmap_xy] *)
+) (* end of [auxmap_xy_elide] *)
 
 in (* in of [local] *)
 
