@@ -10847,7 +10847,7 @@ ATSif(
 tmp679
 ) ATSthen() {
 ATSINSmove_void(tmp684, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__1(arg0)) ;
-ATSINSmove_void(tmp689, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 18495(line=809, offs=5) -- 18528(line=809, offs=38)"), ATSPMVstring("d23explst_trdn"))) ;
+ATSINSmove_void(tmp689, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 18437(line=808, offs=5) -- 18470(line=808, offs=38)"), ATSPMVstring("d23explst_trdn"))) ;
 ATSINSmove_void(tmp690, atspre_prerr_string(ATSPMVstring(": arity mismatch"))) ;
 ATSINSmove(tmp692, ATSLIB_056_prelude__lt_g0int_int__199__1(tmpref676, ATSPMVi0nt(0))) ;
 ATSif(
@@ -11462,7 +11462,7 @@ ATSINSflab(__patsflab_d2exp_trup_sym):
 ATSINSmove(tmp802, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove(tmp803, d2exp_get_D2Esym_26(arg0)) ;
 ATSINSmove_void(tmp804, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__4(tmp802)) ;
-ATSINSmove_void(tmp807, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 22870(line=1006, offs=10) -- 22903(line=1006, offs=43)"), ATSPMVstring("d2exp_trup_sym"))) ;
+ATSINSmove_void(tmp807, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 22812(line=1005, offs=10) -- 22845(line=1005, offs=43)"), ATSPMVstring("d2exp_trup_sym"))) ;
 ATSINSmove(tmp811, PATSHOME_057_src_057_pats_global_056_sats__the_LEGACYERRORS_get()) ;
 ATSINSmove(tmp808, ATSLIB_056_prelude__gt_g0int_int__110__4(tmp811, ATSPMVi0nt(0))) ;
 ATSif(
@@ -11570,7 +11570,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_232):
 ATSINSmove(tmp830, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
 ATSINSmove_void(tmp831, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__5(tmp830)) ;
-ATSINSmove_void(tmp834, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 23804(line=1048, offs=12) -- 23842(line=1048, offs=50)"), ATSPMVstring("d2exp_trup_extfcall"))) ;
+ATSINSmove_void(tmp834, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 23746(line=1047, offs=12) -- 23784(line=1047, offs=50)"), ATSPMVstring("d2exp_trup_extfcall"))) ;
 ATSINSmove_void(tmp835, atspre_prerr_string(ATSPMVstring(": no linear argument is allowed for the extfcall."))) ;
 ATSINSmove_void(tmp836, atspre_prerr_newline()) ;
 ATSINSmove(tmp837, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d3exp_extfcall_arg(arg0, arg1)) ;
@@ -11821,7 +11821,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_245):
 ATSINSmove(tmp876, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
 ATSINSmove_void(tmp877, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__6(tmp876)) ;
-ATSINSmove_void(tmp880, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 25050(line=1105, offs=12) -- 25088(line=1105, offs=50)"), ATSPMVstring("d2exp_trup_extmcall"))) ;
+ATSINSmove_void(tmp880, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 24992(line=1104, offs=12) -- 25030(line=1104, offs=50)"), ATSPMVstring("d2exp_trup_extmcall"))) ;
 ATSINSmove_void(tmp881, atspre_prerr_string(ATSPMVstring(": no linear argument is allowed for the extmcall."))) ;
 ATSINSmove_void(tmp882, atspre_prerr_newline()) ;
 ATSINSmove(tmp883, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d3exp_extmcall_arg(arg0, arg1)) ;
@@ -12108,7 +12108,7 @@ ATSif(
 tmp932
 ) ATSthen() {
 ATSINSmove_void(tmp935, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__7(arg2)) ;
-ATSINSmove_void(tmp938, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 26695(line=1173, offs=14) -- 26728(line=1173, offs=47)"), ATSPMVstring("d2exp_trup_con"))) ;
+ATSINSmove_void(tmp938, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 26637(line=1172, offs=14) -- 26670(line=1172, offs=47)"), ATSPMVstring("d2exp_trup_con"))) ;
 ATSINSmove_void(tmp939, atspre_prerr_string(ATSPMVstring(": static application cannot be properly typechecked."))) ;
 ATSINSmove_void(tmp940, atspre_prerr_newline()) ;
 ATSINSmove(tmp941, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_s2exp_uni_instantiate_sexparglst(arg2, tmp925, arg3)) ;
@@ -12141,7 +12141,7 @@ ATSif(
 tmp960
 ) ATSthen() {
 ATSINSmove_void(tmp963, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__8(tmp924)) ;
-ATSINSmove_void(tmp966, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 27613(line=1202, offs=16) -- 27646(line=1202, offs=49)"), ATSPMVstring("d2exp_trup_con"))) ;
+ATSINSmove_void(tmp966, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 27555(line=1201, offs=16) -- 27588(line=1201, offs=49)"), ATSPMVstring("d2exp_trup_con"))) ;
 ATSINSmove_void(tmp967, atspre_prerr_string(ATSPMVstring(": proof arity mismatch: the constructor ["))) ;
 ATSINSmove_void(tmp968, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_d2con(arg1)) ;
 ATSINSmove_void(tmp969, atspre_prerr_string(ATSPMVstring("] requires ["))) ;
@@ -12369,7 +12369,7 @@ ATSbranch_beg()
 ATSINSlab(__atstmplab320):
 ATSINSmove_void(tmp1016, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1012)) ;
 ATSINSmove_void(tmp1017, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__9(tmp1007)) ;
-ATSINSmove_void(tmp1020, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 29951(line=1294, offs=16) -- 29986(line=1294, offs=51)"), ATSPMVstring("d2exp_trup_tmpid"))) ;
+ATSINSmove_void(tmp1020, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 29893(line=1293, offs=16) -- 29928(line=1293, offs=51)"), ATSPMVstring("d2exp_trup_tmpid"))) ;
 ATSINSmove_void(tmp1021, atspre_prerr_string(ATSPMVstring(": a non-template is treated as a template: "))) ;
 ATSINSmove_void(tmp1022, PATSHOME_057_src_057_pats_dynexp2_056_sats__prerr_d2exp(arg0)) ;
 ATSINSmove_void(tmp1023, atspre_prerr_newline()) ;
@@ -12456,7 +12456,7 @@ ATSif(
 tmp1047
 ) ATSthen() {
 ATSINSmove_void(tmp1050, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__10(tmp1040)) ;
-ATSINSmove_void(tmp1053, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 31525(line=1358, offs=7) -- 31565(line=1358, offs=47)"), ATSPMVstring("d2exp_trup_applst_sta"))) ;
+ATSINSmove_void(tmp1053, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 31467(line=1357, offs=7) -- 31507(line=1357, offs=47)"), ATSPMVstring("d2exp_trup_applst_sta"))) ;
 ATSINSmove_void(tmp1054, atspre_prerr_string(ATSPMVstring(": static application cannot be properly typechecked."))) ;
 ATSINSmove_void(tmp1055, atspre_prerr_newline()) ;
 ATSINSmove(tmp1056, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_s2exp_uni_instantiate_sexparglst(tmp1040, tmp1043, arg2)) ;
@@ -13276,13 +13276,13 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_d3exp_elide_proof_313):
 ATSINSmove(tmp1185, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg2)) ;
 ATSINSmove(tmp1184, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1185)) ;
-ATSifnthen(ATSCKpat_con1(tmp1184, 29)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 36060(line=1533, offs=7) -- 36125(line=1534, offs=55)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1184, 29)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 36002(line=1532, offs=7) -- 36067(line=1533, offs=55)") ; } ;
 ATSINSmove(tmp1186, ATSSELcon(tmp1184, postiats_tysum_14, atslab__1)) ;
 ATSINSfreecon(tmp1184) ;
 ATSINSmove(tmp1187, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1186)) ;
 ATSINSmove(tmp1189, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1187)) ;
 ATSINSmove(tmp1188, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1189)) ;
-ATSifnthen(ATSCKpat_con1(tmp1188, 12)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 36167(line=1536, offs=7) -- 36224(line=1537, offs=51)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1188, 12)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 36109(line=1535, offs=7) -- 36166(line=1536, offs=51)") ; } ;
 ATSINSmove(tmp1190, ATSSELcon(tmp1188, postiats_tysum_18, atslab__1)) ;
 ATSINSfreecon(tmp1188) ;
 ATSINSmove(tmp1191, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1190)) ;
@@ -13760,7 +13760,7 @@ ATSif(
 tmp1290
 ) ATSthen() {
 ATSINSmove_void(tmp1293, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(tmp1261)) ;
-ATSINSmove_void(tmp1296, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 39290(line=1657, offs=16) -- 39326(line=1657, offs=52)"), ATSPMVstring("d23exp_trup_app23"))) ;
+ATSINSmove_void(tmp1296, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 39232(line=1656, offs=16) -- 39268(line=1656, offs=52)"), ATSPMVstring("d23exp_trup_app23"))) ;
 ATSINSmove_void(tmp1297, atspre_prerr_string(ATSPMVstring(": proof arity mismatch"))) ;
 ATSINSmove_void(tmp1298, atspre_prerr_string(ATSPMVstring(": the function requires "))) ;
 ATSINSmove_void(tmp1299, atspre_prerr_int(tmp1275)) ;
@@ -13838,7 +13838,7 @@ ATSINSlab(__atstmplab350):
 ATSINSmove_void(tmp1419, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1270)) ;
 ATSINSmove_void(tmp1420, PATSHOME_057_src_057_pats_trans3_056_sats__d23explst_free(arg4)) ;
 ATSINSmove_void(tmp1421, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(tmp1261)) ;
-ATSINSmove_void(tmp1424, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 41401(line=1720, offs=14) -- 41437(line=1720, offs=50)"), ATSPMVstring("d23exp_trup_app23"))) ;
+ATSINSmove_void(tmp1424, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 41343(line=1719, offs=14) -- 41379(line=1719, offs=50)"), ATSPMVstring("d23exp_trup_app23"))) ;
 ATSINSmove_void(tmp1425, atspre_prerr_string(ATSPMVstring(": the applied dynamic expression is of non-function type: "))) ;
 ATSINSmove_void(tmp1426, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2exp(tmp1266)) ;
 ATSINSmove_void(tmp1427, atspre_prerr_newline()) ;
@@ -16801,7 +16801,7 @@ tmp1856
 ) ATSthen() {
 ATSINSmove(tmp1860, PATSHOME_057_src_057_pats_dynexp2_056_sats__p2at_loc(arg0)) ;
 ATSINSmove_void(tmp1857, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(tmp1860)) ;
-ATSINSmove_void(tmp1861, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 50620(line=2118, offs=7) -- 50660(line=2118, offs=47)"), ATSPMVstring("funarg_patck_exhaust"))) ;
+ATSINSmove_void(tmp1861, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 50562(line=2117, offs=7) -- 50602(line=2117, offs=47)"), ATSPMVstring("funarg_patck_exhaust"))) ;
 ATSINSmove_void(tmp1862, atspre_prerr_string(ATSPMVstring(": the linear pattern cannot be used as a function argument."))) ;
 ATSINSmove_void(tmp1863, atspre_prerr_newline()) ;
 ATSINSmove(tmp1864, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d2exp_trup_arg_body_linpat(arg0)) ;
@@ -17511,7 +17511,7 @@ ATSbranch_end()
 ATSbranch_beg()
 ATSINSlab(__atstmplab412):
 ATSINSmove_void(tmp2020, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(tmp1999)) ;
-ATSINSmove_void(tmp2023, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 55125(line=2310, offs=12) -- 55167(line=2310, offs=54)"), ATSPMVstring("d2exp_trup_laminit_dyn"))) ;
+ATSINSmove_void(tmp2023, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 55067(line=2309, offs=12) -- 55109(line=2309, offs=54)"), ATSPMVstring("d2exp_trup_laminit_dyn"))) ;
 ATSINSmove_void(tmp2024, atspre_prerr_string(ATSPMVstring(": the initializing value is expected to be a flat closure but it is not."))) ;
 ATSINSmove_void(tmp2025, atspre_prerr_newline()) ;
 ATSINSmove(tmp2026, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d2exp_trup_laminit_funclo(arg0, tmp2014)) ;

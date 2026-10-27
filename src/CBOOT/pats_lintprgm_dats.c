@@ -1515,7 +1515,7 @@ ATSINSmove_void(tmp167, ATSPMVempty()) ;
 }
 ATSINSmove_void(tmp158, PMVtmpltcst(myint_free<S2Evar(a(6941))>)(tmp166)) ;
 } ATSelse() {
-ATSINSmove_void(tmp171, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lintprgm.dats: 12951(line=523, offs=18) -- 12967(line=523, offs=34)"))) ;
+ATSINSmove_void(tmp171, atspre_assert_errmsg2_bool1(ATSPMVbool_false(), ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lintprgm.dats: 12806(line=521, offs=18) -- 12822(line=521, offs=34)"))) ;
 ATSINSmove(tmp172, PMVtmpltcst(g1int_neg<S2Eextkind(atstype_int)>)(ATSPMVi0nt(1))) ;
 ATSINSstore(tmpref154, tmp172) ;
 ATSINSmove_void(tmp158, ATSPMVempty()) ;
