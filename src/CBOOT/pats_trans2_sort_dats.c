@@ -1029,7 +1029,7 @@ ATSdyncst_mac(atslib_the_garena_alloc)
 ATSdyncst_mac(atslib_the_garena_strdup)
 ATSdyncst_mac(atspre_strptr_free)
 ATSdyncst_mac(atspre_prerr_string)
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_newline)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_staexp1_056_sats__s1rt_loc, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_staexp1_056_sats__s1rt_is_arrow, (atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_bool)) ;
@@ -2083,7 +2083,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interror_loc__9(atstkind_type(a
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_interror_loc):
-ATSINSmove_void(tmp47, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp47, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmp48, atspre_prerr_string(ATSPMVstring(": INTERROR("))) ;
 ATSINSmove_void(tmp49, PMVtmpltcst(prerr_FILENAME<>)()) ;
 ATSINSmove_void(tmpret46, atspre_prerr_string(ATSPMVstring(")"))) ;
@@ -2097,7 +2097,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interror_loc__9__1(atstkind_typ
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_interror_loc):
-ATSINSmove_void(tmp47__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp47__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmp48__1, atspre_prerr_string(ATSPMVstring(": INTERROR("))) ;
 ATSINSmove_void(tmp49__1, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_FILENAME__7__1()) ;
 ATSINSmove_void(tmpret46__1, atspre_prerr_string(ATSPMVstring(")"))) ;
@@ -2797,7 +2797,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54(atstkind_type(at
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error2_loc):
-ATSINSmove_void(tmp164, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp164, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret163, atspre_prerr_string(ATSPMVstring(": error(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret163) ;
@@ -2809,7 +2809,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54__1(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error2_loc):
-ATSINSmove_void(tmp164__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp164__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret163__1, atspre_prerr_string(ATSPMVstring(": error(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret163__1) ;
@@ -2888,7 +2888,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54__2(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error2_loc):
-ATSINSmove_void(tmp164__2, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp164__2, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret163__2, atspre_prerr_string(ATSPMVstring(": error(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret163__2) ;
@@ -2899,7 +2899,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__54__3(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error2_loc):
-ATSINSmove_void(tmp164__3, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp164__3, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret163__3, atspre_prerr_string(ATSPMVstring(": error(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret163__3) ;

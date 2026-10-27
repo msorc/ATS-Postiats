@@ -419,7 +419,7 @@ ATSdyncst_extfun(PATSHOME_057_src_057_pats_e1xpval_056_sats__valerr_VE_E1XPfun, 
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_e1xpval_056_sats__valerr_VE_E1XPerr, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_mac(atspre_g0int2int_int_int)
 ATSdyncst_mac(atspre_g0int_eq_int)
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_string)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_staexp1_056_sats__v1al_view, (atstkind_type(atstype_ptrk)), atstype_boxed) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_staexp1_056_sats__v1al_view_free, (atstype_boxed), atsvoid_t0ype) ;
@@ -3368,7 +3368,7 @@ prerr_error1_loc_61(atstkind_type(atstype_ptrk) arg0)
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error1_loc_61):
-ATSINSmove_void(tmp182, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp182, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret181, atspre_prerr_string(ATSPMVstring(": error(1)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret181) ;
@@ -7287,7 +7287,7 @@ ATSif(
 tmp847
 ) ATSthen() {
 ATSINSmove(tmp851, PATSHOME_057_src_057_pats_staexp1_056_sats__e1xp_loc(arg2)) ;
-ATSINSmove_void(tmp850, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(tmp851)) ;
+ATSINSmove_void(tmp850, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(tmp851)) ;
 ATSINSmove(tmp856, patsopt_debug_flag_get()) ;
 ATSINSmove(tmp853, ATSLIB_056_prelude__gt_g0int_int__213__2(tmp856, ATSPMVi0nt(0))) ;
 ATSif(
@@ -7390,7 +7390,7 @@ ATSif(
 tmp872
 ) ATSthen() {
 ATSINSmove(tmp876, PATSHOME_057_src_057_pats_staexp1_056_sats__e1xp_loc(arg2)) ;
-ATSINSmove_void(tmp875, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(tmp876)) ;
+ATSINSmove_void(tmp875, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(tmp876)) ;
 ATSINSmove(tmp881, patsopt_debug_flag_get()) ;
 ATSINSmove(tmp878, ATSLIB_056_prelude__gt_g0int_int__213__3(tmp881, ATSPMVi0nt(0))) ;
 ATSif(

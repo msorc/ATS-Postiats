@@ -826,7 +826,7 @@ ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_float, (atstk
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_string, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_empty, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dmacro2_056_sats__m2val_view_free, (atstype_boxed), atsvoid_t0ype) ;
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_newline)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_errexp, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dmacro2_056_sats__alphenv_free, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
@@ -2157,7 +2157,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__51(atstkind_type(at
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errmac_loc):
-ATSINSmove_void(tmp132, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp132, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret131, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret131) ;
@@ -2169,7 +2169,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__51__1(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errmac_loc):
-ATSINSmove_void(tmp132__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp132__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret131__1, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret131__1) ;
@@ -2914,7 +2914,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__51__2(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errmac_loc):
-ATSINSmove_void(tmp132__2, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp132__2, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret131__2, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret131__2) ;

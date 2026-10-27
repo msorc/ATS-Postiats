@@ -415,7 +415,7 @@ ATSdyncst_mac(atspre_g1int_neg_int)
 ATSdyncst_mac(atspre_g0int_gt_lint)
 ATSdyncst_mac(atspre_neg_bool0)
 ATSdyncst_mac(atspre_ptr0_is_null)
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_string)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_symbol_056_sats__eq_symbol_symbol, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_bool)) ;
 ATSdyncst_valdec(patsopt_symbol_PROP, atstkind_type(atstype_ptrk)) ;
@@ -2390,7 +2390,7 @@ prerr_error2_loc_10(atstkind_type(atstype_ptrk) arg0)
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error2_loc_10):
-ATSINSmove_void(tmp15, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp15, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret14, atspre_prerr_string(ATSPMVstring(": error(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret14) ;
@@ -4584,7 +4584,7 @@ ATSif(
 tmp360
 ) ATSthen() {
 ATSINSmove(tmp361, PATSHOME_057_src_057_pats_staexp2_056_sats__s2rt_viewof(arg0)) ;
-ATSifnthen(ATSCKpat_con1(tmp361, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_util1.dats: 9126(line=416, offs=16) -- 9173(line=416, offs=63)") ; } ;
+ATSifnthen(ATSCKpat_con1(tmp361, 1)) { ATSINScaseof_fail("PATSHOME/src/pats_staexp2_util1.dats: 9124(line=416, offs=16) -- 9171(line=416, offs=63)") ; } ;
 ATSINSmove(tmp362, ATSSELcon(tmp361, postiats_tysum_5, atslab__0)) ;
 ATSINSmove(tmp363, ATSSELcon(tmp361, postiats_tysum_5, atslab__1)) ;
 ATSINSfreecon(tmp361) ;

@@ -311,6 +311,7 @@ ATSdyncst_mac(atspre_g1int_add_int)
 ATSdyncst_mac(atspre_g1int2int_int_int)
 ATSdyncst_mac(atspre_g1int_gt_int)
 ATSdyncst_mac(atspre_FILE_stderr)
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc_flush, (), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_fprint_string)
 ATSdyncst_mac(atspre_fprint_int)
 #ifndef _ATS_CCOMP_EXCEPTION_NONE_
@@ -1897,8 +1898,8 @@ PATSHOME_057_src_057_pats_trans1_056_sats__the_trans1errlst_finalize()
 ATStmpdec(tmp184, atstkind_type(atstype_ptrk)) ;
 ATStmpdec(tmp185, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp206, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp213, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp216, atstype_exnconptr) ;
+ATStmpdec(tmp214, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp217, atstype_exnconptr) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_the_trans1errlst_finalize):
 ATSINSmove(tmp184, the_trans1errlst_get_55()) ;
@@ -1907,18 +1908,19 @@ ATSINSmove(tmp206, ATSLIB_056_prelude__gt_g1int_int__84__1(tmp185, ATSPMVi0nt(0)
 ATSif(
 tmp206
 ) ATSthen() {
-ATSINSmove_void(tmp211, atspre_fprint_string(atspre_FILE_stderr, ATSPMVstring("patsopt(TRANS1): there are ["))) ;
-ATSINSmove_void(tmp212, atspre_fprint_int(atspre_FILE_stderr, tmp185)) ;
+ATSINSmove_void(tmp211, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc_flush()) ;
+ATSINSmove_void(tmp212, atspre_fprint_string(atspre_FILE_stderr, ATSPMVstring("patsopt(TRANS1): there are ["))) ;
+ATSINSmove_void(tmp213, atspre_fprint_int(atspre_FILE_stderr, tmp185)) ;
 ATSINSmove_void(tmp205, atspre_fprint_string(atspre_FILE_stderr, ATSPMVstring("] errors in total.\n"))) ;
 } ATSelse() {
 ATSINSmove_void(tmp205, ATSPMVempty()) ;
 }
-ATSINSmove(tmp213, ATSLIB_056_prelude__gt_g1int_int__84__2(tmp185, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp214, ATSLIB_056_prelude__gt_g1int_int__84__2(tmp185, ATSPMVi0nt(0))) ;
 ATSif(
-tmp213
+tmp214
 ) ATSthen() {
-ATSINSmove_exn0(tmp216, PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS1_EXN) ;
-ATSINSraise_exn(tmpret183, tmp216) ;
+ATSINSmove_exn0(tmp217, PATSHOME_057_src_057_pats_error_056_sats__PATSOPT_TRANS1_EXN) ;
+ATSINSraise_exn(tmpret183, tmp217) ;
 } ATSelse() {
 ATSINSmove_void(tmpret183, ATSPMVempty()) ;
 }

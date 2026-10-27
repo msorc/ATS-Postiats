@@ -492,7 +492,7 @@ ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_node_D1Esolve
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp1_056_sats__d1exp_node_D1Eerrexp, (), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp1_056_sats__d1lab_node_D1LABlab, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp1_056_sats__d1lab_node_D1LABind, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_string)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp1_056_sats__p1at_new, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp1_056_sats__p1at_char, (atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_char)), atstkind_type(atstype_ptrk)) ;
@@ -16305,7 +16305,7 @@ prerr_error1_loc_542(atstkind_type(atstype_ptrk) arg0)
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error1_loc_542):
-ATSINSmove_void(tmp2078, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp2078, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret2077, atspre_prerr_string(ATSPMVstring(": error(1)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret2077) ;

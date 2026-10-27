@@ -3846,7 +3846,7 @@ ATSdyncst_extfun(PATSHOME_057_src_057_pats_hidynexp_056_sats__hifundec_def, (ats
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node_view, (atstkind_type(atstype_ptrk)), atstype_boxed) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_hidynexp_056_sats__hidexp_node_view_free, (atstype_boxed), atsvoid_t0ype) ;
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_newline)
 ATSdyncst_mac(atspre_exit)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_ccomp_056_sats__ccompenv_inc_tailcalenv, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
@@ -6666,7 +6666,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errccomp_loc__97(atstkind_type(
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errccomp_loc):
-ATSINSmove_void(tmp318, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp318, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret317, atspre_prerr_string(ATSPMVstring(": error(ccomp)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret317) ;
@@ -6678,7 +6678,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errccomp_loc__97__1(atstkind_ty
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errccomp_loc):
-ATSINSmove_void(tmp318__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp318__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret317__1, atspre_prerr_string(ATSPMVstring(": error(ccomp)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret317__1) ;

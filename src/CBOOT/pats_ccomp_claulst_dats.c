@@ -4625,7 +4625,7 @@ ATSdyncst_extfun(PATSHOME_057_src_057_pats_intinf_056_sats__intinf_get_int, (ats
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_ccomp_056_sats__the_dynconlst_add, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_ccomp_056_sats__patck_PATCKcon, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_hidynexp_056_sats__hipat_node_view_free, (atstype_boxed), atsvoid_t0ype) ;
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_prerr_newline)
 ATSdyncst_mac(atspre_print_string)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_hidynexp_056_sats__print_hipat, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
@@ -14826,7 +14826,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interror_loc__415(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_interror_loc):
-ATSINSmove_void(tmp1407, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp1407, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmp1408, atspre_prerr_string(ATSPMVstring(": INTERROR("))) ;
 ATSINSmove_void(tmp1409, PMVtmpltcst(prerr_FILENAME<>)()) ;
 ATSINSmove_void(tmpret1406, atspre_prerr_string(ATSPMVstring(")"))) ;
@@ -14840,7 +14840,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interror_loc__415__1(atstkind_t
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_interror_loc):
-ATSINSmove_void(tmp1407__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp1407__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmp1408__1, atspre_prerr_string(ATSPMVstring(": INTERROR("))) ;
 ATSINSmove_void(tmp1409__1, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_FILENAME__0__1()) ;
 ATSINSmove_void(tmpret1406__1, atspre_prerr_string(ATSPMVstring(")"))) ;

@@ -58,7 +58,7 @@
 #include "libats/CATS/arena.cats"
 #include "libats/CATS/arena.cats"
 ATSdyncst_mac(atspre_prerr_string)
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_location, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 #ifndef _ATS_CCOMP_EXCEPTION_NONE_
 ATSextern()
 atsvoid_t0ype
@@ -219,7 +219,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_interror_loc__3(atstkind_type(a
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_interror_loc):
-ATSINSmove_void(tmp6, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp6, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmp7, atspre_prerr_string(ATSPMVstring(": INTERROR("))) ;
 ATSINSmove_void(tmp8, PMVtmpltcst(prerr_FILENAME<>)()) ;
 ATSINSmove_void(tmpret5, atspre_prerr_string(ATSPMVstring(")"))) ;
@@ -234,7 +234,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error1_loc__4(atstkind_type(ats
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error1_loc):
-ATSINSmove_void(tmp10, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp10, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret9, atspre_prerr_string(ATSPMVstring(": error(1)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret9) ;
@@ -247,7 +247,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error2_loc__5(atstkind_type(ats
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error2_loc):
-ATSINSmove_void(tmp12, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp12, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret11, atspre_prerr_string(ATSPMVstring(": error(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret11) ;
@@ -260,7 +260,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__6(atstkind_type(ats
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errmac_loc):
-ATSINSmove_void(tmp14, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp14, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret13, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret13) ;
@@ -273,7 +273,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__7(atstkind_type(ats
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error3_loc):
-ATSINSmove_void(tmp16, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp16, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret15, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret15) ;
@@ -286,7 +286,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error4_loc__8(atstkind_type(ats
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error4_loc):
-ATSINSmove_void(tmp18, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp18, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret17, atspre_prerr_string(ATSPMVstring(": error(4)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret17) ;
@@ -299,7 +299,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errccomp_loc__9(atstkind_type(a
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errccomp_loc):
-ATSINSmove_void(tmp20, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp20, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret19, atspre_prerr_string(ATSPMVstring(": error(ccomp)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret19) ;
@@ -312,7 +312,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_warning1_loc__10(atstkind_type(
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_warning1_loc):
-ATSINSmove_void(tmp22, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp22, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret21, atspre_prerr_string(ATSPMVstring(": warning(1)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret21) ;
@@ -325,7 +325,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_warning2_loc__11(atstkind_type(
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_warning2_loc):
-ATSINSmove_void(tmp24, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp24, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret23, atspre_prerr_string(ATSPMVstring(": warning(2)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret23) ;
@@ -338,7 +338,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_warning3_loc__12(atstkind_type(
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_warning3_loc):
-ATSINSmove_void(tmp26, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp26, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret25, atspre_prerr_string(ATSPMVstring(": warning(3)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret25) ;
@@ -351,7 +351,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_warning4_loc__13(atstkind_type(
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_warning4_loc):
-ATSINSmove_void(tmp28, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp28, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret27, atspre_prerr_string(ATSPMVstring(": warning(4)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret27) ;
@@ -364,7 +364,7 @@ PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_warnccomp_loc__14(atstkind_type
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_warnccomp_loc):
-ATSINSmove_void(tmp30, PATSHOME_057_src_057_pats_location_056_sats__prerr_location(arg0)) ;
+ATSINSmove_void(tmp30, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
 ATSINSmove_void(tmpret29, atspre_prerr_string(ATSPMVstring(": warning(ccomp)"))) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret29) ;
