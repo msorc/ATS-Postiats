@@ -107,3 +107,4 @@ type trans3err
   T3E_reassume_tr_isnotasp (location, s2cst)
   T3E_f2undeclst_tr_termetsrtck (f2undec, s2rtlstopt)
   T3E_v2aldeclst_rec_tr_linearity (v2aldec, s2exp)
+  T3E_d23exp_trup_app23_elide (location, int)

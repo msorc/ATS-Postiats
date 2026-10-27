@@ -81,6 +81,8 @@ implement d2exp_trup_deref (loc0, d2s, d2e, d2ls) = stub_stop<d3exp> ("d2exp_tru
 implement d2exp_trup_assgn (d2e0) = stub_stop<d3exp> ("d2exp_trup_assgn")
 implement d2exp_trup_xchng (d2e0) = stub_stop<d3exp> ("d2exp_trup_xchng")
 implement d2exp_trup_viewat (d2e0) = stub_stop<d3exp> ("d2exp_trup_viewat")
+// HX-2026-10: proof-argument elision (after the port; the scenarios do not omit proofs)
+implement s2addr_viewat_deref (loc0, s2l, d3ls) = stub_stop<s2exp> ("s2addr_viewat_deref")
 implement d2exp_trup_loop (loc, inv, init, test, post, body) = stub_stop<d3exp> ("d2exp_trup_loop")
 implement d2exp_trup_loopexn (loc, knd) = stub_stop<d3exp> ("d2exp_trup_loopexn")
 implement d2exp_trdn_ifhead (d2e, s2f) = stub_stop<d3exp> ("d2exp_trdn_ifhead")

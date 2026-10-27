@@ -152,6 +152,77 @@ end // end of [aritest_d2exparglst_s2exp]
 end // end of [local]
 
 (* ****** ****** *)
+//
+// HX-2026-10: proof-argument elision: the arity test of a candidate
+// for a call whose first dynamic arguments have no [|] (npf = ~1) and
+// omit the proofs of the candidate (preserved at-views, !T @ l); it is
+// only tried when no candidate passes [aritest_d2exparglst_s2exp]
+//
+fun
+s2exp_fun_elide_npf
+  (s2e: s2exp): int = let
+  val s2e = s2exp_hnfize (s2e)
+in
+  case+ s2exp_node_view(s2e.s2exp_node()) of
+  | ~S2Efun
+    (
+      _(*fc*), _(*lin*), _(*eff*), npf1, _(*arg*), _(*res*)
+    ) => npf1
+  | ~S2Eexi (_(*s2vs*), _(*s2ps*), s2e) => s2exp_fun_elide_npf (s2e)
+  | ~S2Euni (_(*s2vs*), _(*s2ps*), s2e) => s2exp_fun_elide_npf (s2e)
+  | ~S2Emetfun (_(*opt*), _(*met*), s2e) => s2exp_fun_elide_npf (s2e)
+  | v => (s2exp_node_view_free (v); 0)
+end // end of [s2exp_fun_elide_npf]
+
+fun
+aritest_elide_loop
+(
+  d2as: d2exparglst
+, s2e: s2exp, npf: int, d2es: d2explst
+) : bool = let
+  val s2e = s2exp_hnfize (s2e)
+in
+  case+ s2exp_node_view(s2e.s2exp_node()) of
+  | ~S2Efun
+    (
+      _(*fc*), _(*lin*), _(*eff*), npf1, s2es_arg, s2e_res
+    ) =>
+      if (npf < 0 && npf1 > 0) then let
+        val sgn =
+          glist_length (d2es) + npf1 = glist_length (s2es_arg)
+        // end of [val]
+      in
+        if sgn then (
+          if s2explst_elide_test (npf1, s2es_arg) = 0
+            then aritest_d2exparglst_s2exp (d2as, s2e_res) else false
+          // end of [if]
+        ) else false
+      end else false // end of [if]
+    // end of [S2Efun]
+  | ~S2Eexi (_(*s2vs*), _(*s2ps*), s2e) => aritest_elide_loop (d2as, s2e, npf, d2es)
+  | ~S2Euni (_(*s2vs*), _(*s2ps*), s2e) => aritest_elide_loop (d2as, s2e, npf, d2es)
+  | ~S2Emetfun (_(*opt*), _(*met*), s2e) => aritest_elide_loop (d2as, s2e, npf, d2es)
+  | v => (s2exp_node_view_free (v); false) // end of [_]
+end // end of [aritest_elide_loop]
+
+fun
+aritest_elide_d2exparglst_s2exp
+  (d2as: d2exparglst, s2e: s2exp): bool =
+(
+  case+ glist_view(d2as) of
+  | ~GLcons
+      (d2a, d2as) => (
+    case+ d2exparg_view(d2a) of
+    | ~D2EXPARGdyn (
+        npf, _(*loc*), d2es
+      ) => aritest_elide_loop (d2as, s2e, npf, d2es)
+    | ~D2EXPARGsta _ =>
+        aritest_elide_d2exparglst_s2exp (d2as, s2e)
+    ) // end of [list_cons]
+  | ~GLnil ((*void*)) => false
+) (* end of [aritest_elide_d2exparglst_s2exp] *)
+
+(* ****** ****** *)
 
 fun
 d2exp_trup_item
@@ -315,13 +386,35 @@ case+ glist_view(d3as) of
       val () = trans3_env_add_proplst_vt (loc_fun, s2ps)
       val d3e_fun = d3exp_app_unista (loc0, s2e_fun, d3e_fun)
       val-~S2Efun (
-        fc, _(*lin*), s2fe_fun, _(*npf*), s2es_fun_arg, s2e_fun_res
+        fc, _(*lin*), s2fe_fun, npf_fun, s2es_fun_arg, s2e_fun_res
       ) = s2exp_node_view(s2e_fun.s2exp_node()) // end of[val]
+//
+// HX-2026-10: proof-argument elision: the call has no [|] and the
+// candidate was selected by [aritest_elide_d2exparglst_s2exp] (the
+// other arity test requires npf = npf_fun)
+//
+      val elide = (npf < 0 && npf_fun > 0): bool
 //
       val loc_app = $LOC.location_combine (loc_fun, locarg)
       val s2es_fun_arg =
         s2fun_opninv_and_add (locarg, s2es_fun_arg, s2e_fun_res)
-      val d3es_arg = d3explst_trdn_arg (d3es_arg, s2es_fun_arg)
+      val d3es_arg =
+      (
+        if elide
+          then let
+            val s2es_dyn =
+              s2explst_elide_drop (npf_fun, s2es_fun_arg)
+            val d3es_dyn = d3explst_trdn_arg (d3es_arg, s2es_dyn)
+            val d3es_pf =
+              d3explst_elide_proofs (locarg, npf_fun, s2es_fun_arg)
+            // end of [val]
+          in
+            glist_append (d3es_pf, d3es_dyn)
+          end // end of [then]
+          else d3explst_trdn_arg (d3es_arg, s2es_fun_arg)
+        // end of [if]
+      ) : d3explst // end of [val]
+      val npf = (if elide then npf_fun else npf): int
 //
       val @(
         iswth, s2e_res, wths2es
@@ -370,6 +463,7 @@ auxsel_arity
 , d2piss: List0_vt(d2pitmlst)
 , t2mas: t2mpmarglst
 , d2args: d2exparglst
+, elide: int // HX-2026-10: 1: the arity test of proof elision
 ) : d3pitmlst_vt = let
 in
 //
@@ -380,7 +474,7 @@ case+ glist_view(d2pis) of
   case+ d2piss of
   | ~list_vt_nil() => list_vt_nil ()
   | ~list_vt_cons(d2pis, d2piss) =>
-      auxsel_arity (locsym, d2pis, d2piss, t2mas, d2args)
+      auxsel_arity (locsym, d2pis, d2piss, t2mas, d2args, elide)
     // end of [list_cons]
   ) (* end of [list_nil] *)
 | ~GLcons
@@ -392,13 +486,19 @@ case+ glist_view(d2pis) of
         (_(*sym*), d2pis_new) => let
         val d2piss = list_vt_cons (d2pis, d2piss)
       in
-        auxsel_arity (locsym, d2pis_new, d2piss, t2mas, d2args)
+        auxsel_arity (locsym, d2pis_new, d2piss, t2mas, d2args, elide)
       end // end of [D2ITMsymdef]
     | v => let
         val () = d2itm_view_free (v)
         val d3e = d2exp_trup_item(locsym, d2i, t2mas)
-        val test = aritest_d2exparglst_s2exp(d2args, d3e.d3exp_type())
-        val d3pis = auxsel_arity(locsym, d2pis, d2piss, t2mas, d2args)
+        val test =
+        (
+          if elide = 0
+            then aritest_d2exparglst_s2exp(d2args, d3e.d3exp_type())
+            else aritest_elide_d2exparglst_s2exp(d2args, d3e.d3exp_type())
+          // end of [if]
+        ) : bool // end of [val]
+        val d3pis = auxsel_arity(locsym, d2pis, d2piss, t2mas, d2args, elide)
       in
         if test then let
           val d3pi = d3pitm_make(pval, d3e) in list_vt_cons(d3pi, d3pis)
@@ -691,6 +791,45 @@ case+ glist_view(d3pis) of
   end // end of [GLcons]
 ) (* end of [auxmap_xy] *)
 
+// HX-2026-10: the omitted proofs are dropped from the arguments
+fun
+s2kexp_elide_drop
+  (n: int, s2kes: s2kexplst): s2kexplst =
+(
+  if n > 0 then (
+    if glist_is_cons (s2kes)
+      then s2kexp_elide_drop (n-1, glist_tail (s2kes)) else s2kes
+    // end of [if]
+  ) else s2kes
+) (* end of [s2kexp_elide_drop] *)
+
+fun
+auxmap_xy_elide
+(
+  d3pis: d3pitmlst, res: List0_vt(XY)
+) : List0_vt(XY) =
+(
+case+ glist_view(d3pis) of
+| ~GLnil() => list_vt_reverse(res)
+| ~GLcons(d3pi, d3pis) => let
+    val s2e =
+      d3pitm_get_type(d3pi)
+    // end of [val]
+    val npf1 = s2exp_fun_elide_npf (s2e)
+    val s2ke = s2kexp_make_s2exp(s2e)
+    val s2ke =
+    (
+      case+ s2kexp_view(s2ke) of
+      | ~S2KEfun (s2kes_arg, s2ke_res) =>
+          s2kexp_S2KEfun (s2kexp_elide_drop (npf1, s2kes_arg), s2ke_res)
+      | v => (s2kexp_view_free (v); s2ke)
+    ) : s2kexp // end of [val]
+    val xy = @(d3pi, s2ke)
+  in
+    auxmap_xy_elide(d3pis, list_vt_cons(xy, res))
+  end // end of [GLcons]
+) (* end of [auxmap_xy] *)
+
 in (* in of [local] *)
 
 implement
@@ -716,11 +855,29 @@ d2pis = d2s.d2sym_pitmlst()
 val
 d3pis =
 auxsel_arity
-  (locsym, d2pis, list_vt_nil, t2mas, d2as)
+  (locsym, d2pis, list_vt_nil, t2mas, d2as, 0)
+//
+// HX-2026-10: when no candidate has the arity of the call, the
+// candidates whose proofs can be omitted (proof-argument elision)
+val elide = (if list_vt_is_nil (d3pis) then 1 else 0): int
+val d3pis =
+(
+  if elide = 0 then d3pis else let
+    val () = list_vt_free (d3pis)
+  in
+    auxsel_arity (locsym, d2pis, list_vt_nil, t2mas, d2as, 1)
+  end // end of [else]
+) : d3pitmlst_vt // end of [val]
 //
 // HX: the items of [d3pis] are shared (arena records)
 val d3pis = l2l(d3pis)
-val xys = auxmap_xy (d3pis, list_vt_nil())
+val xys =
+(
+  if elide = 0
+    then auxmap_xy (d3pis, list_vt_nil())
+    else auxmap_xy_elide (d3pis, list_vt_nil())
+  // end of [if]
+) : List0_vt(XY) // end of [val]
 //
 val @(d3pis, d3as, d2as_rest) = auxsel_arglst(xys, d2as, list_vt_nil)
 //
