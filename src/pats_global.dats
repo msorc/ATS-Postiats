@@ -191,12 +191,22 @@ the_DEBUGATS_dbgline_set(flag) = cell_set_int (the_DEBUGATS_dbgline, flag)
 
 (* ****** ****** *)
 
-val the_LEGACYERRORS = cell_make_int (0)
+//
+// HX-2026-10: the flag lives in pats_location (C), where the environment
+// variable PATSOPT_LEGACY_ERRORS is read lazily: the dump drivers of
+// src/test do not go through pats_main
+//
+%{^
+extern int patsopt_legacyerrors_get() ;
+extern void patsopt_legacyerrors_set(int) ;
+%}
+extern fun patsopt_legacyerrors_get (): int = "mac#"
+extern fun patsopt_legacyerrors_set (flag: int): void = "mac#"
 
 implement
-the_LEGACYERRORS_get() = cell_get_int (the_LEGACYERRORS)
+the_LEGACYERRORS_get() = patsopt_legacyerrors_get()
 implement
-the_LEGACYERRORS_set(flag) = cell_set_int (the_LEGACYERRORS, flag)
+the_LEGACYERRORS_set(flag) = patsopt_legacyerrors_set(flag)
 
 (* ****** ****** *)
 

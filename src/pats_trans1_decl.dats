@@ -617,7 +617,7 @@ $FIL.the_filenamelst_push_check(fil)
 val () =
 if isexi then let
   val () =
-    $LOC.prerr_location(loc0)
+    $LOC.prerr_errloc(loc0)
   // end of [val]
   val () = prerr (": error(0)")
   val () = prerr (": including the file [");
@@ -859,7 +859,7 @@ val
 ((*void*)) =
 if isexi then
 {
-  val () = $LOC.prerr_location (loc0)
+  val () = $LOC.prerr_errloc (loc0)
   val () = prerr (": error(0)")
   val () = prerr (": staloading the file [");
   val () = $FIL.prerr_filename_full (fil)

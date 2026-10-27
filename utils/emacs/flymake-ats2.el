@@ -46,6 +46,10 @@
 ;; Regular expressions for detecting and reporting errors.
 (push '("^\\(syntax error\\): *\\([^ ]+\\):.*line=\\([0-9]+\\).*$" 2 3 nil 1)
       flymake-err-line-patterns)
+;; the default form: file:line:col-col or file:line:col-line:col: error(N): ...
+(push '("^\\(.+\\.dats\\|.+\\.sats\\|.+\\.hats\\):\\([0-9]+\\):[0-9]+-[0-9:]+: \\(error.+\\)$" 1 2 nil 3)
+      flymake-err-line-patterns)
+;; the old form (--legacy-errors): file: 3120(line=151, offs=1) -- 3124(line=151, offs=5): error(3): ...
 (push '("^\\(.+.dats\\|.+.sats\\|.+.hats\\):.*line=\\([0-9]+\\).*\\(error.+\\)$" 1 2 nil 3)
       flymake-err-line-patterns)
 

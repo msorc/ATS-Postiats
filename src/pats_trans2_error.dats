@@ -120,6 +120,7 @@ the_trans2errlst_finalize () =
   val () =
   if nxs > 0 then {
     val err = stderr_ref
+    val () = $LOC.prerr_errloc_flush ()
     val () = fprint_string (err, "patsopt(TRANS2): there are [")
     val () = fprint_int (err, nxs)
     val () = fprint_string (err, "] errors in total.\n")

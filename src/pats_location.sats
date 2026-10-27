@@ -137,6 +137,18 @@ overload prerr with prerr_location
 overload fprint with fprint_location
 //
 (* ****** ****** *)
+//
+// HX-2026-10: readable error locations
+// [prerr_errloc] prints "file:line:col-line:col" and remembers the
+// location; the source line(s) are echoed (after the message) by
+// [prerr_errloc_flush], which is called by the next [prerr_errloc], by
+// the error finalizers and (atexit) when the process ends. In the legacy
+// mode (--legacy-errors, PATSOPT_LEGACY_ERRORS) it prints the old form.
+//
+fun prerr_errloc (loc: location): void
+fun prerr_errloc_flush ((*void*)): void
+//
+(* ****** ****** *)
 
 fun
 fprint_locrange (out: FILEref, loc: location): void
