@@ -109,6 +109,12 @@ the_trans3errlst_add
   val () = $UN.ptr0_set<trans3errlst> (the_trans3errlst, glist_cons (x, xs))
 } (* end of [the_trans3errlst_add] *)
 
+// HX-2026-10: for the hints of fold on demand (pats_trans3_fldfrat.dats)
+implement
+the_trans3errlst_count () =
+  glist_length ($UN.ptr0_get<trans3errlst> (the_trans3errlst))
+// end of [the_trans3errlst_count]
+
 implement
 the_trans3errlst_finalize () =
 {

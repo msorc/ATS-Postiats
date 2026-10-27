@@ -185,6 +185,10 @@ extern
 fun
 d2exp_trdn_trywith (d2e0: d2exp, s2f0: s2hnf): d3exp
 //
+extern
+fun
+d2exp_trdn_var (d2e0: d2exp, s2f0: s2hnf, d2v: d2var): d3exp
+//
 (* ****** ****** *)
 
 implement
@@ -289,10 +293,43 @@ of // case+
 //
 | ~D2Etrywith _ => d2exp_trdn_trywith(d2e0, s2f0)
 //
+//
+// HX-2026-10: fold on demand
+| ~D2Evar (d2v) => d2exp_trdn_var(d2e0, s2f0, d2v)
+//
 | v (*rest-of-d2exp*) =>
     (d2exp_node_view_free(v); d2exp_trdn_rest(d2e0, s2f0))
 //
 end // end of [d2exp_trdn]
+
+(* ****** ****** *)
+//
+// HX-2026-10: fold on demand: an unfolded variable that is checked against
+// a type that is not an unfolded one is folded first (as by [fold@]); if it
+// cannot be folded, the reason is printed after the error that follows
+//
+implement
+d2exp_trdn_var
+  (d2e0, s2f0, d2v) = let
+//
+val loc0 = d2e0.d2exp_loc()
+val ans =
+  the_d2varenv_autofold(3, loc0, d2v, s2hnf2exp(s2f0))
+//
+in
+//
+if ans = 2 then let
+  val nerr = the_trans3errlst_count()
+  val d3e0 = d2exp_trdn_rest(d2e0, s2f0)
+  val () =
+  if the_trans3errlst_count() > nerr then {
+    val _ = the_d2varenv_autofold(5, loc0, d2v, s2hnf2exp(s2f0))
+  } (* end of [if] *)
+in
+  d3e0
+end else d2exp_trdn_rest(d2e0, s2f0)
+//
+end // end of [d2exp_trdn_var]
 
 (* ****** ****** *)
 

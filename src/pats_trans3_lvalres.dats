@@ -362,6 +362,7 @@ case+ gopt_view(opt) of
     in
       the_trans3errlst_add (trans3err_T3E_d3lval_linpatcon (d3e0, s2e))
     end (* end of [if] *)
+    else d3lval_autofold_register (d3e0, s2e, p3t) // HX-2026-10
   end // end of [GOsome]
 | ~GOnone ((*void*)) => ()
 //
