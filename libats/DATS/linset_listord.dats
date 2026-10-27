@@ -141,7 +141,7 @@ val+@list_vt_cons (_, xs2) = xs1
 prval () = $UN.cast2void (xs2); val () = (xs2 := xs)
 //
 in
-  fold@ (xs1); xs1
+  xs1
 end // end of [mynode_cons]
 //
 fun ins
@@ -165,14 +165,11 @@ case+ xs of
       false
     end else if sgn < 0 then let
       val ans = ins (xs1)
-      prval () = fold@ (xs)
     in
       ans
-    end else let // [x0] is found
-      prval () = fold@ (xs)
-    in
+    end else
       true (* [x0] in [xs] *)
-    end (* end of [if] *)
+    // end of [if]
   end // end of [list_vt_cons]
 | list_vt_nil () => let
     val nx = mynode_make_elt<a> (x0)
@@ -210,13 +207,10 @@ case+ xs of
       compare_elt_elt<a> (x0, x)
     // end of [val]
   in
-    if sgn > 0 then let
-      prval () = fold@ (xs)
-    in
+    if sgn > 0 then
       false
-    end else if sgn < 0 then let
+    else if sgn < 0 then let
       val ans = rem (xs1)
-      prval () = fold@ (xs)
     in
       ans
     end else let // x0 = x
@@ -408,13 +402,10 @@ case+ xs of
       compare_elt_elt<a> (x0, x)
     // end of [val]
   in
-    if sgn > 0 then let
-      prval () = fold@ (xs)
-    in
+    if sgn > 0 then
       mynode_null{a}((*void*))
-    end else if sgn < 0 then let
+    else if sgn < 0 then let
       val res = takeout (xs1)
-      prval ((*void*)) = fold@ (xs)
     in
       res
     end else let // x0 = x
@@ -451,11 +442,8 @@ case+ xs of
   in
     $UN.castvwtp0{mynode1(a)}((pf_x, pf_xs1 | xs_))
   end // end of [list_vt_cons]
-| @list_vt_nil () => let
-    prval () = fold@ (xs)
-  in
-    mynode_null{a}((*void*))
-  end // end of [list_vt_nil]
+| @list_vt_nil () =>
+    mynode_null{a}((*void*)) // end of [list_vt_nil]
 //
 end // end of [linset_takeoutmax_ngc]
 
@@ -480,7 +468,7 @@ in
 //
 case+ xs1 of
 | list_vt_cons _ =>
-    let val res = unsnoc(xs1) in fold@xs; res end
+    let val res = unsnoc(xs1) in res end
   // end of [list_vt_cons]
 | list_vt_nil () => let
     val xs_ = xs

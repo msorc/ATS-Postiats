@@ -258,7 +258,6 @@ val+@list_vt_cons (kx, _) = nx2
 //
 val k = kx.0
 //
-prval () = fold@ (nx2)
 prval () = __assert (nx2) where {
   extern praxi __assert : List1_vt(ki) -<prf> void
 } // end of [where] // end of [prval]
@@ -279,7 +278,6 @@ val+@list_vt_cons (kx, _) = nx2
 val p_x = addr@ (kx.1)
 val p_x = $UN.cast{P2tr1(itm)}(p_x)
 //
-prval () = fold@ (nx2)
 prval () = __assert (nx2) where {
   extern praxi __assert : List1_vt(ki) -<prf> void
 } // end of [where] // end of [prval]
@@ -342,18 +340,16 @@ case+ kxs of
     (kx, kxs1) => let
     val iseq = equal_key_key<key> (kx.0, k0)
   in
-    if iseq then let
-      prval () = fold@ (kxs)
-    in
+    if iseq then
       $UN.castvwtp1{Ptr1} (kxs)
-    end else let
+    else let
       val res = loop (kxs1, k0)
-      prval () = fold@ (kxs) in res
+    in
+      res
     end // end of [if]
   end // end of [list_vt_cons]
-| @list_vt_nil () => let
-    prval () = fold@ (kxs) in the_null_ptr
-  end // end of [list_vt_cons]
+| @list_vt_nil () =>
+    the_null_ptr // end of [list_vt_nil]
 //
 end // end of [loop]
 //
@@ -433,12 +429,12 @@ case+ kxs of
       res
     end else let
       val res = loop (kxs1, k0)
-      prval () = fold@ (kxs) in res
+    in
+      res
     end // end of [if]
   end // end of [list_vt_cons]
-| @list_vt_nil () => let
-    prval () = fold@ (kxs) in mynode_null ()
-  end // end of [list_vt_cons]
+| @list_vt_nil () =>
+    mynode_null () // end of [list_vt_nil]
 //
 end // end of [loop]
 //

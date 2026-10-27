@@ -218,7 +218,7 @@ res > 0
 then let
   prval() = opt_unsome(ent)
 in
-  xs := auxmain(dirp); fold@(x0_con); x0_con
+  xs := auxmain(dirp); x0_con
 end // end of [then]
 else let
   prval() = opt_unnone(ent)

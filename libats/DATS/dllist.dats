@@ -831,7 +831,6 @@ val nx = g2node_decode (nx)
 //
 val+@DLNODE (elt, _, _) = nx
 val p_elt = addr@ (elt)
-prval ((*void*)) = fold@ (nx)
 prval ((*void*)) = dlnode_vfree (nx)
 //
 in
@@ -848,7 +847,6 @@ val nx = g2node_decode (nx)
 //
 val+@DLNODE (_, next, _) = nx
 val p_next = addr@ (next)
-prval ((*void*)) = fold@ (nx)
 prval ((*void*)) = dlnode_vfree (nx)
 //
 in
@@ -865,7 +863,6 @@ val nx = g2node_decode (nx)
 //
 val+@DLNODE (_, _, prev) = nx
 val p_prev = addr@ (prev)
-prval ((*void*)) = fold@ (nx)
 prval ((*void*)) = dlnode_vfree (nx)
 //
 in

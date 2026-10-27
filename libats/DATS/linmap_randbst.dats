@@ -187,13 +187,13 @@ case+ t of
   in
     case+ 0 of
     | _ when sgn < 0 => let
-        val res = bstree_search_ref (tl, k0) in fold@ (t); res
+        val res = bstree_search_ref (tl, k0) in res
       end // end of [_]
     | _ when sgn > 0 => let
-        val res = bstree_search_ref (tr, k0) in fold@ (t); res
+        val res = bstree_search_ref (tr, k0) in res
       end // end of [_]
     | _ (*sgn = 0*) => let
-        val res = addr@ (x) in fold@ (t); $UN.cast{P2tr1(itm)}(res)
+        val res = addr@ (x) in $UN.cast{P2tr1(itm)}(res)
       end // end of [_]
   end // end of [BSTcons]
 | BSTnil () => p2tr_null {itm} ()
@@ -238,13 +238,12 @@ case+ t of
         prval () = fold@ (t)
         val () = tlr := t
         val () = nl := n_ + 1
-        prval () = fold@ (tl_)
         val () = t := tl_
       in
         ans
-      end else let
-        prval () = fold@ (t) in ans // [x0] is alreay in the tree [t]
-      end // end of [if]
+      end else
+        ans // [x0] is alreay in the tree [t]
+      // end of [if]
     end else if sgn > 0 then let
       val ans = bstree_insert_atroot<key,itm> (tr, k0, x0)
     in
@@ -260,18 +259,16 @@ case+ t of
         prval () = fold@ (t)
         val () = trl := t
         val () = nr := n_ + 1
-        prval () = fold@ (tr_)
         val () = t := tr_
       in
         ans
-      end else let
-        prval () = fold@ (t) in ans // [k0] alreay in [t]
-      end // end of [if]
+      end else
+        ans // [k0] alreay in [t]
+      // end of [if]
     end else let (* sgn = 0 *)
       val x_ = x
       val () = x := x0
       val () = x0 := x_
-      prval () = fold@ (t)
       prval () = opt_some{itm}(x0)
     in
       1 // replaced
@@ -313,18 +310,18 @@ case+ t of
       if sgn < 0 then let
         val ans = bstree_insert_random<key,itm> (tl, k0, x0)
       in
-        if ans = 0 then (n := n + 1; fold@ (t); ans) else (fold@ (t); ans)
+        if ans = 0 then (n := n + 1; ans) else ans
       end else if sgn > 0 then let
         val ans = bstree_insert_random<key,itm> (tr, k0, x0)
       in
-        if ans = 0 then (n := n + 1; fold@ (t); ans) else (fold@ (t); ans)
+        if ans = 0 then (n := n + 1; ans) else ans
       end else let // sgn = 0
         val x_ = x
         val () = x := x0
         val () = x0 := x_
         prval () = opt_some {itm} (x0)
       in
-        fold@ (t); 1 // [k0] is at the root of [t]
+        1 // [k0] is at the root of [t]
       end // end of [if]
     end // end of [if]
   end (* end of [BSTcons] *)
@@ -379,24 +376,19 @@ case+ tl of
       // end of [val]
     in
       if randbit = 0 then let
-        prval () = fold@ (tr)
         val () = tlr := bstree_join_random (tlr, tr)
         val () = nl := n
-        prval () = fold@ (tl)
       in
         tl
       end else let
-        prval () = fold@ tl
         val () = trl := bstree_join_random (tl, trl)
         val () = nr := n
-        prval () = fold@ (tr)
       in
         tr
       end // end of [if]
     end (* end of [BSTcons] *)
-  | ~BSTnil () => let
-      val () = fold@ (tl) in tl
-    end // end of [BSTnil]
+  | ~BSTnil () =>
+      tl // end of [BSTnil]
   ) (* end of [BSTcons] *)
 //
 | ~BSTnil () => tr
@@ -422,13 +414,11 @@ case+ t of
     if sgn < 0 then let
       val ans = bstree_takeout_random<key,itm> (tl, k0, x0)
       val () = n := n - ans
-      prval () = fold@ (t)
     in
       ans
     end else if sgn > 0 then let
       val ans = bstree_takeout_random<key,itm> (tr, k0, x0)
       val () = n := n - ans
-      prval () = fold@ (t)
     in
       ans
     end else let
@@ -480,7 +470,6 @@ case+ t of
     val () = aux (tl, env)
     val () = linmap_foreach$fwork<key,itm><env> (k, x, env)
     val () = aux (tr, env)
-    prval () = fold@ (t)
   in
     // nothing
   end // end of [BSTcons]
@@ -565,7 +554,6 @@ case+ map2 of
     prval () = opt_none {map} (map) in false
   end // end of [BSTnil]
 | @BSTcons _ => let
-    prval () = fold@ (map2)
     prval () =
       __assert (map, map2) where {
       extern praxi __assert : (!map? >> map, map) -<prf> void
@@ -633,7 +621,6 @@ case+ t0 of
     val res = aux (tl, res)
     val res = list_vt_cons{ki}((k, x), res)
     val res = aux (tr, res)
-    prval ((*void*)) = fold@ (t0)
   } // end of [BSTcons]
 | BSTnil () => (res)
 //

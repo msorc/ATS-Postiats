@@ -765,7 +765,6 @@ case+ map of
     val () = sknodelst_insert (nxa, k0, lgN0, nx_new)
     prval () =
       pridentity_vt (lgN) // for opening the type of [lgN]
-    prval () = fold@ (map)
   in
     // nothing
   end // end of [SKIPLIST]
@@ -885,13 +884,11 @@ case+ map of
         extern praxi __assert {N:int} (N: size_t N): [N>0] void
       } // end of [where] // end of [prval]
       val () = N := pred (N)
-      prval () = fold@ (map)
       val () = sknode_free (nx, res)
       prval () = opt_some{itm}(res)
     in
       true
     end else let
-      prval () = fold@ (map)
       prval () = opt_none{itm}(res)
     in
       false
@@ -1032,7 +1029,6 @@ case+ map2 of
     in
       false
     end else let
-      prval () = fold@ (map2)
       prval (
       ) = __assert (map, map2) where
       {

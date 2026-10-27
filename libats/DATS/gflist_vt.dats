@@ -130,7 +130,6 @@ case+ xs of
     val () = res := xs
     val xs = xs1
     val (pf | ()) = loop(xs, ys, xs1)
-    prval () = fold@(res)
   in
     (APPENDcons(pf) | ())
   end // end of [gflist_vt_cons]
@@ -161,7 +160,6 @@ case+ xs of
     (x, xs1) => let
     val xs1_ = xs1
     val () = xs1 := ys
-    prval () = fold@ (xs)
     val (pf | res) =
       gflist_vt_revapp(xs1_, xs)
     // end of [val]
@@ -220,7 +218,6 @@ prval
 LENGTHcons(pflen) = pflen
   val @gflist_vt_cons(_, xs1) = xs
   val (pfapp, pf1len | xs2) = split(pflen | xs1, i-1)
-prval ((*folded*)) = fold@ (xs)
 //
 in
   (APPENDcons(pfapp), LENGTHcons(pf1len) | xs2)
@@ -308,22 +305,18 @@ a:vt0p
       in
         if sgn <= 0 then let
           val () = ys := ys1; val ys1 = ys1_tl
-          prval () = fold@ (ys2)
           prval ISORDcons(pf1ord1, _) = pf1ord
           val (pfuni, pford | ()) = merge(pf1ord1, pf2ord | ys1, ys2, ys1_tl)
           prval pford = isord_union_cons(pf1ord, pf2ord, pfuni, pford)
-          prval () = fold@ (ys)
           prval pfuni = union_cons1 (pfuni)
         in
           (pfuni, pford | ())
         end else let
-          prval () = fold@ (ys1)
           val () = ys := ys2; val ys2 = ys2_tl
           prval ISORDcons(pf2ord1, _) = pf2ord
           val (pfuni, pford | ()) = merge(pf1ord, pf2ord1 | ys1, ys2, ys2_tl)
           prval pfuni = union_commute(pfuni)
           prval pford = isord_union_cons(pf2ord, pf1ord, pfuni, pford)
-          prval () = fold@ (ys)
           prval pfuni = union_cons1 (pfuni)
           prval pfuni = union_commute (pfuni)
         in
@@ -331,7 +324,7 @@ a:vt0p
         end // end of [if]
       end // end of [gflist_vt_cons]
     | ~gflist_vt_nil () => let
-        val () = fold@ (ys1); val () = ys := ys1 in (union_nil2 (), pf1ord | ())
+        val () = ys := ys1 in (union_nil2 (), pf1ord | ())
       end // end of [gflist_vt_nil]
     ) (* end of [gflist_vt_cons] *)
   | ~gflist_vt_nil () => let

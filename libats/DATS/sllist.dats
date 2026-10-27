@@ -770,7 +770,6 @@ val nx = g2node_decode (nx)
 //
 val+@SLNODE (elt, _) = nx
 val p_elt = addr@ (elt)
-prval () = fold@ (nx)
 prval () = slnode_vfree (nx)
 //
 in
@@ -787,7 +786,6 @@ val nx = g2node_decode (nx)
 //
 val+@SLNODE (_, next) = nx
 val p_next = addr@ (next)
-prval () = fold@ (nx)
 prval () = slnode_vfree (nx)
 //
 in

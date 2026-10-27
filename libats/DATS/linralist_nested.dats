@@ -281,14 +281,12 @@ case+ xs of
     if i mod 2 = 0 then let
       val+ @N2 (x0, _) = x01
       val p_x0 = addr@ (x0)
-      prval () = fold@ (x01)
       prval () = __vfree (x01)
     in
       p_x0
     end else let
       val+ @N2 (_, x1) = x01
       val p_x1 = addr@ (x1)
-      prval () = fold@ (x01)
       prval () = __vfree (x01)
     in
       p_x1
@@ -297,26 +295,22 @@ case+ xs of
 | @RAodd (x, xxs) => (
     if i = 0 then let
       val p_x = addr@ (x)
-      prval () = fold@ (xs)
     in
       p_x
     end else let
       val i1 = i - 1
       val p_x01 = getref_at (xxs, half i1)
-      prval () = fold@ (xs)
       val x01 = $UN.ptr1_get<node(a,d+1)>(p_x01)
     in
       if i mod 2 = 0 then let
         val+ @N2 (_, x1) = x01
         val p_x1 = addr@ (x1)
-        prval () = fold@ (x01)
         prval () = __vfree (x01)
       in
         p_x1
       end else let
         val+ @N2 (x0, _) = x01
         val p_x0 = addr@ (x0)
-        prval () = fold@ (x01)
         prval () = __vfree (x01)
       in
         p_x0

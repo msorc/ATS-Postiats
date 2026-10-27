@@ -232,7 +232,6 @@ in
     prval () = fold@ (t0)
     val () = hr2 := 1+max(hrl1, hrr)
     val () = trl := t0
-    prval () = fold@ (tr)
   in
     tr // B (1+max(hrl1,hrr), xr, B (hrl1, x, tl, trl), trr)
   end else let // [hrl==hrr+HTDF1]: deep rotation
@@ -250,7 +249,6 @@ in
     val () = hrl := hr
     val () = trll := t0
     val () = trlr := tr
-    prval () = fold@ (trl_)
   in
     trl_ // B (hr, xrl, B (1+max(hl,hrll) x, tl, trll), B (1+max(hrlr,hrr), xr, trlr, trr))
   end // end of [if]
@@ -287,7 +285,6 @@ in
     prval () = fold@ (t0)
     val () = hl2 := 1+max(hll,hlr1)
     val () = tlr := t0
-    prval () = fold@ (tl)
   in
     tl // B (1+max(hll,hlr1), xl, tll, B (hlr1, x, tlr, tr))
   end else let
@@ -305,7 +302,6 @@ in
     val () = hlr := hl
     val () = tlrl := tl
     val () = tlrr := t0
-    prval () = fold@ (tlr_)
   in
     tlr_ // B (hl, xlr, B (1+max(hll,hlrl), xl, tll, tlrl), B (1+max(hlrr,hr), x, tlrr, tr))
   end // end of [if]
@@ -343,7 +339,6 @@ case+ t0 of
       in
         if hl-hr <= HTDF then let
           val () = h := 1+max(hl,hr)
-          prval () = fold@ (t0)
         in
           ans // B (1+max(hl,hr), x, tl, tr)
         end else let // hl==hr+HTDF1
@@ -362,7 +357,6 @@ case+ t0 of
       in
         if hr-hl <= HTDF then let
           val () = h := 1+max(hl,hr)
-          prval () = fold@ (t0)
         in
           ans // B (1+max(hl, hr), x, tl, tr)
         end else let // hl+HTDF1==hr
@@ -374,11 +368,8 @@ case+ t0 of
           ans
         end // end of [if]
       end // end of [sgn > 0]
-    | _ (*[x0] is found*) => let
-        prval () = fold@ (t0)
-      in
+    | _ (*[x0] is found*) =>
         true // B (h, x0, tl, tr)
-      end // end of [sgn = 0]
   end // end of [B]
 //
 | ~E () => let
@@ -413,7 +404,6 @@ in
     in
       if hl-hr <= HTDF then let
         val () = h := 1+max(hl,hr)
-        prval () = fold@ (t0) // B (1+max(hl,hr), x, tl, tr)
       in
         nx
       end else let
@@ -455,7 +445,6 @@ in
     in
       if hr-hl <= HTDF then let
         val () = h := 1+max(hl,hr)
-        prval () = fold@ (t0) // B (1+max(hl,hr), x, tl, tr)
       in
         nx
       end else let
@@ -514,7 +503,6 @@ case+ tr of
   in
     if hl-hr <= HTDF then let
       val () = h1 := 1+max(hl,hr)
-      prval () = fold@ (t1)
     in
       t1
     end else let
@@ -559,7 +547,6 @@ case+ t0 of
       in
         if hr-hl <= HTDF then let
           val () = h := 1+max(hl,hr)
-          prval () = fold@ (t0)
         in
           nx
         end else let
@@ -578,7 +565,6 @@ case+ t0 of
       in
         if hl-hr <= HTDF then let
           val () = h := 1+max(hl,hr)
-          prval () = fold@ (t0)
         in
           nx
         end else let
