@@ -37,7 +37,6 @@ fun loop
     val list_vt_cons (_, res1) = res
 //
     val () = loop (m+1, n, res1)
-    prval ((*folded*)) = fold@ (res)
   in
     // nothing
   end else

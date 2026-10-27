@@ -139,7 +139,7 @@ sstream_inc
 //
 val+@SSTREAM(data, cap, pos) = cs
 //
-val () = pos := succ(pos); prval () = fold@(cs)
+val () = pos := succ(pos)
 //
 } (* end of [sstream_get] *)
 
@@ -152,7 +152,7 @@ val+@SSTREAM(data, cap, pos) = cs
 //
 val c0 = data[pos]
 //
-val () = pos := succ(pos); prval () = fold@(cs)
+val () = pos := succ(pos)
 //
 } (* end of [sstream_get] *)
 

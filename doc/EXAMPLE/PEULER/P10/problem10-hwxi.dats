@@ -39,7 +39,7 @@ fun remmul
 if (j < m) then let
   val () = if A->[j] then A->[j] := false
 in
-  remmul (pf | i, j+i)
+  remmul (i, j+i)
 end // end of [if]
 ) (* end of [remmul] *)
 //
@@ -51,16 +51,16 @@ fun loop
 if i < m then
 (
   if A->[i] then let
-    val () = remmul (pf | i, i+i)
+    val () = remmul (i, i+i)
   in
-    loop (pf | i+1, res+g0i2u(i))
+    loop (i+1, res+g0i2u(i))
   end else
-    loop (pf | i+1, res)
+    loop (i+1, res)
   // end of [if]
 ) else res // end of [if]
 ) (* end of [loop] *)
 //
-val res = loop (pf | 2, g0i2u(0))
+val res = loop (2, g0i2u(0))
 //
 val () = array_ptr_free (pf, pfgc | A)
 //

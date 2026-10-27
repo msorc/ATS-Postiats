@@ -81,7 +81,7 @@ in
 //
 if p2 < pz then let
   prval (pf21, pf22) = array_v_uncons (pf2)
-  val res = wclbuf (pf22 | ptr_succ<byte>(p2), pz, c, res + 1)
+  val res = wclbuf (ptr_succ<byte>(p2), pz, c, res + 1)
   prval () = pf2 := array_v_cons (pf21, pf22)
   prval () = pf := bytes_v_unsplit (pf1, pf2)
 in
@@ -111,21 +111,21 @@ fun loop
 | inp: FILEref, p: ptr l, c: int, res: int
 ) : int = let
 //
-val n = freadc (pf | inp, p, $UN.cast{char}(c))
+val n = freadc (inp, p, $UN.cast{char}(c))
 //
 in
 //
 if n > 0 then let
   val pz = ptr_add<char> (p, n)
-  val res = wclbuf (pf | p, pz, c, res)
+  val res = wclbuf (p, pz, c, res)
 in
-  loop (pf | inp, p, c, res)
+  loop (inp, p, c, res)
 end else res (* end of [if] *)
 //
 end // end of [loop]
 //
 in
-  loop (pf | inp, p, c, 0(*res*))
+  loop (inp, p, c, 0(*res*))
 end (* end of [wclfil] *)
 
 (* ****** ****** *)
@@ -145,7 +145,7 @@ val (
   pfat, pfgc | p
 ) = malloc_gc (g1i2u(BUFSZ))
 prval () = pfat := b0ytes2bytes_v (pfat)
-val res = wclfil (pfat | inp, p, $UN.cast2int('\n'))
+val res = wclfil (inp, p, $UN.cast2int('\n'))
 val () = mfree_gc (pfat, pfgc | p)
 //
 val () = println! ("wclines: number of lines = ", res)

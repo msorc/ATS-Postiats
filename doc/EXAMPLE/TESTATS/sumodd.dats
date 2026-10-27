@@ -51,11 +51,11 @@ fun loop
     val (
     ) = if i mod 2 != 0 then res := res + i
   in
-    loop (pf | i+1)
+    loop (i+1)
   end else () // end of [if]
 )
 //
-val () = loop (view@res | 0)
+val () = loop (0)
 //
 in
   res

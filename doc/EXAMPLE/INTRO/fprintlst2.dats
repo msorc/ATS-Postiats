@@ -37,7 +37,7 @@ case+ xss of
     val () = fprint_intlst (out, xs)
     val () = fprint_intlstlst (out, xss1, i+1)
   in
-    fold@ (xss)
+    // nothing
   end // end of [list_vt_cons]
 ) (* end of [fprint_intlstlst] *)
 
