@@ -72,6 +72,7 @@ staload _(*anon*) = "./pats_error.dats"
 
 (* ****** ****** *)
 
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 implement
@@ -80,6 +81,8 @@ prerr_FILENAME<> () = prerr "pats_constraint3_solve"
 (* ****** ****** *)
 
 staload "./pats_staexp2.sats"
+staload "./pats_staexp2_sprint.sats"
+staload "./pats_staexp2_util.sats"
 staload "./pats_patcst2.sats"
 staload "./pats_dynexp2.sats"
 staload "./pats_trans3_env.sats"
@@ -280,6 +283,12 @@ extern
 fun
 c3nstr_solve_errmsg(c3t: c3nstr, unsolved: uint): int
 //
+// HX-2026-10: the text of ATS1 (the_LEGACYERRORS_get () > 0)
+//
+extern
+fun
+c3nstr_solve_errmsg_legacy(c3t: c3nstr, unsolved: uint): int
+//
 (* ****** ****** *)
 
 extern
@@ -385,8 +394,406 @@ end // end of [prerr_case_exhaustiveness_errmsg]
 
 (* ****** ****** *)
 
+(* ****** ****** *)
+//
+// HX-2026-10: the hypotheses of the constraint being solved (the
+// [S3ITMsvar] and [S3ITMhypo] items in scope, the newest first), kept
+// by [c3nstr_solve_itmlst] for the error messages
+//
+%{^
+static void *patsopt_c3nstr_hypctx = 0 ;
+ATSinline()
+atstype_ptr
+patsopt_c3nstr_hypctx_get () { return patsopt_c3nstr_hypctx ; }
+ATSinline()
+atsvoid_t0ype
+patsopt_c3nstr_hypctx_set
+  (atstype_ptr x) { patsopt_c3nstr_hypctx = x ; return ; }
+%}
+//
+extern
+fun hypctx_get (): glist(s3itm) = "mac#patsopt_c3nstr_hypctx_get"
+extern
+fun hypctx_set (x: glist(s3itm)): void = "mac#patsopt_c3nstr_hypctx_set"
+//
+fn hypctx_push (s3i: s3itm): void =
+  hypctx_set (glist_cons<s3itm> (s3i, hypctx_get ()))
+//
+(* ****** ****** *)
+
+local
+
+#define MAXHYPO 12
+
+fn s2var_eq
+  (x: s2var, y: s2var): bool = ($UN.cast{ptr} (x) = $UN.cast{ptr} (y))
+
+fn svars_mem
+  (xs: glist(s2var), x: s2var): bool = let
+  fun loop (xs: glist(s2var)): bool =
+    case+ glist_view (xs) of
+    | ~GLnil () => false
+    | ~GLcons (y, xs) => if s2var_eq (x, y) then true else loop (xs)
+in
+  loop (xs)
+end // end of [svars_mem]
+
+fn svars_add
+  (xs: glist(s2var), x: s2var): glist(s2var) =
+  if svars_mem (xs, x) then xs else glist_cons<s2var> (x, xs)
+
+(*
+** the elements of [ys] (oldest first) that are not in [xs] (newest first)
+** are added to it
+*)
+fun svars_union
+  (xs: glist(s2var), ys: glist(s2var)): glist(s2var) =
+  case+ glist_view (ys) of
+  | ~GLnil () => xs
+  | ~GLcons (y, ys) => svars_union (svars_add (xs, y), ys)
+
+fun svars_meet
+  (xs: glist(s2var), ys: glist(s2var)): bool =
+  case+ glist_view (ys) of
+  | ~GLnil () => false
+  | ~GLcons (y, ys) => if svars_mem (xs, y) then true else svars_meet (xs, ys)
+
+(* the variables of [h3p] (oldest first) *)
+fn h3ypo_svars
+  (h3p: h3ypo): glist(s2var) = let
+  val res =
+  (
+    case+ h3ypo_node_view (h3p.h3ypo_node ()) of
+    | ~H3YPOprop (s2p) => s2exp_sprint_svars (s2p, glist_nil ())
+    | ~H3YPObind (s2v, s2e) => s2exp_sprint_svars (s2e, glist_sing<s2var> (s2v))
+    | ~H3YPOeqeq (s2e1, s2e2) =>
+        s2exp_sprint_svars (s2e2, s2exp_sprint_svars (s2e1, glist_nil ()))
+  ) : glist(s2var)
+in
+  glist_reverse<s2var> (res)
+end // end of [h3ypo_svars]
+
+(* the hypotheses in scope, oldest first *)
+fn hypctx_hypos (): glist(h3ypo) = let
+  fun loop (xs: glist(s3itm), res: glist(h3ypo)): glist(h3ypo) =
+    case+ glist_view (xs) of
+    | ~GLnil () => res
+    | ~GLcons (x, xs) => (
+        case+ s3itm_view (x) of
+        | ~S3ITMhypo (h3p) => loop (xs, glist_cons<h3ypo> (h3p, res))
+        | v => (s3itm_view_free (v); loop (xs, res))
+      ) // end of [GLcons]
+in
+  loop (hypctx_get (), glist_nil ())
+end // end of [hypctx_hypos]
+
+(*
+** one step of the closure over the bindings: [v == e] with [v] relevant
+** makes the variables of [e] relevant
+*)
+fun close_step
+  (hs: glist(h3ypo), rel: glist(s2var), changed: &bool): glist(s2var) =
+  case+ glist_view (hs) of
+  | ~GLnil () => rel
+  | ~GLcons (h3p, hs) => let
+      val rel = (
+        case+ h3ypo_node_view (h3p.h3ypo_node ()) of
+        | ~H3YPObind (s2v, s2e) =>
+            if svars_mem (rel, s2v) then let
+              val ys = s2exp_sprint_svars (s2e, glist_nil ())
+              val ys = glist_reverse<s2var> (ys)
+              val () = if ~(svars_meet_all (rel, ys)) then changed := true
+            in
+              svars_union (rel, ys)
+            end else rel
+        | v => (h3ypo_node_view_free (v); rel)
+      ) : glist(s2var)
+    in
+      close_step (hs, rel, changed)
+    end // end of [GLcons]
+
+(* all the elements of [ys] are in [xs] *)
+and svars_meet_all
+  (xs: glist(s2var), ys: glist(s2var)): bool =
+  case+ glist_view (ys) of
+  | ~GLnil () => true
+  | ~GLcons (y, ys) =>
+      if svars_mem (xs, y) then svars_meet_all (xs, ys) else false
+
+fun close_loop
+  (hs: glist(h3ypo), rel: glist(s2var), n: int): glist(s2var) =
+  if n <= 0 then rel else let
+    var changed: bool = false
+    val rel = close_step (hs, rel, changed)
+  in
+    if changed then close_loop (hs, rel, n-1) else rel
+  end // end of [close_loop]
+
+fun select
+  (hs: glist(h3ypo), rel: glist(s2var), res: glist(h3ypo)): glist(h3ypo) =
+  case+ glist_view (hs) of
+  | ~GLnil () => glist_reverse<h3ypo> (res)
+  | ~GLcons (h3p, hs) =>
+      if svars_meet (rel, h3ypo_svars (h3p))
+        then select (hs, rel, glist_cons<h3ypo> (h3p, res))
+        else select (hs, rel, res)
+
+fn prerr_h3ypo_s
+  (h3p: h3ypo): void =
+  case+ h3ypo_node_view (h3p.h3ypo_node ()) of
+  | ~H3YPOprop (s2p) => prerr_s2exp_s (s2p)
+  | ~H3YPObind (s2v, s2e) => (
+      prerr_s2var_s (s2v); prerr " == "; fsprint_s2exp_ctx (stderr_ref, s2e, 31)
+    ) // end of [H3YPObind]
+  | ~H3YPOeqeq (s2e1, s2e2) => (
+      fsprint_s2exp_ctx (stderr_ref, s2e1, 31); prerr " == ";
+      fsprint_s2exp_ctx (stderr_ref, s2e2, 31)
+    ) // end of [H3YPOeqeq]
+
+(*
+** the variables printed so far that are in [fvs], added to [res] in the
+** order of their first occurrence
+*)
+fun seen_filter
+  (xs: List0_vt(s2var), fvs: glist(s2var), res: glist(s2var)): glist(s2var) =
+  case+ xs of
+  | ~list_vt_cons (x, xs) =>
+      if svars_mem (fvs, x)
+        then seen_filter (xs, fvs, svars_add (res, x))
+        else seen_filter (xs, fvs, res)
+  | ~list_vt_nil () => res
+
+in (* in-of-local *)
+
+(*
+** HX-2026-10: the lines [  where n: int] and [  assuming: n >= 0, ...]
+** after an unsolved [s2p]: the variables of [s2p] (closed over the
+** bindings of the hypotheses) and the hypotheses that mention them
+*)
+fn prerr_c3nstr_where
+  (s2p: s2exp): void = let
+//
+val fvs = glist_reverse<s2var> (s2exp_sprint_svars (s2p, glist_nil ()))
+val rel = seen_filter (sprint_s2vars_seen (), fvs, glist_nil ())
+val rel = svars_union (rel, fvs)
+val hs = hypctx_hypos ()
+val rel = close_loop (hs, rel, 8)
+val sel = select (hs, rel, glist_nil ())
+//
+fun allvars (hs: glist(h3ypo), res: glist(s2var)): glist(s2var) =
+  case+ glist_view (hs) of
+  | ~GLnil () => res
+  | ~GLcons (h3p, hs) => allvars (hs, svars_union (res, h3ypo_svars (h3p)))
+//
+fun prvars (xs: glist(s2var), i: int): void =
+  case+ glist_view (xs) of
+  | ~GLnil () => ()
+  | ~GLcons (x, xs) => let
+      val () = if i > 0 then prerr ", "
+      val () = prerr_s2var_s (x)
+      val () = prerr ": "
+      val () = prerr_s2rt_s (s2var_get_srt (x))
+    in
+      prvars (xs, i+1)
+    end // end of [GLcons]
+//
+fun prhypos (hs: glist(h3ypo), i: int): void =
+  case+ glist_view (hs) of
+  | ~GLnil () => ()
+  | ~GLcons (h3p, hs) =>
+      if i >= MAXHYPO then prerr ", ..." else let
+        val () = if i > 0 then prerr ", "
+        val () = prerr_h3ypo_s (h3p)
+      in
+        prhypos (hs, i+1)
+      end // end of [if]
+//
+(* the sets are kept the newest first: they are reversed for printing *)
+val ws = allvars (sel, rel)
+//
+in
+//
+if glist_is_cons (ws) then (
+  prerr "  where "; prvars (glist_reverse<s2var> (ws), 0); prerr_newline ()
+);
+if glist_is_cons (sel) then (
+  prerr "  assuming: "; prhypos (sel, 0); prerr_newline ()
+)
+//
+end // end of [prerr_c3nstr_where]
+
+end // end of [local]
+
+(*
+** HX-2026-10: [pre] and the unsolved proposition of [c3t], then its
+** variables and hypotheses
+*)
+fn prerr_c3nstr_unsolved
+  (pre: string, c3t: c3nstr): void =
+(
+case+
+c3nstr_node_view (c3t.c3nstr_node ())
+of // case+
+| ~C3NSTRprop (s2p) => (
+    prerr pre; prerr_s2exp_s (s2p); prerr_newline (); prerr_c3nstr_where (s2p)
+  ) // end of [C3NSTRprop]
+| ~C3NSTRsolverify (s2p) => (
+    prerr pre; prerr_s2exp_s (s2p); prerr_newline (); prerr_c3nstr_where (s2p)
+  ) // end of [C3NSTRsolverify]
+| ~C3NSTRitmlst _ => (prerr pre; prerr_c3nstr (c3t); prerr_newline ())
+) (* end of [prerr_c3nstr_unsolved] *)
+
+(*
+** HX-2026-10: the new text of the messages (the_LEGACYERRORS_get () = 0)
+*)
+fn c3nstr_solve_errmsg_new
+  (c3t: c3nstr, unsolved: uint): int = let
+//
+val loc0 = c3t.c3nstr_loc ()
+val c3tk = c3t.c3nstr_kind ()
+val () = sprint_reset ()
+//
+fn tail
+  (unsolved: uint, c3t: c3nstr): void =
+  if (unsolved = 0u)
+    then prerr_c3nstr_unsolved (": unsolved ", c3t) else prerr_newline ()
+//
+in
+//
+case+ c3nstrkind_view (c3tk) of
+| ~C3TKmain((*void*)) =>
+  (
+    if unsolved = 0u
+      then let
+        val () = prerr_error3_loc (loc0)
+        val () = prerr_c3nstr_unsolved (": unsolved constraint: ", c3t)
+      in
+        0 // this one is treated as an error
+      end // end of [then]
+      else 0 // this errmsg has already been reported
+    // end of [if]
+  ) (* end of [C3STRKmain] *)
+| ~C3TKcase_exhaustiveness
+    (casknd, p2tcs) => let
+    val () =
+    prerr_case_exhaustiveness_errmsg (loc0, casknd, p2tcs)
+  in
+    case+ casknd of
+    | CK_case () => 1 (*warning*)
+    | CK_case_pos () => 0 (*error*)
+    | CK_case_neg () => 0 (*deadcode*)
+  end // end of [C3TKcase_exhaustiveness]
+//
+| ~C3TKtermet_isnat
+    () => 0 where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the termination metric"
+    val () = (
+      case+
+      c3nstr_node_view (c3t.c3nstr_node ())
+      of // case+
+      | ~C3NSTRprop (s2p) => let
+          var s2c: s2cst
+          var s2es: s2explst
+          val ok = s2exp_sprint_head (s2p, s2c, s2es)
+        in
+          if ok then (
+            if glist_is_cons (s2es) then (
+              prerr " "; prerr_s2exp_s (glist_head<s2exp> (s2es))
+            ) (* end of [if] *)
+          ) // end of [if]
+        end // end of [C3NSTRprop]
+      | v => c3nstr_node_view_free (v)
+    ) : void // end of [val]
+    val () = prerr " must be a natural number"
+    val () = tail (unsolved, c3t)
+  } // end of [C3TKtermet_isnat]
+| ~C3TKtermet_isdec
+    () => 0 where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the termination metric must decrease"
+    val () = tail (unsolved, c3t)
+  } // end of [C3STRKmetric_dec]
+//
+| ~C3TKsome_fin (d2v, s2e_fin, _) =>
+    (0) where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " must have the type "
+    val () = prerr_s2exp_s (s2e_fin)
+    val () = prerr " at the end of its scope"
+    val () = tail (unsolved, c3t)
+  } (* end of [C3TKsome_fin] *)
+| ~C3TKsome_lvar (d2v, s2e_fin, _) =>
+    (0) where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " must have the type "
+    val () = prerr_s2exp_s (s2e_fin)
+    val () = prerr " at the end of its scope"
+    val () = tail (unsolved, c3t)
+  } (* end of [C3TKsome_lvar] *)
+| ~C3TKsome_vbox (d2v, s2e_box, _) =>
+    (0) where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " must have the type "
+    val () = prerr_s2exp_s (s2e_box)
+    val () = prerr " to be returned to its vbox"
+    val () = tail (unsolved, c3t)
+  } (* end of [C3TKsome_vbox] *)
+//
+| ~C3TKlstate
+    () => 0 where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the linear state of the branches cannot be merged"
+    val () = tail (unsolved, c3t)
+  } // end of [C3TKlstate]
+| ~C3TKlstate_var
+    (d2v) => 0 where {
+    val () = prerr_error3_loc (loc0)
+    val () = prerr ": the branches leave the linear variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " with types that cannot be merged"
+    val () = tail (unsolved, c3t)
+  } // end of [C3TKlstate_var]
+//
+| ~C3TKloop(knd) =>
+    (0) where {
+    val () = prerr_error3_loc (loc0)
+    val () =
+    if knd < 0
+      then prerr ": the loop invariant does not hold at the entry of the loop"
+    val () =
+    if knd = 0 then prerr ": the loop invariant does not hold at a break"
+    val () =
+    if knd > 0 then prerr ": the loop invariant does not hold at a continue"
+    val () = tail (unsolved, c3t)
+  } (* end of [C3TKloop] *)
+//
+| ~C3TKsolverify() =>
+    (0) where {
+    val () =
+    prerr_error3_loc (loc0)
+    val () = prerr ": the constraint is expected to be verified externally."
+    val () = prerr_newline ()
+  } (* end of [C3TKsolver] *)
+//
+end // end of [c3nstr_solve_errmsg_new]
+
 implement
 c3nstr_solve_errmsg
+  (c3t, unsolved) =
+  if $GLOB.the_LEGACYERRORS_get () > 0
+    then c3nstr_solve_errmsg_legacy (c3t, unsolved)
+    else c3nstr_solve_errmsg_new (c3t, unsolved)
+// end of [c3nstr_solve_errmsg]
+
+implement
+c3nstr_solve_errmsg_legacy
   (c3t, unsolved) = let
 //
 val loc0 = c3t.c3nstr_loc ()
@@ -515,7 +922,7 @@ case+ c3nstrkind_view (c3tk) of
     )
   } (* end of [C3TKsolver] *)
 //
-end // end of [c3nstr_solve_errmsg]
+end // end of [c3nstr_solve_errmsg_legacy]
 
 (* ****** ****** *)
 
@@ -588,11 +995,13 @@ if glist_is_cons (s3is) then let
 in
   case+ s3itm_view (s3i) of
   | ~S3ITMsvar(s2v) => let
+      val () = hypctx_push (s3i)
       val () = s2vbcfenv_add_svar (env, s2v)
     in
       c3nstr_solve_itmlst(loc0, env, s3is, unsolved, err)
     end // end of [S3ITMsvar]
   | ~S3ITMhypo(h3p) => let
+      val () = hypctx_push (s3i)
       val s3p = s3exp_make_h3ypo (env, h3p)
       val () = (
         if s3exp_is_S3Eerr (s3p) then () // nothing
@@ -631,6 +1040,7 @@ c3nstr_solve_itmlst_cnstr
 (
   loc0, env, s3is, c3t, unsolved, err
 ) = let
+  val ctx = hypctx_get ()
   val () = s2vbcfenv_push (env)
   val () = the_s2varbindmap_push ()
   val ans1 =
@@ -638,6 +1048,7 @@ c3nstr_solve_itmlst_cnstr
   // end of [val]
   val () = the_s2varbindmap_pop ()
   val () = s2vbcfenv_pop (env)
+  val () = hypctx_set (ctx)
   val ans2 =
     c3nstr_solve_itmlst (loc0, env, s3is, unsolved, err)
   // end of [val]
@@ -660,7 +1071,9 @@ if glist_is_cons (s3iss) then let
     val () = s2vbcfenv_push (env)
     val () = the_s2varbindmap_push ()
     val s3is1 = glist_append<s3itm> (s3is, s3is0)
+    val ctx = hypctx_get ()
     val _(*ans*) = c3nstr_solve_itmlst (loc0, env, s3is1, unsolved, err)
+    val ((*void*)) = hypctx_set (ctx)
     val ((*void*)) = the_s2varbindmap_pop ()
     val ((*void*)) = s2vbcfenv_pop (env)
   in
@@ -690,6 +1103,7 @@ val () = the_s2varbindmap_freetop () // top-level constraints!!!
 var
 unsolved: uint = 0u
 var err: int = 0
+val () = hypctx_set (glist_nil ())
 val _(*status*) = c3nstr_solve_main (env, c3t, unsolved, err)
 val ((*freed*)) = s2vbcfenv_free (env)
 //

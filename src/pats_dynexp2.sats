@@ -322,6 +322,12 @@ fun fprint_d2var (out: FILEref, x: d2var): void
 overload fprint with fprint_d2var
 fun fprint_d2varlst (out: FILEref, x: d2varlst): void
 overload fprint with fprint_d2varlst
+//
+// HX-2026-10: the name for the error messages (pats_staexp2_sprint):
+// the symbol, and [#k] for the k-th variable of that name in the message
+//
+fun fsprint_d2var (out: FILEref, x: d2var): void
+fun prerr_d2var_s (x: d2var): void
 
 (* ****** ****** *)
 

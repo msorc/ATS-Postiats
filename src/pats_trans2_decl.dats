@@ -136,6 +136,7 @@ staload "./pats_dynexp1.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_stacst2.sats"
 staload "./pats_staexp2_util.sats"
+staload "./pats_staexp2_sprint.sats"
 
 (* ****** ****** *)
 
@@ -765,6 +766,9 @@ s2cst_make (
 , gopt_some(def) // definition
 ) (* end of [s2cst_make] *)
 //
+// HX-2026-10: the alias for the error messages (pats_staexp2_sprint)
+val () = if the_d2varlev_get () = 0 then sprint_alias_add_tkind (s2c)
+//
 in
   the_s2expenv_add_scst (s2c)
 end // end of [t1kindef_tr]
@@ -867,8 +871,7 @@ case+ gopt_view(res) of
 //
 val def2 = s1expdef_tr_def (arg, res2, def)
 //
-in
-//
+val s2c =
 s2cst_make
 (
   sym // name
@@ -884,6 +887,12 @@ s2cst_make
 , gopt_some(def2) // definition
 ) (* end of [s2cst_make] *)
 //
+// HX-2026-10: the alias for the error messages (pats_staexp2_sprint);
+// the local ones of the functions and implementations are not used
+val () = if the_d2varlev_get () = 0 then sprint_alias_add_s2cst (s2c)
+//
+in
+  s2c
 end // end of [s1expdef_tr]
 
 fun
