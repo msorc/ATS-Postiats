@@ -683,17 +683,95 @@ case+ d2vfin_view (d2vfin) of
 //
 end // end of [d2vfin_check_none]
 
+(* ****** ****** *)
+//
+// HX-2026-10: fold on demand: the hook is installed by pats_trans3_fldfrat.dats
+//
+local
+//
+val the_autofold_hook = gcell_make<ptr> (the_null_ptr)
+//
+in (* in-of-local *)
+//
+implement
+the_d2varenv_set_autofold_hook
+  (f) = gcell_set<ptr> (the_autofold_hook, $UN.cast{ptr}(f))
+//
+implement
+the_d2varenv_autofold
+  (knd, loc0, d2v, s2e) = let
+  val p = gcell_get<ptr> (the_autofold_hook)
+in
+  if ptr_is_null (p) then 0 else let
+    val f = $UN.cast{d2varenv_autofold_hook}(p) in f (knd, loc0, d2v, s2e)
+  end // end of [if]
+end // end of [the_d2varenv_autofold]
+//
+fun
+the_d2varenv_autofold_on (): bool =
+  ptr_isnot_null (gcell_get<ptr> (the_autofold_hook))
+//
+fun
+d2varenv_autofold_loop
+(
+  knd: int, loc0: loc_t, d2vs: d2varlst_vt
+) : void =
+  case+ d2vs of
+  | ~list_vt_cons (d2v, d2vs) => let
+      val _ = the_d2varenv_autofold (knd, loc0, d2v, s2exp_t0ype_err ())
+    in
+      d2varenv_autofold_loop (knd, loc0, d2vs)
+    end // end of [list_vt_cons]
+  | ~list_vt_nil () => ()
+//
+fun
+the_d2varenv_autofold_top
+  (knd: int, loc0: loc_t): void =
+  if the_d2varenv_autofold_on () then
+    d2varenv_autofold_loop (knd, loc0, the_d2varenv_get_top ())
+  // end of [if]
+//
+// HX: @(the result of the try, the number of errors)
+fun
+d2vfin_check_autofold
+  (loc0: loc_t, d2v: d2var): @(int, int) =
+  if the_d2varenv_autofold_on () then let
+    val ans = the_d2varenv_autofold (1, loc0, d2v, s2exp_t0ype_err ())
+  in
+    @(ans, the_trans3errlst_count ())
+  end else @(0, 0) // end of [if]
+//
+fun
+d2vfin_check_autofold_hint
+  (loc0: loc_t, d2v: d2var, ans: int, nerr: int): void =
+  if the_d2varenv_autofold_on () then (
+    if the_trans3errlst_count () > nerr then {
+      // HX: 5: the try of [d2v] has failed; 2: [d2v] may be the view of a field
+      val knd = (if ans = 2 then 5 else 2): int
+      val _ = the_d2varenv_autofold (knd, loc0, d2v, s2exp_t0ype_err ())
+    } // end of [if]
+  ) // end of [if]
+//
+end // end of [local]
+
+(* ****** ****** *)
+
 implement
 d2vfin_check (loc0, d2v) = let
 //
+// HX-2026-10: fold on demand
+val @(ans, nerr) = d2vfin_check_autofold (loc0, d2v)
+//
 val opt = d2var_get_type (d2v)
 //
-in
-//
+val () = (
 case+ gopt_view (opt) of
 | ~GOsome (s2e) => d2vfin_check_some (loc0, d2v, s2e)
 | ~GOnone () => d2vfin_check_none (loc0, d2v)
+) : void // end of [val]
 //
+in
+  d2vfin_check_autofold_hint (loc0, d2v, ans, nerr)
 end // end of [d2vfin_check]
 
 fun
@@ -709,9 +787,13 @@ the_d2varenv_check_loop
 (* end of [loop] *)
 
 implement
-the_d2varenv_check (loc0) =
-  the_d2varenv_check_loop (loc0, the_d2varenv_get_top ())
-// end of [the_d2varenv_check]
+the_d2varenv_check (loc0) = let
+  // HX-2026-10: fold on demand: the unfolded variables whose fields end here
+  val () = the_d2varenv_autofold_top (0(*fold*), loc0)
+  val () = the_d2varenv_check_loop (loc0, the_d2varenv_get_top ())
+in
+  the_d2varenv_autofold_top (4(*forget*), loc0)
+end // end of [the_d2varenv_check]
 
 (* ****** ****** *)
 

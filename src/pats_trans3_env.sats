@@ -484,6 +484,34 @@ fun the_d2varenv_check (loc0: loc_t): void
 fun the_d2varenv_check_llam (loc0: loc_t): void
 
 (* ****** ****** *)
+//
+// HX-2026-10: fold on demand (the folding itself is in
+// pats_trans3_fldfrat.dats, which installs the hook when it is dynloaded;
+// without the hook nothing is folded).
+// [the_d2varenv_autofold (knd, loc0, d2v, s2e)] calls the hook with
+//   knd = 0: [d2v] is a variable of the scope that is checked
+//            ([the_d2varenv_check]): if it is the view of a field of an
+//            unfolded variable, fold that variable;
+//   knd = 1: [d2v] is going to be checked against its [d2vfin]: fold it if
+//            it is unfolded and the type it must have at the end is not an
+//            unfolded one (the result as for knd = 3);
+//   knd = 2: an error has been reported for [d2v]: print why it (or the
+//            variable of which it is the view of a field) cannot be folded;
+//   knd = 3: [d2v] is checked against the type [s2e]: fold it if [s2e] is
+//            not an unfolded type (the result: 0 = nothing to do,
+//            1 = folded, 2 = fold failed);
+//   knd = 4: the scope of [d2v] ends: forget it;
+//   knd = 5: an error has been reported for [d2v] after a failed try
+//            (knd = 1 or 3): print why it could not be folded.
+//
+typedef
+d2varenv_autofold_hook = (int(*knd*), loc_t, d2var, s2exp) -> int
+fun the_d2varenv_set_autofold_hook (f: d2varenv_autofold_hook): void
+fun the_d2varenv_autofold
+  (knd: int, loc0: loc_t, d2v: d2var, s2e: s2exp): int
+//
+
+(* ****** ****** *)
 (*
 ** HX-2012-05
 *)

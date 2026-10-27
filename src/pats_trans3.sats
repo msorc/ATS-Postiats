@@ -62,6 +62,9 @@ staload "./pats_dynexp3.sats"
 (* ****** ****** *)
 
 fun the_trans3errlst_add (x: trans3err): void
+// HX-2026-10: the number of the errors added so far
+// (for the hints of fold on demand)
+fun the_trans3errlst_count ((*void*)): int
 fun the_trans3errlst_finalize ((*void*)): void // cleanup all the errors
 
 (* ****** ****** *)
@@ -328,6 +331,19 @@ fun d2exp_trup_selab
 
 fun d2exp_trup_foldat (d2e0: d2exp): d3exp
 fun d2exp_trup_freeat (d2e0: d2exp): d3exp
+//
+// HX-2026-10: fold on demand: [d2var_foldat_try (loc0, d2v)] folds the
+// unfolded variable [d2v] as [fold@ (d2v)] would; if [fold@] cannot be
+// applied, it reports nothing and leaves the state unchanged (the result:
+// false)
+//
+fun d2var_foldat_try (loc0: $LOC.location, d2v: d2var): bool
+//
+// HX-2026-10: [d3e0] has been given the unfolded type [s2e] by the pattern
+// [p3t]: the views of the fields are registered with [d3e0] (a variable)
+//
+fun d3lval_autofold_register
+  (d3e0: d3exp, s2e: s2exp, p3t: p3at): void
 
 (* ****** ****** *)
 

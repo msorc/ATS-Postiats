@@ -2843,3 +2843,36 @@ check the atsdoc translation, which works, and can stay). None has a line in `ge
 
 
 **Update:** the eight templates (prelude/SATS/DOCUGEN/{list,option,stream,arrayref,matrixref,fcontainer,giterator}.atxt and contrib/atscntrb/atscntrb-hx-libhiredis/SATS/DOCUGEN/hiredis_ML.atxt) were removed, together with their `#make_entry(...)` lines in prelude/SATS/DOCUGEN/Makefile.atxt and Makefile_html.atxt, the three `all_html::` lines in DBOOK/Makefile and the stale `hiredis_ML` lines of the hiredis TEST/README. The `.sats` files they described no longer exist; the linear replacements (list_vt, option_vt, stream_vt, arrayptr, matrixptr) have their own documents. The translation fixtures under utils/atsdoc/TEST/cases stay.
+
+## Fold on demand (trans3, after the port)
+
+An unfolded `datavtype` value (`@Con (..)` pattern: the type of the variable is `S2Edatconptr (d2c, rt, [l_1..l_n])`, the fields are
+the at-views `T_i @ l_i`) is folded by the checker itself, as `fold@` does, where the folded type is required; `fold@` stays
+available and `free@` is never implied. The code is in `pats_trans3_fldfrat.dats` (after `fold@`/`free@`, whose code is unchanged).
+
+* **Demand points.** (1) `d2exp_trdn` of a variable (`d2exp_trdn_var`, `pats_trans3_dynexp_dn.dats`) against a type that is not
+  (and may not be) an unfolded one: the hnf with `S2Erefarg`, `S2Einvar`, `S2Eexi`, `S2Euni`, `S2Ewthtype` and `S2Eat` taken off is not
+  `S2Edatconptr`, `S2EVar`, `S2Etop`, `S2Ehole` or an error (`autofold_wanted`): a return, an argument (`!T`), ... (2) The end of
+  the scope of the views of the fields (`the_d2varenv_check`, before its loop). (3) The end of the variable itself (`d2vfin_check`
+  with `D2VFINsome (T)` / `D2VFINsome_lvar (T @ l)`, the same test on `T`). An assignment (`x := xs`) and an unsafe cast whose
+  argument type is a template parameter are not demand points.
+* **Neutrality.** At each demand point, the program fails without the fold (the unfolded type does not match), so every program
+  that is accepted with its `fold@`s is checked exactly as before. Nothing at a demand point may allocate a stamp before the
+  variable is known to be unfolded (an hnf can make fresh static variables, a proof search makes holes): the owner is checked
+  first, and the views of the fields are registered through the variables of the pattern, not by a proof search. Checked: the C
+  of the 246 `src/pats_*.dats` and `libats/**/DATS/*.dats` is byte-identical with the compiler before the change.
+* **The try** (`autofold_try`): the views of the fields must be whole at-views (`pfobj_search_atview`, not `S2Ewithout`); then in a
+  pushed scope of constraints: the type of the constructor is instantiated (no static arguments) and each field type is
+  `tyleq`-solved against its argument type; on failure the scope is popped and dropped, the static errors are cleared and the
+  reason is kept; on success the scope is added (`trans3_env_pop_and_add_main`), the views are consumed and the variable gets the
+  result type (`d2var_set_type`, or `s2addr_exch_type` for a mutable variable). The owners are the variables that a pattern
+  unfolds (`d3lval_set_pat_type_left` of a `D3Evar`, linear or mutable) and the variables of unfolded types (parameters
+  `Con_unfold (..)`), not a field selection (`fold@ (p.lab)`), and not the variable of a field that is unfolded by a nested
+  pattern (its owner is a field).
+* **Hooks.** `pats_trans3_env_dvar.dats` calls `the_d2varenv_autofold (knd, loc, d2v, s2e)`, a function pointer that
+  `pats_trans3_fldfrat.dats` installs when it is dynloaded (the drivers of `src/test` that link the environment without fldfrat
+  have no hook, and their output is unchanged).
+* **Hints.** After an error about a variable that could not be folded (or about the view of one of its fields), one line:
+  `the variable xs is unfolded (pattern at LOC) and fold@ xs cannot be applied: the view of field K is consumed` /
+  `field K has type [T] but the constructor needs [T']`.
+* **Tests**: `doc/EXAMPLE/AUTOFOLD` (`make regress leakcheck`).
