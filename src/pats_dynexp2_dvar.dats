@@ -82,6 +82,7 @@ staload _(*avlmap*) = "./pats_avlmap.dats"
 
 staload "./pats_staexp2.sats"
 staload "./pats_dynexp2.sats"
+staload "./pats_staexp2_sprint.sats"
 
 (* ****** ****** *)
 
@@ -306,6 +307,12 @@ val () = fprint_int (out, d2var_get_level d2v)
 val () = fprint_string (out, ")")
 //
 } (* end of [fprint_d2var] *)
+
+implement
+fsprint_d2var (out, d2v) =
+  fsprint_varname (out, 1, d2var_get_sym (d2v), $UN.cast{ptr} (d2v))
+implement
+prerr_d2var_s (d2v) = fsprint_d2var (stderr_ref, d2v)
 
 implement
 fprint_d2varlst

@@ -63,6 +63,7 @@ staload "./pats_basics.sats"
 
 (* ****** ****** *)
 //
+staload GLOB = "./pats_global.sats"
 staload "./pats_errmsg.sats"
 staload _(*anon*) = "./pats_errmsg.dats"
 //
@@ -80,6 +81,7 @@ staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
 staload "./pats_staexp2_error.sats"
+staload "./pats_staexp2_sprint.sats"
 
 (* ****** ****** *)
 
@@ -531,6 +533,37 @@ d2vfin_check
 //
 (* ****** ****** *)
 
+//
+// HX-2026-10: the message (after the location) for a linear variable
+// that is not consumed: [d2v] still has the type [s2e]
+//
+fn
+prerr_d2var_unconsumed
+(
+  d2v: d2var, s2e: s2exp
+) : void =
+(
+if $GLOB.the_LEGACYERRORS_get () > 0 then {
+  val () = prerr ": the linear dynamic variable ["
+  val () = prerr_d2var (d2v)
+  val () = prerr "] needs to be consumed but it is preserved with the type ["
+  val () = prerr_s2exp (s2e)
+  val () = prerr "] instead."
+  val () = prerr_newline ()
+} else {
+  val () = sprint_reset ()
+  val () = prerr ": the linear variable "
+  val () = prerr_d2var_s (d2v)
+  val () = prerr " of type "
+  val () = prerr_s2exp_s (s2e)
+  val () = prerr " is not consumed at the end of its scope"
+  val () = prerr_newline ()
+  val () = prerr "  hint: consume it (free it, return it or pass it on),"
+  val () = prerr " or declare the parameter as !T"
+  val () = prerr_newline ()
+} (* end of [if] *)
+) (* end of [prerr_d2var_unconsumed] *)
+
 fun
 d2vfin_check_auxerr1
 (
@@ -538,9 +571,17 @@ d2vfin_check_auxerr1
 , d2v: d2var, s2e1: s2exp, s2e2: s2exp
 ) : void = {
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": the linear dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] is preserved but with an incompatible type."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the linear dynamic variable ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] is preserved but with an incompatible type."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the linear variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " does not have the required type at the end of its scope"
+  } (* end of [if] *)
   val () = prerr_newline ()
   val () = prerr_the_staerrlst ()
   val () =  the_trans3errlst_add (trans3err_T3E_d2var_fin_some_some (loc0, d2v))
@@ -552,12 +593,7 @@ d2vfin_check_auxerr2
   loc0: loc_t, d2v: d2var, s2e: s2exp
 ) : void = {
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": the linear dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] needs to be consumed but it is preserved with the type ["
-  val () = prerr_s2exp (s2e)
-  val () = prerr "] instead."
-  val () = prerr_newline ()
+  val () = prerr_d2var_unconsumed (d2v, s2e)
   val () = the_trans3errlst_add (trans3err_T3E_d2var_fin_none_some (loc0, d2v))
 } (* end of [d2vfin_check_auxerr2] *)
 
@@ -646,9 +682,17 @@ d2vfin_check_none_auxerr
   loc0: loc_t, d2v: d2var
 ) : void = {
   val () = prerr_error3_loc (loc0)
-  val () = prerr ": the linear dynamic variable ["
-  val () = prerr_d2var (d2v)
-  val () = prerr "] needs to be preserved but it is consumed instead."
+  val () =
+  if $GLOB.the_LEGACYERRORS_get () > 0 then {
+    val () = prerr ": the linear dynamic variable ["
+    val () = prerr_d2var (d2v)
+    val () = prerr "] needs to be preserved but it is consumed instead."
+  } else { // HX-2026-10: the surface syntax (pats_staexp2_sprint)
+    val () = sprint_reset ()
+    val () = prerr ": the linear variable "
+    val () = prerr_d2var_s (d2v)
+    val () = prerr " must still be available here, but it was consumed"
+  } (* end of [if] *)
   val () = prerr_newline ()
 } (* end of [d2vfin_check_none_auxerr] *)
 
@@ -728,12 +772,7 @@ in
     in
       if islin then let
         val () = prerr_error3_loc (loc0)
-        val () = prerr ": the linear dynamic variable ["
-        val () = prerr_d2var (d2v)
-        val () = prerr "] needs to be consumed but it is preserved with the type ["
-        val () = prerr_s2exp (s2e)
-        val () = prerr "] instead."
-        val () = prerr_newline ()
+        val () = prerr_d2var_unconsumed (d2v, s2e)
         val () = assertloc (false)
       in
         $extfcall (void, "exit", 1)
