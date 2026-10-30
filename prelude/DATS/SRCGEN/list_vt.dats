@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/list_vt.atxt
-** Time of generation: Wed Oct 28 01:00:16 2026
+** Time of generation: Fri Oct 30 04:15:49 2026
 *)
 
 (* ****** ****** *)
@@ -844,7 +844,6 @@ case+ xs0 of
 | @list_vt_cons
     (x0, xs1) => let
     val res = addr@xs1
-    prval () = fold@(xs0)
     prval () = $UN.cast2void(xs0)
   in
     last(res)
@@ -1338,8 +1337,8 @@ loop
   case+ xs of
   | @list_vt_cons
       (x, xs1) => let
-      val () = f0 (pf | x, env)
-      val () = loop(pf | xs1, f0, env)
+      val () = f0 (x, env)
+      val () = loop(xs1, f0, env)
     in
       // nothing
     end // end of [cons]
@@ -1347,7 +1346,7 @@ loop
 // end of [loop]
 //
 in
-  loop(pf | xs, f0, env)
+  loop(xs, f0, env)
 end // end of [list_vt_foreach_funenv]
 
 (* ****** ****** *)

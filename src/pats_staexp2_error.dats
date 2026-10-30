@@ -136,6 +136,43 @@ the_staerrlst_get
   val () = $UN.ptr0_set<staerrlst> (the_staerrlst, glist_nil ())
 } // end of [the_staerrlst_get]
 
+implement
+the_staerrlst_length
+  () = $UN.ptr0_get<int> (the_length)
+// end of [the_staerrlst_length]
+
+//
+// HX-2026-10: the errors that were added after the length [n] was taken are
+// removed. The list holds the errors in the reverse order (the most recent
+// one first) and only the first [MAXLEN] errors are recorded, so the number
+// of the recorded errors to drop is min(n0, MAXLEN) - min(n, MAXLEN).
+//
+fun
+staerrlst_drop
+(
+  xs: staerrlst, k: int
+) : staerrlst =
+  if k <= 0 then xs else
+  (
+  case+ glist_view (xs) of
+  | ~GLnil () => xs
+  | ~GLcons (_, xs1) => staerrlst_drop (xs1, k-1)
+  ) (* end of [case+] *)
+// end of [staerrlst_drop]
+
+implement
+the_staerrlst_truncate
+  (n) = () where {
+  val n0 = $UN.ptr0_get<int> (the_length)
+  val n = (if n0 > n then n else n0): int
+  val r0 = (if n0 < MAXLEN then n0 else MAXLEN): int
+  val r = (if n < MAXLEN then n else MAXLEN): int
+  val xs = $UN.ptr0_get<staerrlst> (the_staerrlst)
+  val xs = staerrlst_drop (xs, r0 - r)
+  val () = $UN.ptr0_set<staerrlst> (the_staerrlst, xs)
+  val () = $UN.ptr0_set<int> (the_length, n)
+} // end of [the_staerrlst_truncate]
+
 end // end of [local]
 
 (* ****** ****** *)

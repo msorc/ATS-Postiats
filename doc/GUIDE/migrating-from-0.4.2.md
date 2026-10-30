@@ -157,6 +157,15 @@ that the constructor does not accept). See
 [doc/EXAMPLE/AUTOFOLD](../EXAMPLE/AUTOFOLD) for the programs that are
 accepted and the ones that are rejected with their hints.
 
+The fold is also done where the value is passed by value and the fields of
+the unfolded value are not needed any more, and where a mutable variable
+(a `var`, a `&T` parameter, the variable of a field of a `@Con` pattern)
+holding an unfolded value is passed as an argument: the `fold@` before an
+unsafe cast (`$UN.castvwtp0 {t} (x)`) and the `fold@` before `f (xs)`
+(`xs` passed by reference or by value) are not written any more. A
+mutable variable that is folded for a by-value argument is consumed by
+the call, as it is after an explicit `fold@`.
+
 ## The proofs of at-views may be omitted
 
 In 0.4.2 a call of a function with a proof parameter wrote the proof
@@ -171,15 +180,24 @@ fun get {l:addr} (pf: !int @ l | p: ptr l): int = !p
 fun use (x: &int): int = get (addr@ x)   // was: get (view@ x | addr@ x)
 ```
 
-The explicit form is still accepted. The proof must still be written
-when:
+The explicit form is still accepted. The proof of a view that is not an
+at-view (a `dataview` of your own) may be omitted too: the checker looks
+for a proof of that view in the environment, and the proof must be unique.
+When there are several proofs of the same view in the environment, the
+one whose type is the type of the proof parameter is the one (the other
+arguments determine the type of the parameter); the error names them
+when they cannot be told apart. The proof must still be written when:
 
 - the proof is consumed (`pf: int @ l`, no `!`), for example when the
   function frees or stores it;
 - the proof is passed by reference (`&`);
-- the view is not an at-view, for example a `dataview` of your own (an
-  `array_v (a, l, n)` is an at-view, `@[a][n] @ l`, and can be omitted);
-- the other arguments do not determine the address `l`.
+- there is no proof of the view in the environment (the proof of a
+  `dataview` of your own is found by its type; when there is none, or
+  when there are several, the error says so);
+- the other arguments do not determine the address `l` (the proof of an
+  at-view is then looked for by its type: the at-views of the same
+  element type; when there is none, or when there are several, the
+  proof must still be written).
 
 The error then adds a line that names the proof argument and the reason
 ("which is consumed (no !)", "which is not an at-view (T @ l)", and so

@@ -158,7 +158,6 @@ case+ xs of
     // end of [val]
   in
     if sgn > 0 then let
-      prval () = fold@ (xs)
       val nx = mynode_make_elt<a> (x0)
       val ((*void*)) = xs := mynode_cons (nx, xs)
     in
@@ -348,7 +347,6 @@ val+@list_vt_cons (x, _) = nx1
 //
 val () = x := x0
 //
-prval () = fold@ (nx1)
 prval () = $UN.cast2void (nx1)
 //
 prval () = __assert (nx) where

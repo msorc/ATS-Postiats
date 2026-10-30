@@ -2859,8 +2859,22 @@ available and `free@` is never implied. The code is in `pats_trans3_fldfrat.dats
   (and may not be) an unfolded one: the hnf with `S2Erefarg`, `S2Einvar`, `S2Eexi`, `S2Euni`, `S2Ewthtype` and `S2Eat` taken off is not
   `S2Edatconptr`, `S2EVar`, `S2Etop`, `S2Ehole` or an error (`autofold_wanted`): a return, an argument (`!T`), ... (2) The end of
   the scope of the views of the fields (`the_d2varenv_check`, before its loop). (3) The end of the variable itself (`d2vfin_check`
-  with `D2VFINsome (T)` / `D2VFINsome_lvar (T @ l)`, the same test on `T`). An assignment (`x := xs`) and an unsafe cast whose
-  argument type is a template parameter are not demand points.
+  with `D2VFINsome (T)` / `D2VFINsome_lvar (T @ l)`, the same test on `T`). (4) A use of a variable whose type is a bare
+  template variable (`S2EVar`, the type of a parameter of an unsafe cast such as `$UN.castvwtp0 {t} (x)`): the value is
+  passed by value, so the fields of an unfolded value are not needed any more (`autofold_wanted` takes a `byval` flag: a
+  `refarg` (`!T` or `&T`) is not by value). (5) A mutable variable that is passed as an argument, by reference or
+  by value, with the rules of (1) and (4) (`d3exp_trdn_autofold`, `pats_trans3_util.dats`, used by the `D23Ed3exp`
+  path of `d23explst_trdn_aux` and by `d3explst_trdn_arg`): the value is read (`d2exp_trup`) before the argument
+  is checked, so `d2exp_trdn_var` never sees it; the folding of the value is a second hook of the environment
+  (`the_d2varenv_autofold_lval`, `pats_trans3_env_dvar.dats`), as the folding of a variable is
+  (`the_d2varenv_autofold`). The read has already taken the content out (`s2addr_deref` topizes the view), so the
+  hook gives the expression the folded type and the view the *topized* folded type: writing the folded type
+  back would put a consumed value back into the variable (a by-reference argument gets its type back from
+  `d3explst_arg_restore` after the call; `doc/EXAMPLE/AUTOFOLD/NEG_byvalue_twice.dats`). When the fold fails
+  and the check fails, the hint is printed as for (1). An assignment (`x := xs`) is not a demand point: the assignment does
+  not check the type of the right-hand side (the type of the place is not checked either), so the folding there
+  is not needed, and it is not safe (the fields of the value may be used after the assignment: the `merge`
+  function of the prelude's `list_vt_mergesort.dats` does that).
 * **Neutrality.** At each demand point, the program fails without the fold (the unfolded type does not match), so every program
   that is accepted with its `fold@`s is checked exactly as before. Nothing at a demand point may allocate a stamp before the
   variable is known to be unfolded (an hnf can make fresh static variables, a proof search makes holes): the owner is checked
@@ -2880,6 +2894,9 @@ available and `free@` is never implied. The code is in `pats_trans3_fldfrat.dats
 * **Hints.** After an error about a variable that could not be folded (or about the view of one of its fields), one line:
   `the variable xs is unfolded (pattern at LOC) and fold@ xs cannot be applied: the view of field K is consumed` /
   `field K has type [T] but the constructor needs [T']`.
+* **The errors of a failed try.** A try that fails adds the errors of the failed check to the list of the static
+  errors; they are removed when the try is discarded (`the_staerrlst_truncate`, `pats_staexp2_error.dats`), so that
+  the errors that were reported before the try are kept (the truncation removes the errors that the try added).
 * **Tests**: `doc/EXAMPLE/AUTOFOLD` (`make regress leakcheck`).
 
 ## Proof-argument elision (trans3, after the port)
@@ -2905,5 +2922,28 @@ search: `get (p)` is checked as `get (view@ ... | p)` with the view found at the
   dynamic arguments omit preserved at-view proofs are selected (`aritest_elide_d2exparglst_s2exp`) and resolved on the
   dynamic arguments (their `s2kexp` without the proof arguments); `d3exp_trup_applst` elides as above. Candidates that
   differ only in their views are ambiguous (the views are not used for the resolution).
-* **Tests**: `doc/EXAMPLE/AUTOFOLD` (`POS_elide`, `POS_elide_overload`, `NEG_elide_noaddr`, `NEG_elide_nonat`,
-  `NEG_elide_consumed`).
+* **The proofs that are not at-views** (the round 2): the proof of a preserved view that is not an at-view (a `dataview`,
+  an `absview`, a viewdef that does not reduce to an at-view, or a template parameter of a view sort, `!v`) may be
+  omitted too: the proof is found by its type in the environment (`pfobj_search_bytype`,
+  `pats_trans3_env_pfman.dats`: the proofs of the pfman environment whose type has the same head as the type of
+  the proof parameter; the head of an application is its constant, the head of a static variable is the variable
+  itself; one existential level is taken off). The proof must be unique: when there is none, the error says that no
+  proof of the view is in scope; when there are several, it names them. A candidate is a variable whose type is of a
+  proof sort and that is not consumed (it has a type): the pfman environment also holds the linear variables that
+  are not proofs, and a type that is not known (`?1`, the view argument of a template is not given) has every
+  proof as a candidate, never a non-proof. The proof is used as an explicit proof argument is
+  (`d2exp_trup_var_nonmut`: consumed until the call, the type restored after it; a linear proof from outside an
+  enclosing `llam` is the same error). The proof of a view that is passed by reference is not omitted.
+  The proofs of the same head are told apart by their indices: the type of the proof parameter is resolved by the
+  dynamic arguments (they are checked first), so the candidate whose type is the type of the parameter is the one;
+  when there is none or more than one, all the candidates are kept and the error names them. The proofs that are
+  already used are removed from the candidates (the omitted proof arguments are resolved in order).
+* **The at-view whose address is not solved** (the round 2): when the other arguments do not determine the address
+  of the at-view (the pointer argument is `ptr (l+n*sizeof(a))`, which does not solve `l`), the proof is searched
+  for by its type as well (`pfobj_search_atview_bytype`: the proofs whose type is an at-view of the same element
+  type; the head of an array type is the head of its element type). When there is exactly one, it is used and its
+  type solves the address (the constraint of the pointer argument checks that it is the right one); else the error
+  of the round 1 is reported ("the address of the omitted proof argument cannot be inferred").
+* **Tests**: `doc/EXAMPLE/AUTOFOLD` (`POS_elide`, `POS_elide_overload`, `POS_elide_byview`, `NEG_elide_noaddr`,
+  `NEG_elide_noproof`, `NEG_elide_ambiguous`, `NEG_elide_consumed`); the site of the prelude
+  (`prelude/DATS/array.dats`, the `loop` of `array_rforeach_env`) omits its proof.

@@ -120,17 +120,27 @@ NEW
     required (a return, an argument, an assignment) and at the end of the
     scope that holds the views of its fields, so the fold@ that ends a
     clause or a let is no longer written (explicit fold@ still works, and
-    is needed between field writes or to give static arguments). A
-    program that typechecked before is unchanged (the C code of src/ and
-    libats/ is identical). When the fold fails, the error carries a hint
-    that says why (a field view is consumed, a field has the wrong
-    type). Likewise the proofs of at-views may be omitted in a call: f(p)
+    is needed between field writes or to give static arguments). The fold
+    is also done where the value is passed by value (the argument of an
+    unsafe cast whose type is a template parameter) and where a mutable
+    variable is passed as an argument, so the fold@ that precedes those
+    calls is not written any more. A program that typechecked before is
+    unchanged (the C code of src/ and libats/ is identical). When the
+    fold fails, the error carries a hint that says why (a field view is
+    consumed, a field has the wrong type). Likewise the proofs of
+    at-views may be omitted in a call: f(p)
     is accepted for a function whose proof parameters are all preserved
     at-views (pf: !T @ l | ...), the proofs being found in the
-    environment at the address given by the other arguments; a proof that
-    is consumed or passed by reference, a view that is not an at-view
-    (a dataview) and an address that the other arguments do not determine
-    still need the explicit "pf |", and the error says so. See
+    environment at the address given by the other arguments; the proof of
+    a view that is not an at-view (a dataview) is found by its type in
+    the environment (when there are several proofs of the same view,
+    the one whose type is the type of the proof parameter is the one:
+    the other arguments determine it); a proof that is consumed or
+    passed by reference, a proof that is not in the environment and an
+    address that the other arguments do not determine still need the
+    explicit "pf |", and the error says so (the proof of an at-view
+    whose address the other arguments do not determine is looked for by
+    its type as well: the at-views of the same element type). See
     doc/EXAMPLE/AUTOFOLD and doc/GUIDE/migrating-from-0.4.2.md.
 
 REMOVED

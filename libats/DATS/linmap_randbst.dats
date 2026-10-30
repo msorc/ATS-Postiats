@@ -302,9 +302,9 @@ case+ t of
       linmap_randbst_random_m_n (1, n)
     // end of [val]
   in
-    if randbit = 0 then let
-      prval () = fold@ (t) in bstree_insert_atroot<key,itm> (t, k0, x0)
-    end else let
+    if randbit = 0 then
+      bstree_insert_atroot<key,itm> (t, k0, x0)
+    else let
       val sgn = compare_key_key<key> (k0, k)
     in
       if sgn < 0 then let

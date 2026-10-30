@@ -834,7 +834,6 @@ case+ xs0 of
 | @list_vt_cons
     (x0, xs1) => let
     val res = addr@xs1
-    prval () = fold@(xs0)
     prval () = $UN.cast2void(xs0)
   in
     last(res)
@@ -1328,8 +1327,8 @@ loop
   case+ xs of
   | @list_vt_cons
       (x, xs1) => let
-      val () = f0 (pf | x, env)
-      val () = loop(pf | xs1, f0, env)
+      val () = f0 (x, env)
+      val () = loop(xs1, f0, env)
     in
       // nothing
     end // end of [cons]
@@ -1337,7 +1336,7 @@ loop
 // end of [loop]
 //
 in
-  loop(pf | xs, f0, env)
+  loop(xs, f0, env)
 end // end of [list_vt_foreach_funenv]
 
 #atscode_separator()

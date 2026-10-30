@@ -784,7 +784,6 @@ mynode_getref_itm
 val t0 =
   $UN.castvwtp1{avltree(key,itm,1)}(nx)
 val+@B(_, k, x, tl, tr) = t0; val p_x = addr@(x)
-prval ((*void*)) = fold@(t0)
 prval ((*void*)) = $UN.cast2void (t0)
 //
 in

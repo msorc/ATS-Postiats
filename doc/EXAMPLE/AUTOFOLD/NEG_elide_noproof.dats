@@ -2,9 +2,10 @@
 (* SPDX-License-Identifier: MIT *)
 (*
 ** HX-2026-10: proof-argument elision
-** The proof parameter is not an at-view (a dataview): the proof cannot
-** be omitted, the call still needs it. (An [array_v (a, l, n)] is the
-** at-view [@[a][n] @ l]: its proof can be omitted.)
+** The proof of a view that is not an at-view (a dataview) is omitted: the
+** checker looks for a proof of that view in the environment, and there is
+** none. (An [array_v (a, l, n)] is the at-view [@[a][n] @ l]: its proof
+** is found at the address.)
 *)
 #include "share/atspre_staload.hats"
 //
@@ -24,9 +25,6 @@ end // end of [read]
 implement
 main0 () = {
   var x: int = 1
-  prval pf = CELL (view@ x)
-  val r = read (addr@ x) // error: the proof of [cell_v] is needed
-  prval CELL (pf1) = pf
-  prval () = view@ x := pf1
+  val r = read (addr@ x) // error: no proof of [cell_v] is in scope
 }
-(* end of [NEG_elide_nonat.dats] *)
+(* end of [NEG_elide_noproof.dats] *)

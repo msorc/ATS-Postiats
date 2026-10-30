@@ -780,7 +780,8 @@ case+ d23es of
         val d3e = (
           case+ d23e of
           | ~D23Ed2exp(d2e) => d2exp_trdn(d2e, s2e)
-          | ~D23Ed3exp(d3e) => d3exp_trdn(d3e, s2e)
+          // HX-2026-10: fold on demand (a mutable variable)
+          | ~D23Ed3exp(d3e) => d3exp_trdn_autofold(d3e, s2e)
         ) : d3exp // end of [val]
         val d3es = d23explst_trdn_aux(d23es, s2es, err)
       in
@@ -1407,6 +1408,81 @@ of // case+
 | v => (s2exp_node_view_free (v); false)
 ) (* end of [s2exp_elide_atview] *)
 
+//
+// HX-2026-10: the type of a proof that is not an at-view: an application of
+// a view constant (a dataview) or a static variable (a template parameter
+// of a view sort), possibly under an existential
+//
+fun
+s2exp_is_byview
+(
+  s2e: s2exp
+) : bool = let
+//
+val s2e = s2exp_hnfize (s2e)
+val isapp = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2Eapp (s2e1, _) => (
+      case+ s2exp_node_view (s2e1.s2exp_node ()) of
+      | ~S2Ecst (_) => true
+      | v => (s2exp_node_view_free (v); false)
+      )
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+val isvar = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2Evar (_) => true
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+val isunknown = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2EVar (_) => true
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+val isexi = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2Eexi (_, _, s2e1) => s2exp_is_byview (s2e1)
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+//
+in
+//
+  if isapp then true
+  else (if isvar then true else (if isunknown then true else isexi))
+//
+end // end of [s2exp_is_byview]
+//
+// the proof parameter is of a type that is not an at-view: the proof is found
+// by its type in the environment
+//
+fun
+s2exp_elide_byview
+(
+  s2e: s2exp
+) : bool = let
+//
+val s2e = s2exp_hnfize (s2e)
+val isrefarg = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2Erefarg (refval, s2e1) => (
+      if refval = 0 then (
+        case+ s2exp_node_view (s2e1.s2exp_node ()) of
+        | ~S2Eat (_, _) => false // an at-view: the other path
+        | v => (
+            s2exp_node_view_free (v);
+            s2exp_is_byview (s2e1)
+            )
+        ) else false // passed by reference
+      )
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+//
+in
+//
+  isrefarg
+//
+end // end of [s2exp_elide_byview]
+//
 fun
 s2explst_elide_test_loop
 (
@@ -1418,7 +1494,7 @@ if k > npf then 0 else
 case+ glist_view(s2es) of
 | ~GLnil () => k
 | ~GLcons (s2e, s2es) =>
-    if s2exp_elide_atview (s2e)
+    if s2exp_elide_atview (s2e) || s2exp_elide_byview (s2e)
       then s2explst_elide_test_loop (k+1, npf, s2es) else k
     // end of [if]
 )
@@ -1523,15 +1599,206 @@ of // case+
 | v => (s2exp_node_view_free (v); false)
 ) (* end of [s2exp_is_errexp] *)
 
+//
+// HX-2026-10: no proof of the view [s2e] is in scope for the omitted proof
+// argument [k]
+//
+fun
+prerr_elide_noproof_msg
+(
+  locarg: loc_t, k: int, s2e: s2exp
+) : void = let
+//
+val () = sprint_reset ()
+val () = prerr_error3_loc (locarg)
+val () = prerr ": no proof of the view "
+val () = prerr_s2exp_s (s2e)
+val () = prerr " is in scope for the omitted proof argument "
+val () = prerr_int (k)
+val () = prerr "; pass the proof explicitly."
+val () = prerr_newline ()
+//
+in
+  ()
+end // end of [prerr_elide_noproof_msg]
+//
+fun
+auxerr_elide_noproof
+(
+  locarg: loc_t, k: int, s2e: s2exp
+) : void = let
+//
+val legacy = ($GLOB.the_LEGACYERRORS_get () > 0) : bool
+val () = (
+  if legacy then () else prerr_elide_noproof_msg (locarg, k, s2e)
+)
+//
+in
+  the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_elide (locarg, k))
+end // end of [auxerr_elide_noproof]
+//
+// HX-2026-10: more than one proof of the view [s2e] is in scope for the
+// omitted proof argument [k]
+//
+fun
+prerr_d2varlst_names
+(
+  xs: glist (d2var)
+) : void = let
+//
+in
+//
+case+ glist_view (xs) of
+| ~GLnil () => ()
+| ~GLcons (d2v, xs1) => let
+    val () = $SYM.prerr_symbol (d2var_get_sym (d2v))
+  in
+    if glist_is_cons (xs1)
+    then (prerr " or "; prerr_d2varlst_names (xs1)) else ()
+  end // end of [GLcons]
+//
+end // end of [prerr_d2varlst_names]
+//
+fun
+prerr_elide_ambiguous_msg
+(
+  locarg: loc_t, k: int, cands: glist (d2var)
+) : void = let
+//
+val () = sprint_reset ()
+val () = prerr_error3_loc (locarg)
+val () = prerr ": the omitted proof argument "
+val () = prerr_int (k)
+val () = prerr " could be "
+val () = prerr_d2varlst_names (cands)
+val () = prerr "; pass the proof explicitly."
+val () = prerr_newline ()
+//
+in
+  ()
+end // end of [prerr_elide_ambiguous_msg]
+//
+fun
+auxerr_elide_ambiguous
+(
+  locarg: loc_t, k: int, s2e: s2exp, cands: glist (d2var)
+) : void = let
+//
+val legacy = ($GLOB.the_LEGACYERRORS_get () > 0) : bool
+val () = (
+  if legacy then () else prerr_elide_ambiguous_msg (locarg, k, cands)
+)
+//
+in
+  the_trans3errlst_add (trans3err_T3E_d23exp_trup_app23_elide (locarg, k))
+end // end of [auxerr_elide_ambiguous]
+//
+// HX-2026-10: no proof of the view is in scope
+//
+fun
+d3exp_elide_proof_none
+(
+  locarg: loc_t, k: int, s2e_v: s2exp
+) : d3exp = let
+//
+val () = auxerr_elide_noproof (locarg, k, s2e_v)
+//
+in
+  d3exp_errexp (locarg)
+end // end of [d3exp_elide_proof_none]
+//
+// HX-2026-10: more than one proof of the view is in scope
+//
+fun
+d3exp_elide_proof_amb
+(
+  locarg: loc_t, k: int, s2e_v: s2exp, cands: glist (d2var)
+) : d3exp = let
+//
+val () = auxerr_elide_ambiguous (locarg, k, s2e_v, cands)
+//
+in
+  d3exp_errexp (locarg)
+end // end of [d3exp_elide_proof_amb]
+//
+// HX-2026-10: the proof is found: it is used as it is (the type of the
+// variable is restored after the call)
+//
+fun
+d3exp_elide_proof_one
+(
+  locarg: loc_t, s2e_v: s2exp, cands: glist (d2var)
+, used: &glist(d2var) >> _
+) : d3exp = let
+//
+val d2v = (
+  case+ glist_view (cands) of
+  | ~GLcons (d2v, _) => d2v
+  | ~GLnil () => d2var_make_any (locarg) // unreachable
+) : d2var // end of [val]
+// HX-2026-10: the proof is used as an explicit proof argument [d2v] would
+// be (consumed until the restoration; a proof from outside of an enclosing
+// [llam] is an error)
+val d3e = d2exp_trup_var_nonmut (locarg, d2v)
+// HX-2026-10: the proof is used: the next omitted proof does not look
+// for it again
+val () = used := glist_cons (d2v, used)
+//
+in
+  d3exp_trdn (d3e, s2exp_refarg (0, s2e_v))
+end // end of [d3exp_elide_proof_one]
+//
+// HX-2026-10: the omitted proof of a view that is not an at-view: the proof
+// is found by its type in the environment (it must be unique)
+//
+fun
+d3exp_elide_proof_byview
+(
+  locarg: loc_t, k: int, s2e_v: s2exp
+, used: &glist(d2var) >> _
+) : d3exp = let
+//
+val cands = pfobj_search_bytype (s2e_v, used)
+val ncands = glist_length (cands)
+val ans = (
+  if ncands = 0 then 0 else (if ncands = 1 then 1 else 2)
+) : int // end of [val]
+val d3e = (
+  if ans = 0
+    then d3exp_elide_proof_none (locarg, k, s2e_v)
+    else (
+      if ans = 2
+        then d3exp_elide_proof_amb (locarg, k, s2e_v, cands)
+        else d3exp_elide_proof_one (locarg, s2e_v, cands, used)
+      )
+) : d3exp // end of [val]
+//
+in
+  d3e
+//
+end // end of [d3exp_elide_proof_byview]
+//
 // the omitted proof of the parameter [s2e_arg] (!T @ l), of position [k]
 fun
 d3exp_elide_proof
 (
   locarg: loc_t, k: int, s2e_arg: s2exp
+, used: &glist(d2var) >> _
 ) : d3exp = let
   val-~S2Erefarg
     (_, s2e_v) = s2exp_node_view(s2e_arg.s2exp_node())
   val s2f_v = s2exp_hnfize (s2e_v)
+  val isatview = (
+    case+ s2exp_node_view (s2f_v.s2exp_node ()) of
+    | ~S2Eat (_, _) => true
+    | v => (s2exp_node_view_free (v); false)
+  ) : bool // end of [val]
+//
+in
+//
+if ~isatview then
+  d3exp_elide_proof_byview (locarg, k, s2f_v, used)
+else let
   val-~S2Eat
     (_, s2l) = s2exp_node_view(s2f_v.s2exp_node())
   val s2l = s2exp_hnfize (s2l)
@@ -1551,12 +1818,25 @@ d3exp_elide_proof
 in
 //
 if unsolved then let
-  val () = auxerr_elide_noaddr (locarg, k, s2f_v)
+//
+// HX-2026-10: the address of the at-view is not solved by the other
+// arguments: the proof is searched by its type (the at-views of the same
+// element type); when there is exactly one, it is used (its type solves
+// the address), else the error is reported
+//
+  val cands = pfobj_search_atview_bytype (s2f_v)
+  val ncands = glist_length (cands)
 in
-  d3exp_viewat
-  (
-    locarg, s2exp_errexp (s2rt_view), d3exp_errexp (locarg), glist_nil ()
-  )
+  if ncands = 1 then
+    d3exp_elide_proof_one (locarg, s2f_v, cands, used)
+  else let
+    val () = auxerr_elide_noaddr (locarg, k, s2f_v)
+  in
+    d3exp_viewat
+    (
+      locarg, s2exp_errexp (s2rt_view), d3exp_errexp (locarg), glist_nil ()
+    )
+  end // end of [if]
 end else let
   val s2e_at =
     s2addr_viewat_deref (locarg, s2l, glist_nil ())
@@ -1572,6 +1852,7 @@ in
     d3exp_trdn (d3e_pf, s2e_arg)
   end // end of [if]
 end // end of [if]
+end // end of [if]
 //
 end // end of [d3exp_elide_proof]
 
@@ -1579,6 +1860,7 @@ fun
 d3explst_elide_proofs_loop
 (
   locarg: loc_t, k: int, npf: int, s2es: s2explst
+, used: &glist(d2var) >> _
 ) : d3explst =
 (
 if k > npf then glist_nil () else
@@ -1586,18 +1868,22 @@ if k > npf then glist_nil () else
 case+ glist_view(s2es) of
 | ~GLnil () => glist_nil ()
 | ~GLcons (s2e, s2es) => let
-    val d3e = d3exp_elide_proof (locarg, k, s2e)
+    val d3e = d3exp_elide_proof (locarg, k, s2e, used)
   in
-    glist_cons (d3e, d3explst_elide_proofs_loop (locarg, k+1, npf, s2es))
+    glist_cons (d3e, d3explst_elide_proofs_loop (locarg, k+1, npf, s2es, used))
   end // end of [GLcons]
 )
 ) (* end of [d3explst_elide_proofs_loop] *)
 
 implement
 d3explst_elide_proofs
-  (locarg, npf, s2es) =
-  d3explst_elide_proofs_loop (locarg, 1, npf, s2es)
-// end of [d3explst_elide_proofs]
+  (locarg, npf, s2es) = let
+//
+var used: glist (d2var) = glist_nil ()
+//
+in
+  d3explst_elide_proofs_loop (locarg, 1, npf, s2es, used)
+end // end of [d3explst_elide_proofs]
 
 (* ****** ****** *)
 

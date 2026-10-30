@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/array.atxt
-** Time of generation: Wed Oct 28 01:00:16 2026
+** Time of generation: Fri Oct 30 09:37:02 2026
 *)
 
 (* ****** ****** *)
@@ -594,7 +594,7 @@ array_foreach_funenv
 (
 //
 array_foreach_funenv_tsz
-  {a}{v}{vt}(pf | A0, asz, sizeof<a>, fwork, env)
+  {a}{v}{vt}(A0, asz, sizeof<a>, fwork, env)
 //
 ) (* end of [array_foreach_funenv] *)
 
@@ -652,8 +652,7 @@ in
       array_foreach2$fwork<a1,a2><env>(!p1, !p2, env)
     val res =
       loop (
-        pf12, pf22
-      | ptr1_succ<a1>(p1), ptr1_succ<a2>(p2), pred(nz), env
+        ptr1_succ<a1>(p1), ptr1_succ<a2>(p2), pred(nz), env
       ) (* loop *)
     prval () = pf1 := array_v_cons(pf11, pf12)
     prval () = pf2 := array_v_cons(pf21, pf22)
@@ -667,7 +666,7 @@ end else nz(*0*)
 //
 end // end of [loop]
 //
-val nz = loop(view@(A1), view@(A2) | addr@(A1), addr@(A2), asz, env)
+val nz = loop(addr@(A1), addr@(A2), asz, env)
 //
 in
   asz - nz
@@ -812,7 +811,7 @@ in
   if cont then let
     val () =
     array_rforeach$fwork<a><env>(!p1, env)
-    val res = loop(pf1 | p1, pred(nz), env)
+    val res = loop(p1, pred(nz), env)
     prval () = pf := array_v_extend(pf1, pf2)
   in
     res

@@ -391,7 +391,7 @@ prval () = __assert (kxs) where {
 } // end of [where] // end of [prval]
 //
 in
-  kxs := map; fold@ (nx0); map := nx0
+  kxs := map; map := nx0
 end // end of [linmap_insert_any_ngc]
 
 (* ****** ****** *)

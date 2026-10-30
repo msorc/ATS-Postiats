@@ -1,0 +1,37 @@
+elide_ambiguous.dats:26:16-19: error(3): the omitted proof argument 1 could be pf2 or pf1 or y$view or x$view; pass the proof explicitly.
+   26 |   val r = read (1) // error: two proofs are in scope
+      |                ^~~
+elide_ambiguous.dats:26:16-19: error(3): the function argument needs to be a left-value.
+elide_ambiguous.dats:21:12-27:2: error(3): the linear variable pf1 of type cell_v(x) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+   21 | main0 () = {
+      |            ^
+   22 |   var x: int = 1
+      |   ^~~~~~~~~~~~~~
+   23 |   var y: int = 2
+      |   ^~~~~~~~~~~~~~
+      ...
+elide_ambiguous.dats:21:12-27:2: error(3): the linear variable pf2 of type cell_v(y) is not consumed at the end of its scope
+  hint: consume it (free it, return it or pass it on), or declare the parameter as !T
+elide_ambiguous.dats:21:12-27:2: error(3): the linear variable view@ x does not have the required type at the end of its scope
+elide_ambiguous.dats:21:12-27:2: error(3): type mismatch:
+  expected: int
+  actual:   without(int(1))
+elide_ambiguous.dats:21:12-27:2: error(3): type mismatch:
+  expected: int?
+  actual:   without(int(1))?
+elide_ambiguous.dats:21:12-27:2: error(3): type mismatch:
+  expected: int? @ x
+  actual:   without(int(1))? @ x
+elide_ambiguous.dats:21:12-27:2: error(3): the linear variable view@ y does not have the required type at the end of its scope
+elide_ambiguous.dats:21:12-27:2: error(3): type mismatch:
+  expected: int
+  actual:   without(int(2))
+elide_ambiguous.dats:21:12-27:2: error(3): type mismatch:
+  expected: int?
+  actual:   without(int(2))?
+elide_ambiguous.dats:21:12-27:2: error(3): type mismatch:
+  expected: int? @ y
+  actual:   without(int(2))? @ y
+patsopt(TRANS3): there are [6] errors in total.
+exit 1

@@ -405,7 +405,6 @@ prval () =
   __clear (x0) where {
   extern praxi __clear (x: &a >> a?): void
 } (* end of [prval] *)
-prval () = fold@ {a} (hp0)
 //
 fun remove
   {n:nat}{sz:nat}

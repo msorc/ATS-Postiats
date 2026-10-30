@@ -1,0 +1,6 @@
+elide_noproof.dats:27:16-25: error(3): no proof of the view cell_v(x) is in scope for the omitted proof argument 1; pass the proof explicitly.
+   27 |   val r = read (addr@ x) // error: no proof of [cell_v] is in scope
+      |                ^~~~~~~~~
+elide_noproof.dats:27:16-25: error(3): the function argument needs to be a left-value.
+patsopt(TRANS3): there are [2] errors in total.
+exit 1

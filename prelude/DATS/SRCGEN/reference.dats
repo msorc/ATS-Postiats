@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/reference.atxt
-** Time of generation: Wed Oct 21 23:29:31 2026
+** Time of generation: Fri Oct 30 04:15:49 2026
 *)
 
 (* ****** ****** *)
@@ -80,7 +80,7 @@ implement
 {}(*tmp*)
 ref_app_funenv{a}
   (pfv | r, f, env) = let
-  val (vbox _ | p) = ref_get_viewptr (r) in f (pfv | !p, env)
+  val (vbox _ | p) = ref_get_viewptr (r) in f (!p, env)
 end // end of [ref_app_funenv]
 
 (* ****** ****** *)

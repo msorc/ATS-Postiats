@@ -362,6 +362,13 @@ fun d2var_foldat_try (loc0: $LOC.location, d2v: d2var): bool
 //
 fun d3lval_autofold_register
   (d3e0: d3exp, s2e: s2exp, p3t: p3at): void
+//
+// HX-2026-10: fold on demand: [d3exp_trdn_autofold (d3e, s2e)] is
+// [d3exp_trdn (d3e, s2e)] where a mutable variable [d3e] whose content is
+// an unfolded value is first folded if [s2e] is not an unfolded type (the
+// rules are those of a non-mutable variable, see [d2exp_trdn_var])
+//
+fun d3exp_trdn_autofold (d3e: d3exp, s2e: s2exp): d3exp
 
 (* ****** ****** *)
 

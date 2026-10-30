@@ -4144,7 +4144,7 @@ ATSdyncst_mac(atspre_g0int_sub_int)
 ATSdyncst_mac(atspre_g0int_add_int)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_free, (atstype_boxed), atsvoid_t0ype) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__d23explst_free, (atstype_boxed), atsvoid_t0ype) ;
-ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn_autofold, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_mac(atspre_g0int_neq_int)
 ATSdyncst_extfun(patsopt_prerrf_ifdebug, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_g0int_lt_int)
@@ -4217,6 +4217,15 @@ ATSdyncst_valdec(patsopt_s2rt_view, atstkind_type(atstype_ptrk)) ;
 ATSdyncst_mac(atspre_g0int_lte_int)
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_elide, (atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol, (atstkind_type(atstype_ptrk)), atsvoid_t0ype) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_sym, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_make_any, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_refarg, (atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_env_056_sats__pfobj_search_bytype, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+ATSdyncst_mac(atspre_g1int2int_int_int)
+ATSdyncst_mac(atspre_g1int_eq_int)
+ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_env_056_sats__pfobj_search_atview_bytype, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_trans3_056_sats__s2addr_viewat_deref, (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 ATSdyncst_extfun(PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_ptr_addr_type, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
@@ -5344,8 +5353,17 @@ ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__62__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
+atstkind_t0ype(atstype_bool)
+s2exp_is_byview_278(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+s2exp_elide_byview_279(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__3(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
 atstkind_t0ype(atstype_int)
-s2explst_elide_test_loop_278(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+s2explst_elide_test_loop_281(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__110__8(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
@@ -5403,7 +5421,7 @@ atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__40__24(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-s2explst_elide_nth_296(atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+s2explst_elide_nth_299(atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstype_boxed
 ATSLIB_056_libats_056_arena__glist_view__119__7(atstkind_type(atstype_ptrk)) ;
@@ -5432,51 +5450,42 @@ ATSLIB_056_prelude_056_unsafe__ptr0_get__40__26(atstkind_type(atstype_ptrk)) ;
 #if(0)
 ATSextern()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lte_g0int_int__305(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lte_g0int_int__308(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
 #endif
 #endif
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lte_g0int_int__305__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lte_g0int_int__308__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atsvoid_t0ype
-prerr_elide_hint_308(atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+prerr_elide_hint_311(atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__3(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__eq_g0int_int__62__4(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atsvoid_t0ype
-auxerr_elide_noaddr_310(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+auxerr_elide_noaddr_313(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
 PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__11(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-s2exp_is_errexp_312(atstkind_type(atstype_ptrk)) ;
+s2exp_is_errexp_315(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
-atstkind_type(atstype_ptrk)
-d3exp_elide_proof_313(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+atsvoid_t0ype
+prerr_elide_noproof_msg_316(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__10() ;
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__11() ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__12() ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__13() ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-d3explst_elide_proofs_loop_318(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+atsvoid_t0ype
+auxerr_elide_noproof_318(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__110__10(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__14() ;
+atsvoid_t0ype
+prerr_d2varlst_names_320(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstype_boxed
 ATSLIB_056_libats_056_arena__glist_view__119__8(atstkind_type(atstype_ptrk)) ;
@@ -5502,8 +5511,53 @@ ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__40__28(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_libats_056_arena__glist_is_cons__48__4(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+prerr_elide_ambiguous_msg_330(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+auxerr_elide_ambiguous_332(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__11(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__15() ;
+d3exp_elide_proof_none_334(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+d3exp_elide_proof_amb_335(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+d3exp_elide_proof_one_336(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atsrefarg1_type(atstkind_type(atstype_ptrk))) ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__9(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__11(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__17(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__29(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__29(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__14(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__30(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__30(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__7(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5515,81 +5569,116 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__13(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__17(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__18(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__14(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+d3exp_elide_proof_byview_350(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atsrefarg1_type(atstkind_type(atstype_ptrk))) ;
+ATSstatic()
+atstkind_t0ype(atstype_int)
+ATSLIB_056_libats_056_arena__glist_length__89__3(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_int)
+loop_90__90__3(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__15(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__31(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__31(atstkind_type(atstype_ptrk)) ;
+#if(0)
 #if(0)
 ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_elide_proofs(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
+#endif
 #endif
 ATSstatic()
-atstkind_type(atstype_ptrk)
-d23exp_trup_app23_336(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atstype_boxed) ;
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g0int_int__199__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__11(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__4(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__12(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__13(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__eq_g1int_int__356__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__62__5(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__62__6(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-#if(0)
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_append__345(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-#endif
-#endif
-#if(0)
 ATSstatic()
 atstkind_type(atstype_ptrk)
-loop_346__346(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-#endif
+d3exp_elide_proof_363(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atsrefarg1_type(atstkind_type(atstype_ptrk))) ;
+ATSstatic()
+atstkind_t0ype(atstype_int)
+ATSLIB_056_libats_056_arena__glist_length__89__4(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_int)
+loop_90__90__4(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_append__345__1(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__16(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-loop_346__346__1(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__32(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__14(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__32(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356__3(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__29(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__10() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__29(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__11() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__11(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__12() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__18(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__13() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__30(atstkind_type(atstype_ptrk)) ;
+d3explst_elide_proofs_loop_374(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atsrefarg1_type(atstkind_type(atstype_ptrk))) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__12(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__30(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__14() ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__10(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__12(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__19(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__33(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__33(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__17(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__34(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__34(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__15() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__8(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5601,37 +5690,84 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__15(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__19(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__20(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__16(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_elide_proofs(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk)) ;
+#endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_reverse__144__2(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__16() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-loop_145__145__2(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+d23exp_trup_app23_393(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atstype_boxed) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__lt_g0int_int__199__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__13(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__7(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__14(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__15(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__8(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__9(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+#if(0)
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_append__402(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+#endif
+#endif
+#if(0)
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__15(atstkind_type(atstype_ptrk)) ;
+loop_403__403(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+#endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__31(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_append__402__1(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__31(atstkind_type(atstype_ptrk)) ;
+loop_403__403__1(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__12(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__18(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__20(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__35(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__32(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__35(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__32(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__13(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__21(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__36(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__36(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__9(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5643,123 +5779,19 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__17(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__21(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__22(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__18(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__16() ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__7(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__14(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_reverse__144__2(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-d23exp_trup_applst_dyn_379(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_trup_applst(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-#endif
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__glist_view__119__9(atstkind_type(atstype_ptrk)) ;
+loop_145__145__2(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__13(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__22(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__33(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__33(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__16(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__34(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__34(atstkind_type(atstype_ptrk)) ;
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lst(atstkind_type(atstype_ptrk)) ;
-#endif
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gte_g0int_int__217__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__gopt_view__51__5(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__35(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__35(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_t0ype(atstype_int)
-ATSLIB_056_libats_056_arena__glist_length__89__3(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_t0ype(atstype_int)
-loop_90__90__3(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__17(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__36(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__36(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__7() ;
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_tup(atstkind_type(atstype_ptrk)) ;
-#endif
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__8() ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-labd3exp_get_type_402(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_none__220__2() ;
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__labd3explst_get_type(atstkind_type(atstype_ptrk)) ;
-#endif
-ATSstatic()
-atstkind_type(atstype_ptrk)
-glist_map_fun_2__2__2(atstkind_type(atstype_ptrk), atstype_funptr) ;
-ATSstatic()
-atstype_boxed
-glist_map_loop_1__1__2(atstkind_type(atstype_ptrk), atstype_funptr, atstype_boxed) ;
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__glist_view__119__10(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__14(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__23(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__19(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__arena_load__38__37(atstkind_type(atstype_ptrk)) ;
@@ -5768,28 +5800,16 @@ atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__40__37(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__18(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__14(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__23(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__arena_load__38__38(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__40__38(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstype_boxed
-ATSLIB_056_prelude__list_vt_reverse__128__2(atstype_boxed) ;
-ATSstatic()
-atstype_boxed
-ATSLIB_056_prelude__list_vt_reverse_append__130__2(atstype_boxed, atstype_boxed) ;
-ATSstatic()
-atstype_boxed
-loop_131__131__2(atstype_boxed, atstype_boxed) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_make_list_vt__134__2(atstype_boxed) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-loop_135__135__2(atstype_boxed, atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__10(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5809,20 +5829,25 @@ ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_nil__66__17() ;
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_reverse__144__3(atstkind_type(atstype_ptrk)) ;
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__10(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__16(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-loop_145__145__3(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-ATSstatic()
+d23exp_trup_applst_dyn_436(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+#if(0)
+ATSextern()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__19(atstkind_type(atstype_ptrk)) ;
+PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_trup_applst(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+#endif
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__39(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__39(atstkind_type(atstype_ptrk)) ;
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__11(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__acell_head__32__15(atstkind_type(atstype_ptrk)) ;
@@ -5831,10 +5856,118 @@ atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_guint__34__25(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__39(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__39(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__20(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__arena_load__38__40(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__40__40(atstkind_type(atstype_ptrk)) ;
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lst(atstkind_type(atstype_ptrk)) ;
+#endif
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gte_g0int_int__217__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__gopt_view__51__5(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__41(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__41(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_int)
+ATSLIB_056_libats_056_arena__glist_length__89__5(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_int)
+loop_90__90__5(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__21(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__42(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__42(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__7() ;
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_tup(atstkind_type(atstype_ptrk)) ;
+#endif
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__8() ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+labd3exp_get_type_459(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__gopt_none__220__2() ;
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__labd3explst_get_type(atstkind_type(atstype_ptrk)) ;
+#endif
+ATSstatic()
+atstkind_type(atstype_ptrk)
+glist_map_fun_2__2__2(atstkind_type(atstype_ptrk), atstype_funptr) ;
+ATSstatic()
+atstype_boxed
+glist_map_loop_1__1__2(atstkind_type(atstype_ptrk), atstype_funptr, atstype_boxed) ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__12(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__16(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__26(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__43(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__43(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__22(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__44(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__44(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_prelude__list_vt_reverse__128__2(atstype_boxed) ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_prelude__list_vt_reverse_append__130__2(atstype_boxed, atstype_boxed) ;
+ATSstatic()
+atstype_boxed
+loop_131__131__2(atstype_boxed, atstype_boxed) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_make_list_vt__134__2(atstype_boxed) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+loop_135__135__2(atstype_boxed, atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__11(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5846,7 +5979,7 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__21(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__26(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__27(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__22(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5855,34 +5988,31 @@ atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_nil__66__18() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-d2exp_trup_rec_aux_441(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__glist_view__119__11(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_reverse__144__3(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__16(atstkind_type(atstype_ptrk)) ;
+loop_145__145__3(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__27(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__23(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__41(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__45(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__41(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__45(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__20(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__17(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__42(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__28(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__42(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__46(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__19() ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__46(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__12(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5894,51 +6024,43 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__23(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__28(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__29(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__24(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_rec(atstkind_type(atstype_ptrk)) ;
-#endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__9() ;
-ATSstatic()
-postiats_tyrec_0
-d2exp_trup_seq_aux_458(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_libats_056_arena__glist_is_cons__48__4(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__19() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_head__30__2(atstkind_type(atstype_ptrk)) ;
+d2exp_trup_rec_aux_498(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__13(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__17(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__18(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__29(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__30(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__43(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__47(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__43(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__47(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_tail__42__3(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__24(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__21(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__48(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__44(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__48(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__44(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_nil__66__20() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__13(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5950,16 +6072,51 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__25(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__30(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__31(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__26(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_rec(atstkind_type(atstype_ptrk)) ;
+#endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_sing__78__3(atstkind_type(atstype_ptrk)) ;
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__9() ;
+ATSstatic()
+postiats_tyrec_0
+d2exp_trup_seq_aux_515(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_libats_056_arena__glist_is_cons__48__5(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__20() ;
+ATSLIB_056_libats_056_arena__glist_head__30__2(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__19(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__32(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__49(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__49(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_tail__42__3(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__25(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__50(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__50(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_cons__68__14(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
@@ -5971,10 +6128,31 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__27(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__31(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__33(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__28(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_sing__78__3(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__21() ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_cons__68__15(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__15(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__29(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__34(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__30(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 #if(0)
 ATSextern()
 atstkind_type(atstype_ptrk)
@@ -5982,34 +6160,34 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_seq(atstkind_typ
 #endif
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_libats_056_arena__glist_is_cons__48__5(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_is_cons__48__6(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_head__30__3(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__18(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__20(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__32(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__35(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__45(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__51(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__45(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__51(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_tail__42__4(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__22(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__26(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__46(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__52(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__46(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__52(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__10() ;
@@ -6044,10 +6222,10 @@ atstype_boxed
 ATSLIB_056_libats_056_arena__gopt_view__51__6(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__47(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__53(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__47(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__53(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__13() ;
@@ -6061,94 +6239,94 @@ atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__14() ;
 ATSstatic()
 atsvoid_t0ype
-funarg_patck_exhaust_linck_505(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+funarg_patck_exhaust_linck_562(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(atstkind_type(atstype_ptrk)) ;
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__16(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-funarg_patck_exhaust_aux_507(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+funarg_patck_exhaust_aux_564(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_libats_056_arena__glist_is_nil__173__5(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__21() ;
+ATSLIB_056_libats_056_arena__glist_nil__66__22() ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_libats_056_arena__glist_is_nil__173__6(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__22() ;
+ATSLIB_056_libats_056_arena__glist_nil__66__23() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_head__30__4(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__19(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__21(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__33(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__36(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__48(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__54(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__48(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__54(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_tail__42__5(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__23(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__27(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__49(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__55(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__49(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__55(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_head__30__5(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__20(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_head__32__22(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__34(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__37(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__50(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__56(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__50(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__56(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_tail__42__6(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__24(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_tail__44__28(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__51(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__57(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__51(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__57(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__15(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__glist_cons__68__16(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__15(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__acell_make__71__16(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__29(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_store__73__31(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__35(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__38(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__30(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_store__73__32(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 #if(0)
 ATSextern()
 atsvoid_t0ype
@@ -6158,12 +6336,12 @@ PATSHOME_057_src_057_pats_trans3_056_sats__funarg_patck_exhaust(atstkind_type(at
 #if(0)
 ATSextern()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__list_vt_is_nil__536(atsrefarg0_type(atstype_boxed)) ;
+ATSLIB_056_prelude__list_vt_is_nil__593(atsrefarg0_type(atstype_boxed)) ;
 #endif
 #endif
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__list_vt_is_nil__536__1(atsrefarg0_type(atstype_boxed)) ;
+ATSLIB_056_prelude__list_vt_is_nil__593__1(atsrefarg0_type(atstype_boxed)) ;
 #if(0)
 ATSextern()
 postiats_tyrec_1
@@ -6171,10 +6349,10 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(atstkin
 #endif
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__15(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__gt_g0int_int__110__17(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__16(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__gt_g0int_int__110__18(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 #if(0)
 ATSextern()
 atstkind_type(atstype_ptrk)
@@ -6190,7 +6368,7 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_laminit_dyn(atst
 #endif
 ATSstatic()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(atstkind_type(atstype_ptrk)) ;
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__17(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__16() ;
@@ -6212,7 +6390,7 @@ atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__18() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-s2exp_clo2fun_550(atstkind_type(atstype_ptrk)) ;
+s2exp_clo2fun_607(atstkind_type(atstype_ptrk)) ;
 #if(0)
 ATSextern()
 atstkind_type(atstype_ptrk)
@@ -6222,15 +6400,15 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_fix(atstkind_typ
 #if(0)
 ATSextern()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552(atstyvar_type(a)) ;
+ATSLIB_056_libats_056_arena__gopt_some__609(atstyvar_type(a)) ;
 #endif
 #endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552__1(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__gopt_some__609__1(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__31(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_store__73__33(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__19() ;
@@ -6241,7 +6419,7 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_delay(atstkind_t
 #endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__23() ;
+ATSLIB_056_libats_056_arena__glist_nil__66__24() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__20() ;
@@ -6255,10 +6433,10 @@ atstype_boxed
 ATSLIB_056_libats_056_arena__gopt_view__51__7(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__52(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_load__38__58(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__52(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__58(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__21() ;
@@ -6269,16 +6447,16 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_for(atstkind_typ
 #endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552__2(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__gopt_some__609__2(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__32(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_store__73__34(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552__3(atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__gopt_some__609__3(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__33(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSLIB_056_libats_056_arena__arena_store__73__35(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__22() ;
@@ -6306,27 +6484,6 @@ atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_sing__78__4(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__24() ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__16(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__16(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__34(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__36(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__35(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_sing__78__5(atstkind_type(atstype_ptrk)) ;
-ATSstatic()
-atstkind_type(atstype_ptrk)
 ATSLIB_056_libats_056_arena__glist_nil__66__25() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -6339,10 +6496,31 @@ atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__36(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__37(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSLIB_056_prelude__ptr0_add_guint__34__39(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
 ATSstatic()
 atsvoid_t0ype
 ATSLIB_056_libats_056_arena__arena_store__73__37(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_sing__78__5(atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__26() ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_cons__68__18(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__18(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__38(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__40(atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_size)) ;
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__39(atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__24() ;
@@ -6353,7 +6531,7 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_mac(atstkind_typ
 #endif
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__26() ;
+ATSLIB_056_libats_056_arena__glist_nil__66__27() ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__25() ;
@@ -6366,12 +6544,12 @@ PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_macsyn(atstkind_
 #if(0)
 ATSextern()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__594(atstkind_type(atstype_ptrk)) ;
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__651(atstkind_type(atstype_ptrk)) ;
 #endif
 #endif
 ATSstatic()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__594__1(atstkind_type(atstype_ptrk)) ;
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__651__1(atstkind_type(atstype_ptrk)) ;
 ATSstatic()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__26() ;
@@ -10567,7 +10745,7 @@ ATSifnthen(ATSCKpat_con1(tmp622, 1)) { ATSINSdeadcode_fail() ; } ;
 ATSINSlab(__atstmplab285):
 ATSINSmove(tmp657, ATSSELcon(tmp622, postiats_tysum_11, atslab__0)) ;
 ATSINSfreecon(tmp622) ;
-ATSINSmove(tmp655, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn(tmp657, tmp649)) ;
+ATSINSmove(tmp655, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn_autofold(tmp657, tmp649)) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSINSmove(tmp658, d23explst_trdn_aux_172(tmp623, tmp650, ATSPMVrefarg1(arg2))) ;
@@ -10847,7 +11025,7 @@ ATSif(
 tmp679
 ) ATSthen() {
 ATSINSmove_void(tmp684, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__1(arg0)) ;
-ATSINSmove_void(tmp689, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 18437(line=808, offs=5) -- 18470(line=808, offs=38)"), ATSPMVstring("d23explst_trdn"))) ;
+ATSINSmove_void(tmp689, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 18507(line=809, offs=5) -- 18540(line=809, offs=38)"), ATSPMVstring("d23explst_trdn"))) ;
 ATSINSmove_void(tmp690, atspre_prerr_string(ATSPMVstring(": arity mismatch"))) ;
 ATSINSmove(tmp692, ATSLIB_056_prelude__lt_g0int_int__199__1(tmpref676, ATSPMVi0nt(0))) ;
 ATSif(
@@ -11462,7 +11640,7 @@ ATSINSflab(__patsflab_d2exp_trup_sym):
 ATSINSmove(tmp802, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
 ATSINSmove(tmp803, d2exp_get_D2Esym_26(arg0)) ;
 ATSINSmove_void(tmp804, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__4(tmp802)) ;
-ATSINSmove_void(tmp807, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 22812(line=1005, offs=10) -- 22845(line=1005, offs=43)"), ATSPMVstring("d2exp_trup_sym"))) ;
+ATSINSmove_void(tmp807, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 22882(line=1006, offs=10) -- 22915(line=1006, offs=43)"), ATSPMVstring("d2exp_trup_sym"))) ;
 ATSINSmove(tmp811, PATSHOME_057_src_057_pats_global_056_sats__the_LEGACYERRORS_get()) ;
 ATSINSmove(tmp808, ATSLIB_056_prelude__gt_g0int_int__110__4(tmp811, ATSPMVi0nt(0))) ;
 ATSif(
@@ -11570,7 +11748,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_232):
 ATSINSmove(tmp830, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
 ATSINSmove_void(tmp831, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__5(tmp830)) ;
-ATSINSmove_void(tmp834, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 23746(line=1047, offs=12) -- 23784(line=1047, offs=50)"), ATSPMVstring("d2exp_trup_extfcall"))) ;
+ATSINSmove_void(tmp834, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 23816(line=1048, offs=12) -- 23854(line=1048, offs=50)"), ATSPMVstring("d2exp_trup_extfcall"))) ;
 ATSINSmove_void(tmp835, atspre_prerr_string(ATSPMVstring(": no linear argument is allowed for the extfcall."))) ;
 ATSINSmove_void(tmp836, atspre_prerr_newline()) ;
 ATSINSmove(tmp837, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d3exp_extfcall_arg(arg0, arg1)) ;
@@ -11821,7 +11999,7 @@ ATSfunbody_beg()
 ATSINSflab(__patsflab_auxerr_245):
 ATSINSmove(tmp876, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
 ATSINSmove_void(tmp877, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__6(tmp876)) ;
-ATSINSmove_void(tmp880, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 24992(line=1104, offs=12) -- 25030(line=1104, offs=50)"), ATSPMVstring("d2exp_trup_extmcall"))) ;
+ATSINSmove_void(tmp880, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 25062(line=1105, offs=12) -- 25100(line=1105, offs=50)"), ATSPMVstring("d2exp_trup_extmcall"))) ;
 ATSINSmove_void(tmp881, atspre_prerr_string(ATSPMVstring(": no linear argument is allowed for the extmcall."))) ;
 ATSINSmove_void(tmp882, atspre_prerr_newline()) ;
 ATSINSmove(tmp883, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d3exp_extmcall_arg(arg0, arg1)) ;
@@ -12108,7 +12286,7 @@ ATSif(
 tmp932
 ) ATSthen() {
 ATSINSmove_void(tmp935, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__7(arg2)) ;
-ATSINSmove_void(tmp938, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 26637(line=1172, offs=14) -- 26670(line=1172, offs=47)"), ATSPMVstring("d2exp_trup_con"))) ;
+ATSINSmove_void(tmp938, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 26707(line=1173, offs=14) -- 26740(line=1173, offs=47)"), ATSPMVstring("d2exp_trup_con"))) ;
 ATSINSmove_void(tmp939, atspre_prerr_string(ATSPMVstring(": static application cannot be properly typechecked."))) ;
 ATSINSmove_void(tmp940, atspre_prerr_newline()) ;
 ATSINSmove(tmp941, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_s2exp_uni_instantiate_sexparglst(arg2, tmp925, arg3)) ;
@@ -12141,7 +12319,7 @@ ATSif(
 tmp960
 ) ATSthen() {
 ATSINSmove_void(tmp963, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__8(tmp924)) ;
-ATSINSmove_void(tmp966, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 27555(line=1201, offs=16) -- 27588(line=1201, offs=49)"), ATSPMVstring("d2exp_trup_con"))) ;
+ATSINSmove_void(tmp966, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 27625(line=1202, offs=16) -- 27658(line=1202, offs=49)"), ATSPMVstring("d2exp_trup_con"))) ;
 ATSINSmove_void(tmp967, atspre_prerr_string(ATSPMVstring(": proof arity mismatch: the constructor ["))) ;
 ATSINSmove_void(tmp968, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_d2con(arg1)) ;
 ATSINSmove_void(tmp969, atspre_prerr_string(ATSPMVstring("] requires ["))) ;
@@ -12369,7 +12547,7 @@ ATSbranch_beg()
 ATSINSlab(__atstmplab320):
 ATSINSmove_void(tmp1016, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1012)) ;
 ATSINSmove_void(tmp1017, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__9(tmp1007)) ;
-ATSINSmove_void(tmp1020, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 29893(line=1293, offs=16) -- 29928(line=1293, offs=51)"), ATSPMVstring("d2exp_trup_tmpid"))) ;
+ATSINSmove_void(tmp1020, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 29963(line=1294, offs=16) -- 29998(line=1294, offs=51)"), ATSPMVstring("d2exp_trup_tmpid"))) ;
 ATSINSmove_void(tmp1021, atspre_prerr_string(ATSPMVstring(": a non-template is treated as a template: "))) ;
 ATSINSmove_void(tmp1022, PATSHOME_057_src_057_pats_dynexp2_056_sats__prerr_d2exp(arg0)) ;
 ATSINSmove_void(tmp1023, atspre_prerr_newline()) ;
@@ -12456,7 +12634,7 @@ ATSif(
 tmp1047
 ) ATSthen() {
 ATSINSmove_void(tmp1050, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__10(tmp1040)) ;
-ATSINSmove_void(tmp1053, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 31467(line=1357, offs=7) -- 31507(line=1357, offs=47)"), ATSPMVstring("d2exp_trup_applst_sta"))) ;
+ATSINSmove_void(tmp1053, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 31537(line=1358, offs=7) -- 31577(line=1358, offs=47)"), ATSPMVstring("d2exp_trup_applst_sta"))) ;
 ATSINSmove_void(tmp1054, atspre_prerr_string(ATSPMVstring(": static application cannot be properly typechecked."))) ;
 ATSINSmove_void(tmp1055, atspre_prerr_newline()) ;
 ATSINSmove(tmp1056, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_s2exp_uni_instantiate_sexparglst(tmp1040, tmp1043, arg2)) ;
@@ -12600,66 +12778,274 @@ ATSfunbody_end()
 ATSreturn(tmpret305__2) ;
 }
 ATSstatic()
+atstkind_t0ype(atstype_bool)
+s2exp_is_byview_278(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret1071, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1072, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1073, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1074, atstype_boxed) ;
+ATStmpdec(tmp1075, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1076, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1078, atstype_boxed) ;
+ATStmpdec(tmp1079, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1082, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1083, atstype_boxed) ;
+ATStmpdec(tmp1084, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1086, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1087, atstype_boxed) ;
+ATStmpdec(tmp1088, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1090, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1091, atstype_boxed) ;
+ATStmpdec(tmp1092, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1095, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_s2exp_is_byview_278):
+ATSINSmove(tmp1072, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(arg0)) ;
+ATSINSmove(tmp1075, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1072)) ;
+ATSINSmove(tmp1074, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1075)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab327):
+ATSifnthen(ATSCKpat_con1(tmp1074, 17)) { ATSINSgoto(__atstmplab329) ; } ;
+ATSINSlab(__atstmplab328):
+ATSINSmove(tmp1076, ATSSELcon(tmp1074, postiats_tysum_18, atslab__0)) ;
+ATSINSfreecon(tmp1074) ;
+ATSINSmove(tmp1079, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1076)) ;
+ATSINSmove(tmp1078, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1079)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab330):
+ATSifnthen(ATSCKpat_con1(tmp1078, 4)) { ATSINSgoto(__atstmplab332) ; } ;
+ATSINSlab(__atstmplab331):
+ATSINSfreecon(tmp1078) ;
+ATSINSmove(tmp1073, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab332):
+ATSINSmove_void(tmp1080, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1078)) ;
+ATSINSmove(tmp1073, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab329):
+ATSINSmove_void(tmp1081, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1074)) ;
+ATSINSmove(tmp1073, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp1084, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1072)) ;
+ATSINSmove(tmp1083, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1084)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab333):
+ATSifnthen(ATSCKpat_con1(tmp1083, 7)) { ATSINSgoto(__atstmplab335) ; } ;
+ATSINSlab(__atstmplab334):
+ATSINSfreecon(tmp1083) ;
+ATSINSmove(tmp1082, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab335):
+ATSINSmove_void(tmp1085, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1083)) ;
+ATSINSmove(tmp1082, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp1088, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1072)) ;
+ATSINSmove(tmp1087, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1088)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab336):
+ATSifnthen(ATSCKpat_con1(tmp1087, 8)) { ATSINSgoto(__atstmplab338) ; } ;
+ATSINSlab(__atstmplab337):
+ATSINSfreecon(tmp1087) ;
+ATSINSmove(tmp1086, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab338):
+ATSINSmove_void(tmp1089, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1087)) ;
+ATSINSmove(tmp1086, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp1092, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1072)) ;
+ATSINSmove(tmp1091, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1092)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab339):
+ATSifnthen(ATSCKpat_con1(tmp1091, 27)) { ATSINSgoto(__atstmplab341) ; } ;
+ATSINSlab(__atstmplab340):
+ATSINSmove(tmp1095, ATSSELcon(tmp1091, postiats_tysum_21, atslab__2)) ;
+ATSINSfreecon(tmp1091) ;
+ATSINSmove(tmp1090, s2exp_is_byview_278(tmp1095)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab341):
+ATSINSmove_void(tmp1096, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1091)) ;
+ATSINSmove(tmp1090, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSif(
+tmp1073
+) ATSthen() {
+ATSINSmove(tmpret1071, ATSPMVbool_true()) ;
+} ATSelse() {
+ATSif(
+tmp1082
+) ATSthen() {
+ATSINSmove(tmpret1071, ATSPMVbool_true()) ;
+} ATSelse() {
+ATSif(
+tmp1086
+) ATSthen() {
+ATSINSmove(tmpret1071, ATSPMVbool_true()) ;
+} ATSelse() {
+ATSINSmove(tmpret1071, tmp1090) ;
+}
+}
+}
+ATSfunbody_end()
+ATSreturn(tmpret1071) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+s2exp_elide_byview_279(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret1097, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1098, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1099, atstype_boxed) ;
+ATStmpdec(tmp1100, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1101, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1102, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1103, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1106, atstype_boxed) ;
+ATStmpdec(tmp1107, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_s2exp_elide_byview_279):
+ATSINSmove(tmp1098, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(arg0)) ;
+ATSINSmove(tmp1100, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1098)) ;
+ATSINSmove(tmp1099, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1100)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab342):
+ATSifnthen(ATSCKpat_con1(tmp1099, 29)) { ATSINSgoto(__atstmplab344) ; } ;
+ATSINSlab(__atstmplab343):
+ATSINSmove(tmp1101, ATSSELcon(tmp1099, postiats_tysum_14, atslab__0)) ;
+ATSINSmove(tmp1102, ATSSELcon(tmp1099, postiats_tysum_14, atslab__1)) ;
+ATSINSfreecon(tmp1099) ;
+ATSINSmove(tmp1103, ATSLIB_056_prelude__eq_g0int_int__62__3(tmp1101, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1103
+) ATSthen() {
+ATSINSmove(tmp1107, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1102)) ;
+ATSINSmove(tmp1106, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1107)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab345):
+ATSifnthen(ATSCKpat_con1(tmp1106, 12)) { ATSINSgoto(__atstmplab347) ; } ;
+ATSINSlab(__atstmplab346):
+ATSINSfreecon(tmp1106) ;
+ATSINSmove(tmpret1097, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab347):
+ATSINSmove_void(tmp1108, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1106)) ;
+ATSINSmove(tmpret1097, s2exp_is_byview_278(tmp1102)) ;
+ATSbranch_end()
+ATScaseof_end()
+} ATSelse() {
+ATSINSmove(tmpret1097, ATSPMVbool_false()) ;
+}
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab344):
+ATSINSmove_void(tmp1109, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1099)) ;
+ATSINSmove(tmpret1097, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret1097) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret305__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__3, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_eq_g0int_int):
+ATSINSmove(tmp306__3, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__3, atspre_g0int_eq_int(arg0, tmp306__3)) ;
+ATSfunbody_end()
+ATSreturn(tmpret305__3) ;
+}
+ATSstatic()
 atstkind_t0ype(atstype_int)
-s2explst_elide_test_loop_278(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
+s2explst_elide_test_loop_281(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
 {
 ATStmpdec(apy0, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret1071, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1072, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1075, atstype_boxed) ;
-ATStmpdec(tmp1094, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1095, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1096, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1097, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1110, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1111, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1114, atstype_boxed) ;
+ATStmpdec(tmp1133, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1134, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1135, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1136, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1137, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_s2explst_elide_test_loop_278):
-ATSINSmove(tmp1072, ATSLIB_056_prelude__gt_g0int_int__110__8(arg0, arg1)) ;
+ATSINSflab(__patsflab_s2explst_elide_test_loop_281):
+ATSINSmove(tmp1111, ATSLIB_056_prelude__gt_g0int_int__110__8(arg0, arg1)) ;
 ATSif(
-tmp1072
+tmp1111
 ) ATSthen() {
-ATSINSmove(tmpret1071, ATSPMVi0nt(0)) ;
+ATSINSmove(tmpret1110, ATSPMVi0nt(0)) ;
 } ATSelse() {
-ATSINSmove(tmp1075, ATSLIB_056_libats_056_arena__glist_view__119__6(arg2)) ;
+ATSINSmove(tmp1114, ATSLIB_056_libats_056_arena__glist_view__119__6(arg2)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab327):
-ATSifthen(ATSCKptriscons(tmp1075)) { ATSINSgoto(__atstmplab330) ; } ;
-ATSINSlab(__atstmplab328):
-ATSINSmove(tmpret1071, arg0) ;
+ATSINSlab(__atstmplab348):
+ATSifthen(ATSCKptriscons(tmp1114)) { ATSINSgoto(__atstmplab351) ; } ;
+ATSINSlab(__atstmplab349):
+ATSINSmove(tmpret1110, arg0) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab329):
+ATSINSlab(__atstmplab350):
 #if(0)
-ATSifthen(ATSCKptrisnull(tmp1075)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptrisnull(tmp1114)) { ATSINSdeadcode_fail() ; } ;
 #endif
-ATSINSlab(__atstmplab330):
-ATSINSmove(tmp1094, ATSSELcon(tmp1075, postiats_tysum_8, atslab__0)) ;
-ATSINSmove(tmp1095, ATSSELcon(tmp1075, postiats_tysum_8, atslab__1)) ;
-ATSINSfreecon(tmp1075) ;
-ATSINSmove(tmp1096, s2exp_elide_atview_276(tmp1094)) ;
+ATSINSlab(__atstmplab351):
+ATSINSmove(tmp1133, ATSSELcon(tmp1114, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp1134, ATSSELcon(tmp1114, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp1114) ;
+ATSINSmove(tmp1136, s2exp_elide_atview_276(tmp1133)) ;
 ATSif(
-tmp1096
+tmp1136
 ) ATSthen() {
-ATSINSmove(tmp1097, atspre_g0int_add_int(arg0, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1135, ATSPMVbool_true()) ;
+} ATSelse() {
+ATSINSmove(tmp1135, s2exp_elide_byview_279(tmp1133)) ;
+}
+ATSif(
+tmp1135
+) ATSthen() {
+ATSINSmove(tmp1137, atspre_g0int_add_int(arg0, ATSPMVi0nt(1))) ;
 ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp1097) ;
+ATSINSmove_tlcal(apy0, tmp1137) ;
 ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, tmp1095) ;
+ATSINSmove_tlcal(apy2, tmp1134) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSfgoto(__patsflab_s2explst_elide_test_loop_278) ;
+ATSINSfgoto(__patsflab_s2explst_elide_test_loop_281) ;
 ATStailcal_end()
 } ATSelse() {
-ATSINSmove(tmpret1071, arg0) ;
+ATSINSmove(tmpret1110, arg0) ;
 }
 ATSbranch_end()
 ATScaseof_end()
 }
 ATSfunbody_end()
-ATSreturn(tmpret1071) ;
+ATSreturn(tmpret1110) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -12797,12 +13183,12 @@ ATSextern()
 atstkind_t0ype(atstype_int)
 PATSHOME_057_src_057_pats_trans3_056_sats__s2explst_elide_test(atstkind_t0ype(atstype_int) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret1098, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1138, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_s2explst_elide_test):
-ATSINSmove(tmpret1098, s2explst_elide_test_loop_278(ATSPMVi0nt(1), arg0, arg1)) ;
+ATSINSmove(tmpret1138, s2explst_elide_test_loop_281(ATSPMVi0nt(1), arg0, arg1)) ;
 ATSfunbody_end()
-ATSreturn(tmpret1098) ;
+ATSreturn(tmpret1138) ;
 }
 ATSextern()
 atstkind_type(atstype_ptrk)
@@ -12810,38 +13196,38 @@ PATSHOME_057_src_057_pats_trans3_056_sats__s2explst_elide_drop(atstkind_t0ype(at
 {
 ATStmpdec(apy0, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret1099, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1100, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1103, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1105, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1106, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1139, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1140, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1143, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1145, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1146, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_s2explst_elide_drop):
-ATSINSmove(tmp1100, ATSLIB_056_prelude__gt_g0int_int__110__9(arg0, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1140, ATSLIB_056_prelude__gt_g0int_int__110__9(arg0, ATSPMVi0nt(0))) ;
 ATSif(
-tmp1100
+tmp1140
 ) ATSthen() {
-ATSINSmove(tmp1103, ATSLIB_056_libats_056_arena__glist_is_cons__48__3(arg1)) ;
+ATSINSmove(tmp1143, ATSLIB_056_libats_056_arena__glist_is_cons__48__3(arg1)) ;
 ATSif(
-tmp1103
+tmp1143
 ) ATSthen() {
-ATSINSmove(tmp1105, atspre_g0int_sub_int(arg0, ATSPMVi0nt(1))) ;
-ATSINSmove(tmp1106, ATSLIB_056_libats_056_arena__glist_tail__42__2(arg1)) ;
+ATSINSmove(tmp1145, atspre_g0int_sub_int(arg0, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1146, ATSLIB_056_libats_056_arena__glist_tail__42__2(arg1)) ;
 ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp1105) ;
-ATSINSmove_tlcal(apy1, tmp1106) ;
+ATSINSmove_tlcal(apy0, tmp1145) ;
+ATSINSmove_tlcal(apy1, tmp1146) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSfgoto(__patsflab_s2explst_elide_drop) ;
 ATStailcal_end()
 } ATSelse() {
-ATSINSmove(tmpret1099, arg1) ;
+ATSINSmove(tmpret1139, arg1) ;
 }
 } ATSelse() {
-ATSINSmove(tmpret1099, arg1) ;
+ATSINSmove(tmpret1139, arg1) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret1099) ;
+ATSreturn(tmpret1139) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -12921,54 +13307,54 @@ ATSreturn(tmpret174__24) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-s2explst_elide_nth_296(atstkind_t0ype(atstype_int) arg0, atstkind_type(atstype_ptrk) arg1)
+s2explst_elide_nth_299(atstkind_t0ype(atstype_int) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 ATStmpdec(apy0, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret1116, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1117, atstype_boxed) ;
-ATStmpdec(tmp1136, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1137, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1138, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1143, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1156, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1157, atstype_boxed) ;
+ATStmpdec(tmp1176, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1177, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1178, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1183, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_s2explst_elide_nth_296):
-ATSINSmove(tmp1117, ATSLIB_056_libats_056_arena__glist_view__119__7(arg1)) ;
+ATSINSflab(__patsflab_s2explst_elide_nth_299):
+ATSINSmove(tmp1157, ATSLIB_056_libats_056_arena__glist_view__119__7(arg1)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab331):
-ATSifthen(ATSCKptriscons(tmp1117)) { ATSINSgoto(__atstmplab334) ; } ;
-ATSINSlab(__atstmplab332):
-ATSINSmove(tmpret1116, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_errexp(patsopt_s2rt_view)) ;
+ATSINSlab(__atstmplab352):
+ATSifthen(ATSCKptriscons(tmp1157)) { ATSINSgoto(__atstmplab355) ; } ;
+ATSINSlab(__atstmplab353):
+ATSINSmove(tmpret1156, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_errexp(patsopt_s2rt_view)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab333):
+ATSINSlab(__atstmplab354):
 #if(0)
-ATSifthen(ATSCKptrisnull(tmp1117)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptrisnull(tmp1157)) { ATSINSdeadcode_fail() ; } ;
 #endif
-ATSINSlab(__atstmplab334):
-ATSINSmove(tmp1136, ATSSELcon(tmp1117, postiats_tysum_8, atslab__0)) ;
-ATSINSmove(tmp1137, ATSSELcon(tmp1117, postiats_tysum_8, atslab__1)) ;
-ATSINSfreecon(tmp1117) ;
-ATSINSmove(tmp1138, ATSLIB_056_prelude__lte_g0int_int__305__1(arg0, ATSPMVi0nt(1))) ;
+ATSINSlab(__atstmplab355):
+ATSINSmove(tmp1176, ATSSELcon(tmp1157, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp1177, ATSSELcon(tmp1157, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp1157) ;
+ATSINSmove(tmp1178, ATSLIB_056_prelude__lte_g0int_int__308__1(arg0, ATSPMVi0nt(1))) ;
 ATSif(
-tmp1138
+tmp1178
 ) ATSthen() {
-ATSINSmove(tmpret1116, tmp1136) ;
+ATSINSmove(tmpret1156, tmp1176) ;
 } ATSelse() {
-ATSINSmove(tmp1143, atspre_g0int_sub_int(arg0, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1183, atspre_g0int_sub_int(arg0, ATSPMVi0nt(1))) ;
 ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp1143) ;
-ATSINSmove_tlcal(apy1, tmp1137) ;
+ATSINSmove_tlcal(apy0, tmp1183) ;
+ATSINSmove_tlcal(apy1, tmp1177) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_s2explst_elide_nth_296) ;
+ATSINSfgoto(__patsflab_s2explst_elide_nth_299) ;
 ATStailcal_end()
 }
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret1116) ;
+ATSreturn(tmpret1156) ;
 }
 ATSstatic()
 atstype_boxed
@@ -13092,119 +13478,119 @@ ATSreturn(tmpret174__26) ;
 #if(0)
 ATSextern()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lte_g0int_int__305(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lte_g0int_int__308(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret1139, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1140, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret1179, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1180, atstkind_t0ype(atstyvar_type(tk))) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_lte_g0int_int):
-ATSINSmove(tmp1140, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(3955))>)(arg1)) ;
-ATSINSmove(tmpret1139, PMVtmpltcst(g0int_lte<S2Evar(tk(3955))>)(arg0, tmp1140)) ;
+ATSINSmove(tmp1180, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(3955))>)(arg1)) ;
+ATSINSmove(tmpret1179, PMVtmpltcst(g0int_lte<S2Evar(tk(3955))>)(arg0, tmp1180)) ;
 ATSfunbody_end()
-ATSreturn(tmpret1139) ;
+ATSreturn(tmpret1179) ;
 }
 #endif
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lte_g0int_int__305__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lte_g0int_int__308__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret1139__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1140__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1179__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1180__1, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_lte_g0int_int):
-ATSINSmove(tmp1140__1, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret1139__1, atspre_g0int_lte_int(arg0, tmp1140__1)) ;
+ATSINSmove(tmp1180__1, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret1179__1, atspre_g0int_lte_int(arg0, tmp1180__1)) ;
 ATSfunbody_end()
-ATSreturn(tmpret1139__1) ;
+ATSreturn(tmpret1179__1) ;
 }
 ATSstatic()
 atsvoid_t0ype
-prerr_elide_hint_308(atstkind_t0ype(atstype_int) arg0, atstkind_type(atstype_ptrk) arg1)
+prerr_elide_hint_311(atstkind_t0ype(atstype_int) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmp1145, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1150, atstype_boxed) ;
-ATStmpdec(tmp1151, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1152, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1153, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1156, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1157, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1163, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1185, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1190, atstype_boxed) ;
+ATStmpdec(tmp1191, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1192, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1193, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1196, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1197, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1203, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_prerr_elide_hint_308):
-ATSINSmove(tmp1145, s2explst_elide_nth_296(arg0, arg1)) ;
-ATSINSmove_void(tmp1146, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__sprint_reset()) ;
-ATSINSmove_void(tmp1147, atspre_prerr_string(ATSPMVstring("  the proof arguments cannot be omitted: proof argument "))) ;
-ATSINSmove_void(tmp1148, atspre_prerr_int(arg0)) ;
-ATSINSmove(tmp1151, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1145)) ;
-ATSINSmove(tmp1150, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1151)) ;
+ATSINSflab(__patsflab_prerr_elide_hint_311):
+ATSINSmove(tmp1185, s2explst_elide_nth_299(arg0, arg1)) ;
+ATSINSmove_void(tmp1186, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__sprint_reset()) ;
+ATSINSmove_void(tmp1187, atspre_prerr_string(ATSPMVstring("  the proof arguments cannot be omitted: proof argument "))) ;
+ATSINSmove_void(tmp1188, atspre_prerr_int(arg0)) ;
+ATSINSmove(tmp1191, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1185)) ;
+ATSINSmove(tmp1190, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1191)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab335):
-ATSifnthen(ATSCKpat_con1(tmp1150, 29)) { ATSINSgoto(__atstmplab337) ; } ;
-ATSINSlab(__atstmplab336):
-ATSINSmove(tmp1152, ATSSELcon(tmp1150, postiats_tysum_14, atslab__0)) ;
-ATSINSmove(tmp1153, ATSSELcon(tmp1150, postiats_tysum_14, atslab__1)) ;
-ATSINSfreecon(tmp1150) ;
-ATSINSmove_void(tmp1154, atspre_prerr_string(ATSPMVstring(" is of type "))) ;
-ATSINSmove(tmp1156, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1153)) ;
-ATSINSmove_void(tmp1155, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(tmp1156)) ;
-ATSINSmove(tmp1157, ATSLIB_056_prelude__eq_g0int_int__62__3(tmp1152, ATSPMVi0nt(0))) ;
+ATSINSlab(__atstmplab356):
+ATSifnthen(ATSCKpat_con1(tmp1190, 29)) { ATSINSgoto(__atstmplab358) ; } ;
+ATSINSlab(__atstmplab357):
+ATSINSmove(tmp1192, ATSSELcon(tmp1190, postiats_tysum_14, atslab__0)) ;
+ATSINSmove(tmp1193, ATSSELcon(tmp1190, postiats_tysum_14, atslab__1)) ;
+ATSINSfreecon(tmp1190) ;
+ATSINSmove_void(tmp1194, atspre_prerr_string(ATSPMVstring(" is of type "))) ;
+ATSINSmove(tmp1196, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1193)) ;
+ATSINSmove_void(tmp1195, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(tmp1196)) ;
+ATSINSmove(tmp1197, ATSLIB_056_prelude__eq_g0int_int__62__4(tmp1192, ATSPMVi0nt(0))) ;
 ATSif(
-tmp1157
+tmp1197
 ) ATSthen() {
-ATSINSmove_void(tmp1149, atspre_prerr_string(ATSPMVstring(", which is not an at-view (T @ l)."))) ;
+ATSINSmove_void(tmp1189, atspre_prerr_string(ATSPMVstring(", which is not an at-view (T @ l)."))) ;
 } ATSelse() {
-ATSINSmove_void(tmp1149, atspre_prerr_string(ATSPMVstring(", which is passed by reference (&)."))) ;
+ATSINSmove_void(tmp1189, atspre_prerr_string(ATSPMVstring(", which is passed by reference (&)."))) ;
 }
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab337):
-ATSINSmove_void(tmp1160, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1150)) ;
-ATSINSmove_void(tmp1161, atspre_prerr_string(ATSPMVstring(" is of type "))) ;
-ATSINSmove(tmp1163, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1145)) ;
-ATSINSmove_void(tmp1162, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(tmp1163)) ;
-ATSINSmove_void(tmp1149, atspre_prerr_string(ATSPMVstring(", which is consumed (no !)."))) ;
+ATSINSlab(__atstmplab358):
+ATSINSmove_void(tmp1200, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1190)) ;
+ATSINSmove_void(tmp1201, atspre_prerr_string(ATSPMVstring(" is of type "))) ;
+ATSINSmove(tmp1203, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1185)) ;
+ATSINSmove_void(tmp1202, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(tmp1203)) ;
+ATSINSmove_void(tmp1189, atspre_prerr_string(ATSPMVstring(", which is consumed (no !)."))) ;
 ATSbranch_end()
 ATScaseof_end()
-ATSINSmove_void(tmp1164, atspre_prerr_newline()) ;
-ATSINSmove_void(tmp1165, atspre_prerr_string(ATSPMVstring("  (only proofs of preserved at-views, !T @ l, can be omitted.)"))) ;
-ATSINSmove_void(tmpret1144, atspre_prerr_newline()) ;
+ATSINSmove_void(tmp1204, atspre_prerr_newline()) ;
+ATSINSmove_void(tmp1205, atspre_prerr_string(ATSPMVstring("  (only proofs of preserved at-views, !T @ l, can be omitted.)"))) ;
+ATSINSmove_void(tmpret1184, atspre_prerr_newline()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1144) ;
+ATSreturn_void(tmpret1184) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__eq_g0int_int__62__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret305__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp306__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret305__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__4, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_eq_g0int_int):
-ATSINSmove(tmp306__3, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret305__3, atspre_g0int_eq_int(arg0, tmp306__3)) ;
+ATSINSmove(tmp306__4, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__4, atspre_g0int_eq_int(arg0, tmp306__4)) ;
 ATSfunbody_end()
-ATSreturn(tmpret305__3) ;
+ATSreturn(tmpret305__4) ;
 }
 ATSstatic()
 atsvoid_t0ype
-auxerr_elide_noaddr_310(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
+auxerr_elide_noaddr_313(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmp1178, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1218, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_auxerr_elide_noaddr_310):
-ATSINSmove_void(tmp1167, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__sprint_reset()) ;
-ATSINSmove_void(tmp1168, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__11(arg0)) ;
-ATSINSmove_void(tmp1171, atspre_prerr_string(ATSPMVstring(": the address of the omitted proof argument "))) ;
-ATSINSmove_void(tmp1172, atspre_prerr_int(arg1)) ;
-ATSINSmove_void(tmp1173, atspre_prerr_string(ATSPMVstring(" of type "))) ;
-ATSINSmove_void(tmp1174, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(arg2)) ;
-ATSINSmove_void(tmp1175, atspre_prerr_string(ATSPMVstring(" cannot be inferred from the other arguments"))) ;
-ATSINSmove_void(tmp1176, atspre_prerr_string(ATSPMVstring("; pass the proof explicitly."))) ;
-ATSINSmove_void(tmp1177, atspre_prerr_newline()) ;
-ATSINSmove(tmp1178, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_elide(arg0, arg1)) ;
-ATSINSmove_void(tmpret1166, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1178)) ;
+ATSINSflab(__patsflab_auxerr_elide_noaddr_313):
+ATSINSmove_void(tmp1207, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__sprint_reset()) ;
+ATSINSmove_void(tmp1208, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__11(arg0)) ;
+ATSINSmove_void(tmp1211, atspre_prerr_string(ATSPMVstring(": the address of the omitted proof argument "))) ;
+ATSINSmove_void(tmp1212, atspre_prerr_int(arg1)) ;
+ATSINSmove_void(tmp1213, atspre_prerr_string(ATSPMVstring(" of type "))) ;
+ATSINSmove_void(tmp1214, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(arg2)) ;
+ATSINSmove_void(tmp1215, atspre_prerr_string(ATSPMVstring(" cannot be inferred from the other arguments"))) ;
+ATSINSmove_void(tmp1216, atspre_prerr_string(ATSPMVstring("; pass the proof explicitly."))) ;
+ATSINSmove_void(tmp1217, atspre_prerr_newline()) ;
+ATSINSmove(tmp1218, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_elide(arg0, arg1)) ;
+ATSINSmove_void(tmpret1206, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1218)) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1166) ;
+ATSreturn_void(tmpret1206) ;
 }
 ATSstatic()
 atsvoid_t0ype
@@ -13219,208 +13605,81 @@ ATSreturn_void(tmpret685__11) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-s2exp_is_errexp_312(atstkind_type(atstype_ptrk) arg0)
+s2exp_is_errexp_315(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret1179, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1180, atstype_boxed) ;
-ATStmpdec(tmp1181, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1219, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1220, atstype_boxed) ;
+ATStmpdec(tmp1221, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_s2exp_is_errexp_312):
-ATSINSmove(tmp1181, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg0)) ;
-ATSINSmove(tmp1180, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1181)) ;
+ATSINSflab(__patsflab_s2exp_is_errexp_315):
+ATSINSmove(tmp1221, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg0)) ;
+ATSINSmove(tmp1220, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1221)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab338):
-ATSifnthen(ATSCKpat_con0(tmp1180, 32)) { ATSINSgoto(__atstmplab340) ; } ;
-ATSINSlab(__atstmplab339):
-ATSINSmove(tmpret1179, ATSPMVbool_true()) ;
+ATSINSlab(__atstmplab359):
+ATSifnthen(ATSCKpat_con0(tmp1220, 32)) { ATSINSgoto(__atstmplab361) ; } ;
+ATSINSlab(__atstmplab360):
+ATSINSmove(tmpret1219, ATSPMVbool_true()) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab340):
-ATSINSmove_void(tmp1182, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1180)) ;
-ATSINSmove(tmpret1179, ATSPMVbool_false()) ;
+ATSINSlab(__atstmplab361):
+ATSINSmove_void(tmp1222, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1220)) ;
+ATSINSmove(tmpret1219, ATSPMVbool_false()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret1179) ;
+ATSreturn(tmpret1219) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-d3exp_elide_proof_313(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
+atsvoid_t0ype
+prerr_elide_noproof_msg_316(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmpret1183, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1184, atstype_boxed) ;
-ATStmpdec(tmp1185, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1186, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1187, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1188, atstype_boxed) ;
-ATStmpdec(tmp1189, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1190, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1191, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1192, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1193, atstype_boxed) ;
-ATStmpdec(tmp1194, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1197, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1198, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1199, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1201, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1202, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1204, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1205, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1206, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1208, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1209, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1210, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1211, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d3exp_elide_proof_313):
-ATSINSmove(tmp1185, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg2)) ;
-ATSINSmove(tmp1184, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1185)) ;
-ATSifnthen(ATSCKpat_con1(tmp1184, 29)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 36002(line=1532, offs=7) -- 36067(line=1533, offs=55)") ; } ;
-ATSINSmove(tmp1186, ATSSELcon(tmp1184, postiats_tysum_14, atslab__1)) ;
-ATSINSfreecon(tmp1184) ;
-ATSINSmove(tmp1187, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1186)) ;
-ATSINSmove(tmp1189, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1187)) ;
-ATSINSmove(tmp1188, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1189)) ;
-ATSifnthen(ATSCKpat_con1(tmp1188, 12)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 36109(line=1535, offs=7) -- 36166(line=1536, offs=51)") ; } ;
-ATSINSmove(tmp1190, ATSSELcon(tmp1188, postiats_tysum_18, atslab__1)) ;
-ATSINSfreecon(tmp1188) ;
-ATSINSmove(tmp1191, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1190)) ;
-ATSINSmove(tmp1194, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1191)) ;
-ATSINSmove(tmp1193, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1194)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab341):
-ATSifnthen(ATSCKpat_con1(tmp1193, 8)) { ATSINSgoto(__atstmplab343) ; } ;
-ATSINSlab(__atstmplab342):
-ATSINSfreecon(tmp1193) ;
-ATSINSmove(tmp1192, ATSPMVbool_true()) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab343):
-ATSINSmove_void(tmp1195, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1193)) ;
-ATSINSmove(tmp1192, ATSPMVbool_false()) ;
-ATSbranch_end()
-ATScaseof_end()
+ATSINSflab(__patsflab_prerr_elide_noproof_msg_316):
+ATSINSmove_void(tmp1224, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__sprint_reset()) ;
+ATSINSmove_void(tmp1225, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(arg0)) ;
+ATSINSmove_void(tmp1228, atspre_prerr_string(ATSPMVstring(": no proof of the view "))) ;
+ATSINSmove_void(tmp1229, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__prerr_s2exp_s(arg2)) ;
+ATSINSmove_void(tmp1230, atspre_prerr_string(ATSPMVstring(" is in scope for the omitted proof argument "))) ;
+ATSINSmove_void(tmp1231, atspre_prerr_int(arg1)) ;
+ATSINSmove_void(tmp1232, atspre_prerr_string(ATSPMVstring("; pass the proof explicitly."))) ;
+ATSINSmove_void(tmpret1223, atspre_prerr_newline()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret1223) ;
+}
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(atstkind_type(atstype_ptrk) arg0)
+{
+ATSfunbody_beg()
+ATSINSflab(__patsflab_prerr_error3_loc):
+ATSINSmove_void(tmp686__12, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret685__12, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret685__12) ;
+}
+ATSstatic()
+atsvoid_t0ype
+auxerr_elide_noproof_318(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp1234, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1237, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1239, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_auxerr_elide_noproof_318):
+ATSINSmove(tmp1237, PATSHOME_057_src_057_pats_global_056_sats__the_LEGACYERRORS_get()) ;
+ATSINSmove(tmp1234, ATSLIB_056_prelude__gt_g0int_int__110__10(tmp1237, ATSPMVi0nt(0))) ;
 ATSif(
-tmp1192
+tmp1234
 ) ATSthen() {
-ATSINSmove_void(tmp1196, auxerr_elide_noaddr_310(arg0, arg1, tmp1187)) ;
-ATSINSmove(tmp1197, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_errexp(patsopt_s2rt_view)) ;
-ATSINSmove(tmp1198, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(arg0)) ;
-ATSINSmove(tmp1199, ATSLIB_056_libats_056_arena__glist_nil__66__10()) ;
-ATSINSmove(tmpret1183, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat(arg0, tmp1197, tmp1198, tmp1199)) ;
+ATSINSmove_void(tmp1238, ATSPMVempty()) ;
 } ATSelse() {
-ATSINSmove(tmp1202, ATSLIB_056_libats_056_arena__glist_nil__66__11()) ;
-ATSINSmove(tmp1201, PATSHOME_057_src_057_pats_trans3_056_sats__s2addr_viewat_deref(arg0, tmp1191, tmp1202)) ;
-ATSINSmove(tmp1204, s2exp_is_errexp_312(tmp1201)) ;
-ATSif(
-tmp1204
-) ATSthen() {
-ATSINSmove(tmp1205, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(arg0)) ;
-ATSINSmove(tmp1206, ATSLIB_056_libats_056_arena__glist_nil__66__12()) ;
-ATSINSmove(tmpret1183, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat(arg0, tmp1201, tmp1205, tmp1206)) ;
-} ATSelse() {
-ATSINSmove(tmp1208, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_ptr_addr_type(tmp1191)) ;
-ATSINSmove(tmp1209, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_empty(arg0, tmp1208)) ;
-ATSINSmove(tmp1211, ATSLIB_056_libats_056_arena__glist_nil__66__13()) ;
-ATSINSmove(tmp1210, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat(arg0, tmp1201, tmp1209, tmp1211)) ;
-ATSINSmove(tmpret1183, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn(tmp1210, arg2)) ;
+ATSINSmove_void(tmp1238, prerr_elide_noproof_msg_316(arg0, arg1, arg2)) ;
 }
-}
+ATSINSmove(tmp1239, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_elide(arg0, arg1)) ;
+ATSINSmove_void(tmpret1233, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1239)) ;
 ATSfunbody_end()
-ATSreturn(tmpret1183) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__10()
-{
-ATStmpdec(tmpret316__10, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__10, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__10) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__11()
-{
-ATStmpdec(tmpret316__11, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__11, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__11) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__12()
-{
-ATStmpdec(tmpret316__12, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__12, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__12) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__13()
-{
-ATStmpdec(tmpret316__13, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__13, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__13) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-d3explst_elide_proofs_loop_318(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_type(atstype_ptrk) arg3)
-{
-ATStmpdec(tmpret1213, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1214, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1218, atstype_boxed) ;
-ATStmpdec(tmp1237, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1238, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1240, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1257, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1258, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d3explst_elide_proofs_loop_318):
-ATSINSmove(tmp1214, ATSLIB_056_prelude__gt_g0int_int__110__10(arg1, arg2)) ;
-ATSif(
-tmp1214
-) ATSthen() {
-ATSINSmove(tmpret1213, ATSLIB_056_libats_056_arena__glist_nil__66__14()) ;
-} ATSelse() {
-ATSINSmove(tmp1218, ATSLIB_056_libats_056_arena__glist_view__119__8(arg3)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab344):
-ATSifthen(ATSCKptriscons(tmp1218)) { ATSINSgoto(__atstmplab347) ; } ;
-ATSINSlab(__atstmplab345):
-ATSINSmove(tmpret1213, ATSLIB_056_libats_056_arena__glist_nil__66__15()) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab346):
-#if(0)
-ATSifthen(ATSCKptrisnull(tmp1218)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab347):
-ATSINSmove(tmp1237, ATSSELcon(tmp1218, postiats_tysum_8, atslab__0)) ;
-ATSINSmove(tmp1238, ATSSELcon(tmp1218, postiats_tysum_8, atslab__1)) ;
-ATSINSfreecon(tmp1218) ;
-ATSINSmove(tmp1240, d3exp_elide_proof_313(arg0, arg1, tmp1237)) ;
-ATSINSmove(tmp1258, atspre_g0int_add_int(arg1, ATSPMVi0nt(1))) ;
-ATSINSmove(tmp1257, d3explst_elide_proofs_loop_318(arg0, tmp1258, arg2, tmp1238)) ;
-ATSINSmove(tmpret1213, ATSLIB_056_libats_056_arena__glist_cons__68__7(tmp1240, tmp1257)) ;
-ATSbranch_end()
-ATScaseof_end()
-}
-ATSfunbody_end()
-ATSreturn(tmpret1213) ;
+ATSreturn_void(tmpret1233) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -13436,15 +13695,53 @@ ATSfunbody_end()
 ATSreturn(tmpret441__10) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__14()
+atsvoid_t0ype
+prerr_d2varlst_names_320(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret316__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1241, atstype_boxed) ;
+ATStmpdec(tmp1260, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1261, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1263, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1264, atstkind_t0ype(atstype_bool)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__14, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSINSflab(__patsflab_prerr_d2varlst_names_320):
+ATSINSmove(tmp1241, ATSLIB_056_libats_056_arena__glist_view__119__8(arg0)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab362):
+ATSifthen(ATSCKptriscons(tmp1241)) { ATSINSgoto(__atstmplab365) ; } ;
+ATSINSlab(__atstmplab363):
+ATSINSmove_void(tmpret1240, ATSPMVempty()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab364):
+#if(0)
+ATSifthen(ATSCKptrisnull(tmp1241)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab365):
+ATSINSmove(tmp1260, ATSSELcon(tmp1241, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp1261, ATSSELcon(tmp1241, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp1241) ;
+ATSINSmove(tmp1263, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_sym(tmp1260)) ;
+ATSINSmove_void(tmp1262, PATSHOME_057_src_057_pats_symbol_056_sats__prerr_symbol(tmp1263)) ;
+ATSINSmove(tmp1264, ATSLIB_056_libats_056_arena__glist_is_cons__48__4(tmp1261)) ;
+ATSif(
+tmp1264
+) ATSthen() {
+ATSINSmove_void(tmp1266, atspre_prerr_string(ATSPMVstring(" or "))) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp1261) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSfgoto(__patsflab_prerr_d2varlst_names_320) ;
+ATStailcal_end()
+} ATSelse() {
+ATSINSmove_void(tmpret1240, ATSPMVempty()) ;
+}
+ATSbranch_end()
+ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret316__14) ;
+ATSreturn_void(tmpret1240) ;
 }
 ATSstatic()
 atstype_boxed
@@ -13566,302 +13863,66 @@ ATSfunbody_end()
 ATSreturn(tmpret174__28) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__15()
-{
-ATStmpdec(tmpret316__15, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__15, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__15) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__7(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret321__7, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__7, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__7, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__7, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__7, atslib_the_garena_alloc(tmp323__7)) ;
-ATSINSmove_void(tmp324__7, ATSLIB_056_libats_056_arena__acell_make__71__7(tmp322__7, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__7, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__7)) ;
-ATSfunbody_end()
-ATSreturn(tmpret321__7) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__7(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__7, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__7, ATSLIB_056_libats_056_arena__arena_store__73__13(arg0, arg2)) ;
-ATSINSmove(tmp331__7, ATSLIB_056_prelude__ptr0_add_guint__34__17(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__7, ATSLIB_056_libats_056_arena__arena_store__73__14(tmp331__7, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__7) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__13(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__13, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__13, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__13, arg1) ;
-ATSINSmove(tmp337__13, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__13), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__13, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__13) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__17(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__17, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__17, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__17, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__17, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__17, atspre_g0uint_mul_size(tmp164__17, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__17, atspre_add_ptr0_bsz(arg0, tmp163__17)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__17) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__14(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__14, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__14, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__14, arg1) ;
-ATSINSmove(tmp337__14, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__14), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__14, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__14) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_elide_proofs(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmpret1259, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d3explst_elide_proofs):
-ATSINSmove(tmpret1259, d3explst_elide_proofs_loop_318(arg0, ATSPMVi0nt(1), arg1, arg2)) ;
-ATSfunbody_end()
-ATSreturn(tmpret1259) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-d23exp_trup_app23_336(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_type(atstype_ptrk) arg3, atstype_boxed arg4)
-{
-ATStmpdec(tmpret1260, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1261, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1262, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref1263, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1264, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1265, postiats_tyrec_26) ;
-ATStmpdec(tmp1266, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1267, atstype_boxed) ;
-ATStmpdec(tmp1269, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1270, atstype_boxed) ;
-ATStmpdec(tmp1271, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1272, atstype_boxed) ;
-ATStmpdec(tmp1274, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1275, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1276, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1277, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1278, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1279, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1282, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1285, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1286, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1290, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1304, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1305, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1310, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1311, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1312, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1313, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1314, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1315, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1318, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1319, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1320, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1403, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1404, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1407, postiats_tyrec_29) ;
-ATStmpdec(tmp1408, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1409, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1410, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1411, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1412, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1413, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1415, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1418, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1429, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d23exp_trup_app23_336):
-ATSINSmove(tmp1261, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
-ATSINSmove(tmp1262, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(arg1)) ;
-ATSINSmove(tmpref1263, ATSPMVi0nt(0)) ;
-ATSINSmove(tmp1264, PATSHOME_057_src_057_pats_location_056_sats__location_rightmost(tmp1261)) ;
-ATSINSmove(tmp1265, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2exp_unimet_instantiate_all(tmp1262, tmp1264, ATSPMVrefarg1(ATSPMVptrof(tmpref1263)))) ;
-ATSINSmove(tmp1266, ATSSELfltrec(tmp1265, postiats_tyrec_26, atslab__0)) ;
-ATSINSmove(tmp1267, ATSSELfltrec(tmp1265, postiats_tyrec_26, atslab__1)) ;
-ATSINSmove_void(tmp1268, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_proplst_vt(tmp1264, tmp1267)) ;
-ATSINSmove(tmp1269, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_app_unista(tmp1261, tmp1266, arg1)) ;
-ATSINSmove(tmp1271, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1266)) ;
-ATSINSmove(tmp1270, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1271)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab348):
-ATSifnthen(ATSCKpat_con1(tmp1270, 19)) { ATSINSgoto(__atstmplab350) ; } ;
-ATSINSlab(__atstmplab349):
-ATSINSmove(tmp1272, ATSSELcon(tmp1270, postiats_tysum_27, atslab__0)) ;
-ATSINSmove(tmp1274, ATSSELcon(tmp1270, postiats_tysum_27, atslab__2)) ;
-ATSINSmove(tmp1275, ATSSELcon(tmp1270, postiats_tysum_27, atslab__3)) ;
-ATSINSmove(tmp1276, ATSSELcon(tmp1270, postiats_tysum_27, atslab__4)) ;
-ATSINSmove(tmp1277, ATSSELcon(tmp1270, postiats_tysum_27, atslab__5)) ;
-ATSINSfreecon(tmp1270) ;
-ATSINSmove(tmp1279, ATSLIB_056_prelude__lt_g0int_int__199__2(arg2, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1279
-) ATSthen() {
-ATSINSmove(tmp1282, ATSLIB_056_prelude__gt_g0int_int__110__11(tmp1275, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1282
-) ATSthen() {
-ATSINSmove(tmp1278, PATSHOME_057_src_057_pats_trans3_056_sats__s2explst_elide_test(tmp1275, tmp1276)) ;
-} ATSelse() {
-ATSINSmove(tmp1278, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
-}
-} ATSelse() {
-ATSINSmove(tmp1278, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
-}
-ATSINSmove(tmp1286, ATSLIB_056_prelude__eq_g0int_int__62__4(tmp1278, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1286
-) ATSthen() {
-ATSINSmove(tmp1285, ATSPMVi0nt(0)) ;
-} ATSelse() {
-ATSINSmove(tmp1285, PATSHOME_057_src_057_pats_staexp2_solve_056_sats__pfarity_equal_solve(tmp1261, tmp1275, arg2)) ;
-}
-ATSINSmove(tmp1290, ATSLIB_056_prelude__gt_g0int_int__110__12(tmp1285, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1290
-) ATSthen() {
-ATSINSmove_void(tmp1293, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(tmp1261)) ;
-ATSINSmove_void(tmp1296, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 39232(line=1656, offs=16) -- 39268(line=1656, offs=52)"), ATSPMVstring("d23exp_trup_app23"))) ;
-ATSINSmove_void(tmp1297, atspre_prerr_string(ATSPMVstring(": proof arity mismatch"))) ;
-ATSINSmove_void(tmp1298, atspre_prerr_string(ATSPMVstring(": the function requires "))) ;
-ATSINSmove_void(tmp1299, atspre_prerr_int(tmp1275)) ;
-ATSINSmove_void(tmp1300, atspre_prerr_string(ATSPMVstring(" proof arguments."))) ;
-ATSINSmove_void(tmp1301, atspre_prerr_newline()) ;
-ATSINSmove_void(tmp1302, PATSHOME_057_src_057_pats_staexp2_error_056_sats__prerr_the_staerrlst()) ;
-ATSINSmove(tmp1305, ATSLIB_056_prelude__gt_g0int_int__110__13(tmp1278, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1305
-) ATSthen() {
-ATSINSmove(tmp1310, PATSHOME_057_src_057_pats_global_056_sats__the_LEGACYERRORS_get()) ;
-ATSINSmove(tmp1304, ATSLIB_056_prelude__eq_g0int_int__62__5(tmp1310, ATSPMVi0nt(0))) ;
-} ATSelse() {
-ATSINSmove(tmp1304, ATSPMVbool_false()) ;
-}
-ATSif(
-tmp1304
-) ATSthen() {
-ATSINSmove_void(tmp1303, prerr_elide_hint_308(tmp1278, tmp1276)) ;
-} ATSelse() {
-ATSINSmove_void(tmp1303, ATSPMVempty()) ;
-}
-ATSINSmove(tmp1311, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_npf(tmp1261, arg2)) ;
-ATSINSmove_void(tmp1289, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1311)) ;
-} ATSelse() {
-ATSINSmove_void(tmp1289, ATSPMVempty()) ;
-}
-ATSINSmove(tmp1312, PATSHOME_057_src_057_pats_location_056_sats__location_combine(tmp1261, arg3)) ;
-ATSINSmove(tmp1313, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2fun_opninv_and_add(arg3, tmp1276, tmp1277)) ;
-ATSINSmove(tmp1315, ATSLIB_056_prelude__eq_g0int_int__62__6(tmp1278, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1315
-) ATSthen() {
-ATSINSmove(tmp1318, PATSHOME_057_src_057_pats_trans3_056_sats__s2explst_elide_drop(tmp1275, tmp1313)) ;
-ATSINSmove(tmp1319, d23explst_trdn_193(arg3, arg4, tmp1318)) ;
-ATSINSmove(tmp1320, PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_elide_proofs(arg3, tmp1275, tmp1313)) ;
-ATSINSmove(tmp1314, ATSLIB_056_libats_056_arena__glist_append__345__1(tmp1320, tmp1319)) ;
-} ATSelse() {
-ATSINSmove(tmp1314, d23explst_trdn_193(arg3, arg4, tmp1313)) ;
-}
-ATSINSmove(tmp1404, ATSLIB_056_prelude__eq_g0int_int__62__7(tmp1278, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1404
-) ATSthen() {
-ATSINSmove(tmp1403, tmp1275) ;
-} ATSelse() {
-ATSINSmove(tmp1403, arg2) ;
-}
-ATSINSmove(tmp1407, PATSHOME_057_src_057_pats_trans3_env_056_sats__un_s2exp_wthtype(tmp1312, tmp1277)) ;
-ATSINSmove(tmp1408, ATSSELfltrec(tmp1407, postiats_tyrec_29, atslab__0)) ;
-ATSINSmove(tmp1409, ATSSELfltrec(tmp1407, postiats_tyrec_29, atslab__1)) ;
-ATSINSmove(tmp1410, ATSSELfltrec(tmp1407, postiats_tyrec_29, atslab__2)) ;
-ATSINSmove(tmp1411, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_fun_restore(tmp1272, tmp1269)) ;
-ATSif(
-tmp1408
-) ATSthen() {
-ATSINSmove(tmp1412, PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_arg_restore(tmp1314, tmp1313, tmp1410)) ;
-} ATSelse() {
-ATSINSmove(tmp1412, tmp1314) ;
-}
-ATSINSmove(tmp1413, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_check_s2eff(tmp1312, tmp1274)) ;
-ATSINSmove(tmp1415, ATSLIB_056_prelude__gt_g0int_int__110__14(tmp1413, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1415
-) ATSthen() {
-ATSINSmove(tmp1418, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_eff(tmp1312, tmp1274)) ;
-ATSINSmove_void(tmp1414, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1418)) ;
-} ATSelse() {
-ATSINSmove_void(tmp1414, ATSPMVempty()) ;
-}
-ATSINSmove(tmpret1260, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_app_dyn(tmp1312, tmp1409, tmp1411, tmp1403, tmp1412)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab350):
-ATSINSmove_void(tmp1419, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1270)) ;
-ATSINSmove_void(tmp1420, PATSHOME_057_src_057_pats_trans3_056_sats__d23explst_free(arg4)) ;
-ATSINSmove_void(tmp1421, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(tmp1261)) ;
-ATSINSmove_void(tmp1424, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 41343(line=1719, offs=14) -- 41379(line=1719, offs=50)"), ATSPMVstring("d23exp_trup_app23"))) ;
-ATSINSmove_void(tmp1425, atspre_prerr_string(ATSPMVstring(": the applied dynamic expression is of non-function type: "))) ;
-ATSINSmove_void(tmp1426, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2exp(tmp1266)) ;
-ATSINSmove_void(tmp1427, atspre_prerr_newline()) ;
-ATSINSmove(tmp1429, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_fun(tmp1261, tmp1266)) ;
-ATSINSmove_void(tmp1428, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1429)) ;
-ATSINSmove(tmpret1260, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(tmp1261)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1260) ;
-}
-ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g0int_int__199__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_libats_056_arena__glist_is_cons__48__4(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret693__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp694__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret192__4, atstkind_t0ype(atstype_bool)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_lt_g0int_int):
-ATSINSmove(tmp694__2, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret693__2, atspre_g0int_lt_int(arg0, tmp694__2)) ;
+ATSINSflab(__patsflab_glist_is_cons):
+ATSINSmove(tmpret192__4, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
 ATSfunbody_end()
-ATSreturn(tmpret693__2) ;
+ATSreturn(tmpret192__4) ;
+}
+ATSstatic()
+atsvoid_t0ype
+prerr_elide_ambiguous_msg_330(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATSfunbody_beg()
+ATSINSflab(__patsflab_prerr_elide_ambiguous_msg_330):
+ATSINSmove_void(tmp1268, PATSHOME_057_src_057_pats_staexp2_sprint_056_sats__sprint_reset()) ;
+ATSINSmove_void(tmp1269, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(arg0)) ;
+ATSINSmove_void(tmp1272, atspre_prerr_string(ATSPMVstring(": the omitted proof argument "))) ;
+ATSINSmove_void(tmp1273, atspre_prerr_int(arg1)) ;
+ATSINSmove_void(tmp1274, atspre_prerr_string(ATSPMVstring(" could be "))) ;
+ATSINSmove_void(tmp1275, prerr_d2varlst_names_320(arg2)) ;
+ATSINSmove_void(tmp1276, atspre_prerr_string(ATSPMVstring("; pass the proof explicitly."))) ;
+ATSINSmove_void(tmpret1267, atspre_prerr_newline()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret1267) ;
+}
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(atstkind_type(atstype_ptrk) arg0)
+{
+ATSfunbody_beg()
+ATSINSflab(__patsflab_prerr_error3_loc):
+ATSINSmove_void(tmp686__13, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret685__13, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret685__13) ;
+}
+ATSstatic()
+atsvoid_t0ype
+auxerr_elide_ambiguous_332(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2, atstkind_type(atstype_ptrk) arg3)
+{
+ATStmpdec(tmp1278, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1281, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1283, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_auxerr_elide_ambiguous_332):
+ATSINSmove(tmp1281, PATSHOME_057_src_057_pats_global_056_sats__the_LEGACYERRORS_get()) ;
+ATSINSmove(tmp1278, ATSLIB_056_prelude__gt_g0int_int__110__11(tmp1281, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1278
+) ATSthen() {
+ATSINSmove_void(tmp1282, ATSPMVempty()) ;
+} ATSelse() {
+ATSINSmove_void(tmp1282, prerr_elide_ambiguous_msg_330(arg0, arg1, arg3)) ;
+}
+ATSINSmove(tmp1283, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_elide(arg0, arg1)) ;
+ATSINSmove_void(tmpret1277, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1283)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret1277) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -13877,187 +13938,126 @@ ATSfunbody_end()
 ATSreturn(tmpret441__11) ;
 }
 ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+atstkind_type(atstype_ptrk)
+d3exp_elide_proof_none_334(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmpret305__4, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp306__4, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1284, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_eq_g0int_int):
-ATSINSmove(tmp306__4, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret305__4, atspre_g0int_eq_int(arg0, tmp306__4)) ;
+ATSINSflab(__patsflab_d3exp_elide_proof_none_334):
+ATSINSmove_void(tmp1285, auxerr_elide_noproof_318(arg0, arg1, arg2)) ;
+ATSINSmove(tmpret1284, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret305__4) ;
+ATSreturn(tmpret1284) ;
 }
 ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+atstkind_type(atstype_ptrk)
+d3exp_elide_proof_amb_335(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2, atstkind_type(atstype_ptrk) arg3)
 {
-ATStmpdec(tmpret441__12, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp442__12, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1286, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_gt_g0int_int):
-ATSINSmove(tmp442__12, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret441__12, atspre_g0int_gt_int(arg0, tmp442__12)) ;
+ATSINSflab(__patsflab_d3exp_elide_proof_amb_335):
+ATSINSmove_void(tmp1287, auxerr_elide_ambiguous_332(arg0, arg1, arg2, arg3)) ;
+ATSINSmove(tmpret1286, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret441__12) ;
+ATSreturn(tmpret1286) ;
 }
 ATSstatic()
-atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__12(atstkind_type(atstype_ptrk) arg0)
+atstkind_type(atstype_ptrk)
+d3exp_elide_proof_one_336(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2, atsrefarg1_type(atstkind_type(atstype_ptrk)) arg3)
 {
+ATStmpdec(tmpret1288, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1289, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1290, atstype_boxed) ;
+ATStmpdec(tmp1309, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1311, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1312, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1329, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_prerr_error3_loc):
-ATSINSmove_void(tmp686__12, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
-ATSINSmove_void(tmpret685__12, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret685__12) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-ATStmpdec(tmpret441__13, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp442__13, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gt_g0int_int):
-ATSINSmove(tmp442__13, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret441__13, atspre_g0int_gt_int(arg0, tmp442__13)) ;
-ATSfunbody_end()
-ATSreturn(tmpret441__13) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-ATStmpdec(tmpret305__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp306__5, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_eq_g0int_int):
-ATSINSmove(tmp306__5, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret305__5, atspre_g0int_eq_int(arg0, tmp306__5)) ;
-ATSfunbody_end()
-ATSreturn(tmpret305__5) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__eq_g0int_int__62__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-ATStmpdec(tmpret305__6, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp306__6, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_eq_g0int_int):
-ATSINSmove(tmp306__6, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret305__6, atspre_g0int_eq_int(arg0, tmp306__6)) ;
-ATSfunbody_end()
-ATSreturn(tmpret305__6) ;
-}
+ATSINSflab(__patsflab_d3exp_elide_proof_one_336):
+ATSINSmove(tmp1290, ATSLIB_056_libats_056_arena__glist_view__119__9(arg2)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab366):
+ATSifthen(ATSCKptrisnull(tmp1290)) { ATSINSgoto(__atstmplab369) ; } ;
+ATSINSlab(__atstmplab367):
+ATSINSmove(tmp1309, ATSSELcon(tmp1290, postiats_tysum_8, atslab__0)) ;
+ATSINSfreecon(tmp1290) ;
+ATSINSmove(tmp1289, tmp1309) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab368):
 #if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_append__345(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret1321, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1327, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_append):
-ATSINSmove(tmp1327, PMVtmpltcst(glist_reverse<S2Evar(a(6694))>)(arg0)) ;
-ATSINSmove(tmpret1321, ATSfunclo_fun(PMVd2vfunlab(d2v=loop$3473(1), flab=loop_346$0(level=1)), (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk))(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp1327), arg1)) ;
-ATSfunbody_end()
-ATSreturn(tmpret1321) ;
-}
+ATSifthen(ATSCKptriscons(tmp1290)) { ATSINSdeadcode_fail() ; } ;
 #endif
+ATSINSlab(__atstmplab369):
+ATSINSmove(tmp1289, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_make_any(arg0)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp1311, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup_var_nonmut(arg0, tmp1289)) ;
+ATSINSmove(tmp1312, ATSLIB_056_libats_056_arena__glist_cons__68__7(tmp1289, ATSderef(arg3, atstkind_type(atstype_ptrk)))) ;
+ATSINSstore(ATSderef(arg3, atstkind_type(atstype_ptrk)), tmp1312) ;
+ATSINSmove(tmp1329, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_refarg(ATSPMVi0nt(0), arg1)) ;
+ATSINSmove(tmpret1288, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn(tmp1311, tmp1329)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1288) ;
+}
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__9(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret478__9, atstype_boxed) ;
+ATStmpdec(tmp479__9, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp480__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp481__9, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_view):
+ATSINSmove(tmp479__9, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSif(
+tmp479__9
+) ATSthen() {
+ATSINSmove(tmp480__9, ATSLIB_056_libats_056_arena__acell_head__32__11(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp481__9, ATSLIB_056_libats_056_arena__acell_tail__44__14(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret478__9, postiats_tysum_8) ;
 #if(0)
-ATSstatic()
-atstkind_type(atstype_ptrk)
-loop_346__346(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret1322, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1323, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1324, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1325, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1326, atstyvar_type(a)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_346):
-ATSINSmove(tmp1323, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
-ATSif(
-tmp1323
-) ATSthen() {
-ATSINSmove(tmp1324, PMVtmpltcst(acell_tail<>)(arg0)) ;
-ATSINSmove(tmp1326, PMVtmpltcst(acell_head<S2Evar(a(6694))>)(arg0)) ;
-ATSINSmove(tmp1325, PMVtmpltcst(glist_cons<S2Evar(a(6694))>)(tmp1326, arg1)) ;
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp1324) ;
-ATSINSmove_tlcal(apy1, tmp1325) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_346) ;
-ATStailcal_end()
-} ATSelse() {
-ATSINSmove(tmpret1322, arg1) ;
-}
-ATSfunbody_end()
-ATSreturn(tmpret1322) ;
-}
+ATSINSstore_con1_tag(tmpret478__9, 1) ;
 #endif
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_append__345__1(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret1321__1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1327__1, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_append):
-ATSINSmove(tmp1327__1, ATSLIB_056_libats_056_arena__glist_reverse__144__2(arg0)) ;
-ATSINSmove(tmpret1321__1, loop_346__346__1(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp1327__1), arg1)) ;
-ATSfunbody_end()
-ATSreturn(tmpret1321__1) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-loop_346__346__1(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret1322__1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1323__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1324__1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1325__1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1326__1, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_346):
-ATSINSmove(tmp1323__1, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
-ATSif(
-tmp1323__1
-) ATSthen() {
-ATSINSmove(tmp1324__1, ATSLIB_056_libats_056_arena__acell_tail__44__14(arg0)) ;
-ATSINSmove(tmp1326__1, ATSLIB_056_libats_056_arena__acell_head__32__11(arg0)) ;
-ATSINSmove(tmp1325__1, ATSLIB_056_libats_056_arena__glist_cons__68__8(tmp1326__1, arg1)) ;
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp1324__1) ;
-ATSINSmove_tlcal(apy1, tmp1325__1) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_346) ;
-ATStailcal_end()
+ATSINSstore_con1_ofs(tmpret478__9, postiats_tysum_8, atslab__0, tmp480__9) ;
+ATSINSstore_con1_ofs(tmpret478__9, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__9)) ;
+ATSINSmove_con1_end()
 } ATSelse() {
-ATSINSmove(tmpret1322__1, arg1) ;
+ATSINSmove_nil(tmpret478__9) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret1322__1) ;
+ATSreturn(tmpret478__9) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__14(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_head__32__11(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret185__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret158__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__11, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__14, ATSLIB_056_libats_056_arena__arena_load__38__29(arg0)) ;
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__11, ATSLIB_056_prelude__ptr0_add_guint__34__17(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__11, ATSLIB_056_libats_056_arena__arena_load__38__29(tmp159__11)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__14) ;
+ATSreturn(tmpret158__11) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__17(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__17, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__17, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__17, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__17, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__17, atspre_g0uint_mul_size(tmp164__17, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__17, atspre_add_ptr0_bsz(arg0, tmp163__17)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__17) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14086,31 +14086,14 @@ ATSreturn(tmpret174__29) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__11(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_tail__44__14(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret158__11, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret185__14, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__11, ATSLIB_056_prelude__ptr0_add_guint__34__18(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__11, ATSLIB_056_libats_056_arena__arena_load__38__30(tmp159__11)) ;
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__14, ATSLIB_056_libats_056_arena__arena_load__38__30(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret158__11) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__18(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__18, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__18, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__18, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__18, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__18, atspre_g0uint_mul_size(tmp164__18, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__18, atspre_add_ptr0_bsz(arg0, tmp163__18)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__18) ;
+ATSreturn(tmpret185__14) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14139,121 +14122,166 @@ ATSreturn(tmpret174__30) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__8(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+ATSLIB_056_libats_056_arena__glist_cons__68__7(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret321__8, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__8, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__8, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret321__7, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__7, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__7, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__8, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__8, atslib_the_garena_alloc(tmp323__8)) ;
-ATSINSmove_void(tmp324__8, ATSLIB_056_libats_056_arena__acell_make__71__8(tmp322__8, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__8, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__8)) ;
+ATSINSmove(tmp323__7, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__7, atslib_the_garena_alloc(tmp323__7)) ;
+ATSINSmove_void(tmp324__7, ATSLIB_056_libats_056_arena__acell_make__71__7(tmp322__7, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__7, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__7)) ;
 ATSfunbody_end()
-ATSreturn(tmpret321__8) ;
+ATSreturn(tmpret321__7) ;
 }
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__8(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+ATSLIB_056_libats_056_arena__acell_make__71__7(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmp331__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp331__7, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__8, ATSLIB_056_libats_056_arena__arena_store__73__15(arg0, arg2)) ;
-ATSINSmove(tmp331__8, ATSLIB_056_prelude__ptr0_add_guint__34__19(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__8, ATSLIB_056_libats_056_arena__arena_store__73__16(tmp331__8, arg1)) ;
+ATSINSmove_void(tmp330__7, ATSLIB_056_libats_056_arena__arena_store__73__13(arg0, arg2)) ;
+ATSINSmove(tmp331__7, ATSLIB_056_prelude__ptr0_add_guint__34__18(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__7, ATSLIB_056_libats_056_arena__arena_store__73__14(tmp331__7, arg1)) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret329__8) ;
+ATSreturn_void(tmpret329__7) ;
 }
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__15(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+ATSLIB_056_libats_056_arena__arena_store__73__13(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpref336__15, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref336__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__13, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__15, arg1) ;
-ATSINSmove(tmp337__15, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__15), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__15, ATSPMVempty()) ;
+ATSINSmove(tmpref336__13, arg1) ;
+ATSINSmove(tmp337__13, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__13), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__13, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret335__15) ;
+ATSreturn_void(tmpret335__13) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__19(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+ATSLIB_056_prelude__ptr0_add_guint__34__18(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret162__19, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__19, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__19, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret162__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__18, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__18, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__19, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__19, atspre_g0uint_mul_size(tmp164__19, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__19, atspre_add_ptr0_bsz(arg0, tmp163__19)) ;
+ATSINSmove(tmp164__18, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__18, atspre_g0uint_mul_size(tmp164__18, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__18, atspre_add_ptr0_bsz(arg0, tmp163__18)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__19) ;
+ATSreturn(tmpret162__18) ;
 }
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__16(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+ATSLIB_056_libats_056_arena__arena_store__73__14(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpref336__16, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__16, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref336__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__14, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__16, arg1) ;
-ATSINSmove(tmp337__16, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__16), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__16, ATSPMVempty()) ;
+ATSINSmove(tmpref336__14, arg1) ;
+ATSINSmove(tmp337__14, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__14), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__14, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret335__16) ;
+ATSreturn_void(tmpret335__14) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_reverse__144__2(atstkind_type(atstype_ptrk) arg0)
+d3exp_elide_proof_byview_350(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2, atsrefarg1_type(atstkind_type(atstype_ptrk)) arg3)
 {
-ATStmpdec(tmpret543__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp549__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1330, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1331, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1332, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1343, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1344, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1349, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1352, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1355, atstkind_t0ype(atstype_bool)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_reverse):
-ATSINSmove(tmp549__2, ATSLIB_056_libats_056_arena__glist_nil__66__16()) ;
-ATSINSmove(tmpret543__2, loop_145__145__2(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), tmp549__2)) ;
+ATSINSflab(__patsflab_d3exp_elide_proof_byview_350):
+ATSINSmove(tmp1331, PATSHOME_057_src_057_pats_trans3_env_056_sats__pfobj_search_bytype(arg2, ATSderef(arg3, atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp1332, ATSLIB_056_libats_056_arena__glist_length__89__3(tmp1331)) ;
+ATSINSmove(tmp1344, ATSLIB_056_prelude__eq_g1int_int__356__1(tmp1332, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1344
+) ATSthen() {
+ATSINSmove(tmp1343, ATSPMVi0nt(0)) ;
+} ATSelse() {
+ATSINSmove(tmp1349, ATSLIB_056_prelude__eq_g1int_int__356__2(tmp1332, ATSPMVi0nt(1))) ;
+ATSif(
+tmp1349
+) ATSthen() {
+ATSINSmove(tmp1343, ATSPMVi0nt(1)) ;
+} ATSelse() {
+ATSINSmove(tmp1343, ATSPMVi0nt(2)) ;
+}
+}
+ATSINSmove(tmp1352, ATSLIB_056_prelude__eq_g0int_int__62__5(tmp1343, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1352
+) ATSthen() {
+ATSINSmove(tmpret1330, d3exp_elide_proof_none_334(arg0, arg1, arg2)) ;
+} ATSelse() {
+ATSINSmove(tmp1355, ATSLIB_056_prelude__eq_g0int_int__62__6(tmp1343, ATSPMVi0nt(2))) ;
+ATSif(
+tmp1355
+) ATSthen() {
+ATSINSmove(tmpret1330, d3exp_elide_proof_amb_335(arg0, arg1, arg2, tmp1331)) ;
+} ATSelse() {
+ATSINSmove(tmpret1330, d3exp_elide_proof_one_336(arg0, arg2, tmp1331, ATSPMVrefarg1(arg3))) ;
+}
+}
 ATSfunbody_end()
-ATSreturn(tmpret543__2) ;
+ATSreturn(tmpret1330) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-loop_145__145__2(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+atstkind_t0ype(atstype_int)
+ATSLIB_056_libats_056_arena__glist_length__89__3(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret382__3, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_length):
+ATSINSmove(tmpret382__3, loop_90__90__3(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), ATSPMVi0nt(0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret382__3) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_int)
+loop_90__90__3(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret544__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp545__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp546__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp547__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp548__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret383__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp384__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp385__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp386__3, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_145):
-ATSINSmove(tmp545__2, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSINSflab(__patsflab_loop_90):
+ATSINSmove(tmp384__3, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
 ATSif(
-tmp545__2
+tmp384__3
 ) ATSthen() {
-ATSINSmove(tmp546__2, ATSLIB_056_libats_056_arena__acell_tail__44__15(arg0)) ;
-ATSINSmove(tmp548__2, ATSLIB_056_libats_056_arena__acell_head__32__12(arg0)) ;
-ATSINSmove(tmp547__2, ATSLIB_056_libats_056_arena__glist_cons__68__9(tmp548__2, arg1)) ;
+ATSINSmove(tmp385__3, ATSLIB_056_libats_056_arena__acell_tail__44__15(arg0)) ;
+ATSINSmove(tmp386__3, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp546__2) ;
-ATSINSmove_tlcal(apy1, tmp547__2) ;
+ATSINSmove_tlcal(apy0, tmp385__3) ;
+ATSINSmove_tlcal(apy1, tmp386__3) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_145) ;
+ATSINSfgoto(__patsflab_loop_90) ;
 ATStailcal_end()
 } ATSelse() {
-ATSINSmove(tmpret544__2, arg1) ;
+ATSINSmove(tmpret383__3, arg1) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret544__2) ;
+ATSreturn(tmpret383__3) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14291,33 +14319,251 @@ ATSINSmove(tmpret174__31, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstyp
 ATSfunbody_end()
 ATSreturn(tmpret174__31) ;
 }
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__12(atstkind_type(atstype_ptrk) arg0)
+#if(0)
+ATSextern()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret158__12, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1345, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1346, atstkind_t0ype(atstyvar_type(tk))) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__12, ATSLIB_056_prelude__ptr0_add_guint__34__20(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__12, ATSLIB_056_libats_056_arena__arena_load__38__32(tmp159__12)) ;
+ATSINSflab(__patsflab_eq_g1int_int):
+ATSINSmove(tmp1346, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(3973))>)(arg1)) ;
+ATSINSmove(tmpret1345, PMVtmpltcst(g1int_eq<S2Evar(tk(3973))>)(arg0, tmp1346)) ;
 ATSfunbody_end()
-ATSreturn(tmpret158__12) ;
+ATSreturn(tmpret1345) ;
+}
+#endif
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret1345__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1346__1, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_eq_g1int_int):
+ATSINSmove(tmp1346__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmpret1345__1, atspre_g1int_eq_int(arg0, tmp1346__1)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1345__1) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret1345__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1346__2, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_eq_g1int_int):
+ATSINSmove(tmp1346__2, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmpret1345__2, atspre_g1int_eq_int(arg0, tmp1346__2)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1345__2) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret305__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__5, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_eq_g0int_int):
+ATSINSmove(tmp306__5, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__5, atspre_g0int_eq_int(arg0, tmp306__5)) ;
+ATSfunbody_end()
+ATSreturn(tmpret305__5) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret305__6, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__6, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_eq_g0int_int):
+ATSINSmove(tmp306__6, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__6, atspre_g0int_eq_int(arg0, tmp306__6)) ;
+ATSfunbody_end()
+ATSreturn(tmpret305__6) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__20(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+d3exp_elide_proof_363(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2, atsrefarg1_type(atstkind_type(atstype_ptrk)) arg3)
 {
-ATStmpdec(tmpret162__20, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__20, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__20, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret1358, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1359, atstype_boxed) ;
+ATStmpdec(tmp1360, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1361, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1362, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1363, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1364, atstype_boxed) ;
+ATStmpdec(tmp1365, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1367, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1368, atstype_boxed) ;
+ATStmpdec(tmp1369, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1370, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1371, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1372, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1373, atstype_boxed) ;
+ATStmpdec(tmp1374, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1376, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1377, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1388, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1392, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1393, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1394, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1396, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1397, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1399, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1400, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1401, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1403, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1404, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1405, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1406, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__20, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__20, atspre_g0uint_mul_size(tmp164__20, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__20, atspre_add_ptr0_bsz(arg0, tmp163__20)) ;
+ATSINSflab(__patsflab_d3exp_elide_proof_363):
+ATSINSmove(tmp1360, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg2)) ;
+ATSINSmove(tmp1359, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1360)) ;
+ATSifnthen(ATSCKpat_con1(tmp1359, 29)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 42313(line=1788, offs=7) -- 42378(line=1789, offs=55)") ; } ;
+ATSINSmove(tmp1361, ATSSELcon(tmp1359, postiats_tysum_14, atslab__1)) ;
+ATSINSfreecon(tmp1359) ;
+ATSINSmove(tmp1362, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1361)) ;
+ATSINSmove(tmp1365, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1362)) ;
+ATSINSmove(tmp1364, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1365)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab370):
+ATSifnthen(ATSCKpat_con1(tmp1364, 12)) { ATSINSgoto(__atstmplab372) ; } ;
+ATSINSlab(__atstmplab371):
+ATSINSfreecon(tmp1364) ;
+ATSINSmove(tmp1363, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab372):
+ATSINSmove_void(tmp1366, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1364)) ;
+ATSINSmove(tmp1363, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp1367, atspre_neg_bool0(tmp1363)) ;
+ATSif(
+tmp1367
+) ATSthen() {
+ATSINSmove(tmpret1358, d3exp_elide_proof_byview_350(arg0, arg1, tmp1362, ATSPMVrefarg1(arg3))) ;
+} ATSelse() {
+ATSINSmove(tmp1369, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1362)) ;
+ATSINSmove(tmp1368, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1369)) ;
+ATSifnthen(ATSCKpat_con1(tmp1368, 12)) { ATSINScaseof_fail("PATSHOME/src/pats_trans3_dynexp_up.dats: 42678(line=1802, offs=7) -- 42735(line=1803, offs=51)") ; } ;
+ATSINSmove(tmp1370, ATSSELcon(tmp1368, postiats_tysum_18, atslab__1)) ;
+ATSINSfreecon(tmp1368) ;
+ATSINSmove(tmp1371, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1370)) ;
+ATSINSmove(tmp1374, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1371)) ;
+ATSINSmove(tmp1373, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1374)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab373):
+ATSifnthen(ATSCKpat_con1(tmp1373, 8)) { ATSINSgoto(__atstmplab375) ; } ;
+ATSINSlab(__atstmplab374):
+ATSINSfreecon(tmp1373) ;
+ATSINSmove(tmp1372, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab375):
+ATSINSmove_void(tmp1375, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1373)) ;
+ATSINSmove(tmp1372, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSif(
+tmp1372
+) ATSthen() {
+ATSINSmove(tmp1376, PATSHOME_057_src_057_pats_trans3_env_056_sats__pfobj_search_atview_bytype(tmp1362)) ;
+ATSINSmove(tmp1377, ATSLIB_056_libats_056_arena__glist_length__89__4(tmp1376)) ;
+ATSINSmove(tmp1388, ATSLIB_056_prelude__eq_g1int_int__356__3(tmp1377, ATSPMVi0nt(1))) ;
+ATSif(
+tmp1388
+) ATSthen() {
+ATSINSmove(tmpret1358, d3exp_elide_proof_one_336(arg0, tmp1362, tmp1376, ATSPMVrefarg1(arg3))) ;
+} ATSelse() {
+ATSINSmove_void(tmp1391, auxerr_elide_noaddr_313(arg0, arg1, tmp1362)) ;
+ATSINSmove(tmp1392, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_errexp(patsopt_s2rt_view)) ;
+ATSINSmove(tmp1393, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(arg0)) ;
+ATSINSmove(tmp1394, ATSLIB_056_libats_056_arena__glist_nil__66__10()) ;
+ATSINSmove(tmpret1358, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat(arg0, tmp1392, tmp1393, tmp1394)) ;
+}
+} ATSelse() {
+ATSINSmove(tmp1397, ATSLIB_056_libats_056_arena__glist_nil__66__11()) ;
+ATSINSmove(tmp1396, PATSHOME_057_src_057_pats_trans3_056_sats__s2addr_viewat_deref(arg0, tmp1371, tmp1397)) ;
+ATSINSmove(tmp1399, s2exp_is_errexp_315(tmp1396)) ;
+ATSif(
+tmp1399
+) ATSthen() {
+ATSINSmove(tmp1400, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(arg0)) ;
+ATSINSmove(tmp1401, ATSLIB_056_libats_056_arena__glist_nil__66__12()) ;
+ATSINSmove(tmpret1358, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat(arg0, tmp1396, tmp1400, tmp1401)) ;
+} ATSelse() {
+ATSINSmove(tmp1403, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_ptr_addr_type(tmp1371)) ;
+ATSINSmove(tmp1404, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_empty(arg0, tmp1403)) ;
+ATSINSmove(tmp1406, ATSLIB_056_libats_056_arena__glist_nil__66__13()) ;
+ATSINSmove(tmp1405, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_viewat(arg0, tmp1396, tmp1404, tmp1406)) ;
+ATSINSmove(tmpret1358, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_trdn(tmp1405, arg2)) ;
+}
+}
+}
 ATSfunbody_end()
-ATSreturn(tmpret162__20) ;
+ATSreturn(tmpret1358) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_int)
+ATSLIB_056_libats_056_arena__glist_length__89__4(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret382__4, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_length):
+ATSINSmove(tmpret382__4, loop_90__90__4(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), ATSPMVi0nt(0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret382__4) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_int)
+loop_90__90__4(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret383__4, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp384__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp385__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp386__4, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_loop_90):
+ATSINSmove(tmp384__4, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSif(
+tmp384__4
+) ATSthen() {
+ATSINSmove(tmp385__4, ATSLIB_056_libats_056_arena__acell_tail__44__16(arg0)) ;
+ATSINSmove(tmp386__4, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp385__4) ;
+ATSINSmove_tlcal(apy1, tmp386__4) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_90) ;
+ATStailcal_end()
+} ATSelse() {
+ATSINSmove(tmpret383__4, arg1) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret383__4) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__16(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__16, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__16, ATSLIB_056_libats_056_arena__arena_load__38__32(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__16) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14345,76 +14591,347 @@ ATSfunbody_end()
 ATSreturn(tmpret174__32) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__9(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g1int_int__356__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret321__9, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__9, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__9, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret1345__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1346__3, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__9, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__9, atslib_the_garena_alloc(tmp323__9)) ;
-ATSINSmove_void(tmp324__9, ATSLIB_056_libats_056_arena__acell_make__71__9(tmp322__9, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__9, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__9)) ;
+ATSINSflab(__patsflab_eq_g1int_int):
+ATSINSmove(tmp1346__3, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmpret1345__3, atspre_g1int_eq_int(arg0, tmp1346__3)) ;
 ATSfunbody_end()
-ATSreturn(tmpret321__9) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__9(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__9, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__9, ATSLIB_056_libats_056_arena__arena_store__73__17(arg0, arg2)) ;
-ATSINSmove(tmp331__9, ATSLIB_056_prelude__ptr0_add_guint__34__21(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__9, ATSLIB_056_libats_056_arena__arena_store__73__18(tmp331__9, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__9) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__17(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__17, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__17, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__17, arg1) ;
-ATSINSmove(tmp337__17, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__17), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__17, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__17) ;
+ATSreturn(tmpret1345__3) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__21(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+ATSLIB_056_libats_056_arena__glist_nil__66__10()
 {
-ATStmpdec(tmpret162__21, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__21, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__21, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret316__10, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__10, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__10) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__11()
+{
+ATStmpdec(tmpret316__11, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__11, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__11) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__12()
+{
+ATStmpdec(tmpret316__12, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__12, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__12) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__13()
+{
+ATStmpdec(tmpret316__13, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__13, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__13) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+d3explst_elide_proofs_loop_374(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_type(atstype_ptrk) arg3, atsrefarg1_type(atstkind_type(atstype_ptrk)) arg4)
+{
+ATStmpdec(tmpret1408, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1409, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1413, atstype_boxed) ;
+ATStmpdec(tmp1432, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1433, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1435, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1452, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1453, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d3explst_elide_proofs_loop_374):
+ATSINSmove(tmp1409, ATSLIB_056_prelude__gt_g0int_int__110__12(arg1, arg2)) ;
+ATSif(
+tmp1409
+) ATSthen() {
+ATSINSmove(tmpret1408, ATSLIB_056_libats_056_arena__glist_nil__66__14()) ;
+} ATSelse() {
+ATSINSmove(tmp1413, ATSLIB_056_libats_056_arena__glist_view__119__10(arg3)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab376):
+ATSifthen(ATSCKptriscons(tmp1413)) { ATSINSgoto(__atstmplab379) ; } ;
+ATSINSlab(__atstmplab377):
+ATSINSmove(tmpret1408, ATSLIB_056_libats_056_arena__glist_nil__66__15()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab378):
+#if(0)
+ATSifthen(ATSCKptrisnull(tmp1413)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab379):
+ATSINSmove(tmp1432, ATSSELcon(tmp1413, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp1433, ATSSELcon(tmp1413, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp1413) ;
+ATSINSmove(tmp1435, d3exp_elide_proof_363(arg0, arg1, tmp1432, ATSPMVrefarg1(arg4))) ;
+ATSINSmove(tmp1453, atspre_g0int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1452, d3explst_elide_proofs_loop_374(arg0, tmp1453, arg2, tmp1433, ATSPMVrefarg1(arg4))) ;
+ATSINSmove(tmpret1408, ATSLIB_056_libats_056_arena__glist_cons__68__8(tmp1435, tmp1452)) ;
+ATSbranch_end()
+ATScaseof_end()
+}
+ATSfunbody_end()
+ATSreturn(tmpret1408) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret441__12, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442__12, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gt_g0int_int):
+ATSINSmove(tmp442__12, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret441__12, atspre_g0int_gt_int(arg0, tmp442__12)) ;
+ATSfunbody_end()
+ATSreturn(tmpret441__12) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__14()
+{
+ATStmpdec(tmpret316__14, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__14, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__14) ;
+}
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__10(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret478__10, atstype_boxed) ;
+ATStmpdec(tmp479__10, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp480__10, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp481__10, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_view):
+ATSINSmove(tmp479__10, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSif(
+tmp479__10
+) ATSthen() {
+ATSINSmove(tmp480__10, ATSLIB_056_libats_056_arena__acell_head__32__12(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp481__10, ATSLIB_056_libats_056_arena__acell_tail__44__17(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret478__10, postiats_tysum_8) ;
+#if(0)
+ATSINSstore_con1_tag(tmpret478__10, 1) ;
+#endif
+ATSINSstore_con1_ofs(tmpret478__10, postiats_tysum_8, atslab__0, tmp480__10) ;
+ATSINSstore_con1_ofs(tmpret478__10, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__10)) ;
+ATSINSmove_con1_end()
+} ATSelse() {
+ATSINSmove_nil(tmpret478__10) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret478__10) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__12(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret158__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__12, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__12, ATSLIB_056_prelude__ptr0_add_guint__34__19(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__12, ATSLIB_056_libats_056_arena__arena_load__38__33(tmp159__12)) ;
+ATSfunbody_end()
+ATSreturn(tmpret158__12) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__19(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__19, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__19, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__19, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__21, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__21, atspre_g0uint_mul_size(tmp164__21, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__21, atspre_add_ptr0_bsz(arg0, tmp163__21)) ;
+ATSINSmove(tmp164__19, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__19, atspre_g0uint_mul_size(tmp164__19, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__19, atspre_add_ptr0_bsz(arg0, tmp163__19)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__21) ;
+ATSreturn(tmpret162__19) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__33(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__33, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__33, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__33, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__33, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__33), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__33, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__33(ATSPMVptrof(tmpref169__33))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__33) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__33(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__33, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__33, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__33) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__17(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__17, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__17, ATSLIB_056_libats_056_arena__arena_load__38__34(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__17) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__34(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__34, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__34, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__34, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__34, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__34), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__34, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__34(ATSPMVptrof(tmpref169__34))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__34) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__34(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__34, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__34, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__34) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__15()
+{
+ATStmpdec(tmpret316__15, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__15, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__15) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_cons__68__8(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret321__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__8, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__8, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__8, atslib_the_garena_alloc(tmp323__8)) ;
+ATSINSmove_void(tmp324__8, ATSLIB_056_libats_056_arena__acell_make__71__8(tmp322__8, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__8, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__8)) ;
+ATSfunbody_end()
+ATSreturn(tmpret321__8) ;
 }
 ATSstatic()
 atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__18(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+ATSLIB_056_libats_056_arena__acell_make__71__8(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmpref336__18, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp331__8, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__8, ATSLIB_056_libats_056_arena__arena_store__73__15(arg0, arg2)) ;
+ATSINSmove(tmp331__8, ATSLIB_056_prelude__ptr0_add_guint__34__20(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__8, ATSLIB_056_libats_056_arena__arena_store__73__16(tmp331__8, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__8) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__15(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__15, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__18, arg1) ;
-ATSINSmove(tmp337__18, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__18), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__18, ATSPMVempty()) ;
+ATSINSmove(tmpref336__15, arg1) ;
+ATSINSmove(tmp337__15, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__15), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__15, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret335__18) ;
+ATSreturn_void(tmpret335__15) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__20(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__20, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__20, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__20, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__20, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__20, atspre_g0uint_mul_size(tmp164__20, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__20, atspre_add_ptr0_bsz(arg0, tmp163__20)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__20) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__16(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__16, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__16, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__16, arg1) ;
+ATSINSmove(tmp337__16, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__16), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__16, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__16) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_elide_proofs(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmpret1454, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref1455, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d3explst_elide_proofs):
+ATSINSmove(tmpref1455, ATSLIB_056_libats_056_arena__glist_nil__66__16()) ;
+ATSINSmove(tmpret1454, d3explst_elide_proofs_loop_374(arg0, ATSPMVi0nt(1), arg1, arg2, ATSPMVrefarg1(ATSPMVptrof(tmpref1455)))) ;
+ATSfunbody_end()
+ATSreturn(tmpret1454) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14426,6 +14943,223 @@ ATSINSflab(__patsflab_glist_nil):
 ATSINSmove(tmpret316__16, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
 ATSfunbody_end()
 ATSreturn(tmpret316__16) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+d23exp_trup_app23_393(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_type(atstype_ptrk) arg3, atstype_boxed arg4)
+{
+ATStmpdec(tmpret1457, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1458, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1459, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref1460, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1461, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1462, postiats_tyrec_26) ;
+ATStmpdec(tmp1463, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1464, atstype_boxed) ;
+ATStmpdec(tmp1466, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1467, atstype_boxed) ;
+ATStmpdec(tmp1468, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1469, atstype_boxed) ;
+ATStmpdec(tmp1471, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1472, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1473, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1474, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1475, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1476, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1479, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1482, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1483, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1487, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1501, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1502, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1507, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1508, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1509, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1510, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1511, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1512, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1515, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1516, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1517, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1600, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1601, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1604, postiats_tyrec_29) ;
+ATStmpdec(tmp1605, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1606, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1607, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1608, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1609, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1610, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1612, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1615, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1626, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d23exp_trup_app23_393):
+ATSINSmove(tmp1458, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
+ATSINSmove(tmp1459, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(arg1)) ;
+ATSINSmove(tmpref1460, ATSPMVi0nt(0)) ;
+ATSINSmove(tmp1461, PATSHOME_057_src_057_pats_location_056_sats__location_rightmost(tmp1458)) ;
+ATSINSmove(tmp1462, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2exp_unimet_instantiate_all(tmp1459, tmp1461, ATSPMVrefarg1(ATSPMVptrof(tmpref1460)))) ;
+ATSINSmove(tmp1463, ATSSELfltrec(tmp1462, postiats_tyrec_26, atslab__0)) ;
+ATSINSmove(tmp1464, ATSSELfltrec(tmp1462, postiats_tyrec_26, atslab__1)) ;
+ATSINSmove_void(tmp1465, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_proplst_vt(tmp1461, tmp1464)) ;
+ATSINSmove(tmp1466, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_app_unista(tmp1458, tmp1463, arg1)) ;
+ATSINSmove(tmp1468, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp1463)) ;
+ATSINSmove(tmp1467, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp1468)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab380):
+ATSifnthen(ATSCKpat_con1(tmp1467, 19)) { ATSINSgoto(__atstmplab382) ; } ;
+ATSINSlab(__atstmplab381):
+ATSINSmove(tmp1469, ATSSELcon(tmp1467, postiats_tysum_27, atslab__0)) ;
+ATSINSmove(tmp1471, ATSSELcon(tmp1467, postiats_tysum_27, atslab__2)) ;
+ATSINSmove(tmp1472, ATSSELcon(tmp1467, postiats_tysum_27, atslab__3)) ;
+ATSINSmove(tmp1473, ATSSELcon(tmp1467, postiats_tysum_27, atslab__4)) ;
+ATSINSmove(tmp1474, ATSSELcon(tmp1467, postiats_tysum_27, atslab__5)) ;
+ATSINSfreecon(tmp1467) ;
+ATSINSmove(tmp1476, ATSLIB_056_prelude__lt_g0int_int__199__2(arg2, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1476
+) ATSthen() {
+ATSINSmove(tmp1479, ATSLIB_056_prelude__gt_g0int_int__110__13(tmp1472, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1479
+) ATSthen() {
+ATSINSmove(tmp1475, PATSHOME_057_src_057_pats_trans3_056_sats__s2explst_elide_test(tmp1472, tmp1473)) ;
+} ATSelse() {
+ATSINSmove(tmp1475, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+}
+} ATSelse() {
+ATSINSmove(tmp1475, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+}
+ATSINSmove(tmp1483, ATSLIB_056_prelude__eq_g0int_int__62__7(tmp1475, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1483
+) ATSthen() {
+ATSINSmove(tmp1482, ATSPMVi0nt(0)) ;
+} ATSelse() {
+ATSINSmove(tmp1482, PATSHOME_057_src_057_pats_staexp2_solve_056_sats__pfarity_equal_solve(tmp1458, tmp1472, arg2)) ;
+}
+ATSINSmove(tmp1487, ATSLIB_056_prelude__gt_g0int_int__110__14(tmp1482, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1487
+) ATSthen() {
+ATSINSmove_void(tmp1490, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(tmp1458)) ;
+ATSINSmove_void(tmp1493, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 46395(line=1942, offs=16) -- 46431(line=1942, offs=52)"), ATSPMVstring("d23exp_trup_app23"))) ;
+ATSINSmove_void(tmp1494, atspre_prerr_string(ATSPMVstring(": proof arity mismatch"))) ;
+ATSINSmove_void(tmp1495, atspre_prerr_string(ATSPMVstring(": the function requires "))) ;
+ATSINSmove_void(tmp1496, atspre_prerr_int(tmp1472)) ;
+ATSINSmove_void(tmp1497, atspre_prerr_string(ATSPMVstring(" proof arguments."))) ;
+ATSINSmove_void(tmp1498, atspre_prerr_newline()) ;
+ATSINSmove_void(tmp1499, PATSHOME_057_src_057_pats_staexp2_error_056_sats__prerr_the_staerrlst()) ;
+ATSINSmove(tmp1502, ATSLIB_056_prelude__gt_g0int_int__110__15(tmp1475, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1502
+) ATSthen() {
+ATSINSmove(tmp1507, PATSHOME_057_src_057_pats_global_056_sats__the_LEGACYERRORS_get()) ;
+ATSINSmove(tmp1501, ATSLIB_056_prelude__eq_g0int_int__62__8(tmp1507, ATSPMVi0nt(0))) ;
+} ATSelse() {
+ATSINSmove(tmp1501, ATSPMVbool_false()) ;
+}
+ATSif(
+tmp1501
+) ATSthen() {
+ATSINSmove_void(tmp1500, prerr_elide_hint_311(tmp1475, tmp1473)) ;
+} ATSelse() {
+ATSINSmove_void(tmp1500, ATSPMVempty()) ;
+}
+ATSINSmove(tmp1508, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_npf(tmp1458, arg2)) ;
+ATSINSmove_void(tmp1486, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1508)) ;
+} ATSelse() {
+ATSINSmove_void(tmp1486, ATSPMVempty()) ;
+}
+ATSINSmove(tmp1509, PATSHOME_057_src_057_pats_location_056_sats__location_combine(tmp1458, arg3)) ;
+ATSINSmove(tmp1510, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2fun_opninv_and_add(arg3, tmp1473, tmp1474)) ;
+ATSINSmove(tmp1512, ATSLIB_056_prelude__eq_g0int_int__62__9(tmp1475, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1512
+) ATSthen() {
+ATSINSmove(tmp1515, PATSHOME_057_src_057_pats_trans3_056_sats__s2explst_elide_drop(tmp1472, tmp1510)) ;
+ATSINSmove(tmp1516, d23explst_trdn_193(arg3, arg4, tmp1515)) ;
+ATSINSmove(tmp1517, PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_elide_proofs(arg3, tmp1472, tmp1510)) ;
+ATSINSmove(tmp1511, ATSLIB_056_libats_056_arena__glist_append__402__1(tmp1517, tmp1516)) ;
+} ATSelse() {
+ATSINSmove(tmp1511, d23explst_trdn_193(arg3, arg4, tmp1510)) ;
+}
+ATSINSmove(tmp1601, ATSLIB_056_prelude__eq_g0int_int__62__10(tmp1475, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1601
+) ATSthen() {
+ATSINSmove(tmp1600, tmp1472) ;
+} ATSelse() {
+ATSINSmove(tmp1600, arg2) ;
+}
+ATSINSmove(tmp1604, PATSHOME_057_src_057_pats_trans3_env_056_sats__un_s2exp_wthtype(tmp1509, tmp1474)) ;
+ATSINSmove(tmp1605, ATSSELfltrec(tmp1604, postiats_tyrec_29, atslab__0)) ;
+ATSINSmove(tmp1606, ATSSELfltrec(tmp1604, postiats_tyrec_29, atslab__1)) ;
+ATSINSmove(tmp1607, ATSSELfltrec(tmp1604, postiats_tyrec_29, atslab__2)) ;
+ATSINSmove(tmp1608, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_fun_restore(tmp1469, tmp1466)) ;
+ATSif(
+tmp1605
+) ATSthen() {
+ATSINSmove(tmp1609, PATSHOME_057_src_057_pats_trans3_056_sats__d3explst_arg_restore(tmp1511, tmp1510, tmp1607)) ;
+} ATSelse() {
+ATSINSmove(tmp1609, tmp1511) ;
+}
+ATSINSmove(tmp1610, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_check_s2eff(tmp1509, tmp1471)) ;
+ATSINSmove(tmp1612, ATSLIB_056_prelude__gt_g0int_int__110__16(tmp1610, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1612
+) ATSthen() {
+ATSINSmove(tmp1615, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_eff(tmp1509, tmp1471)) ;
+ATSINSmove_void(tmp1611, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1615)) ;
+} ATSelse() {
+ATSINSmove_void(tmp1611, ATSPMVempty()) ;
+}
+ATSINSmove(tmpret1457, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_app_dyn(tmp1509, tmp1606, tmp1608, tmp1600, tmp1609)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab382):
+ATSINSmove_void(tmp1616, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp1467)) ;
+ATSINSmove_void(tmp1617, PATSHOME_057_src_057_pats_trans3_056_sats__d23explst_free(arg4)) ;
+ATSINSmove_void(tmp1618, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(tmp1458)) ;
+ATSINSmove_void(tmp1621, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 48506(line=2005, offs=14) -- 48542(line=2005, offs=50)"), ATSPMVstring("d23exp_trup_app23"))) ;
+ATSINSmove_void(tmp1622, atspre_prerr_string(ATSPMVstring(": the applied dynamic expression is of non-function type: "))) ;
+ATSINSmove_void(tmp1623, PATSHOME_057_src_057_pats_staexp2_056_sats__prerr_s2exp(tmp1463)) ;
+ATSINSmove_void(tmp1624, atspre_prerr_newline()) ;
+ATSINSmove(tmp1626, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d23exp_trup_app23_fun(tmp1458, tmp1463)) ;
+ATSINSmove_void(tmp1625, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1626)) ;
+ATSINSmove(tmpret1457, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_errexp(tmp1458)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret1457) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__lt_g0int_int__199__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret693__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp694__2, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_lt_g0int_int):
+ATSINSmove(tmp694__2, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret693__2, atspre_g0int_lt_int(arg0, tmp694__2)) ;
+ATSfunbody_end()
+ATSreturn(tmpret693__2) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret441__13, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442__13, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gt_g0int_int):
+ATSINSmove(tmp442__13, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret441__13, atspre_g0int_gt_int(arg0, tmp442__13)) ;
+ATSfunbody_end()
+ATSreturn(tmpret441__13) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -14455,341 +15189,160 @@ ATSreturn(tmpret441__14) ;
 }
 ATSstatic()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__13(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(atstkind_type(atstype_ptrk) arg0)
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_error3_loc):
-ATSINSmove_void(tmp686__13, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
-ATSINSmove_void(tmpret685__13, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
+ATSINSmove_void(tmp686__14, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret685__14, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret685__13) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-d23exp_trup_applst_dyn_379(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_type(atstype_ptrk) arg3, atstkind_type(atstype_ptrk) arg4, atstkind_type(atstype_ptrk) arg5)
-{
-ATStmpdec(tmpret1430, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1431, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1432, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1433, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1434, atstype_boxed) ;
-ATStmpdec(tmp1436, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d23exp_trup_applst_dyn_379):
-ATSINSmove(tmp1431, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
-ATSINSmove(tmp1432, PATSHOME_057_src_057_pats_location_056_sats__location_combine(tmp1431, arg3)) ;
-ATSINSmove(tmp1433, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(arg1)) ;
-ATSINSmove(tmp1434, d2explst_trup_arg_161(arg4)) ;
-ATSINSmove_void(tmp1435, d23explst_open_and_add_171(ATSPMVrefarg0(tmp1434))) ;
-ATSINSmove(tmp1436, d23exp_trup_app23_336(arg0, arg1, arg2, arg3, tmp1434)) ;
-ATSINSmove(tmpret1430, PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_trup_applst(arg0, tmp1436, arg5)) ;
-ATSfunbody_end()
-ATSreturn(tmpret1430) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_trup_applst(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmpret1437, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1438, atstype_boxed) ;
-ATStmpdec(tmp1457, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1458, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1459, atstype_boxed) ;
-ATStmpdec(tmp1461, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1462, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1463, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1464, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d23exp_trup_applst):
-ATSINSmove(tmp1438, ATSLIB_056_libats_056_arena__glist_view__119__9(arg2)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab351):
-ATSifthen(ATSCKptrisnull(tmp1438)) { ATSINSgoto(__atstmplab354) ; } ;
-ATSINSlab(__atstmplab352):
-ATSINSmove(tmp1457, ATSSELcon(tmp1438, postiats_tysum_8, atslab__0)) ;
-ATSINSmove(tmp1458, ATSSELcon(tmp1438, postiats_tysum_8, atslab__1)) ;
-ATSINSfreecon(tmp1438) ;
-ATSINSmove(tmp1459, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exparg_view(tmp1457)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab355):
-ATSifnthen(ATSCKpat_con1(tmp1459, 0)) { ATSINSgoto(__atstmplab358) ; } ;
-ATSINSlab(__atstmplab356):
-ATSINSmove(tmp1461, ATSSELcon(tmp1459, postiats_tysum_18, atslab__1)) ;
-ATSINSfreecon(tmp1459) ;
-ATSINSmove(tmpret1437, d23exp_trup_applst_sta_271(arg0, arg1, tmp1461, tmp1458)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab357):
-#if(0)
-ATSifnthen(ATSCKpat_con1(tmp1459, 1)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab358):
-ATSINSmove(tmp1462, ATSSELcon(tmp1459, postiats_tysum_20, atslab__0)) ;
-ATSINSmove(tmp1463, ATSSELcon(tmp1459, postiats_tysum_20, atslab__1)) ;
-ATSINSmove(tmp1464, ATSSELcon(tmp1459, postiats_tysum_20, atslab__2)) ;
-ATSINSfreecon(tmp1459) ;
-ATSINSmove(tmpret1437, d23exp_trup_applst_dyn_379(arg0, arg1, tmp1462, tmp1463, tmp1464, tmp1458)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab353):
-#if(0)
-ATSifthen(ATSCKptriscons(tmp1438)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab354):
-ATSINSmove(tmpret1437, arg1) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1437) ;
-}
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__glist_view__119__9(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret478__9, atstype_boxed) ;
-ATStmpdec(tmp479__9, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp480__9, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp481__9, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_view):
-ATSINSmove(tmp479__9, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSif(
-tmp479__9
-) ATSthen() {
-ATSINSmove(tmp480__9, ATSLIB_056_libats_056_arena__acell_head__32__13(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmp481__9, ATSLIB_056_libats_056_arena__acell_tail__44__16(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret478__9, postiats_tysum_8) ;
-#if(0)
-ATSINSstore_con1_tag(tmpret478__9, 1) ;
-#endif
-ATSINSstore_con1_ofs(tmpret478__9, postiats_tysum_8, atslab__0, tmp480__9) ;
-ATSINSstore_con1_ofs(tmpret478__9, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__9)) ;
-ATSINSmove_con1_end()
-} ATSelse() {
-ATSINSmove_nil(tmpret478__9) ;
-}
-ATSfunbody_end()
-ATSreturn(tmpret478__9) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__13(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret158__13, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__13, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__13, ATSLIB_056_prelude__ptr0_add_guint__34__22(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__13, ATSLIB_056_libats_056_arena__arena_load__38__33(tmp159__13)) ;
-ATSfunbody_end()
-ATSreturn(tmpret158__13) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__22(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__22, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__22, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__22, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__22, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__22, atspre_g0uint_mul_size(tmp164__22, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__22, atspre_add_ptr0_bsz(arg0, tmp163__22)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__22) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__33(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret168__33, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref169__33, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp170__33, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_load):
-ATSINSmove(tmp170__33, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__33), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove(tmpret168__33, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__33(ATSPMVptrof(tmpref169__33))) ;
-ATSfunbody_end()
-ATSreturn(tmpret168__33) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__33(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret174__33, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_get):
-ATSINSmove(tmpret174__33, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
-ATSfunbody_end()
-ATSreturn(tmpret174__33) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__16(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret185__16, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__16, ATSLIB_056_libats_056_arena__arena_load__38__34(arg0)) ;
-ATSfunbody_end()
-ATSreturn(tmpret185__16) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__arena_load__38__34(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret168__34, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref169__34, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp170__34, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_load):
-ATSINSmove(tmp170__34, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__34), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove(tmpret168__34, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__34(ATSPMVptrof(tmpref169__34))) ;
-ATSfunbody_end()
-ATSreturn(tmpret168__34) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude_056_unsafe__ptr0_get__40__34(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret174__34, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_get):
-ATSINSmove(tmpret174__34, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
-ATSfunbody_end()
-ATSreturn(tmpret174__34) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lst(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1465, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1466, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1467, atstype_boxed) ;
-ATStmpdec(tmp1468, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1469, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1470, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1471, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1472, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1473, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1476, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1477, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1478, atstype_boxed) ;
-ATStmpdec(tmp1486, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1487, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1488, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1499, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1500, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1501, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_lst):
-ATSINSmove(tmp1466, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1468, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1467, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1468)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab359):
-ATSifnthen(ATSCKpat_con1(tmp1467, 36)) { ATSINSgoto(__atstmplab361) ; } ;
-ATSINSlab(__atstmplab360):
-ATSINSmove(tmp1469, ATSSELcon(tmp1467, postiats_tysum_20, atslab__0)) ;
-ATSINSmove(tmp1470, ATSSELcon(tmp1467, postiats_tysum_20, atslab__1)) ;
-ATSINSmove(tmp1471, ATSSELcon(tmp1467, postiats_tysum_20, atslab__2)) ;
-ATSINSfreecon(tmp1467) ;
-ATSINSmove(tmp1473, ATSLIB_056_prelude__gte_g0int_int__217__2(tmp1469, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1473
-) ATSthen() {
-ATSINSmove(tmp1472, PATSHOME_057_src_057_pats_basics_056_sats__test_linkind(tmp1469)) ;
-} ATSelse() {
-ATSINSmove(tmp1472, ATSPMVbool_false()) ;
-}
-ATSINSmove(tmp1476, atspre_neg_bool0(tmp1472)) ;
-ATSINSmove(tmp1478, ATSLIB_056_libats_056_arena__gopt_view__51__5(tmp1470)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab362):
-ATSifthen(ATSCKptrisnull(tmp1478)) { ATSINSgoto(__atstmplab365) ; } ;
-ATSINSlab(__atstmplab363):
-ATSINSmove(tmp1486, ATSSELcon(tmp1478, postiats_tysum_15, atslab__0)) ;
-ATSINSfreecon(tmp1478) ;
-ATSINSmove(tmp1477, tmp1486) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab364):
-#if(0)
-ATSifthen(ATSCKptriscons(tmp1478)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab365):
-ATSif(
-tmp1476
-) ATSthen() {
-ATSINSmove(tmp1487, patsopt_s2rt_t0ype) ;
-} ATSelse() {
-ATSINSmove(tmp1487, patsopt_s2rt_vt0ype) ;
-}
-ATSINSmove(tmp1477, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2exp_Var_make_srt(tmp1466, tmp1487)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSINSmove(tmp1488, ATSLIB_056_libats_056_arena__glist_length__89__3(tmp1471)) ;
-ATSINSmove(tmp1499, PATSHOME_057_src_057_pats_trans3_056_sats__d2explst_trdn_elt(tmp1471, tmp1477)) ;
-ATSINSmove(tmp1500, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_list_vt0ype_int_vtype(tmp1477, tmp1488)) ;
-ATSINSmove(tmp1501, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lst(tmp1466, tmp1500, tmp1469, tmp1477, tmp1499)) ;
-ATSINSmove(tmpret1465, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1501)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab361):
-ATSINSmove_void(tmp1502, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1467)) ;
-ATSINSmove(tmpret1465, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__7()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1465) ;
+ATSreturn_void(tmpret685__14) ;
 }
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gte_g0int_int__217__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__gt_g0int_int__110__15(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret765__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp766__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret441__15, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442__15, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_gte_g0int_int):
-ATSINSmove(tmp766__2, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret765__2, atspre_g0int_gte_int(arg0, tmp766__2)) ;
+ATSINSflab(__patsflab_gt_g0int_int):
+ATSINSmove(tmp442__15, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret441__15, atspre_g0int_gt_int(arg0, tmp442__15)) ;
 ATSfunbody_end()
-ATSreturn(tmpret765__2) ;
+ATSreturn(tmpret441__15) ;
 }
 ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__gopt_view__51__5(atstkind_type(atstype_ptrk) arg0)
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret197__5, atstype_boxed) ;
-ATStmpdec(tmp198__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp199__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret305__8, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__8, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_view):
-ATSINSmove(tmp198__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSif(
-tmp198__5
-) ATSthen() {
-ATSINSmove(tmp199__5, ATSLIB_056_libats_056_arena__arena_load__38__35(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret197__5, postiats_tysum_15) ;
+ATSINSflab(__patsflab_eq_g0int_int):
+ATSINSmove(tmp306__8, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__8, atspre_g0int_eq_int(arg0, tmp306__8)) ;
+ATSfunbody_end()
+ATSreturn(tmpret305__8) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret305__9, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__9, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_eq_g0int_int):
+ATSINSmove(tmp306__9, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__9, atspre_g0int_eq_int(arg0, tmp306__9)) ;
+ATSfunbody_end()
+ATSreturn(tmpret305__9) ;
+}
 #if(0)
-ATSINSstore_con1_tag(tmpret197__5, 1) ;
+ATSextern()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_append__402(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret1518, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1524, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_append):
+ATSINSmove(tmp1524, PMVtmpltcst(glist_reverse<S2Evar(a(6694))>)(arg0)) ;
+ATSINSmove(tmpret1518, ATSfunclo_fun(PMVd2vfunlab(d2v=loop$3473(1), flab=loop_403$0(level=1)), (atstkind_type(atstype_ptrk), atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk))(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp1524), arg1)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1518) ;
+}
 #endif
-ATSINSstore_con1_ofs(tmpret197__5, postiats_tysum_15, atslab__0, tmp199__5) ;
-ATSINSmove_con1_end()
+#if(0)
+ATSstatic()
+atstkind_type(atstype_ptrk)
+loop_403__403(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1519, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1520, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1521, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1522, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1523, atstyvar_type(a)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_loop_403):
+ATSINSmove(tmp1520, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSif(
+tmp1520
+) ATSthen() {
+ATSINSmove(tmp1521, PMVtmpltcst(acell_tail<>)(arg0)) ;
+ATSINSmove(tmp1523, PMVtmpltcst(acell_head<S2Evar(a(6694))>)(arg0)) ;
+ATSINSmove(tmp1522, PMVtmpltcst(glist_cons<S2Evar(a(6694))>)(tmp1523, arg1)) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp1521) ;
+ATSINSmove_tlcal(apy1, tmp1522) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_403) ;
+ATStailcal_end()
 } ATSelse() {
-ATSINSmove_nil(tmpret197__5) ;
+ATSINSmove(tmpret1519, arg1) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret197__5) ;
+ATSreturn(tmpret1519) ;
+}
+#endif
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_append__402__1(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret1518__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1524__1, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_append):
+ATSINSmove(tmp1524__1, ATSLIB_056_libats_056_arena__glist_reverse__144__2(arg0)) ;
+ATSINSmove(tmpret1518__1, loop_403__403__1(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp1524__1), arg1)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1518__1) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+loop_403__403__1(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1519__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1520__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1521__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1522__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1523__1, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_loop_403):
+ATSINSmove(tmp1520__1, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSif(
+tmp1520__1
+) ATSthen() {
+ATSINSmove(tmp1521__1, ATSLIB_056_libats_056_arena__acell_tail__44__18(arg0)) ;
+ATSINSmove(tmp1523__1, ATSLIB_056_libats_056_arena__acell_head__32__13(arg0)) ;
+ATSINSmove(tmp1522__1, ATSLIB_056_libats_056_arena__glist_cons__68__9(tmp1523__1, arg1)) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp1521__1) ;
+ATSINSmove_tlcal(apy1, tmp1522__1) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_403) ;
+ATStailcal_end()
+} ATSelse() {
+ATSINSmove(tmpret1519__1, arg1) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret1519__1) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__18(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__18, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__18, ATSLIB_056_libats_056_arena__arena_load__38__35(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__18) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14817,57 +15370,32 @@ ATSfunbody_end()
 ATSreturn(tmpret174__35) ;
 }
 ATSstatic()
-atstkind_t0ype(atstype_int)
-ATSLIB_056_libats_056_arena__glist_length__89__3(atstkind_type(atstype_ptrk) arg0)
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__13(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret382__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret158__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__13, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_length):
-ATSINSmove(tmpret382__3, loop_90__90__3(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), ATSPMVi0nt(0))) ;
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__13, ATSLIB_056_prelude__ptr0_add_guint__34__21(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__13, ATSLIB_056_libats_056_arena__arena_load__38__36(tmp159__13)) ;
 ATSfunbody_end()
-ATSreturn(tmpret382__3) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_int)
-loop_90__90__3(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret383__3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp384__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp385__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp386__3, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_90):
-ATSINSmove(tmp384__3, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
-ATSif(
-tmp384__3
-) ATSthen() {
-ATSINSmove(tmp385__3, ATSLIB_056_libats_056_arena__acell_tail__44__17(arg0)) ;
-ATSINSmove(tmp386__3, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp385__3) ;
-ATSINSmove_tlcal(apy1, tmp386__3) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_90) ;
-ATStailcal_end()
-} ATSelse() {
-ATSINSmove(tmpret383__3, arg1) ;
-}
-ATSfunbody_end()
-ATSreturn(tmpret383__3) ;
+ATSreturn(tmpret158__13) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__17(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_prelude__ptr0_add_guint__34__21(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret185__17, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret162__21, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__21, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__21, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__17, ATSLIB_056_libats_056_arena__arena_load__38__36(arg0)) ;
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__21, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__21, atspre_g0uint_mul_size(tmp164__21, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__21, atspre_add_ptr0_bsz(arg0, tmp163__21)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__17) ;
+ATSreturn(tmpret162__21) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -14896,244 +15424,132 @@ ATSreturn(tmpret174__36) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__7()
+ATSLIB_056_libats_056_arena__glist_cons__68__9(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret146__7, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__7, atstype_exnconptr) ;
+ATStmpdec(tmpret321__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__9, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__7, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__7, tmp147__7) ;
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__9, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__9, atslib_the_garena_alloc(tmp323__9)) ;
+ATSINSmove_void(tmp324__9, ATSLIB_056_libats_056_arena__acell_make__71__9(tmp322__9, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__9, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__9)) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__7) ;
+ATSreturn(tmpret321__9) ;
 }
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_tup(atstkind_type(atstype_ptrk) arg0)
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__9(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmpret1505, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1506, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1507, atstype_boxed) ;
-ATStmpdec(tmp1508, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1509, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1510, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1511, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1512, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1513, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1514, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1515, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp331__9, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_tup):
-ATSINSmove(tmp1506, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1508, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1507, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1508)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab366):
-ATSifnthen(ATSCKpat_con1(tmp1507, 37)) { ATSINSgoto(__atstmplab368) ; } ;
-ATSINSlab(__atstmplab367):
-ATSINSmove(tmp1509, ATSSELcon(tmp1507, postiats_tysum_30, atslab__0)) ;
-ATSINSmove(tmp1510, ATSSELcon(tmp1507, postiats_tysum_30, atslab__1)) ;
-ATSINSmove(tmp1511, ATSSELcon(tmp1507, postiats_tysum_30, atslab__2)) ;
-ATSINSfreecon(tmp1507) ;
-ATSINSmove(tmp1512, PATSHOME_057_src_057_pats_trans3_056_sats__d2explst_trup(tmp1511)) ;
-ATSINSmove(tmp1513, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3explst_get_labtype(tmp1512)) ;
-ATSINSmove(tmp1514, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec(tmp1509, tmp1510, tmp1513)) ;
-ATSINSmove(tmp1515, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_tup(tmp1506, tmp1514, tmp1509, tmp1510, tmp1512)) ;
-ATSINSmove(tmpret1505, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1515)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab368):
-ATSINSmove_void(tmp1516, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1507)) ;
-ATSINSmove(tmpret1505, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__8()) ;
-ATSbranch_end()
-ATScaseof_end()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__9, ATSLIB_056_libats_056_arena__arena_store__73__17(arg0, arg2)) ;
+ATSINSmove(tmp331__9, ATSLIB_056_prelude__ptr0_add_guint__34__22(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__9, ATSLIB_056_libats_056_arena__arena_store__73__18(tmp331__9, arg1)) ;
 ATSfunbody_end()
-ATSreturn(tmpret1505) ;
+ATSreturn_void(tmpret329__9) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__17(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__17, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__17, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__17, arg1) ;
+ATSINSmove(tmp337__17, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__17), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__17, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__17) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__8()
+ATSLIB_056_prelude__ptr0_add_guint__34__22(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret146__8, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__8, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__8, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__8, tmp147__8) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__8) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-labd3exp_get_type_402(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1519, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1520, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1521, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1522, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1523, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1525, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_labd3exp_get_type_402):
-ATSINSmove(tmp1520, PATSHOME_057_src_057_pats_dynexp3_056_sats__labd3exp_lab(arg0)) ;
-ATSINSmove(tmp1521, PATSHOME_057_src_057_pats_dynexp3_056_sats__labd3exp_elt(arg0)) ;
-ATSINSmove(tmp1522, PATSHOME_057_src_057_pats_syntax_056_sats__l0ab_lab(tmp1520)) ;
-ATSINSmove(tmp1523, ATSLIB_056_libats_056_arena__gopt_none__220__2()) ;
-ATSINSmove(tmp1525, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp1521)) ;
-ATSINSmove(tmpret1519, PATSHOME_057_src_057_pats_staexp2_056_sats__labs2exp_new(tmp1522, tmp1523, tmp1525)) ;
-ATSfunbody_end()
-ATSreturn(tmpret1519) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_none__220__2()
-{
-ATStmpdec(tmpret772__2, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_none):
-ATSINSmove(tmpret772__2, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret772__2) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__labd3explst_get_type(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1526, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_labd3explst_get_type):
-ATSINSmove(tmpret1526, glist_map_fun_2__2__2(arg0, ATSPMVfunlab(labd3exp_get_type_402))) ;
-ATSfunbody_end()
-ATSreturn(tmpret1526) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-glist_map_fun_2__2__2(atstkind_type(atstype_ptrk) arg0, atstype_funptr arg1)
-{
-ATStmpdec(tmpret7__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp8__2, atstype_boxed) ;
-ATStmpdec(tmp9__2, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_map_fun_2):
-ATSINSmove_nil(tmp9__2) ;
-ATSINSmove(tmp8__2, glist_map_loop_1__1__2(arg0, arg1, tmp9__2)) ;
-ATSINSmove(tmpret7__2, ATSLIB_056_libats_056_arena__glist_make_list_vt__134__2(tmp8__2)) ;
-ATSfunbody_end()
-ATSreturn(tmpret7__2) ;
-}
-ATSstatic()
-atstype_boxed
-glist_map_loop_1__1__2(atstkind_type(atstype_ptrk) arg0, atstype_funptr arg1, atstype_boxed arg2)
-{
-ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(apy1, atstype_funptr) ;
-ATStmpdec(apy2, atstype_boxed) ;
-ATStmpdec(tmpret1__2, atstype_boxed) ;
-ATStmpdec(tmp2__2, atstype_boxed) ;
-ATStmpdec(tmp3__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp4__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp5__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp6__2, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_map_loop_1):
-ATSINSmove(tmp2__2, ATSLIB_056_libats_056_arena__glist_view__119__10(arg0)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab0):
-ATSifthen(ATSCKptriscons(tmp2__2)) { ATSINSgoto(__atstmplab3) ; } ;
-ATSINSlab(__atstmplab1):
-ATSINSmove(tmpret1__2, ATSLIB_056_prelude__list_vt_reverse__128__2(arg2)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab2):
-#if(0)
-ATSifthen(ATSCKptrisnull(tmp2__2)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab3):
-ATSINSmove(tmp3__2, ATSSELcon(tmp2__2, postiats_tysum_8, atslab__0)) ;
-ATSINSmove(tmp4__2, ATSSELcon(tmp2__2, postiats_tysum_8, atslab__1)) ;
-ATSINSfreecon(tmp2__2) ;
-ATSINSmove(tmp5__2, ATSfunclo_fun(arg1, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk))(tmp3__2)) ;
-ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmp6__2, postiats_tysum_22) ;
-#if(0)
-ATSINSstore_con1_tag(tmp6__2, 1) ;
-#endif
-ATSINSstore_con1_ofs(tmp6__2, postiats_tysum_22, atslab__0, tmp5__2) ;
-ATSINSstore_con1_ofs(tmp6__2, postiats_tysum_22, atslab__1, arg2) ;
-ATSINSmove_con1_end()
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp4__2) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, tmp6__2) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSfgoto(__patsflab_glist_map_loop_1) ;
-ATStailcal_end()
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1__2) ;
-}
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__glist_view__119__10(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret478__10, atstype_boxed) ;
-ATStmpdec(tmp479__10, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp480__10, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp481__10, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_view):
-ATSINSmove(tmp479__10, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSif(
-tmp479__10
-) ATSthen() {
-ATSINSmove(tmp480__10, ATSLIB_056_libats_056_arena__acell_head__32__14(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmp481__10, ATSLIB_056_libats_056_arena__acell_tail__44__18(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret478__10, postiats_tysum_8) ;
-#if(0)
-ATSINSstore_con1_tag(tmpret478__10, 1) ;
-#endif
-ATSINSstore_con1_ofs(tmpret478__10, postiats_tysum_8, atslab__0, tmp480__10) ;
-ATSINSstore_con1_ofs(tmpret478__10, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__10)) ;
-ATSINSmove_con1_end()
-} ATSelse() {
-ATSINSmove_nil(tmpret478__10) ;
-}
-ATSfunbody_end()
-ATSreturn(tmpret478__10) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__14(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret158__14, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__14, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__14, ATSLIB_056_prelude__ptr0_add_guint__34__23(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__14, ATSLIB_056_libats_056_arena__arena_load__38__37(tmp159__14)) ;
-ATSfunbody_end()
-ATSreturn(tmpret158__14) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__23(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__23, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__23, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__23, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret162__22, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__22, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__22, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__23, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__23, atspre_g0uint_mul_size(tmp164__23, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__23, atspre_add_ptr0_bsz(arg0, tmp163__23)) ;
+ATSINSmove(tmp164__22, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__22, atspre_g0uint_mul_size(tmp164__22, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__22, atspre_add_ptr0_bsz(arg0, tmp163__22)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__23) ;
+ATSreturn(tmpret162__22) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__18(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__18, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__18, arg1) ;
+ATSINSmove(tmp337__18, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__18), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__18, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__18) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_reverse__144__2(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret543__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp549__2, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_reverse):
+ATSINSmove(tmp549__2, ATSLIB_056_libats_056_arena__glist_nil__66__17()) ;
+ATSINSmove(tmpret543__2, loop_145__145__2(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), tmp549__2)) ;
+ATSfunbody_end()
+ATSreturn(tmpret543__2) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+loop_145__145__2(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret544__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp545__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp546__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp547__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp548__2, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_loop_145):
+ATSINSmove(tmp545__2, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSif(
+tmp545__2
+) ATSthen() {
+ATSINSmove(tmp546__2, ATSLIB_056_libats_056_arena__acell_tail__44__19(arg0)) ;
+ATSINSmove(tmp548__2, ATSLIB_056_libats_056_arena__acell_head__32__14(arg0)) ;
+ATSINSmove(tmp547__2, ATSLIB_056_libats_056_arena__glist_cons__68__10(tmp548__2, arg1)) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp546__2) ;
+ATSINSmove_tlcal(apy1, tmp547__2) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_145) ;
+ATStailcal_end()
+} ATSelse() {
+ATSINSmove(tmpret544__2, arg1) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret544__2) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__19(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__19, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__19, ATSLIB_056_libats_056_arena__arena_load__38__37(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__19) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15162,14 +15578,31 @@ ATSreturn(tmpret174__37) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__18(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_head__32__14(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret185__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret158__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__14, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__18, ATSLIB_056_libats_056_arena__arena_load__38__38(arg0)) ;
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__14, ATSLIB_056_prelude__ptr0_add_guint__34__23(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__14, ATSLIB_056_libats_056_arena__arena_load__38__38(tmp159__14)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__18) ;
+ATSreturn(tmpret158__14) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__23(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__23, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__23, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__23, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__23, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__23, atspre_g0uint_mul_size(tmp164__23, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__23, atspre_add_ptr0_bsz(arg0, tmp163__23)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__23) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15195,123 +15628,6 @@ ATSINSflab(__patsflab_ptr0_get):
 ATSINSmove(tmpret174__38, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
 ATSfunbody_end()
 ATSreturn(tmpret174__38) ;
-}
-ATSstatic()
-atstype_boxed
-ATSLIB_056_prelude__list_vt_reverse__128__2(atstype_boxed arg0)
-{
-ATStmpdec(tmpret500__2, atstype_boxed) ;
-ATStmpdec(tmp501__2, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_list_vt_reverse):
-ATSINSmove_nil(tmp501__2) ;
-ATSINSmove(tmpret500__2, ATSLIB_056_prelude__list_vt_reverse_append__130__2(arg0, tmp501__2)) ;
-ATSfunbody_end()
-ATSreturn(tmpret500__2) ;
-}
-ATSstatic()
-atstype_boxed
-ATSLIB_056_prelude__list_vt_reverse_append__130__2(atstype_boxed arg0, atstype_boxed arg1)
-{
-ATStmpdec(tmpret504__2, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_list_vt_reverse_append):
-ATSINSmove(tmpret504__2, loop_131__131__2(arg0, arg1)) ;
-ATSfunbody_end()
-ATSreturn(tmpret504__2) ;
-}
-ATSstatic()
-atstype_boxed
-loop_131__131__2(atstype_boxed arg0, atstype_boxed arg1)
-{
-ATStmpdec(apy0, atstype_boxed) ;
-ATStmpdec(apy1, atstype_boxed) ;
-ATStmpdec(tmpret505__2, atstype_boxed) ;
-ATStmpdec(tmp508__2, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_131):
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab254):
-ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab257) ; } ;
-ATSINSlab(__atstmplab255):
-ATSINSmove(tmpret505__2, arg1) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab256):
-#if(0)
-ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab257):
-ATSINSmove(tmp508__2, ATSSELcon(arg0, postiats_tysum_22, atslab__1)) ;
-ATSINSstore(ATSSELcon(arg0, postiats_tysum_22, atslab__1), arg1) ;
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp508__2) ;
-ATSINSmove_tlcal(apy1, arg0) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_131) ;
-ATStailcal_end()
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret505__2) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_make_list_vt__134__2(atstype_boxed arg0)
-{
-ATStmpdec(tmpret512__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp517__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp518__2, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_make_list_vt):
-ATSINSmove(tmp518__2, ATSLIB_056_libats_056_arena__glist_nil__66__17()) ;
-ATSINSmove(tmp517__2, loop_135__135__2(arg0, tmp518__2)) ;
-ATSINSmove(tmpret512__2, ATSLIB_056_libats_056_arena__glist_reverse__144__3(tmp517__2)) ;
-ATSfunbody_end()
-ATSreturn(tmpret512__2) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-loop_135__135__2(atstype_boxed arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(apy0, atstype_boxed) ;
-ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret513__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp514__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp515__2, atstype_boxed) ;
-ATStmpdec(tmp516__2, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_135):
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab258):
-ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab261) ; } ;
-ATSINSlab(__atstmplab259):
-ATSINSmove(tmpret513__2, arg1) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab260):
-#if(0)
-ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab261):
-ATSINSmove(tmp514__2, ATSSELcon(arg0, postiats_tysum_22, atslab__0)) ;
-ATSINSmove(tmp515__2, ATSSELcon(arg0, postiats_tysum_22, atslab__1)) ;
-ATSINSfreecon(arg0) ;
-ATSINSmove(tmp516__2, ATSLIB_056_libats_056_arena__glist_cons__68__10(tmp514__2, arg1)) ;
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp515__2) ;
-ATSINSmove_tlcal(apy1, tmp516__2) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_135) ;
-ATStailcal_end()
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret513__2) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15397,61 +15713,181 @@ ATSfunbody_end()
 ATSreturn(tmpret316__17) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_reverse__144__3(atstkind_type(atstype_ptrk) arg0)
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__62__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
-ATStmpdec(tmpret543__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp549__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret305__10, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306__10, atstkind_t0ype(atstype_int)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_reverse):
-ATSINSmove(tmp549__3, ATSLIB_056_libats_056_arena__glist_nil__66__18()) ;
-ATSINSmove(tmpret543__3, loop_145__145__3(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), tmp549__3)) ;
+ATSINSflab(__patsflab_eq_g0int_int):
+ATSINSmove(tmp306__10, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret305__10, atspre_g0int_eq_int(arg0, tmp306__10)) ;
 ATSfunbody_end()
-ATSreturn(tmpret543__3) ;
+ATSreturn(tmpret305__10) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__16(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret441__16, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442__16, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gt_g0int_int):
+ATSINSmove(tmp442__16, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret441__16, atspre_g0int_gt_int(arg0, tmp442__16)) ;
+ATSfunbody_end()
+ATSreturn(tmpret441__16) ;
+}
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(atstkind_type(atstype_ptrk) arg0)
+{
+ATSfunbody_beg()
+ATSINSflab(__patsflab_prerr_error3_loc):
+ATSINSmove_void(tmp686__15, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret685__15, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret685__15) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-loop_145__145__3(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+d23exp_trup_applst_dyn_436(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_type(atstype_ptrk) arg3, atstkind_type(atstype_ptrk) arg4, atstkind_type(atstype_ptrk) arg5)
 {
-ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpret544__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp545__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp546__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp547__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp548__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1627, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1628, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1629, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1630, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1631, atstype_boxed) ;
+ATStmpdec(tmp1633, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_loop_145):
-ATSINSmove(tmp545__3, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSINSflab(__patsflab_d23exp_trup_applst_dyn_436):
+ATSINSmove(tmp1628, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(arg1)) ;
+ATSINSmove(tmp1629, PATSHOME_057_src_057_pats_location_056_sats__location_combine(tmp1628, arg3)) ;
+ATSINSmove(tmp1630, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(arg1)) ;
+ATSINSmove(tmp1631, d2explst_trup_arg_161(arg4)) ;
+ATSINSmove_void(tmp1632, d23explst_open_and_add_171(ATSPMVrefarg0(tmp1631))) ;
+ATSINSmove(tmp1633, d23exp_trup_app23_393(arg0, arg1, arg2, arg3, tmp1631)) ;
+ATSINSmove(tmpret1627, PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_trup_applst(arg0, tmp1633, arg5)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1627) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_056_sats__d23exp_trup_applst(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmpret1634, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1635, atstype_boxed) ;
+ATStmpdec(tmp1654, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1655, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1656, atstype_boxed) ;
+ATStmpdec(tmp1658, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1659, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1660, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1661, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d23exp_trup_applst):
+ATSINSmove(tmp1635, ATSLIB_056_libats_056_arena__glist_view__119__11(arg2)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab383):
+ATSifthen(ATSCKptrisnull(tmp1635)) { ATSINSgoto(__atstmplab386) ; } ;
+ATSINSlab(__atstmplab384):
+ATSINSmove(tmp1654, ATSSELcon(tmp1635, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp1655, ATSSELcon(tmp1635, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp1635) ;
+ATSINSmove(tmp1656, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exparg_view(tmp1654)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab387):
+ATSifnthen(ATSCKpat_con1(tmp1656, 0)) { ATSINSgoto(__atstmplab390) ; } ;
+ATSINSlab(__atstmplab388):
+ATSINSmove(tmp1658, ATSSELcon(tmp1656, postiats_tysum_18, atslab__1)) ;
+ATSINSfreecon(tmp1656) ;
+ATSINSmove(tmpret1634, d23exp_trup_applst_sta_271(arg0, arg1, tmp1658, tmp1655)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab389):
+#if(0)
+ATSifnthen(ATSCKpat_con1(tmp1656, 1)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab390):
+ATSINSmove(tmp1659, ATSSELcon(tmp1656, postiats_tysum_20, atslab__0)) ;
+ATSINSmove(tmp1660, ATSSELcon(tmp1656, postiats_tysum_20, atslab__1)) ;
+ATSINSmove(tmp1661, ATSSELcon(tmp1656, postiats_tysum_20, atslab__2)) ;
+ATSINSfreecon(tmp1656) ;
+ATSINSmove(tmpret1634, d23exp_trup_applst_dyn_436(arg0, arg1, tmp1659, tmp1660, tmp1661, tmp1655)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab385):
+#if(0)
+ATSifthen(ATSCKptriscons(tmp1635)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab386):
+ATSINSmove(tmpret1634, arg1) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret1634) ;
+}
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__11(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret478__11, atstype_boxed) ;
+ATStmpdec(tmp479__11, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp480__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp481__11, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_view):
+ATSINSmove(tmp479__11, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
 ATSif(
-tmp545__3
+tmp479__11
 ) ATSthen() {
-ATSINSmove(tmp546__3, ATSLIB_056_libats_056_arena__acell_tail__44__19(arg0)) ;
-ATSINSmove(tmp548__3, ATSLIB_056_libats_056_arena__acell_head__32__15(arg0)) ;
-ATSINSmove(tmp547__3, ATSLIB_056_libats_056_arena__glist_cons__68__11(tmp548__3, arg1)) ;
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, tmp546__3) ;
-ATSINSmove_tlcal(apy1, tmp547__3) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSfgoto(__patsflab_loop_145) ;
-ATStailcal_end()
+ATSINSmove(tmp480__11, ATSLIB_056_libats_056_arena__acell_head__32__15(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp481__11, ATSLIB_056_libats_056_arena__acell_tail__44__20(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret478__11, postiats_tysum_8) ;
+#if(0)
+ATSINSstore_con1_tag(tmpret478__11, 1) ;
+#endif
+ATSINSstore_con1_ofs(tmpret478__11, postiats_tysum_8, atslab__0, tmp480__11) ;
+ATSINSstore_con1_ofs(tmpret478__11, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__11)) ;
+ATSINSmove_con1_end()
 } ATSelse() {
-ATSINSmove(tmpret544__3, arg1) ;
+ATSINSmove_nil(tmpret478__11) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret544__3) ;
+ATSreturn(tmpret478__11) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__19(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_head__32__15(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret185__19, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret158__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__15, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__19, ATSLIB_056_libats_056_arena__arena_load__38__39(arg0)) ;
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__15, ATSLIB_056_prelude__ptr0_add_guint__34__25(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__15, ATSLIB_056_libats_056_arena__arena_load__38__39(tmp159__15)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__19) ;
+ATSreturn(tmpret158__15) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__25(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__25, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__25, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__25, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__25, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__25, atspre_g0uint_mul_size(tmp164__25, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__25, atspre_add_ptr0_bsz(arg0, tmp163__25)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__25) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15480,31 +15916,14 @@ ATSreturn(tmpret174__39) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__15(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_tail__44__20(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret158__15, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret185__20, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__15, ATSLIB_056_prelude__ptr0_add_guint__34__25(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__15, ATSLIB_056_libats_056_arena__arena_load__38__40(tmp159__15)) ;
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__20, ATSLIB_056_libats_056_arena__arena_load__38__40(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret158__15) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__25(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__25, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__25, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__25, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__25, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__25, atspre_g0uint_mul_size(tmp164__25, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__25, atspre_add_ptr0_bsz(arg0, tmp163__25)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__25) ;
+ATSreturn(tmpret185__20) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15531,189 +15950,131 @@ ATSINSmove(tmpret174__40, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstyp
 ATSfunbody_end()
 ATSreturn(tmpret174__40) ;
 }
-ATSstatic()
+ATSextern()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__11(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lst(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret321__11, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__11, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__11, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret1662, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1663, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1664, atstype_boxed) ;
+ATStmpdec(tmp1665, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1666, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1667, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1668, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1669, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1670, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1673, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1674, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1675, atstype_boxed) ;
+ATStmpdec(tmp1683, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1684, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1685, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1696, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1697, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1698, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__11, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__11, atslib_the_garena_alloc(tmp323__11)) ;
-ATSINSmove_void(tmp324__11, ATSLIB_056_libats_056_arena__acell_make__71__11(tmp322__11, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__11, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__11)) ;
-ATSfunbody_end()
-ATSreturn(tmpret321__11) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__11(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__11, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__11, ATSLIB_056_libats_056_arena__arena_store__73__21(arg0, arg2)) ;
-ATSINSmove(tmp331__11, ATSLIB_056_prelude__ptr0_add_guint__34__26(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__11, ATSLIB_056_libats_056_arena__arena_store__73__22(tmp331__11, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__11) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__21(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__21, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__21, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__21, arg1) ;
-ATSINSmove(tmp337__21, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__21), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__21, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__21) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__26(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__26, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__26, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__26, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__26, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__26, atspre_g0uint_mul_size(tmp164__26, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__26, atspre_add_ptr0_bsz(arg0, tmp163__26)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__26) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__22(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__22, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__22, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__22, arg1) ;
-ATSINSmove(tmp337__22, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__22), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__22, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__22) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__18()
-{
-ATStmpdec(tmpret316__18, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__18, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__18) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-d2exp_trup_rec_aux_441(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1621, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1622, atstype_boxed) ;
-ATStmpdec(tmp1641, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1642, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1644, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1645, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1646, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1647, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1664, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_rec_aux_441):
-ATSINSmove(tmp1622, ATSLIB_056_libats_056_arena__glist_view__119__11(arg0)) ;
+ATSINSflab(__patsflab_d2exp_trup_lst):
+ATSINSmove(tmp1663, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp1665, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp1664, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1665)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab369):
-ATSifthen(ATSCKptriscons(tmp1622)) { ATSINSgoto(__atstmplab372) ; } ;
-ATSINSlab(__atstmplab370):
-ATSINSmove(tmpret1621, ATSLIB_056_libats_056_arena__glist_nil__66__19()) ;
+ATSINSlab(__atstmplab391):
+ATSifnthen(ATSCKpat_con1(tmp1664, 36)) { ATSINSgoto(__atstmplab393) ; } ;
+ATSINSlab(__atstmplab392):
+ATSINSmove(tmp1666, ATSSELcon(tmp1664, postiats_tysum_20, atslab__0)) ;
+ATSINSmove(tmp1667, ATSSELcon(tmp1664, postiats_tysum_20, atslab__1)) ;
+ATSINSmove(tmp1668, ATSSELcon(tmp1664, postiats_tysum_20, atslab__2)) ;
+ATSINSfreecon(tmp1664) ;
+ATSINSmove(tmp1670, ATSLIB_056_prelude__gte_g0int_int__217__2(tmp1666, ATSPMVi0nt(0))) ;
+ATSif(
+tmp1670
+) ATSthen() {
+ATSINSmove(tmp1669, PATSHOME_057_src_057_pats_basics_056_sats__test_linkind(tmp1666)) ;
+} ATSelse() {
+ATSINSmove(tmp1669, ATSPMVbool_false()) ;
+}
+ATSINSmove(tmp1673, atspre_neg_bool0(tmp1669)) ;
+ATSINSmove(tmp1675, ATSLIB_056_libats_056_arena__gopt_view__51__5(tmp1667)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab394):
+ATSifthen(ATSCKptrisnull(tmp1675)) { ATSINSgoto(__atstmplab397) ; } ;
+ATSINSlab(__atstmplab395):
+ATSINSmove(tmp1683, ATSSELcon(tmp1675, postiats_tysum_15, atslab__0)) ;
+ATSINSfreecon(tmp1675) ;
+ATSINSmove(tmp1674, tmp1683) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab371):
+ATSINSlab(__atstmplab396):
 #if(0)
-ATSifthen(ATSCKptrisnull(tmp1622)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptriscons(tmp1675)) { ATSINSdeadcode_fail() ; } ;
 #endif
-ATSINSlab(__atstmplab372):
-ATSINSmove(tmp1641, ATSSELcon(tmp1622, postiats_tysum_8, atslab__0)) ;
-ATSINSmove(tmp1642, ATSSELcon(tmp1622, postiats_tysum_8, atslab__1)) ;
-ATSINSfreecon(tmp1622) ;
-ATSINSmove(tmp1644, PATSHOME_057_src_057_pats_dynexp2_056_sats__labd2exp_lab(tmp1641)) ;
-ATSINSmove(tmp1645, PATSHOME_057_src_057_pats_dynexp2_056_sats__labd2exp_elt(tmp1641)) ;
-ATSINSmove(tmp1647, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp1645)) ;
-ATSINSmove(tmp1646, PATSHOME_057_src_057_pats_dynexp3_056_sats__labd3exp_new(tmp1644, tmp1647)) ;
-ATSINSmove(tmp1664, d2exp_trup_rec_aux_441(tmp1642)) ;
-ATSINSmove(tmpret1621, ATSLIB_056_libats_056_arena__glist_cons__68__12(tmp1646, tmp1664)) ;
+ATSINSlab(__atstmplab397):
+ATSif(
+tmp1673
+) ATSthen() {
+ATSINSmove(tmp1684, patsopt_s2rt_t0ype) ;
+} ATSelse() {
+ATSINSmove(tmp1684, patsopt_s2rt_vt0ype) ;
+}
+ATSINSmove(tmp1674, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2exp_Var_make_srt(tmp1663, tmp1684)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp1685, ATSLIB_056_libats_056_arena__glist_length__89__5(tmp1668)) ;
+ATSINSmove(tmp1696, PATSHOME_057_src_057_pats_trans3_056_sats__d2explst_trdn_elt(tmp1668, tmp1674)) ;
+ATSINSmove(tmp1697, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_list_vt0ype_int_vtype(tmp1674, tmp1685)) ;
+ATSINSmove(tmp1698, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lst(tmp1663, tmp1697, tmp1666, tmp1674, tmp1696)) ;
+ATSINSmove(tmpret1662, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1698)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab393):
+ATSINSmove_void(tmp1699, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1664)) ;
+ATSINSmove(tmpret1662, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__7()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret1621) ;
+ATSreturn(tmpret1662) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gte_g0int_int__217__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret765__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp766__2, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gte_g0int_int):
+ATSINSmove(tmp766__2, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret765__2, atspre_g0int_gte_int(arg0, tmp766__2)) ;
+ATSfunbody_end()
+ATSreturn(tmpret765__2) ;
 }
 ATSstatic()
 atstype_boxed
-ATSLIB_056_libats_056_arena__glist_view__119__11(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__gopt_view__51__5(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret478__11, atstype_boxed) ;
-ATStmpdec(tmp479__11, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp480__11, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp481__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret197__5, atstype_boxed) ;
+ATStmpdec(tmp198__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp199__5, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_view):
-ATSINSmove(tmp479__11, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSflab(__patsflab_gopt_view):
+ATSINSmove(tmp198__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
 ATSif(
-tmp479__11
+tmp198__5
 ) ATSthen() {
-ATSINSmove(tmp480__11, ATSLIB_056_libats_056_arena__acell_head__32__16(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmp481__11, ATSLIB_056_libats_056_arena__acell_tail__44__20(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp199__5, ATSLIB_056_libats_056_arena__arena_load__38__41(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret478__11, postiats_tysum_8) ;
+ATSINSmove_con1_new(tmpret197__5, postiats_tysum_15) ;
 #if(0)
-ATSINSstore_con1_tag(tmpret478__11, 1) ;
+ATSINSstore_con1_tag(tmpret197__5, 1) ;
 #endif
-ATSINSstore_con1_ofs(tmpret478__11, postiats_tysum_8, atslab__0, tmp480__11) ;
-ATSINSstore_con1_ofs(tmpret478__11, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__11)) ;
+ATSINSstore_con1_ofs(tmpret197__5, postiats_tysum_15, atslab__0, tmp199__5) ;
 ATSINSmove_con1_end()
 } ATSelse() {
-ATSINSmove_nil(tmpret478__11) ;
+ATSINSmove_nil(tmpret197__5) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret478__11) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__16(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret158__16, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__16, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__16, ATSLIB_056_prelude__ptr0_add_guint__34__27(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__16, ATSLIB_056_libats_056_arena__arena_load__38__41(tmp159__16)) ;
-ATSfunbody_end()
-ATSreturn(tmpret158__16) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__27(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__27, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__27, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__27, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__27, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__27, atspre_g0uint_mul_size(tmp164__27, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__27, atspre_add_ptr0_bsz(arg0, tmp163__27)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__27) ;
+ATSreturn(tmpret197__5) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15741,15 +16102,57 @@ ATSfunbody_end()
 ATSreturn(tmpret174__41) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__20(atstkind_type(atstype_ptrk) arg0)
+atstkind_t0ype(atstype_int)
+ATSLIB_056_libats_056_arena__glist_length__89__5(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret185__20, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret382__5, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_length):
+ATSINSmove(tmpret382__5, loop_90__90__5(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), ATSPMVi0nt(0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret382__5) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_int)
+loop_90__90__5(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret383__5, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp384__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp385__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp386__5, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_loop_90):
+ATSINSmove(tmp384__5, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSif(
+tmp384__5
+) ATSthen() {
+ATSINSmove(tmp385__5, ATSLIB_056_libats_056_arena__acell_tail__44__21(arg0)) ;
+ATSINSmove(tmp386__5, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp385__5) ;
+ATSINSmove_tlcal(apy1, tmp386__5) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_90) ;
+ATStailcal_end()
+} ATSelse() {
+ATSINSmove(tmpret383__5, arg1) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret383__5) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__21(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__21, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__20, ATSLIB_056_libats_056_arena__arena_load__38__42(arg0)) ;
+ATSINSmove(tmpret185__21, ATSLIB_056_libats_056_arena__arena_load__38__42(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__20) ;
+ATSreturn(tmpret185__21) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -15778,243 +16181,244 @@ ATSreturn(tmpret174__42) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__19()
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__7()
 {
-ATStmpdec(tmpret316__19, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret146__7, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__7, atstype_exnconptr) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__19, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__7, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__7, tmp147__7) ;
 ATSfunbody_end()
-ATSreturn(tmpret316__19) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__12(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret321__12, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__12, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__12, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__12, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__12, atslib_the_garena_alloc(tmp323__12)) ;
-ATSINSmove_void(tmp324__12, ATSLIB_056_libats_056_arena__acell_make__71__12(tmp322__12, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__12, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__12)) ;
-ATSfunbody_end()
-ATSreturn(tmpret321__12) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__12(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__12, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__12, ATSLIB_056_libats_056_arena__arena_store__73__23(arg0, arg2)) ;
-ATSINSmove(tmp331__12, ATSLIB_056_prelude__ptr0_add_guint__34__28(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__12, ATSLIB_056_libats_056_arena__arena_store__73__24(tmp331__12, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__12) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__23(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__23, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__23, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__23, arg1) ;
-ATSINSmove(tmp337__23, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__23), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__23, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__23) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__28(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__28, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__28, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__28, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__28, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__28, atspre_g0uint_mul_size(tmp164__28, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__28, atspre_add_ptr0_bsz(arg0, tmp163__28)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__28) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__24(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__24, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__24, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__24, arg1) ;
-ATSINSmove(tmp337__24, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__24), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__24, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__24) ;
+ATSreturn(tmpret146__7) ;
 }
 ATSextern()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_rec(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_tup(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret1665, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1666, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1667, atstype_boxed) ;
-ATStmpdec(tmp1668, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1669, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1670, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1671, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1672, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1673, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1674, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1675, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1702, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1703, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1704, atstype_boxed) ;
+ATStmpdec(tmp1705, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1706, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1707, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1708, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1709, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1710, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1711, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1712, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_rec):
-ATSINSmove(tmp1666, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1668, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1667, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1668)) ;
+ATSINSflab(__patsflab_d2exp_trup_tup):
+ATSINSmove(tmp1703, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp1705, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp1704, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1705)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab373):
-ATSifnthen(ATSCKpat_con1(tmp1667, 38)) { ATSINSgoto(__atstmplab375) ; } ;
-ATSINSlab(__atstmplab374):
-ATSINSmove(tmp1669, ATSSELcon(tmp1667, postiats_tysum_30, atslab__0)) ;
-ATSINSmove(tmp1670, ATSSELcon(tmp1667, postiats_tysum_30, atslab__1)) ;
-ATSINSmove(tmp1671, ATSSELcon(tmp1667, postiats_tysum_30, atslab__2)) ;
-ATSINSfreecon(tmp1667) ;
-ATSINSmove(tmp1672, d2exp_trup_rec_aux_441(tmp1671)) ;
-ATSINSmove(tmp1673, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__labd3explst_get_type(tmp1672)) ;
-ATSINSmove(tmp1674, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec(tmp1669, tmp1670, tmp1673)) ;
-ATSINSmove(tmp1675, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_rec(tmp1666, tmp1674, tmp1669, tmp1670, tmp1672)) ;
-ATSINSmove(tmpret1665, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1675)) ;
+ATSINSlab(__atstmplab398):
+ATSifnthen(ATSCKpat_con1(tmp1704, 37)) { ATSINSgoto(__atstmplab400) ; } ;
+ATSINSlab(__atstmplab399):
+ATSINSmove(tmp1706, ATSSELcon(tmp1704, postiats_tysum_30, atslab__0)) ;
+ATSINSmove(tmp1707, ATSSELcon(tmp1704, postiats_tysum_30, atslab__1)) ;
+ATSINSmove(tmp1708, ATSSELcon(tmp1704, postiats_tysum_30, atslab__2)) ;
+ATSINSfreecon(tmp1704) ;
+ATSINSmove(tmp1709, PATSHOME_057_src_057_pats_trans3_056_sats__d2explst_trup(tmp1708)) ;
+ATSINSmove(tmp1710, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3explst_get_labtype(tmp1709)) ;
+ATSINSmove(tmp1711, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec(tmp1706, tmp1707, tmp1710)) ;
+ATSINSmove(tmp1712, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_tup(tmp1703, tmp1711, tmp1706, tmp1707, tmp1709)) ;
+ATSINSmove(tmpret1702, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1712)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab375):
-ATSINSmove_void(tmp1676, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1667)) ;
-ATSINSmove(tmpret1665, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__9()) ;
+ATSINSlab(__atstmplab400):
+ATSINSmove_void(tmp1713, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1704)) ;
+ATSINSmove(tmpret1702, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__8()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret1665) ;
+ATSreturn(tmpret1702) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__9()
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__8()
 {
-ATStmpdec(tmpret146__9, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__9, atstype_exnconptr) ;
+ATStmpdec(tmpret146__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__8, atstype_exnconptr) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__9, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__9, tmp147__9) ;
+ATSINSmove_exn0(tmp147__8, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__8, tmp147__8) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__9) ;
+ATSreturn(tmpret146__8) ;
 }
 ATSstatic()
-postiats_tyrec_0
-d2exp_trup_seq_aux_458(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+atstkind_type(atstype_ptrk)
+labd3exp_get_type_459(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret1679, postiats_tyrec_0) ;
-ATStmpdec(tmp1680, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1682, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1695, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1705, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1706, postiats_tyrec_0) ;
-ATStmpdec(tmp1707, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1708, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1709, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1726, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1727, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1728, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1729, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1716, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1717, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1718, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1719, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1720, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1722, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_seq_aux_458):
-ATSINSmove(tmp1680, ATSLIB_056_libats_056_arena__glist_is_cons__48__4(arg1)) ;
+ATSINSflab(__patsflab_labd3exp_get_type_459):
+ATSINSmove(tmp1717, PATSHOME_057_src_057_pats_dynexp3_056_sats__labd3exp_lab(arg0)) ;
+ATSINSmove(tmp1718, PATSHOME_057_src_057_pats_dynexp3_056_sats__labd3exp_elt(arg0)) ;
+ATSINSmove(tmp1719, PATSHOME_057_src_057_pats_syntax_056_sats__l0ab_lab(tmp1717)) ;
+ATSINSmove(tmp1720, ATSLIB_056_libats_056_arena__gopt_none__220__2()) ;
+ATSINSmove(tmp1722, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp1718)) ;
+ATSINSmove(tmpret1716, PATSHOME_057_src_057_pats_staexp2_056_sats__labs2exp_new(tmp1719, tmp1720, tmp1722)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1716) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__gopt_none__220__2()
+{
+ATStmpdec(tmpret772__2, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gopt_none):
+ATSINSmove(tmpret772__2, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret772__2) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__labd3explst_get_type(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret1723, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_labd3explst_get_type):
+ATSINSmove(tmpret1723, glist_map_fun_2__2__2(arg0, ATSPMVfunlab(labd3exp_get_type_459))) ;
+ATSfunbody_end()
+ATSreturn(tmpret1723) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+glist_map_fun_2__2__2(atstkind_type(atstype_ptrk) arg0, atstype_funptr arg1)
+{
+ATStmpdec(tmpret7__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp8__2, atstype_boxed) ;
+ATStmpdec(tmp9__2, atstype_boxed) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_map_fun_2):
+ATSINSmove_nil(tmp9__2) ;
+ATSINSmove(tmp8__2, glist_map_loop_1__1__2(arg0, arg1, tmp9__2)) ;
+ATSINSmove(tmpret7__2, ATSLIB_056_libats_056_arena__glist_make_list_vt__134__2(tmp8__2)) ;
+ATSfunbody_end()
+ATSreturn(tmpret7__2) ;
+}
+ATSstatic()
+atstype_boxed
+glist_map_loop_1__1__2(atstkind_type(atstype_ptrk) arg0, atstype_funptr arg1, atstype_boxed arg2)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstype_funptr) ;
+ATStmpdec(apy2, atstype_boxed) ;
+ATStmpdec(tmpret1__2, atstype_boxed) ;
+ATStmpdec(tmp2__2, atstype_boxed) ;
+ATStmpdec(tmp3__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp4__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp5__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp6__2, atstype_boxed) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_map_loop_1):
+ATSINSmove(tmp2__2, ATSLIB_056_libats_056_arena__glist_view__119__12(arg0)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab0):
+ATSifthen(ATSCKptriscons(tmp2__2)) { ATSINSgoto(__atstmplab3) ; } ;
+ATSINSlab(__atstmplab1):
+ATSINSmove(tmpret1__2, ATSLIB_056_prelude__list_vt_reverse__128__2(arg2)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab2):
+#if(0)
+ATSifthen(ATSCKptrisnull(tmp2__2)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab3):
+ATSINSmove(tmp3__2, ATSSELcon(tmp2__2, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp4__2, ATSSELcon(tmp2__2, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp2__2) ;
+ATSINSmove(tmp5__2, ATSfunclo_fun(arg1, (atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk))(tmp3__2)) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmp6__2, postiats_tysum_22) ;
+#if(0)
+ATSINSstore_con1_tag(tmp6__2, 1) ;
+#endif
+ATSINSstore_con1_ofs(tmp6__2, postiats_tysum_22, atslab__0, tmp5__2) ;
+ATSINSstore_con1_ofs(tmp6__2, postiats_tysum_22, atslab__1, arg2) ;
+ATSINSmove_con1_end()
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp4__2) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, tmp6__2) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSfgoto(__patsflab_glist_map_loop_1) ;
+ATStailcal_end()
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret1__2) ;
+}
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__glist_view__119__12(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret478__12, atstype_boxed) ;
+ATStmpdec(tmp479__12, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp480__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp481__12, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_view):
+ATSINSmove(tmp479__12, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
 ATSif(
-tmp1680
+tmp479__12
 ) ATSthen() {
-ATSINSmove(tmp1682, ATSLIB_056_libats_056_arena__glist_head__30__2(arg1)) ;
-ATSINSmove(tmp1695, ATSLIB_056_libats_056_arena__glist_tail__42__3(arg1)) ;
-ATSINSmove(tmp1705, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trdn(arg0, arg2)) ;
-ATSINSmove(tmp1706, d2exp_trup_seq_aux_458(tmp1682, tmp1695, arg2)) ;
-ATSINSmove(tmp1707, ATSSELfltrec(tmp1706, postiats_tyrec_0, atslab__0)) ;
-ATSINSmove(tmp1708, ATSSELfltrec(tmp1706, postiats_tyrec_0, atslab__1)) ;
-ATSINSmove(tmp1709, ATSLIB_056_libats_056_arena__glist_cons__68__13(tmp1705, tmp1707)) ;
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1679, postiats_tyrec_0, atslab__0, tmp1709) ;
-ATSINSstore_fltrec_ofs(tmpret1679, postiats_tyrec_0, atslab__1, tmp1708) ;
-ATSINSmove_fltrec_end()
+ATSINSmove(tmp480__12, ATSLIB_056_libats_056_arena__acell_head__32__16(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp481__12, ATSLIB_056_libats_056_arena__acell_tail__44__22(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret478__12, postiats_tysum_8) ;
+#if(0)
+ATSINSstore_con1_tag(tmpret478__12, 1) ;
+#endif
+ATSINSstore_con1_ofs(tmpret478__12, postiats_tysum_8, atslab__0, tmp480__12) ;
+ATSINSstore_con1_ofs(tmpret478__12, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__12)) ;
+ATSINSmove_con1_end()
 } ATSelse() {
-ATSINSmove(tmp1726, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(arg0)) ;
-ATSINSmove(tmp1728, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp1726)) ;
-ATSINSmove(tmp1727, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1728)) ;
-ATSINSmove(tmp1729, ATSLIB_056_libats_056_arena__glist_sing__78__3(tmp1726)) ;
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1679, postiats_tyrec_0, atslab__0, tmp1729) ;
-ATSINSstore_fltrec_ofs(tmpret1679, postiats_tyrec_0, atslab__1, tmp1727) ;
-ATSINSmove_fltrec_end()
+ATSINSmove_nil(tmpret478__12) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret1679) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_libats_056_arena__glist_is_cons__48__4(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret192__4, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_is_cons):
-ATSINSmove(tmpret192__4, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret192__4) ;
+ATSreturn(tmpret478__12) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_head__30__2(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_head__32__16(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret152__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp154__2, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_head):
-ATSINSmove(tmp154__2, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp153__2, atspre_assert_errmsg_bool0(tmp154__2, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
-ATSINSmove(tmpret152__2, ATSLIB_056_libats_056_arena__acell_head__32__17(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSfunbody_end()
-ATSreturn(tmpret152__2) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__17(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret158__17, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__17, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret158__16, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__16, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__17, ATSLIB_056_prelude__ptr0_add_guint__34__29(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__17, ATSLIB_056_libats_056_arena__arena_load__38__43(tmp159__17)) ;
+ATSINSmove(tmp159__16, ATSLIB_056_prelude__ptr0_add_guint__34__26(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__16, ATSLIB_056_libats_056_arena__arena_load__38__43(tmp159__16)) ;
 ATSfunbody_end()
-ATSreturn(tmpret158__17) ;
+ATSreturn(tmpret158__16) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__29(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+ATSLIB_056_prelude__ptr0_add_guint__34__26(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret162__29, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__29, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__29, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret162__26, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__26, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__26, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__29, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__29, atspre_g0uint_mul_size(tmp164__29, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__29, atspre_add_ptr0_bsz(arg0, tmp163__29)) ;
+ATSINSmove(tmp164__26, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__26, atspre_g0uint_mul_size(tmp164__26, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__26, atspre_add_ptr0_bsz(arg0, tmp163__26)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__29) ;
+ATSreturn(tmpret162__26) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -16043,30 +16447,14 @@ ATSreturn(tmpret174__43) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_tail__42__3(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_tail__44__22(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret177__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp179__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp180__3, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_tail):
-ATSINSmove(tmp179__3, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp178__3, atspre_assert_errmsg_bool0(tmp179__3, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
-ATSINSmove(tmp180__3, ATSLIB_056_libats_056_arena__acell_tail__44__21(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmpret177__3, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__3)) ;
-ATSfunbody_end()
-ATSreturn(tmpret177__3) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__21(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret185__21, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret185__22, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__21, ATSLIB_056_libats_056_arena__arena_load__38__44(arg0)) ;
+ATSINSmove(tmpret185__22, ATSLIB_056_libats_056_arena__arena_load__38__44(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__21) ;
+ATSreturn(tmpret185__22) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -16094,277 +16482,261 @@ ATSfunbody_end()
 ATSreturn(tmpret174__44) ;
 }
 ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__13(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+atstype_boxed
+ATSLIB_056_prelude__list_vt_reverse__128__2(atstype_boxed arg0)
 {
-ATStmpdec(tmpret321__13, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__13, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__13, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret500__2, atstype_boxed) ;
+ATStmpdec(tmp501__2, atstype_boxed) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__13, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__13, atslib_the_garena_alloc(tmp323__13)) ;
-ATSINSmove_void(tmp324__13, ATSLIB_056_libats_056_arena__acell_make__71__13(tmp322__13, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__13, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__13)) ;
+ATSINSflab(__patsflab_list_vt_reverse):
+ATSINSmove_nil(tmp501__2) ;
+ATSINSmove(tmpret500__2, ATSLIB_056_prelude__list_vt_reverse_append__130__2(arg0, tmp501__2)) ;
 ATSfunbody_end()
-ATSreturn(tmpret321__13) ;
+ATSreturn(tmpret500__2) ;
 }
 ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__13(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+atstype_boxed
+ATSLIB_056_prelude__list_vt_reverse_append__130__2(atstype_boxed arg0, atstype_boxed arg1)
 {
-ATStmpdec(tmp331__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret504__2, atstype_boxed) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__13, ATSLIB_056_libats_056_arena__arena_store__73__25(arg0, arg2)) ;
-ATSINSmove(tmp331__13, ATSLIB_056_prelude__ptr0_add_guint__34__30(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__13, ATSLIB_056_libats_056_arena__arena_store__73__26(tmp331__13, arg1)) ;
+ATSINSflab(__patsflab_list_vt_reverse_append):
+ATSINSmove(tmpret504__2, loop_131__131__2(arg0, arg1)) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret329__13) ;
+ATSreturn(tmpret504__2) ;
 }
 ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__25(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+atstype_boxed
+loop_131__131__2(atstype_boxed arg0, atstype_boxed arg1)
 {
-ATStmpdec(tmpref336__25, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__25, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy0, atstype_boxed) ;
+ATStmpdec(apy1, atstype_boxed) ;
+ATStmpdec(tmpret505__2, atstype_boxed) ;
+ATStmpdec(tmp508__2, atstype_boxed) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__25, arg1) ;
-ATSINSmove(tmp337__25, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__25), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__25, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__25) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__30(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__30, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__30, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__30, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__30, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__30, atspre_g0uint_mul_size(tmp164__30, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__30, atspre_add_ptr0_bsz(arg0, tmp163__30)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__30) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__26(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__26, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__26, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__26, arg1) ;
-ATSINSmove(tmp337__26, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__26), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__26, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__26) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_sing__78__3(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret350__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp351__3, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_sing):
-ATSINSmove(tmp351__3, ATSLIB_056_libats_056_arena__glist_nil__66__20()) ;
-ATSINSmove(tmpret350__3, ATSLIB_056_libats_056_arena__glist_cons__68__14(arg0, tmp351__3)) ;
-ATSfunbody_end()
-ATSreturn(tmpret350__3) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__20()
-{
-ATStmpdec(tmpret316__20, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__20, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__20) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__14(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret321__14, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__14, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__14, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__14, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__14, atslib_the_garena_alloc(tmp323__14)) ;
-ATSINSmove_void(tmp324__14, ATSLIB_056_libats_056_arena__acell_make__71__14(tmp322__14, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__14, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__14)) ;
-ATSfunbody_end()
-ATSreturn(tmpret321__14) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__14(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__14, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__14, ATSLIB_056_libats_056_arena__arena_store__73__27(arg0, arg2)) ;
-ATSINSmove(tmp331__14, ATSLIB_056_prelude__ptr0_add_guint__34__31(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__14, ATSLIB_056_libats_056_arena__arena_store__73__28(tmp331__14, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__14) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__27(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__27, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__27, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__27, arg1) ;
-ATSINSmove(tmp337__27, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__27), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__27, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__27) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__31(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__31, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__31, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__31, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__31, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__31, atspre_g0uint_mul_size(tmp164__31, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__31, atspre_add_ptr0_bsz(arg0, tmp163__31)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__31) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__28(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__28, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__28, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__28, arg1) ;
-ATSINSmove(tmp337__28, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__28), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__28, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__28) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_seq(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1749, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1750, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1751, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1752, atstype_boxed) ;
-ATStmpdec(tmp1753, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1754, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1755, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1757, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1770, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1780, postiats_tyrec_0) ;
-ATStmpdec(tmp1781, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1782, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_seq):
-ATSINSmove(tmp1750, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1751, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
-ATSINSmove(tmp1753, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1752, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1753)) ;
+ATSINSflab(__patsflab_loop_131):
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab376):
-ATSifnthen(ATSCKpat_con1(tmp1752, 39)) { ATSINSgoto(__atstmplab378) ; } ;
-ATSINSlab(__atstmplab377):
-ATSINSmove(tmp1754, ATSSELcon(tmp1752, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp1752) ;
-ATSINSmove(tmp1755, ATSLIB_056_libats_056_arena__glist_is_cons__48__5(tmp1754)) ;
-ATSif(
-tmp1755
-) ATSthen() {
-ATSINSmove(tmp1757, ATSLIB_056_libats_056_arena__glist_head__30__3(tmp1754)) ;
-ATSINSmove(tmp1770, ATSLIB_056_libats_056_arena__glist_tail__42__4(tmp1754)) ;
-ATSINSmove(tmp1780, d2exp_trup_seq_aux_458(tmp1757, tmp1770, tmp1751)) ;
-ATSINSmove(tmp1781, ATSSELfltrec(tmp1780, postiats_tyrec_0, atslab__0)) ;
-ATSINSmove(tmp1782, ATSSELfltrec(tmp1780, postiats_tyrec_0, atslab__1)) ;
-ATSINSmove(tmpret1749, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_seq(tmp1750, tmp1782, tmp1781)) ;
-} ATSelse() {
-ATSINSmove(tmpret1749, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_empty(tmp1750, tmp1751)) ;
-}
+ATSINSlab(__atstmplab254):
+ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab257) ; } ;
+ATSINSlab(__atstmplab255):
+ATSINSmove(tmpret505__2, arg1) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab378):
-ATSINSmove_void(tmp1783, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1752)) ;
-ATSINSmove(tmpret1749, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__10()) ;
+ATSINSlab(__atstmplab256):
+#if(0)
+ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab257):
+ATSINSmove(tmp508__2, ATSSELcon(arg0, postiats_tysum_22, atslab__1)) ;
+ATSINSstore(ATSSELcon(arg0, postiats_tysum_22, atslab__1), arg1) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp508__2) ;
+ATSINSmove_tlcal(apy1, arg0) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_131) ;
+ATStailcal_end()
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret1749) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_libats_056_arena__glist_is_cons__48__5(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret192__5, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_is_cons):
-ATSINSmove(tmpret192__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret192__5) ;
+ATSreturn(tmpret505__2) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_head__30__3(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__glist_make_list_vt__134__2(atstype_boxed arg0)
 {
-ATStmpdec(tmpret152__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp154__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret512__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp517__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp518__2, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_head):
-ATSINSmove(tmp154__3, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp153__3, atspre_assert_errmsg_bool0(tmp154__3, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
-ATSINSmove(tmpret152__3, ATSLIB_056_libats_056_arena__acell_head__32__18(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSflab(__patsflab_glist_make_list_vt):
+ATSINSmove(tmp518__2, ATSLIB_056_libats_056_arena__glist_nil__66__18()) ;
+ATSINSmove(tmp517__2, loop_135__135__2(arg0, tmp518__2)) ;
+ATSINSmove(tmpret512__2, ATSLIB_056_libats_056_arena__glist_reverse__144__3(tmp517__2)) ;
 ATSfunbody_end()
-ATSreturn(tmpret152__3) ;
+ATSreturn(tmpret512__2) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__18(atstkind_type(atstype_ptrk) arg0)
+loop_135__135__2(atstype_boxed arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret158__18, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy0, atstype_boxed) ;
+ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret513__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp514__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp515__2, atstype_boxed) ;
+ATStmpdec(tmp516__2, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__18, ATSLIB_056_prelude__ptr0_add_guint__34__32(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__18, ATSLIB_056_libats_056_arena__arena_load__38__45(tmp159__18)) ;
+ATSINSflab(__patsflab_loop_135):
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab258):
+ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab261) ; } ;
+ATSINSlab(__atstmplab259):
+ATSINSmove(tmpret513__2, arg1) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab260):
+#if(0)
+ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab261):
+ATSINSmove(tmp514__2, ATSSELcon(arg0, postiats_tysum_22, atslab__0)) ;
+ATSINSmove(tmp515__2, ATSSELcon(arg0, postiats_tysum_22, atslab__1)) ;
+ATSINSfreecon(arg0) ;
+ATSINSmove(tmp516__2, ATSLIB_056_libats_056_arena__glist_cons__68__11(tmp514__2, arg1)) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp515__2) ;
+ATSINSmove_tlcal(apy1, tmp516__2) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_135) ;
+ATStailcal_end()
+ATSbranch_end()
+ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret158__18) ;
+ATSreturn(tmpret513__2) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__32(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+ATSLIB_056_libats_056_arena__glist_cons__68__11(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret162__32, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__32, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__32, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret321__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__11, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__11, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__11, atslib_the_garena_alloc(tmp323__11)) ;
+ATSINSmove_void(tmp324__11, ATSLIB_056_libats_056_arena__acell_make__71__11(tmp322__11, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__11, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__11)) ;
+ATSfunbody_end()
+ATSreturn(tmpret321__11) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__11(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp331__11, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__11, ATSLIB_056_libats_056_arena__arena_store__73__21(arg0, arg2)) ;
+ATSINSmove(tmp331__11, ATSLIB_056_prelude__ptr0_add_guint__34__27(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__11, ATSLIB_056_libats_056_arena__arena_store__73__22(tmp331__11, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__11) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__21(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__21, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__21, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__21, arg1) ;
+ATSINSmove(tmp337__21, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__21), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__21, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__21) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__27(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__27, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__27, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__27, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__32, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__32, atspre_g0uint_mul_size(tmp164__32, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__32, atspre_add_ptr0_bsz(arg0, tmp163__32)) ;
+ATSINSmove(tmp164__27, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__27, atspre_g0uint_mul_size(tmp164__27, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__27, atspre_add_ptr0_bsz(arg0, tmp163__27)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__32) ;
+ATSreturn(tmpret162__27) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__22(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__22, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__22, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__22, arg1) ;
+ATSINSmove(tmp337__22, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__22), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__22, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__22) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__18()
+{
+ATStmpdec(tmpret316__18, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__18, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__18) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_reverse__144__3(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret543__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp549__3, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_reverse):
+ATSINSmove(tmp549__3, ATSLIB_056_libats_056_arena__glist_nil__66__19()) ;
+ATSINSmove(tmpret543__3, loop_145__145__3(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), tmp549__3)) ;
+ATSfunbody_end()
+ATSreturn(tmpret543__3) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+loop_145__145__3(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(apy0, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(apy1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret544__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp545__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp546__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp547__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp548__3, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_loop_145):
+ATSINSmove(tmp545__3, atspre_gt_ptr0_ptr0(arg0, the_atsptr_null)) ;
+ATSif(
+tmp545__3
+) ATSthen() {
+ATSINSmove(tmp546__3, ATSLIB_056_libats_056_arena__acell_tail__44__23(arg0)) ;
+ATSINSmove(tmp548__3, ATSLIB_056_libats_056_arena__acell_head__32__17(arg0)) ;
+ATSINSmove(tmp547__3, ATSLIB_056_libats_056_arena__glist_cons__68__12(tmp548__3, arg1)) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, tmp546__3) ;
+ATSINSmove_tlcal(apy1, tmp547__3) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSfgoto(__patsflab_loop_145) ;
+ATStailcal_end()
+} ATSelse() {
+ATSINSmove(tmpret544__3, arg1) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret544__3) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__23(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__23, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__23, ATSLIB_056_libats_056_arena__arena_load__38__45(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__23) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -16393,30 +16765,31 @@ ATSreturn(tmpret174__45) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_tail__42__4(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_head__32__17(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret177__4, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp179__4, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp180__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret158__17, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__17, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_tail):
-ATSINSmove(tmp179__4, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp178__4, atspre_assert_errmsg_bool0(tmp179__4, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
-ATSINSmove(tmp180__4, ATSLIB_056_libats_056_arena__acell_tail__44__22(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmpret177__4, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__4)) ;
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__17, ATSLIB_056_prelude__ptr0_add_guint__34__28(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__17, ATSLIB_056_libats_056_arena__arena_load__38__46(tmp159__17)) ;
 ATSfunbody_end()
-ATSreturn(tmpret177__4) ;
+ATSreturn(tmpret158__17) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__22(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_prelude__ptr0_add_guint__34__28(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret185__22, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret162__28, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__28, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__28, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__22, ATSLIB_056_libats_056_arena__arena_load__38__46(arg0)) ;
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__28, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__28, atspre_g0uint_mul_size(tmp164__28, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__28, atspre_add_ptr0_bsz(arg0, tmp163__28)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__22) ;
+ATSreturn(tmpret162__28) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -16445,254 +16818,187 @@ ATSreturn(tmpret174__46) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__10()
+ATSLIB_056_libats_056_arena__glist_cons__68__12(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret146__10, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__10, atstype_exnconptr) ;
+ATStmpdec(tmpret321__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__12, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__10, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__10, tmp147__10) ;
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__12, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__12, atslib_the_garena_alloc(tmp323__12)) ;
+ATSINSmove_void(tmp324__12, ATSLIB_056_libats_056_arena__acell_make__71__12(tmp322__12, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__12, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__12)) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__10) ;
+ATSreturn(tmpret321__12) ;
 }
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_letwhere(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__12(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmpret1786, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1787, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1791, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1792, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp331__12, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_letwhere):
-ATSINSmove(tmp1787, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove_void(tmp1788, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_push()) ;
-ATSINSmove_void(tmp1789, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_s2cstbindlst_push()) ;
-ATSINSmove_void(tmp1790, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_push_let()) ;
-ATSINSmove(tmp1791, PATSHOME_057_src_057_pats_trans3_056_sats__d2eclist_tr(arg1)) ;
-ATSINSmove(tmp1792, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(arg2)) ;
-ATSINSmove_void(tmp1793, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_check(tmp1787)) ;
-ATSINSmove_void(tmp1794, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_pop()) ;
-ATSINSmove_void(tmp1795, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_s2cstbindlst_pop_and_unbind()) ;
-ATSINSmove_void(tmp1796, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_pop()) ;
-ATSINSmove(tmpret1786, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_let(tmp1787, tmp1791, tmp1792)) ;
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__12, ATSLIB_056_libats_056_arena__arena_store__73__23(arg0, arg2)) ;
+ATSINSmove(tmp331__12, ATSLIB_056_prelude__ptr0_add_guint__34__29(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__12, ATSLIB_056_libats_056_arena__arena_store__73__24(tmp331__12, arg1)) ;
 ATSfunbody_end()
-ATSreturn(tmpret1786) ;
+ATSreturn_void(tmpret329__12) ;
 }
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_effmask(atstkind_type(atstype_ptrk) arg0)
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__23(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret1797, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1798, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1799, atstype_boxed) ;
-ATStmpdec(tmp1800, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1801, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1802, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1804, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref336__23, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__23, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_effmask):
-ATSINSmove(tmp1798, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1800, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1799, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1800)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab379):
-ATSifnthen(ATSCKpat_con1(tmp1799, 50)) { ATSINSgoto(__atstmplab381) ; } ;
-ATSINSlab(__atstmplab380):
-ATSINSmove(tmp1801, ATSSELcon(tmp1799, postiats_tysum_18, atslab__0)) ;
-ATSINSmove(tmp1802, ATSSELcon(tmp1799, postiats_tysum_18, atslab__1)) ;
-ATSINSfreecon(tmp1799) ;
-ATSINSmove_void(tmp1803, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_push_effmask(tmp1801)) ;
-ATSINSmove(tmp1804, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp1802)) ;
-ATSINSmove_void(tmp1805, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_pop()) ;
-ATSINSmove(tmpret1797, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_effmask(tmp1798, tmp1801, tmp1804)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab381):
-ATSINSmove_void(tmp1806, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1799)) ;
-ATSINSmove(tmpret1797, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__11()) ;
-ATSbranch_end()
-ATScaseof_end()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__23, arg1) ;
+ATSINSmove(tmp337__23, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__23), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__23, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn(tmpret1797) ;
+ATSreturn_void(tmpret335__23) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__11()
+ATSLIB_056_prelude__ptr0_add_guint__34__29(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret146__11, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__11, atstype_exnconptr) ;
+ATStmpdec(tmpret162__29, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__29, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__29, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__11, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__11, tmp147__11) ;
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__29, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__29, atspre_g0uint_mul_size(tmp164__29, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__29, atspre_add_ptr0_bsz(arg0, tmp163__29)) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__11) ;
+ATSreturn(tmpret162__29) ;
 }
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_vararg(atstkind_type(atstype_ptrk) arg0)
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__24(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret1809, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1810, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1811, atstype_boxed) ;
-ATStmpdec(tmp1812, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1813, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1814, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1815, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1816, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref336__24, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__24, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_vararg):
-ATSINSmove(tmp1810, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1812, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1811, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1812)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab382):
-ATSifnthen(ATSCKpat_con1(tmp1811, 51)) { ATSINSgoto(__atstmplab384) ; } ;
-ATSINSlab(__atstmplab383):
-ATSINSmove(tmp1813, ATSSELcon(tmp1811, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp1811) ;
-ATSINSmove(tmp1814, PATSHOME_057_src_057_pats_trans3_056_sats__d2explst_trup(tmp1813)) ;
-ATSINSmove(tmp1815, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3explst_get_type(tmp1814)) ;
-ATSINSmove(tmp1816, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_types_list(tmp1815)) ;
-ATSINSmove(tmpret1809, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_vararg(tmp1810, tmp1816, tmp1814)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab384):
-ATSINSmove_void(tmp1817, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1811)) ;
-ATSINSmove(tmpret1809, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__12()) ;
-ATSbranch_end()
-ATScaseof_end()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__24, arg1) ;
+ATSINSmove(tmp337__24, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__24), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__24, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn(tmpret1809) ;
+ATSreturn_void(tmpret335__24) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__12()
+ATSLIB_056_libats_056_arena__glist_nil__66__19()
 {
-ATStmpdec(tmpret146__12, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__12, atstype_exnconptr) ;
+ATStmpdec(tmpret316__19, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__12, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__12, tmp147__12) ;
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__19, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__12) ;
+ATSreturn(tmpret316__19) ;
 }
-ATSextern()
+ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_vcopyenv(atstkind_type(atstype_ptrk) arg0)
+d2exp_trup_rec_aux_498(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret1820, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1821, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1822, atstype_boxed) ;
-ATStmpdec(tmp1823, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1824, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1825, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1826, atstype_boxed) ;
-ATStmpdec(tmp1827, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1828, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1829, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1830, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1831, atstype_boxed) ;
+ATStmpdec(tmpret1818, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1819, atstype_boxed) ;
+ATStmpdec(tmp1838, atstkind_type(atstype_ptrk)) ;
 ATStmpdec(tmp1839, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1840, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1841, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1842, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1843, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1844, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1861, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_vcopyenv):
-ATSINSmove(tmp1821, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1823, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1822, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1823)) ;
+ATSINSflab(__patsflab_d2exp_trup_rec_aux_498):
+ATSINSmove(tmp1819, ATSLIB_056_libats_056_arena__glist_view__119__13(arg0)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab385):
-ATSifnthen(ATSCKpat_con1(tmp1822, 52)) { ATSINSgoto(__atstmplab387) ; } ;
-ATSINSlab(__atstmplab386):
-ATSINSmove(tmp1824, ATSSELcon(tmp1822, postiats_tysum_14, atslab__0)) ;
-ATSINSmove(tmp1825, ATSSELcon(tmp1822, postiats_tysum_14, atslab__1)) ;
-ATSINSfreecon(tmp1822) ;
-ATSINSmove(tmp1827, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(tmp1825)) ;
-ATSINSmove(tmp1826, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1827)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab388):
-ATSifnthen(ATSCKpat_con1(tmp1826, 1)) { ATSINSgoto(__atstmplab390) ; } ;
-ATSINSlab(__atstmplab389):
-ATSINSmove(tmp1828, ATSSELcon(tmp1826, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp1826) ;
-ATSINSmove(tmp1829, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_type(tmp1828)) ;
-ATSINSmove(tmp1831, ATSLIB_056_libats_056_arena__gopt_view__51__6(tmp1829)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab391):
-ATSifthen(ATSCKptrisnull(tmp1831)) { ATSINSgoto(__atstmplab394) ; } ;
-ATSINSlab(__atstmplab392):
-ATSINSmove(tmp1839, ATSSELcon(tmp1831, postiats_tysum_15, atslab__0)) ;
-ATSINSfreecon(tmp1831) ;
-ATSINSmove(tmp1840, PATSHOME_057_src_057_pats_basics_056_sats__test_prfkind(tmp1824)) ;
-ATSif(
-tmp1840
-) ATSthen() {
-ATSINSmove(tmp1830, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_vcopyenv_v(tmp1839)) ;
-} ATSelse() {
-ATSINSmove(tmp1830, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_vcopyenv_vt(tmp1839)) ;
-}
+ATSINSlab(__atstmplab401):
+ATSifthen(ATSCKptriscons(tmp1819)) { ATSINSgoto(__atstmplab404) ; } ;
+ATSINSlab(__atstmplab402):
+ATSINSmove(tmpret1818, ATSLIB_056_libats_056_arena__glist_nil__66__20()) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab393):
+ATSINSlab(__atstmplab403):
 #if(0)
-ATSifthen(ATSCKptriscons(tmp1831)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptrisnull(tmp1819)) { ATSINSdeadcode_fail() ; } ;
 #endif
-ATSINSlab(__atstmplab394):
-ATSINSmove(tmp1830, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSINSmove(tmpret1820, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_vcopyenv(tmp1821, tmp1830, tmp1824, tmp1828)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab390):
-ATSINSmove_void(tmp1841, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1826)) ;
-ATSINSmove(tmpret1820, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp1825)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab387):
-ATSINSmove_void(tmp1842, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1822)) ;
-ATSINSmove(tmpret1820, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__13()) ;
+ATSINSlab(__atstmplab404):
+ATSINSmove(tmp1838, ATSSELcon(tmp1819, postiats_tysum_8, atslab__0)) ;
+ATSINSmove(tmp1839, ATSSELcon(tmp1819, postiats_tysum_8, atslab__1)) ;
+ATSINSfreecon(tmp1819) ;
+ATSINSmove(tmp1841, PATSHOME_057_src_057_pats_dynexp2_056_sats__labd2exp_lab(tmp1838)) ;
+ATSINSmove(tmp1842, PATSHOME_057_src_057_pats_dynexp2_056_sats__labd2exp_elt(tmp1838)) ;
+ATSINSmove(tmp1844, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp1842)) ;
+ATSINSmove(tmp1843, PATSHOME_057_src_057_pats_dynexp3_056_sats__labd3exp_new(tmp1841, tmp1844)) ;
+ATSINSmove(tmp1861, d2exp_trup_rec_aux_498(tmp1839)) ;
+ATSINSmove(tmpret1818, ATSLIB_056_libats_056_arena__glist_cons__68__13(tmp1843, tmp1861)) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret1820) ;
+ATSreturn(tmpret1818) ;
 }
 ATSstatic()
 atstype_boxed
-ATSLIB_056_libats_056_arena__gopt_view__51__6(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__glist_view__119__13(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret197__6, atstype_boxed) ;
-ATStmpdec(tmp198__6, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp199__6, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret478__13, atstype_boxed) ;
+ATStmpdec(tmp479__13, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp480__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp481__13, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_view):
-ATSINSmove(tmp198__6, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSflab(__patsflab_glist_view):
+ATSINSmove(tmp479__13, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
 ATSif(
-tmp198__6
+tmp479__13
 ) ATSthen() {
-ATSINSmove(tmp199__6, ATSLIB_056_libats_056_arena__arena_load__38__47(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp480__13, ATSLIB_056_libats_056_arena__acell_head__32__18(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmp481__13, ATSLIB_056_libats_056_arena__acell_tail__44__24(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret197__6, postiats_tysum_15) ;
+ATSINSmove_con1_new(tmpret478__13, postiats_tysum_8) ;
 #if(0)
-ATSINSstore_con1_tag(tmpret197__6, 1) ;
+ATSINSstore_con1_tag(tmpret478__13, 1) ;
 #endif
-ATSINSstore_con1_ofs(tmpret197__6, postiats_tysum_15, atslab__0, tmp199__6) ;
+ATSINSstore_con1_ofs(tmpret478__13, postiats_tysum_8, atslab__0, tmp480__13) ;
+ATSINSstore_con1_ofs(tmpret478__13, postiats_tysum_8, atslab__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp481__13)) ;
 ATSINSmove_con1_end()
 } ATSelse() {
-ATSINSmove_nil(tmpret197__6) ;
+ATSINSmove_nil(tmpret478__13) ;
 }
 ATSfunbody_end()
-ATSreturn(tmpret197__6) ;
+ATSreturn(tmpret478__13) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__18(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret158__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__18, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__18, ATSLIB_056_prelude__ptr0_add_guint__34__30(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__18, ATSLIB_056_libats_056_arena__arena_load__38__47(tmp159__18)) ;
+ATSfunbody_end()
+ATSreturn(tmpret158__18) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__30(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__30, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__30, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__30, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__30, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__30, atspre_g0uint_mul_size(tmp164__30, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__30, atspre_add_ptr0_bsz(arg0, tmp163__30)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__30) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -16721,234 +17027,14 @@ ATSreturn(tmpret174__47) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__13()
+ATSLIB_056_libats_056_arena__acell_tail__44__24(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret146__13, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__13, atstype_exnconptr) ;
+ATStmpdec(tmpret185__24, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__13, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__13, tmp147__13) ;
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__24, ATSLIB_056_libats_056_arena__arena_load__38__48(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__13) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_tempenver(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1845, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1846, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1847, atstype_boxed) ;
-ATStmpdec(tmp1848, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1849, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1850, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_tempenver):
-ATSINSmove(tmp1846, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1848, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1847, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1848)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab395):
-ATSifnthen(ATSCKpat_con1(tmp1847, 54)) { ATSINSgoto(__atstmplab397) ; } ;
-ATSINSlab(__atstmplab396):
-ATSINSmove(tmp1849, ATSSELcon(tmp1847, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp1847) ;
-ATSINSmove(tmp1850, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
-ATSINSmove(tmpret1845, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_tempenver(tmp1846, tmp1850, tmp1849)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab397):
-ATSINSmove_void(tmp1851, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1847)) ;
-ATSINSmove(tmpret1845, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__14()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1845) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__14()
-{
-ATStmpdec(tmpret146__14, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__14, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__14, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__14, tmp147__14) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__14) ;
-}
-ATSstatic()
-atsvoid_t0ype
-funarg_patck_exhaust_linck_505(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp1855, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1856, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1860, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1864, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_funarg_patck_exhaust_linck_505):
-ATSINSmove(tmp1855, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcst_is_P2TCany(arg1)) ;
-ATSif(
-tmp1855
-) ATSthen() {
-ATSINSmove_void(tmpret1854, ATSPMVempty()) ;
-} ATSelse() {
-ATSINSmove(tmp1856, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_is_lin(arg2)) ;
-ATSif(
-tmp1856
-) ATSthen() {
-ATSINSmove(tmp1860, PATSHOME_057_src_057_pats_dynexp2_056_sats__p2at_loc(arg0)) ;
-ATSINSmove_void(tmp1857, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(tmp1860)) ;
-ATSINSmove_void(tmp1861, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 50562(line=2117, offs=7) -- 50602(line=2117, offs=47)"), ATSPMVstring("funarg_patck_exhaust"))) ;
-ATSINSmove_void(tmp1862, atspre_prerr_string(ATSPMVstring(": the linear pattern cannot be used as a function argument."))) ;
-ATSINSmove_void(tmp1863, atspre_prerr_newline()) ;
-ATSINSmove(tmp1864, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d2exp_trup_arg_body_linpat(arg0)) ;
-ATSINSmove_void(tmpret1854, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp1864)) ;
-} ATSelse() {
-ATSINSmove_void(tmpret1854, ATSPMVempty()) ;
-}
-}
-ATSfunbody_end()
-ATSreturn_void(tmpret1854) ;
-}
-ATSstatic()
-atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__14(atstkind_type(atstype_ptrk) arg0)
-{
-ATSfunbody_beg()
-ATSINSflab(__patsflab_prerr_error3_loc):
-ATSINSmove_void(tmp686__14, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
-ATSINSmove_void(tmpret685__14, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret685__14) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-funarg_patck_exhaust_aux_507(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret1865, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1866, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1869, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1872, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1885, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1895, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1908, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1918, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1936, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_funarg_patck_exhaust_aux_507):
-ATSINSmove(tmp1866, ATSLIB_056_libats_056_arena__glist_is_nil__173__5(arg0)) ;
-ATSif(
-tmp1866
-) ATSthen() {
-ATSINSmove(tmpret1865, ATSLIB_056_libats_056_arena__glist_nil__66__21()) ;
-} ATSelse() {
-ATSINSmove(tmp1869, ATSLIB_056_libats_056_arena__glist_is_nil__173__6(arg1)) ;
-ATSif(
-tmp1869
-) ATSthen() {
-ATSINSmove(tmpret1865, ATSLIB_056_libats_056_arena__glist_nil__66__22()) ;
-} ATSelse() {
-ATSINSmove(tmp1872, ATSLIB_056_libats_056_arena__glist_head__30__4(arg0)) ;
-ATSINSmove(tmp1885, ATSLIB_056_libats_056_arena__glist_tail__42__5(arg0)) ;
-ATSINSmove(tmp1895, ATSLIB_056_libats_056_arena__glist_head__30__5(arg1)) ;
-ATSINSmove(tmp1908, ATSLIB_056_libats_056_arena__glist_tail__42__6(arg1)) ;
-ATSINSmove(tmp1918, PATSHOME_057_src_057_pats_patcst2_056_sats__p2at2cst(tmp1872)) ;
-ATSINSmove_void(tmp1919, funarg_patck_exhaust_linck_505(tmp1872, tmp1918, tmp1895)) ;
-ATSINSmove(tmp1936, funarg_patck_exhaust_aux_507(tmp1885, tmp1908)) ;
-ATSINSmove(tmpret1865, ATSLIB_056_libats_056_arena__glist_cons__68__15(tmp1918, tmp1936)) ;
-}
-}
-ATSfunbody_end()
-ATSreturn(tmpret1865) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_libats_056_arena__glist_is_nil__173__5(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret625__5, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_is_nil):
-ATSINSmove(tmpret625__5, atspre_eq_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret625__5) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__21()
-{
-ATStmpdec(tmpret316__21, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__21, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__21) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_libats_056_arena__glist_is_nil__173__6(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret625__6, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_is_nil):
-ATSINSmove(tmpret625__6, atspre_eq_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret625__6) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__22()
-{
-ATStmpdec(tmpret316__22, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__22, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__22) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_head__30__4(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret152__4, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp154__4, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_head):
-ATSINSmove(tmp154__4, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp153__4, atspre_assert_errmsg_bool0(tmp154__4, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
-ATSINSmove(tmpret152__4, ATSLIB_056_libats_056_arena__acell_head__32__19(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSfunbody_end()
-ATSreturn(tmpret152__4) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__19(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret158__19, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__19, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__19, ATSLIB_056_prelude__ptr0_add_guint__34__33(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__19, ATSLIB_056_libats_056_arena__arena_load__38__48(tmp159__19)) ;
-ATSfunbody_end()
-ATSreturn(tmpret158__19) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__33(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__33, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__33, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__33, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__33, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__33, atspre_g0uint_mul_size(tmp164__33, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__33, atspre_add_ptr0_bsz(arg0, tmp163__33)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__33) ;
+ATSreturn(tmpret185__24) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -16977,30 +17063,243 @@ ATSreturn(tmpret174__48) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_tail__42__5(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__glist_nil__66__20()
 {
-ATStmpdec(tmpret177__5, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp179__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp180__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret316__20, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_tail):
-ATSINSmove(tmp179__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp178__5, atspre_assert_errmsg_bool0(tmp179__5, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
-ATSINSmove(tmp180__5, ATSLIB_056_libats_056_arena__acell_tail__44__23(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmpret177__5, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__5)) ;
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__20, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
 ATSfunbody_end()
-ATSreturn(tmpret177__5) ;
+ATSreturn(tmpret316__20) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__23(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__glist_cons__68__13(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret185__23, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret321__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__13, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__23, ATSLIB_056_libats_056_arena__arena_load__38__49(arg0)) ;
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__13, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__13, atslib_the_garena_alloc(tmp323__13)) ;
+ATSINSmove_void(tmp324__13, ATSLIB_056_libats_056_arena__acell_make__71__13(tmp322__13, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__13, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__13)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__23) ;
+ATSreturn(tmpret321__13) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__13(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp331__13, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__13, ATSLIB_056_libats_056_arena__arena_store__73__25(arg0, arg2)) ;
+ATSINSmove(tmp331__13, ATSLIB_056_prelude__ptr0_add_guint__34__31(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__13, ATSLIB_056_libats_056_arena__arena_store__73__26(tmp331__13, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__13) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__25(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__25, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__25, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__25, arg1) ;
+ATSINSmove(tmp337__25, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__25), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__25, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__25) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__31(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__31, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__31, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__31, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__31, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__31, atspre_g0uint_mul_size(tmp164__31, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__31, atspre_add_ptr0_bsz(arg0, tmp163__31)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__31) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__26(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__26, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__26, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__26, arg1) ;
+ATSINSmove(tmp337__26, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__26), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__26, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__26) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_rec(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret1862, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1863, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1864, atstype_boxed) ;
+ATStmpdec(tmp1865, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1866, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1867, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1868, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1869, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1870, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1871, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1872, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_rec):
+ATSINSmove(tmp1863, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp1865, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp1864, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1865)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab405):
+ATSifnthen(ATSCKpat_con1(tmp1864, 38)) { ATSINSgoto(__atstmplab407) ; } ;
+ATSINSlab(__atstmplab406):
+ATSINSmove(tmp1866, ATSSELcon(tmp1864, postiats_tysum_30, atslab__0)) ;
+ATSINSmove(tmp1867, ATSSELcon(tmp1864, postiats_tysum_30, atslab__1)) ;
+ATSINSmove(tmp1868, ATSSELcon(tmp1864, postiats_tysum_30, atslab__2)) ;
+ATSINSfreecon(tmp1864) ;
+ATSINSmove(tmp1869, d2exp_trup_rec_aux_498(tmp1868)) ;
+ATSINSmove(tmp1870, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__labd3explst_get_type(tmp1869)) ;
+ATSINSmove(tmp1871, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_tyrec(tmp1866, tmp1867, tmp1870)) ;
+ATSINSmove(tmp1872, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_rec(tmp1863, tmp1871, tmp1866, tmp1867, tmp1869)) ;
+ATSINSmove(tmpret1862, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1872)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab407):
+ATSINSmove_void(tmp1873, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1864)) ;
+ATSINSmove(tmpret1862, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__9()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret1862) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__9()
+{
+ATStmpdec(tmpret146__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__9, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__9, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__9, tmp147__9) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__9) ;
+}
+ATSstatic()
+postiats_tyrec_0
+d2exp_trup_seq_aux_515(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmpret1876, postiats_tyrec_0) ;
+ATStmpdec(tmp1877, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1879, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1892, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1902, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1903, postiats_tyrec_0) ;
+ATStmpdec(tmp1904, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1905, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1906, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1923, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1924, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1925, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1926, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_seq_aux_515):
+ATSINSmove(tmp1877, ATSLIB_056_libats_056_arena__glist_is_cons__48__5(arg1)) ;
+ATSif(
+tmp1877
+) ATSthen() {
+ATSINSmove(tmp1879, ATSLIB_056_libats_056_arena__glist_head__30__2(arg1)) ;
+ATSINSmove(tmp1892, ATSLIB_056_libats_056_arena__glist_tail__42__3(arg1)) ;
+ATSINSmove(tmp1902, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trdn(arg0, arg2)) ;
+ATSINSmove(tmp1903, d2exp_trup_seq_aux_515(tmp1879, tmp1892, arg2)) ;
+ATSINSmove(tmp1904, ATSSELfltrec(tmp1903, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp1905, ATSSELfltrec(tmp1903, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp1906, ATSLIB_056_libats_056_arena__glist_cons__68__14(tmp1902, tmp1904)) ;
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret1876, postiats_tyrec_0, atslab__0, tmp1906) ;
+ATSINSstore_fltrec_ofs(tmpret1876, postiats_tyrec_0, atslab__1, tmp1905) ;
+ATSINSmove_fltrec_end()
+} ATSelse() {
+ATSINSmove(tmp1923, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(arg0)) ;
+ATSINSmove(tmp1925, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp1923)) ;
+ATSINSmove(tmp1924, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp1925)) ;
+ATSINSmove(tmp1926, ATSLIB_056_libats_056_arena__glist_sing__78__3(tmp1923)) ;
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret1876, postiats_tyrec_0, atslab__0, tmp1926) ;
+ATSINSstore_fltrec_ofs(tmpret1876, postiats_tyrec_0, atslab__1, tmp1924) ;
+ATSINSmove_fltrec_end()
+}
+ATSfunbody_end()
+ATSreturn(tmpret1876) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_libats_056_arena__glist_is_cons__48__5(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret192__5, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_is_cons):
+ATSINSmove(tmpret192__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret192__5) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_head__30__2(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret152__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp154__2, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_head):
+ATSINSmove(tmp154__2, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp153__2, atspre_assert_errmsg_bool0(tmp154__2, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
+ATSINSmove(tmpret152__2, ATSLIB_056_libats_056_arena__acell_head__32__19(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret152__2) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__19(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret158__19, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__19, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__19, ATSLIB_056_prelude__ptr0_add_guint__34__32(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__19, ATSLIB_056_libats_056_arena__arena_load__38__49(tmp159__19)) ;
+ATSfunbody_end()
+ATSreturn(tmpret158__19) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__32(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__32, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__32, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__32, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__32, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__32, atspre_g0uint_mul_size(tmp164__32, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__32, atspre_add_ptr0_bsz(arg0, tmp163__32)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__32) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -17029,45 +17328,30 @@ ATSreturn(tmpret174__49) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_head__30__5(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__glist_tail__42__3(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret152__5, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp154__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret177__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp179__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp180__3, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_head):
-ATSINSmove(tmp154__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp153__5, atspre_assert_errmsg_bool0(tmp154__5, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
-ATSINSmove(tmpret152__5, ATSLIB_056_libats_056_arena__acell_head__32__20(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSflab(__patsflab_glist_tail):
+ATSINSmove(tmp179__3, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp178__3, atspre_assert_errmsg_bool0(tmp179__3, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
+ATSINSmove(tmp180__3, ATSLIB_056_libats_056_arena__acell_tail__44__25(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmpret177__3, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__3)) ;
 ATSfunbody_end()
-ATSreturn(tmpret152__5) ;
+ATSreturn(tmpret177__3) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_head__32__20(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__acell_tail__44__25(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret158__20, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp159__20, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret185__25, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_head):
-ATSINSmove(tmp159__20, ATSLIB_056_prelude__ptr0_add_guint__34__34(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmpret158__20, ATSLIB_056_libats_056_arena__arena_load__38__50(tmp159__20)) ;
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__25, ATSLIB_056_libats_056_arena__arena_load__38__50(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret158__20) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__34(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__34, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__34, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__34, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__34, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__34, atspre_g0uint_mul_size(tmp164__34, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__34, atspre_add_ptr0_bsz(arg0, tmp163__34)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__34) ;
+ATSreturn(tmpret185__25) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -17096,30 +17380,276 @@ ATSreturn(tmpret174__50) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_tail__42__6(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_libats_056_arena__glist_cons__68__14(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
 {
-ATStmpdec(tmpret177__6, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp179__6, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp180__6, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret321__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__14, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_tail):
-ATSINSmove(tmp179__6, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSINSmove_void(tmp178__6, atspre_assert_errmsg_bool0(tmp179__6, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
-ATSINSmove(tmp180__6, ATSLIB_056_libats_056_arena__acell_tail__44__24(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove(tmpret177__6, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__6)) ;
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__14, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__14, atslib_the_garena_alloc(tmp323__14)) ;
+ATSINSmove_void(tmp324__14, ATSLIB_056_libats_056_arena__acell_make__71__14(tmp322__14, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__14, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__14)) ;
 ATSfunbody_end()
-ATSreturn(tmpret177__6) ;
+ATSreturn(tmpret321__14) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__14(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp331__14, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__14, ATSLIB_056_libats_056_arena__arena_store__73__27(arg0, arg2)) ;
+ATSINSmove(tmp331__14, ATSLIB_056_prelude__ptr0_add_guint__34__33(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__14, ATSLIB_056_libats_056_arena__arena_store__73__28(tmp331__14, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__14) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__27(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__27, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__27, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__27, arg1) ;
+ATSINSmove(tmp337__27, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__27), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__27, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__27) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__acell_tail__44__24(atstkind_type(atstype_ptrk) arg0)
+ATSLIB_056_prelude__ptr0_add_guint__34__33(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret185__24, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret162__33, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__33, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__33, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_tail):
-ATSINSmove(tmpret185__24, ATSLIB_056_libats_056_arena__arena_load__38__51(arg0)) ;
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__33, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__33, atspre_g0uint_mul_size(tmp164__33, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__33, atspre_add_ptr0_bsz(arg0, tmp163__33)) ;
 ATSfunbody_end()
-ATSreturn(tmpret185__24) ;
+ATSreturn(tmpret162__33) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__28(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__28, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__28, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__28, arg1) ;
+ATSINSmove(tmp337__28, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__28), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__28, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__28) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_sing__78__3(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret350__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp351__3, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_sing):
+ATSINSmove(tmp351__3, ATSLIB_056_libats_056_arena__glist_nil__66__21()) ;
+ATSINSmove(tmpret350__3, ATSLIB_056_libats_056_arena__glist_cons__68__15(arg0, tmp351__3)) ;
+ATSfunbody_end()
+ATSreturn(tmpret350__3) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__21()
+{
+ATStmpdec(tmpret316__21, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__21, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__21) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_cons__68__15(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret321__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__15, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__15, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__15, atslib_the_garena_alloc(tmp323__15)) ;
+ATSINSmove_void(tmp324__15, ATSLIB_056_libats_056_arena__acell_make__71__15(tmp322__15, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__15, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__15)) ;
+ATSfunbody_end()
+ATSreturn(tmpret321__15) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__15(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp331__15, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__15, ATSLIB_056_libats_056_arena__arena_store__73__29(arg0, arg2)) ;
+ATSINSmove(tmp331__15, ATSLIB_056_prelude__ptr0_add_guint__34__34(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__15, ATSLIB_056_libats_056_arena__arena_store__73__30(tmp331__15, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__15) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__29(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__29, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__29, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__29, arg1) ;
+ATSINSmove(tmp337__29, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__29), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__29, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__29) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__34(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__34, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__34, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__34, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__34, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__34, atspre_g0uint_mul_size(tmp164__34, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__34, atspre_add_ptr0_bsz(arg0, tmp163__34)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__34) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__30(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__30, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__30, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__30, arg1) ;
+ATSINSmove(tmp337__30, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__30), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__30, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__30) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_seq(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret1946, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1947, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1948, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1949, atstype_boxed) ;
+ATStmpdec(tmp1950, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1951, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1952, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1954, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1967, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1977, postiats_tyrec_0) ;
+ATStmpdec(tmp1978, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1979, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_seq):
+ATSINSmove(tmp1947, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp1948, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
+ATSINSmove(tmp1950, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp1949, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1950)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab408):
+ATSifnthen(ATSCKpat_con1(tmp1949, 39)) { ATSINSgoto(__atstmplab410) ; } ;
+ATSINSlab(__atstmplab409):
+ATSINSmove(tmp1951, ATSSELcon(tmp1949, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp1949) ;
+ATSINSmove(tmp1952, ATSLIB_056_libats_056_arena__glist_is_cons__48__6(tmp1951)) ;
+ATSif(
+tmp1952
+) ATSthen() {
+ATSINSmove(tmp1954, ATSLIB_056_libats_056_arena__glist_head__30__3(tmp1951)) ;
+ATSINSmove(tmp1967, ATSLIB_056_libats_056_arena__glist_tail__42__4(tmp1951)) ;
+ATSINSmove(tmp1977, d2exp_trup_seq_aux_515(tmp1954, tmp1967, tmp1948)) ;
+ATSINSmove(tmp1978, ATSSELfltrec(tmp1977, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp1979, ATSSELfltrec(tmp1977, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmpret1946, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_seq(tmp1947, tmp1979, tmp1978)) ;
+} ATSelse() {
+ATSINSmove(tmpret1946, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_empty(tmp1947, tmp1948)) ;
+}
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab410):
+ATSINSmove_void(tmp1980, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1949)) ;
+ATSINSmove(tmpret1946, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__10()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret1946) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_libats_056_arena__glist_is_cons__48__6(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret192__6, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_is_cons):
+ATSINSmove(tmpret192__6, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret192__6) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_head__30__3(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret152__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp154__3, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_head):
+ATSINSmove(tmp154__3, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp153__3, atspre_assert_errmsg_bool0(tmp154__3, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
+ATSINSmove(tmpret152__3, ATSLIB_056_libats_056_arena__acell_head__32__20(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret152__3) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__20(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret158__20, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__20, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__20, ATSLIB_056_prelude__ptr0_add_guint__34__35(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__20, ATSLIB_056_libats_056_arena__arena_load__38__51(tmp159__20)) ;
+ATSfunbody_end()
+ATSreturn(tmpret158__20) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__35(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__35, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__35, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__35, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__35, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__35, atspre_g0uint_mul_size(tmp164__35, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__35, atspre_add_ptr0_bsz(arg0, tmp163__35)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__35) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -17148,865 +17678,30 @@ ATSreturn(tmpret174__51) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__15(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+ATSLIB_056_libats_056_arena__glist_tail__42__4(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret321__15, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__15, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__15, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret177__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp179__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp180__4, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__15, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__15, atslib_the_garena_alloc(tmp323__15)) ;
-ATSINSmove_void(tmp324__15, ATSLIB_056_libats_056_arena__acell_make__71__15(tmp322__15, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__15, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__15)) ;
+ATSINSflab(__patsflab_glist_tail):
+ATSINSmove(tmp179__4, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp178__4, atspre_assert_errmsg_bool0(tmp179__4, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
+ATSINSmove(tmp180__4, ATSLIB_056_libats_056_arena__acell_tail__44__26(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmpret177__4, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__4)) ;
 ATSfunbody_end()
-ATSreturn(tmpret321__15) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__15(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__15, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__15, ATSLIB_056_libats_056_arena__arena_store__73__29(arg0, arg2)) ;
-ATSINSmove(tmp331__15, ATSLIB_056_prelude__ptr0_add_guint__34__35(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__15, ATSLIB_056_libats_056_arena__arena_store__73__30(tmp331__15, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__15) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__29(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__29, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__29, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__29, arg1) ;
-ATSINSmove(tmp337__29, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__29), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__29, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__29) ;
+ATSreturn(tmpret177__4) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__35(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+ATSLIB_056_libats_056_arena__acell_tail__44__26(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret162__35, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__35, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__35, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret185__26, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__35, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__35, atspre_g0uint_mul_size(tmp164__35, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__35, atspre_add_ptr0_bsz(arg0, tmp163__35)) ;
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__26, ATSLIB_056_libats_056_arena__arena_load__38__52(arg0)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__35) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__30(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__30, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__30, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__30, arg1) ;
-ATSINSmove(tmp337__30, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__30), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__30, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__30) ;
-}
-ATSextern()
-atsvoid_t0ype
-PATSHOME_057_src_057_pats_trans3_056_sats__funarg_patck_exhaust(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp1938, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1939, atstype_boxed) ;
-ATStmpdec(tmp1940, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1941, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1945, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1946, atstype_boxed) ;
-ATStmpdec(tmp1947, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_funarg_patck_exhaust):
-ATSINSmove(tmp1938, funarg_patck_exhaust_aux_507(arg1, arg2)) ;
-ATSINSmove(tmp1939, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcstlst_comp(tmp1938)) ;
-ATSINSmove(tmp1941, ATSLIB_056_prelude__list_vt_is_nil__536__1(ATSPMVrefarg0(tmp1939))) ;
-ATSif(
-tmp1941
-) ATSthen() {
-ATSINSmove(tmp1940, ATSPMVbool_true()) ;
-} ATSelse() {
-ATSINSmove(tmp1940, ATSPMVbool_false()) ;
-}
-ATSINSmove(tmp1945, atspre_neg_bool0(tmp1940)) ;
-ATSif(
-tmp1945
-) ATSthen() {
-ATSINSmove(tmp1946, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcstlstlst_vt_copy(ATSPMVrefarg0(tmp1939))) ;
-ATSINSmove_con0(tmp1947, 1) ;
-ATSINSmove_void(tmp1944, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_patcstlstlst_false(arg0, tmp1947, tmp1946, arg2)) ;
-} ATSelse() {
-ATSINSmove_void(tmp1944, ATSPMVempty()) ;
-}
-ATSINSmove_void(tmpret1937, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcstlstlst_vt_free(tmp1939)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret1937) ;
-}
-#if(0)
-ATSextern()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__list_vt_is_nil__536(atsrefarg0_type(atstype_boxed) arg0)
-{
-ATStmpdec(tmpret1942, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_list_vt_is_nil):
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab398):
-ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab400) ; } ;
-ATSINSlab(__atstmplab399):
-ATSINSmove(tmpret1942, ATSPMVbool_true()) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab400):
-ATSINSmove(tmpret1942, ATSPMVbool_false()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1942) ;
-}
-#endif
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__list_vt_is_nil__536__1(atsrefarg0_type(atstype_boxed) arg0)
-{
-ATStmpdec(tmpret1942__1, atstkind_t0ype(atstype_bool)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_list_vt_is_nil):
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab398):
-ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab400) ; } ;
-ATSINSlab(__atstmplab399):
-ATSINSmove(tmpret1942__1, ATSPMVbool_true()) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab400):
-ATSINSmove(tmpret1942__1, ATSPMVbool_false()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1942__1) ;
-}
-ATSextern()
-postiats_tyrec_1
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(atstkind_type(atstype_ptrk) arg0, atstype_boxed arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_type(atstype_ptrk) arg4, atstkind_type(atstype_ptrk) arg5)
-{
-ATStmpdec(tmpret1948, postiats_tyrec_1) ;
-ATStmpdec(tmpref1950, atstype_boxed) ;
-ATStmpdec(tmp1951, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref1952, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1953, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1955, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1957, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1963, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1966, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1974, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1975, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1978, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1979, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1980, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_arg_body):
-ATSINSmove_void(tmp1949, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
-ATSINSmove(tmpref1950, arg1) ;
-ATSINSmove(tmp1951, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_funclo_of_d2exp(arg5, ATSPMVrefarg1(ATSPMVptrof(tmpref1950)))) ;
-ATSINSmove(tmp1953, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_s2eff_of_d2exp(tmp1951, ATSPMVrefarg1(ATSPMVptrof(tmpref1952)))) ;
-ATSINSmove_void(tmp1954, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_push_lam(tmpref1952)) ;
-ATSINSmove(tmp1955, PATSHOME_057_src_057_pats_trans3_056_sats__p2atlst_syn_type(arg4)) ;
-ATSINSmove_void(tmp1956, PATSHOME_057_src_057_pats_trans3_056_sats__funarg_patck_exhaust(arg0, arg4, tmp1955)) ;
-ATSINSmove(tmp1957, PATSHOME_057_src_057_pats_trans3_056_sats__p2atlst_trup_arg(arg3, arg4)) ;
-ATSINSmove_void(tmp1958, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_push_lam(arg2)) ;
-ATSINSmove_void(tmp1959, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_add_p3atlst(tmp1957)) ;
-ATSINSmove_void(tmp1960, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_push_lam(arg2)) ;
-ATSINSmove_void(tmp1961, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_add_p3atlst(tmp1957)) ;
-ATSINSmove_void(tmp1962, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_lamlpenv_push_lam(tmp1957)) ;
-ATSINSmove(tmp1963, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp1953)) ;
-ATSINSmove_void(tmp1964, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_check(arg0)) ;
-ATSINSmove(tmp1966, ATSLIB_056_prelude__gt_g0int_int__110__15(arg2, ATSPMVi0nt(0))) ;
-ATSif(
-tmp1966
-) ATSthen() {
-ATSINSmove_void(tmp1965, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_check_llam(arg0)) ;
-} ATSelse() {
-ATSINSmove_void(tmp1965, ATSPMVempty()) ;
-}
-ATSINSmove_void(tmp1969, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_pop()) ;
-ATSINSmove_void(tmp1970, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_pop()) ;
-ATSINSmove_void(tmp1971, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_pop()) ;
-ATSINSmove_void(tmp1972, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_lamlpenv_pop()) ;
-ATSINSmove_void(tmp1973, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(arg0)) ;
-ATSINSmove(tmp1974, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp1963)) ;
-ATSINSmove(tmp1975, ATSLIB_056_prelude__gt_g0int_int__110__16(arg2, ATSPMVi0nt(0))) ;
-ATSINSmove(tmp1978, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_is_prf(tmp1974)) ;
-ATSINSmove(tmp1979, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2rt_prf_lin_fc(arg0, tmp1978, tmp1975, tmpref1950)) ;
-ATSINSmove(tmp1980, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_fun_srt(tmp1979, tmpref1950, arg2, tmpref1952, arg3, tmp1955, tmp1974)) ;
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1948, postiats_tyrec_1, atslab__0, tmp1980) ;
-ATSINSstore_fltrec_ofs(tmpret1948, postiats_tyrec_1, atslab__1, tmp1957) ;
-ATSINSstore_fltrec_ofs(tmpret1948, postiats_tyrec_1, atslab__2, tmp1963) ;
-ATSINSmove_fltrec_end()
-ATSfunbody_end()
-ATSreturn(tmpret1948) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__15(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-ATStmpdec(tmpret441__15, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp442__15, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gt_g0int_int):
-ATSINSmove(tmp442__15, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret441__15, atspre_g0int_gt_int(arg0, tmp442__15)) ;
-ATSfunbody_end()
-ATSreturn(tmpret441__15) ;
-}
-ATSstatic()
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__gt_g0int_int__110__16(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-ATStmpdec(tmpret441__16, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp442__16, atstkind_t0ype(atstype_int)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gt_g0int_int):
-ATSINSmove(tmp442__16, atspre_g0int2int_int_int(arg1)) ;
-ATSINSmove(tmpret441__16, atspre_g0int_gt_int(arg0, tmp442__16)) ;
-ATSfunbody_end()
-ATSreturn(tmpret441__16) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lam_dyn(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1981, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1982, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1983, atstype_boxed) ;
-ATStmpdec(tmp1984, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1985, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1986, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1987, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1988, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1989, atstype_boxed) ;
-ATStmpdec(tmp1990, postiats_tyrec_1) ;
-ATStmpdec(tmp1991, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1992, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1993, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1994, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_lam_dyn):
-ATSINSmove(tmp1982, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp1984, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp1983, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1984)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab401):
-ATSifnthen(ATSCKpat_con1(tmp1983, 56)) { ATSINSgoto(__atstmplab403) ; } ;
-ATSINSlab(__atstmplab402):
-ATSINSmove(tmp1985, ATSSELcon(tmp1983, postiats_tysum_31, atslab__0)) ;
-ATSINSmove(tmp1986, ATSSELcon(tmp1983, postiats_tysum_31, atslab__1)) ;
-ATSINSmove(tmp1987, ATSSELcon(tmp1983, postiats_tysum_31, atslab__2)) ;
-ATSINSmove(tmp1988, ATSSELcon(tmp1983, postiats_tysum_31, atslab__3)) ;
-ATSINSfreecon(tmp1983) ;
-ATSINSmove_con0(tmp1989, 0) ;
-ATSINSmove(tmp1990, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(tmp1982, tmp1989, tmp1985, tmp1986, tmp1987, tmp1988)) ;
-ATSINSmove(tmp1991, ATSSELfltrec(tmp1990, postiats_tyrec_1, atslab__0)) ;
-ATSINSmove(tmp1992, ATSSELfltrec(tmp1990, postiats_tyrec_1, atslab__1)) ;
-ATSINSmove(tmp1993, ATSSELfltrec(tmp1990, postiats_tyrec_1, atslab__2)) ;
-ATSINSmove(tmp1994, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lam_dyn(tmp1982, tmp1991, tmp1985, tmp1986, tmp1992, tmp1993)) ;
-ATSINSmove(tmpret1981, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp1994)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab403):
-ATSINSmove_void(tmp1995, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1983)) ;
-ATSINSmove(tmpret1981, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__15()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1981) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__15()
-{
-ATStmpdec(tmpret146__15, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__15, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__15, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__15, tmp147__15) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__15) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_laminit_dyn(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret1998, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1999, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2000, atstype_boxed) ;
-ATStmpdec(tmp2001, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2002, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp2003, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp2004, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2005, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2006, atstype_boxed) ;
-ATStmpdec(tmp2007, postiats_tyrec_1) ;
-ATStmpdec(tmp2008, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2009, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2010, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2012, atstype_boxed) ;
-ATStmpdec(tmp2013, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2014, atstype_boxed) ;
-ATStmpdec(tmp2026, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_laminit_dyn):
-ATSINSmove(tmp1999, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2001, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2000, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2001)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab404):
-ATSifnthen(ATSCKpat_con1(tmp2000, 57)) { ATSINSgoto(__atstmplab406) ; } ;
-ATSINSlab(__atstmplab405):
-ATSINSmove(tmp2002, ATSSELcon(tmp2000, postiats_tysum_31, atslab__0)) ;
-ATSINSmove(tmp2003, ATSSELcon(tmp2000, postiats_tysum_31, atslab__1)) ;
-ATSINSmove(tmp2004, ATSSELcon(tmp2000, postiats_tysum_31, atslab__2)) ;
-ATSINSmove(tmp2005, ATSSELcon(tmp2000, postiats_tysum_31, atslab__3)) ;
-ATSINSfreecon(tmp2000) ;
-ATSINSmove(tmp2006, PATSHOME_057_src_057_pats_basics_056_sats__FUNCLOclo(ATSPMVi0nt(0))) ;
-ATSINSmove(tmp2007, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(tmp1999, tmp2006, tmp2002, tmp2003, tmp2004, tmp2005)) ;
-ATSINSmove(tmp2008, ATSSELfltrec(tmp2007, postiats_tyrec_1, atslab__0)) ;
-ATSINSmove(tmp2009, ATSSELfltrec(tmp2007, postiats_tyrec_1, atslab__1)) ;
-ATSINSmove(tmp2010, ATSSELfltrec(tmp2007, postiats_tyrec_1, atslab__2)) ;
-ATSINSmove(tmp2013, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp2008)) ;
-ATSINSmove(tmp2012, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp2013)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab407):
-ATSifnthen(ATSCKpat_con1(tmp2012, 19)) { ATSINSgoto(__atstmplab409) ; } ;
-ATSINSlab(__atstmplab408):
-ATSINSmove(tmp2014, ATSSELcon(tmp2012, postiats_tysum_27, atslab__0)) ;
-ATSINSfreecon(tmp2012) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab410):
-ATSifnthen(ATSCKpat_con0(tmp2014, 2)) { ATSINSgoto(__atstmplab412) ; } ;
-ATSINSlab(__atstmplab411):
-ATSINSmove_void(tmp2011, ATSPMVempty()) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab412):
-ATSINSmove_void(tmp2020, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(tmp1999)) ;
-ATSINSmove_void(tmp2023, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 55067(line=2309, offs=12) -- 55109(line=2309, offs=54)"), ATSPMVstring("d2exp_trup_laminit_dyn"))) ;
-ATSINSmove_void(tmp2024, atspre_prerr_string(ATSPMVstring(": the initializing value is expected to be a flat closure but it is not."))) ;
-ATSINSmove_void(tmp2025, atspre_prerr_newline()) ;
-ATSINSmove(tmp2026, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d2exp_trup_laminit_funclo(arg0, tmp2014)) ;
-ATSINSmove_void(tmp2011, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp2026)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab409):
-ATSINSmove_void(tmp2011, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp2012)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSINSmove(tmpret1998, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_laminit_dyn(tmp1999, tmp2008, tmp2002, tmp2003, tmp2009, tmp2010)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab406):
-ATSINSmove_void(tmp2027, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2000)) ;
-ATSINSmove(tmpret1998, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__16()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret1998) ;
-}
-ATSstatic()
-atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__15(atstkind_type(atstype_ptrk) arg0)
-{
-ATSfunbody_beg()
-ATSINSflab(__patsflab_prerr_error3_loc):
-ATSINSmove_void(tmp686__15, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
-ATSINSmove_void(tmpret685__15, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret685__15) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__16()
-{
-ATStmpdec(tmpret146__16, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__16, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__16, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__16, tmp147__16) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__16) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lam_sta(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2030, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2031, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2032, atstype_boxed) ;
-ATStmpdec(tmp2033, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2034, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2035, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2036, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2040, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2042, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2043, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_lam_sta):
-ATSINSmove(tmp2031, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2033, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2032, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2033)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab413):
-ATSifnthen(ATSCKpat_con1(tmp2032, 58)) { ATSINSgoto(__atstmplab415) ; } ;
-ATSINSlab(__atstmplab414):
-ATSINSmove(tmp2034, ATSSELcon(tmp2032, postiats_tysum_21, atslab__0)) ;
-ATSINSmove(tmp2035, ATSSELcon(tmp2032, postiats_tysum_21, atslab__1)) ;
-ATSINSmove(tmp2036, ATSSELcon(tmp2032, postiats_tysum_21, atslab__2)) ;
-ATSINSfreecon(tmp2032) ;
-ATSINSmove_void(tmp2037, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
-ATSINSmove_void(tmp2038, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_svarlst(tmp2034)) ;
-ATSINSmove_void(tmp2039, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_hypadd_proplst(tmp2031, tmp2035)) ;
-ATSINSmove(tmp2040, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2036)) ;
-ATSINSmove_void(tmp2041, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(tmp2031)) ;
-ATSINSmove(tmp2042, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp2040)) ;
-ATSINSmove(tmp2043, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_uni(tmp2034, tmp2035, tmp2042)) ;
-ATSINSmove(tmpret2030, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lam_sta(tmp2031, tmp2043, tmp2034, tmp2035, tmp2040)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab415):
-ATSINSmove_void(tmp2044, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2032)) ;
-ATSINSmove(tmpret2030, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__17()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret2030) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__17()
-{
-ATStmpdec(tmpret146__17, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__17, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__17, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__17, tmp147__17) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__17) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lam_met(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2047, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2048, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2049, atstype_boxed) ;
-ATStmpdec(tmp2050, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2051, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2052, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2053, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2056, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2057, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_lam_met):
-ATSINSmove(tmp2048, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2050, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2049, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2050)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab416):
-ATSifnthen(ATSCKpat_con1(tmp2049, 59)) { ATSINSgoto(__atstmplab418) ; } ;
-ATSINSlab(__atstmplab417):
-ATSINSmove(tmp2051, ATSSELcon(tmp2049, postiats_tysum_21, atslab__0)) ;
-ATSINSmove(tmp2052, ATSSELcon(tmp2049, postiats_tysum_21, atslab__1)) ;
-ATSINSmove(tmp2053, ATSSELcon(tmp2049, postiats_tysum_21, atslab__2)) ;
-ATSINSfreecon(tmp2049) ;
-ATSINSmove_void(tmp2054, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2explst_check_termet(tmp2048, tmp2052)) ;
-ATSINSmove(tmp2056, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2varlstref_val(tmp2051)) ;
-ATSINSmove_void(tmp2055, PATSHOME_057_src_057_pats_trans3_env_056_sats__termetenv_push_dvarlst(tmp2056, tmp2052)) ;
-ATSINSmove(tmp2057, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2053)) ;
-ATSINSmove_void(tmp2058, PATSHOME_057_src_057_pats_trans3_env_056_sats__termetenv_pop()) ;
-ATSINSmove(tmpret2047, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lam_met(tmp2048, tmp2052, tmp2057)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab418):
-ATSINSmove_void(tmp2059, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2049)) ;
-ATSINSmove(tmpret2047, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__18()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret2047) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__18()
-{
-ATStmpdec(tmpret146__18, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__18, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__18, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__18, tmp147__18) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__18) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-s2exp_clo2fun_550(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2062, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2063, atstype_boxed) ;
-ATStmpdec(tmp2064, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2066, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp2067, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2068, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp2069, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2070, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2071, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2072, atstype_boxed) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_s2exp_clo2fun_550):
-ATSINSmove(tmp2064, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg0)) ;
-ATSINSmove(tmp2063, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp2064)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab419):
-ATSifnthen(ATSCKpat_con1(tmp2063, 19)) { ATSINSgoto(__atstmplab421) ; } ;
-ATSINSlab(__atstmplab420):
-ATSINSmove(tmp2066, ATSSELcon(tmp2063, postiats_tysum_27, atslab__1)) ;
-ATSINSmove(tmp2067, ATSSELcon(tmp2063, postiats_tysum_27, atslab__2)) ;
-ATSINSmove(tmp2068, ATSSELcon(tmp2063, postiats_tysum_27, atslab__3)) ;
-ATSINSmove(tmp2069, ATSSELcon(tmp2063, postiats_tysum_27, atslab__4)) ;
-ATSINSmove(tmp2070, ATSSELcon(tmp2063, postiats_tysum_27, atslab__5)) ;
-ATSINSfreecon(tmp2063) ;
-ATSINSmove(tmp2071, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_srt(arg0)) ;
-ATSINSmove_con0(tmp2072, 0) ;
-ATSINSmove(tmpret2062, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_fun_srt(tmp2071, tmp2072, tmp2066, tmp2067, tmp2068, tmp2069, tmp2070)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab421):
-ATSINSmove_void(tmp2073, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp2063)) ;
-ATSINSmove(tmpret2062, arg0) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret2062) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_fix(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2074, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2075, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2076, atstype_boxed) ;
-ATStmpdec(tmp2077, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2078, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp2079, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2080, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2081, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2082, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2083, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2095, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_fix):
-ATSINSmove(tmp2075, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2077, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2076, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2077)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab422):
-ATSifnthen(ATSCKpat_con1(tmp2076, 60)) { ATSINSgoto(__atstmplab424) ; } ;
-ATSINSlab(__atstmplab423):
-ATSINSmove(tmp2078, ATSSELcon(tmp2076, postiats_tysum_20, atslab__0)) ;
-ATSINSmove(tmp2079, ATSSELcon(tmp2076, postiats_tysum_20, atslab__1)) ;
-ATSINSmove(tmp2080, ATSSELcon(tmp2076, postiats_tysum_20, atslab__2)) ;
-ATSINSfreecon(tmp2076) ;
-ATSINSmove(tmp2081, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_syn_type(tmp2080)) ;
-ATSINSmove(tmp2082, s2exp_clo2fun_550(tmp2081)) ;
-ATSINSmove(tmp2083, ATSLIB_056_libats_056_arena__gopt_some__552__1(tmp2082)) ;
-ATSINSmove_void(tmp2093, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_set_type(tmp2079, tmp2083)) ;
-ATSINSmove_void(tmp2094, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_set_mastype(tmp2079, tmp2083)) ;
-ATSINSmove(tmp2095, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2080)) ;
-ATSINSmove(tmpret2074, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_fix(tmp2075, tmp2081, tmp2078, tmp2079, tmp2095)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab424):
-ATSINSmove_void(tmp2096, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2076)) ;
-ATSINSmove(tmpret2074, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__19()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret2074) ;
-}
-#if(0)
-ATSextern()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552(atstyvar_type(a) arg0)
-{
-ATStmpdec(tmpret2084, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2085, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_some):
-ATSINSmove(tmp2085, atslib_the_garena_alloc(ATSPMVsizeof(atstyvar_type(a)))) ;
-ATSINSmove_void(tmp2086, PMVtmpltcst(arena_store<S2Evar(a(6706))>)(tmp2085, arg0)) ;
-ATSINSmove(tmpret2084, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2085)) ;
-ATSfunbody_end()
-ATSreturn(tmpret2084) ;
-}
-#endif
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552__1(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2084__1, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2085__1, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_some):
-ATSINSmove(tmp2085__1, atslib_the_garena_alloc(ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmp2086__1, ATSLIB_056_libats_056_arena__arena_store__73__31(tmp2085__1, arg0)) ;
-ATSINSmove(tmpret2084__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2085__1)) ;
-ATSfunbody_end()
-ATSreturn(tmpret2084__1) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__31(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__31, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__31, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__31, arg1) ;
-ATSINSmove(tmp337__31, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__31), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__31, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__31) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__19()
-{
-ATStmpdec(tmpret146__19, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__19, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__19, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__19, tmp147__19) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__19) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_delay(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2099, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2100, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2101, atstype_boxed) ;
-ATStmpdec(tmp2102, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2103, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2104, atstype_boxed) ;
-ATStmpdec(tmp2105, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp2106, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2108, postiats_tyrec_1) ;
-ATStmpdec(tmp2109, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2110, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2111, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2112, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_delay):
-ATSINSmove(tmp2100, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2102, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2101, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2102)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab425):
-ATSifnthen(ATSCKpat_con1(tmp2101, 61)) { ATSINSgoto(__atstmplab427) ; } ;
-ATSINSlab(__atstmplab426):
-ATSINSmove(tmp2103, ATSSELcon(tmp2101, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp2101) ;
-ATSINSmove_con0(tmp2104, 0) ;
-ATSINSmove(tmp2105, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
-ATSINSmove(tmp2106, ATSLIB_056_libats_056_arena__glist_nil__66__23()) ;
-ATSINSmove(tmp2108, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(tmp2100, tmp2104, ATSPMVi0nt(0), tmp2105, tmp2106, tmp2103)) ;
-ATSINSmove(tmp2109, ATSSELfltrec(tmp2108, postiats_tyrec_1, atslab__2)) ;
-ATSINSmove(tmp2110, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2109)) ;
-ATSINSmove(tmp2111, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_lazy_vt0ype_vtype(tmp2110)) ;
-ATSINSmove(tmp2112, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_delay(tmp2100, tmp2111, tmp2109)) ;
-ATSINSmove(tmpret2099, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp2112)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab427):
-ATSINSmove_void(tmp2113, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2101)) ;
-ATSINSmove(tmpret2099, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__20()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret2099) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__23()
-{
-ATStmpdec(tmpret316__23, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__23, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__23) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__20()
-{
-ATStmpdec(tmpret146__20, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__20, atstype_exnconptr) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__20, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__20, tmp147__20) ;
-ATSfunbody_end()
-ATSreturn(tmpret146__20) ;
-}
-ATSextern()
-atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_ldelay(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret2116, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2117, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2118, atstype_boxed) ;
-ATStmpdec(tmp2119, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2120, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2121, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2122, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2123, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2124, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2125, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2127, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2132, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2133, atstype_boxed) ;
-ATStmpdec(tmp2141, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2142, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2143, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2145, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2146, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2153, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2154, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_ldelay):
-ATSINSmove(tmp2117, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2119, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2118, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2119)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab428):
-ATSifnthen(ATSCKpat_con1(tmp2118, 62)) { ATSINSgoto(__atstmplab430) ; } ;
-ATSINSlab(__atstmplab429):
-ATSINSmove(tmp2120, ATSSELcon(tmp2118, postiats_tysum_18, atslab__0)) ;
-ATSINSmove(tmp2121, ATSSELcon(tmp2118, postiats_tysum_18, atslab__1)) ;
-ATSINSfreecon(tmp2118) ;
-ATSINSmove(tmp2122, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_save_lstbefitmlst()) ;
-ATSINSmove(tmp2123, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_initize(tmp2122)) ;
-ATSINSmove(tmp2124, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(tmp2120)) ;
-ATSINSmove(tmp2125, PATSHOME_057_src_057_pats_trans3_env_056_sats__c3nstroptref_make_none(tmp2124)) ;
-ATSINSmove_void(tmp2126, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
-ATSINSmove(tmp2127, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2120)) ;
-ATSINSmove_void(tmp2128, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_cnstr_ref(tmp2125)) ;
-ATSINSmove_void(tmp2129, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(tmp2124)) ;
-ATSINSmove_void(tmp2130, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_update(ATSPMVrefarg0(tmp2123), tmp2125)) ;
-ATSINSmove_void(tmp2131, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstbefitmlst_restore_type(tmp2122)) ;
-ATSINSmove(tmp2133, ATSLIB_056_libats_056_arena__gopt_view__51__7(tmp2121)) ;
-ATScaseof_beg()
-ATSbranch_beg()
-ATSINSlab(__atstmplab431):
-ATSifthen(ATSCKptrisnull(tmp2133)) { ATSINSgoto(__atstmplab434) ; } ;
-ATSINSlab(__atstmplab432):
-ATSINSmove(tmp2141, ATSSELcon(tmp2133, postiats_tysum_15, atslab__0)) ;
-ATSINSfreecon(tmp2133) ;
-ATSINSmove(tmp2132, tmp2141) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab433):
-#if(0)
-ATSifthen(ATSCKptriscons(tmp2133)) { ATSINSdeadcode_fail() ; } ;
-#endif
-ATSINSlab(__atstmplab434):
-ATSINSmove(tmp2132, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_empty(tmp2124)) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSINSmove(tmp2142, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(tmp2132)) ;
-ATSINSmove(tmp2143, PATSHOME_057_src_057_pats_trans3_env_056_sats__c3nstroptref_make_none(tmp2142)) ;
-ATSINSmove_void(tmp2144, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
-ATSINSmove(tmp2145, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
-ATSINSmove(tmp2146, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trdn(tmp2132, tmp2145)) ;
-ATSINSmove_void(tmp2147, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_cnstr_ref(tmp2143)) ;
-ATSINSmove_void(tmp2148, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(tmp2142)) ;
-ATSINSmove_void(tmp2149, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_update(ATSPMVrefarg0(tmp2123), tmp2143)) ;
-ATSINSmove_void(tmp2150, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_process(ATSPMVrefarg0(tmp2123), patsopt_i2nvresstate_nil)) ;
-ATSINSmove_void(tmp2151, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_finalize(tmp2123)) ;
-ATSINSmove_void(tmp2152, PATSHOME_057_src_057_pats_trans3_env_056_sats__i2nvresstate_update(tmp2117, patsopt_i2nvresstate_nil)) ;
-ATSINSmove(tmp2153, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2127)) ;
-ATSINSmove(tmp2154, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_lazy_vt0ype_vtype(tmp2153)) ;
-ATSINSmove(tmpret2116, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_ldelay(tmp2117, tmp2154, tmp2127, tmp2146)) ;
-ATSbranch_end()
-ATSbranch_beg()
-ATSINSlab(__atstmplab430):
-ATSINSmove_void(tmp2155, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2118)) ;
-ATSINSmove(tmpret2116, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__21()) ;
-ATSbranch_end()
-ATScaseof_end()
-ATSfunbody_end()
-ATSreturn(tmpret2116) ;
-}
-ATSstatic()
-atstype_boxed
-ATSLIB_056_libats_056_arena__gopt_view__51__7(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret197__7, atstype_boxed) ;
-ATStmpdec(tmp198__7, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp199__7, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_view):
-ATSINSmove(tmp198__7, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
-ATSif(
-tmp198__7
-) ATSthen() {
-ATSINSmove(tmp199__7, ATSLIB_056_libats_056_arena__arena_load__38__52(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
-ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret197__7, postiats_tysum_15) ;
-#if(0)
-ATSINSstore_con1_tag(tmpret197__7, 1) ;
-#endif
-ATSINSstore_con1_ofs(tmpret197__7, postiats_tysum_15, atslab__0, tmp199__7) ;
-ATSINSmove_con1_end()
-} ATSelse() {
-ATSINSmove_nil(tmpret197__7) ;
-}
-ATSfunbody_end()
-ATSreturn(tmpret197__7) ;
+ATSreturn(tmpret185__26) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18035,74 +17730,764 @@ ATSreturn(tmpret174__52) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__21()
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__10()
 {
-ATStmpdec(tmpret146__21, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp147__21, atstype_exnconptr) ;
+ATStmpdec(tmpret146__10, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__10, atstype_exnconptr) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_abort_interr):
-ATSINSmove_exn0(tmp147__21, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
-ATSINSraise_exn(tmpret146__21, tmp147__21) ;
+ATSINSmove_exn0(tmp147__10, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__10, tmp147__10) ;
 ATSfunbody_end()
-ATSreturn(tmpret146__21) ;
+ATSreturn(tmpret146__10) ;
 }
 ATSextern()
 atstkind_type(atstype_ptrk)
-PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_for(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_letwhere(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
 {
-ATStmpdec(tmpret2158, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2159, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2160, atstype_boxed) ;
-ATStmpdec(tmp2161, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2162, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2163, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2164, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2165, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2166, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2167, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2174, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1983, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1984, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1988, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1989, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_d2exp_trup_for):
-ATSINSmove(tmp2159, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2161, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2160, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2161)) ;
+ATSINSflab(__patsflab_d2exp_trup_letwhere):
+ATSINSmove(tmp1984, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove_void(tmp1985, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_push()) ;
+ATSINSmove_void(tmp1986, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_s2cstbindlst_push()) ;
+ATSINSmove_void(tmp1987, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_push_let()) ;
+ATSINSmove(tmp1988, PATSHOME_057_src_057_pats_trans3_056_sats__d2eclist_tr(arg1)) ;
+ATSINSmove(tmp1989, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(arg2)) ;
+ATSINSmove_void(tmp1990, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_check(tmp1984)) ;
+ATSINSmove_void(tmp1991, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_pop()) ;
+ATSINSmove_void(tmp1992, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_s2cstbindlst_pop_and_unbind()) ;
+ATSINSmove_void(tmp1993, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_pop()) ;
+ATSINSmove(tmpret1983, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_let(tmp1984, tmp1988, tmp1989)) ;
+ATSfunbody_end()
+ATSreturn(tmpret1983) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_effmask(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret1994, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1995, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1996, atstype_boxed) ;
+ATStmpdec(tmp1997, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1998, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1999, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2001, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_effmask):
+ATSINSmove(tmp1995, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp1997, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp1996, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp1997)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab435):
-ATSifnthen(ATSCKpat_con1(tmp2160, 63)) { ATSINSgoto(__atstmplab437) ; } ;
-ATSINSlab(__atstmplab436):
-ATSINSmove(tmp2162, ATSSELcon(tmp2160, postiats_tysum_32, atslab__0)) ;
-ATSINSmove(tmp2163, ATSSELcon(tmp2160, postiats_tysum_32, atslab__1)) ;
-ATSINSmove(tmp2164, ATSSELcon(tmp2160, postiats_tysum_32, atslab__2)) ;
-ATSINSmove(tmp2165, ATSSELcon(tmp2160, postiats_tysum_32, atslab__3)) ;
-ATSINSmove(tmp2166, ATSSELcon(tmp2160, postiats_tysum_32, atslab__4)) ;
-ATSINSfreecon(tmp2160) ;
-ATSINSmove(tmp2167, ATSLIB_056_libats_056_arena__gopt_some__552__2(tmp2163)) ;
-ATSINSmove(tmp2174, ATSLIB_056_libats_056_arena__gopt_some__552__3(tmp2165)) ;
-ATSINSmove(tmpret2158, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup_loop(tmp2159, tmp2162, tmp2167, tmp2164, tmp2174, tmp2166)) ;
+ATSINSlab(__atstmplab411):
+ATSifnthen(ATSCKpat_con1(tmp1996, 50)) { ATSINSgoto(__atstmplab413) ; } ;
+ATSINSlab(__atstmplab412):
+ATSINSmove(tmp1998, ATSSELcon(tmp1996, postiats_tysum_18, atslab__0)) ;
+ATSINSmove(tmp1999, ATSSELcon(tmp1996, postiats_tysum_18, atslab__1)) ;
+ATSINSfreecon(tmp1996) ;
+ATSINSmove_void(tmp2000, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_push_effmask(tmp1998)) ;
+ATSINSmove(tmp2001, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp1999)) ;
+ATSINSmove_void(tmp2002, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_pop()) ;
+ATSINSmove(tmpret1994, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_effmask(tmp1995, tmp1998, tmp2001)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab437):
-ATSINSmove_void(tmp2181, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2160)) ;
-ATSINSmove(tmpret2158, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__22()) ;
+ATSINSlab(__atstmplab413):
+ATSINSmove_void(tmp2003, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp1996)) ;
+ATSINSmove(tmpret1994, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__11()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2158) ;
+ATSreturn(tmpret1994) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552__2(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__11()
 {
-ATStmpdec(tmpret2084__2, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2085__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret146__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__11, atstype_exnconptr) ;
 ATSfunbody_beg()
-ATSINSflab(__patsflab_gopt_some):
-ATSINSmove(tmp2085__2, atslib_the_garena_alloc(ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmp2086__2, ATSLIB_056_libats_056_arena__arena_store__73__32(tmp2085__2, arg0)) ;
-ATSINSmove(tmpret2084__2, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2085__2)) ;
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__11, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__11, tmp147__11) ;
 ATSfunbody_end()
-ATSreturn(tmpret2084__2) ;
+ATSreturn(tmpret146__11) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_vararg(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2006, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2007, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2008, atstype_boxed) ;
+ATStmpdec(tmp2009, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2010, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2011, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2012, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2013, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_vararg):
+ATSINSmove(tmp2007, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2009, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2008, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2009)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab414):
+ATSifnthen(ATSCKpat_con1(tmp2008, 51)) { ATSINSgoto(__atstmplab416) ; } ;
+ATSINSlab(__atstmplab415):
+ATSINSmove(tmp2010, ATSSELcon(tmp2008, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2008) ;
+ATSINSmove(tmp2011, PATSHOME_057_src_057_pats_trans3_056_sats__d2explst_trup(tmp2010)) ;
+ATSINSmove(tmp2012, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3explst_get_type(tmp2011)) ;
+ATSINSmove(tmp2013, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_types_list(tmp2012)) ;
+ATSINSmove(tmpret2006, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_vararg(tmp2007, tmp2013, tmp2011)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab416):
+ATSINSmove_void(tmp2014, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2008)) ;
+ATSINSmove(tmpret2006, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__12()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2006) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__12()
+{
+ATStmpdec(tmpret146__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__12, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__12, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__12, tmp147__12) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__12) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_vcopyenv(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2017, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2018, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2019, atstype_boxed) ;
+ATStmpdec(tmp2020, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2021, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2022, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2023, atstype_boxed) ;
+ATStmpdec(tmp2024, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2025, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2026, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2027, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2028, atstype_boxed) ;
+ATStmpdec(tmp2036, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2037, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_vcopyenv):
+ATSINSmove(tmp2018, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2020, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2019, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2020)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab417):
+ATSifnthen(ATSCKpat_con1(tmp2019, 52)) { ATSINSgoto(__atstmplab419) ; } ;
+ATSINSlab(__atstmplab418):
+ATSINSmove(tmp2021, ATSSELcon(tmp2019, postiats_tysum_14, atslab__0)) ;
+ATSINSmove(tmp2022, ATSSELcon(tmp2019, postiats_tysum_14, atslab__1)) ;
+ATSINSfreecon(tmp2019) ;
+ATSINSmove(tmp2024, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(tmp2022)) ;
+ATSINSmove(tmp2023, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2024)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab420):
+ATSifnthen(ATSCKpat_con1(tmp2023, 1)) { ATSINSgoto(__atstmplab422) ; } ;
+ATSINSlab(__atstmplab421):
+ATSINSmove(tmp2025, ATSSELcon(tmp2023, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2023) ;
+ATSINSmove(tmp2026, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_get_type(tmp2025)) ;
+ATSINSmove(tmp2028, ATSLIB_056_libats_056_arena__gopt_view__51__6(tmp2026)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab423):
+ATSifthen(ATSCKptrisnull(tmp2028)) { ATSINSgoto(__atstmplab426) ; } ;
+ATSINSlab(__atstmplab424):
+ATSINSmove(tmp2036, ATSSELcon(tmp2028, postiats_tysum_15, atslab__0)) ;
+ATSINSfreecon(tmp2028) ;
+ATSINSmove(tmp2037, PATSHOME_057_src_057_pats_basics_056_sats__test_prfkind(tmp2021)) ;
+ATSif(
+tmp2037
+) ATSthen() {
+ATSINSmove(tmp2027, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_vcopyenv_v(tmp2036)) ;
+} ATSelse() {
+ATSINSmove(tmp2027, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_vcopyenv_vt(tmp2036)) ;
+}
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab425):
+#if(0)
+ATSifthen(ATSCKptriscons(tmp2028)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab426):
+ATSINSmove(tmp2027, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmpret2017, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_vcopyenv(tmp2018, tmp2027, tmp2021, tmp2025)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab422):
+ATSINSmove_void(tmp2038, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2023)) ;
+ATSINSmove(tmpret2017, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2022)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab419):
+ATSINSmove_void(tmp2039, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2019)) ;
+ATSINSmove(tmpret2017, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__13()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2017) ;
+}
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__gopt_view__51__6(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret197__6, atstype_boxed) ;
+ATStmpdec(tmp198__6, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp199__6, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gopt_view):
+ATSINSmove(tmp198__6, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSif(
+tmp198__6
+) ATSthen() {
+ATSINSmove(tmp199__6, ATSLIB_056_libats_056_arena__arena_load__38__53(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret197__6, postiats_tysum_15) ;
+#if(0)
+ATSINSstore_con1_tag(tmpret197__6, 1) ;
+#endif
+ATSINSstore_con1_ofs(tmpret197__6, postiats_tysum_15, atslab__0, tmp199__6) ;
+ATSINSmove_con1_end()
+} ATSelse() {
+ATSINSmove_nil(tmpret197__6) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret197__6) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__53(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__53, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__53, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__53, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__53, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__53), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__53, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__53(ATSPMVptrof(tmpref169__53))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__53) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__53(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__53, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__53, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__53) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__13()
+{
+ATStmpdec(tmpret146__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__13, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__13, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__13, tmp147__13) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__13) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_tempenver(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2042, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2043, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2044, atstype_boxed) ;
+ATStmpdec(tmp2045, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2046, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2047, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_tempenver):
+ATSINSmove(tmp2043, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2045, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2044, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2045)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab427):
+ATSifnthen(ATSCKpat_con1(tmp2044, 54)) { ATSINSgoto(__atstmplab429) ; } ;
+ATSINSlab(__atstmplab428):
+ATSINSmove(tmp2046, ATSSELcon(tmp2044, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2044) ;
+ATSINSmove(tmp2047, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
+ATSINSmove(tmpret2042, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_tempenver(tmp2043, tmp2047, tmp2046)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab429):
+ATSINSmove_void(tmp2048, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2044)) ;
+ATSINSmove(tmpret2042, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__14()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2042) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__14()
+{
+ATStmpdec(tmpret146__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__14, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__14, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__14, tmp147__14) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__14) ;
+}
+ATSstatic()
+atsvoid_t0ype
+funarg_patck_exhaust_linck_562(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp2052, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2053, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2057, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2061, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_funarg_patck_exhaust_linck_562):
+ATSINSmove(tmp2052, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcst_is_P2TCany(arg1)) ;
+ATSif(
+tmp2052
+) ATSthen() {
+ATSINSmove_void(tmpret2051, ATSPMVempty()) ;
+} ATSelse() {
+ATSINSmove(tmp2053, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_is_lin(arg2)) ;
+ATSif(
+tmp2053
+) ATSthen() {
+ATSINSmove(tmp2057, PATSHOME_057_src_057_pats_dynexp2_056_sats__p2at_loc(arg0)) ;
+ATSINSmove_void(tmp2054, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__16(tmp2057)) ;
+ATSINSmove_void(tmp2058, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 57725(line=2403, offs=7) -- 57765(line=2403, offs=47)"), ATSPMVstring("funarg_patck_exhaust"))) ;
+ATSINSmove_void(tmp2059, atspre_prerr_string(ATSPMVstring(": the linear pattern cannot be used as a function argument."))) ;
+ATSINSmove_void(tmp2060, atspre_prerr_newline()) ;
+ATSINSmove(tmp2061, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d2exp_trup_arg_body_linpat(arg0)) ;
+ATSINSmove_void(tmpret2051, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp2061)) ;
+} ATSelse() {
+ATSINSmove_void(tmpret2051, ATSPMVempty()) ;
+}
+}
+ATSfunbody_end()
+ATSreturn_void(tmpret2051) ;
+}
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__16(atstkind_type(atstype_ptrk) arg0)
+{
+ATSfunbody_beg()
+ATSINSflab(__patsflab_prerr_error3_loc):
+ATSINSmove_void(tmp686__16, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret685__16, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret685__16) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+funarg_patck_exhaust_aux_564(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret2062, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2063, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2066, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2069, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2082, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2092, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2105, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2115, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2133, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_funarg_patck_exhaust_aux_564):
+ATSINSmove(tmp2063, ATSLIB_056_libats_056_arena__glist_is_nil__173__5(arg0)) ;
+ATSif(
+tmp2063
+) ATSthen() {
+ATSINSmove(tmpret2062, ATSLIB_056_libats_056_arena__glist_nil__66__22()) ;
+} ATSelse() {
+ATSINSmove(tmp2066, ATSLIB_056_libats_056_arena__glist_is_nil__173__6(arg1)) ;
+ATSif(
+tmp2066
+) ATSthen() {
+ATSINSmove(tmpret2062, ATSLIB_056_libats_056_arena__glist_nil__66__23()) ;
+} ATSelse() {
+ATSINSmove(tmp2069, ATSLIB_056_libats_056_arena__glist_head__30__4(arg0)) ;
+ATSINSmove(tmp2082, ATSLIB_056_libats_056_arena__glist_tail__42__5(arg0)) ;
+ATSINSmove(tmp2092, ATSLIB_056_libats_056_arena__glist_head__30__5(arg1)) ;
+ATSINSmove(tmp2105, ATSLIB_056_libats_056_arena__glist_tail__42__6(arg1)) ;
+ATSINSmove(tmp2115, PATSHOME_057_src_057_pats_patcst2_056_sats__p2at2cst(tmp2069)) ;
+ATSINSmove_void(tmp2116, funarg_patck_exhaust_linck_562(tmp2069, tmp2115, tmp2092)) ;
+ATSINSmove(tmp2133, funarg_patck_exhaust_aux_564(tmp2082, tmp2105)) ;
+ATSINSmove(tmpret2062, ATSLIB_056_libats_056_arena__glist_cons__68__16(tmp2115, tmp2133)) ;
+}
+}
+ATSfunbody_end()
+ATSreturn(tmpret2062) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_libats_056_arena__glist_is_nil__173__5(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret625__5, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_is_nil):
+ATSINSmove(tmpret625__5, atspre_eq_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret625__5) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__22()
+{
+ATStmpdec(tmpret316__22, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__22, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__22) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_libats_056_arena__glist_is_nil__173__6(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret625__6, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_is_nil):
+ATSINSmove(tmpret625__6, atspre_eq_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret625__6) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__23()
+{
+ATStmpdec(tmpret316__23, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__23, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__23) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_head__30__4(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret152__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp154__4, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_head):
+ATSINSmove(tmp154__4, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp153__4, atspre_assert_errmsg_bool0(tmp154__4, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
+ATSINSmove(tmpret152__4, ATSLIB_056_libats_056_arena__acell_head__32__21(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret152__4) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__21(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret158__21, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__21, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__21, ATSLIB_056_prelude__ptr0_add_guint__34__36(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__21, ATSLIB_056_libats_056_arena__arena_load__38__54(tmp159__21)) ;
+ATSfunbody_end()
+ATSreturn(tmpret158__21) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__36(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__36, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__36, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__36, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__36, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__36, atspre_g0uint_mul_size(tmp164__36, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__36, atspre_add_ptr0_bsz(arg0, tmp163__36)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__36) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__54(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__54, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__54, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__54, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__54, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__54), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__54, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__54(ATSPMVptrof(tmpref169__54))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__54) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__54(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__54, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__54, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__54) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_tail__42__5(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret177__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp179__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp180__5, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_tail):
+ATSINSmove(tmp179__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp178__5, atspre_assert_errmsg_bool0(tmp179__5, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
+ATSINSmove(tmp180__5, ATSLIB_056_libats_056_arena__acell_tail__44__27(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmpret177__5, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__5)) ;
+ATSfunbody_end()
+ATSreturn(tmpret177__5) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__27(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__27, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__27, ATSLIB_056_libats_056_arena__arena_load__38__55(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__27) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__55(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__55, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__55, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__55, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__55, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__55), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__55, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__55(ATSPMVptrof(tmpref169__55))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__55) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__55(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__55, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__55, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__55) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_head__30__5(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret152__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp154__5, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_head):
+ATSINSmove(tmp154__5, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp153__5, atspre_assert_errmsg_bool0(tmp154__5, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12281(line=571, offs=12) -- 12308(line=571, offs=39)"))) ;
+ATSINSmove(tmpret152__5, ATSLIB_056_libats_056_arena__acell_head__32__22(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSfunbody_end()
+ATSreturn(tmpret152__5) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_head__32__22(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret158__22, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp159__22, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_head):
+ATSINSmove(tmp159__22, ATSLIB_056_prelude__ptr0_add_guint__34__37(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmpret158__22, ATSLIB_056_libats_056_arena__arena_load__38__56(tmp159__22)) ;
+ATSfunbody_end()
+ATSreturn(tmpret158__22) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__37(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__37, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__37, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__37, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__37, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__37, atspre_g0uint_mul_size(tmp164__37, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__37, atspre_add_ptr0_bsz(arg0, tmp163__37)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__37) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__56(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__56, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__56, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__56, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__56, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__56), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__56, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__56(ATSPMVptrof(tmpref169__56))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__56) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__56(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__56, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__56, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__56) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_tail__42__6(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret177__6, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp179__6, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp180__6, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_tail):
+ATSINSmove(tmp179__6, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSINSmove_void(tmp178__6, atspre_assert_errmsg_bool0(tmp179__6, ATSCSTSPmyloc("PATSHOME/libats/DATS/arena.dats: 12445(line=581, offs=12) -- 12472(line=581, offs=39)"))) ;
+ATSINSmove(tmp180__6, ATSLIB_056_libats_056_arena__acell_tail__44__28(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove(tmpret177__6, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp180__6)) ;
+ATSfunbody_end()
+ATSreturn(tmpret177__6) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__acell_tail__44__28(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret185__28, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_tail):
+ATSINSmove(tmpret185__28, ATSLIB_056_libats_056_arena__arena_load__38__57(arg0)) ;
+ATSfunbody_end()
+ATSreturn(tmpret185__28) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__57(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__57, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__57, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__57, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__57, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__57), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__57, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__57(ATSPMVptrof(tmpref169__57))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__57) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__57(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__57, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__57, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__57) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_cons__68__16(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret321__16, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__16, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__16, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__16, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__16, atslib_the_garena_alloc(tmp323__16)) ;
+ATSINSmove_void(tmp324__16, ATSLIB_056_libats_056_arena__acell_make__71__16(tmp322__16, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__16, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__16)) ;
+ATSfunbody_end()
+ATSreturn(tmpret321__16) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__16(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp331__16, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__16, ATSLIB_056_libats_056_arena__arena_store__73__31(arg0, arg2)) ;
+ATSINSmove(tmp331__16, ATSLIB_056_prelude__ptr0_add_guint__34__38(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__16, ATSLIB_056_libats_056_arena__arena_store__73__32(tmp331__16, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__16) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__31(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__31, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__31, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__31, arg1) ;
+ATSINSmove(tmp337__31, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__31), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__31, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__31) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__38(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__38, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__38, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__38, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__38, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__38, atspre_g0uint_mul_size(tmp164__38, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__38, atspre_add_ptr0_bsz(arg0, tmp163__38)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__38) ;
 }
 ATSstatic()
 atsvoid_t0ype
@@ -18118,19 +18503,579 @@ ATSINSmove_void(tmpret335__32, ATSPMVempty()) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret335__32) ;
 }
+ATSextern()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_trans3_056_sats__funarg_patck_exhaust(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp2135, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2136, atstype_boxed) ;
+ATStmpdec(tmp2137, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2138, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2142, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2143, atstype_boxed) ;
+ATStmpdec(tmp2144, atstype_boxed) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_funarg_patck_exhaust):
+ATSINSmove(tmp2135, funarg_patck_exhaust_aux_564(arg1, arg2)) ;
+ATSINSmove(tmp2136, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcstlst_comp(tmp2135)) ;
+ATSINSmove(tmp2138, ATSLIB_056_prelude__list_vt_is_nil__593__1(ATSPMVrefarg0(tmp2136))) ;
+ATSif(
+tmp2138
+) ATSthen() {
+ATSINSmove(tmp2137, ATSPMVbool_true()) ;
+} ATSelse() {
+ATSINSmove(tmp2137, ATSPMVbool_false()) ;
+}
+ATSINSmove(tmp2142, atspre_neg_bool0(tmp2137)) ;
+ATSif(
+tmp2142
+) ATSthen() {
+ATSINSmove(tmp2143, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcstlstlst_vt_copy(ATSPMVrefarg0(tmp2136))) ;
+ATSINSmove_con0(tmp2144, 1) ;
+ATSINSmove_void(tmp2141, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_patcstlstlst_false(arg0, tmp2144, tmp2143, arg2)) ;
+} ATSelse() {
+ATSINSmove_void(tmp2141, ATSPMVempty()) ;
+}
+ATSINSmove_void(tmpret2134, PATSHOME_057_src_057_pats_patcst2_056_sats__p2atcstlstlst_vt_free(tmp2136)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret2134) ;
+}
+#if(0)
+ATSextern()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__list_vt_is_nil__593(atsrefarg0_type(atstype_boxed) arg0)
+{
+ATStmpdec(tmpret2139, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_list_vt_is_nil):
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab430):
+ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab432) ; } ;
+ATSINSlab(__atstmplab431):
+ATSINSmove(tmpret2139, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab432):
+ATSINSmove(tmpret2139, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2139) ;
+}
+#endif
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__list_vt_is_nil__593__1(atsrefarg0_type(atstype_boxed) arg0)
+{
+ATStmpdec(tmpret2139__1, atstkind_t0ype(atstype_bool)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_list_vt_is_nil):
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab430):
+ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab432) ; } ;
+ATSINSlab(__atstmplab431):
+ATSINSmove(tmpret2139__1, ATSPMVbool_true()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab432):
+ATSINSmove(tmpret2139__1, ATSPMVbool_false()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2139__1) ;
+}
+ATSextern()
+postiats_tyrec_1
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(atstkind_type(atstype_ptrk) arg0, atstype_boxed arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_type(atstype_ptrk) arg4, atstkind_type(atstype_ptrk) arg5)
+{
+ATStmpdec(tmpret2145, postiats_tyrec_1) ;
+ATStmpdec(tmpref2147, atstype_boxed) ;
+ATStmpdec(tmp2148, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref2149, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2150, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2152, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2154, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2160, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2163, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2171, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2172, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2175, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp2176, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2177, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_arg_body):
+ATSINSmove_void(tmp2146, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
+ATSINSmove(tmpref2147, arg1) ;
+ATSINSmove(tmp2148, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_funclo_of_d2exp(arg5, ATSPMVrefarg1(ATSPMVptrof(tmpref2147)))) ;
+ATSINSmove(tmp2150, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_s2eff_of_d2exp(tmp2148, ATSPMVrefarg1(ATSPMVptrof(tmpref2149)))) ;
+ATSINSmove_void(tmp2151, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_push_lam(tmpref2149)) ;
+ATSINSmove(tmp2152, PATSHOME_057_src_057_pats_trans3_056_sats__p2atlst_syn_type(arg4)) ;
+ATSINSmove_void(tmp2153, PATSHOME_057_src_057_pats_trans3_056_sats__funarg_patck_exhaust(arg0, arg4, tmp2152)) ;
+ATSINSmove(tmp2154, PATSHOME_057_src_057_pats_trans3_056_sats__p2atlst_trup_arg(arg3, arg4)) ;
+ATSINSmove_void(tmp2155, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_push_lam(arg2)) ;
+ATSINSmove_void(tmp2156, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_add_p3atlst(tmp2154)) ;
+ATSINSmove_void(tmp2157, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_push_lam(arg2)) ;
+ATSINSmove_void(tmp2158, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_add_p3atlst(tmp2154)) ;
+ATSINSmove_void(tmp2159, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_lamlpenv_push_lam(tmp2154)) ;
+ATSINSmove(tmp2160, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2150)) ;
+ATSINSmove_void(tmp2161, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_check(arg0)) ;
+ATSINSmove(tmp2163, ATSLIB_056_prelude__gt_g0int_int__110__17(arg2, ATSPMVi0nt(0))) ;
+ATSif(
+tmp2163
+) ATSthen() {
+ATSINSmove_void(tmp2162, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_check_llam(arg0)) ;
+} ATSelse() {
+ATSINSmove_void(tmp2162, ATSPMVempty()) ;
+}
+ATSINSmove_void(tmp2166, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_effenv_pop()) ;
+ATSINSmove_void(tmp2167, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_pop()) ;
+ATSINSmove_void(tmp2168, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_pop()) ;
+ATSINSmove_void(tmp2169, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_lamlpenv_pop()) ;
+ATSINSmove_void(tmp2170, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(arg0)) ;
+ATSINSmove(tmp2171, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp2160)) ;
+ATSINSmove(tmp2172, ATSLIB_056_prelude__gt_g0int_int__110__18(arg2, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp2175, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_is_prf(tmp2171)) ;
+ATSINSmove(tmp2176, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2rt_prf_lin_fc(arg0, tmp2175, tmp2172, tmpref2147)) ;
+ATSINSmove(tmp2177, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_fun_srt(tmp2176, tmpref2147, arg2, tmpref2149, arg3, tmp2152, tmp2171)) ;
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret2145, postiats_tyrec_1, atslab__0, tmp2177) ;
+ATSINSstore_fltrec_ofs(tmpret2145, postiats_tyrec_1, atslab__1, tmp2154) ;
+ATSINSstore_fltrec_ofs(tmpret2145, postiats_tyrec_1, atslab__2, tmp2160) ;
+ATSINSmove_fltrec_end()
+ATSfunbody_end()
+ATSreturn(tmpret2145) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__17(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret441__17, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442__17, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gt_g0int_int):
+ATSINSmove(tmp442__17, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret441__17, atspre_g0int_gt_int(arg0, tmp442__17)) ;
+ATSfunbody_end()
+ATSreturn(tmpret441__17) ;
+}
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__gt_g0int_int__110__18(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+ATStmpdec(tmpret441__18, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442__18, atstkind_t0ype(atstype_int)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gt_g0int_int):
+ATSINSmove(tmp442__18, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmpret441__18, atspre_g0int_gt_int(arg0, tmp442__18)) ;
+ATSfunbody_end()
+ATSreturn(tmpret441__18) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lam_dyn(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2178, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2179, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2180, atstype_boxed) ;
+ATStmpdec(tmp2181, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2182, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2183, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2184, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2185, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2186, atstype_boxed) ;
+ATStmpdec(tmp2187, postiats_tyrec_1) ;
+ATStmpdec(tmp2188, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2189, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2190, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2191, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_lam_dyn):
+ATSINSmove(tmp2179, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2181, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2180, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2181)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab433):
+ATSifnthen(ATSCKpat_con1(tmp2180, 56)) { ATSINSgoto(__atstmplab435) ; } ;
+ATSINSlab(__atstmplab434):
+ATSINSmove(tmp2182, ATSSELcon(tmp2180, postiats_tysum_31, atslab__0)) ;
+ATSINSmove(tmp2183, ATSSELcon(tmp2180, postiats_tysum_31, atslab__1)) ;
+ATSINSmove(tmp2184, ATSSELcon(tmp2180, postiats_tysum_31, atslab__2)) ;
+ATSINSmove(tmp2185, ATSSELcon(tmp2180, postiats_tysum_31, atslab__3)) ;
+ATSINSfreecon(tmp2180) ;
+ATSINSmove_con0(tmp2186, 0) ;
+ATSINSmove(tmp2187, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(tmp2179, tmp2186, tmp2182, tmp2183, tmp2184, tmp2185)) ;
+ATSINSmove(tmp2188, ATSSELfltrec(tmp2187, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp2189, ATSSELfltrec(tmp2187, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp2190, ATSSELfltrec(tmp2187, postiats_tyrec_1, atslab__2)) ;
+ATSINSmove(tmp2191, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lam_dyn(tmp2179, tmp2188, tmp2182, tmp2183, tmp2189, tmp2190)) ;
+ATSINSmove(tmpret2178, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp2191)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab435):
+ATSINSmove_void(tmp2192, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2180)) ;
+ATSINSmove(tmpret2178, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__15()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2178) ;
+}
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__gopt_some__552__3(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__15()
 {
-ATStmpdec(tmpret2084__3, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2085__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret146__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__15, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__15, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__15, tmp147__15) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__15) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_laminit_dyn(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2195, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2196, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2197, atstype_boxed) ;
+ATStmpdec(tmp2198, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2199, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2200, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2201, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2202, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2203, atstype_boxed) ;
+ATStmpdec(tmp2204, postiats_tyrec_1) ;
+ATStmpdec(tmp2205, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2206, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2207, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2209, atstype_boxed) ;
+ATStmpdec(tmp2210, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2211, atstype_boxed) ;
+ATStmpdec(tmp2223, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_laminit_dyn):
+ATSINSmove(tmp2196, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2198, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2197, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2198)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab436):
+ATSifnthen(ATSCKpat_con1(tmp2197, 57)) { ATSINSgoto(__atstmplab438) ; } ;
+ATSINSlab(__atstmplab437):
+ATSINSmove(tmp2199, ATSSELcon(tmp2197, postiats_tysum_31, atslab__0)) ;
+ATSINSmove(tmp2200, ATSSELcon(tmp2197, postiats_tysum_31, atslab__1)) ;
+ATSINSmove(tmp2201, ATSSELcon(tmp2197, postiats_tysum_31, atslab__2)) ;
+ATSINSmove(tmp2202, ATSSELcon(tmp2197, postiats_tysum_31, atslab__3)) ;
+ATSINSfreecon(tmp2197) ;
+ATSINSmove(tmp2203, PATSHOME_057_src_057_pats_basics_056_sats__FUNCLOclo(ATSPMVi0nt(0))) ;
+ATSINSmove(tmp2204, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(tmp2196, tmp2203, tmp2199, tmp2200, tmp2201, tmp2202)) ;
+ATSINSmove(tmp2205, ATSSELfltrec(tmp2204, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp2206, ATSSELfltrec(tmp2204, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp2207, ATSSELfltrec(tmp2204, postiats_tyrec_1, atslab__2)) ;
+ATSINSmove(tmp2210, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(tmp2205)) ;
+ATSINSmove(tmp2209, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp2210)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab439):
+ATSifnthen(ATSCKpat_con1(tmp2209, 19)) { ATSINSgoto(__atstmplab441) ; } ;
+ATSINSlab(__atstmplab440):
+ATSINSmove(tmp2211, ATSSELcon(tmp2209, postiats_tysum_27, atslab__0)) ;
+ATSINSfreecon(tmp2209) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab442):
+ATSifnthen(ATSCKpat_con0(tmp2211, 2)) { ATSINSgoto(__atstmplab444) ; } ;
+ATSINSlab(__atstmplab443):
+ATSINSmove_void(tmp2208, ATSPMVempty()) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab444):
+ATSINSmove_void(tmp2217, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__17(tmp2196)) ;
+ATSINSmove_void(tmp2220, patsopt_prerrf_ifdebug(ATSPMVstring(": [%s]: %s"), ATSCSTSPmyloc("PATSHOME/src/pats_trans3_dynexp_up.dats: 62230(line=2595, offs=12) -- 62272(line=2595, offs=54)"), ATSPMVstring("d2exp_trup_laminit_dyn"))) ;
+ATSINSmove_void(tmp2221, atspre_prerr_string(ATSPMVstring(": the initializing value is expected to be a flat closure but it is not."))) ;
+ATSINSmove_void(tmp2222, atspre_prerr_newline()) ;
+ATSINSmove(tmp2223, PATSHOME_057_src_057_pats_trans3_056_sats__trans3err_T3E_d2exp_trup_laminit_funclo(arg0, tmp2211)) ;
+ATSINSmove_void(tmp2208, PATSHOME_057_src_057_pats_trans3_056_sats__the_trans3errlst_add(tmp2223)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab441):
+ATSINSmove_void(tmp2208, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp2209)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmpret2195, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_laminit_dyn(tmp2196, tmp2205, tmp2199, tmp2200, tmp2206, tmp2207)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab438):
+ATSINSmove_void(tmp2224, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2197)) ;
+ATSINSmove(tmpret2195, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__16()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2195) ;
+}
+ATSstatic()
+atsvoid_t0ype
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_error3_loc__197__17(atstkind_type(atstype_ptrk) arg0)
+{
+ATSfunbody_beg()
+ATSINSflab(__patsflab_prerr_error3_loc):
+ATSINSmove_void(tmp686__17, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret685__17, atspre_prerr_string(ATSPMVstring(": error(3)"))) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret685__17) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__16()
+{
+ATStmpdec(tmpret146__16, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__16, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__16, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__16, tmp147__16) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__16) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lam_sta(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2227, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2228, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2229, atstype_boxed) ;
+ATStmpdec(tmp2230, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2231, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2232, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2233, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2237, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2239, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2240, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_lam_sta):
+ATSINSmove(tmp2228, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2230, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2229, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2230)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab445):
+ATSifnthen(ATSCKpat_con1(tmp2229, 58)) { ATSINSgoto(__atstmplab447) ; } ;
+ATSINSlab(__atstmplab446):
+ATSINSmove(tmp2231, ATSSELcon(tmp2229, postiats_tysum_21, atslab__0)) ;
+ATSINSmove(tmp2232, ATSSELcon(tmp2229, postiats_tysum_21, atslab__1)) ;
+ATSINSmove(tmp2233, ATSSELcon(tmp2229, postiats_tysum_21, atslab__2)) ;
+ATSINSfreecon(tmp2229) ;
+ATSINSmove_void(tmp2234, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
+ATSINSmove_void(tmp2235, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_svarlst(tmp2231)) ;
+ATSINSmove_void(tmp2236, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_hypadd_proplst(tmp2228, tmp2232)) ;
+ATSINSmove(tmp2237, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2233)) ;
+ATSINSmove_void(tmp2238, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(tmp2228)) ;
+ATSINSmove(tmp2239, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_type(tmp2237)) ;
+ATSINSmove(tmp2240, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_uni(tmp2231, tmp2232, tmp2239)) ;
+ATSINSmove(tmpret2227, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lam_sta(tmp2228, tmp2240, tmp2231, tmp2232, tmp2237)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab447):
+ATSINSmove_void(tmp2241, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2229)) ;
+ATSINSmove(tmpret2227, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__17()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2227) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__17()
+{
+ATStmpdec(tmpret146__17, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__17, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__17, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__17, tmp147__17) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__17) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_lam_met(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2244, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2245, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2246, atstype_boxed) ;
+ATStmpdec(tmp2247, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2248, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2249, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2250, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2253, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2254, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_lam_met):
+ATSINSmove(tmp2245, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2247, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2246, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2247)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab448):
+ATSifnthen(ATSCKpat_con1(tmp2246, 59)) { ATSINSgoto(__atstmplab450) ; } ;
+ATSINSlab(__atstmplab449):
+ATSINSmove(tmp2248, ATSSELcon(tmp2246, postiats_tysum_21, atslab__0)) ;
+ATSINSmove(tmp2249, ATSSELcon(tmp2246, postiats_tysum_21, atslab__1)) ;
+ATSINSmove(tmp2250, ATSSELcon(tmp2246, postiats_tysum_21, atslab__2)) ;
+ATSINSfreecon(tmp2246) ;
+ATSINSmove_void(tmp2251, PATSHOME_057_src_057_pats_trans3_env_056_sats__s2explst_check_termet(tmp2245, tmp2249)) ;
+ATSINSmove(tmp2253, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2varlstref_val(tmp2248)) ;
+ATSINSmove_void(tmp2252, PATSHOME_057_src_057_pats_trans3_env_056_sats__termetenv_push_dvarlst(tmp2253, tmp2249)) ;
+ATSINSmove(tmp2254, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2250)) ;
+ATSINSmove_void(tmp2255, PATSHOME_057_src_057_pats_trans3_env_056_sats__termetenv_pop()) ;
+ATSINSmove(tmpret2244, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_lam_met(tmp2245, tmp2249, tmp2254)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab450):
+ATSINSmove_void(tmp2256, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2246)) ;
+ATSINSmove(tmpret2244, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__18()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2244) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__18()
+{
+ATStmpdec(tmpret146__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__18, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__18, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__18, tmp147__18) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__18) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+s2exp_clo2fun_607(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2259, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2260, atstype_boxed) ;
+ATStmpdec(tmp2261, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2263, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2264, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2265, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2266, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2267, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2268, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2269, atstype_boxed) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_s2exp_clo2fun_607):
+ATSINSmove(tmp2261, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node(arg0)) ;
+ATSINSmove(tmp2260, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view(tmp2261)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab451):
+ATSifnthen(ATSCKpat_con1(tmp2260, 19)) { ATSINSgoto(__atstmplab453) ; } ;
+ATSINSlab(__atstmplab452):
+ATSINSmove(tmp2263, ATSSELcon(tmp2260, postiats_tysum_27, atslab__1)) ;
+ATSINSmove(tmp2264, ATSSELcon(tmp2260, postiats_tysum_27, atslab__2)) ;
+ATSINSmove(tmp2265, ATSSELcon(tmp2260, postiats_tysum_27, atslab__3)) ;
+ATSINSmove(tmp2266, ATSSELcon(tmp2260, postiats_tysum_27, atslab__4)) ;
+ATSINSmove(tmp2267, ATSSELcon(tmp2260, postiats_tysum_27, atslab__5)) ;
+ATSINSfreecon(tmp2260) ;
+ATSINSmove(tmp2268, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_srt(arg0)) ;
+ATSINSmove_con0(tmp2269, 0) ;
+ATSINSmove(tmpret2259, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_fun_srt(tmp2268, tmp2269, tmp2263, tmp2264, tmp2265, tmp2266, tmp2267)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab453):
+ATSINSmove_void(tmp2270, PATSHOME_057_src_057_pats_staexp2_056_sats__s2exp_node_view_free(tmp2260)) ;
+ATSINSmove(tmpret2259, arg0) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2259) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_fix(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2271, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2272, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2273, atstype_boxed) ;
+ATStmpdec(tmp2274, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2275, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2276, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2277, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2278, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2279, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2280, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2292, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_fix):
+ATSINSmove(tmp2272, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2274, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2273, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2274)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab454):
+ATSifnthen(ATSCKpat_con1(tmp2273, 60)) { ATSINSgoto(__atstmplab456) ; } ;
+ATSINSlab(__atstmplab455):
+ATSINSmove(tmp2275, ATSSELcon(tmp2273, postiats_tysum_20, atslab__0)) ;
+ATSINSmove(tmp2276, ATSSELcon(tmp2273, postiats_tysum_20, atslab__1)) ;
+ATSINSmove(tmp2277, ATSSELcon(tmp2273, postiats_tysum_20, atslab__2)) ;
+ATSINSfreecon(tmp2273) ;
+ATSINSmove(tmp2278, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_syn_type(tmp2277)) ;
+ATSINSmove(tmp2279, s2exp_clo2fun_607(tmp2278)) ;
+ATSINSmove(tmp2280, ATSLIB_056_libats_056_arena__gopt_some__609__1(tmp2279)) ;
+ATSINSmove_void(tmp2290, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_set_type(tmp2276, tmp2280)) ;
+ATSINSmove_void(tmp2291, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2var_set_mastype(tmp2276, tmp2280)) ;
+ATSINSmove(tmp2292, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2277)) ;
+ATSINSmove(tmpret2271, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_fix(tmp2272, tmp2278, tmp2275, tmp2276, tmp2292)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab456):
+ATSINSmove_void(tmp2293, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2273)) ;
+ATSINSmove(tmpret2271, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__19()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2271) ;
+}
+#if(0)
+ATSextern()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__gopt_some__609(atstyvar_type(a) arg0)
+{
+ATStmpdec(tmpret2281, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2282, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_gopt_some):
-ATSINSmove(tmp2085__3, atslib_the_garena_alloc(ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmp2086__3, ATSLIB_056_libats_056_arena__arena_store__73__33(tmp2085__3, arg0)) ;
-ATSINSmove(tmpret2084__3, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2085__3)) ;
+ATSINSmove(tmp2282, atslib_the_garena_alloc(ATSPMVsizeof(atstyvar_type(a)))) ;
+ATSINSmove_void(tmp2283, PMVtmpltcst(arena_store<S2Evar(a(6706))>)(tmp2282, arg0)) ;
+ATSINSmove(tmpret2281, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2282)) ;
 ATSfunbody_end()
-ATSreturn(tmpret2084__3) ;
+ATSreturn(tmpret2281) ;
+}
+#endif
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__gopt_some__609__1(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2281__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2282__1, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gopt_some):
+ATSINSmove(tmp2282__1, atslib_the_garena_alloc(ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmp2283__1, ATSLIB_056_libats_056_arena__arena_store__73__33(tmp2282__1, arg0)) ;
+ATSINSmove(tmpret2281__1, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2282__1)) ;
+ATSfunbody_end()
+ATSreturn(tmpret2281__1) ;
 }
 ATSstatic()
 atsvoid_t0ype
@@ -18145,6 +19090,346 @@ ATSINSmove(tmp337__33, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__33), AT
 ATSINSmove_void(tmpret335__33, ATSPMVempty()) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret335__33) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__19()
+{
+ATStmpdec(tmpret146__19, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__19, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__19, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__19, tmp147__19) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__19) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_delay(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2296, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2297, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2298, atstype_boxed) ;
+ATStmpdec(tmp2299, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2300, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2301, atstype_boxed) ;
+ATStmpdec(tmp2302, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp2303, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2305, postiats_tyrec_1) ;
+ATStmpdec(tmp2306, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2307, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2308, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2309, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_delay):
+ATSINSmove(tmp2297, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2299, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2298, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2299)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab457):
+ATSifnthen(ATSCKpat_con1(tmp2298, 61)) { ATSINSgoto(__atstmplab459) ; } ;
+ATSINSlab(__atstmplab458):
+ATSINSmove(tmp2300, ATSSELcon(tmp2298, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2298) ;
+ATSINSmove_con0(tmp2301, 0) ;
+ATSINSmove(tmp2302, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmp2303, ATSLIB_056_libats_056_arena__glist_nil__66__24()) ;
+ATSINSmove(tmp2305, PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_arg_body(tmp2297, tmp2301, ATSPMVi0nt(0), tmp2302, tmp2303, tmp2300)) ;
+ATSINSmove(tmp2306, ATSSELfltrec(tmp2305, postiats_tyrec_1, atslab__2)) ;
+ATSINSmove(tmp2307, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2306)) ;
+ATSINSmove(tmp2308, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_lazy_vt0ype_vtype(tmp2307)) ;
+ATSINSmove(tmp2309, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_delay(tmp2297, tmp2308, tmp2306)) ;
+ATSINSmove(tmpret2296, PATSHOME_057_src_057_pats_trans3_056_sats__d3exp_linheap_check(tmp2309)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab459):
+ATSINSmove_void(tmp2310, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2298)) ;
+ATSINSmove(tmpret2296, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__20()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2296) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__24()
+{
+ATStmpdec(tmpret316__24, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__24, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__24) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__20()
+{
+ATStmpdec(tmpret146__20, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__20, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__20, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__20, tmp147__20) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__20) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_ldelay(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2313, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2314, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2315, atstype_boxed) ;
+ATStmpdec(tmp2316, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2317, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2318, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2319, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2320, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2321, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2322, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2324, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2329, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2330, atstype_boxed) ;
+ATStmpdec(tmp2338, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2339, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2340, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2342, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2343, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2350, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2351, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_ldelay):
+ATSINSmove(tmp2314, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2316, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2315, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2316)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab460):
+ATSifnthen(ATSCKpat_con1(tmp2315, 62)) { ATSINSgoto(__atstmplab462) ; } ;
+ATSINSlab(__atstmplab461):
+ATSINSmove(tmp2317, ATSSELcon(tmp2315, postiats_tysum_18, atslab__0)) ;
+ATSINSmove(tmp2318, ATSSELcon(tmp2315, postiats_tysum_18, atslab__1)) ;
+ATSINSfreecon(tmp2315) ;
+ATSINSmove(tmp2319, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_save_lstbefitmlst()) ;
+ATSINSmove(tmp2320, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_initize(tmp2319)) ;
+ATSINSmove(tmp2321, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(tmp2317)) ;
+ATSINSmove(tmp2322, PATSHOME_057_src_057_pats_trans3_env_056_sats__c3nstroptref_make_none(tmp2321)) ;
+ATSINSmove_void(tmp2323, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
+ATSINSmove(tmp2324, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2317)) ;
+ATSINSmove_void(tmp2325, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_cnstr_ref(tmp2322)) ;
+ATSINSmove_void(tmp2326, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(tmp2321)) ;
+ATSINSmove_void(tmp2327, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_update(ATSPMVrefarg0(tmp2320), tmp2322)) ;
+ATSINSmove_void(tmp2328, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstbefitmlst_restore_type(tmp2319)) ;
+ATSINSmove(tmp2330, ATSLIB_056_libats_056_arena__gopt_view__51__7(tmp2318)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab463):
+ATSifthen(ATSCKptrisnull(tmp2330)) { ATSINSgoto(__atstmplab466) ; } ;
+ATSINSlab(__atstmplab464):
+ATSINSmove(tmp2338, ATSSELcon(tmp2330, postiats_tysum_15, atslab__0)) ;
+ATSINSfreecon(tmp2330) ;
+ATSINSmove(tmp2329, tmp2338) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab465):
+#if(0)
+ATSifthen(ATSCKptriscons(tmp2330)) { ATSINSdeadcode_fail() ; } ;
+#endif
+ATSINSlab(__atstmplab466):
+ATSINSmove(tmp2329, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_empty(tmp2321)) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSINSmove(tmp2339, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(tmp2329)) ;
+ATSINSmove(tmp2340, PATSHOME_057_src_057_pats_trans3_env_056_sats__c3nstroptref_make_none(tmp2339)) ;
+ATSINSmove_void(tmp2341, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_push()) ;
+ATSINSmove(tmp2342, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
+ATSINSmove(tmp2343, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trdn(tmp2329, tmp2342)) ;
+ATSINSmove_void(tmp2344, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_add_cnstr_ref(tmp2340)) ;
+ATSINSmove_void(tmp2345, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_pop_and_add_main(tmp2339)) ;
+ATSINSmove_void(tmp2346, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_update(ATSPMVrefarg0(tmp2320), tmp2340)) ;
+ATSINSmove_void(tmp2347, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_process(ATSPMVrefarg0(tmp2320), patsopt_i2nvresstate_nil)) ;
+ATSINSmove_void(tmp2348, PATSHOME_057_src_057_pats_trans3_env_056_sats__lstaftc3nstr_finalize(tmp2320)) ;
+ATSINSmove_void(tmp2349, PATSHOME_057_src_057_pats_trans3_env_056_sats__i2nvresstate_update(tmp2314, patsopt_i2nvresstate_nil)) ;
+ATSINSmove(tmp2350, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2324)) ;
+ATSINSmove(tmp2351, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_lazy_vt0ype_vtype(tmp2350)) ;
+ATSINSmove(tmpret2313, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_ldelay(tmp2314, tmp2351, tmp2324, tmp2343)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab462):
+ATSINSmove_void(tmp2352, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2315)) ;
+ATSINSmove(tmpret2313, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__21()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2313) ;
+}
+ATSstatic()
+atstype_boxed
+ATSLIB_056_libats_056_arena__gopt_view__51__7(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret197__7, atstype_boxed) ;
+ATStmpdec(tmp198__7, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp199__7, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gopt_view):
+ATSINSmove(tmp198__7, atspre_gt_ptr0_ptr0(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0), the_atsptr_null)) ;
+ATSif(
+tmp198__7
+) ATSthen() {
+ATSINSmove(tmp199__7, ATSLIB_056_libats_056_arena__arena_load__38__58(ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg0))) ;
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret197__7, postiats_tysum_15) ;
+#if(0)
+ATSINSstore_con1_tag(tmpret197__7, 1) ;
+#endif
+ATSINSstore_con1_ofs(tmpret197__7, postiats_tysum_15, atslab__0, tmp199__7) ;
+ATSINSmove_con1_end()
+} ATSelse() {
+ATSINSmove_nil(tmpret197__7) ;
+}
+ATSfunbody_end()
+ATSreturn(tmpret197__7) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__arena_load__38__58(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret168__58, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref169__58, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp170__58, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_load):
+ATSINSmove(tmp170__58, ATSextfcall(memcpy, (ATSPMVptrof(tmpref169__58), arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove(tmpret168__58, ATSLIB_056_prelude_056_unsafe__ptr0_get__40__58(ATSPMVptrof(tmpref169__58))) ;
+ATSfunbody_end()
+ATSreturn(tmpret168__58) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude_056_unsafe__ptr0_get__40__58(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret174__58, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_get):
+ATSINSmove(tmpret174__58, ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0), atstkind_type(atstype_ptrk))) ;
+ATSfunbody_end()
+ATSreturn(tmpret174__58) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__21()
+{
+ATStmpdec(tmpret146__21, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp147__21, atstype_exnconptr) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_abort_interr):
+ATSINSmove_exn0(tmp147__21, PATSHOME_057_src_057_pats_error_056_sats__FatalErrorExn_interr) ;
+ATSINSraise_exn(tmpret146__21, tmp147__21) ;
+ATSfunbody_end()
+ATSreturn(tmpret146__21) ;
+}
+ATSextern()
+atstkind_type(atstype_ptrk)
+PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_for(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2355, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2356, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2357, atstype_boxed) ;
+ATStmpdec(tmp2358, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2359, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2360, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2361, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2362, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2363, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2364, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2371, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_d2exp_trup_for):
+ATSINSmove(tmp2356, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2358, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2357, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2358)) ;
+ATScaseof_beg()
+ATSbranch_beg()
+ATSINSlab(__atstmplab467):
+ATSifnthen(ATSCKpat_con1(tmp2357, 63)) { ATSINSgoto(__atstmplab469) ; } ;
+ATSINSlab(__atstmplab468):
+ATSINSmove(tmp2359, ATSSELcon(tmp2357, postiats_tysum_32, atslab__0)) ;
+ATSINSmove(tmp2360, ATSSELcon(tmp2357, postiats_tysum_32, atslab__1)) ;
+ATSINSmove(tmp2361, ATSSELcon(tmp2357, postiats_tysum_32, atslab__2)) ;
+ATSINSmove(tmp2362, ATSSELcon(tmp2357, postiats_tysum_32, atslab__3)) ;
+ATSINSmove(tmp2363, ATSSELcon(tmp2357, postiats_tysum_32, atslab__4)) ;
+ATSINSfreecon(tmp2357) ;
+ATSINSmove(tmp2364, ATSLIB_056_libats_056_arena__gopt_some__609__2(tmp2360)) ;
+ATSINSmove(tmp2371, ATSLIB_056_libats_056_arena__gopt_some__609__3(tmp2362)) ;
+ATSINSmove(tmpret2355, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup_loop(tmp2356, tmp2359, tmp2364, tmp2361, tmp2371, tmp2363)) ;
+ATSbranch_end()
+ATSbranch_beg()
+ATSINSlab(__atstmplab469):
+ATSINSmove_void(tmp2378, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2357)) ;
+ATSINSmove(tmpret2355, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__22()) ;
+ATSbranch_end()
+ATScaseof_end()
+ATSfunbody_end()
+ATSreturn(tmpret2355) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__gopt_some__609__2(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2281__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2282__2, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gopt_some):
+ATSINSmove(tmp2282__2, atslib_the_garena_alloc(ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmp2283__2, ATSLIB_056_libats_056_arena__arena_store__73__34(tmp2282__2, arg0)) ;
+ATSINSmove(tmpret2281__2, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2282__2)) ;
+ATSfunbody_end()
+ATSreturn(tmpret2281__2) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__34(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__34, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__34, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__34, arg1) ;
+ATSINSmove(tmp337__34, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__34), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__34, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__34) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__gopt_some__609__3(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret2281__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2282__3, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_gopt_some):
+ATSINSmove(tmp2282__3, atslib_the_garena_alloc(ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmp2283__3, ATSLIB_056_libats_056_arena__arena_store__73__35(tmp2282__3, arg0)) ;
+ATSINSmove(tmpret2281__3, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp2282__3)) ;
+ATSfunbody_end()
+ATSreturn(tmpret2281__3) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__35(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__35, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__35, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__35, arg1) ;
+ATSINSmove(tmp337__35, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__35), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__35, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__35) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18163,41 +19448,41 @@ ATSextern()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_while(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret2184, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2185, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2186, atstype_boxed) ;
-ATStmpdec(tmp2187, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2188, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2189, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2190, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2191, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2193, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret2381, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2382, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2383, atstype_boxed) ;
+ATStmpdec(tmp2384, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2385, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2386, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2387, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2388, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2390, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_d2exp_trup_while):
-ATSINSmove(tmp2185, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2187, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2186, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2187)) ;
+ATSINSmove(tmp2382, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2384, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2383, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2384)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab438):
-ATSifnthen(ATSCKpat_con1(tmp2186, 64)) { ATSINSgoto(__atstmplab440) ; } ;
-ATSINSlab(__atstmplab439):
-ATSINSmove(tmp2188, ATSSELcon(tmp2186, postiats_tysum_21, atslab__0)) ;
-ATSINSmove(tmp2189, ATSSELcon(tmp2186, postiats_tysum_21, atslab__1)) ;
-ATSINSmove(tmp2190, ATSSELcon(tmp2186, postiats_tysum_21, atslab__2)) ;
-ATSINSfreecon(tmp2186) ;
-ATSINSmove(tmp2191, ATSLIB_056_libats_056_arena__gopt_none__220__3()) ;
-ATSINSmove(tmp2193, ATSLIB_056_libats_056_arena__gopt_none__220__4()) ;
-ATSINSmove(tmpret2184, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup_loop(tmp2185, tmp2188, tmp2191, tmp2189, tmp2193, tmp2190)) ;
+ATSINSlab(__atstmplab470):
+ATSifnthen(ATSCKpat_con1(tmp2383, 64)) { ATSINSgoto(__atstmplab472) ; } ;
+ATSINSlab(__atstmplab471):
+ATSINSmove(tmp2385, ATSSELcon(tmp2383, postiats_tysum_21, atslab__0)) ;
+ATSINSmove(tmp2386, ATSSELcon(tmp2383, postiats_tysum_21, atslab__1)) ;
+ATSINSmove(tmp2387, ATSSELcon(tmp2383, postiats_tysum_21, atslab__2)) ;
+ATSINSfreecon(tmp2383) ;
+ATSINSmove(tmp2388, ATSLIB_056_libats_056_arena__gopt_none__220__3()) ;
+ATSINSmove(tmp2390, ATSLIB_056_libats_056_arena__gopt_none__220__4()) ;
+ATSINSmove(tmpret2381, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup_loop(tmp2382, tmp2385, tmp2388, tmp2386, tmp2390, tmp2387)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab440):
-ATSINSmove_void(tmp2195, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2186)) ;
-ATSINSmove(tmpret2184, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__23()) ;
+ATSINSlab(__atstmplab472):
+ATSINSmove_void(tmp2392, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2383)) ;
+ATSINSmove(tmpret2381, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__23()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2184) ;
+ATSreturn(tmpret2381) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18238,59 +19523,59 @@ ATSextern()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_trywith(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret2198, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2199, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2200, atstype_boxed) ;
-ATStmpdec(tmp2201, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2202, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2203, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2204, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2205, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2206, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2209, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2210, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2211, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2212, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2232, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2252, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2253, atstype_boxed) ;
+ATStmpdec(tmpret2395, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2396, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2397, atstype_boxed) ;
+ATStmpdec(tmp2398, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2399, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2400, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2401, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2402, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2403, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2406, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2407, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2408, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2409, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2429, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2449, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2450, atstype_boxed) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_d2exp_trup_trywith):
-ATSINSmove(tmp2199, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2201, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2200, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2201)) ;
+ATSINSmove(tmp2396, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2398, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2397, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2398)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab441):
-ATSifnthen(ATSCKpat_con1(tmp2200, 66)) { ATSINSgoto(__atstmplab443) ; } ;
-ATSINSlab(__atstmplab442):
-ATSINSmove(tmp2202, ATSSELcon(tmp2200, postiats_tysum_21, atslab__0)) ;
-ATSINSmove(tmp2203, ATSSELcon(tmp2200, postiats_tysum_21, atslab__1)) ;
-ATSINSmove(tmp2204, ATSSELcon(tmp2200, postiats_tysum_21, atslab__2)) ;
-ATSINSfreecon(tmp2200) ;
-ATSINSmove(tmp2205, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2203)) ;
-ATSINSmove(tmp2206, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2205)) ;
-ATSINSmove_void(tmp2207, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_push_try()) ;
-ATSINSmove_void(tmp2208, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_push_try()) ;
-ATSINSmove(tmp2209, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_exception_vtype()) ;
-ATSINSmove(tmp2210, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(tmp2205)) ;
-ATSINSmove(tmp2211, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_top(tmp2210, tmp2209)) ;
-ATSINSmove(tmp2212, ATSLIB_056_libats_056_arena__glist_sing__78__4(tmp2211)) ;
-ATSINSmove(tmp2232, ATSLIB_056_libats_056_arena__glist_sing__78__5(tmp2209)) ;
-ATSINSmove_con0(tmp2253, 2) ;
-ATSINSmove(tmp2252, PATSHOME_057_src_057_pats_trans3_056_sats__c2laulst_trdn(tmp2199, tmp2253, tmp2202, tmp2204, tmp2212, tmp2232, tmp2206)) ;
-ATSINSmove_void(tmp2254, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_pop()) ;
-ATSINSmove_void(tmp2255, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_pop()) ;
-ATSINSmove(tmpret2198, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_trywith(tmp2199, tmp2205, tmp2252)) ;
+ATSINSlab(__atstmplab473):
+ATSifnthen(ATSCKpat_con1(tmp2397, 66)) { ATSINSgoto(__atstmplab475) ; } ;
+ATSINSlab(__atstmplab474):
+ATSINSmove(tmp2399, ATSSELcon(tmp2397, postiats_tysum_21, atslab__0)) ;
+ATSINSmove(tmp2400, ATSSELcon(tmp2397, postiats_tysum_21, atslab__1)) ;
+ATSINSmove(tmp2401, ATSSELcon(tmp2397, postiats_tysum_21, atslab__2)) ;
+ATSINSfreecon(tmp2397) ;
+ATSINSmove(tmp2402, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2400)) ;
+ATSINSmove(tmp2403, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2402)) ;
+ATSINSmove_void(tmp2404, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_push_try()) ;
+ATSINSmove_void(tmp2405, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_push_try()) ;
+ATSINSmove(tmp2406, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_exception_vtype()) ;
+ATSINSmove(tmp2407, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_loc(tmp2402)) ;
+ATSINSmove(tmp2408, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_top(tmp2407, tmp2406)) ;
+ATSINSmove(tmp2409, ATSLIB_056_libats_056_arena__glist_sing__78__4(tmp2408)) ;
+ATSINSmove(tmp2429, ATSLIB_056_libats_056_arena__glist_sing__78__5(tmp2406)) ;
+ATSINSmove_con0(tmp2450, 2) ;
+ATSINSmove(tmp2449, PATSHOME_057_src_057_pats_trans3_056_sats__c2laulst_trdn(tmp2396, tmp2450, tmp2399, tmp2401, tmp2409, tmp2429, tmp2403)) ;
+ATSINSmove_void(tmp2451, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_d2varenv_pop()) ;
+ATSINSmove_void(tmp2452, PATSHOME_057_src_057_pats_trans3_env_056_sats__the_pfmanenv_pop()) ;
+ATSINSmove(tmpret2395, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_trywith(tmp2396, tmp2402, tmp2449)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab443):
-ATSINSmove_void(tmp2256, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2200)) ;
-ATSINSmove(tmpret2198, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__24()) ;
+ATSINSlab(__atstmplab475):
+ATSINSmove_void(tmp2453, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2397)) ;
+ATSINSmove(tmpret2395, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__24()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2198) ;
+ATSreturn(tmpret2395) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18300,106 +19585,10 @@ ATStmpdec(tmpret350__4, atstkind_type(atstype_ptrk)) ;
 ATStmpdec(tmp351__4, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_glist_sing):
-ATSINSmove(tmp351__4, ATSLIB_056_libats_056_arena__glist_nil__66__24()) ;
-ATSINSmove(tmpret350__4, ATSLIB_056_libats_056_arena__glist_cons__68__16(arg0, tmp351__4)) ;
+ATSINSmove(tmp351__4, ATSLIB_056_libats_056_arena__glist_nil__66__25()) ;
+ATSINSmove(tmpret350__4, ATSLIB_056_libats_056_arena__glist_cons__68__17(arg0, tmp351__4)) ;
 ATSfunbody_end()
 ATSreturn(tmpret350__4) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__24()
-{
-ATStmpdec(tmpret316__24, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__24, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
-ATSfunbody_end()
-ATSreturn(tmpret316__24) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_cons__68__16(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpret321__16, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp322__16, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp323__16, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_cons):
-ATSINSmove(tmp323__16, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove(tmp322__16, atslib_the_garena_alloc(tmp323__16)) ;
-ATSINSmove_void(tmp324__16, ATSLIB_056_libats_056_arena__acell_make__71__16(tmp322__16, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
-ATSINSmove(tmpret321__16, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__16)) ;
-ATSfunbody_end()
-ATSreturn(tmpret321__16) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__acell_make__71__16(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
-{
-ATStmpdec(tmp331__16, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_acell_make):
-ATSINSmove_void(tmp330__16, ATSLIB_056_libats_056_arena__arena_store__73__34(arg0, arg2)) ;
-ATSINSmove(tmp331__16, ATSLIB_056_prelude__ptr0_add_guint__34__36(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
-ATSINSmove_void(tmpret329__16, ATSLIB_056_libats_056_arena__arena_store__73__35(tmp331__16, arg1)) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret329__16) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__34(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__34, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__34, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__34, arg1) ;
-ATSINSmove(tmp337__34, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__34), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__34, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__34) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__36(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
-{
-ATStmpdec(tmpret162__36, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__36, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__36, atstkind_t0ype(atstype_size)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__36, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__36, atspre_g0uint_mul_size(tmp164__36, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__36, atspre_add_ptr0_bsz(arg0, tmp163__36)) ;
-ATSfunbody_end()
-ATSreturn(tmpret162__36) ;
-}
-ATSstatic()
-atsvoid_t0ype
-ATSLIB_056_libats_056_arena__arena_store__73__35(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
-{
-ATStmpdec(tmpref336__35, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp337__35, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_arena_store):
-ATSINSmove(tmpref336__35, arg1) ;
-ATSINSmove(tmp337__35, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__35), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
-ATSINSmove_void(tmpret335__35, ATSPMVempty()) ;
-ATSfunbody_end()
-ATSreturn_void(tmpret335__35) ;
-}
-ATSstatic()
-atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_sing__78__5(atstkind_type(atstype_ptrk) arg0)
-{
-ATStmpdec(tmpret350__5, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp351__5, atstkind_type(atstype_ptrk)) ;
-ATSfunbody_beg()
-ATSINSflab(__patsflab_glist_sing):
-ATSINSmove(tmp351__5, ATSLIB_056_libats_056_arena__glist_nil__66__25()) ;
-ATSINSmove(tmpret350__5, ATSLIB_056_libats_056_arena__glist_cons__68__17(arg0, tmp351__5)) ;
-ATSfunbody_end()
-ATSreturn(tmpret350__5) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18436,7 +19625,7 @@ ATStmpdec(tmp331__17, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_acell_make):
 ATSINSmove_void(tmp330__17, ATSLIB_056_libats_056_arena__arena_store__73__36(arg0, arg2)) ;
-ATSINSmove(tmp331__17, ATSLIB_056_prelude__ptr0_add_guint__34__37(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp331__17, ATSLIB_056_prelude__ptr0_add_guint__34__39(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
 ATSINSmove_void(tmpret329__17, ATSLIB_056_libats_056_arena__arena_store__73__37(tmp331__17, arg1)) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret329__17) ;
@@ -18457,18 +19646,18 @@ ATSreturn_void(tmpret335__36) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_prelude__ptr0_add_guint__34__37(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+ATSLIB_056_prelude__ptr0_add_guint__34__39(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
 {
-ATStmpdec(tmpret162__37, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp163__37, atstkind_t0ype(atstype_size)) ;
-ATStmpdec(tmp164__37, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmpret162__39, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__39, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__39, atstkind_t0ype(atstype_size)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_ptr0_add_guint):
-ATSINSmove(tmp164__37, atspre_g0uint2uint_size_size(arg1)) ;
-ATSINSmove(tmp163__37, atspre_g0uint_mul_size(tmp164__37, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
-ATSINSmove(tmpret162__37, atspre_add_ptr0_bsz(arg0, tmp163__37)) ;
+ATSINSmove(tmp164__39, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__39, atspre_g0uint_mul_size(tmp164__39, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__39, atspre_add_ptr0_bsz(arg0, tmp163__39)) ;
 ATSfunbody_end()
-ATSreturn(tmpret162__37) ;
+ATSreturn(tmpret162__39) ;
 }
 ATSstatic()
 atsvoid_t0ype
@@ -18483,6 +19672,102 @@ ATSINSmove(tmp337__37, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__37), AT
 ATSINSmove_void(tmpret335__37, ATSPMVempty()) ;
 ATSfunbody_end()
 ATSreturn_void(tmpret335__37) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_sing__78__5(atstkind_type(atstype_ptrk) arg0)
+{
+ATStmpdec(tmpret350__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp351__5, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_sing):
+ATSINSmove(tmp351__5, ATSLIB_056_libats_056_arena__glist_nil__66__26()) ;
+ATSINSmove(tmpret350__5, ATSLIB_056_libats_056_arena__glist_cons__68__18(arg0, tmp351__5)) ;
+ATSfunbody_end()
+ATSreturn(tmpret350__5) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_nil__66__26()
+{
+ATStmpdec(tmpret316__26, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_nil):
+ATSINSmove(tmpret316__26, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSfunbody_end()
+ATSreturn(tmpret316__26) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_libats_056_arena__glist_cons__68__18(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpret321__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp322__18, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp323__18, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_glist_cons):
+ATSINSmove(tmp323__18, atspre_g1uint_add_size(ATSPMVsizeof(atstkind_type(atstype_ptrk)), ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove(tmp322__18, atslib_the_garena_alloc(tmp323__18)) ;
+ATSINSmove_void(tmp324__18, ATSLIB_056_libats_056_arena__acell_make__71__18(tmp322__18, arg0, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), arg1))) ;
+ATSINSmove(tmpret321__18, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), tmp322__18)) ;
+ATSfunbody_end()
+ATSreturn(tmpret321__18) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__acell_make__71__18(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1, atstkind_type(atstype_ptrk) arg2)
+{
+ATStmpdec(tmp331__18, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_acell_make):
+ATSINSmove_void(tmp330__18, ATSLIB_056_libats_056_arena__arena_store__73__38(arg0, arg2)) ;
+ATSINSmove(tmp331__18, ATSLIB_056_prelude__ptr0_add_guint__34__40(arg0, ATSPMVsizeof(atstkind_type(atstype_ptrk)))) ;
+ATSINSmove_void(tmpret329__18, ATSLIB_056_libats_056_arena__arena_store__73__39(tmp331__18, arg1)) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret329__18) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__38(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__38, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__38, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__38, arg1) ;
+ATSINSmove(tmp337__38, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__38), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__38, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__38) ;
+}
+ATSstatic()
+atstkind_type(atstype_ptrk)
+ATSLIB_056_prelude__ptr0_add_guint__34__40(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_size) arg1)
+{
+ATStmpdec(tmpret162__40, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp163__40, atstkind_t0ype(atstype_size)) ;
+ATStmpdec(tmp164__40, atstkind_t0ype(atstype_size)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_ptr0_add_guint):
+ATSINSmove(tmp164__40, atspre_g0uint2uint_size_size(arg1)) ;
+ATSINSmove(tmp163__40, atspre_g0uint_mul_size(tmp164__40, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret162__40, atspre_add_ptr0_bsz(arg0, tmp163__40)) ;
+ATSfunbody_end()
+ATSreturn(tmpret162__40) ;
+}
+ATSstatic()
+atsvoid_t0ype
+ATSLIB_056_libats_056_arena__arena_store__73__39(atstkind_type(atstype_ptrk) arg0, atstkind_type(atstype_ptrk) arg1)
+{
+ATStmpdec(tmpref336__39, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp337__39, atstkind_type(atstype_ptrk)) ;
+ATSfunbody_beg()
+ATSINSflab(__patsflab_arena_store):
+ATSINSmove(tmpref336__39, arg1) ;
+ATSINSmove(tmp337__39, ATSextfcall(memcpy, (arg0, ATSPMVptrof(tmpref336__39), ATSPMVsizeof(atstkind_type(atstype_ptrk))))) ;
+ATSINSmove_void(tmpret335__39, ATSPMVempty()) ;
+ATSfunbody_end()
+ATSreturn_void(tmpret335__39) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18501,48 +19786,48 @@ ATSextern()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_mac(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret2259, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2260, atstype_boxed) ;
-ATStmpdec(tmp2261, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2262, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2263, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2264, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2265, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret2456, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2457, atstype_boxed) ;
+ATStmpdec(tmp2458, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2459, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2460, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2461, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2462, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_d2exp_trup_mac):
-ATSINSmove(tmp2261, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2260, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2261)) ;
+ATSINSmove(tmp2458, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2457, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2458)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab444):
-ATSifnthen(ATSCKpat_con1(tmp2260, 70)) { ATSINSgoto(__atstmplab446) ; } ;
-ATSINSlab(__atstmplab445):
-ATSINSmove(tmp2262, ATSSELcon(tmp2260, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp2260) ;
-ATSINSmove(tmp2264, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2265, ATSLIB_056_libats_056_arena__glist_nil__66__26()) ;
-ATSINSmove(tmp2263, PATSHOME_057_src_057_pats_dmacro2_056_sats__dmacro_eval_app_short(tmp2264, tmp2262, tmp2265)) ;
-ATSINSmove(tmpret2259, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2263)) ;
+ATSINSlab(__atstmplab476):
+ATSifnthen(ATSCKpat_con1(tmp2457, 70)) { ATSINSgoto(__atstmplab478) ; } ;
+ATSINSlab(__atstmplab477):
+ATSINSmove(tmp2459, ATSSELcon(tmp2457, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2457) ;
+ATSINSmove(tmp2461, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2462, ATSLIB_056_libats_056_arena__glist_nil__66__27()) ;
+ATSINSmove(tmp2460, PATSHOME_057_src_057_pats_dmacro2_056_sats__dmacro_eval_app_short(tmp2461, tmp2459, tmp2462)) ;
+ATSINSmove(tmpret2456, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2460)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab446):
-ATSINSmove_void(tmp2267, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2260)) ;
-ATSINSmove(tmpret2259, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__25()) ;
+ATSINSlab(__atstmplab478):
+ATSINSmove_void(tmp2464, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2457)) ;
+ATSINSmove(tmpret2456, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__25()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2259) ;
+ATSreturn(tmpret2456) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
-ATSLIB_056_libats_056_arena__glist_nil__66__26()
+ATSLIB_056_libats_056_arena__glist_nil__66__27()
 {
-ATStmpdec(tmpret316__26, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret316__27, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_glist_nil):
-ATSINSmove(tmpret316__26, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
+ATSINSmove(tmpret316__27, ATSPMVcastfn(cast, atstkind_type(atstype_ptrk), the_atsptr_null)) ;
 ATSfunbody_end()
-ATSreturn(tmpret316__26) ;
+ATSreturn(tmpret316__27) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18561,85 +19846,85 @@ ATSextern()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_macsyn(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret2270, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2271, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2272, atstype_boxed) ;
-ATStmpdec(tmp2273, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2274, atstype_boxed) ;
-ATStmpdec(tmp2275, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2276, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret2467, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2468, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2469, atstype_boxed) ;
+ATStmpdec(tmp2470, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2471, atstype_boxed) ;
+ATStmpdec(tmp2472, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2473, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_d2exp_trup_macsyn):
-ATSINSmove(tmp2271, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2273, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2272, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2273)) ;
+ATSINSmove(tmp2468, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2470, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2469, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2470)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab447):
-ATSifnthen(ATSCKpat_con1(tmp2272, 71)) { ATSINSgoto(__atstmplab449) ; } ;
-ATSINSlab(__atstmplab448):
-ATSINSmove(tmp2274, ATSSELcon(tmp2272, postiats_tysum_33, atslab__0)) ;
-ATSINSmove(tmp2275, ATSSELcon(tmp2272, postiats_tysum_33, atslab__1)) ;
-ATSINSfreecon(tmp2272) ;
+ATSINSlab(__atstmplab479):
+ATSifnthen(ATSCKpat_con1(tmp2469, 71)) { ATSINSgoto(__atstmplab481) ; } ;
+ATSINSlab(__atstmplab480):
+ATSINSmove(tmp2471, ATSSELcon(tmp2469, postiats_tysum_33, atslab__0)) ;
+ATSINSmove(tmp2472, ATSSELcon(tmp2469, postiats_tysum_33, atslab__1)) ;
+ATSINSfreecon(tmp2469) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab450):
-ATSifnthen(ATSCKpat_con0(tmp2274, 1)) { ATSINSgoto(__atstmplab452) ; } ;
-ATSINSlab(__atstmplab451):
-ATSINSmove(tmp2276, PATSHOME_057_src_057_pats_dmacro2_056_sats__dmacro_eval_decode(tmp2275)) ;
+ATSINSlab(__atstmplab482):
+ATSifnthen(ATSCKpat_con0(tmp2471, 1)) { ATSINSgoto(__atstmplab484) ; } ;
+ATSINSlab(__atstmplab483):
+ATSINSmove(tmp2473, PATSHOME_057_src_057_pats_dmacro2_056_sats__dmacro_eval_decode(tmp2472)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab452):
-ATSifnthen(ATSCKpat_con0(tmp2274, 2)) { ATSINSgoto(__atstmplab454) ; } ;
-ATSINSlab(__atstmplab453):
-ATSINSmove(tmp2276, PATSHOME_057_src_057_pats_dmacro2_056_sats__dmacro_eval_xstage(tmp2275)) ;
+ATSINSlab(__atstmplab484):
+ATSifnthen(ATSCKpat_con0(tmp2471, 2)) { ATSINSgoto(__atstmplab486) ; } ;
+ATSINSlab(__atstmplab485):
+ATSINSmove(tmp2473, PATSHOME_057_src_057_pats_dmacro2_056_sats__dmacro_eval_xstage(tmp2472)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab454):
+ATSINSlab(__atstmplab486):
 #if(0)
-ATSifnthen(ATSCKpat_con0(tmp2274, 0)) { ATSINSdeadcode_fail() ; } ;
+ATSifnthen(ATSCKpat_con0(tmp2471, 0)) { ATSINSdeadcode_fail() ; } ;
 #endif
-ATSINSlab(__atstmplab455):
-ATSINSmove_void(tmp2277, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__594__1(tmp2271)) ;
-ATSINSmove_void(tmp2282, atspre_prerr_string(ATSPMVstring(": the macro syntax `(...) is used incorrectly."))) ;
-ATSINSmove_void(tmp2283, atspre_prerr_newline()) ;
-ATSINSmove(tmp2276, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_errexp(tmp2271)) ;
+ATSINSlab(__atstmplab487):
+ATSINSmove_void(tmp2474, PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__651__1(tmp2468)) ;
+ATSINSmove_void(tmp2479, atspre_prerr_string(ATSPMVstring(": the macro syntax `(...) is used incorrectly."))) ;
+ATSINSmove_void(tmp2480, atspre_prerr_newline()) ;
+ATSINSmove(tmp2473, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_errexp(tmp2468)) ;
 ATSbranch_end()
 ATScaseof_end()
-ATSINSmove(tmpret2270, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2276)) ;
+ATSINSmove(tmpret2467, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2473)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab449):
-ATSINSmove_void(tmp2284, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2272)) ;
-ATSINSmove(tmpret2270, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__26()) ;
+ATSINSlab(__atstmplab481):
+ATSINSmove_void(tmp2481, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2469)) ;
+ATSINSmove(tmpret2467, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__26()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2270) ;
+ATSreturn(tmpret2467) ;
 }
 #if(0)
 ATSextern()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__594(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__651(atstkind_type(atstype_ptrk) arg0)
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errmac_loc):
-ATSINSmove_void(tmp2279, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
-ATSINSmove_void(tmpret2278, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
+ATSINSmove_void(tmp2476, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret2475, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret2278) ;
+ATSreturn_void(tmpret2475) ;
 }
 #endif
 ATSstatic()
 atsvoid_t0ype
-PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__594__1(atstkind_type(atstype_ptrk) arg0)
+PATSHOME_057_src_057_pats_errmsg_056_sats__prerr_errmac_loc__651__1(atstkind_type(atstype_ptrk) arg0)
 {
 ATSfunbody_beg()
 ATSINSflab(__patsflab_prerr_errmac_loc):
-ATSINSmove_void(tmp2279__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
-ATSINSmove_void(tmpret2278__1, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
+ATSINSmove_void(tmp2476__1, PATSHOME_057_src_057_pats_location_056_sats__prerr_errloc(arg0)) ;
+ATSINSmove_void(tmpret2475__1, atspre_prerr_string(ATSPMVstring(": error(mac)"))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret2278__1) ;
+ATSreturn_void(tmpret2475__1) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18658,40 +19943,40 @@ ATSextern()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_solassert(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret2287, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2288, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2289, atstype_boxed) ;
-ATStmpdec(tmp2290, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2291, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2292, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2293, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2295, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret2484, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2485, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2486, atstype_boxed) ;
+ATStmpdec(tmp2487, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2488, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2489, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2490, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2492, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_d2exp_trup_solassert):
-ATSINSmove(tmp2288, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2290, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2289, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2290)) ;
+ATSINSmove(tmp2485, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2487, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2486, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2487)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab456):
-ATSifnthen(ATSCKpat_con1(tmp2289, 73)) { ATSINSgoto(__atstmplab458) ; } ;
-ATSINSlab(__atstmplab457):
-ATSINSmove(tmp2291, ATSSELcon(tmp2289, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp2289) ;
-ATSINSmove(tmp2292, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2291)) ;
-ATSINSmove(tmp2293, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2292)) ;
-ATSINSmove_void(tmp2294, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_solver_assert(tmp2288, tmp2293)) ;
-ATSINSmove(tmp2295, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
-ATSINSmove(tmpret2287, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_empty(tmp2288, tmp2295)) ;
+ATSINSlab(__atstmplab488):
+ATSifnthen(ATSCKpat_con1(tmp2486, 73)) { ATSINSgoto(__atstmplab490) ; } ;
+ATSINSlab(__atstmplab489):
+ATSINSmove(tmp2488, ATSSELcon(tmp2486, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2486) ;
+ATSINSmove(tmp2489, PATSHOME_057_src_057_pats_trans3_056_sats__d2exp_trup(tmp2488)) ;
+ATSINSmove(tmp2490, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_get_type(tmp2489)) ;
+ATSINSmove_void(tmp2491, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_solver_assert(tmp2485, tmp2490)) ;
+ATSINSmove(tmp2492, PATSHOME_057_src_057_pats_stacst2_056_sats__s2exp_void_t0ype()) ;
+ATSINSmove(tmpret2484, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_empty(tmp2485, tmp2492)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab458):
-ATSINSmove_void(tmp2296, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2289)) ;
-ATSINSmove(tmpret2287, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__27()) ;
+ATSINSlab(__atstmplab490):
+ATSINSmove_void(tmp2493, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2486)) ;
+ATSINSmove(tmpret2484, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__27()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2287) ;
+ATSreturn(tmpret2484) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)
@@ -18710,36 +19995,36 @@ ATSextern()
 atstkind_type(atstype_ptrk)
 PATSHOME_057_src_057_pats_trans3_dynexp_up_056_dats__d2exp_trup_solverify(atstkind_type(atstype_ptrk) arg0)
 {
-ATStmpdec(tmpret2299, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2300, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2301, atstype_boxed) ;
-ATStmpdec(tmp2302, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2303, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp2304, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret2496, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2497, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2498, atstype_boxed) ;
+ATStmpdec(tmp2499, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2500, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp2501, atstkind_type(atstype_ptrk)) ;
 ATSfunbody_beg()
 ATSINSflab(__patsflab_d2exp_trup_solverify):
-ATSINSmove(tmp2300, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
-ATSINSmove(tmp2302, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
-ATSINSmove(tmp2301, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2302)) ;
+ATSINSmove(tmp2497, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_loc(arg0)) ;
+ATSINSmove(tmp2499, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node(arg0)) ;
+ATSINSmove(tmp2498, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view(tmp2499)) ;
 ATScaseof_beg()
 ATSbranch_beg()
-ATSINSlab(__atstmplab459):
-ATSifnthen(ATSCKpat_con1(tmp2301, 74)) { ATSINSgoto(__atstmplab461) ; } ;
-ATSINSlab(__atstmplab460):
-ATSINSmove(tmp2303, ATSSELcon(tmp2301, postiats_tysum_11, atslab__0)) ;
-ATSINSfreecon(tmp2301) ;
-ATSINSmove(tmp2304, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp2303)) ;
-ATSINSmove_void(tmp2305, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_solver_verify(tmp2300, tmp2304)) ;
-ATSINSmove(tmpret2299, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_solverify(tmp2300, tmp2304)) ;
+ATSINSlab(__atstmplab491):
+ATSifnthen(ATSCKpat_con1(tmp2498, 74)) { ATSINSgoto(__atstmplab493) ; } ;
+ATSINSlab(__atstmplab492):
+ATSINSmove(tmp2500, ATSSELcon(tmp2498, postiats_tysum_11, atslab__0)) ;
+ATSINSfreecon(tmp2498) ;
+ATSINSmove(tmp2501, PATSHOME_057_src_057_pats_staexp2_util_056_sats__s2exp_hnfize(tmp2500)) ;
+ATSINSmove_void(tmp2502, PATSHOME_057_src_057_pats_trans3_env_056_sats__trans3_env_solver_verify(tmp2497, tmp2501)) ;
+ATSINSmove(tmpret2496, PATSHOME_057_src_057_pats_dynexp3_056_sats__d3exp_solverify(tmp2497, tmp2501)) ;
 ATSbranch_end()
 ATSbranch_beg()
-ATSINSlab(__atstmplab461):
-ATSINSmove_void(tmp2306, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2301)) ;
-ATSINSmove(tmpret2299, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__28()) ;
+ATSINSlab(__atstmplab493):
+ATSINSmove_void(tmp2503, PATSHOME_057_src_057_pats_dynexp2_056_sats__d2exp_node_view_free(tmp2498)) ;
+ATSINSmove(tmpret2496, PATSHOME_057_src_057_pats_error_056_sats__abort_interr__27__28()) ;
 ATSbranch_end()
 ATScaseof_end()
 ATSfunbody_end()
-ATSreturn(tmpret2299) ;
+ATSreturn(tmpret2496) ;
 }
 ATSstatic()
 atstkind_type(atstype_ptrk)

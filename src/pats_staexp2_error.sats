@@ -69,6 +69,17 @@ fun the_staerrlst_add (x: staerr): void
 //
 fun the_staerrlst_get (n: &int? >> int): staerrlst_vt
 //
+// HX-2026-10: the number of errors that have been added (some of which may
+// not be recorded)
+//
+fun the_staerrlst_length (): int
+//
+// HX-2026-10: the errors that were added after the length [n] was taken are
+// removed (a speculative check that fails must not remove the errors that
+// were reported before it)
+//
+fun the_staerrlst_truncate (n: int): void
+//
 (* ****** ****** *)
 
 fun prerr_the_staerrlst (): void

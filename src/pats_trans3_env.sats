@@ -510,6 +510,20 @@ fun the_d2varenv_set_autofold_hook (f: d2varenv_autofold_hook): void
 fun the_d2varenv_autofold
   (knd: int, loc0: loc_t, d2v: d2var, s2e: s2exp): int
 //
+// HX-2026-10: the same, for a value (a mutable variable that is used as
+// an argument): [the_d2varenv_autofold_lval (knd, loc0, d3e, s2e)] calls
+// the hook with
+//   knd = 3: [d3e] is a value whose type is an unfolded type and it is
+//            checked against [s2e]: fold it if [s2e] is not an unfolded
+//            type (the result: 0 = nothing to do, 1 = folded,
+//            2 = fold failed)
+//
+typedef
+d3expenv_autofold_hook = (int(*knd*), loc_t, d3exp, s2exp) -> int
+fun the_d2varenv_set_autofold_lval_hook (f: d3expenv_autofold_hook): void
+fun the_d2varenv_autofold_lval
+  (knd: int, loc0: loc_t, d3e: d3exp, s2e: s2exp): int
+//
 
 (* ****** ****** *)
 (*
@@ -592,6 +606,19 @@ pfobj = PFOBJ of
 vtypedef pfobjopt = Option_vt (pfobj)
 //
 fun pfobj_search_atview (s2l0: s2exp): pfobjopt
+//
+// HX-2026-10: the variables of the pfman environment whose type has the
+// same head as the type [s2e] (the proof of a view that is not an at-view);
+// the ones that are already used ([used]) are removed, and, when exactly
+// one of the others has the type [s2e], it is the only one that is kept
+//
+fun pfobj_search_bytype (s2e: s2exp, used: glist (d2var)): glist (d2var)
+//
+// HX-2026-10: the variables of the pfman environment whose type is an
+// at-view of the same element type as the type [s2e] (the proof of an
+// at-view whose address is not solved by the other arguments)
+//
+fun pfobj_search_atview_bytype (s2e: s2exp): glist (d2var)
 //
 (* ****** ****** *)
 

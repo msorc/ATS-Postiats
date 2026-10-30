@@ -565,10 +565,11 @@ case+ glist_view (s2es1) of
 end // end of [autofold_solve]
 
 fn
-autofold_discard (): void = {
+autofold_discard (nerr: int): void = {
   val s3is = trans3_env_pop ()
   val ((*freed*)) = list_vt_free (s3is)
-  val () = the_staerrlst_clear ()
+  // HX-2026-10: only the errors that the try has added are removed
+  val () = the_staerrlst_truncate (nerr)
 } (* end of [autofold_discard] *)
 
 fun
@@ -582,20 +583,20 @@ autofold_consume
 ) (* end of [autofold_consume] *)
 
 (*
-** the steps of [fold@ (d2v)] without static arguments: the result is
-** 0: [d2v] is not unfolded; 1: folded (or foldable if [commit] is false);
-** 2: [fold@] cannot be applied (the reason is in [the_afwhy];
-**    nothing is changed)
+** HX-2026-10: the folding of an unfolded value of the type [s2e_dcp]: the
+** views of its fields are found and (if the fold succeeds) consumed, and
+** the folded type is returned. The result is 0: nothing to do; 1: folded
+** (or foldable if [commit] is false); 2: the fold cannot be applied (the
+** reason is in [the_afwhy]; nothing is changed)
 *)
 fun
-autofold_try
+autofold_try_main
 (
-  loc0: loc_t, d2v: d2var, commit: bool
-) : int = let
-  val @(knd, s2e_dcp, s2l) = autofold_owner (d2v)
-in
-//
-if knd = 0 then 0 else let
+  loc0: loc_t, s2e_dcp: s2exp, commit: bool
+) : @(int, s2expopt) = let
+  // HX-2026-10: the number of errors that have been reported so far (the
+  // try must not remove the ones that were reported before it)
+  val nerr = the_staerrlst_length ()
   val-~S2Edatconptr
     (d2c, _(*rt*), s2ls) = s2exp_node_view (s2e_dcp.s2exp_node ())
   var d2vs: glist(d2var) = glist_nil ()
@@ -603,7 +604,7 @@ if knd = 0 then 0 else let
   val k = autofold_views (s2ls, 1, d2vs, s2es)
 in
 //
-if k > 0 then (afwhy_set (1, k); 2) else let
+if k > 0 then (afwhy_set (1, k); @(2, gopt_none ())) else let
   val s2es_elt = glist_reverse (s2es)
   val () = trans3_env_push ()
   val s2e_dcon = d2con_get_type (d2c)
@@ -626,14 +627,41 @@ of // case+
     val k = autofold_solve (loc0, s2es_elt, s2es_arg, 1)
   in
     if k > 0 then let
-      val () = autofold_discard ()
+      val () = autofold_discard (nerr)
     in
-      afwhy_set (2, k); 2
+      afwhy_set (2, k); @(2, gopt_none ())
     end else if ~(commit) then let
-      val () = autofold_discard () in 1
+      val () = autofold_discard (nerr) in @(1, gopt_none ())
     end else let
       val () = trans3_env_pop_and_add_main (loc0)
       val () = autofold_consume (d2vs)
+    in
+      @(1, gopt_some (s2e_res))
+    end // end of [if]
+  end // end of [S2Efun]
+| v (*non-S2Efun*) => let
+    val () = s2exp_node_view_free (v)
+    val () = autofold_discard (nerr)
+  in
+    afwhy_set (3, 0); @(2, gopt_none ())
+  end // end of [non-S2Efun]
+//
+end // end of [if]
+//
+end // end of [autofold_try_main]
+
+(* ****** ****** *)
+
+(*
+** HX-2026-10: the type of the value is changed to the folded one
+*)
+fun
+autofold_set_type
+(
+  loc0: loc_t, d2v: d2var, knd: int, s2l: s2exp, s2e_folded: s2expopt
+) : void = (
+  case+ gopt_view (s2e_folded) of
+  | ~GOsome (s2e_res) => let
       val () =
       if knd = 1
         then d2var_set_type (d2v, gopt_some (s2e_res))
@@ -642,43 +670,64 @@ of // case+
         } (* end of [else] *)
       // end of [if]
     in
-      1
-    end // end of [if]
-  end // end of [S2Efun]
-| v (*non-S2Efun*) => let
-    val () = s2exp_node_view_free (v)
-    val () = autofold_discard ()
-  in
-    afwhy_set (3, 0); 2
-  end // end of [non-S2Efun]
+      // nothing
+    end // end of [GOsome]
+  | ~GOnone () => ()
+) (* end of [autofold_set_type] *)
+
+(* ****** ****** *)
+
+(*
+** the steps of [fold@ (d2v)] without static arguments: the result is
+** 0: [d2v] is not unfolded; 1: folded (or foldable if [commit] is false);
+** 2: [fold@] cannot be applied (the reason is in [the_afwhy];
+**    nothing is changed)
+*)
+fun
+autofold_try
+(
+  loc0: loc_t, d2v: d2var, commit: bool
+) : int = let
+  val @(knd, s2e_dcp, s2l) = autofold_owner (d2v)
+in
 //
+if knd = 0 then 0 else let
+  val @(ans, s2e_folded) =
+    autofold_try_main (loc0, s2e_dcp, commit)
+  val () = (
+    if (ans = 1)
+      then autofold_set_type (loc0, d2v, knd, s2l, s2e_folded) else ()
+  )
+in
+  ans
 end // end of [if]
-//
-end // end of [if]
-//
 end // end of [autofold_try]
 
 (* ****** ****** *)
 
 (*
 ** a variable checked against [s2e] is folded unless [s2e] is (or may be)
-** an unfolded type itself
+** an unfolded type itself; [byval] tells if the value is passed by value
+** (it is reset under [S2Erefarg], i.e. [!T] or [&T]): a template variable
+** ([S2EVar]) as the type of a by-value argument does not prevent the
+** folding (the value is consumed), but it does for an argument that is
+** passed by reference (the fields of the value may still be used)
 *)
 fun
 autofold_wanted
-  (s2e: s2exp): bool = let
+  (s2e: s2exp, byval: bool): bool = let
   val s2e = s2hnf2exp (s2exp2hnf (s2e))
 in
 //
 case+ s2exp_node_view (s2e.s2exp_node ()) of
-| ~S2Erefarg (_, s2e1) => autofold_wanted (s2e1)
-| ~S2Einvar (s2e1) => autofold_wanted (s2e1)
-| ~S2Eexi (_, _, s2e1) => autofold_wanted (s2e1)
-| ~S2Euni (_, _, s2e1) => autofold_wanted (s2e1)
-| ~S2Ewthtype (s2e1, _) => autofold_wanted (s2e1)
-| ~S2Eat (s2e1, _) => autofold_wanted (s2e1)
+| ~S2Erefarg (_, s2e1) => autofold_wanted (s2e1, false)
+| ~S2Einvar (s2e1) => autofold_wanted (s2e1, byval)
+| ~S2Eexi (_, _, s2e1) => autofold_wanted (s2e1, byval)
+| ~S2Euni (_, _, s2e1) => autofold_wanted (s2e1, byval)
+| ~S2Ewthtype (s2e1, _) => autofold_wanted (s2e1, byval)
+| ~S2Eat (s2e1, _) => autofold_wanted (s2e1, byval)
 | ~S2Edatconptr (_, _, _) => false
-| ~S2EVar (_) => false
+| ~S2EVar (_) => byval
 | ~S2Etop (_, _) => false
 | ~S2Ehole (_) => false
 | ~S2Eerrexp () => false
@@ -882,10 +931,10 @@ else if knd = 1 then let // the end of [d2v] itself
   val @(knd1, _, _) = autofold_owner (d2v)
   val wanted = if knd1 = 0 then false else (
     case+ d2vfin_view (d2var_get_finknd (d2v)) of
-    | ~D2VFINsome (s2e_fin) => autofold_wanted (s2e_fin)
+    | ~D2VFINsome (s2e_fin) => autofold_wanted (s2e_fin, false)
     | ~D2VFINsome_lvar (s2e_fin) => (
         case+ s2exp_node_view (s2e_fin.s2exp_node ()) of
-        | ~S2Eat (s2e1, _) => autofold_wanted (s2e1)
+        | ~S2Eat (s2e1, _) => autofold_wanted (s2e1, false)
         | v => (s2exp_node_view_free (v); false)
       ) (* end of [D2VFINsome_lvar] *)
     | v => (d2vfin_view_free (v); false)
@@ -909,7 +958,7 @@ else if knd = 3 then let // a use against [s2e]
   val @(knd1, _, _) = autofold_owner (d2v)
 in
   if knd1 = 0 then 0 else
-  if autofold_wanted (s2e) then let
+  if autofold_wanted (s2e, true) then let
     val ans = autofold_try (loc0, d2v, true)
   in
     ans (* 0/1/2: nothing/folded/failed *)
@@ -938,6 +987,82 @@ end // end of [knd = 5]
 else 0 // end of [if]
 //
 end // end of [autofold_hook]
+
+(* ****** ****** *)
+
+(*
+** HX-2026-10: the fold of a value (a mutable variable that is used as an
+** argument): the type of the value is an unfolded type, and the value is
+** folded if the type it is checked against is not an unfolded type (the
+** same rule as the one of a non-mutable variable, knd = 3)
+*)
+fun
+autofold_lval_set_type
+(
+  loc0: loc_t, d3e: d3exp, s2l: s2exp, s2e_folded: s2expopt
+) : void = (
+  case+ gopt_view (s2e_folded) of
+  | ~GOsome (s2e_res) => let
+      // HX-2026-10: the content of the variable was taken out when [d3e]
+      // was read (s2addr_deref topizes it), so the view gets the topized
+      // folded type: the folded value is the one of [d3e] (a by-reference
+      // argument is restored after the call by d3explst_arg_restore)
+      val _(*old*) =
+        s2addr_exch_type (loc0, s2l, glist_nil (), s2exp_topize (1, s2e_res))
+      val () = d3exp_set_type (d3e, s2e_res)
+    in
+      // nothing
+    end // end of [GOsome]
+  | ~GOnone () => ()
+) (* end of [autofold_lval_set_type] *)
+
+fun
+autofold_hook_lval
+(
+  knd: int, loc0: loc_t, d3e: d3exp, s2e: s2exp
+) : int = let
+//
+val opt = (
+  case+ d3exp_node_view (d3e.d3exp_node ()) of
+  | ~D3Evar (d2v) => (
+      case+ gopt_view (d2var_get_addr (d2v)) of
+      | ~GOsome (s2l) => Some_vt (s2l)
+      | ~GOnone () => None_vt ()
+      )
+  | v => (d3exp_node_view_free (v); None_vt ())
+) : s2expopt_vt // end of [val]
+//
+in
+//
+case+ opt of
+| ~Some_vt (s2l) => let
+    // the type of the value must be an unfolded type
+    val s2e_d3e = d3exp_get_type (d3e)
+    val ans = (
+      case+ s2exp_node_view (s2e_d3e.s2exp_node ()) of
+      | ~S2Edatconptr (_, _, _) => (
+          if autofold_wanted (s2e, true) then let
+            val @(ans, s2e_folded) =
+              autofold_try_main (loc0, s2e_d3e, true)
+            val () = (
+              if (ans = 1)
+                then autofold_lval_set_type (loc0, d3e, s2l, s2e_folded)
+                else ()
+            )
+          in
+            ans (* 0/1/2: nothing/folded/failed *)
+          end // end of [if]
+          else (0))
+      | v => (s2exp_node_view_free (v); 0)
+    ) : int // end of [val]
+  in
+    ans (* 0/1/2: nothing/folded/failed *)
+  end // end of [Some_vt]
+| ~None_vt () => 0
+end // end of [case]
+//
+// end of [autofold_hook_lval]
+//
 
 in (* in-of-local *)
 
@@ -968,6 +1093,7 @@ if s2exp_is_datconptr (s2e) then (
 ) (* end of [d3lval_autofold_register] *)
 
 val () = the_d2varenv_set_autofold_hook (autofold_hook)
+val () = the_d2varenv_set_autofold_lval_hook (autofold_hook_lval)
 
 end // end of [local]
 

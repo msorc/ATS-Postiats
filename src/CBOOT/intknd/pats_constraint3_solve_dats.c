@@ -15038,7 +15038,7 @@ ATSINSmove(tmp118, PMVtmpltcst(g1int_sub<S2Eextkind(atstype_int)>)(arg1, ATSPMVi
 ATSINSmove_void(tmp116, ATSfunclo_fun(PMVd2vfunlab(d2v=loop$4157(1), flab=loop_39$0(level=1)), (atstkind_type(atstype_ptrk), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_bool), atsrefarg1_type(atstkind_t0ype(atstype_int)), atsrefarg1_type(atstyvar_type(a))), atsvoid_t0ype)(tmp117, arg1, tmp118, ATSPMVbool_true(), ATSPMVrefarg1(ATSPMVptrof(tmpref114)), ATSPMVrefarg1(ATSPMVptrof(tmpref115)))) ;
 ATSINSmove_void(tmp119, PMVtmpltcst(myint_free<S2Evar(a(7380))>)(tmpref115)) ;
 ATSINSmove(tmp121, PMVtmpltcst(gt_g1int_int<S2Eextkind(atstype_int)>)(tmpref114, ATSPMVi0nt(0))) ;
-ATSINSmove_void(tmp120, atspre_assert_errmsg2_bool1(tmp121, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lintprgm_solve.dats: 7913(line=311, offs=10) -- 7932(line=311, offs=29)"))) ;
+ATSINSmove_void(tmp120, atspre_assert_errmsg2_bool1(tmp121, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lintprgm_solve.dats: 7826(line=308, offs=10) -- 7845(line=308, offs=29)"))) ;
 ATSINSmove(tmpret92, tmpref114) ;
 ATSfunbody_end()
 ATSreturn(tmpret92) ;
@@ -48440,7 +48440,7 @@ ATSINSmove(tmp118__1, atspre_g1int_sub_int(arg1, ATSPMVi0nt(1))) ;
 ATSINSmove_void(tmp116__1, loop_39__39__1(tmp117__1, arg1, tmp118__1, ATSPMVbool_true(), ATSPMVrefarg1(ATSPMVptrof(tmpref114__1)), ATSPMVrefarg1(ATSPMVptrof(tmpref115__1)))) ;
 ATSINSmove_void(tmp119__1, PATSHOME_057_src_057_pats_lintprgm_056_sats__myint_free__3__116(tmpref115__1)) ;
 ATSINSmove(tmp121__1, ATSLIB_056_prelude__gt_g1int_int__98__101(tmpref114__1, ATSPMVi0nt(0))) ;
-ATSINSmove_void(tmp120__1, atspre_assert_errmsg2_bool1(tmp121__1, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lintprgm_solve.dats: 7913(line=311, offs=10) -- 7932(line=311, offs=29)"))) ;
+ATSINSmove_void(tmp120__1, atspre_assert_errmsg2_bool1(tmp121__1, ATSPMVstring("exit(ATS): [assert] failed: "), ATSCSTSPmyloc("PATSHOME/src/pats_lintprgm_solve.dats: 7826(line=308, offs=10) -- 7845(line=308, offs=29)"))) ;
 ATSINSmove(tmpret92__1, tmpref114__1) ;
 ATSfunbody_end()
 ATSreturn(tmpret92__1) ;

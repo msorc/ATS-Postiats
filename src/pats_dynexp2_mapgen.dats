@@ -104,7 +104,6 @@ val env2 =
 val+@MYENV
   (s2cs, _, _, _, _, _) = env2
 val ((*void*)) = s2cs := s2cstset_vt_add(s2cs, s2c)
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
@@ -120,7 +119,6 @@ val env2 =
 val+@MYENV
   (_, s2vs, _, _, _, _) = env2
 val ((*void*)) = s2vs := s2varset_vt_add(s2vs, s2v)
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
@@ -136,7 +134,6 @@ val env2 =
 val+@MYENV
   (_, _, s2Vs, _, _, _) = env2
 val ((*void*)) = s2Vs := s2Varset_vt_add(s2Vs, s2V)
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
@@ -157,7 +154,6 @@ val env2 =
 val+@MYENV
   (_, _, _, d2cs, _, _) = env2
 val ((*void*)) = d2cs := d2conset_vt_add(d2cs, d2c)
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
@@ -181,7 +177,6 @@ val+@MYENV
 val ((*void*)) =
   d2cs := d2cstset_vt_add(d2cs, d2c)
 //
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in
@@ -200,7 +195,6 @@ val+@MYENV
 val ((*void*)) =
   d2vs := d2varset_vt_add(d2vs, d2v)
 //
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in

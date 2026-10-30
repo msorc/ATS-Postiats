@@ -36,7 +36,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/parray.atxt
-** Time of generation: Wed Oct 21 23:29:39 2026
+** Time of generation: Fri Oct 30 04:15:50 2026
 *)
 
 (* ****** ****** *)
@@ -107,7 +107,7 @@ loop
 //
   val
   isnot =
-  parray_isnot_empty<a>(pf | p0)
+  parray_isnot_empty<a>(p0)
 //
 in
 //
@@ -119,7 +119,7 @@ in
   parray_v_cons
     (pf1, pf2) = pf
     val asz =
-    loop(pf2 | ptr_succ<a>(p0), j0+1)
+    loop(ptr_succ<a>(p0), j0+1)
   prval ((*returned*)) =
     (pf := parray_v_cons{a}(pf1, pf2))
   } (* end of [then] *)
@@ -130,7 +130,7 @@ end (* end of [loop] *)
 in
 let
 prval () =
-lemma_parray_v_params(pf) in loop(pf | p0, i2sz(0))
+lemma_parray_v_params(pf) in loop(p0, i2sz(0))
 end // end of [let]
 end // end of [parray_size]
 

@@ -124,19 +124,16 @@ case+ ivs of
   in
     if sgn > 0 then let
       val () = ivs1 := poss
-      prval () = fold@ (ivs)
       val () = poss := ivs
     in
       auxbeg (ivs1_, i, neus, poss, negs)
     end else if sgn < 0 then let
       val () = ivs1 := negs
-      prval () = fold@ (ivs)
       val () = negs := ivs
     in
       auxbeg (ivs1_, i, neus, poss, negs)
     end else let // sgn = 0
       val () = ivs1 := neus
-      prval () = fold@ (ivs)
       val () = neus := ivs
     in
       auxbeg (ivs1_, i, neus, poss, negs)
@@ -1232,8 +1229,6 @@ case+ ic of
         auxneq<a> (stamp, i1vs, i1veqs, iv_, n, ans3)
       val () =
         ic := ic_new // HX: [ic] is equivalent to [ic_new]
-      prval () =
-        fold@ (ics) // HX: trying again after folding
       // end of [prval]
     in
       if ans3 >= 0 then

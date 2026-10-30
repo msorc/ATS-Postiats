@@ -130,7 +130,6 @@ val env2 =
 val+@MYENV (_, s2vs, _) = env2
 val ((*void*)) =
   s2vs := s2varset_vt_add(s2vs, s2v)
-prval ((*void*)) = fold@ (env2)
 val ((*void*)) = $UN.castvwtp0{void}(env2)
 //
 in

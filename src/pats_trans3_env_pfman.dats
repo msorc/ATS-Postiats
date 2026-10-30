@@ -73,6 +73,7 @@ typedef label = $LAB.label
 
 (* ****** ****** *)
 
+staload "./pats_stamp.sats"
 staload "./pats_avlmap.sats"
 staload "./pats_staexp2.sats"
 staload "./pats_staexp2_util.sats"
@@ -402,6 +403,355 @@ end else None_vt ()
 //
 end // end of [pfobj_search_loop]
 
+//
+// HX-2026-10: the proof of a view that is not an at-view (a dataview or a
+// template parameter of a view sort) is found by its type: the variables of
+// the pfman environment whose type has the same head as the type of the
+// proof parameter are the candidates (the head of an application is its
+// constant, the head of a static variable is the variable itself, the head
+// of an array type is the head of its element type)
+//
+fun
+s2exp_same_head
+(
+  s2e1: s2exp, s2e2: s2exp
+) : bool = let
+//
+val s2e1 = s2exp_hnfize (s2e1)
+val s2e2 = s2exp_hnfize (s2e2)
+//
+in
+//
+case+ s2exp_node_view (s2e1.s2exp_node ()) of
+| ~S2Eapp (s2e11, _) => (
+    case+ s2exp_node_view (s2e2.s2exp_node ()) of
+    | ~S2Eapp (s2e21, _) => (
+        case+ s2exp_node_view (s2e11.s2exp_node ()) of
+        | ~S2Ecst (s2c1) => (
+            case+ s2exp_node_view (s2e21.s2exp_node ()) of
+            | ~S2Ecst (s2c2) => s2cst_get_stamp (s2c1) = s2cst_get_stamp (s2c2)
+            | v => (s2exp_node_view_free (v); false)
+            )
+        | v => (s2exp_node_view_free (v); false)
+        )
+    | v => (s2exp_node_view_free (v); false)
+    )
+| ~S2Evar (s2v1) => (
+    case+ s2exp_node_view (s2e2.s2exp_node ()) of
+    | ~S2Evar (s2v2) => s2var_get_stamp (s2v1) = s2var_get_stamp (s2v2)
+    | v => (s2exp_node_view_free (v); false)
+    )
+// HX-2026-10: the head of an array type is the head of its element type
+// (the at-views of the arrays of [a] are the candidates of the proof of
+// an at-view of an array of [a])
+| ~S2Etyarr (s2e11, _) => (
+    case+ s2exp_node_view (s2e2.s2exp_node ()) of
+    | ~S2Etyarr (s2e21, _) => s2exp_same_head (s2e11, s2e21)
+    | v => (s2exp_node_view_free (v); false)
+    )
+// HX-2026-10: the head of a constant without arguments is the constant
+| ~S2Ecst (s2c1) => (
+    case+ s2exp_node_view (s2e2.s2exp_node ()) of
+    | ~S2Ecst (s2c2) => s2cst_get_stamp (s2c1) = s2cst_get_stamp (s2c2)
+    | v => (s2exp_node_view_free (v); false)
+    )
+| v => (s2exp_node_view_free (v); false)
+//
+end // end of [s2exp_same_head]
+//
+// HX-2026-10: the type of a proof is a preserved view ([!T]): the head is
+// the head of the type inside it
+//
+fun
+s2exp_unrefarg
+(
+  s2e: s2exp
+) : s2exp = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2Erefarg (_, s2e1) => s2e1
+  | v => (s2exp_node_view_free (v); s2e)
+) (* end of [s2exp_unrefarg] *)
+//
+// HX-2026-10: the type of the proof is not known (the template variable is
+// not given at the call): any preserved proof is a candidate
+//
+fun
+s2exp_is_unknown
+(
+  s2e: s2exp
+) : bool = let
+//
+val s2e = s2exp_unrefarg (s2e)
+val ans = (
+  case+ s2exp_node_view (s2e.s2exp_node ()) of
+  | ~S2EVar (_) => true
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+//
+in
+  ans
+//
+end // end of [s2exp_is_unknown]
+//
+// the type of a proof may be under an existential: the head is then the
+// head of the type inside it
+//
+fun
+s2exp_same_head_exi
+(
+  s2e1: s2exp, s2e2: s2exp
+) : bool = let
+//
+val s2e1 = s2exp_unrefarg (s2e1)
+val s2e2 = s2exp_unrefarg (s2e2)
+val ans = (
+  case+ s2exp_node_view (s2e1.s2exp_node ()) of
+  | ~S2Eexi (_, _, s2e1) => s2exp_same_head (s2e1, s2e2)
+  | v => (s2exp_node_view_free (v); s2exp_same_head (s2e1, s2e2))
+) : bool // end of [val]
+//
+in
+  ans
+//
+end // end of [s2exp_same_head_exi]
+//
+fun
+d2varlst_contains
+(
+  xs: glist (d2var), d2v: d2var
+) : bool = let
+//
+in
+//
+case+ glist_view (xs) of
+| ~GLnil () => false
+| ~GLcons (d2v1, xs1) => (
+    if d2var_get_stamp (d2v1) = d2var_get_stamp (d2v)
+      then true else d2varlst_contains (xs1, d2v)
+    )
+//
+end // end of [d2varlst_contains]
+//
+fun
+pfobj_search_bytype_one
+(
+  x: d2vmrk, s2e: s2exp, res: &glist(d2var) >> _
+) : void = let
+//
+val-~GOsome (d2v) = gopt_view (x.d2vmrk_d2v ())
+//
+// HX-2026-10: a candidate is a proof that is not consumed yet: the pfman
+// environment also holds the linear variables that are not proofs, and a
+// consumed variable has no type
+//
+val found = (
+  case+ gopt_view (d2var_get_type (d2v)) of
+  | ~GOsome (s2e1) =>
+    if s2rt_is_prf (s2e1.s2exp_srt ()) then (
+      if s2exp_same_head_exi (s2e1, s2e) then true else s2exp_is_unknown (s2e)
+    ) else false
+  | ~GOnone () => false
+) : bool // end of [val]
+val () = (
+  if found then (
+    if d2varlst_contains (res, d2v) then () else res := glist_cons (d2v, res)
+    ) else ()
+  )
+//
+in
+  ()
+end // end of [pfobj_search_bytype_one]
+//
+fun
+pfobj_search_bytype_loop
+(
+  xs: d2varmrklst, s2e: s2exp, res: &glist(d2var) >> _
+) : void = let
+//
+in
+//
+case+ glist_view (xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs1) => let
+    val knd = x.d2vmrk_mrk ()
+    val () = (
+      if x.d2vmrk_knd () = 0 then pfobj_search_bytype_one (x, s2e, res) else ()
+    )
+  in
+    if x.d2vmrk_knd () = 0
+      then pfobj_search_bytype_loop (xs1, s2e, res)
+      else (
+        // HX-2015-01-12: the search is only blocked by [lam]
+        if knd > 0 then pfobj_search_bytype_loop (xs1, s2e, res) else ()
+        )
+  end // end of [GLcons]
+//
+end // end of [pfobj_search_bytype_loop]
+//
+// HX-2026-10: the candidates that are already used (the proofs of the
+// previous omitted arguments) are removed
+//
+fun
+pfobj_search_bytype_notused_loop
+(
+  xs: glist (d2var), used: glist (d2var), res: &glist(d2var) >> _
+) : void = let
+//
+in
+//
+case+ glist_view (xs) of
+| ~GLnil () => ()
+| ~GLcons (d2v, xs1) => let
+    val () = (
+      if d2varlst_contains (used, d2v)
+        then () else res := glist_cons (d2v, res)
+    )
+  in
+    pfobj_search_bytype_notused_loop (xs1, used, res)
+  end // end of [GLcons]
+//
+end // end of [pfobj_search_bytype_notused_loop]
+//
+// HX-2026-10: the candidates whose type is equal to the type of the
+// proof parameter: the indices of the dynamic arguments tell the proofs
+// of the same head apart (the type of the parameter is resolved by them)
+//
+fun
+pfobj_search_bytype_equal_one
+(
+  d2v: d2var, s2e: s2exp, res: &glist(d2var) >> _
+) : void = let
+//
+val opt = d2var_get_type (d2v)
+val s2e1 = (
+  case+ gopt_view (opt) of
+  | ~GOsome (s2e1) => s2exp_hnfize (s2e1)
+  | ~GOnone () => s2exp_t0ype_err ()
+) : s2exp // end of [val]
+val same = s2exp_syneq (s2e, s2e1) : bool
+//
+in
+//
+if same then res := glist_cons (d2v, res) else ()
+//
+end // end of [pfobj_search_bytype_equal_one]
+//
+fun
+pfobj_search_bytype_equal_loop
+(
+  xs: glist (d2var), s2e: s2exp, res: &glist(d2var) >> _
+) : void = let
+//
+in
+//
+case+ glist_view (xs) of
+| ~GLnil () => ()
+| ~GLcons (d2v, xs1) => let
+    val () = pfobj_search_bytype_equal_one (d2v, s2e, res)
+  in
+    pfobj_search_bytype_equal_loop (xs1, s2e, res)
+  end // end of [GLcons]
+//
+end // end of [pfobj_search_bytype_equal_loop]
+//
+// HX-2026-10: the candidates of the proof of an at-view whose address is
+// not solved by the other arguments: the proofs whose type is an at-view
+// of the same element type (the head of the element type is the same)
+//
+fun
+pfobj_search_atview_bytype_one
+(
+  d2v: d2var, s2e: s2exp
+) : bool = let
+//
+val opt = d2var_get_type (d2v)
+val s2e1 = (
+  case+ gopt_view (opt) of
+  | ~GOsome (s2e1) => s2exp_hnfize (s2e1)
+  | ~GOnone () => s2exp_t0ype_err ()
+) : s2exp // end of [val]
+val found = (
+  case+ s2exp_node_view (s2e1.s2exp_node ()) of
+  | ~S2Eat (s2e11, _) => (
+      case+ s2exp_node_view (s2e.s2exp_node ()) of
+      | ~S2Eat (s2e21, _) => s2exp_same_head (s2e11, s2e21)
+      | v => (s2exp_node_view_free (v); false)
+      )
+  | v => (s2exp_node_view_free (v); false)
+) : bool // end of [val]
+//
+in
+  found
+end // end of [pfobj_search_atview_bytype_one]
+//
+fun
+pfobj_search_atview_bytype_loop
+(
+  xs: d2varmrklst, s2e: s2exp, res: &glist(d2var) >> _
+) : void = let
+//
+in
+//
+case+ glist_view (xs) of
+| ~GLnil () => ()
+| ~GLcons (x, xs1) => let
+    val knd = x.d2vmrk_mrk ()
+    val () = (
+      if x.d2vmrk_knd () = 0 then (
+        case+ gopt_view (x.d2vmrk_d2v ()) of
+        | ~GOsome (d2v) => (
+            if pfobj_search_atview_bytype_one (d2v, s2e) then (
+              if d2varlst_contains (res, d2v)
+                then () else res := glist_cons (d2v, res)
+              ) else ()
+          )
+        | ~GOnone () => ()
+      ) else ()
+    )
+  in
+    if x.d2vmrk_knd () = 0
+      then pfobj_search_atview_bytype_loop (xs1, s2e, res)
+      else (
+        // HX-2015-01-12: the search is only blocked by [lam]
+        if knd > 0 then pfobj_search_atview_bytype_loop (xs1, s2e, res) else ()
+        )
+  end // end of [GLcons]
+//
+end // end of [pfobj_search_atview_bytype_loop]
+//
+implement
+pfobj_search_atview_bytype
+  (s2e: s2exp): glist (d2var) = let
+//
+var res: glist (d2var) = glist_nil ()
+val () = pfobj_search_atview_bytype_loop (mrklst_get (), s2e, res)
+//
+in
+  res
+//
+end // end of [pfobj_search_atview_bytype]
+//
+implement
+pfobj_search_bytype
+  (s2e: s2exp, used: glist (d2var)): glist (d2var) = let
+//
+var res: glist (d2var) = glist_nil ()
+val () = pfobj_search_bytype_loop (mrklst_get (), s2e, res)
+var res1: glist (d2var) = glist_nil ()
+val () = pfobj_search_bytype_notused_loop (res, used, res1)
+// HX-2026-10: when exactly one of the candidates has the type of the
+// proof parameter, it is the one (the others are the proofs of another
+// view of the same head); when there is none or more than one, all the
+// candidates are kept (the error names them)
+var res2: glist (d2var) = glist_nil ()
+val () = pfobj_search_bytype_equal_loop (res1, s2e, res2)
+//
+in
+//
+if glist_length (res2) = 1 then res2 else res1
+//
+end // end of [pfobj_search_bytype]
+//
 implement
 pfobj_search_atview
   (s2l0) = let

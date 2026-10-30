@@ -321,7 +321,6 @@ end // end of [then] // end of [if]
 //
 ) : void // end of [val]
 //
-prval ((*proof*)) = fold@ (xs)
 prval ((*proof*)) = $UN.cast2void(xs)
 //
 in

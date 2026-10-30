@@ -65,7 +65,7 @@ implement
 {}(*tmp*)
 ref_app_funenv{a}
   (pfv | r, f, env) = let
-  val (vbox _ | p) = ref_get_viewptr (r) in f (pfv | !p, env)
+  val (vbox _ | p) = ref_get_viewptr (r) in f (!p, env)
 end // end of [ref_app_funenv]
 
 #atscode_separator()

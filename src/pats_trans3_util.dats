@@ -477,6 +477,48 @@ end // end of [local]
 
 (* ****** ****** *)
 
+//
+// HX-2026-10: fold on demand: a mutable variable whose content is an
+// unfolded value is folded (by the hook of the environment) when it is
+// checked against a type that is not an unfolded one; when the fold fails
+// and the check fails as well, the reason is printed after the error
+//
+implement
+d3exp_trdn_autofold
+  (d3e, s2e) = let
+//
+val opt = (
+  case+ d3exp_node_view (d3e.d3exp_node ()) of
+  | ~D3Evar (d2v) => (
+      if d2var_is_mutabl (d2v) then Some_vt (d2v) else None_vt ())
+  | v => (d3exp_node_view_free (v); None_vt ())
+) : d2varopt_vt // end of [val]
+//
+in
+//
+case+ opt of
+| ~Some_vt (d2v) =>
+  if s2exp_node_is_S2Edatconptr ((d3exp_get_type (d3e)).s2exp_node ()) then let
+    val loc0 = d3e.d3exp_loc ()
+    val ans = the_d2varenv_autofold_lval (3, loc0, d3e, s2e)
+  in
+    if ans = 2 then let
+      val nerr = the_trans3errlst_count ()
+      val d3e = d3exp_trdn (d3e, s2e)
+      val () =
+      if the_trans3errlst_count () > nerr then {
+        val _ = the_d2varenv_autofold (5, loc0, d2v, s2e)
+      } (* end of [if] *)
+    in
+      d3e
+    end else d3exp_trdn (d3e, s2e)
+  end else d3exp_trdn (d3e, s2e)
+| ~None_vt () => d3exp_trdn (d3e, s2e)
+//
+end // end of [d3exp_trdn_autofold]
+
+(* ****** ****** *)
+
 implement
 d3explst_trdn_arg
   (d3es, s2es) =
@@ -484,10 +526,11 @@ d3explst_trdn_arg
   | ~GLcons (d3e, d3es) => (
     case+ glist_view (s2es) of
     | ~GLcons (s2e, s2es) => let
-        val d3e = d3exp_trdn (d3e, s2e)
+        // HX-2026-10: fold on demand (a mutable variable)
+        val d3e = d3exp_trdn_autofold (d3e, s2e)
       in
         glist_cons (d3e, d3explst_trdn_arg (d3es, s2es))
-      end // end of [list_cons]
+      end // end of [GLcons]
     | ~GLnil () => glist_nil ()
     ) // end of [list_cons]
   | ~GLnil () => glist_nil ()

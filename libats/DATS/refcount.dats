@@ -108,7 +108,6 @@ if
 isgtz(u1)
 then let
   val ((*void*)) = u := u1
-  prval () = fold@(rfc)
   prval () = $UN.cast2void (rfc)
   prval () = opt_none{a}(x0)
 in

@@ -735,6 +735,8 @@ local
 //
 val the_autofold_hook = gcell_make<ptr> (the_null_ptr)
 //
+val the_autofold_lval_hook = gcell_make<ptr> (the_null_ptr)
+//
 in (* in-of-local *)
 //
 implement
@@ -750,6 +752,20 @@ in
     val f = $UN.cast{d2varenv_autofold_hook}(p) in f (knd, loc0, d2v, s2e)
   end // end of [if]
 end // end of [the_d2varenv_autofold]
+//
+implement
+the_d2varenv_set_autofold_lval_hook
+  (f) = gcell_set<ptr> (the_autofold_lval_hook, $UN.cast{ptr}(f))
+//
+implement
+the_d2varenv_autofold_lval
+  (knd, loc0, d3e, s2e) = let
+  val p = gcell_get<ptr> (the_autofold_lval_hook)
+in
+  if ptr_is_null (p) then 0 else let
+    val f = $UN.cast{d3expenv_autofold_hook}(p) in f (knd, loc0, d3e, s2e)
+  end // end of [if]
+end // end of [the_d2varenv_autofold_lval]
 //
 fun
 the_d2varenv_autofold_on (): bool =

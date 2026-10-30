@@ -30,7 +30,7 @@
 (*
 ** Source:
 ** $PATSHOME/prelude/DATS/SRCGEN/unsafe.atxt
-** Time of generation: Wed Oct 21 23:29:31 2026
+** Time of generation: Thu Oct 29 21:52:52 2026
 *)
 
 (* ****** ****** *)
@@ -254,7 +254,6 @@ ptr1_list_next
   castvwtp1{list_vt(a,1)}(p)
   val+@list_vt_cons(_, xs_next) = xs
   val p_next = addr@(xs_next)
-  prval ((*void*)) = fold@ (xs)
   prval ((*void*)) = cast2void (xs)
 } (* end of [ptr1_list_next] *)
 

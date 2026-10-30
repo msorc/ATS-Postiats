@@ -19,9 +19,9 @@ export PATSCCOMP
 
 ######
 
-POSTESTS := POS_traverse POS_demand POS_rotate POS_elide POS_elide_overload
+POSTESTS := POS_traverse POS_demand POS_rotate POS_elide POS_elide_overload POS_byvalue POS_elide_byview
 NEGTESTS := NEG_consumed.dats NEG_fieldtype.dats
-NEGELIDE := NEG_elide_noaddr NEG_elide_nonat NEG_elide_consumed
+NEGELIDE := NEG_elide_noaddr NEG_elide_noproof NEG_elide_ambiguous NEG_elide_consumed
 
 ######
 
@@ -62,9 +62,22 @@ NEG_elide_%.hint: NEG_elide_%.dats ; \
   fi
 regress:: $(addsuffix .hint,$(NEGELIDE)); \
 grep -q "cannot be inferred from the other arguments" NEG_elide_noaddr.hint && \
-grep -q "which is not an at-view" NEG_elide_nonat.hint && \
+grep -q "no proof of the view" NEG_elide_noproof.hint && \
+grep -qE "could be (pf1 or pf2|pf2 or pf1)" NEG_elide_ambiguous.hint && \
 grep -q "which is consumed (no !)" NEG_elide_consumed.hint && \
 echo "NEG_elide_*: all rejected with the reasons"
+#
+# HX: a mutable variable folded for a by-value argument is consumed: its
+# second use (line 18) is the error, not the first one (line 17)
+#
+NEG_byvalue_twice.hint: NEG_byvalue_twice.dats ; \
+  if $(PATSOPT) --typecheck -d $< > $@ 2>&1; then \
+    echo "$<: accepted but should be rejected"; $(RMF) $@; exit 1; \
+  fi
+regress:: NEG_byvalue_twice.hint; \
+grep -q "NEG_byvalue_twice.dats:18:" NEG_byvalue_twice.hint && \
+! grep -q "NEG_byvalue_twice.dats:17:" NEG_byvalue_twice.hint && \
+echo "NEG_byvalue_twice: rejected at the second use"
 cleanall:: ; $(RMF) *.hint
 
 ######
